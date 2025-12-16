@@ -1,6 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { NextRequest, NextResponse } from 'next/server';
-import { buildCheckPrompt } from '@/prompts/brand-guardian';
+import { buildToneAnalysisPrompt } from '@/prompts/brand-guardian';
 import { BrandDNA } from '@/lib/types';
 
 export async function POST(request: NextRequest) {
@@ -8,7 +8,6 @@ export async function POST(request: NextRequest) {
     const apiKey = process.env.ANTHROPIC_API_KEY;
     
     if (!apiKey) {
-      console.error('ANTHROPIC_API_KEY is not set. Value:', apiKey);
       return NextResponse.json(
         { error: 'API key not configured' },
         { status: 500 }
@@ -31,11 +30,11 @@ export async function POST(request: NextRequest) {
 
     const message = await anthropic.messages.create({
       model: 'claude-sonnet-4-20250514',
-      max_tokens: 1024,
+      max_tokens: 512,
       messages: [
         {
           role: 'user',
-          content: buildCheckPrompt(brandDNA, content),
+          content: buildToneAnalysisPrompt(brandDNA, content),
         },
       ],
     });
@@ -54,9 +53,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(result);
     
   } catch (error: unknown) {
-    console.error('Check API error:', error);
+    console.error('Tone analysis error:', error);
     
-    // Extract error message
     let message = 'Analysis failed';
     if (error instanceof Error) {
       if (error.message.includes('credit balance is too low')) {
@@ -72,5 +70,4 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-
 

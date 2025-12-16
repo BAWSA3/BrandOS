@@ -1,17 +1,26 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { NextRequest, NextResponse } from 'next/server';
 import { buildGeneratePrompt } from '@/prompts/brand-guardian';
-import { BrandDNA } from '@/lib/types';
-
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
+import { BrandDNA, ContentType } from '@/lib/types';
 
 export async function POST(request: NextRequest) {
   try {
-    const { brandDNA, prompt } = await request.json() as {
+    const apiKey = process.env.ANTHROPIC_API_KEY;
+    
+    if (!apiKey) {
+      console.error('ANTHROPIC_API_KEY is not set. Value:', apiKey);
+      return NextResponse.json(
+        { error: 'API key not configured' },
+        { status: 500 }
+      );
+    }
+
+    const anthropic = new Anthropic({ apiKey });
+
+    const { brandDNA, prompt, contentType = 'general' } = await request.json() as {
       brandDNA: BrandDNA;
       prompt: string;
+      contentType?: ContentType;
     };
 
     if (!brandDNA?.name || !prompt) {
@@ -23,11 +32,11 @@ export async function POST(request: NextRequest) {
 
     const message = await anthropic.messages.create({
       model: 'claude-sonnet-4-20250514',
-      max_tokens: 1024,
+      max_tokens: 1500,
       messages: [
         {
           role: 'user',
-          content: buildGeneratePrompt(brandDNA, prompt),
+          content: buildGeneratePrompt(brandDNA, prompt, contentType),
         },
       ],
     });
@@ -38,10 +47,21 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ content: responseText });
     
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Generate API error:', error);
+    
+    // Extract error message
+    let message = 'Generation failed';
+    if (error instanceof Error) {
+      if (error.message.includes('credit balance is too low')) {
+        message = 'API credits depleted. Please add credits at console.anthropic.com';
+      } else {
+        message = error.message;
+      }
+    }
+    
     return NextResponse.json(
-      { error: 'Generation failed' },
+      { error: message },
       { status: 500 }
     );
   }
