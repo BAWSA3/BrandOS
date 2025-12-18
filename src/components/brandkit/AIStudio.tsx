@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useCurrentBrand } from '@/lib/store';
-import useBrandKitStore from '@/lib/brandKitStore';
+import { useBrandKitStore } from '@/lib/brandKitStore';
 
 type GenerationType = 'logo' | 'imagery' | 'icon' | 'colors' | 'tagline' | 'voice';
 
