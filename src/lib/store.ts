@@ -5,6 +5,14 @@ import { v4 as uuidv4 } from 'uuid';
 
 type Theme = 'light' | 'dark';
 
+// Phase tracking for guided experience
+interface PhaseProgress {
+  hasCompletedOnboarding: boolean;
+  hasCompletedFirstCheck: boolean;
+  hasCompletedFirstGeneration: boolean;
+  lastActivePhase: 'define' | 'check' | 'generate' | 'brandkit' | 'scale';
+}
+
 interface BrandStore {
   // Theme
   theme: Theme;
@@ -41,6 +49,14 @@ interface BrandStore {
   designIntents: Record<string, DesignIntentBlock[]>;
   addDesignIntent: (intent: DesignIntentBlock) => void;
   deleteDesignIntent: (id: string) => void;
+  
+  // Phase Progress (for guided experience)
+  phaseProgress: PhaseProgress;
+  completeOnboarding: () => void;
+  markFirstCheck: () => void;
+  markFirstGeneration: () => void;
+  setLastActivePhase: (phase: PhaseProgress['lastActivePhase']) => void;
+  resetOnboarding: () => void;
 }
 
 const createDefaultBrandDNA = (name: string = ''): BrandDNA => ({
@@ -80,6 +96,14 @@ export const useBrandStore = create<BrandStore>()(
       safeZones: {},
       brandMemory: {},
       designIntents: {},
+      
+      // Phase progress initial state
+      phaseProgress: {
+        hasCompletedOnboarding: false,
+        hasCompletedFirstCheck: false,
+        hasCompletedFirstGeneration: false,
+        lastActivePhase: 'define',
+      },
       
       setBrandDNA: (dna) =>
         set((state) => ({
@@ -229,6 +253,37 @@ export const useBrandStore = create<BrandStore>()(
             },
           };
         }),
+      
+      // Phase Progress Methods
+      completeOnboarding: () =>
+        set((state) => ({
+          phaseProgress: { ...state.phaseProgress, hasCompletedOnboarding: true },
+        })),
+      
+      markFirstCheck: () =>
+        set((state) => ({
+          phaseProgress: { ...state.phaseProgress, hasCompletedFirstCheck: true },
+        })),
+      
+      markFirstGeneration: () =>
+        set((state) => ({
+          phaseProgress: { ...state.phaseProgress, hasCompletedFirstGeneration: true },
+        })),
+      
+      setLastActivePhase: (phase) =>
+        set((state) => ({
+          phaseProgress: { ...state.phaseProgress, lastActivePhase: phase },
+        })),
+      
+      resetOnboarding: () =>
+        set((state) => ({
+          phaseProgress: {
+            hasCompletedOnboarding: false,
+            hasCompletedFirstCheck: false,
+            hasCompletedFirstGeneration: false,
+            lastActivePhase: 'define',
+          },
+        })),
     }),
     {
       name: 'brandos-storage',

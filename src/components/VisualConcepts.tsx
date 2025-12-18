@@ -2,7 +2,6 @@
 
 import { useState, useRef } from 'react';
 import { useCurrentBrand } from '@/lib/store';
-import { useExportStore } from '@/lib/exportStore';
 import { ImageAnalysis, VisualConcept } from '@/lib/types';
 import PinterestSearch from './PinterestSearch';
 
@@ -15,7 +14,6 @@ interface Inspiration {
 
 export default function VisualConcepts() {
   const brandDNA = useCurrentBrand();
-  const { savedConcepts, addConcept, removeConcept } = useExportStore();
   const [inputMode, setInputMode] = useState<'search' | 'url'>('search');
   const [imageUrl, setImageUrl] = useState('');
   const [inspirations, setInspirations] = useState<Inspiration[]>([]);
@@ -23,9 +21,7 @@ export default function VisualConcepts() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [concept, setConcept] = useState<VisualConcept | null>(null);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [selectedImageUrl, setSelectedImageUrl] = useState<string>('');
   const [error, setError] = useState('');
-  const [savedMessage, setSavedMessage] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const addInspiration = async (url: string, isDataUrl = false) => {
@@ -99,11 +95,9 @@ export default function VisualConcepts() {
     if (!brandDNA?.name) return;
 
     setSelectedImage(inspiration.id);
-    setSelectedImageUrl(inspiration.url);
     setIsGenerating(true);
     setConcept(null);
     setError('');
-    setSavedMessage('');
 
     try {
       const body = inspiration.isDataUrl
@@ -122,30 +116,13 @@ export default function VisualConcepts() {
         throw new Error(result.error || 'Generation failed');
       }
 
-      // Store the image URL with the concept
-      setConcept({ ...result, imageUrl: inspiration.url });
+      setConcept(result);
     } catch (err) {
       console.error('Concept generation failed:', err);
       setError(err instanceof Error ? err.message : 'Failed to generate concept');
     }
 
     setIsGenerating(false);
-  };
-
-  const saveConceptToExport = () => {
-    if (!concept) return;
-    
-    // Check if already saved
-    const alreadySaved = savedConcepts.some(c => c.title === concept.title);
-    if (alreadySaved) {
-      setSavedMessage('Already saved!');
-      setTimeout(() => setSavedMessage(''), 2000);
-      return;
-    }
-    
-    addConcept({ ...concept, imageUrl: selectedImageUrl });
-    setSavedMessage('Saved to Export!');
-    setTimeout(() => setSavedMessage(''), 2000);
   };
 
   const removeInspiration = (id: string) => {
@@ -445,61 +422,13 @@ ${concept.doNotUse?.map((d) => `- ${d}`).join('\n')}`.trim();
                   </div>
                 )}
 
-                {/* Export Buttons */}
-                <div className="flex gap-3">
-                  <button
-                    onClick={copyBrief}
-                    className="flex-1 py-3 bg-surface border border-border text-foreground rounded-full text-sm font-medium hover:bg-background transition-colors"
-                  >
-                    Copy Brief
-                  </button>
-                  <button
-                    onClick={saveConceptToExport}
-                    className="flex-1 py-3 bg-foreground text-background rounded-full text-sm font-medium hover:opacity-80 transition-opacity"
-                  >
-                    {savedMessage || 'Save to Export'}
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Saved Concepts */}
-            {savedConcepts.length > 0 && (
-              <div className="mt-12 border-t border-border pt-12">
-                <h3 className="text-xs uppercase tracking-widest text-muted mb-4">
-                  Saved Concepts ({savedConcepts.length})
-                </h3>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {savedConcepts.map((saved, i) => (
-                    <div key={i} className="relative group bg-surface rounded-lg overflow-hidden">
-                      {saved.imageUrl && (
-                        <img
-                          src={saved.imageUrl}
-                          alt={saved.title}
-                          className="w-full h-32 object-cover"
-                        />
-                      )}
-                      <div className="p-3">
-                        <h4 className="font-medium text-sm truncate">{saved.title}</h4>
-                        <div className="flex gap-1 mt-2">
-                          {saved.colorPalette.slice(0, 4).map((c, ci) => (
-                            <div
-                              key={ci}
-                              className="w-4 h-4 rounded-full border border-border"
-                              style={{ backgroundColor: c }}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => removeConcept(saved.title)}
-                        className="absolute top-2 right-2 w-6 h-6 bg-background/80 rounded-full text-foreground opacity-0 group-hover:opacity-100 transition-opacity hover:bg-background flex items-center justify-center text-sm"
-                      >
-                        ×
-                      </button>
-                    </div>
-                  ))}
-                </div>
+                {/* Export Button */}
+                <button
+                  onClick={copyBrief}
+                  className="w-full py-3 bg-foreground text-background rounded-full text-sm font-medium hover:opacity-80 transition-opacity"
+                >
+                  Copy Brief to Clipboard
+                </button>
               </div>
             )}
           </>

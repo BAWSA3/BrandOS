@@ -14,6 +14,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" data-theme="dark" suppressHydrationWarning>
+      <head>
+        {/* Custom fonts loaded via @font-face in globals.css */}
+      </head>
       <body>
         <ThemeProvider>{children}</ThemeProvider>
       </body>

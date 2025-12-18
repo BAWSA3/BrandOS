@@ -112,7 +112,6 @@ export interface VisualConcept {
   typography: string;
   imagery: string;
   doNotUse: string[];
-  imageUrl?: string; // Source inspiration image
 }
 
 // ===== NEW PRD FEATURES =====
@@ -269,34 +268,4 @@ export interface ContextAdaptedContent {
   context: ToneContext;
   adaptedContent: string;
   adjustmentsApplied: string[];
-}
-
-// ===== EXPORT TYPES =====
-
-export interface GeneratedContentItem {
-  id: string;
-  type: 'copy' | 'visual-concept' | 'social-post';
-  content: string;
-  platform?: string;
-  createdAt: Date;
-  approved: boolean;
-}
-
-export interface BrandKitExport {
-  brandDNA: BrandDNA;
-  visualConcepts: VisualConcept[];
-  generatedContent: GeneratedContentItem[];
-}
-
-export type ExportFormat = 'pdf' | 'pptx' | 'one-pager';
-
-export interface PitchSlide {
-  slideNumber: number;
-  type: 'title' | 'content' | 'quote' | 'stats' | 'visual' | 'colors' | 'closing';
-  headline?: string;
-  subheadline?: string;
-  bullets?: string[];
-  quote?: string;
-  attribution?: string;
-  stats?: { value: string; label: string }[];
 }

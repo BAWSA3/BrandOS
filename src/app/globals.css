@@ -1,5 +1,38 @@
 @import "tailwindcss";
 
+/* Custom Font Faces */
+@font-face {
+  font-family: 'Helvetica Custom';
+  src: url('/fonts/Helvetica.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Helvetica Custom';
+  src: url('/fonts/Helvetica-BoldOblique.ttf') format('truetype');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'PP Mondwest';
+  src: url('/fonts/PPMondwest-Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'VCR OSD Mono';
+  src: url('/fonts/VCR_OSD_MONO_1.001.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* Light theme (default) */
 :root {
   --background: #ffffff;
@@ -8,6 +41,27 @@
   --border: #d2d2d7;
   --surface: #f5f5f7;
   --accent: #1d1d1f;
+
+  /* Brand colors */
+  --brand-blue: #0000FF;
+  --brand-blue-light: rgba(0, 0, 255, 0.1);
+  --brand-blue-glow: rgba(0, 0, 255, 0.3);
+
+  /* Design tokens */
+  --noise-opacity: 0.03;
+  --transition-fast: 0.15s ease-out;
+  --transition-medium: 0.3s ease-out;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+
+  /* Retro gradient colors */
+  --gradient-1: #ff6b6b;
+  --gradient-2: #feca57;
+  --gradient-3: #48dbfb;
+  --gradient-4: #ff9ff3;
+  --gradient-5: #54a0ff;
 }
 
 /* Dark theme */
@@ -184,5 +238,671 @@ button:focus-visible {
   body {
     background: white !important;
     color: black !important;
+  }
+}
+
+/* Additional animations for bento grid */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.5s ease-out forwards;
+}
+
+.animate-shimmer {
+  animation: shimmer 2s linear infinite;
+  background: linear-gradient(90deg, transparent 0%, var(--surface) 50%, transparent 100%);
+  background-size: 200% 100%;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Glass morphism effect */
+.glass {
+  background: rgba(245, 245, 247, 0.5);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(210, 210, 215, 0.3);
+}
+
+[data-theme="dark"] .glass {
+  background: rgba(29, 29, 31, 0.5);
+  border: 1px solid rgba(66, 66, 69, 0.3);
+}
+
+/* ============================================
+   RETRO PIXEL TYPOGRAPHY SYSTEM
+   ============================================ */
+
+/* Helvetica for "brand" */
+.font-helvetica {
+  font-family: 'Helvetica Custom', "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
+
+/* PP Mondwest Bitmap font for "OS" */
+.font-pixel {
+  font-family: 'PP Mondwest', 'VCR OSD Mono', monospace;
+  letter-spacing: 0.02em;
+}
+
+/* Animated gradient text effect - Blue/Off-white palette */
+.pixel-gradient-text {
+  background: linear-gradient(
+    135deg,
+    #4a90d9 0%,
+    #a8c8e8 25%,
+    #f5f5f0 50%,
+    #a8c8e8 75%,
+    #4a90d9 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradientShift 6s ease-in-out infinite;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% center; }
+  50% { background-position: 100% center; }
+  100% { background-position: 0% center; }
+}
+
+/* Pixel fade effect - creates dithered edge */
+.pixel-fade {
+  position: relative;
+}
+
+.pixel-fade::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40%;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    var(--background) 100%
+  );
+  pointer-events: none;
+  image-rendering: pixelated;
+}
+
+/* CRT scanline effect overlay */
+.crt-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 100;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.03) 0px,
+    rgba(0, 0, 0, 0.03) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+  opacity: 0.4;
+}
+
+[data-theme="dark"] .crt-overlay {
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(255, 255, 255, 0.02) 0px,
+    rgba(255, 255, 255, 0.02) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+  opacity: 0.3;
+}
+
+/* Pixelated image rendering */
+.pixelated {
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+}
+
+/* Retro glow effect */
+.retro-glow {
+  text-shadow:
+    0 0 10px rgba(255, 107, 107, 0.5),
+    0 0 20px rgba(254, 202, 87, 0.3),
+    0 0 30px rgba(72, 219, 251, 0.2);
+}
+
+[data-theme="dark"] .retro-glow {
+  text-shadow:
+    0 0 20px rgba(255, 107, 107, 0.6),
+    0 0 40px rgba(254, 202, 87, 0.4),
+    0 0 60px rgba(72, 219, 251, 0.3);
+}
+
+/* Noise texture overlay */
+.noise-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 99;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+}
+
+/* Dithered gradient background */
+@keyframes dither-shift {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 0.8; }
+}
+
+.dither-bg {
+  position: relative;
+}
+
+.dither-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 2px,
+      rgba(255, 255, 255, 0.02) 2px,
+      rgba(255, 255, 255, 0.02) 4px
+    );
+  pointer-events: none;
+}
+
+/* Pixel border effect */
+.pixel-border {
+  box-shadow:
+    inset -4px -4px 0px 0px rgba(0, 0, 0, 0.2),
+    inset 4px 4px 0px 0px rgba(255, 255, 255, 0.1);
+  border: 2px solid var(--border);
+}
+
+/* Retro button style */
+.retro-btn {
+  position: relative;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10px;
+  padding: 16px 32px;
+  background: var(--foreground);
+  color: var(--background);
+  border: none;
+  cursor: pointer;
+  transition: transform 0.1s ease;
+  box-shadow:
+    4px 4px 0px 0px var(--muted);
+}
+
+.retro-btn:hover {
+  transform: translate(-2px, -2px);
+  box-shadow:
+    6px 6px 0px 0px var(--muted);
+}
+
+.retro-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow:
+    2px 2px 0px 0px var(--muted);
+}
+
+/* Floating pixel decoration animation */
+@keyframes pixel-float {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 0.6;
+  }
+  25% {
+    transform: translateY(-10px) rotate(2deg);
+    opacity: 0.8;
+  }
+  50% {
+    transform: translateY(-5px) rotate(-1deg);
+    opacity: 0.7;
+  }
+  75% {
+    transform: translateY(-15px) rotate(1deg);
+    opacity: 0.9;
+  }
+}
+
+.pixel-float {
+  animation: pixel-float 6s ease-in-out infinite;
+}
+
+/* Glitch effect for text */
+@keyframes glitch {
+  0%, 90%, 100% {
+    transform: translate(0);
+    opacity: 1;
+  }
+  91% {
+    transform: translate(-2px, 1px);
+    opacity: 0.8;
+  }
+  92% {
+    transform: translate(2px, -1px);
+    opacity: 0.9;
+  }
+  93% {
+    transform: translate(-1px, 2px);
+    opacity: 0.7;
+  }
+  94% {
+    transform: translate(1px, -2px);
+    opacity: 1;
+  }
+}
+
+.glitch-text {
+  animation: glitch 5s ease-in-out infinite;
+}
+
+/* Vintage vignette effect */
+.vignette {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 98;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 0%,
+    transparent 60%,
+    rgba(0, 0, 0, 0.15) 100%
+  );
+}
+
+[data-theme="dark"] .vignette {
+  background: radial-gradient(
+    ellipse at center,
+    transparent 0%,
+    transparent 50%,
+    rgba(0, 0, 0, 0.4) 100%
+  );
+}
+
+/* ============================================
+   PHASE NAVIGATION STEPPER STYLES
+   ============================================ */
+
+/* Stepper connector animation */
+@keyframes stepperFill {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.stepper-connector {
+  transform-origin: left;
+  animation: stepperFill 0.5s ease-out forwards;
+}
+
+/* Phase indicator pulse */
+@keyframes phasePulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(var(--foreground-rgb), 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(var(--foreground-rgb), 0);
+  }
+}
+
+.phase-active {
+  animation: phasePulse 2s ease-in-out infinite;
+}
+
+/* Smooth tab transitions */
+.tab-content {
+  animation: tabSlideIn 0.3s ease-out;
+}
+
+@keyframes tabSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Progress ring animation */
+@keyframes progressRing {
+  from {
+    stroke-dashoffset: 251.2; /* 2 * PI * 40 */
+  }
+}
+
+.progress-ring-animated {
+  animation: progressRing 1s ease-out forwards;
+}
+
+/* Onboarding step transitions */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.slide-up {
+  animation: slideUp 0.4s ease-out forwards;
+}
+
+.slide-down {
+  animation: slideDown 0.4s ease-out forwards;
+}
+
+/* Completion celebration animation */
+@keyframes celebrate {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.celebrate {
+  animation: celebrate 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* FAB hover effects */
+@keyframes fabPulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.fab-hover:hover {
+  animation: fabPulse 0.6s ease-in-out;
+}
+
+/* Tooltip arrow positioning */
+.tooltip-arrow-top {
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 6px solid var(--foreground);
+}
+
+.tooltip-arrow-bottom {
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-bottom: 6px solid var(--foreground);
+}
+
+/* Smooth scrollbar for navigation */
+.nav-scroll {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.nav-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* Badge animations */
+@keyframes badgeBounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+.badge-bounce {
+  animation: badgeBounce 2s ease-in-out infinite;
+}
+
+/* Keyboard shortcut styling */
+kbd {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+}
+
+/* Brand Kit Canvas Grid Pattern */
+.bg-grid-pattern {
+  background-image: 
+    linear-gradient(rgba(var(--border), 0.5) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(var(--border), 0.5) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+[data-theme="dark"] .bg-grid-pattern {
+  background-image: 
+    linear-gradient(rgba(66, 66, 69, 0.3) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(66, 66, 69, 0.3) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* Canvas zoom transitions */
+.canvas-zoom {
+  transition: transform 0.2s ease-out;
+}
+
+/* Section card hover */
+.section-card {
+  transition: box-shadow 0.2s ease-out, border-color 0.2s ease-out;
+}
+
+.section-card:hover {
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+}
+
+/* Color picker customization */
+.react-colorful {
+  width: 100% !important;
+  height: 160px !important;
+}
+
+.react-colorful__saturation {
+  border-radius: 8px 8px 0 0;
+}
+
+.react-colorful__hue {
+  height: 20px;
+  border-radius: 0 0 8px 8px;
+}
+
+.react-colorful__saturation-pointer,
+.react-colorful__hue-pointer {
+  width: 20px;
+  height: 20px;
+}
+
+/* Asset card transitions */
+.asset-card {
+  transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
+}
+
+.asset-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Upload dropzone */
+.dropzone {
+  border: 2px dashed var(--border);
+  transition: border-color 0.2s ease-out, background-color 0.2s ease-out;
+}
+
+.dropzone:hover,
+.dropzone.dragover {
+  border-color: var(--foreground);
+  background-color: var(--surface);
+}
+
+/* Template preview scaling */
+.template-preview {
+  transition: transform 0.2s ease-out;
+}
+
+.template-preview:hover {
+  transform: scale(1.02);
+}
+
+/* ============================================
+   BRANDOS DESIGN SYSTEM
+   ============================================ */
+
+/* Noise texture utility class */
+.with-noise-texture::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 99;
+  opacity: var(--noise-opacity, 0.03);
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+}
+
+/* VCR OSD Mono label typography */
+.vcr-label {
+  font-family: 'VCR OSD Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* Phase indicator badge */
+.phase-badge {
+  font-family: 'VCR OSD Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--brand-blue);
+  background: var(--brand-blue-light);
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+/* Brand blue CTA button */
+.btn-brand {
+  font-family: 'VCR OSD Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #FFFFFF;
+  background: var(--brand-blue);
+  border: none;
+  padding: 16px 48px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.btn-brand:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px var(--brand-blue-glow);
+}
+
+/* Section header with phase indicator */
+.section-header {
+  text-align: center;
+  padding: 64px 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.section-header h2 {
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 300;
+  letter-spacing: -0.02em;
+  margin-bottom: 16px;
+}
+
+.section-header p {
+  color: var(--muted);
+  font-size: 1.125rem;
+  max-width: 28rem;
+  margin: 0 auto;
+}
+
+/* BrandOS Logo shimmer effect */
+.os-shimmer {
+  background: linear-gradient(90deg, #0000FF 0%, #4444FF 25%, #0000FF 50%, #4444FF 75%, #0000FF 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 3s linear infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
   }
 }
