@@ -12,7 +12,7 @@ export type SubTab =
   // Generate phase
   | 'generate' | 'platforms' | 'context' | 'visual'
   // Brand Kit phase
-  | 'kit-canvas' | 'kit-logos' | 'kit-colors' | 'kit-typography' | 'kit-imagery' | 'kit-icons' | 'kit-templates'
+  | 'kit-canvas' | 'kit-logos' | 'kit-colors' | 'kit-typography' | 'kit-imagery' | 'kit-icons' | 'kit-templates' | 'kit-ai-studio'
   // Scale phase
   | 'dashboard' | 'history' | 'export' | 'competitors' | 'memory';
 
@@ -87,6 +87,7 @@ const phases: PhaseConfig[] = [
       </svg>
     ),
     tabs: [
+      { id: 'kit-ai-studio', label: 'AI Studio', description: 'Generate with Gemini' },
       { id: 'kit-canvas', label: 'Canvas', description: 'Visual brand layout' },
       { id: 'kit-logos', label: 'Logos', description: 'Logo variants & rules' },
       { id: 'kit-colors', label: 'Colors', description: 'Extended palette' },
@@ -278,7 +279,7 @@ export function getPhaseFromTab(tab: SubTab): Phase {
   const definesTabs: SubTab[] = ['brand', 'safezones', 'intents'];
   const checkTabs: SubTab[] = ['check', 'cohesion', 'guardrails', 'protect', 'taste'];
   const generateTabs: SubTab[] = ['generate', 'platforms', 'context', 'visual'];
-  const brandKitTabs: SubTab[] = ['kit-canvas', 'kit-logos', 'kit-colors', 'kit-typography', 'kit-imagery', 'kit-icons', 'kit-templates'];
+  const brandKitTabs: SubTab[] = ['kit-ai-studio', 'kit-canvas', 'kit-logos', 'kit-colors', 'kit-typography', 'kit-imagery', 'kit-icons', 'kit-templates'];
   
   if (definesTabs.includes(tab)) return 'define';
   if (checkTabs.includes(tab)) return 'check';
@@ -293,7 +294,7 @@ export function getDefaultTabForPhase(phase: Phase): SubTab {
     case 'define': return 'brand';
     case 'check': return 'check';
     case 'generate': return 'generate';
-    case 'brandkit': return 'kit-canvas';
+    case 'brandkit': return 'kit-ai-studio';
     case 'scale': return 'dashboard';
   }
 }

@@ -21,7 +21,7 @@ import PhaseNavigation, { Phase, SubTab, getPhaseFromTab, getDefaultTabForPhase 
 import OnboardingWizard from '@/components/OnboardingWizard';
 import BrandCompleteness, { useBrandCompleteness } from '@/components/BrandCompleteness';
 import QuickActions from '@/components/QuickActions';
-import { BrandKitCanvas, LogoSection, ColorSection, TypographySection, ImagerySection, IconSection, TemplateSection } from '@/components/brandkit';
+import { BrandKitCanvas, LogoSection, ColorSection, TypographySection, ImagerySection, IconSection, TemplateSection, AIStudio } from '@/components/brandkit';
 import { BrandImportHub } from '@/components/import';
 import { ExtractedBrand } from '@/lib/importTypes';
 import PhasesBreakdown from '@/components/PhasesBreakdown';
@@ -1336,6 +1336,25 @@ function HomeContent() {
         )}
 
         {/* ======================= BRAND KIT PHASE ======================= */}
+
+        {/* AI Studio Tab */}
+        {activeTab === 'kit-ai-studio' && (
+          <div className="animate-fade-in">
+            <section className="py-16 px-6 text-center border-b border-border">
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-gradient-to-r from-purple-500/10 to-blue-500/10 rounded-full text-xs text-muted mb-6">
+                <span className="w-2 h-2 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full animate-pulse"></span>
+                Phase 4: Brand Kit
+              </div>
+              <h2 className="text-5xl font-light tracking-tight mb-4">AI Studio.</h2>
+              <p className="text-muted text-lg max-w-md mx-auto">
+                Generate brand assets with Gemini AI.
+              </p>
+            </section>
+            <section className="px-6 py-16">
+              <AIStudio />
+            </section>
+          </div>
+        )}
 
         {/* Brand Kit Canvas Tab */}
         {activeTab === 'kit-canvas' && (
