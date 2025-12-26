@@ -390,3 +390,9 @@ EFFORT   │                  │                  │      EFFORT
 *Next: [Business Model →](09-business-model.md)*
 
 
+
+
+
+
+
+

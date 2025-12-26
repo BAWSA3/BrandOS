@@ -10,7 +10,7 @@ interface PhaseProgress {
   hasCompletedOnboarding: boolean;
   hasCompletedFirstCheck: boolean;
   hasCompletedFirstGeneration: boolean;
-  lastActivePhase: 'define' | 'check' | 'generate' | 'brandkit' | 'scale';
+  lastActivePhase: 'define' | 'check' | 'generate' | 'scale';
 }
 
 interface BrandStore {

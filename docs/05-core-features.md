@@ -592,3 +592,9 @@ type ToneContext = 'launch' | 'tease' | 'apology' | 'crisis' | 'celebration' | '
 *Next: [Technical Architecture →](06-technical-architecture.md)*
 
 
+
+
+
+
+
+

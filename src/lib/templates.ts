@@ -2,6 +2,48 @@ import { BrandTemplate } from './types';
 
 export const brandTemplates: BrandTemplate[] = [
   {
+    id: 'phantom-gaming',
+    name: 'Phantom Gaming',
+    description: 'Premium retro-futuristic gaming, Y2K nostalgia meets modern minimalism',
+    preview: {
+      colors: {
+        primary: '#1c1c1c',
+        secondary: '#fffdf8',
+        accent: '#ab9ff2',
+      },
+      tone: {
+        minimal: 80,
+        playful: 35,
+        bold: 55,
+        experimental: 45,
+      },
+      keywords: ['premium', 'nostalgic', 'frosted', 'translucent', 'matte', 'collectible', 'artifact', 'Y2K', 'retro-futuristic'],
+      doPatterns: [
+        'Use clean, confident language',
+        'Evoke 90s gaming nostalgia without being kitschy',
+        'Emphasize premium materials and craftsmanship',
+        'Create sense of quiet exclusivity',
+        'Use tactile, sensory descriptions',
+        'Reference heritage gaming culture subtly',
+      ],
+      dontPatterns: [
+        'Avoid aggressive gamer aesthetics',
+        'No neon or high-saturation language',
+        'Avoid loud, shouty marketing speak',
+        'No cheap nostalgia cash-grab vibes',
+        'Avoid technical jargon overload',
+        'No "epic" or "legendary" hyperbole',
+      ],
+      voiceSamples: [
+        'The kind of device that feels substantial in hand.',
+        'A quiet statement piece that rewards close inspection.',
+        'Premium but not sterile. Confident but not aggressive.',
+        'The console you\'d see in an architecture magazine.',
+        'Museum quality. Elevates the object, respects the design.',
+      ],
+    },
+  },
+  {
     id: 'minimal-tech',
     name: 'Minimal Tech',
     description: 'Clean, sophisticated, Apple-inspired',

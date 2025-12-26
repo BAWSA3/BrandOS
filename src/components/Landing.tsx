@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import PixelatedBackground from "./PixelatedBackground";
-import AnimatedBackground from "./AnimatedBackground";
 import { useBrandStore } from "@/lib/store";
 
 interface LandingProps {
@@ -32,7 +31,6 @@ export default function Landing({ onEnter }: LandingProps) {
     <div className="min-h-screen bg-background relative overflow-hidden">
       {/* Layered backgrounds */}
       <PixelatedBackground />
-      <AnimatedBackground />
 
       {/* CRT scanline overlay */}
       <div className="crt-overlay" />

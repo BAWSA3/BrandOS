@@ -3,15 +3,14 @@
 import { useMemo } from 'react';
 import BrandOSLogo from './BrandOSLogo';
 
-export type Phase = 'define' | 'check' | 'generate' | 'brandkit' | 'scale';
-export type SubTab = 
+export type Phase = 'define' | 'check' | 'generate' | 'scale';
+export type SubTab =
   // Define phase
   | 'brand' | 'safezones' | 'intents'
-  // Check phase  
+  // Check phase
   | 'check' | 'cohesion' | 'guardrails' | 'protect' | 'taste'
-  // Generate phase
+  // Generate phase (includes Brand Kit for beta)
   | 'generate' | 'platforms' | 'context' | 'visual'
-  // Brand Kit phase
   | 'kit-canvas' | 'kit-logos' | 'kit-colors' | 'kit-typography' | 'kit-imagery' | 'kit-icons' | 'kit-templates' | 'kit-ai-studio'
   // Scale phase
   | 'dashboard' | 'history' | 'export' | 'competitors' | 'memory';
@@ -19,8 +18,8 @@ export type SubTab =
 interface PhaseConfig {
   id: Phase;
   label: string;
+  number: string;
   description: string;
-  icon: React.ReactNode;
   tabs: { id: SubTab; label: string; description?: string }[];
   unlockCondition: (brandCompleteness: number, hasChecked: boolean, hasGenerated: boolean) => boolean;
 }
@@ -29,28 +28,20 @@ const phases: PhaseConfig[] = [
   {
     id: 'define',
     label: 'Define',
+    number: '01',
     description: 'Set up your brand DNA',
-    icon: (
-      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z" />
-      </svg>
-    ),
     tabs: [
       { id: 'brand', label: 'Brand DNA', description: 'Name, colors, tone, keywords' },
       { id: 'safezones', label: 'Safe Zones', description: 'Lock/unlock elements' },
       { id: 'intents', label: 'Design Intents', description: 'Natural language rules' },
     ],
-    unlockCondition: () => true, // Always unlocked
+    unlockCondition: () => true,
   },
   {
     id: 'check',
     label: 'Check',
+    number: '02',
     description: 'Analyze content alignment',
-    icon: (
-      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-    ),
     tabs: [
       { id: 'check', label: 'Content Check', description: 'Score your content' },
       { id: 'cohesion', label: 'Cohesion', description: 'Analyze consistency' },
@@ -63,30 +54,13 @@ const phases: PhaseConfig[] = [
   {
     id: 'generate',
     label: 'Generate',
+    number: '03',
     description: 'Create on-brand content',
-    icon: (
-      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
-      </svg>
-    ),
     tabs: [
       { id: 'generate', label: 'Generate', description: 'AI content creation' },
       { id: 'platforms', label: 'Platforms', description: 'Adapt for channels' },
       { id: 'context', label: 'Context', description: 'Situational tone' },
       { id: 'visual', label: 'Visual', description: 'Design inspiration' },
-    ],
-    unlockCondition: (completeness, hasChecked) => completeness >= 30 && hasChecked,
-  },
-  {
-    id: 'brandkit',
-    label: 'Brand Kit',
-    description: 'Visual brand assets',
-    icon: (
-      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
-      </svg>
-    ),
-    tabs: [
       { id: 'kit-ai-studio', label: 'AI Studio', description: 'Generate with Gemini' },
       { id: 'kit-canvas', label: 'Canvas', description: 'Visual brand layout' },
       { id: 'kit-logos', label: 'Logos', description: 'Logo variants & rules' },
@@ -96,17 +70,13 @@ const phases: PhaseConfig[] = [
       { id: 'kit-icons', label: 'Icons', description: 'Icon library' },
       { id: 'kit-templates', label: 'Templates', description: 'Content templates' },
     ],
-    unlockCondition: (completeness, _hasChecked, hasGenerated) => completeness >= 50 || hasGenerated,
+    unlockCondition: (completeness, hasChecked) => completeness >= 30 && hasChecked,
   },
   {
     id: 'scale',
     label: 'Scale',
+    number: '04',
     description: 'Track and export',
-    icon: (
-      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-      </svg>
-    ),
     tabs: [
       { id: 'dashboard', label: 'Dashboard', description: 'Brand analytics' },
       { id: 'history', label: 'History', description: 'Past activity' },
@@ -114,7 +84,7 @@ const phases: PhaseConfig[] = [
       { id: 'competitors', label: 'Compare', description: 'Competitor analysis' },
       { id: 'memory', label: 'Memory', description: 'Brand learnings' },
     ],
-    unlockCondition: () => true, // Always available
+    unlockCondition: () => true,
   },
 ];
 
@@ -153,72 +123,104 @@ export default function PhaseNavigation({
   }, [activePhase, brandCompleteness, hasChecked, hasGenerated, currentPhaseIndex]);
 
   return (
-    <div className="border-b border-border bg-background/80 backdrop-blur-xl sticky top-0 z-50">
-      {/* Phase Stepper */}
-      <div className="max-w-6xl mx-auto px-6">
+    <div className="border-b border-[rgba(255,255,255,0.1)] bg-[rgba(10,10,10,0.8)] backdrop-blur-xl sticky top-0 z-50">
+      {/* Main Navigation */}
+      <div className="max-w-7xl mx-auto px-6">
         <div className="flex items-center justify-between py-4">
           {/* Logo */}
           <BrandOSLogo size="sm" />
 
-          {/* Phase Steps */}
-          <nav className="flex items-center gap-1">
+          {/* Phase Pills - Numbered Navigation */}
+          <nav className="flex items-center gap-2">
             {phaseStates.map((phase, index) => (
               <div key={phase.id} className="flex items-center">
+                {/* Phase Pill */}
                 <button
                   onClick={() => phase.isUnlocked && onPhaseChange(phase.id)}
                   disabled={!phase.isUnlocked}
                   className={`
-                    relative flex items-center gap-2 px-3 py-2 rounded-full text-sm font-medium
-                    transition-all duration-200
+                    relative flex items-center gap-3 px-4 py-2.5 rounded-full
+                    transition-all duration-200 ease-out
                     ${phase.isActive 
-                      ? 'bg-foreground text-background' 
+                      ? 'bg-[#0047FF] text-white shadow-[0_0_20px_rgba(0,71,255,0.4)]' 
                       : phase.isUnlocked
-                        ? 'text-muted hover:text-foreground hover:bg-surface'
-                        : 'text-muted/40 cursor-not-allowed'
+                        ? 'bg-[rgba(255,255,255,0.05)] text-white/70 border border-[rgba(255,255,255,0.1)] hover:bg-[rgba(255,255,255,0.1)] hover:text-white'
+                        : 'bg-transparent text-white/30 cursor-not-allowed'
                     }
                   `}
                 >
+                  {/* Number */}
+                  <span className={`
+                    font-mono text-[10px] tracking-[0.1em]
+                    ${phase.isActive ? 'text-white/80' : 'text-white/40'}
+                  `}>
+                    {phase.number}
+                  </span>
+
+                  {/* Label */}
+                  <span className="text-sm font-medium hidden sm:inline">
+                    {phase.label}
+                  </span>
+
                   {/* Completion indicator */}
                   {phase.isComplete && !phase.isActive && (
-                    <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full flex items-center justify-center">
-                      <svg className="w-2 h-2 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                      </svg>
-                    </span>
+                    <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500 rounded-full ring-2 ring-[#0a0a0a]" />
                   )}
                   
-                  {/* Lock icon for locked phases */}
+                  {/* Lock icon */}
                   {!phase.isUnlocked && (
-                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="w-3 h-3 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                     </svg>
                   )}
-                  
-                  <span className="hidden sm:inline">{phase.icon}</span>
-                  <span className="hidden md:inline">{phase.label}</span>
-                  <span className="md:hidden">{phase.label.slice(0, 3)}</span>
                 </button>
                 
-                {/* Connector line */}
+                {/* Connector Arrow */}
                 {index < phases.length - 1 && (
-                  <div className={`w-4 sm:w-6 h-px mx-0.5 transition-colors duration-200 ${
-                    index < currentPhaseIndex ? 'bg-foreground' : 'bg-border'
-                  }`} />
+                  <div className="mx-2 hidden sm:flex items-center">
+                    <svg 
+                      className={`w-4 h-4 ${index < currentPhaseIndex ? 'text-white/40' : 'text-white/20'}`} 
+                      fill="none" 
+                      viewBox="0 0 24 24" 
+                      stroke="currentColor"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
                 )}
               </div>
             ))}
           </nav>
 
-          {/* Brand Completeness Mini */}
-          <div className="hidden sm:flex items-center gap-3">
-            <div className="flex items-center gap-2">
-              <div className="w-16 sm:w-24 h-1.5 bg-surface rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-foreground rounded-full transition-all duration-500"
-                  style={{ width: `${brandCompleteness}%` }}
+          {/* Brand Completeness Mini Ring */}
+          <div className="hidden md:flex items-center gap-3">
+            <div className="relative w-10 h-10">
+              <svg className="w-10 h-10 -rotate-90" viewBox="0 0 36 36">
+                {/* Background circle */}
+                <circle
+                  cx="18"
+                  cy="18"
+                  r="16"
+                  fill="none"
+                  stroke="rgba(255,255,255,0.1)"
+                  strokeWidth="2"
                 />
-              </div>
-              <span className="text-xs text-muted">{brandCompleteness}%</span>
+                {/* Progress circle */}
+                <circle
+                  cx="18"
+                  cy="18"
+                  r="16"
+                  fill="none"
+                  stroke="#0047FF"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeDasharray={`${brandCompleteness} 100`}
+                  className="transition-all duration-500"
+                />
+              </svg>
+              <span className="absolute inset-0 flex items-center justify-center text-[10px] font-mono text-white/70">
+                {brandCompleteness}
+              </span>
             </div>
           </div>
         </div>
@@ -230,10 +232,10 @@ export default function PhaseNavigation({
               key={tab.id}
               onClick={() => onTabChange(tab.id)}
               className={`
-                px-3 py-1.5 text-sm rounded-md whitespace-nowrap transition-all
+                px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-all duration-200
                 ${activeTab === tab.id
-                  ? 'bg-surface text-foreground font-medium'
-                  : 'text-muted hover:text-foreground hover:bg-surface/50'
+                  ? 'bg-[rgba(255,255,255,0.1)] text-white font-medium'
+                  : 'text-white/50 hover:text-white/80 hover:bg-[rgba(255,255,255,0.05)]'
                 }
               `}
             >
@@ -243,29 +245,20 @@ export default function PhaseNavigation({
           
           {/* Hints for locked phases */}
           {activePhase === 'define' && brandCompleteness < 30 && (
-            <span className="ml-auto text-xs text-muted flex items-center gap-1">
+            <span className="ml-auto text-[10px] text-white/40 flex items-center gap-1.5 font-mono tracking-wide">
               <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              Complete 30% to unlock Check
+              COMPLETE 30% TO UNLOCK CHECK
             </span>
           )}
           
           {activePhase === 'check' && !hasChecked && (
-            <span className="ml-auto text-xs text-muted flex items-center gap-1">
+            <span className="ml-auto text-[10px] text-white/40 flex items-center gap-1.5 font-mono tracking-wide">
               <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              Run your first check to unlock Generate
-            </span>
-          )}
-
-          {activePhase === 'generate' && !hasGenerated && (
-            <span className="ml-auto text-xs text-muted flex items-center gap-1">
-              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              Generate content to unlock Brand Kit
+              RUN FIRST CHECK TO UNLOCK GENERATE
             </span>
           )}
         </div>
@@ -278,13 +271,11 @@ export default function PhaseNavigation({
 export function getPhaseFromTab(tab: SubTab): Phase {
   const definesTabs: SubTab[] = ['brand', 'safezones', 'intents'];
   const checkTabs: SubTab[] = ['check', 'cohesion', 'guardrails', 'protect', 'taste'];
-  const generateTabs: SubTab[] = ['generate', 'platforms', 'context', 'visual'];
-  const brandKitTabs: SubTab[] = ['kit-ai-studio', 'kit-canvas', 'kit-logos', 'kit-colors', 'kit-typography', 'kit-imagery', 'kit-icons', 'kit-templates'];
-  
+  const generateTabs: SubTab[] = ['generate', 'platforms', 'context', 'visual', 'kit-ai-studio', 'kit-canvas', 'kit-logos', 'kit-colors', 'kit-typography', 'kit-imagery', 'kit-icons', 'kit-templates'];
+
   if (definesTabs.includes(tab)) return 'define';
   if (checkTabs.includes(tab)) return 'check';
   if (generateTabs.includes(tab)) return 'generate';
-  if (brandKitTabs.includes(tab)) return 'brandkit';
   return 'scale';
 }
 
@@ -294,7 +285,6 @@ export function getDefaultTabForPhase(phase: Phase): SubTab {
     case 'define': return 'brand';
     case 'check': return 'check';
     case 'generate': return 'generate';
-    case 'brandkit': return 'kit-ai-studio';
     case 'scale': return 'dashboard';
   }
 }

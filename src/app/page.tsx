@@ -1,1905 +1,2032 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
-import { useBrandStore, useCurrentBrand } from '@/lib/store';
-import { CheckResult, ContentType, ToneAnalysis } from '@/lib/types';
-import { brandTemplates, contentTypeLabels } from '@/lib/templates';
-import ToneSlider from '@/components/ToneSlider';
-import ScoreRing from '@/components/ScoreRing';
-import VisualConcepts from '@/components/VisualConcepts';
-import DesignIntentBlocks from '@/components/DesignIntentBlocks';
-import TasteTranslator from '@/components/TasteTranslator';
-import BrandCohesion from '@/components/BrandCohesion';
-import PlatformAdapter from '@/components/PlatformAdapter';
-import CreatorGuardrails from '@/components/CreatorGuardrails';
-import SafeZones from '@/components/SafeZones';
-import BrandMemory from '@/components/BrandMemory';
-import TasteProtection from '@/components/TasteProtection';
-import ContextTone from '@/components/ContextTone';
-import PhaseNavigation, { Phase, SubTab, getPhaseFromTab, getDefaultTabForPhase } from '@/components/PhaseNavigation';
-import OnboardingWizard from '@/components/OnboardingWizard';
-import BrandCompleteness, { useBrandCompleteness } from '@/components/BrandCompleteness';
-import QuickActions from '@/components/QuickActions';
-import { BrandKitCanvas, LogoSection, ColorSection, TypographySection, ImagerySection, IconSection, TemplateSection, AIStudio } from '@/components/brandkit';
-import { BrandImportHub } from '@/components/import';
-import { ExtractedBrand } from '@/lib/importTypes';
-import PhasesBreakdown from '@/components/PhasesBreakdown';
+import { useState, useEffect, useRef, useLayoutEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { motion } from 'motion/react';
+import { useBrandStore } from '@/lib/store';
+import gsap from '@/lib/gsap';
+import { ScrollTrigger } from '@/lib/gsap/ScrollTrigger';
+import { ScrollSmoother } from '@/lib/gsap/ScrollSmoother';
+import { SplitText } from '@/lib/gsap/SplitText';
 
-function HomeContent() {
-  const searchParams = useSearchParams();
-  const {
-    setBrandDNA,
-    brands,
-    currentBrandId,
-    createBrand,
-    deleteBrand,
-    switchBrand,
-    history,
-    addHistoryItem,
-    clearHistory,
-    theme,
-    toggleTheme,
-    phaseProgress,
-    completeOnboarding,
-    markFirstCheck,
-    markFirstGeneration,
-    setLastActivePhase,
-  } = useBrandStore();
+// Register GSAP plugins
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger, ScrollSmoother, SplitText);
+}
 
-  const brandDNA = useCurrentBrand();
-  const brandCompleteness = useBrandCompleteness();
+interface PhaseDetail {
+  title: string;
+  description: string;
+}
 
-  // Check for phases breakdown query param (from landing page)
-  const showPhasesParam = searchParams.get('showPhases') === 'true';
+interface Phase {
+  number: number;
+  title: string;
+  subtitle: string;
+  description: string;
+  features: string[];
+  details: PhaseDetail[];
+  icon: React.ReactNode;
+}
 
-  // Phase-based navigation
-  const [activePhase, setActivePhase] = useState<Phase>(phaseProgress.lastActivePhase || 'define');
-  const [activeTab, setActiveTab] = useState<SubTab>(getDefaultTabForPhase(phaseProgress.lastActivePhase || 'define'));
-  const [showBrandMenu, setShowBrandMenu] = useState(false);
-  const [showTemplates, setShowTemplates] = useState(false);
-  const [showOnboarding, setShowOnboarding] = useState(!phaseProgress.hasCompletedOnboarding);
-  const [showImportHub, setShowImportHub] = useState(false);
-  const [showPhasesBreakdown, setShowPhasesBreakdown] = useState(showPhasesParam && !phaseProgress.hasCompletedOnboarding);
-  
-  // Check state
-  const [contentToCheck, setContentToCheck] = useState('');
-  const [checkResult, setCheckResult] = useState<CheckResult | null>(null);
-  const [isChecking, setIsChecking] = useState(false);
-  const [checkError, setCheckError] = useState('');
-  const [toneAnalysis, setToneAnalysis] = useState<ToneAnalysis | null>(null);
-  const [isAnalyzingTone, setIsAnalyzingTone] = useState(false);
-  
-  // Generate state
-  const [generatePrompt, setGeneratePrompt] = useState('');
-  const [generatedContent, setGeneratedContent] = useState('');
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [generateError, setGenerateError] = useState('');
-  const [contentType, setContentType] = useState<ContentType>('general');
+const phases: Phase[] = [
+  {
+    number: 1,
+    title: 'DEFINE',
+    subtitle: 'Your brand, documented',
+    description: 'Your brand guidelines live in someone\'s head. Or worse, a PDF no one reads. Define it once, use it everywhere.',
+    features: ['Voice & Tone', 'Safe Zones', 'Do\'s & Don\'ts', 'Examples'],
+    details: [
+      { title: 'Tone Spectrum', description: 'Sliders for formality, energy, and style. No more "make it pop" debates.' },
+      { title: 'Voice Samples', description: 'Feed it examples of your best writing. The AI learns your actual voice.' },
+      { title: 'Safe Zones', description: 'Lock what\'s sacred. Flex what\'s not. Clear rules, zero ambiguity.' },
+      { title: 'Do\'s & Don\'ts', description: 'Explicit patterns to follow and avoid. New hires get it on day one.' },
+    ],
+    icon: (
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+      </svg>
+    ),
+  },
+  {
+    number: 2,
+    title: 'CHECK',
+    subtitle: 'Catch drift before it ships',
+    description: 'Stop spending hours reviewing content. Paste anything—emails, ads, social posts—and know instantly if it\'s on brand.',
+    features: ['Instant Scoring', 'Tone Analysis', 'Suggestions', 'Guardrails'],
+    details: [
+      { title: 'Brand Score', description: '0-100 in seconds. No more subjective "I don\'t know, it just feels off."' },
+      { title: 'Tone Breakdown', description: 'See exactly where content drifts—too formal? Too casual? Fix it.' },
+      { title: 'Smart Rewrites', description: 'AI suggests fixes that match your voice. One click to apply.' },
+      { title: 'Agency Mode', description: 'Share a link. Creators check their own work before sending to you.' },
+    ],
+    icon: (
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <path d="M9 11l3 3L22 4" />
+        <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />
+      </svg>
+    ),
+  },
+  {
+    number: 3,
+    title: 'GENERATE',
+    subtitle: 'Content that sounds like you',
+    description: 'Anyone can write content. The hard part is making it sound like your brand. Generate on-brand copy for any channel, instantly.',
+    features: ['Any Format', 'Any Platform', 'Visual Direction', 'Templates'],
+    details: [
+      { title: 'Multi-format', description: 'Tweets, emails, headlines, taglines, scripts. All in your voice.' },
+      { title: 'Platform Native', description: 'Same message, adapted for LinkedIn vs Twitter vs email. Automatically.' },
+      { title: 'Visual Concepts', description: 'AI-generated mood boards and design direction that match your brand.' },
+      { title: 'Starter Templates', description: 'Pre-built formats for common needs. Customize once, reuse forever.' },
+    ],
+    icon: (
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <path d="M12 5v14M5 12h14" />
+        <circle cx="12" cy="12" r="10" />
+      </svg>
+    ),
+  },
+  {
+    number: 4,
+    title: 'SCALE',
+    subtitle: 'Brand consistency, measured',
+    description: 'You can\'t improve what you don\'t measure. Track brand health across your team, catch patterns, and prove ROI.',
+    features: ['Dashboard', 'Trends', 'Export', 'Compete'],
+    details: [
+      { title: 'Health Dashboard', description: 'See brand consistency scores over time. Spot drift before it spreads.' },
+      { title: 'Team Insights', description: 'Who\'s on brand? Who needs coaching? Data, not guesswork.' },
+      { title: 'Export Anywhere', description: 'JSON, PDF, shareable links. Your brand goes where your team goes.' },
+      { title: 'Competitor Intel', description: 'Analyze competitor voice. Find whitespace. Own your position.' },
+    ],
+    icon: (
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <path d="M23 6l-9.5 9.5-5-5L1 18" />
+        <path d="M17 6h6v6" />
+      </svg>
+    ),
+  },
+];
 
-  // Competitor state
-  const [competitorName, setCompetitorName] = useState('');
-  const [competitorSampleInput, setCompetitorSampleInput] = useState('');
-  const [competitorSamples, setCompetitorSamples] = useState<string[]>([]);
-  const [competitorAnalysis, setCompetitorAnalysis] = useState<{
-    keyDifferences: string[];
-    uniquePositioning: string;
-    differentiationOpportunities: string[];
-    learnings: string[];
-    competitorTone: { formality: number; energy: number; confidence: number; style: number };
-    summary: string;
-  } | null>(null);
-  const [isAnalyzingCompetitor, setIsAnalyzingCompetitor] = useState(false);
-  const [competitorError, setCompetitorError] = useState('');
-
-  // Input states
-  const [keywordInput, setKeywordInput] = useState('');
-  const [doPatternInput, setDoPatternInput] = useState('');
-  const [dontPatternInput, setDontPatternInput] = useState('');
-  const [voiceSampleInput, setVoiceSampleInput] = useState('');
-  
-  // Refs
-  const exportRef = useRef<HTMLDivElement>(null);
-  const toneDebounceRef = useRef<NodeJS.Timeout | null>(null);
-
-  // Handle phase changes
-  const handlePhaseChange = (phase: Phase) => {
-    setActivePhase(phase);
-    setActiveTab(getDefaultTabForPhase(phase));
-    setLastActivePhase(phase);
-  };
-
-  const handleTabChange = (tab: SubTab) => {
-    setActiveTab(tab);
-    const phase = getPhaseFromTab(tab);
-    if (phase !== activePhase) {
-      setActivePhase(phase);
-      setLastActivePhase(phase);
-    }
-  };
-
-  // Quick action navigation
-  const handleQuickNavigate = (phase: Phase, tab: SubTab) => {
-    handlePhaseChange(phase);
-    setActiveTab(tab);
-  };
-
-  // Onboarding handlers
-  const handleOnboardingComplete = () => {
-    completeOnboarding();
-    setShowOnboarding(false);
-    handlePhaseChange('check'); // Move to Check phase after onboarding
-  };
-
-  const handleOnboardingSkip = () => {
-    completeOnboarding();
-    setShowOnboarding(false);
-  };
-
-  // Phases breakdown handlers
-  const handlePhasesGetStarted = () => {
-    setShowPhasesBreakdown(false);
-    setShowImportHub(true);
-  };
-
-  const handlePhasesSkip = () => {
-    setShowPhasesBreakdown(false);
-    setShowImportHub(true);
-  };
-
-  // Import handlers
-  const handleStartFresh = () => {
-    setShowImportHub(false);
-    setShowOnboarding(true);
-  };
-
-  const handleImportComplete = (extractedBrand: ExtractedBrand) => {
-    // Apply extracted brand data to current brand
-    if (extractedBrand.name?.value) {
-      setBrandDNA({ name: extractedBrand.name.value });
-    }
-    if (extractedBrand.colors) {
-      setBrandDNA({
-        colors: {
-          primary: extractedBrand.colors.primary?.value || brandDNA?.colors?.primary || '#000000',
-          secondary: extractedBrand.colors.secondary?.value || brandDNA?.colors?.secondary || '#ffffff',
-          accent: extractedBrand.colors.accent?.value || brandDNA?.colors?.accent || '#6366f1',
-        },
-      });
-    }
-    if (extractedBrand.tone) {
-      setBrandDNA({
-        tone: {
-          minimal: extractedBrand.tone.formality?.value ?? brandDNA?.tone?.minimal ?? 50,
-          playful: extractedBrand.tone.energy?.value ?? brandDNA?.tone?.playful ?? 50,
-          bold: extractedBrand.tone.confidence?.value ?? brandDNA?.tone?.bold ?? 50,
-          experimental: extractedBrand.tone.style?.value ?? brandDNA?.tone?.experimental ?? 30,
-        },
-      });
-    }
-    if (extractedBrand.keywords && extractedBrand.keywords.length > 0) {
-      setBrandDNA({ keywords: extractedBrand.keywords.map(k => k.value) });
-    }
-    if (extractedBrand.doPatterns && extractedBrand.doPatterns.length > 0) {
-      setBrandDNA({ doPatterns: extractedBrand.doPatterns.map(p => p.value) });
-    }
-    if (extractedBrand.dontPatterns && extractedBrand.dontPatterns.length > 0) {
-      setBrandDNA({ dontPatterns: extractedBrand.dontPatterns.map(p => p.value) });
-    }
-    if (extractedBrand.voiceSamples && extractedBrand.voiceSamples.length > 0) {
-      setBrandDNA({ voiceSamples: extractedBrand.voiceSamples.map(s => s.value) });
-    }
-
-    // Mark onboarding as complete and show define phase
-    completeOnboarding();
-    setShowImportHub(false);
-    handlePhaseChange('define');
-  };
-
-  // Real-time tone analysis (debounced)
-  const analyzeTone = useCallback(async (content: string) => {
-    if (!content.trim() || content.length < 20 || !brandDNA?.name) {
-      setToneAnalysis(null);
-      return;
-    }
-    
-    setIsAnalyzingTone(true);
-    
-    try {
-      const res = await fetch('/api/analyze-tone', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ brandDNA, content }),
-      });
-      
-      if (res.ok) {
-        const result = await res.json();
-        setToneAnalysis(result);
-      }
-    } catch (error) {
-      console.error('Tone analysis error:', error);
-    } finally {
-      setIsAnalyzingTone(false);
-    }
-  }, [brandDNA]);
+export default function LandingPage() {
+  const router = useRouter();
+  const { theme, toggleTheme } = useBrandStore();
+  const [mounted, setMounted] = useState(false);
+  const [expandedPhase, setExpandedPhase] = useState<number | null>(null);
+  const [visiblePhases, setVisiblePhases] = useState<Set<number>>(new Set());
+  const [sectionTitleVisible, setSectionTitleVisible] = useState(false);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const smoothWrapperRef = useRef<HTMLDivElement>(null);
+  const smoothContentRef = useRef<HTMLDivElement>(null);
+  const heroTitleRef = useRef<HTMLHeadingElement>(null);
+  const brandTextRef = useRef<HTMLSpanElement>(null);
+  const osTextRef = useRef<HTMLSpanElement>(null);
+  const statsRef = useRef<HTMLDivElement>(null);
+  const statValueRefs = useRef<(HTMLParagraphElement | null)[]>([]);
+  const phaseRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const sectionTitleRef = useRef<HTMLElement>(null);
+  const heroSectionRef = useRef<HTMLElement>(null);
+  const zeroDriftRef = useRef<HTMLSpanElement>(null);
+  const painStatementRef = useRef<HTMLParagraphElement>(null);
+  const supportingTextRef = useRef<HTMLParagraphElement>(null);
+  const oneSystemRef = useRef<HTMLSpanElement>(null);
+  const heroGlowRef = useRef<HTMLDivElement>(null);
+  const taglineContainerRef = useRef<HTMLParagraphElement>(null);
+  const scrollIndicatorRef = useRef<HTMLDivElement>(null);
+  const typingCursorRef = useRef<HTMLSpanElement>(null);
+  const mouseRef = useRef({ x: 0, y: 0 });
+  const particlesRef = useRef<Array<{ x: number; y: number; vx: number; vy: number; life: number }>>([]);
+  const gradientPhaseRef = useRef(0);
+  const lastGradientTimeRef = useRef(0);
+  const scrollYRef = useRef(0);
+  const smootherRef = useRef<ScrollSmoother | null>(null);
+  const typographyCanvasRef = useRef<HTMLCanvasElement>(null);
+  const gaugeCanvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    if (toneDebounceRef.current) {
-      clearTimeout(toneDebounceRef.current);
-    }
-    
-    if (contentToCheck.length >= 20) {
-      toneDebounceRef.current = setTimeout(() => {
-        analyzeTone(contentToCheck);
-      }, 1000);
-    } else {
-      setToneAnalysis(null);
-    }
-    
+    setMounted(true);
+  }, []);
+
+  // GSAP Animations
+  useEffect(() => {
+    if (!mounted) return;
+
+    let ctx: gsap.Context;
+
+    // Small delay to ensure DOM is fully ready
+    const timer = setTimeout(() => {
+      ctx = gsap.context(() => {
+        // 1. ScrollSmoother for buttery smooth scrolling
+        if (smoothWrapperRef.current && smoothContentRef.current) {
+          smootherRef.current = ScrollSmoother.create({
+            wrapper: smoothWrapperRef.current,
+            content: smoothContentRef.current,
+            smooth: 1.5,
+            effects: true,
+            smoothTouch: 0.1,
+          });
+        }
+
+        // 2. Typing animation for BrandOS title - characters appear one by one
+        if (heroTitleRef.current && typingCursorRef.current && brandTextRef.current && osTextRef.current) {
+          const cursor = typingCursorRef.current;
+          const brandText = brandTextRef.current;
+          const osText = osTextRef.current;
+          const title = heroTitleRef.current;
+
+          // Split Brand text into characters for typing
+          const typingSplit = new SplitText(brandText, {
+            type: 'chars',
+            charsClass: 'typing-char'
+          });
+
+          // Hide all Brand characters initially
+          gsap.set(typingSplit.chars, {
+            opacity: 0,
+            display: 'inline-block',
+          });
+
+          // Hide OS initially
+          gsap.set(osText, {
+            opacity: 0,
+          });
+
+          // Position cursor at start
+          gsap.set(cursor, {
+            position: 'absolute',
+            left: 0,
+            top: '50%',
+            transform: 'translateY(-50%)',
+            opacity: 1,
+          });
+
+          // Make hero title position relative for cursor positioning
+          gsap.set(title, {
+            position: 'relative',
+          });
+
+          // Create typing timeline
+          const typingTl = gsap.timeline({ delay: 0.5 });
+
+          // Type out "Brand" characters one by one using stagger
+          typingTl.to(typingSplit.chars, {
+            opacity: 1,
+            duration: 0.01,
+            stagger: 0.12,
+            ease: 'none',
+          });
+
+          // Animate cursor across Brand text during typing
+          typingTl.to(cursor, {
+            left: () => brandText.offsetWidth + 'px',
+            duration: typingSplit.chars.length * 0.12,
+            ease: 'steps(' + typingSplit.chars.length + ')',
+          }, 0);
+
+          // Type out "OS" after Brand completes
+          typingTl.to(osText, {
+            opacity: 1,
+            duration: 0.01,
+          });
+
+          // Move cursor to end after OS
+          typingTl.to(cursor, {
+            left: '100%',
+            duration: 0.12,
+            ease: 'steps(2)',
+          });
+
+          // After typing completes, cursor blinks then fades
+          typingTl.to(cursor, {
+            opacity: 0,
+            duration: 0.1,
+            delay: 0.2,
+            repeat: 4,
+            yoyo: true,
+          });
+
+          typingTl.to(cursor, {
+            opacity: 0,
+            duration: 0.15,
+          });
+        }
+
+        // 3. Hero text fade-in animations (on page load, not scroll)
+        // Fade in the supporting text elements
+        if (supportingTextRef.current) {
+          gsap.to(supportingTextRef.current, {
+            opacity: 1,
+            y: 0,
+            duration: 0.6,
+            delay: 0.8,
+            ease: 'power2.out',
+          });
+        }
+
+        if (oneSystemRef.current) {
+          gsap.to(oneSystemRef.current, {
+            opacity: 1,
+            y: 0,
+            duration: 0.5,
+            delay: 1.2,
+            ease: 'power2.out',
+          });
+        }
+
+        if (zeroDriftRef.current) {
+          gsap.to(zeroDriftRef.current, {
+            opacity: 1,
+            x: 0,
+            duration: 0.5,
+            delay: 1.5,
+            ease: 'power2.out',
+          });
+        }
+
+        // 4. Animated stat counters with ScrollTrigger
+        const stats = [
+          { value: 2.4, suffix: 'K', decimals: 1 },
+          { value: 156, suffix: 'K', decimals: 0 },
+          { value: 94, suffix: '%', decimals: 0 },
+          { value: 3, prefix: '<', suffix: 's', decimals: 0 },
+        ];
+
+        statValueRefs.current.forEach((ref, index) => {
+          if (!ref) return;
+
+          const stat = stats[index];
+          const obj = { value: 0 };
+
+          gsap.to(obj, {
+            value: stat.value,
+            duration: 2,
+            ease: 'power2.out',
+            scrollTrigger: {
+              trigger: ref,
+              start: 'top 80%',
+              toggleActions: 'play none none none',
+            },
+            onUpdate: () => {
+              if (ref) {
+                const prefix = stat.prefix || '';
+                const formatted = stat.decimals > 0
+                  ? obj.value.toFixed(stat.decimals)
+                  : Math.floor(obj.value).toString();
+                ref.textContent = `${prefix}${formatted}${stat.suffix}`;
+              }
+            },
+          });
+        });
+
+        // 5. Scroll-triggered animations (no duplicate SplitText - typing animation handles character splitting)
+        if (heroSectionRef.current) {
+          // Create master timeline with scroll trigger
+          const masterTl = gsap.timeline({
+            scrollTrigger: {
+              trigger: heroSectionRef.current,
+              start: 'top top',
+              end: '+=150%',
+              scrub: 1,
+              pin: true,
+              pinSpacing: true,
+            }
+          });
+
+          // Phase 1: Title stays stable (no chaos animation)
+
+          // Pain statement converges (letter spacing tightens, opacity increases)
+          if (painStatementRef.current) {
+            masterTl.to(painStatementRef.current, {
+              letterSpacing: '0.15em',
+              opacity: 0.5,
+              ease: 'power2.out',
+              duration: 0.4,
+            }, 0);
+          }
+
+          // Phase 2: The Snap (40-50%) - scale pulse on entire logo
+          masterTl.to(heroTitleRef.current, {
+            scale: 1.03,
+            ease: 'power2.in',
+            duration: 0.05,
+          }, 0.4);
+
+          masterTl.to(heroTitleRef.current, {
+            scale: 1,
+            ease: 'back.out(3)',
+            duration: 0.1,
+          }, 0.45);
+
+          // Glow pulse on snap
+          if (heroGlowRef.current) {
+            masterTl.to(heroGlowRef.current, {
+              opacity: 0.4,
+              background: 'radial-gradient(circle, rgba(0, 71, 255, 0.3) 0%, transparent 70%)',
+              duration: 0.05,
+            }, 0.4);
+
+            masterTl.to(heroGlowRef.current, {
+              opacity: 0,
+              duration: 0.15,
+            }, 0.5);
+          }
+
+          // Phase 3: Supporting text handled by page-load animations (not scroll)
+
+          // Phase 4: Fade out as user continues scrolling (85-100%)
+          const fadeElements = [
+            painStatementRef.current,
+            heroTitleRef.current,
+            supportingTextRef.current,
+            taglineContainerRef.current,
+          ].filter(Boolean);
+
+          masterTl.to(fadeElements, {
+            opacity: 0.2,
+            y: -40,
+            ease: 'power2.in',
+            duration: 0.15,
+          }, 0.85);
+
+          // Scroll indicator fades out earlier
+          if (scrollIndicatorRef.current) {
+            masterTl.to(scrollIndicatorRef.current, {
+              opacity: 0,
+              y: -20,
+              ease: 'power2.in',
+              duration: 0.1,
+            }, 0.3);
+          }
+        }
+
+      }, containerRef);
+    }, 100);
+
     return () => {
-      if (toneDebounceRef.current) {
-        clearTimeout(toneDebounceRef.current);
+      clearTimeout(timer);
+      if (ctx) ctx.revert();
+      if (smootherRef.current) {
+        smootherRef.current.kill();
       }
     };
-  }, [contentToCheck, analyzeTone]);
+  }, [mounted]);
 
-  const handleCheck = async () => {
-    if (!contentToCheck.trim() || !brandDNA?.name) return;
-    
-    setIsChecking(true);
-    setCheckResult(null);
-    setCheckError('');
-    
-    try {
-      const res = await fetch('/api/check', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ brandDNA, content: contentToCheck }),
+  // Scroll-triggered animations with Intersection Observer
+  useEffect(() => {
+    if (!mounted) return;
+
+    const observerOptions = {
+      root: null,
+      rootMargin: '-50px 0px -100px 0px',
+      threshold: 0.15,
+    };
+
+    const phaseObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const phaseIndex = phaseRefs.current.findIndex((ref) => ref === entry.target);
+          if (phaseIndex !== -1) {
+            const staggerDelay = phaseIndex * 100; // Smoother, faster stagger
+            // Add staggered delay based on phase index
+            setTimeout(() => {
+              setVisiblePhases((prev) => new Set([...prev, phaseIndex]));
+
+              // After animation completes (0.7s), add the animation-complete class
+              setTimeout(() => {
+                const element = phaseRefs.current[phaseIndex];
+                if (element) {
+                  element.classList.add('animation-complete');
+                }
+              }, 800); // 0.7s animation + 100ms buffer
+            }, staggerDelay);
+          }
+        }
       });
-      
-      const result = await res.json();
-      
-      if (!res.ok) {
-        setCheckError(result.error || 'Analysis failed. Please try again.');
-        return;
-      }
-      
-      setCheckResult(result);
-      
-      // Mark first check complete
-      if (!phaseProgress.hasCompletedFirstCheck) {
-        markFirstCheck();
-      }
-      
-      addHistoryItem({
-        type: 'check',
-        brandId: brandDNA.id,
-        brandName: brandDNA.name,
-        input: contentToCheck,
-        output: result,
+    }, observerOptions);
+
+    const titleObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          setSectionTitleVisible(true);
+        }
       });
-    } catch (error) {
-      console.error(error);
-      setCheckError('Network error. Please check your connection.');
-    } finally {
-      setIsChecking(false);
-    }
-  };
+    }, { ...observerOptions, threshold: 0.5 });
 
-  const handleGenerate = async () => {
-    if (!generatePrompt.trim() || !brandDNA?.name) return;
-    
-    setIsGenerating(true);
-    setGeneratedContent('');
-    setGenerateError('');
-    
-    try {
-      const res = await fetch('/api/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ brandDNA, prompt: generatePrompt, contentType }),
-      });
-      
-      const result = await res.json();
-      
-      if (!res.ok) {
-        setGenerateError(result.error || 'Generation failed. Please try again.');
-        return;
-      }
-      
-      setGeneratedContent(result.content);
-      
-      // Mark first generation complete
-      if (!phaseProgress.hasCompletedFirstGeneration) {
-        markFirstGeneration();
-      }
-      
-      addHistoryItem({
-        type: 'generate',
-        brandId: brandDNA.id,
-        brandName: brandDNA.name,
-        input: generatePrompt,
-        contentType,
-        output: result.content,
-      });
-    } catch (error) {
-      console.error(error);
-      setGenerateError('Network error. Please check your connection.');
-    } finally {
-      setIsGenerating(false);
-    }
-  };
-
-  const handleCompetitorAnalysis = async () => {
-    if (!competitorName.trim() || competitorSamples.length === 0 || !brandDNA?.name) return;
-    
-    setIsAnalyzingCompetitor(true);
-    setCompetitorAnalysis(null);
-    setCompetitorError('');
-    
-    try {
-      const res = await fetch('/api/analyze-competitor', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ brandDNA, competitorName, competitorSamples }),
-      });
-      
-      const result = await res.json();
-      
-      if (!res.ok) {
-        setCompetitorError(result.error || 'Analysis failed. Please try again.');
-        return;
-      }
-      
-      setCompetitorAnalysis(result);
-    } catch (error) {
-      console.error(error);
-      setCompetitorError('Network error. Please check your connection.');
-    } finally {
-      setIsAnalyzingCompetitor(false);
-    }
-  };
-
-  const applyTemplate = (templateId: string) => {
-    const template = brandTemplates.find(t => t.id === templateId);
-    if (template?.preview) {
-      setBrandDNA(template.preview);
-      setShowTemplates(false);
-    }
-  };
-
-  const addKeyword = () => {
-    if (!keywordInput.trim()) return;
-    setBrandDNA({ keywords: [...(brandDNA?.keywords || []), keywordInput.trim()] });
-    setKeywordInput('');
-  };
-
-  const removeKeyword = (index: number) => {
-    setBrandDNA({ keywords: brandDNA?.keywords?.filter((_, i) => i !== index) });
-  };
-
-  const addDoPattern = () => {
-    if (!doPatternInput.trim()) return;
-    setBrandDNA({ doPatterns: [...(brandDNA?.doPatterns || []), doPatternInput.trim()] });
-    setDoPatternInput('');
-  };
-
-  const removeDoPattern = (index: number) => {
-    setBrandDNA({ doPatterns: brandDNA?.doPatterns?.filter((_, i) => i !== index) });
-  };
-
-  const addDontPattern = () => {
-    if (!dontPatternInput.trim()) return;
-    setBrandDNA({ dontPatterns: [...(brandDNA?.dontPatterns || []), dontPatternInput.trim()] });
-    setDontPatternInput('');
-  };
-
-  const removeDontPattern = (index: number) => {
-    setBrandDNA({ dontPatterns: brandDNA?.dontPatterns?.filter((_, i) => i !== index) });
-  };
-
-  const addVoiceSample = () => {
-    if (!voiceSampleInput.trim()) return;
-    setBrandDNA({ voiceSamples: [...(brandDNA?.voiceSamples || []), voiceSampleInput.trim()] });
-    setVoiceSampleInput('');
-  };
-
-  const removeVoiceSample = (index: number) => {
-    setBrandDNA({ voiceSamples: brandDNA?.voiceSamples?.filter((_, i) => i !== index) });
-  };
-
-  const addCompetitorSample = () => {
-    if (!competitorSampleInput.trim()) return;
-    setCompetitorSamples([...competitorSamples, competitorSampleInput.trim()]);
-    setCompetitorSampleInput('');
-  };
-
-  const removeCompetitorSample = (index: number) => {
-    setCompetitorSamples(competitorSamples.filter((_, i) => i !== index));
-  };
-
-  const [shareUrl, setShareUrl] = useState('');
-  const [isSharing, setIsSharing] = useState(false);
-
-  const exportAsJSON = () => {
-    if (!brandDNA) return;
-    const data = JSON.stringify(brandDNA, null, 2);
-    const blob = new Blob([data], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${brandDNA.name.toLowerCase().replace(/\s+/g, '-')}-brand-guidelines.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
-  const handleShare = async () => {
-    if (!brandDNA) return;
-    
-    setIsSharing(true);
-    setShareUrl('');
-    
-    try {
-      const res = await fetch('/api/brands/share', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ brand: brandDNA }),
-      });
-      
-      const data = await res.json();
-      
-      if (res.ok) {
-        setShareUrl(data.shareUrl);
-      }
-    } catch (error) {
-      console.error('Share error:', error);
-    } finally {
-      setIsSharing(false);
-    }
-  };
-
-  const formatDate = (date: Date) => {
-    return new Date(date).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+    // Observe phase cards
+    phaseRefs.current.forEach((ref) => {
+      if (ref) phaseObserver.observe(ref);
     });
+
+    // Observe section title
+    if (sectionTitleRef.current) {
+      titleObserver.observe(sectionTitleRef.current);
+    }
+
+    return () => {
+      phaseObserver.disconnect();
+      titleObserver.disconnect();
+    };
+  }, [mounted]);
+
+  // Morphing Typography Wave Animation
+  useEffect(() => {
+    const canvas = typographyCanvasRef.current;
+    if (!canvas || !mounted) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const resize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    resize();
+    window.addEventListener('resize', resize);
+
+    // Brand-related words that will morph
+    const brandWords = [
+      'voice', 'tone', 'style', 'brand', 'trust',
+      'clarity', 'focus', 'align', 'unity', 'flow',
+      'guide', 'rule', 'check', 'scale', 'grow'
+    ];
+
+    // Chaotic fonts (start state)
+    const chaoticFonts = [
+      'Comic Sans MS',
+      'Papyrus',
+      'Impact',
+      'Brush Script MT',
+      'Courier New',
+      'Times New Roman',
+      'Georgia',
+      'Trebuchet MS',
+    ];
+
+    // Target font (end state - brand consistent)
+    const targetFont = 'Helvetica Neue';
+
+    // Create floating word objects
+    interface FloatingWord {
+      word: string;
+      x: number;
+      y: number;
+      targetX: number;
+      targetY: number;
+      font: string;
+      fontSize: number;
+      targetFontSize: number;
+      rotation: number;
+      targetRotation: number;
+      opacity: number;
+      delay: number;
+      vx: number;
+      vy: number;
+    }
+
+    const floatingWords: FloatingWord[] = [];
+    const wordCount = 15;
+
+    for (let i = 0; i < wordCount; i++) {
+      const word = brandWords[i % brandWords.length];
+      const col = i % 5;
+      const row = Math.floor(i / 5);
+
+      floatingWords.push({
+        word,
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        targetX: 100 + col * (canvas.width - 200) / 4,
+        targetY: canvas.height * 0.4 + row * 60,
+        font: chaoticFonts[Math.floor(Math.random() * chaoticFonts.length)],
+        fontSize: Math.random() * 20 + 12,
+        targetFontSize: 18,
+        rotation: (Math.random() - 0.5) * 0.6, // Random rotation in chaos
+        targetRotation: 0, // Aligned in order
+        opacity: 0.3,
+        delay: i * 0.04,
+        vx: (Math.random() - 0.5) * 1.5,
+        vy: (Math.random() - 0.5) * 1.5,
+      });
+    }
+
+    let animationId: number;
+
+    const animate = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+      const smoother = smootherRef.current;
+      const scrollY = smoother ? smoother.scrollTop() : window.scrollY;
+      const viewportHeight = window.innerHeight;
+
+      // Progress based on scroll
+      const progress = Math.min(scrollY / (viewportHeight * 1.5), 1);
+
+      floatingWords.forEach((wordObj, index) => {
+        const adjustedProgress = Math.max(0, Math.min(1, (progress - wordObj.delay) / 0.6));
+        const easeProgress = 1 - Math.pow(1 - adjustedProgress, 3);
+
+        if (adjustedProgress < 0.1) {
+          // Chaos phase - random floating
+          wordObj.x += wordObj.vx;
+          wordObj.y += wordObj.vy;
+
+          // Bounce off edges
+          if (wordObj.x < 50 || wordObj.x > canvas.width - 50) wordObj.vx *= -1;
+          if (wordObj.y < 50 || wordObj.y > canvas.height - 50) wordObj.vy *= -1;
+
+          // Add slight randomness
+          wordObj.vx += (Math.random() - 0.5) * 0.1;
+          wordObj.vy += (Math.random() - 0.5) * 0.1;
+          wordObj.vx *= 0.99;
+          wordObj.vy *= 0.99;
+        } else {
+          // Transition to order
+          const targetX = wordObj.targetX;
+          const targetY = wordObj.targetY;
+          wordObj.x += (targetX - wordObj.x) * 0.05;
+          wordObj.y += (targetY - wordObj.y) * 0.05;
+        }
+
+        // Interpolate font size and rotation
+        const currentFontSize = wordObj.fontSize + (wordObj.targetFontSize - wordObj.fontSize) * easeProgress;
+        const currentRotation = wordObj.rotation + (wordObj.targetRotation - wordObj.rotation) * easeProgress;
+
+        // Calculate opacity (fade in as scroll, fade out near end)
+        let opacity = Math.min(adjustedProgress * 2, 0.6);
+        if (progress > 0.8) {
+          opacity *= 1 - (progress - 0.8) / 0.2;
+        }
+
+        if (opacity > 0.02) {
+          ctx.save();
+          ctx.translate(wordObj.x, wordObj.y);
+          ctx.rotate(currentRotation);
+
+          // Interpolate between chaotic font and target font
+          const fontWeight = easeProgress > 0.5 ? '500' : '400';
+          const currentFont = easeProgress > 0.7 ? targetFont : wordObj.font;
+          ctx.font = `${fontWeight} ${currentFontSize}px "${currentFont}", sans-serif`;
+
+          // Color transitions from varied to consistent brand blue
+          const colorProgress = easeProgress;
+          if (colorProgress < 0.5) {
+            // Chaotic colors (various grays)
+            const grayValue = isDark ? 150 + Math.random() * 50 : 80 + Math.random() * 50;
+            ctx.fillStyle = isDark
+              ? `rgba(${grayValue}, ${grayValue}, ${grayValue + 20}, ${opacity})`
+              : `rgba(${grayValue}, ${grayValue}, ${grayValue}, ${opacity})`;
+          } else {
+            // Transitioning to brand blue
+            const blueProgress = (colorProgress - 0.5) * 2;
+            const r = isDark ? Math.floor(150 * (1 - blueProgress)) : Math.floor(80 * (1 - blueProgress));
+            const g = isDark ? Math.floor(150 * (1 - blueProgress) + 71 * blueProgress) : Math.floor(80 * (1 - blueProgress) + 47 * blueProgress);
+            const b = isDark ? Math.floor(170 * (1 - blueProgress) + 255 * blueProgress) : Math.floor(100 * (1 - blueProgress) + 167 * blueProgress);
+            ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${opacity})`;
+          }
+
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(wordObj.word, 0, 0);
+
+          ctx.restore();
+        }
+      });
+
+      animationId = requestAnimationFrame(animate);
+    };
+
+    animationId = requestAnimationFrame(animate);
+
+    return () => {
+      window.removeEventListener('resize', resize);
+      cancelAnimationFrame(animationId);
+    };
+  }, [mounted]);
+
+  // Brand Score Gauge Animation
+  useEffect(() => {
+    const canvas = gaugeCanvasRef.current;
+    if (!canvas || !mounted) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const resize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    resize();
+    window.addEventListener('resize', resize);
+
+    let animationId: number;
+
+    const animate = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+      const smoother = smootherRef.current;
+      const scrollY = smoother ? smoother.scrollTop() : window.scrollY;
+      const viewportHeight = window.innerHeight;
+      const progress = Math.min(scrollY / (viewportHeight * 1.5), 1);
+
+      // Position: center-right of screen, more prominent
+      const centerX = canvas.width - 180;
+      const centerY = canvas.height * 0.45;
+      const radius = 100; // Larger radius
+
+      let opacity = Math.min(progress * 2, 0.95);
+      if (progress > 0.85) opacity *= 1 - (progress - 0.85) / 0.15;
+
+      if (opacity > 0.02) {
+        // Outer glow ring
+        const glowGradient = ctx.createRadialGradient(centerX, centerY, radius * 0.8, centerX, centerY, radius * 1.4);
+        glowGradient.addColorStop(0, `rgba(0, 71, 255, ${opacity * 0.15})`);
+        glowGradient.addColorStop(1, `rgba(0, 71, 255, 0)`);
+        ctx.fillStyle = glowGradient;
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius * 1.4, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Background arc
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius, Math.PI * 0.75, Math.PI * 2.25);
+        ctx.strokeStyle = isDark ? `rgba(255, 255, 255, ${opacity * 0.15})` : `rgba(0, 0, 0, ${opacity * 0.15})`;
+        ctx.lineWidth = 12;
+        ctx.lineCap = 'round';
+        ctx.stroke();
+
+        // Progress arc (brand score filling up)
+        const scoreProgress = Math.min(progress * 1.3, 1);
+        const endAngle = Math.PI * 0.75 + scoreProgress * Math.PI * 1.5;
+
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius, Math.PI * 0.75, endAngle);
+
+        // Gradient from red to green via yellow
+        const gradient = ctx.createLinearGradient(centerX - radius, centerY, centerX + radius, centerY);
+        gradient.addColorStop(0, `rgba(255, 80, 80, ${opacity})`);
+        gradient.addColorStop(0.5, `rgba(255, 200, 80, ${opacity})`);
+        gradient.addColorStop(1, `rgba(0, 200, 100, ${opacity})`);
+
+        ctx.strokeStyle = scoreProgress > 0.7 ? `rgba(0, 71, 255, ${opacity})` : gradient;
+        ctx.lineWidth = 12;
+        ctx.stroke();
+
+        // Inner circle background
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius * 0.7, 0, Math.PI * 2);
+        ctx.fillStyle = isDark ? `rgba(10, 10, 15, ${opacity * 0.8})` : `rgba(255, 255, 255, ${opacity * 0.8})`;
+        ctx.fill();
+
+        // Score text - larger
+        const score = Math.floor(scoreProgress * 100);
+        ctx.font = `700 42px "Helvetica Neue", sans-serif`;
+        ctx.fillStyle = isDark ? `rgba(255, 255, 255, ${opacity})` : `rgba(0, 0, 0, ${opacity})`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(`${score}`, centerX, centerY - 5);
+
+        // Label - larger
+        ctx.font = `500 12px "VCR OSD Mono", monospace`;
+        ctx.fillStyle = isDark ? `rgba(255, 255, 255, ${opacity * 0.7})` : `rgba(0, 0, 0, ${opacity * 0.7})`;
+        ctx.fillText('BRAND SCORE', centerX, centerY + 30);
+
+        // Percentage symbol
+        ctx.font = `400 16px "Helvetica Neue", sans-serif`;
+        ctx.fillStyle = isDark ? `rgba(255, 255, 255, ${opacity * 0.5})` : `rgba(0, 0, 0, ${opacity * 0.5})`;
+        ctx.fillText('%', centerX + 35, centerY - 12);
+      }
+
+      animationId = requestAnimationFrame(animate);
+    };
+
+    animationId = requestAnimationFrame(animate);
+
+    return () => {
+      window.removeEventListener('resize', resize);
+      cancelAnimationFrame(animationId);
+    };
+  }, [mounted]);
+
+  // Interactive background effect
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const container = containerRef.current;
+    if (!canvas || !container) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const resize = () => {
+      canvas.width = window.innerWidth;
+      // Use document height to cover entire scrollable area
+      canvas.height = Math.max(
+        document.body.scrollHeight,
+        document.documentElement.scrollHeight,
+        container.scrollHeight
+      );
+    };
+    resize();
+    window.addEventListener('resize', resize);
+
+    const handleScroll = () => {
+      scrollYRef.current = window.scrollY;
+      // Update canvas height on scroll in case content changed
+      const newHeight = Math.max(
+        document.body.scrollHeight,
+        document.documentElement.scrollHeight,
+        container.scrollHeight
+      );
+      if (canvas.height !== newHeight) {
+        canvas.height = newHeight;
+      }
+    };
+    window.addEventListener('scroll', handleScroll);
+
+    const handleMouseMove = (e: MouseEvent) => {
+      // Use window.scrollY for accurate scroll position
+      const scrollY = window.scrollY;
+      mouseRef.current = { x: e.clientX, y: e.clientY + scrollY };
+
+      for (let i = 0; i < 2; i++) {
+        particlesRef.current.push({
+          x: e.clientX + (Math.random() - 0.5) * 20,
+          y: e.clientY + scrollY + (Math.random() - 0.5) * 20,
+          vx: (Math.random() - 0.5) * 2,
+          vy: (Math.random() - 0.5) * 2,
+          life: 1,
+        });
+      }
+
+      if (particlesRef.current.length > 100) {
+        particlesRef.current = particlesRef.current.slice(-100);
+      }
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+
+    let animationId: number;
+    const pixelSize = 8;
+    let startTime: number | null = null;
+
+    const animate = (time: number) => {
+      if (startTime === null) {
+        startTime = time;
+        lastGradientTimeRef.current = time;
+      }
+
+      // Resize canvas if document height changed
+      const docHeight = Math.max(
+        document.body.scrollHeight,
+        document.documentElement.scrollHeight,
+        container.scrollHeight
+      );
+      if (canvas.height !== docHeight) {
+        canvas.height = docHeight;
+      }
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw grid - subtle lines
+      const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+      const gridSize = 60;
+
+      // Primary grid lines - SUBTLE
+      ctx.strokeStyle = isDark ? 'rgba(255, 255, 255, 0.04)' : 'rgba(0, 0, 0, 0.03)';
+      ctx.lineWidth = 1;
+
+      for (let x = 0; x < canvas.width; x += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+        ctx.stroke();
+      }
+
+      for (let y = 0; y < canvas.height; y += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+      }
+
+      // Accent grid lines (every 4th line slightly brighter) - Klein Blue
+      ctx.strokeStyle = isDark ? 'rgba(0, 71, 255, 0.08)' : 'rgba(0, 47, 167, 0.05)';
+      ctx.lineWidth = 1;
+
+      for (let x = 0; x < canvas.width; x += gridSize * 4) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+        ctx.stroke();
+      }
+
+      for (let y = 0; y < canvas.height; y += gridSize * 4) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.height, y);
+        ctx.stroke();
+      }
+
+      // Pixelated gradient wave
+      const gradientInterval = 5500;
+      if (time - lastGradientTimeRef.current > gradientInterval) {
+        lastGradientTimeRef.current = time;
+        gradientPhaseRef.current = 0;
+      }
+
+      if (gradientPhaseRef.current < 1) {
+        gradientPhaseRef.current += 0.008;
+
+        const waveX = gradientPhaseRef.current * (canvas.width + 400) - 200;
+        const waveWidth = 300;
+
+        for (let x = Math.max(0, waveX - waveWidth); x < Math.min(canvas.width, waveX + waveWidth); x += pixelSize) {
+          for (let y = 0; y < canvas.height; y += pixelSize) {
+            const dist = Math.abs(x - waveX);
+            const intensity = Math.max(0, 1 - dist / waveWidth);
+            const alpha = intensity * 0.12;
+
+            if (alpha > 0.01) {
+              // Klein Blue wave effect
+              ctx.fillStyle = `rgba(0, 47, 167, ${alpha})`;
+              ctx.fillRect(
+                Math.floor(x / pixelSize) * pixelSize,
+                Math.floor(y / pixelSize) * pixelSize,
+                pixelSize,
+                pixelSize
+              );
+            }
+          }
+        }
+      }
+
+      // Draw particles - electric blue
+      particlesRef.current.forEach((particle) => {
+        particle.x += particle.vx;
+        particle.y += particle.vy;
+        particle.life -= 0.015;
+
+        if (particle.life > 0) {
+          const size = Math.floor(particle.life * 12 / pixelSize) * pixelSize;
+          if (size > 0) {
+            ctx.fillStyle = `rgba(0, 71, 255, ${particle.life * 0.5})`;
+            ctx.fillRect(
+              Math.floor(particle.x / pixelSize) * pixelSize,
+              Math.floor(particle.y / pixelSize) * pixelSize,
+              size,
+              size
+            );
+          }
+        }
+      });
+
+      particlesRef.current = particlesRef.current.filter(p => p.life > 0);
+
+      // Cursor glow - electric blue
+      const mx = mouseRef.current.x;
+      const my = mouseRef.current.y;
+      const glowRadius = 150;
+
+      for (let x = mx - glowRadius; x < mx + glowRadius; x += pixelSize) {
+        for (let y = my - glowRadius; y < my + glowRadius; y += pixelSize) {
+          const dist = Math.sqrt((x - mx) ** 2 + (y - my) ** 2);
+          if (dist < glowRadius) {
+            const alpha = (1 - dist / glowRadius) * 0.1;
+            ctx.fillStyle = `rgba(0, 71, 255, ${alpha})`;
+            ctx.fillRect(
+              Math.floor(x / pixelSize) * pixelSize,
+              Math.floor(y / pixelSize) * pixelSize,
+              pixelSize,
+              pixelSize
+            );
+          }
+        }
+      }
+
+      animationId = requestAnimationFrame(animate);
+    };
+
+    animationId = requestAnimationFrame(animate);
+
+    return () => {
+      window.removeEventListener('resize', resize);
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('mousemove', handleMouseMove);
+      cancelAnimationFrame(animationId);
+    };
+  }, [mounted]);
+
+  const handlePhaseClick = (phaseNumber: number) => {
+    setExpandedPhase(expandedPhase === phaseNumber ? null : phaseNumber);
   };
 
-  // Dashboard calculations
-  const dashboardStats = {
-    totalChecks: history.filter(h => h.type === 'check').length,
-    totalGenerations: history.filter(h => h.type === 'generate').length,
-    averageScore: history.filter(h => h.type === 'check').length > 0
-      ? Math.round(
-          history
-            .filter(h => h.type === 'check')
-            .reduce((sum, h) => sum + (h.output as CheckResult).score, 0) /
-          history.filter(h => h.type === 'check').length
-        )
-      : 0,
-    recentScores: history
-      .filter(h => h.type === 'check')
-      .slice(0, 10)
-      .map(h => ({
-        date: formatDate(h.timestamp),
-        score: (h.output as CheckResult).score,
-      }))
-      .reverse(),
+  const handleGetStarted = () => {
+    router.push('/app');
   };
 
-  const contentTypes = Object.entries(contentTypeLabels) as [ContentType, typeof contentTypeLabels[string]][];
-
-  // Show phases breakdown for new users coming from landing page
-  if (showPhasesBreakdown) {
+  if (!mounted) {
     return (
-      <PhasesBreakdown
-        onGetStarted={handlePhasesGetStarted}
-        onSkip={handlePhasesSkip}
-      />
+      <div style={{ position: 'fixed', inset: 0, background: '#000000' }} />
     );
   }
 
-  // Show import hub for new users (first step) or when explicitly requested
-  if (showImportHub || (!phaseProgress.hasCompletedOnboarding && !showOnboarding && !showPhasesBreakdown)) {
     return (
-      <BrandImportHub
-        onStartFresh={handleStartFresh}
-        onImportComplete={handleImportComplete}
+    <div
+      ref={containerRef}
+      style={{
+        minHeight: '100vh',
+        background: theme === 'dark' ? '#0a0a0a' : '#f5f5f5',
+        position: 'relative',
+        overflowX: 'hidden',
+        transition: 'background 0.3s ease',
+        isolation: 'isolate',
+      }}
+    >
+      {/* Morphing Typography Wave Canvas */}
+      <canvas
+        ref={typographyCanvasRef}
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          pointerEvents: 'none',
+          zIndex: 2,
+          background: 'transparent',
+        }}
       />
-    );
-  }
 
-  // Show onboarding wizard after choosing "Start Fresh"
-  if (showOnboarding) {
-    return <OnboardingWizard onComplete={handleOnboardingComplete} onSkip={handleOnboardingSkip} />;
-  }
-
-  return (
-    <div className="min-h-screen bg-background with-noise-texture">
-      {/* Phase Navigation */}
-      <PhaseNavigation
-        activePhase={activePhase}
-        activeTab={activeTab}
-        onPhaseChange={handlePhaseChange}
-        onTabChange={handleTabChange}
-        brandCompleteness={brandCompleteness}
-        hasChecked={phaseProgress.hasCompletedFirstCheck}
-        hasGenerated={phaseProgress.hasCompletedFirstGeneration}
+      {/* Brand Score Gauge Canvas */}
+      <canvas
+        ref={gaugeCanvasRef}
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          pointerEvents: 'none',
+          zIndex: 6,
+          background: 'transparent',
+        }}
       />
 
-      {/* Brand Switcher (floating) */}
-      <div className="fixed top-20 right-6 z-40">
-        <div className="relative">
-          <button
-            onClick={() => setShowBrandMenu(!showBrandMenu)}
-            className="flex items-center gap-2 px-3 py-2 text-sm bg-surface rounded-full hover:bg-border transition-colors"
-          >
-            <span className="text-muted">Brand:</span>
-            <span className="font-medium">{brandDNA?.name || 'Select'}</span>
-            <svg className="w-4 h-4 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 9l-7 7-7-7" />
-            </svg>
-          </button>
-          
-          {showBrandMenu && (
-            <div className="absolute top-full right-0 mt-2 w-64 bg-background border border-border rounded-lg shadow-lg overflow-hidden animate-fade-in">
-              <div className="p-2 max-h-64 overflow-y-auto">
-                {brands.map((brand) => (
-                  <div
-                    key={brand.id}
-                    className={`flex items-center justify-between px-3 py-2 rounded-md cursor-pointer transition-colors ${
-                      brand.id === currentBrandId ? 'bg-surface' : 'hover:bg-surface'
-                    }`}
-                  >
-                    <span
-                      className="flex-1 text-sm"
-                      onClick={() => {
-                        switchBrand(brand.id);
-                        setShowBrandMenu(false);
-                      }}
-                    >
-                      {brand.name || 'Unnamed Brand'}
-                    </span>
-                    {brands.length > 1 && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          deleteBrand(brand.id);
-                        }}
-                        className="text-muted hover:text-foreground p-1"
-                      >
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
-                    )}
+      {/* ScrollSmoother Wrapper */}
+      <div ref={smoothWrapperRef} id="smooth-wrapper">
+        <div ref={smoothContentRef} id="smooth-content">
+
+      {/* Interactive Canvas Background - Grid Pattern */}
+      <canvas
+        ref={canvasRef}
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          pointerEvents: 'none',
+          zIndex: 2,
+          background: 'transparent',
+        }}
+      />
+
+      {/* Noise Texture Overlay */}
+      <div className="noise-overlay" />
+
+      {/* Bento Frame Corners */}
+      <div style={{ position: 'fixed', inset: '24px', pointerEvents: 'none', zIndex: 10 }}>
+        <div style={{ position: 'absolute', top: 0, left: 0 }}>
+          <div className="corner-pulse" style={{ width: '8px', height: '8px', background: '#0000FF' }} />
+          <div style={{ position: 'absolute', top: 0, left: 0, width: '48px', height: '1px', background: 'rgba(255,255,255,0.2)' }} />
+          <div style={{ position: 'absolute', top: 0, left: 0, width: '1px', height: '48px', background: 'rgba(255,255,255,0.2)' }} />
                   </div>
-                ))}
+        <div style={{ position: 'absolute', top: 0, right: 0 }}>
+          <div className="corner-pulse" style={{ width: '8px', height: '8px', background: '#0000FF', marginLeft: 'auto' }} />
+          <div style={{ position: 'absolute', top: 0, right: 0, width: '48px', height: '1px', background: 'rgba(255,255,255,0.2)' }} />
+          <div style={{ position: 'absolute', top: 0, right: 0, width: '1px', height: '48px', background: 'rgba(255,255,255,0.2)' }} />
               </div>
-              <div className="border-t border-border p-2">
-                <button
-                  onClick={() => {
-                    createBrand();
-                    setShowBrandMenu(false);
-                  }}
-                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-muted hover:text-foreground hover:bg-surface rounded-md transition-colors"
-                >
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" />
-                  </svg>
-                  New Brand
-                </button>
+        <div style={{ position: 'absolute', bottom: 0, left: 0 }}>
+          <div className="corner-pulse" style={{ width: '8px', height: '8px', background: '#0000FF' }} />
+          <div style={{ position: 'absolute', bottom: 0, left: 0, width: '48px', height: '1px', background: 'rgba(255,255,255,0.2)' }} />
+          <div style={{ position: 'absolute', bottom: 0, left: 0, width: '1px', height: '48px', background: 'rgba(255,255,255,0.2)' }} />
               </div>
+        <div style={{ position: 'absolute', bottom: 0, right: 0 }}>
+          <div className="corner-pulse" style={{ width: '8px', height: '8px', background: '#0000FF', marginLeft: 'auto' }} />
+          <div style={{ position: 'absolute', bottom: 0, right: 0, width: '48px', height: '1px', background: 'rgba(255,255,255,0.2)' }} />
+          <div style={{ position: 'absolute', bottom: 0, right: 0, width: '1px', height: '48px', background: 'rgba(255,255,255,0.2)' }} />
             </div>
-          )}
         </div>
         
         {/* Theme Toggle */}
         <button
           onClick={toggleTheme}
-          className="ml-2 p-2 text-muted hover:text-foreground transition-colors bg-surface rounded-full"
+        style={{
+          position: 'fixed',
+          top: '32px',
+          right: '32px',
+          zIndex: 100,
+          background: theme === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
+          border: `1px solid ${theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'}`,
+          borderRadius: '12px',
+          padding: '12px',
+          cursor: 'pointer',
+          transition: 'all 0.3s ease',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.background = theme === 'dark' ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.12)';
+          e.currentTarget.style.transform = 'scale(1.05)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.background = theme === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)';
+          e.currentTarget.style.transform = 'scale(1)';
+        }}
           aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
         >
           {theme === 'dark' ? (
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.8)" strokeWidth="1.5">
+            <circle cx="12" cy="12" r="5" />
+            <line x1="12" y1="1" x2="12" y2="3" />
+            <line x1="12" y1="21" x2="12" y2="23" />
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+            <line x1="1" y1="12" x2="3" y2="12" />
+            <line x1="21" y1="12" x2="23" y2="12" />
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
             </svg>
           ) : (
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(0,0,0,0.8)" strokeWidth="1.5">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
             </svg>
           )}
         </button>
-      </div>
 
-      {/* Click outside to close menus */}
-      {(showBrandMenu || showTemplates) && (
-        <div 
-          className="fixed inset-0 z-30" 
-          onClick={() => {
-            setShowBrandMenu(false);
-            setShowTemplates(false);
+      {/* Content */}
+      <div style={{ position: 'relative', zIndex: 5, background: 'transparent' }}>
+        {/* Hero Section */}
+        <section
+          ref={heroSectionRef}
+          className="content-entrance"
+          style={{
+            minHeight: '100vh',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            background: theme === 'dark'
+              ? `radial-gradient(ellipse 80% 50% at 50% 15%, rgba(0, 47, 167, 0.18) 0%, rgba(0, 24, 71, 0.08) 40%, transparent 70%),
+                 radial-gradient(ellipse 60% 40% at 10% 25%, rgba(0, 71, 255, 0.12) 0%, transparent 50%),
+                 radial-gradient(ellipse 50% 35% at 90% 20%, rgba(0, 47, 167, 0.14) 0%, transparent 50%)`
+              : `radial-gradient(ellipse 80% 50% at 50% 15%, rgba(0, 47, 167, 0.1) 0%, rgba(0, 71, 255, 0.05) 40%, transparent 70%),
+                 radial-gradient(ellipse 60% 40% at 10% 25%, rgba(0, 71, 255, 0.08) 0%, transparent 50%),
+                 radial-gradient(ellipse 50% 35% at 90% 20%, rgba(0, 47, 167, 0.08) 0%, transparent 50%)`,
+            justifyContent: 'center',
+            padding: '48px',
+            position: 'relative',
+            overflow: 'hidden',
           }}
-        />
-      )}
+        >
+          {/* Hero Glow - pulses on snap */}
+          <div
+            ref={heroGlowRef}
+            style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: '120%',
+              height: '120%',
+              background: 'radial-gradient(circle, rgba(0, 71, 255, 0) 0%, transparent 70%)',
+              pointerEvents: 'none',
+              opacity: 0,
+              zIndex: 0,
+            }}
+          />
 
-      {/* Quick Actions FAB */}
-      <QuickActions
-        onNavigate={handleQuickNavigate}
-        canCheck={brandCompleteness >= 30}
-        canGenerate={phaseProgress.hasCompletedFirstCheck}
-      />
-
-      {/* Main Content */}
-      <main className="pt-4">
-        {/* ======================= DEFINE PHASE ======================= */}
-        
-        {/* Brand DNA Tab */}
-        {activeTab === 'brand' && (
-          <div className="animate-fade-in">
-            <section className="py-16 px-6 text-center border-b border-border">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-surface rounded-full text-xs text-muted mb-6">
-                <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
-                Phase 1: Define
+          {/* Side Labels */}
+          <div
+            className="side-label"
+            style={{
+              position: 'absolute',
+              left: '48px',
+              top: '50%',
+              transform: 'translateY(-50%) rotate(180deg)',
+              writingMode: 'vertical-rl',
+              fontFamily: "'VCR OSD Mono', monospace",
+              fontSize: '10px',
+              color: theme === 'dark' ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0, 0, 0, 0.4)',
+              letterSpacing: '0.3em',
+              textTransform: 'uppercase',
+            }}
+          >
+            BRAND CONSISTENCY
               </div>
-              <h2 className="text-5xl font-light tracking-tight mb-4">
-                Define your brand.
-              </h2>
-              <p className="text-muted text-lg max-w-md mx-auto mb-8">
-                Capture the essence of your brand identity.
-              </p>
+          <div
+            className="side-label"
+            style={{
+              position: 'absolute',
+              right: '48px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              writingMode: 'vertical-rl',
+              fontFamily: "'VCR OSD Mono', monospace",
+              fontSize: '10px',
+              color: theme === 'dark' ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0, 0, 0, 0.4)',
+              letterSpacing: '0.3em',
+              textTransform: 'uppercase',
+            }}
+          >
+            AI-POWERED
+              </div>
               
-              {/* Brand Completeness */}
-              <div className="max-w-md mx-auto mb-8">
-                <BrandCompleteness size="sm" showDetails={false} />
-              </div>
-              
-              {/* Import/Template Buttons */}
-              <div className="flex items-center justify-center gap-3">
-                <button
-                  onClick={() => setShowImportHub(true)}
-                  className="px-4 py-2 text-sm border border-border rounded-full hover:border-foreground transition-colors flex items-center gap-2"
-                >
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                  </svg>
-                  Import Existing Brand
-                </button>
-                <div className="relative inline-block">
-                  <button
-                    onClick={() => setShowTemplates(!showTemplates)}
-                    className="px-4 py-2 text-sm border border-border rounded-full hover:border-foreground transition-colors"
-                  >
-                    Start from Template
-                  </button>
-                
-                {showTemplates && (
-                  <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-80 bg-background border border-border rounded-lg shadow-lg overflow-hidden animate-fade-in z-50">
-                    <div className="p-2 max-h-96 overflow-y-auto">
-                      {brandTemplates.map((template) => (
-                        <button
-                          key={template.id}
-                          onClick={() => applyTemplate(template.id)}
-                          className="w-full text-left px-4 py-3 hover:bg-surface rounded-md transition-colors"
-                        >
-                          <div className="flex items-center gap-3">
-                            <div className="flex -space-x-1">
-                              {Object.values(template.preview.colors || {}).map((color, i) => (
-                                <div
-                                  key={i}
-                                  className="w-4 h-4 rounded-full border border-background"
-                                  style={{ backgroundColor: color }}
-                                />
-                              ))}
-                            </div>
-                            <div>
-                              <p className="text-sm font-medium">{template.name}</p>
-                              <p className="text-xs text-muted">{template.description}</p>
-                            </div>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                </div>
-              </div>
-            </section>
+          {/* Pain Statement */}
+          <p
+            ref={painStatementRef}
+            style={{
+              fontFamily: "'VCR OSD Mono', monospace",
+              fontSize: 'clamp(12px, 1.5vw, 16px)',
+              fontWeight: 400,
+              letterSpacing: '0.3em',
+              color: theme === 'dark' ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0, 0, 0, 0.3)',
+              textTransform: 'uppercase',
+              margin: 0,
+              marginBottom: '24px',
+            }}
+          >
+            Brand drift kills companies slowly.
+          </p>
 
-            <section className="max-w-2xl mx-auto px-6 py-16">
-              {/* Brand Name */}
-              <div className="mb-16">
-                <label className="block text-xs uppercase tracking-widest text-muted mb-4">
-                  Brand Name
-                </label>
-                <input
-                  type="text"
-                  value={brandDNA?.name || ''}
-                  onChange={(e) => setBrandDNA({ name: e.target.value })}
-                  placeholder="Enter brand name"
-                  className="w-full bg-transparent text-3xl font-light tracking-tight border-none outline-none placeholder:text-border"
-                />
-              </div>
+          {/* Logo */}
+          <h1
+            ref={heroTitleRef}
+            style={{
+              fontSize: 'clamp(72px, 14vw, 180px)',
+              lineHeight: 1,
+              margin: 0,
+              display: 'flex',
+              alignItems: 'baseline',
+              letterSpacing: '-0.05em',
+              marginBottom: '32px',
+              perspective: '1000px',
+            }}
+          >
+            <span
+              ref={brandTextRef}
+              className="brand-text-chaos"
+              style={{
+                fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
+                fontWeight: 700,
+                color: theme === 'dark' ? '#FFFFFF' : '#000000',
+                display: 'inline-block',
+              }}
+            >
+              Brand
+            </span>
+            <span
+              ref={osTextRef}
+              className="os-shimmer"
+              style={{
+                fontFamily: "'VCR OSD Mono', monospace",
+                fontWeight: 400,
+                position: 'relative',
+                top: '0.05em',
+                display: 'inline-block',
+              }}
+            >
+              OS
+            </span>
+            <span
+              ref={typingCursorRef}
+              className="typing-cursor-element"
+              style={{
+                display: 'inline-block',
+                width: '4px',
+                height: '0.9em',
+                background: '#0047FF',
+                marginLeft: '4px',
+                verticalAlign: 'baseline',
+                opacity: 0,
+              }}
+            />
+          </h1>
 
-              {/* Brand Colors */}
-              <div className="mb-16">
-                <h3 className="text-xs uppercase tracking-widest text-muted mb-8">
-                  Brand Colors
-                </h3>
-                <div className="grid grid-cols-3 gap-6">
-                  {[
-                    { key: 'primary', label: 'Primary' },
-                    { key: 'secondary', label: 'Secondary' },
-                    { key: 'accent', label: 'Accent' },
-                  ].map(({ key, label }) => (
-                    <div key={key} className="group">
-                      <label className="block text-xs text-muted mb-3">{label}</label>
-                      <label className="block cursor-pointer">
-                        <div 
-                          className="h-16 rounded-lg border border-border transition-all group-hover:scale-[1.02] group-hover:shadow-lg"
-                          style={{ backgroundColor: brandDNA?.colors?.[key as keyof typeof brandDNA.colors] || '#000000' }}
-                        />
-                        <input
-                          type="color"
-                          value={brandDNA?.colors?.[key as keyof typeof brandDNA.colors] || '#000000'}
-                          onChange={(e) => setBrandDNA({ 
-                            colors: { ...brandDNA?.colors!, [key]: e.target.value } 
-                          })}
-                          className="sr-only"
-                        />
-                      </label>
-                      <div className="flex items-center gap-2 mt-2">
-                        <input
-                          type="text"
-                          value={brandDNA?.colors?.[key as keyof typeof brandDNA.colors] || '#000000'}
-                          onChange={(e) => {
-                            const value = e.target.value;
-                            if (/^#[0-9A-Fa-f]{0,6}$/.test(value)) {
-                              setBrandDNA({ 
-                                colors: { ...brandDNA?.colors!, [key]: value } 
-                              });
-                            }
-                          }}
-                          className="flex-1 text-xs font-mono bg-transparent border-b border-border pb-1 outline-none focus:border-foreground transition-colors"
-                          placeholder="#000000"
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+          {/* Agitation + Solution */}
+          <p
+            ref={supportingTextRef}
+            style={{
+              fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
+              fontSize: 'clamp(14px, 2vw, 20px)',
+              fontWeight: 400,
+              color: theme === 'dark' ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)',
+              maxWidth: '700px',
+              lineHeight: 1.5,
+              margin: 0,
+              textAlign: 'center',
+              marginBottom: '32px',
+              opacity: 0,
+              transform: 'translateY(20px)',
+            }}
+          >
+            Your brand is a promise — customers notice when you break it.
+          </p>
+          <p
+            ref={taglineContainerRef}
+            style={{
+              fontSize: 'clamp(24px, 4vw, 40px)',
+              fontWeight: 600,
+              color: theme === 'dark' ? '#FFFFFF' : '#000000',
+              maxWidth: '700px',
+              lineHeight: 1.3,
+              margin: 0,
+              textAlign: 'center',
+              marginBottom: '48px',
+              display: 'flex',
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '16px',
+            }}
+          >
+            <span
+              ref={oneSystemRef}
+              style={{
+                fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
+                opacity: 0,
+                transform: 'translateY(20px)',
+              }}
+            >
+              One system.
+            </span>
+            <span
+              ref={zeroDriftRef}
+              className="zero-drift-text"
+              style={{
+                fontFamily: "'PP Mondwest', monospace",
+                display: 'inline-block',
+                letterSpacing: '0.05em',
+                opacity: 0,
+                transform: 'translateX(-50px)',
+              }}
+            >
+              Zero Drift.
+            </span>
+          </p>
 
-              {/* Tone Spectrum */}
-              <div className="mb-16">
-                <h3 className="text-xs uppercase tracking-widest text-muted mb-8">
-                  Tone Spectrum
-                </h3>
-                <div className="flex flex-wrap gap-x-12 gap-y-8">
-                  <ToneSlider
-                    label="Formality"
-                    value={brandDNA?.tone?.minimal || 50}
-                    onChange={(v) => setBrandDNA({ tone: { ...brandDNA?.tone!, minimal: v } })}
-                    leftLabel="Casual"
-                    rightLabel="Formal"
-                  />
-                  <ToneSlider
-                    label="Energy"
-                    value={brandDNA?.tone?.playful || 50}
-                    onChange={(v) => setBrandDNA({ tone: { ...brandDNA?.tone!, playful: v } })}
-                    leftLabel="Reserved"
-                    rightLabel="Energetic"
-                  />
-                  <ToneSlider
-                    label="Confidence"
-                    value={brandDNA?.tone?.bold || 50}
-                    onChange={(v) => setBrandDNA({ tone: { ...brandDNA?.tone!, bold: v } })}
-                    leftLabel="Humble"
-                    rightLabel="Bold"
-                  />
-                  <ToneSlider
-                    label="Style"
-                    value={brandDNA?.tone?.experimental || 30}
-                    onChange={(v) => setBrandDNA({ tone: { ...brandDNA?.tone!, experimental: v } })}
-                    leftLabel="Classic"
-                    rightLabel="Experimental"
-                  />
-                </div>
-              </div>
-
-              {/* Keywords */}
-              <div className="mb-16">
-                <h3 className="text-xs uppercase tracking-widest text-muted mb-4">Brand Keywords</h3>
-                <div className="flex gap-2 mb-4">
-                  <input
-                    type="text"
-                    value={keywordInput}
-                    onChange={(e) => setKeywordInput(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && addKeyword()}
-                    placeholder="Add a keyword"
-                    className="flex-1 bg-transparent text-base border-b border-border pb-2 outline-none placeholder:text-muted"
-                  />
-                  <button onClick={addKeyword} className="text-muted hover:text-foreground transition-colors">
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" />
-                    </svg>
-                  </button>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {brandDNA?.keywords?.map((keyword, i) => (
+          {/* Scroll indicator */}
+          <div
+            ref={scrollIndicatorRef}
+            className="bounce"
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '8px',
+              marginTop: '48px',
+            }}
+          >
                     <span
-                      key={i}
-                      className="group inline-flex items-center gap-2 px-3 py-1.5 bg-surface rounded-full text-sm cursor-pointer hover:bg-border transition-colors"
-                      onClick={() => removeKeyword(i)}
-                    >
-                      {keyword}
-                      <span className="text-muted group-hover:text-foreground">×</span>
+              style={{
+                fontFamily: "'VCR OSD Mono', monospace",
+                fontSize: '10px',
+                letterSpacing: '0.2em',
+                color: theme === 'dark' ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0, 0, 0, 0.4)',
+                textTransform: 'uppercase',
+              }}
+            >
+              See how it works
                     </span>
-                  ))}
-                </div>
-              </div>
-
-              {/* Do/Don't Patterns */}
-              <div className="grid grid-cols-2 gap-8 mb-16">
-                <div>
-                  <h3 className="text-xs uppercase tracking-widest text-muted mb-4">Do</h3>
-                  <div className="flex gap-2 mb-4">
-                    <input
-                      type="text"
-                      value={doPatternInput}
-                      onChange={(e) => setDoPatternInput(e.target.value)}
-                      onKeyDown={(e) => e.key === 'Enter' && addDoPattern()}
-                      placeholder="Add pattern"
-                      className="flex-1 bg-transparent text-sm border-b border-border pb-2 outline-none placeholder:text-muted"
-                    />
-                    <button onClick={addDoPattern} className="text-muted hover:text-foreground">
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" />
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={theme === 'dark' ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.4)'} strokeWidth="1.5">
+              <path d="M12 5v14M5 12l7 7 7-7" />
                       </svg>
-                    </button>
                   </div>
-                  <div className="space-y-1">
-                    {brandDNA?.doPatterns?.map((pattern, i) => (
-                      <div key={i} className="group flex items-center gap-2 py-1.5 cursor-pointer" onClick={() => removeDoPattern(i)}>
-                        <span className="text-green-500 text-xs">✓</span>
-                        <span className="text-sm flex-1">{pattern}</span>
-                        <span className="text-muted opacity-0 group-hover:opacity-100">×</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <h3 className="text-xs uppercase tracking-widest text-muted mb-4">Don&apos;t</h3>
-                  <div className="flex gap-2 mb-4">
-                    <input
-                      type="text"
-                      value={dontPatternInput}
-                      onChange={(e) => setDontPatternInput(e.target.value)}
-                      onKeyDown={(e) => e.key === 'Enter' && addDontPattern()}
-                      placeholder="Add pattern"
-                      className="flex-1 bg-transparent text-sm border-b border-border pb-2 outline-none placeholder:text-muted"
-                    />
-                    <button onClick={addDontPattern} className="text-muted hover:text-foreground">
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" />
-                      </svg>
-                    </button>
-                  </div>
-                  <div className="space-y-1">
-                    {brandDNA?.dontPatterns?.map((pattern, i) => (
-                      <div key={i} className="group flex items-center gap-2 py-1.5 cursor-pointer" onClick={() => removeDontPattern(i)}>
-                        <span className="text-red-500 text-xs">✗</span>
-                        <span className="text-sm flex-1">{pattern}</span>
-                        <span className="text-muted opacity-0 group-hover:opacity-100">×</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
+        </section>
 
-              {/* Voice Samples */}
-              <div className="mb-16">
-                <h3 className="text-xs uppercase tracking-widest text-muted mb-4">Voice Samples</h3>
-                <textarea
-                  value={voiceSampleInput}
-                  onChange={(e) => setVoiceSampleInput(e.target.value)}
-                  placeholder="Paste an example of your brand's writing..."
-                  rows={3}
-                  className="w-full bg-transparent text-sm border border-border rounded-lg p-3 outline-none placeholder:text-muted focus:border-foreground transition-colors resize-none mb-3"
-                />
-                <button
-                  onClick={addVoiceSample}
-                  disabled={!voiceSampleInput.trim()}
-                  className="px-4 py-2 text-sm border border-border rounded-full hover:border-foreground disabled:opacity-30 transition-colors"
+        {/* Social Proof Stats */}
+        <section
+          style={{
+            padding: '64px 48px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '48px',
+            position: 'relative',
+            zIndex: 10,
+          }}
+        >
+          {/* Stats Row */}
+          <div
+            ref={statsRef}
+            style={{
+              display: 'flex',
+              gap: 'clamp(32px, 8vw, 96px)',
+              flexWrap: 'wrap',
+              justifyContent: 'center',
+            }}
+          >
+            {[
+              { value: '0K', label: 'Brands defined' },
+              { value: '0K', label: 'Content checks' },
+              { value: '0%', label: 'Avg brand score' },
+              { value: '<0s', label: 'Time to check' },
+            ].map((stat, index) => (
+              <div
+                key={stat.label}
+                style={{
+                  textAlign: 'center',
+                }}
+              >
+                <p
+                  ref={(el) => { statValueRefs.current[index] = el; }}
+                  style={{
+                    fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
+                    fontSize: 'clamp(32px, 5vw, 48px)',
+                    fontWeight: 600,
+                    color: theme === 'dark' ? '#FFFFFF' : '#000000',
+                    margin: 0,
+                    letterSpacing: '-0.02em',
+                  }}
                 >
-                  Add Sample
-                </button>
-                <div className="space-y-3 mt-4">
-                  {brandDNA?.voiceSamples?.map((sample, i) => (
-                    <div key={i} className="group relative p-3 bg-surface rounded-lg cursor-pointer hover:bg-border transition-colors" onClick={() => removeVoiceSample(i)}>
-                      <p className="text-sm pr-6 italic">&ldquo;{sample}&rdquo;</p>
-                      <span className="absolute top-2 right-2 text-muted opacity-0 group-hover:opacity-100">×</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Next Step CTA */}
-              {brandCompleteness >= 30 && (
-                <div className="p-6 bg-surface rounded-xl text-center">
-                  <p className="text-sm text-muted mb-4">Your brand is {brandCompleteness}% complete. Ready to check some content?</p>
-                  <button
-                    onClick={() => handlePhaseChange('check')}
-                    className="px-6 py-3 bg-foreground text-background rounded-full text-sm font-medium hover:opacity-90 transition-opacity"
-                  >
-                    Go to Check →
-                  </button>
-                </div>
-              )}
-            </section>
-          </div>
-        )}
-
-        {/* Safe Zones Tab */}
-        {activeTab === 'safezones' && (
-          <div className="animate-fade-in">
-            <section className="py-16 px-6 text-center border-b border-border">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-surface rounded-full text-xs text-muted mb-6">
-                <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-                Phase 1: Define
-              </div>
-              <h2 className="text-5xl font-light tracking-tight mb-4">Safe Zones.</h2>
-              <p className="text-muted text-lg max-w-md mx-auto">
-                Define what&apos;s locked, flexible, and experimental in your brand.
-              </p>
-            </section>
-            <section className="max-w-3xl mx-auto px-6 py-16">
-              <SafeZones />
-            </section>
-          </div>
-        )}
-
-        {/* Design Intents Tab */}
-        {activeTab === 'intents' && (
-          <div className="animate-fade-in">
-            <section className="py-16 px-6 text-center border-b border-border">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-surface rounded-full text-xs text-muted mb-6">
-                <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-                Phase 1: Define
-              </div>
-              <h2 className="text-5xl font-light tracking-tight mb-4">Design Intents.</h2>
-              <p className="text-muted text-lg max-w-md mx-auto">
-                Convert natural language directives into structured, enforceable brand rules.
-              </p>
-            </section>
-            <section className="max-w-3xl mx-auto px-6 py-16">
-              <DesignIntentBlocks />
-            </section>
-          </div>
-        )}
-
-        {/* ======================= CHECK PHASE ======================= */}
-
-        {/* Check Tab */}
-        {activeTab === 'check' && (
-          <div className="animate-fade-in">
-            <section className="py-16 px-6 text-center border-b border-border">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-surface rounded-full text-xs text-muted mb-6">
-                <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                Phase 2: Check
-              </div>
-              <h2 className="text-5xl font-light tracking-tight mb-4">Check your content.</h2>
-              <p className="text-muted text-lg max-w-md mx-auto">
-                Real-time brand alignment analysis.
-              </p>
-            </section>
-
-            <section className="max-w-2xl mx-auto px-6 py-16">
-              <div className="mb-8">
-                <div className="flex items-center justify-between mb-4">
-                  <label className="text-xs uppercase tracking-widest text-muted">Content to Analyze</label>
-                  {isAnalyzingTone && (
-                    <span className="text-xs text-muted animate-pulse">Analyzing tone...</span>
-                  )}
-                </div>
-                <textarea
-                  value={contentToCheck}
-                  onChange={(e) => setContentToCheck(e.target.value)}
-                  placeholder="Start typing or paste your content here..."
-                  rows={6}
-                  className="w-full bg-transparent text-base border border-border rounded-lg p-4 outline-none resize-none placeholder:text-muted focus:border-foreground transition-colors"
-                />
-              </div>
-
-              {/* Real-time Tone Analysis */}
-              {toneAnalysis && (
-                <div className="mb-8 p-4 bg-surface rounded-lg animate-fade-in">
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="text-xs uppercase tracking-widest text-muted">Live Tone Analysis</span>
-                    <span className="text-2xl font-light">{toneAnalysis.overallMatch}<span className="text-sm text-muted">%</span></span>
-                  </div>
-                  <div className="grid grid-cols-4 gap-4 mb-4">
-                    {[
-                      { label: 'Formality', value: toneAnalysis.formality, target: brandDNA?.tone?.minimal || 50 },
-                      { label: 'Energy', value: toneAnalysis.energy, target: brandDNA?.tone?.playful || 50 },
-                      { label: 'Confidence', value: toneAnalysis.confidence, target: brandDNA?.tone?.bold || 50 },
-                      { label: 'Style', value: toneAnalysis.style, target: brandDNA?.tone?.experimental || 50 },
-                    ].map(({ label, value, target }) => (
-                      <div key={label} className="text-center">
-                        <div className="text-xs text-muted mb-1">{label}</div>
-                        <div className="text-lg font-light">{value}</div>
-                        <div className="text-xs text-muted">target: {target}</div>
+                  {stat.value}
+                </p>
+                <p
+                  style={{
+                    fontFamily: "'VCR OSD Mono', monospace",
+                    fontSize: '10px',
+                    letterSpacing: '0.15em',
+                    color: theme === 'dark' ? 'rgba(255, 255, 255, 0.4)' : 'rgba(0, 0, 0, 0.5)',
+                    textTransform: 'uppercase',
+                    margin: 0,
+                    marginTop: '8px',
+                  }}
+                >
+                  {stat.label}
+                </p>
                       </div>
                     ))}
                   </div>
-                  <p className="text-sm text-muted">{toneAnalysis.feedback}</p>
-                </div>
-              )}
 
-              <button
-                onClick={handleCheck}
-                disabled={isChecking || !contentToCheck.trim() || !brandDNA?.name}
-                className="w-full py-3 bg-foreground text-background rounded-full text-sm font-medium disabled:opacity-30 disabled:cursor-not-allowed hover:opacity-80 transition-opacity"
+          {/* Testimonial */}
+          <div
+            style={{
+              maxWidth: '600px',
+              textAlign: 'center',
+            }}
+          >
+            <p
+              style={{
+                fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
+                fontSize: 'clamp(16px, 2vw, 20px)',
+                fontStyle: 'italic',
+                fontWeight: 400,
+                color: theme === 'dark' ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)',
+                lineHeight: 1.6,
+                margin: 0,
+                marginBottom: '16px',
+              }}
+            >
+              "We used to spend 4 hours a week reviewing agency content. Now it takes 20 minutes."
+            </p>
+            <p
+              style={{
+                fontFamily: "'VCR OSD Mono', monospace",
+                fontSize: '11px',
+                letterSpacing: '0.1em',
+                color: theme === 'dark' ? 'rgba(255, 255, 255, 0.4)' : 'rgba(0, 0, 0, 0.5)',
+                margin: 0,
+              }}
+            >
+              — Head of Brand, Series B Startup
+            </p>
+          </div>
+            </section>
+
+        {/* Section Title */}
+        <section
+          ref={sectionTitleRef}
+          className={`section-title-reveal ${sectionTitleVisible ? 'visible' : ''}`}
+          style={{
+            padding: '48px 48px 24px',
+            textAlign: 'center',
+            position: 'relative',
+            zIndex: 10,
+          }}
+        >
+          <p
+            style={{
+              fontFamily: "'VCR OSD Mono', monospace",
+              fontSize: 'clamp(14px, 2vw, 18px)',
+              letterSpacing: '0.2em',
+              color: theme === 'dark' ? 'rgba(255, 255, 255, 0.4)' : 'rgba(0, 0, 0, 0.5)',
+              textTransform: 'uppercase',
+              margin: 0,
+            }}
+          >
+            How brandOS keeps everyone on brand
+              </p>
+            </section>
+
+        {/* Phases Bento Grid */}
+        <section
+          style={{
+            padding: '24px 48px 48px',
+            maxWidth: '1400px',
+            margin: '0 auto',
+            position: 'relative',
+            zIndex: 10,
+            background: 'transparent',
+          }}
+        >
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(2, 1fr)',
+              gap: '24px',
+            }}
+            className="phases-grid"
+          >
+            {phases.map((phase, index) => (
+              <motion.div
+                key={phase.number}
+                ref={(el) => { phaseRefs.current[index] = el; }}
+                onClick={() => handlePhaseClick(phase.number)}
+                className={`phase-card phase-card-reveal ${visiblePhases.has(index) ? 'visible' : ''}`}
+                whileHover={expandedPhase !== phase.number ? { 
+                  y: -8, 
+                  scale: 1.02,
+                  boxShadow: '0 20px 40px rgba(0, 71, 255, 0.15)',
+                } : {}}
+                whileTap={expandedPhase !== phase.number ? { 
+                  scale: 0.98 
+                } : {}}
+                transition={{ 
+                  type: "spring", 
+                  stiffness: 400, 
+                  damping: 25 
+                }}
+                style={{
+                  background: expandedPhase === phase.number
+                    ? 'rgba(0, 71, 255, 0.08)'
+                    : theme === 'dark' ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.03)',
+                  backdropFilter: 'blur(12px)',
+                  WebkitBackdropFilter: 'blur(12px)',
+                  border: `1px solid ${expandedPhase === phase.number ? 'rgba(0, 71, 255, 0.4)' : theme === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)'}`,
+                  borderRadius: '24px',
+                  padding: '32px',
+                  cursor: 'pointer',
+                  gridColumn: expandedPhase === phase.number ? '1 / -1' : 'auto',
+                  boxShadow: expandedPhase === phase.number ? '0 0 60px rgba(0, 71, 255, 0.15)' : 'none',
+                }}
               >
-                {isChecking ? 'Analyzing...' : 'Full Analysis'}
-              </button>
-
-              {checkError && (
-                <div className="mt-6 p-4 border border-red-500/20 bg-red-500/5 rounded-lg">
-                  <p className="text-sm text-red-500">{checkError}</p>
-                </div>
-              )}
-
-              {checkResult && (
-                <div className="mt-16 animate-fade-in">
-                  <div className="flex justify-center mb-12">
-                    <ScoreRing score={checkResult.score} />
-                  </div>
-                  <div className="grid gap-8">
-                    {checkResult.strengths?.length > 0 && (
-                      <div>
-                        <h4 className="text-xs uppercase tracking-widest text-muted mb-4">Strengths</h4>
-                        {checkResult.strengths.map((s, i) => (
-                          <p key={i} className="text-sm py-2 border-b border-border">{s}</p>
-                        ))}
-                      </div>
-                    )}
-                    {checkResult.issues?.length > 0 && (
-                      <div>
-                        <h4 className="text-xs uppercase tracking-widest text-muted mb-4">Issues</h4>
-                        {checkResult.issues.map((s, i) => (
-                          <p key={i} className="text-sm py-2 border-b border-border">{s}</p>
-                        ))}
-                      </div>
-                    )}
-                    {checkResult.suggestions?.length > 0 && (
-                      <div>
-                        <h4 className="text-xs uppercase tracking-widest text-muted mb-4">Suggestions</h4>
-                        {checkResult.suggestions.map((s, i) => (
-                          <p key={i} className="text-sm py-2 border-b border-border">{s}</p>
-                        ))}
-                      </div>
-                    )}
-                    {checkResult.revisedVersion && (
-                      <div>
-                        <h4 className="text-xs uppercase tracking-widest text-muted mb-4">Suggested Revision</h4>
-                        <div className="p-4 bg-surface rounded-lg">
-                          <p className="text-sm leading-relaxed">{checkResult.revisedVersion}</p>
-                        </div>
-                        <button
-                          onClick={() => navigator.clipboard.writeText(checkResult.revisedVersion)}
-                          className="mt-3 text-xs text-muted hover:text-foreground transition-colors"
-                        >
-                          Copy to clipboard
-                        </button>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Next Step CTA */}
-                  {phaseProgress.hasCompletedFirstCheck && !phaseProgress.hasCompletedFirstGeneration && (
-                    <div className="mt-12 p-6 bg-surface rounded-xl text-center">
-                      <p className="text-sm text-muted mb-4">Great! Now let&apos;s generate some on-brand content.</p>
-                      <button
-                        onClick={() => handlePhaseChange('generate')}
-                        className="px-6 py-3 bg-foreground text-background rounded-full text-sm font-medium hover:opacity-90 transition-opacity"
-                      >
-                        Go to Generate →
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )}
-            </section>
-          </div>
-        )}
-
-        {/* Cohesion Tab */}
-        {activeTab === 'cohesion' && (
-          <div className="animate-fade-in">
-            <section className="py-16 px-6 text-center border-b border-border">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-surface rounded-full text-xs text-muted mb-6">
-                <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                Phase 2: Check
-              </div>
-              <h2 className="text-5xl font-light tracking-tight mb-4">Brand Cohesion.</h2>
-              <p className="text-muted text-lg max-w-md mx-auto">
-                Analyze your brand as a system. Detect drift, repetition, and missing anchors.
-              </p>
-            </section>
-            <section className="max-w-3xl mx-auto px-6 py-16">
-              <BrandCohesion />
-            </section>
-          </div>
-        )}
-
-        {/* Guardrails Tab */}
-        {activeTab === 'guardrails' && (
-          <div className="animate-fade-in">
-            <section className="py-16 px-6 text-center border-b border-border">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-surface rounded-full text-xs text-muted mb-6">
-                <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                Phase 2: Check
-              </div>
-              <h2 className="text-5xl font-light tracking-tight mb-4">Creator Guardrails.</h2>
-              <p className="text-muted text-lg max-w-md mx-auto">
-                Review drafts from creators and agencies against your brand guidelines.
-              </p>
-            </section>
-            <section className="max-w-3xl mx-auto px-6 py-16">
-              <CreatorGuardrails />
-            </section>
-          </div>
-        )}
-
-        {/* Protect Tab */}
-        {activeTab === 'protect' && (
-          <div className="animate-fade-in">
-            <section className="py-16 px-6 text-center border-b border-border">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-surface rounded-full text-xs text-muted mb-6">
-                <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                Phase 2: Check
-              </div>
-              <h2 className="text-5xl font-light tracking-tight mb-4">Taste Protection.</h2>
-              <p className="text-muted text-lg max-w-md mx-auto">
-                AI optimized for restraint. Suggests removal over addition.
-              </p>
-            </section>
-            <section className="max-w-3xl mx-auto px-6 py-16">
-              <TasteProtection />
-            </section>
-          </div>
-        )}
-
-        {/* Taste Tab */}
-        {activeTab === 'taste' && (
-          <div className="animate-fade-in">
-            <section className="py-16 px-6 text-center border-b border-border">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-surface rounded-full text-xs text-muted mb-6">
-                <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                Phase 2: Check
-              </div>
-              <h2 className="text-5xl font-light tracking-tight mb-4">Taste Translation.</h2>
-              <p className="text-muted text-lg max-w-md mx-auto">
-                Turn subjective feedback into concrete, actionable design rules.
-              </p>
-            </section>
-            <section className="max-w-3xl mx-auto px-6 py-16">
-              <TasteTranslator />
-            </section>
-          </div>
-        )}
-
-        {/* ======================= GENERATE PHASE ======================= */}
-
-        {/* Generate Tab */}
-        {activeTab === 'generate' && (
-          <div className="animate-fade-in">
-            <section className="py-16 px-6 text-center border-b border-border">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-surface rounded-full text-xs text-muted mb-6">
-                <span className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></span>
-                Phase 3: Generate
-              </div>
-              <h2 className="text-5xl font-light tracking-tight mb-4">Generate content.</h2>
-              <p className="text-muted text-lg max-w-md mx-auto">
-                Create on-brand content for any channel.
-              </p>
-            </section>
-
-            <section className="max-w-3xl mx-auto px-6 py-16">
-              {/* Content Type Selector */}
-              <div className="mb-8">
-                <label className="block text-xs uppercase tracking-widest text-muted mb-4">Content Type</label>
-                <div className="grid grid-cols-4 gap-2">
-                  {contentTypes.map(([type, info]) => (
-                    <button
-                      key={type}
-                      onClick={() => setContentType(type)}
-                      className={`p-3 text-left rounded-lg border transition-all ${
-                        contentType === type
-                          ? 'border-foreground bg-surface'
-                          : 'border-border hover:border-muted'
-                      }`}
-                    >
-                      <div className="text-sm font-medium">{info.label}</div>
-                      <div className="text-xs text-muted">{info.description}</div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Prompt Input */}
-              <div className="mb-8">
-                <label className="block text-xs uppercase tracking-widest text-muted mb-4">Your Request</label>
-                <textarea
-                  value={generatePrompt}
-                  onChange={(e) => setGeneratePrompt(e.target.value)}
-                  placeholder={contentTypeLabels[contentType]?.placeholder || 'Describe what you need...'}
-                  rows={4}
-                  className="w-full bg-transparent text-base border border-border rounded-lg p-4 outline-none resize-none placeholder:text-muted focus:border-foreground transition-colors"
-                />
-              </div>
-
-              <button
-                onClick={handleGenerate}
-                disabled={isGenerating || !generatePrompt.trim() || !brandDNA?.name}
-                className="w-full py-3 bg-foreground text-background rounded-full text-sm font-medium disabled:opacity-30 disabled:cursor-not-allowed hover:opacity-80 transition-opacity"
-              >
-                {isGenerating ? 'Generating...' : 'Generate Content'}
-              </button>
-
-              {generateError && (
-                <div className="mt-6 p-4 border border-red-500/20 bg-red-500/5 rounded-lg">
-                  <p className="text-sm text-red-500">{generateError}</p>
-                </div>
-              )}
-
-              {generatedContent && (
-                <div className="mt-16 animate-fade-in">
-                  <h4 className="text-xs uppercase tracking-widest text-muted mb-4">Generated Options</h4>
-                  <div className="p-6 bg-surface rounded-lg">
-                    <div className="text-sm leading-relaxed whitespace-pre-wrap">{generatedContent}</div>
-                  </div>
-                  <button
-                    onClick={() => navigator.clipboard.writeText(generatedContent)}
-                    className="mt-3 text-xs text-muted hover:text-foreground transition-colors"
-                  >
-                    Copy to clipboard
-                  </button>
-
-                  {/* Next Step CTA */}
-                  <div className="mt-12 p-6 bg-surface rounded-xl text-center">
-                    <p className="text-sm text-muted mb-4">Track your brand performance and export guidelines.</p>
-                    <button
-                      onClick={() => handlePhaseChange('scale')}
-                      className="px-6 py-3 bg-foreground text-background rounded-full text-sm font-medium hover:opacity-90 transition-opacity"
-                    >
-                      Go to Scale →
-                    </button>
-                  </div>
-                </div>
-              )}
-            </section>
-          </div>
-        )}
-
-        {/* Platforms Tab */}
-        {activeTab === 'platforms' && (
-          <div className="animate-fade-in">
-            <section className="py-16 px-6 text-center border-b border-border">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-surface rounded-full text-xs text-muted mb-6">
-                <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
-                Phase 3: Generate
-              </div>
-              <h2 className="text-5xl font-light tracking-tight mb-4">Platform Adaptation.</h2>
-              <p className="text-muted text-lg max-w-md mx-auto">
-                Adapt your content for each platform while preserving brand identity.
-              </p>
-            </section>
-            <section className="max-w-3xl mx-auto px-6 py-16">
-              <PlatformAdapter />
-            </section>
-          </div>
-        )}
-
-        {/* Context Tab */}
-        {activeTab === 'context' && (
-          <div className="animate-fade-in">
-            <section className="py-16 px-6 text-center border-b border-border">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-surface rounded-full text-xs text-muted mb-6">
-                <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
-                Phase 3: Generate
-              </div>
-              <h2 className="text-5xl font-light tracking-tight mb-4">Context Tone.</h2>
-              <p className="text-muted text-lg max-w-md mx-auto">
-                Adapt your brand voice for launches, apologies, crises, and more.
-              </p>
-            </section>
-            <section className="max-w-3xl mx-auto px-6 py-16">
-              <ContextTone />
-            </section>
-          </div>
-        )}
-
-        {/* Visual Tab */}
-        {activeTab === 'visual' && (
-          <div className="animate-fade-in">
-            <section className="py-16 px-6 text-center border-b border-border">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-surface rounded-full text-xs text-muted mb-6">
-                <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
-                Phase 3: Generate
-              </div>
-            </section>
-            <VisualConcepts />
-          </div>
-        )}
-
-        {/* ======================= BRAND KIT PHASE ======================= */}
-
-        {/* AI Studio Tab */}
-        {activeTab === 'kit-ai-studio' && (
-          <div className="animate-fade-in">
-            <section className="py-16 px-6 text-center border-b border-border">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-gradient-to-r from-purple-500/10 to-blue-500/10 rounded-full text-xs text-muted mb-6">
-                <span className="w-2 h-2 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full animate-pulse"></span>
-                Phase 4: Brand Kit
-              </div>
-              <h2 className="text-5xl font-light tracking-tight mb-4">AI Studio.</h2>
-              <p className="text-muted text-lg max-w-md mx-auto">
-                Generate brand assets with Gemini AI.
-              </p>
-            </section>
-            <section className="px-6 py-16">
-              <AIStudio />
-            </section>
-          </div>
-        )}
-
-        {/* Brand Kit Canvas Tab */}
-        {activeTab === 'kit-canvas' && (
-          <div className="animate-fade-in">
-            <BrandKitCanvas />
-          </div>
-        )}
-
-        {/* Brand Kit Logos Tab */}
-        {activeTab === 'kit-logos' && (
-          <div className="animate-fade-in">
-            <section className="py-16 px-6 text-center border-b border-border">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-surface rounded-full text-xs text-muted mb-6">
-                <span className="w-2 h-2 bg-pink-500 rounded-full animate-pulse"></span>
-                Phase 4: Brand Kit
-              </div>
-              <h2 className="text-5xl font-light tracking-tight mb-4">Logos & Marks.</h2>
-              <p className="text-muted text-lg max-w-md mx-auto">
-                Upload and manage your logo variants with usage guidelines.
-              </p>
-            </section>
-            <section className="max-w-3xl mx-auto px-6 py-16">
-              {currentBrandId && <LogoSection brandId={currentBrandId} />}
-            </section>
-          </div>
-        )}
-
-        {/* Brand Kit Colors Tab */}
-        {activeTab === 'kit-colors' && (
-          <div className="animate-fade-in">
-            <section className="py-16 px-6 text-center border-b border-border">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-surface rounded-full text-xs text-muted mb-6">
-                <span className="w-2 h-2 bg-pink-500 rounded-full"></span>
-                Phase 4: Brand Kit
-              </div>
-              <h2 className="text-5xl font-light tracking-tight mb-4">Extended Colors.</h2>
-              <p className="text-muted text-lg max-w-md mx-auto">
-                Build your complete color palette with semantic naming and accessibility checks.
-              </p>
-            </section>
-            <section className="max-w-3xl mx-auto px-6 py-16">
-              {currentBrandId && <ColorSection brandId={currentBrandId} />}
-            </section>
-          </div>
-        )}
-
-        {/* Brand Kit Typography Tab */}
-        {activeTab === 'kit-typography' && (
-          <div className="animate-fade-in">
-            <section className="py-16 px-6 text-center border-b border-border">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-surface rounded-full text-xs text-muted mb-6">
-                <span className="w-2 h-2 bg-pink-500 rounded-full"></span>
-                Phase 4: Brand Kit
-              </div>
-              <h2 className="text-5xl font-light tracking-tight mb-4">Typography.</h2>
-              <p className="text-muted text-lg max-w-md mx-auto">
-                Define your type system with fonts, scales, and pairings.
-              </p>
-            </section>
-            <section className="max-w-4xl mx-auto px-6 py-16">
-              {currentBrandId && <TypographySection brandId={currentBrandId} />}
-            </section>
-          </div>
-        )}
-
-        {/* Brand Kit Imagery Tab */}
-        {activeTab === 'kit-imagery' && (
-          <div className="animate-fade-in">
-            <section className="py-16 px-6 text-center border-b border-border">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-surface rounded-full text-xs text-muted mb-6">
-                <span className="w-2 h-2 bg-pink-500 rounded-full"></span>
-                Phase 4: Brand Kit
-              </div>
-              <h2 className="text-5xl font-light tracking-tight mb-4">Imagery & Mood.</h2>
-              <p className="text-muted text-lg max-w-md mx-auto">
-                Create mood boards and define your visual style with do/don&apos;t examples.
-              </p>
-            </section>
-            <section className="max-w-4xl mx-auto px-6 py-16">
-              {currentBrandId && <ImagerySection brandId={currentBrandId} />}
-            </section>
-          </div>
-        )}
-
-        {/* Brand Kit Icons Tab */}
-        {activeTab === 'kit-icons' && (
-          <div className="animate-fade-in">
-            <section className="py-16 px-6 text-center border-b border-border">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-surface rounded-full text-xs text-muted mb-6">
-                <span className="w-2 h-2 bg-pink-500 rounded-full"></span>
-                Phase 4: Brand Kit
-              </div>
-              <h2 className="text-5xl font-light tracking-tight mb-4">Icon Library.</h2>
-              <p className="text-muted text-lg max-w-md mx-auto">
-                Organize and categorize your brand icons with usage guidelines.
-              </p>
-            </section>
-            <section className="max-w-4xl mx-auto px-6 py-16">
-              {currentBrandId && <IconSection brandId={currentBrandId} />}
-            </section>
-          </div>
-        )}
-
-        {/* Brand Kit Templates Tab */}
-        {activeTab === 'kit-templates' && (
-          <div className="animate-fade-in">
-            <section className="py-16 px-6 text-center border-b border-border">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-surface rounded-full text-xs text-muted mb-6">
-                <span className="w-2 h-2 bg-pink-500 rounded-full"></span>
-                Phase 4: Brand Kit
-              </div>
-              <h2 className="text-5xl font-light tracking-tight mb-4">Templates.</h2>
-              <p className="text-muted text-lg max-w-md mx-auto">
-                Create templates for social media, email, ads, and more.
-              </p>
-            </section>
-            <section className="max-w-4xl mx-auto px-6 py-16">
-              {currentBrandId && <TemplateSection brandId={currentBrandId} />}
-            </section>
-          </div>
-        )}
-
-        {/* ======================= SCALE PHASE ======================= */}
-
-        {/* Dashboard Tab */}
-        {activeTab === 'dashboard' && (
-          <div className="animate-fade-in">
-            <section className="py-16 px-6 text-center border-b border-border">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-surface rounded-full text-xs text-muted mb-6">
-                <span className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></span>
-                Phase 5: Scale
-              </div>
-              <h2 className="text-5xl font-light tracking-tight mb-4">Dashboard.</h2>
-              <p className="text-muted text-lg max-w-md mx-auto">
-                Track your brand consistency over time.
-              </p>
-            </section>
-
-            <section className="max-w-4xl mx-auto px-6 py-16">
-              {/* Brand Health Summary */}
-              <div className="mb-12 p-6 bg-surface rounded-xl">
-                <BrandCompleteness size="md" showDetails={true} />
-              </div>
-
-              {/* Stats Grid */}
-              <div className="grid grid-cols-3 gap-6 mb-16">
-                <div className="p-6 bg-surface rounded-lg text-center">
-                  <div className="text-4xl font-light mb-2">{dashboardStats.totalChecks}</div>
-                  <div className="text-xs uppercase tracking-widest text-muted">Content Checks</div>
-                </div>
-                <div className="p-6 bg-surface rounded-lg text-center">
-                  <div className="text-4xl font-light mb-2">{dashboardStats.totalGenerations}</div>
-                  <div className="text-xs uppercase tracking-widest text-muted">Generations</div>
-                </div>
-                <div className="p-6 bg-surface rounded-lg text-center">
-                  <div className="text-4xl font-light mb-2">{dashboardStats.averageScore}<span className="text-lg text-muted">%</span></div>
-                  <div className="text-xs uppercase tracking-widest text-muted">Average Score</div>
-                </div>
-              </div>
-
-              {/* Score History Chart */}
-              {dashboardStats.recentScores.length > 0 && (
-                <div className="mb-16">
-                  <h3 className="text-xs uppercase tracking-widest text-muted mb-8">Recent Check Scores</h3>
-                  <div className="h-48 flex items-end gap-2">
-                    {dashboardStats.recentScores.map((item, i) => (
-                      <div key={i} className="flex-1 flex flex-col items-center gap-2">
-                        <div 
-                          className="w-full bg-foreground rounded-t transition-all hover:opacity-80"
-                          style={{ height: `${item.score * 1.8}px` }}
-                          title={`${item.score}%`}
-                        />
-                        <span className="text-xs text-muted">{item.score}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {dashboardStats.totalChecks === 0 && dashboardStats.totalGenerations === 0 && (
-                <div className="text-center py-16">
-                  <p className="text-muted mb-4">No activity yet. Start by checking or generating content.</p>
-                  <button
-                    onClick={() => handlePhaseChange('check')}
-                    className="px-6 py-3 bg-foreground text-background rounded-full text-sm font-medium hover:opacity-90 transition-opacity"
-                  >
-                    Start Checking Content
-                  </button>
-                </div>
-              )}
-            </section>
-          </div>
-        )}
-
-        {/* History Tab */}
-        {activeTab === 'history' && (
-          <div className="animate-fade-in">
-            <section className="py-16 px-6 text-center border-b border-border">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-surface rounded-full text-xs text-muted mb-6">
-                <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
-                Phase 5: Scale
-              </div>
-              <h2 className="text-5xl font-light tracking-tight mb-4">History.</h2>
-              <p className="text-muted text-lg max-w-md mx-auto">Review your previous checks and generations.</p>
-            </section>
-
-            <section className="max-w-2xl mx-auto px-6 py-16">
-              {history.length === 0 ? (
-                <div className="text-center py-16">
-                  <p className="text-muted">No history yet.</p>
-                </div>
-              ) : (
-                <>
-                  <div className="flex justify-between items-center mb-8">
-                    <span className="text-xs uppercase tracking-widest text-muted">{history.length} items</span>
-                    <button onClick={clearHistory} className="text-xs text-muted hover:text-foreground transition-colors">Clear All</button>
-                  </div>
-                  <div className="space-y-4">
-                    {history.map((item) => (
-                      <div key={item.id} className="p-4 bg-surface rounded-lg">
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="flex items-center gap-2">
-                            <span className={`px-2 py-0.5 text-xs rounded-full ${
-                              item.type === 'check' ? 'bg-blue-500/10 text-blue-500' : 'bg-green-500/10 text-green-500'
-                            }`}>
-                              {item.type}
-                            </span>
-                            {item.contentType && item.contentType !== 'general' && (
-                              <span className="text-xs text-muted">{contentTypeLabels[item.contentType]?.label}</span>
-                            )}
-                          </div>
-                          <span className="text-xs text-muted">{formatDate(item.timestamp)}</span>
-                        </div>
-                        <p className="text-sm line-clamp-2 mb-2">{item.input}</p>
-                        {item.type === 'check' && (
-                          <div className="text-xl font-light">{(item.output as CheckResult).score}<span className="text-sm text-muted">/100</span></div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </>
-              )}
-            </section>
-          </div>
-        )}
-
-        {/* Export Tab */}
-        {activeTab === 'export' && (
-          <div className="animate-fade-in">
-            <section className="py-16 px-6 text-center border-b border-border">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-surface rounded-full text-xs text-muted mb-6">
-                <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
-                Phase 5: Scale
-              </div>
-              <h2 className="text-5xl font-light tracking-tight mb-4">Export.</h2>
-              <p className="text-muted text-lg max-w-md mx-auto">Download your brand guidelines.</p>
-            </section>
-
-            <section className="max-w-2xl mx-auto px-6 py-16">
-              <div className="grid grid-cols-3 gap-4 mb-8">
-                <button onClick={exportAsJSON} className="py-4 border border-border rounded-lg hover:border-foreground transition-colors">
-                  <span className="block text-sm font-medium mb-1">Export JSON</span>
-                  <span className="text-xs text-muted">Machine-readable</span>
-                </button>
-                <button onClick={() => window.print()} className="py-4 border border-border rounded-lg hover:border-foreground transition-colors">
-                  <span className="block text-sm font-medium mb-1">Print / PDF</span>
-                  <span className="text-xs text-muted">Print-ready</span>
-                </button>
-                <button onClick={handleShare} disabled={isSharing} className="py-4 border border-border rounded-lg hover:border-foreground transition-colors disabled:opacity-50">
-                  <span className="block text-sm font-medium mb-1">{isSharing ? 'Creating...' : 'Share Link'}</span>
-                  <span className="text-xs text-muted">Shareable URL</span>
-                </button>
-              </div>
-
-              {/* Share URL */}
-              {shareUrl && (
-                <div className="mb-16 p-4 bg-surface rounded-lg animate-fade-in">
-                  <p className="text-xs uppercase tracking-widest text-muted mb-2">Share URL</p>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={shareUrl}
-                      readOnly
-                      className="flex-1 bg-transparent text-sm font-mono border border-border rounded px-3 py-2"
-                    />
-                    <button
-                      onClick={() => {
-                        navigator.clipboard.writeText(shareUrl);
-                      }}
-                      className="px-4 py-2 text-sm bg-foreground text-background rounded hover:opacity-80 transition-opacity"
-                    >
-                      Copy
-                    </button>
-                  </div>
-                  <p className="text-xs text-muted mt-2">Anyone with this link can view and import your brand guidelines.</p>
-                </div>
-              )}
-
-              {/* API Docs Link */}
-              <div className="mb-16 text-center">
-                <a href="/api-docs" className="text-sm text-muted hover:text-foreground transition-colors">
-                  View API Documentation →
-                </a>
-              </div>
-
-              <div ref={exportRef} className="border border-border rounded-lg p-8 print:border-none">
-                <div className="text-center mb-12">
-                  <h3 className="text-3xl font-light tracking-tight mb-2">{brandDNA?.name}</h3>
-                  <p className="text-sm text-muted">Brand Guidelines</p>
-                </div>
-
-                {brandDNA?.colors && (
-                  <div className="mb-12">
-                    <h4 className="text-xs uppercase tracking-widest text-muted mb-4">Brand Colors</h4>
-                    <div className="flex gap-4">
-                      {Object.entries(brandDNA.colors).map(([key, value]) => (
-                        <div key={key} className="flex-1">
-                          <div className="h-20 rounded-lg mb-2" style={{ backgroundColor: value }} />
-                          <p className="text-xs text-muted capitalize">{key}</p>
-                          <p className="text-xs font-mono">{value}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {brandDNA?.tone && (
-                  <div className="mb-12">
-                    <h4 className="text-xs uppercase tracking-widest text-muted mb-4">Tone Profile</h4>
-                    <div className="grid grid-cols-2 gap-4">
-                      {Object.entries(brandDNA.tone).map(([key, value]) => (
-                        <div key={key} className="flex justify-between py-2 border-b border-border">
-                          <span className="text-sm capitalize">{key}</span>
-                          <span className="text-sm text-muted">{value}/100</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {brandDNA?.keywords && brandDNA.keywords.length > 0 && (
-                  <div className="mb-12">
-                    <h4 className="text-xs uppercase tracking-widest text-muted mb-4">Keywords</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {brandDNA.keywords.map((k, i) => (
-                        <span key={i} className="px-3 py-1 bg-surface rounded-full text-sm">{k}</span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                <div className="grid grid-cols-2 gap-8 mb-12">
-                  {brandDNA?.doPatterns && brandDNA.doPatterns.length > 0 && (
-                    <div>
-                      <h4 className="text-xs uppercase tracking-widest text-muted mb-4">Do</h4>
-                      {brandDNA.doPatterns.map((p, i) => (
-                        <p key={i} className="text-sm flex items-start gap-2 mb-2">
-                          <span className="text-green-500">✓</span>{p}
-                        </p>
-                      ))}
-                    </div>
-                  )}
-                  {brandDNA?.dontPatterns && brandDNA.dontPatterns.length > 0 && (
-                    <div>
-                      <h4 className="text-xs uppercase tracking-widest text-muted mb-4">Don&apos;t</h4>
-                      {brandDNA.dontPatterns.map((p, i) => (
-                        <p key={i} className="text-sm flex items-start gap-2 mb-2">
-                          <span className="text-red-500">✗</span>{p}
-                        </p>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {brandDNA?.voiceSamples && brandDNA.voiceSamples.length > 0 && (
+                {/* Phase Header */}
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    justifyContent: 'space-between',
+                    marginBottom: '24px',
+                  }}
+                >
                   <div>
-                    <h4 className="text-xs uppercase tracking-widest text-muted mb-4">Voice Samples</h4>
-                    {brandDNA.voiceSamples.map((s, i) => (
-                      <blockquote key={i} className="p-4 bg-surface rounded-lg text-sm italic mb-3">&ldquo;{s}&rdquo;</blockquote>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </section>
+                    <span
+                      style={{
+                        fontFamily: "'VCR OSD Mono', monospace",
+                        fontSize: '11px',
+                        letterSpacing: '0.15em',
+                        color: '#0047FF',
+                        background: 'rgba(0, 71, 255, 0.15)',
+                        padding: '6px 14px',
+                        borderRadius: '20px',
+                        display: 'inline-block',
+                        marginBottom: '16px',
+                        border: '1px solid rgba(0, 71, 255, 0.2)',
+                      }}
+                    >
+                      0{phase.number}
+                    </span>
+
+                    <h2
+                      style={{
+                        fontFamily: "'VCR OSD Mono', monospace",
+                        fontSize: expandedPhase === phase.number ? '48px' : '32px',
+                        fontWeight: 400,
+                        letterSpacing: '0.05em',
+                        color: theme === 'dark' ? '#FFFFFF' : '#000000',
+                        margin: 0,
+                        marginBottom: '8px',
+                        transition: 'font-size 1.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                      }}
+                    >
+                      {phase.title}
+                    </h2>
+
+                    <p
+                      style={{
+                        fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
+                        fontSize: '16px',
+                        color: theme === 'dark' ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.6)',
+                        margin: 0,
+                      }}
+                    >
+                      {phase.subtitle}
+                    </p>
           </div>
-        )}
 
-        {/* Competitors Tab */}
-        {activeTab === 'competitors' && (
-          <div className="animate-fade-in">
-            <section className="py-16 px-6 text-center border-b border-border">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-surface rounded-full text-xs text-muted mb-6">
-                <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
-                Phase 5: Scale
+                  <div
+                    style={{
+                      color: expandedPhase === phase.number ? '#0047FF' : theme === 'dark' ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0, 0, 0, 0.3)',
+                      transition: 'color 1s ease',
+                    }}
+                  >
+                    {phase.icon}
               </div>
-              <h2 className="text-5xl font-light tracking-tight mb-4">Compare.</h2>
-              <p className="text-muted text-lg max-w-md mx-auto">
-                Analyze how your brand voice differs from competitors.
-              </p>
-            </section>
+          </div>
 
-            <section className="max-w-2xl mx-auto px-6 py-16">
-              <div className="mb-8">
-                <label className="block text-xs uppercase tracking-widest text-muted mb-4">Competitor Name</label>
-                <input
-                  type="text"
-                  value={competitorName}
-                  onChange={(e) => setCompetitorName(e.target.value)}
-                  placeholder="e.g., Nike, Apple, Slack..."
-                  className="w-full bg-transparent text-xl font-light border-b border-border pb-2 outline-none placeholder:text-muted focus:border-foreground transition-colors"
-                />
-              </div>
-
-              <div className="mb-8">
-                <label className="block text-xs uppercase tracking-widest text-muted mb-4">Competitor Voice Samples</label>
-                <textarea
-                  value={competitorSampleInput}
-                  onChange={(e) => setCompetitorSampleInput(e.target.value)}
-                  placeholder="Paste examples of their copy, taglines, or messaging..."
-                  rows={3}
-                  className="w-full bg-transparent text-sm border border-border rounded-lg p-3 outline-none placeholder:text-muted focus:border-foreground transition-colors resize-none mb-3"
-                />
-                <button
-                  onClick={addCompetitorSample}
-                  disabled={!competitorSampleInput.trim()}
-                  className="px-4 py-2 text-sm border border-border rounded-full hover:border-foreground disabled:opacity-30 transition-colors"
+                {/* Expanded Content */}
+                <div
+                  style={{
+                    maxHeight: expandedPhase === phase.number ? '800px' : '0',
+                    overflow: 'hidden',
+                    transition: 'max-height 1.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 1s ease',
+                    opacity: expandedPhase === phase.number ? 1 : 0,
+                  }}
                 >
-                  Add Sample
-                </button>
-                <div className="space-y-2 mt-4">
-                  {competitorSamples.map((sample, i) => (
-                    <div key={i} className="group flex items-start gap-2 p-3 bg-surface rounded-lg cursor-pointer" onClick={() => removeCompetitorSample(i)}>
-                      <span className="text-sm flex-1 italic">&ldquo;{sample}&rdquo;</span>
-                      <span className="text-muted opacity-0 group-hover:opacity-100">×</span>
-                    </div>
-                  ))}
-                </div>
+                  <p
+                    style={{
+                      fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
+                      fontSize: '18px',
+                      lineHeight: 1.6,
+                      color: theme === 'dark' ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.7)',
+                      marginBottom: '32px',
+                      maxWidth: '600px',
+                    }}
+                  >
+                    {phase.description}
+                  </p>
+
+                  <div
+                    className="details-grid"
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+                      gap: '16px',
+                      paddingTop: '24px',
+                      borderTop: `1px solid ${theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'}`,
+                    }}
+                  >
+                    {phase.details.map((detail) => (
+                      <div
+                        key={detail.title}
+                        style={{
+                          background: theme === 'dark' ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.03)',
+                          borderRadius: '12px',
+                          padding: '20px',
+                          border: `1px solid ${theme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.08)'}`,
+                        }}
+                      >
+                        <h4
+                          style={{
+                            fontFamily: "'VCR OSD Mono', monospace",
+                            fontSize: '12px',
+                            letterSpacing: '0.1em',
+                            color: '#0047FF',
+                            margin: 0,
+                            marginBottom: '8px',
+                          }}
+                        >
+                          {detail.title}
+                        </h4>
+                        <p
+                          style={{
+                            fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
+                            fontSize: '14px',
+                            lineHeight: 1.5,
+                            color: theme === 'dark' ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)',
+                            margin: 0,
+                          }}
+                        >
+                          {detail.description}
+                        </p>
+          </div>
+                    ))}
               </div>
+          </div>
 
-              <button
-                onClick={handleCompetitorAnalysis}
-                disabled={isAnalyzingCompetitor || !competitorName.trim() || competitorSamples.length === 0 || !brandDNA?.name}
-                className="w-full py-3 bg-foreground text-background rounded-full text-sm font-medium disabled:opacity-30 disabled:cursor-not-allowed hover:opacity-80 transition-opacity"
-              >
-                {isAnalyzingCompetitor ? 'Analyzing...' : 'Analyze Competitor'}
-              </button>
-
-              {competitorError && (
-                <div className="mt-6 p-4 border border-red-500/20 bg-red-500/5 rounded-lg">
-                  <p className="text-sm text-red-500">{competitorError}</p>
-                </div>
-              )}
-
-              {competitorAnalysis && (
-                <div className="mt-16 animate-fade-in">
-                  <div className="p-6 bg-surface rounded-lg mb-8">
-                    <p className="text-lg font-light leading-relaxed">{competitorAnalysis.summary}</p>
-                  </div>
-
-                  {/* Tone Comparison */}
-                  <div className="mb-8">
-                    <h4 className="text-xs uppercase tracking-widest text-muted mb-4">Tone Comparison</h4>
-                    <div className="grid grid-cols-4 gap-4">
-                      {[
-                        { label: 'Formality', yours: brandDNA?.tone?.minimal || 50, theirs: competitorAnalysis.competitorTone.formality },
-                        { label: 'Energy', yours: brandDNA?.tone?.playful || 50, theirs: competitorAnalysis.competitorTone.energy },
-                        { label: 'Confidence', yours: brandDNA?.tone?.bold || 50, theirs: competitorAnalysis.competitorTone.confidence },
-                        { label: 'Style', yours: brandDNA?.tone?.experimental || 50, theirs: competitorAnalysis.competitorTone.style },
-                      ].map(({ label, yours, theirs }) => (
-                        <div key={label} className="text-center p-4 border border-border rounded-lg">
-                          <div className="text-xs text-muted mb-2">{label}</div>
-                          <div className="flex justify-center gap-4">
-                            <div>
-                              <div className="text-lg font-light">{yours}</div>
-                              <div className="text-xs text-muted">You</div>
-                            </div>
-                            <div className="text-muted">vs</div>
-                            <div>
-                              <div className="text-lg font-light">{theirs}</div>
-                              <div className="text-xs text-muted">Them</div>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-8">
-                    <div>
-                      <h4 className="text-xs uppercase tracking-widest text-muted mb-4">Key Differences</h4>
-                      {competitorAnalysis.keyDifferences.map((d, i) => (
-                        <p key={i} className="text-sm py-2 border-b border-border">{d}</p>
-                      ))}
-                    </div>
-                    <div>
-                      <h4 className="text-xs uppercase tracking-widest text-muted mb-4">Differentiation Opportunities</h4>
-                      {competitorAnalysis.differentiationOpportunities.map((d, i) => (
-                        <p key={i} className="text-sm py-2 border-b border-border">{d}</p>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="mt-8">
-                    <h4 className="text-xs uppercase tracking-widest text-muted mb-4">Your Unique Positioning</h4>
-                    <p className="text-sm p-4 bg-surface rounded-lg">{competitorAnalysis.uniquePositioning}</p>
-                  </div>
-                </div>
-              )}
-            </section>
+                {/* Feature tags (collapsed) */}
+                {expandedPhase !== phase.number && (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '16px' }}>
+                    {phase.features.map((feature) => (
+                      <span
+                        key={feature}
+                        style={{
+                          fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
+                          fontSize: '12px',
+                          color: theme === 'dark' ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.6)',
+                          background: theme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)',
+                          padding: '6px 12px',
+                          borderRadius: '20px',
+                          border: `1px solid ${theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'}`,
+                        }}
+                      >
+                        {feature}
+                      </span>
+                    ))}
           </div>
         )}
 
-        {/* Memory Tab */}
-        {activeTab === 'memory' && (
-          <div className="animate-fade-in">
-            <section className="py-16 px-6 text-center border-b border-border">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-surface rounded-full text-xs text-muted mb-6">
-                <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
-                Phase 5: Scale
+                {/* Expand indicator */}
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginTop: '24px',
+                    color: theme === 'dark' ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0, 0, 0, 0.4)',
+                  }}
+                >
+                  <span
+                    style={{
+                      fontFamily: "'VCR OSD Mono', monospace",
+                      fontSize: '10px',
+                      letterSpacing: '0.1em',
+                      marginRight: '8px',
+                    }}
+                  >
+                    {expandedPhase === phase.number ? 'COLLAPSE' : 'EXPAND'}
+                  </span>
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    style={{
+                      transform: expandedPhase === phase.number ? 'rotate(180deg)' : 'rotate(0)',
+                      transition: 'transform 1.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                    }}
+                  >
+                    <path d="M6 9l6 6 6-6" />
+                  </svg>
               </div>
-              <h2 className="text-5xl font-light tracking-tight mb-4">Brand Memory.</h2>
-              <p className="text-muted text-lg max-w-md mx-auto">
-                Track what worked and what failed. Build institutional memory.
+          </motion.div>
+            ))}
+              </div>
+            </section>
+
+        {/* CTA Section */}
+        <section
+          style={{
+            padding: '96px 48px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '24px',
+            position: 'relative',
+            zIndex: 10,
+          }}
+        >
+          <p
+            style={{
+              fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
+              fontSize: 'clamp(18px, 2.5vw, 28px)',
+              fontWeight: 400,
+              color: theme === 'dark' ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.7)',
+              textAlign: 'center',
+              maxWidth: '500px',
+              lineHeight: 1.5,
+            }}
+          >
+            Stop reviewing. Start trusting.
+          </p>
+
+          <motion.button
+            onClick={handleGetStarted}
+            className="cta-pulse"
+            whileHover={{ 
+              y: -4, 
+              scale: 1.02,
+              boxShadow: '0 20px 60px rgba(0, 71, 255, 0.5)',
+            }}
+            whileTap={{ scale: 0.96 }}
+            transition={{ 
+              type: "spring", 
+              stiffness: 500, 
+              damping: 30 
+            }}
+            style={{
+              fontFamily: "'VCR OSD Mono', monospace",
+              fontSize: '14px',
+              letterSpacing: '0.15em',
+              color: '#FFFFFF',
+              background: '#0047FF',
+              border: 'none',
+              padding: '20px 64px',
+              cursor: 'pointer',
+              borderRadius: '16px',
+              boxShadow: '0 0 30px rgba(0, 71, 255, 0.3)',
+            }}
+          >
+            GET STARTED
+          </motion.button>
+
+          <p
+            style={{
+              fontFamily: "'VCR OSD Mono', monospace",
+              fontSize: '10px',
+              color: theme === 'dark' ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0, 0, 0, 0.4)',
+              letterSpacing: '0.2em',
+              textTransform: 'uppercase',
+              marginTop: '16px',
+            }}
+          >
+            One brand. Every channel. Always consistent.
               </p>
             </section>
-            <section className="max-w-3xl mx-auto px-6 py-16">
-              <BrandMemory />
-            </section>
-          </div>
-        )}
+              </div>
 
-        <footer className="border-t border-border py-8 mt-16 print:hidden">
-          <div className="max-w-6xl mx-auto px-6 text-center">
-            <p className="text-xs text-muted">brandos — AI-powered brand consistency</p>
-          </div>
-        </footer>
-      </main>
+        </div>{/* End smooth-content */}
+      </div>{/* End smooth-wrapper */}
+
+      {/* Styles */}
+      <style jsx global>{`
+        /* ScrollSmoother wrapper styles */
+        #smooth-wrapper {
+          overflow: hidden;
+          position: fixed;
+          height: 100%;
+          width: 100%;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+        }
+
+        #smooth-content {
+          overflow: visible;
+          width: 100%;
+        }
+
+        /* SplitText character styles */
+        .brand-char, .os-char {
+          display: inline-block;
+          will-change: transform, opacity;
+          transform-style: preserve-3d;
+          backface-visibility: hidden;
+        }
+
+        .brand-char {
+          transform-origin: center bottom;
+        }
+
+        .os-char {
+          transform-origin: center center;
+        }
+
+        /* Typing cursor */
+        .typing-cursor {
+          display: inline-block;
+          color: #0047FF;
+          font-weight: 100;
+          font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+          animation: cursorBlink 0.8s ease-in-out infinite;
+        }
+
+        @keyframes cursorBlink {
+          0%, 50% { opacity: 1; }
+          51%, 100% { opacity: 0; }
+        }
+
+        @keyframes shimmer {
+          0% { background-position: 200% 0; }
+          100% { background-position: -200% 0; }
+        }
+
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        @keyframes cornerPulse {
+          0%, 100% {
+            opacity: 1;
+            transform: scale(1);
+          }
+          50% {
+            opacity: 0.6;
+            transform: scale(1.2);
+          }
+        }
+
+        @keyframes bounce {
+          0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+          40% { transform: translateY(-10px); }
+          60% { transform: translateY(-5px); }
+        }
+
+        @keyframes ctaGlow {
+          0%, 100% { box-shadow: 0 0 15px rgba(0, 0, 255, 0.15); }
+          50% { box-shadow: 0 0 25px rgba(0, 0, 255, 0.25); }
+        }
+
+        /* Scroll-triggered phase card reveal animation - smooth and elegant */
+        @keyframes phaseDropIn {
+          0% {
+            opacity: 0;
+            transform: translateY(40px) scale(0.97);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+        }
+
+        @keyframes phaseGlowPulse {
+          0% {
+            box-shadow: 0 0 0 rgba(0, 71, 255, 0);
+          }
+          60% {
+            box-shadow: 0 0 30px rgba(0, 71, 255, 0.15);
+          }
+          100% {
+            box-shadow: 0 0 0 rgba(0, 71, 255, 0);
+          }
+        }
+
+        @keyframes sectionTitleReveal {
+          0% {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        /* Zero Drift - Static, stable, unmovable */
+        .zero-drift-text {
+          /* No animation - embodies "zero drift" by being completely stable */
+        }
+
+        /* Phase card reveal initial state */
+        .phase-card-reveal {
+          opacity: 0;
+          transform: translateY(40px) scale(0.97);
+        }
+
+        /* Phase card visible state - smooth ease-out curve */
+        .phase-card-reveal.visible {
+          animation: phaseDropIn 0.7s cubic-bezier(0.33, 1, 0.68, 1) forwards,
+                     phaseGlowPulse 1.2s ease-out 0.3s forwards;
+          opacity: 1;
+        }
+        
+        /* After animation completes, lock in final state */
+        .phase-card-reveal.animation-complete {
+          animation: none !important;
+          opacity: 1 !important;
+          transform: translateY(0) scale(1) !important;
+          transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), 
+                      border-color 0.2s ease, 
+                      box-shadow 0.25s ease !important;
+        }
+
+        /* Section title reveal */
+        .section-title-reveal {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+
+        .section-title-reveal.visible {
+          animation: sectionTitleReveal 0.6s cubic-bezier(0.33, 1, 0.68, 1) forwards;
+        }
+
+        .os-shimmer {
+          background: linear-gradient(90deg, #0047FF 0%, #4477FF 25%, #0047FF 50%, #4477FF 75%, #0047FF 100%);
+          background-size: 200% 100%;
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          animation: shimmer 3s linear infinite;
+        }
+
+        .content-entrance {
+          animation: fadeInUp 0.8s ease-out forwards;
+        }
+
+        .corner-pulse {
+          animation: cornerPulse 3s ease-in-out infinite;
+        }
+
+        .bounce {
+          animation: bounce 2s infinite;
+        }
+
+        .cta-pulse {
+          animation: ctaGlow 2.5s ease-in-out infinite;
+        }
+
+        .cta-pulse:hover {
+          animation: none;
+        }
+
+        /* Hover state - only border and shadow animate, transform is instant */
+        .phase-card:hover {
+          border-color: rgba(0, 71, 255, 0.4) !important;
+          box-shadow: 0 0 40px rgba(0, 71, 255, 0.15) !important;
+        }
+
+        /* After animation is complete, allow hover transform */
+        .phase-card-reveal.animation-complete:hover {
+          transform: translateY(-4px) scale(1) !important;
+        }
+
+        @media (max-width: 768px) {
+          .phases-grid {
+            grid-template-columns: 1fr !important;
+          }
+
+          .side-label {
+            display: none !important;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .details-grid {
+            grid-template-columns: 1fr !important;
+          }
+        }
+
+        /* Reduced motion preference */
+        @media (prefers-reduced-motion: reduce) {
+          .phase-card-reveal {
+            opacity: 1;
+            transform: none;
+          }
+          .phase-card-reveal.visible {
+            animation: none;
+          }
+          .section-title-reveal {
+            opacity: 1;
+            transform: none;
+          }
+          .section-title-reveal.visible {
+            animation: none;
+          }
+        }
+      `}</style>
     </div>
-  );
-}
-
-export default function Home() {
-  return (
-    <Suspense fallback={<div className="min-h-screen bg-background" />}>
-      <HomeContent />
-    </Suspense>
   );
 }

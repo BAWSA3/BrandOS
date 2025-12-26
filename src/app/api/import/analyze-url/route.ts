@@ -227,3 +227,9 @@ function analyzeTone(text: string): { formality: number; energy: number; confide
   return { formality, energy, confidence, style };
 }
 
+
+
+
+
+
+

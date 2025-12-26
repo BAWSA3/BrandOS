@@ -284,3 +284,9 @@ function getSectionTitle(type: string): string {
   return titles[type] || type;
 }
 
+
+
+
+
+
+

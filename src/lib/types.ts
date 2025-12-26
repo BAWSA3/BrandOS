@@ -269,3 +269,130 @@ export interface ContextAdaptedContent {
   adaptedContent: string;
   adjustmentsApplied: string[];
 }
+
+// ===== GEMINI VISUAL ENGINE TYPES =====
+
+// Animation Concepts
+export type AnimationContext = 'page-load' | 'hover' | 'click' | 'transition' | 'scroll' | 'micro-interaction' | 'loading';
+
+export interface AnimationConcept {
+  id: string;
+  context: AnimationContext;
+  name: string;
+  description: string;
+  timing: {
+    duration: string;
+    delay?: string;
+    easing: string;
+    easingCurve?: string;
+  };
+  keyframes: {
+    step: string;
+    properties: Record<string, string>;
+  }[];
+  cssCode: string;
+  framerMotionCode?: string;
+  brandAlignment: string;
+  createdAt: Date;
+}
+
+// UI Component Styles
+export type UIComponentType = 'button' | 'card' | 'input' | 'modal' | 'tooltip' | 'badge' | 'avatar' | 'nav-item';
+
+export interface UIStyle {
+  id: string;
+  componentType: UIComponentType;
+  name: string;
+  description: string;
+  baseStyles: {
+    borderRadius: string;
+    padding: string;
+    fontSize: string;
+    fontWeight: string;
+    letterSpacing?: string;
+  };
+  colors: {
+    background: string;
+    text: string;
+    border?: string;
+    shadow?: string;
+  };
+  states: {
+    hover?: Record<string, string>;
+    active?: Record<string, string>;
+    focus?: Record<string, string>;
+    disabled?: Record<string, string>;
+  };
+  cssVariables: Record<string, string>;
+  tailwindClasses: string;
+  brandAlignment: string;
+  createdAt: Date;
+}
+
+// Background Patterns
+export type PatternType = 'geometric' | 'organic' | 'noise' | 'gradient' | 'dots' | 'lines' | 'waves';
+
+export interface Pattern {
+  id: string;
+  patternType: PatternType;
+  name: string;
+  description: string;
+  cssCode: string;
+  svgCode?: string;
+  colors: string[];
+  opacity?: number;
+  scale?: string;
+  brandAlignment: string;
+  createdAt: Date;
+}
+
+// Icon Sets
+export type IconStyle = 'line' | 'filled' | 'duotone' | 'outline';
+export type IconCategory = 'navigation' | 'actions' | 'status' | 'social' | 'media' | 'commerce';
+
+export interface IconSet {
+  id: string;
+  name: string;
+  style: IconStyle;
+  category: IconCategory;
+  icons: {
+    name: string;
+    purpose: string;
+    svgCode: string;
+  }[];
+  strokeWidth?: string;
+  cornerRadius?: string;
+  brandAlignment: string;
+  createdAt: Date;
+}
+
+// Motion Design Brief
+export interface MotionBrief {
+  id: string;
+  brandName: string;
+  philosophy: string;
+  principles: {
+    name: string;
+    description: string;
+    example: string;
+  }[];
+  timingGuidelines: {
+    microInteractions: string;
+    transitions: string;
+    pageAnimations: string;
+    loading: string;
+  };
+  easingPreferences: {
+    primary: string;
+    secondary: string;
+    avoid: string[];
+  };
+  doRules: string[];
+  dontRules: string[];
+  codeSnippets: {
+    name: string;
+    description: string;
+    code: string;
+  }[];
+  createdAt: Date;
+}

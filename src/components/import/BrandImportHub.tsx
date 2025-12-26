@@ -352,3 +352,9 @@ function countExtractedElements(brand: ExtractedBrand): number {
   return count;
 }
 
+
+
+
+
+
+
