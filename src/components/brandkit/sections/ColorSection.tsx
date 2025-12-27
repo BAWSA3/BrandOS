@@ -297,3 +297,4 @@ function calculateContrastRatio(hex1: string, hex2: string): number {
 
 
 
+

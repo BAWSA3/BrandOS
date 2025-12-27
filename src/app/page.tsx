@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion } from 'motion/react';
+import { motion, useScroll, useTransform, useSpring, useMotionValue, animate } from 'motion/react';
 import { useBrandStore } from '@/lib/store';
 import gsap from '@/lib/gsap';
 import { ScrollTrigger } from '@/lib/gsap/ScrollTrigger';
@@ -12,6 +12,264 @@ import { SplitText } from '@/lib/gsap/SplitText';
 // Register GSAP plugins
 if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger, ScrollSmoother, SplitText);
+}
+
+// =============================================================================
+// ADVANCED Mesh Gradient Background - SVG Morphing Blobs
+// =============================================================================
+const MESH_COLORS = {
+  light: {
+    gradientTop: "#e8f0f8",
+    gradientMiddle: "#b8d4f0",
+    gradientBottom: "#6a9fd4",
+    blobPrimary: "#e8a598",
+    blobSecondary: "#f4c4ba",
+    blobAccent: "#d88a7a",
+    blobHighlight: "#ffddd5",
+    glowColor: "rgba(255, 245, 240, 0.6)",
+  },
+  dark: {
+    gradientTop: "#0a0a1a",
+    gradientMiddle: "#0f1025",
+    gradientBottom: "#050510",
+    blobPrimary: "rgba(74, 144, 217, 0.6)",
+    blobSecondary: "rgba(100, 160, 255, 0.5)",
+    blobAccent: "rgba(0, 100, 200, 0.7)",
+    blobHighlight: "rgba(150, 200, 255, 0.3)",
+    glowColor: "rgba(50, 100, 150, 0.4)",
+  },
+  grainOpacity: 0.3,
+  morphSpeed: 12,        // Slower, smoother morphing
+  floatSpeed: 18,        // Slower, gentler floating
+  mouseInfluence: 15,    // Subtler mouse response
+  parallaxStrength: 100, // Gentler parallax
+};
+
+// SVG Filters for grain and gooey effect
+function SVGFilters() {
+  return (
+    <svg className="absolute w-0 h-0" aria-hidden="true">
+      <defs>
+        <filter id="fine-grain" x="0%" y="0%" width="100%" height="100%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" seed="15" stitchTiles="stitch" result="noise" />
+          <feColorMatrix type="saturate" values="0" in="noise" result="mono" />
+          <feComponentTransfer in="mono" result="grain">
+            <feFuncA type="linear" slope="0.4" />
+          </feComponentTransfer>
+          <feBlend in="SourceGraphic" in2="grain" mode="overlay" />
+        </filter>
+        <filter id="gooey">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur" />
+          <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -10" result="gooey" />
+          <feComposite in="SourceGraphic" in2="gooey" operator="atop" />
+        </filter>
+      </defs>
+    </svg>
+  );
+}
+
+// Static grain overlay
+function StaticGrainOverlay() {
+  return (
+    <div
+      className="absolute inset-0 pointer-events-none"
+      style={{
+        backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
+        opacity: MESH_COLORS.grainOpacity,
+        mixBlendMode: "overlay",
+      }}
+    />
+  );
+}
+
+// Grid overlay for background
+function GridOverlay({ theme }: { theme: string }) {
+  const gridColor = theme === 'dark'
+    ? 'rgba(255, 255, 255, 0.12)'
+    : 'rgba(0, 0, 0, 0.08)';
+  const gridSize = 120; // pixels between lines
+
+  return (
+    <div
+      className="absolute inset-0 pointer-events-none"
+      style={{
+        backgroundImage: `
+          linear-gradient(to right, ${gridColor} 1px, transparent 1px),
+          linear-gradient(to bottom, ${gridColor} 1px, transparent 1px)
+        `,
+        backgroundSize: `${gridSize}px ${gridSize}px`,
+      }}
+    />
+  );
+}
+
+// Morphing SVG Blob
+function MorphingBlob({ color, size, initialX, initialY, mouseX, mouseY, scrollY, index }: {
+  color: string; size: number; initialX: string; initialY: string;
+  mouseX: any; mouseY: any; scrollY: any; index: number;
+}) {
+  const pathRef = useRef<SVGPathElement>(null);
+
+  const blobPaths = [
+    "M44.5,-76.2C57.1,-69.5,66.5,-55.9,73.2,-41.3C79.9,-26.7,83.8,-11.1,82.9,4.1C82,19.3,76.2,34.2,66.7,46.1C57.2,58,43.9,66.9,29.4,72.9C14.9,78.9,-0.8,82,-16.7,80.1C-32.6,78.2,-48.6,71.3,-60.4,60C-72.2,48.7,-79.7,33,-82.3,16.5C-84.9,0,-82.6,-17.3,-75.6,-32.1C-68.6,-46.9,-56.9,-59.2,-43.3,-65.5C-29.7,-71.8,-14.8,-72.1,0.8,-73.4C16.5,-74.7,31.9,-82.9,44.5,-76.2Z",
+    "M38.9,-67.1C50.4,-60.3,59.8,-49.5,66.8,-37C73.8,-24.5,78.4,-10.3,78.1,3.9C77.8,18.1,72.6,32.2,63.9,43.8C55.2,55.4,43,64.5,29.4,70.3C15.8,76.1,0.8,78.6,-14.4,77.1C-29.6,75.6,-45,70.1,-57.3,60.4C-69.6,50.7,-78.8,36.8,-82.6,21.5C-86.4,6.2,-84.8,-10.5,-78.5,-25.1C-72.2,-39.7,-61.2,-52.2,-48,-60.1C-34.8,-68,-17.4,-71.3,-1.3,-69.2C14.8,-67.1,27.4,-73.9,38.9,-67.1Z",
+    "M41.3,-71C53.5,-64.4,63.4,-53.3,70.9,-40.6C78.4,-27.9,83.5,-13.9,83.4,-0.1C83.3,13.8,78,27.5,70.1,39.5C62.2,51.5,51.6,61.7,39.2,68.6C26.8,75.5,12.6,79.1,-1.5,81.6C-15.6,84.1,-29.6,85.5,-42.3,80.1C-55,74.7,-66.4,62.5,-74.1,48.4C-81.8,34.3,-85.8,18.4,-84.9,2.9C-84,-12.6,-78.2,-27.8,-69.3,-40.6C-60.4,-53.4,-48.4,-63.8,-35.2,-69.8C-22,-75.8,-7.6,-77.4,4,-82.2C15.6,-87,29.1,-77.6,41.3,-71Z",
+    "M47.7,-79.9C61.4,-73.1,71.9,-59.5,78.5,-44.5C85.1,-29.5,87.8,-13.1,85.8,2.4C83.8,17.9,77.1,32.5,67.5,44.9C57.9,57.3,45.4,67.5,31.3,73.8C17.2,80.1,1.5,82.5,-14.2,80.6C-29.9,78.7,-45.6,72.5,-58.1,62.3C-70.6,52.1,-79.9,37.9,-83.5,22.4C-87.1,6.9,-85,-9.9,-78.6,-24.6C-72.2,-39.3,-61.5,-51.9,-48.5,-59.1C-35.5,-66.3,-20.2,-68.1,-4.4,-62.2C11.4,-56.3,34,-86.7,47.7,-79.9Z",
+  ];
+
+  useEffect(() => {
+    if (!pathRef.current) return;
+    let currentIndex = 0;
+    const morphToNext = () => {
+      currentIndex = (currentIndex + 1) % blobPaths.length;
+      animate(pathRef.current, { d: blobPaths[currentIndex] }, { duration: MESH_COLORS.morphSpeed, ease: "easeInOut" });
+    };
+    const interval = setInterval(morphToNext, MESH_COLORS.morphSpeed * 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const mouseInfluenceX = useTransform(mouseX, [0, typeof window !== "undefined" ? window.innerWidth : 1000], [-MESH_COLORS.mouseInfluence, MESH_COLORS.mouseInfluence]);
+  const springX = useSpring(mouseInfluenceX, { stiffness: 30, damping: 25 });
+
+  // Blob follows user down the page - travels to the CTA section at bottom
+  // Using larger offset values so blob accompanies user throughout the journey
+  const scrollOffset = useTransform(scrollY, [0, 500, 1500, 2500], [0, 200, 600, 900 + index * 50]);
+  const smoothScrollY = useSpring(scrollOffset, { stiffness: 40, damping: 25 });
+
+  // Blob entrance: starts invisible, fades in as user begins scrolling
+  const scrollOpacity = useTransform(scrollY, [0, 50, 200], [0, 0.3, 1]);
+  const smoothOpacity = useSpring(scrollOpacity, { stiffness: 40, damping: 30 });
+
+  // Scale grows as user scrolls down - starts small, grows moderately
+  // Reduced final size for better visual balance near the CTA
+  const scrollScale = useTransform(scrollY, [0, 100, 800, 2000], [0.2, 0.35 + index * 0.05, 0.6 + index * 0.05, 0.85 + index * 0.05]);
+  const smoothScale = useSpring(scrollScale, { stiffness: 35, damping: 25 });
+
+  return (
+    <motion.div
+      className="absolute"
+      style={{
+        left: initialX,
+        top: initialY,
+        width: size,
+        height: size,
+        x: springX,
+        y: smoothScrollY,
+        scale: smoothScale,
+        opacity: smoothOpacity,
+        filter: "blur(40px)"
+      }}
+    >
+      <svg viewBox="-100 -100 200 200" className="w-full h-full" style={{ overflow: "visible" }}>
+        <motion.path
+          ref={pathRef}
+          d={blobPaths[index % blobPaths.length]}
+          fill={color}
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 1, delay: index * 0.2 }}
+        />
+      </svg>
+    </motion.div>
+  );
+}
+
+// Radial Glow Blob
+function GlowBlob({ color, size, x, y, mouseX, mouseY, scrollY, index, blur = 60 }: {
+  color: string; size: number; x: string; y: string;
+  mouseX: any; mouseY: any; scrollY: any; index: number; blur?: number;
+}) {
+  const mouseInfluenceX = useTransform(mouseX, [0, typeof window !== "undefined" ? window.innerWidth : 1000], [-8 * (index + 1), 8 * (index + 1)]);
+  const springX = useSpring(mouseInfluenceX, { stiffness: 25, damping: 30 });
+
+  // Glow follows user down the page alongside the main blob
+  const scrollOffset = useTransform(scrollY, [0, 500, 1500, 2500], [0, 180, 550, 850 + index * 40]);
+  const smoothScrollY = useSpring(scrollOffset, { stiffness: 40, damping: 25 });
+
+  // Glow entrance: fades in slightly after the main blob
+  const scrollOpacity = useTransform(scrollY, [0, 80, 250], [0, 0.2, 0.8]);
+  const smoothOpacity = useSpring(scrollOpacity, { stiffness: 35, damping: 30 });
+
+  // Scale grows with scroll - reduced final size
+  const scrollScale = useTransform(scrollY, [0, 100, 800, 2000], [0.3, 0.4, 0.7, 0.9 + index * 0.05]);
+  const smoothScale = useSpring(scrollScale, { stiffness: 40, damping: 25 });
+
+  return (
+    <motion.div
+      className="absolute rounded-full"
+      style={{
+        left: x,
+        top: y,
+        width: size,
+        height: size,
+        background: `radial-gradient(circle at 30% 30%, ${color} 0%, transparent 70%)`,
+        filter: `blur(${blur}px)`,
+        x: springX,
+        y: smoothScrollY,
+        scale: smoothScale,
+        opacity: smoothOpacity,
+        transform: "translate(-50%, -50%)",
+      }}
+    />
+  );
+}
+
+// Main Advanced Mesh Gradient Background
+function MeshGradientBg({ theme }: { theme: string }) {
+  const { scrollY } = useScroll();
+  const colors = theme === 'dark' ? MESH_COLORS.dark : MESH_COLORS.light;
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => { mouseX.set(e.clientX); mouseY.set(e.clientY); };
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, [mouseX, mouseY]);
+
+  return (
+    <div className="fixed inset-0 overflow-hidden z-[1] pointer-events-none">
+      <SVGFilters />
+
+      {/* Base gradient */}
+      <div
+        className="absolute inset-0 transition-colors duration-500"
+        style={{ background: `linear-gradient(180deg, ${colors.gradientTop} 0%, ${colors.gradientMiddle} 40%, ${colors.gradientBottom} 100%)` }}
+      />
+
+      {/* Ambient glow */}
+      <motion.div
+        className="absolute"
+        style={{
+          left: "50%", top: "20%", width: 600, height: 400,
+          background: `radial-gradient(ellipse, ${colors.glowColor} 0%, transparent 70%)`,
+          transform: "translate(-50%, -50%)", filter: "blur(40px)",
+        }}
+        animate={{ scale: [1, 1.1, 1], opacity: [0.6, 0.8, 0.6] }}
+        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+      />
+
+      {/* Morphing SVG Blobs */}
+      <div className="absolute inset-0" style={{ filter: "url(#gooey)" }}>
+        <MorphingBlob color={colors.blobPrimary} size={350} initialX="45%" initialY="22%" mouseX={mouseX} mouseY={mouseY} scrollY={scrollY} index={0} />
+        <MorphingBlob color={colors.blobSecondary} size={280} initialX="55%" initialY="28%" mouseX={mouseX} mouseY={mouseY} scrollY={scrollY} index={1} />
+        <MorphingBlob color={colors.blobAccent} size={200} initialX="48%" initialY="25%" mouseX={mouseX} mouseY={mouseY} scrollY={scrollY} index={2} />
+      </div>
+
+      {/* Radial glow blobs */}
+      <GlowBlob color={colors.blobHighlight} size={500} x="50%" y="25%" mouseX={mouseX} mouseY={mouseY} scrollY={scrollY} index={0} blur={80} />
+      <GlowBlob color={colors.blobPrimary} size={300} x="42%" y="30%" mouseX={mouseX} mouseY={mouseY} scrollY={scrollY} index={1} blur={50} />
+
+      {/* Top highlight */}
+      <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse 80% 50% at 50% 0%, rgba(255, 255, 255, ${theme === 'dark' ? '0.1' : '0.4'}) 0%, transparent 50%)` }} />
+
+      {/* Grain texture */}
+      <StaticGrainOverlay />
+
+      {/* Vignette */}
+      <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse at center, transparent 50%, rgba(0, 0, 0, ${theme === 'dark' ? '0.3' : '0.05'}) 100%)` }} />
+    </div>
+  );
 }
 
 interface PhaseDetail {
@@ -114,6 +372,10 @@ export default function LandingPage() {
   const [expandedPhase, setExpandedPhase] = useState<number | null>(null);
   const [visiblePhases, setVisiblePhases] = useState<Set<number>>(new Set());
   const [sectionTitleVisible, setSectionTitleVisible] = useState(false);
+  const [email, setEmail] = useState('');
+  const [signupStatus, setSignupStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [signupMessage, setSignupMessage] = useState('');
+  const [signupCount, setSignupCount] = useState(0);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const smoothWrapperRef = useRef<HTMLDivElement>(null);
@@ -121,17 +383,12 @@ export default function LandingPage() {
   const heroTitleRef = useRef<HTMLHeadingElement>(null);
   const brandTextRef = useRef<HTMLSpanElement>(null);
   const osTextRef = useRef<HTMLSpanElement>(null);
-  const statsRef = useRef<HTMLDivElement>(null);
-  const statValueRefs = useRef<(HTMLParagraphElement | null)[]>([]);
   const phaseRefs = useRef<(HTMLDivElement | null)[]>([]);
   const sectionTitleRef = useRef<HTMLElement>(null);
   const heroSectionRef = useRef<HTMLElement>(null);
-  const zeroDriftRef = useRef<HTMLSpanElement>(null);
   const painStatementRef = useRef<HTMLParagraphElement>(null);
   const supportingTextRef = useRef<HTMLParagraphElement>(null);
-  const oneSystemRef = useRef<HTMLSpanElement>(null);
   const heroGlowRef = useRef<HTMLDivElement>(null);
-  const taglineContainerRef = useRef<HTMLParagraphElement>(null);
   const scrollIndicatorRef = useRef<HTMLDivElement>(null);
   const typingCursorRef = useRef<HTMLSpanElement>(null);
   const mouseRef = useRef({ x: 0, y: 0 });
@@ -146,6 +403,52 @@ export default function LandingPage() {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Fetch signup count on mount
+  useEffect(() => {
+    async function fetchStats() {
+      try {
+        const res = await fetch('/api/stats');
+        const data = await res.json();
+        setSignupCount(data.signups || 0);
+      } catch (error) {
+        console.error('Failed to fetch stats:', error);
+      }
+    }
+    fetchStats();
+  }, []);
+
+  // Handle email signup
+  const handleEmailSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || signupStatus === 'loading') return;
+
+    setSignupStatus('loading');
+    setSignupMessage('');
+
+    try {
+      const res = await fetch('/api/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, source: 'landing' }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        setSignupStatus('success');
+        setSignupMessage('You\'re on the list!');
+        setEmail('');
+        setSignupCount(prev => prev + 1);
+      } else {
+        setSignupStatus('error');
+        setSignupMessage(data.error || 'Something went wrong');
+      }
+    } catch (error) {
+      setSignupStatus('error');
+      setSignupMessage('Network error. Please try again.');
+    }
+  };
 
   // GSAP Animations
   useEffect(() => {
@@ -263,62 +566,7 @@ export default function LandingPage() {
           });
         }
 
-        if (oneSystemRef.current) {
-          gsap.to(oneSystemRef.current, {
-            opacity: 1,
-            y: 0,
-            duration: 0.5,
-            delay: 1.2,
-            ease: 'power2.out',
-          });
-        }
-
-        if (zeroDriftRef.current) {
-          gsap.to(zeroDriftRef.current, {
-            opacity: 1,
-            x: 0,
-            duration: 0.5,
-            delay: 1.5,
-            ease: 'power2.out',
-          });
-        }
-
-        // 4. Animated stat counters with ScrollTrigger
-        const stats = [
-          { value: 2.4, suffix: 'K', decimals: 1 },
-          { value: 156, suffix: 'K', decimals: 0 },
-          { value: 94, suffix: '%', decimals: 0 },
-          { value: 3, prefix: '<', suffix: 's', decimals: 0 },
-        ];
-
-        statValueRefs.current.forEach((ref, index) => {
-          if (!ref) return;
-
-          const stat = stats[index];
-          const obj = { value: 0 };
-
-          gsap.to(obj, {
-            value: stat.value,
-            duration: 2,
-            ease: 'power2.out',
-            scrollTrigger: {
-              trigger: ref,
-              start: 'top 80%',
-              toggleActions: 'play none none none',
-            },
-            onUpdate: () => {
-              if (ref) {
-                const prefix = stat.prefix || '';
-                const formatted = stat.decimals > 0
-                  ? obj.value.toFixed(stat.decimals)
-                  : Math.floor(obj.value).toString();
-                ref.textContent = `${prefix}${formatted}${stat.suffix}`;
-              }
-            },
-          });
-        });
-
-        // 5. Scroll-triggered animations (no duplicate SplitText - typing animation handles character splitting)
+        // 4. Scroll-triggered animations (no duplicate SplitText - typing animation handles character splitting)
         if (heroSectionRef.current) {
           // Create master timeline with scroll trigger
           const masterTl = gsap.timeline({
@@ -378,7 +626,6 @@ export default function LandingPage() {
             painStatementRef.current,
             heroTitleRef.current,
             supportingTextRef.current,
-            taglineContainerRef.current,
           ].filter(Boolean);
 
           masterTl.to(fadeElements, {
@@ -417,8 +664,8 @@ export default function LandingPage() {
 
     const observerOptions = {
       root: null,
-      rootMargin: '-50px 0px -100px 0px',
-      threshold: 0.15,
+      rootMargin: '50px 0px -50px 0px', // Trigger earlier (positive top margin)
+      threshold: 0.05, // Lower threshold to trigger sooner
     };
 
     const phaseObserver = new IntersectionObserver((entries) => {
@@ -426,18 +673,18 @@ export default function LandingPage() {
         if (entry.isIntersecting) {
           const phaseIndex = phaseRefs.current.findIndex((ref) => ref === entry.target);
           if (phaseIndex !== -1) {
-            const staggerDelay = phaseIndex * 100; // Smoother, faster stagger
+            const staggerDelay = phaseIndex * 60; // Faster stagger (was 100ms)
             // Add staggered delay based on phase index
             setTimeout(() => {
               setVisiblePhases((prev) => new Set([...prev, phaseIndex]));
 
-              // After animation completes (0.7s), add the animation-complete class
+              // After animation completes (0.5s), add the animation-complete class
               setTimeout(() => {
                 const element = phaseRefs.current[phaseIndex];
                 if (element) {
                   element.classList.add('animation-complete');
                 }
-              }, 800); // 0.7s animation + 100ms buffer
+              }, 600); // Faster completion
             }, staggerDelay);
           }
         }
@@ -450,7 +697,7 @@ export default function LandingPage() {
           setSectionTitleVisible(true);
         }
       });
-    }, { ...observerOptions, threshold: 0.5 });
+    }, { ...observerOptions, threshold: 0.2 }); // Lower threshold
 
     // Observe phase cards
     phaseRefs.current.forEach((ref) => {
@@ -598,6 +845,23 @@ export default function LandingPage() {
           opacity *= 1 - (progress - 0.8) / 0.2;
         }
 
+        // Create an elliptical clear zone in the center where the loading bar will appear
+        const centerX = canvas.width * 0.5;
+        const centerY = canvas.height * 0.5;
+        const clearZoneWidth = canvas.width * 0.5; // Horizontal radius
+        const clearZoneHeight = 200; // Vertical radius
+
+        // Calculate normalized distance from center (elliptical)
+        const normalizedX = (wordObj.x - centerX) / clearZoneWidth;
+        const normalizedY = (wordObj.y - centerY) / clearZoneHeight;
+        const ellipticalDistance = Math.sqrt(normalizedX * normalizedX + normalizedY * normalizedY);
+
+        if (ellipticalDistance < 1) {
+          // Word is inside the elliptical clear zone - fade based on how close to center
+          const zoneFade = Math.pow(ellipticalDistance, 1.5);
+          opacity *= zoneFade;
+        }
+
         if (opacity > 0.02) {
           ctx.save();
           ctx.translate(wordObj.x, wordObj.y);
@@ -644,7 +908,7 @@ export default function LandingPage() {
     };
   }, [mounted]);
 
-  // Brand Score Gauge Animation
+  // Brand Score Horizontal Loading Bar Animation
   useEffect(() => {
     const canvas = gaugeCanvasRef.current;
     if (!canvas || !mounted) return;
@@ -660,6 +924,8 @@ export default function LandingPage() {
     window.addEventListener('resize', resize);
 
     let animationId: number;
+    let entranceStartTime: number | null = null;
+    const entranceDuration = 800; // ms for entrance animation
 
     const animate = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -668,74 +934,152 @@ export default function LandingPage() {
       const smoother = smootherRef.current;
       const scrollY = smoother ? smoother.scrollTop() : window.scrollY;
       const viewportHeight = window.innerHeight;
-      const progress = Math.min(scrollY / (viewportHeight * 1.5), 1);
 
-      // Position: center-right of screen, more prominent
-      const centerX = canvas.width - 180;
-      const centerY = canvas.height * 0.45;
-      const radius = 100; // Larger radius
+      // Delay the loading bar - only start after scrolling 25% of viewport
+      const scrollThreshold = viewportHeight * 0.25;
+      const adjustedScroll = Math.max(0, scrollY - scrollThreshold);
+      const progress = Math.min(adjustedScroll / (viewportHeight * 1.2), 1);
 
-      let opacity = Math.min(progress * 2, 0.95);
+      // Track entrance animation timing
+      if (progress > 0 && entranceStartTime === null) {
+        entranceStartTime = Date.now();
+      } else if (progress === 0) {
+        entranceStartTime = null;
+      }
+
+      // Calculate entrance animation progress (0 to 1)
+      const entranceProgress = entranceStartTime
+        ? Math.min((Date.now() - entranceStartTime) / entranceDuration, 1)
+        : 0;
+
+      // Smooth easing for entrance (ease-out cubic)
+      const entranceEase = 1 - Math.pow(1 - entranceProgress, 3);
+
+      // Horizontal bar dimensions - takes up most of the screen width
+      const barPadding = 80;
+      const barX = barPadding;
+      const barY = canvas.height * 0.5; // Centered vertically
+      const barWidth = canvas.width - (barPadding * 2);
+      const barHeight = 24;
+      const borderRadius = 12;
+
+      // Apply entrance animation to opacity and position
+      const baseOpacity = Math.min(progress * 2, 0.95);
+      let opacity = baseOpacity * entranceEase;
       if (progress > 0.85) opacity *= 1 - (progress - 0.85) / 0.15;
 
+      // Entrance slide-up offset (starts 60px below, animates to 0)
+      const entranceOffsetY = (1 - entranceEase) * 60;
+
       if (opacity > 0.02) {
-        // Outer glow ring
-        const glowGradient = ctx.createRadialGradient(centerX, centerY, radius * 0.8, centerX, centerY, radius * 1.4);
-        glowGradient.addColorStop(0, `rgba(0, 71, 255, ${opacity * 0.15})`);
-        glowGradient.addColorStop(1, `rgba(0, 71, 255, 0)`);
-        ctx.fillStyle = glowGradient;
-        ctx.beginPath();
-        ctx.arc(centerX, centerY, radius * 1.4, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Background arc
-        ctx.beginPath();
-        ctx.arc(centerX, centerY, radius, Math.PI * 0.75, Math.PI * 2.25);
-        ctx.strokeStyle = isDark ? `rgba(255, 255, 255, ${opacity * 0.15})` : `rgba(0, 0, 0, ${opacity * 0.15})`;
-        ctx.lineWidth = 12;
-        ctx.lineCap = 'round';
-        ctx.stroke();
-
-        // Progress arc (brand score filling up)
         const scoreProgress = Math.min(progress * 1.3, 1);
-        const endAngle = Math.PI * 0.75 + scoreProgress * Math.PI * 1.5;
+        const score = Math.floor(scoreProgress * 100);
 
+        // Apply entrance offset to Y positions
+        const animatedBarY = barY + entranceOffsetY;
+
+        // Outer glow behind the bar
+        const glowGradient = ctx.createLinearGradient(barX, animatedBarY, barX + barWidth * scoreProgress, animatedBarY);
+        glowGradient.addColorStop(0, `rgba(0, 71, 255, ${opacity * 0.3})`);
+        glowGradient.addColorStop(1, `rgba(0, 71, 255, ${opacity * 0.5})`);
+
+        ctx.shadowColor = 'rgba(0, 71, 255, 0.6)';
+        ctx.shadowBlur = 40 * entranceEase;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 0;
+
+        // Background bar (track)
         ctx.beginPath();
-        ctx.arc(centerX, centerY, radius, Math.PI * 0.75, endAngle);
-
-        // Gradient from red to green via yellow
-        const gradient = ctx.createLinearGradient(centerX - radius, centerY, centerX + radius, centerY);
-        gradient.addColorStop(0, `rgba(255, 80, 80, ${opacity})`);
-        gradient.addColorStop(0.5, `rgba(255, 200, 80, ${opacity})`);
-        gradient.addColorStop(1, `rgba(0, 200, 100, ${opacity})`);
-
-        ctx.strokeStyle = scoreProgress > 0.7 ? `rgba(0, 71, 255, ${opacity})` : gradient;
-        ctx.lineWidth = 12;
-        ctx.stroke();
-
-        // Inner circle background
-        ctx.beginPath();
-        ctx.arc(centerX, centerY, radius * 0.7, 0, Math.PI * 2);
-        ctx.fillStyle = isDark ? `rgba(10, 10, 15, ${opacity * 0.8})` : `rgba(255, 255, 255, ${opacity * 0.8})`;
+        ctx.roundRect(barX, animatedBarY - barHeight / 2, barWidth, barHeight, borderRadius);
+        ctx.fillStyle = isDark ? `rgba(255, 255, 255, ${opacity * 0.08})` : `rgba(0, 0, 0, ${opacity * 0.08})`;
+        ctx.shadowColor = 'transparent';
         ctx.fill();
 
-        // Score text - larger
-        const score = Math.floor(scoreProgress * 100);
-        ctx.font = `700 42px "Helvetica Neue", sans-serif`;
-        ctx.fillStyle = isDark ? `rgba(255, 255, 255, ${opacity})` : `rgba(0, 0, 0, ${opacity})`;
+        // Add subtle border to track
+        ctx.strokeStyle = isDark ? `rgba(255, 255, 255, ${opacity * 0.1})` : `rgba(0, 0, 0, ${opacity * 0.1})`;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        // Progress bar fill
+        const fillWidth = barWidth * scoreProgress;
+        if (fillWidth > 0) {
+          ctx.beginPath();
+          ctx.roundRect(barX, animatedBarY - barHeight / 2, fillWidth, barHeight, borderRadius);
+
+          // Gradient fill - Klein blue with electric highlights
+          const fillGradient = ctx.createLinearGradient(barX, animatedBarY, barX + fillWidth, animatedBarY);
+          if (scoreProgress < 0.3) {
+            // Red to orange for low scores
+            fillGradient.addColorStop(0, `rgba(255, 60, 60, ${opacity})`);
+            fillGradient.addColorStop(1, `rgba(255, 120, 60, ${opacity})`);
+          } else if (scoreProgress < 0.7) {
+            // Orange to yellow for medium scores
+            fillGradient.addColorStop(0, `rgba(255, 120, 60, ${opacity})`);
+            fillGradient.addColorStop(1, `rgba(255, 200, 80, ${opacity})`);
+          } else {
+            // Klein blue for high scores (on brand!)
+            fillGradient.addColorStop(0, `rgba(0, 47, 167, ${opacity})`);
+            fillGradient.addColorStop(0.5, `rgba(0, 71, 255, ${opacity})`);
+            fillGradient.addColorStop(1, `rgba(60, 120, 255, ${opacity})`);
+          }
+
+          ctx.fillStyle = fillGradient;
+          ctx.shadowColor = scoreProgress > 0.7 ? 'rgba(0, 71, 255, 0.8)' : 'rgba(255, 150, 60, 0.5)';
+          ctx.shadowBlur = 30 * entranceEase;
+          ctx.fill();
+          ctx.shadowColor = 'transparent';
+
+          // Animated shimmer effect on the progress bar (only after entrance complete)
+          if (entranceEase > 0.8) {
+            const shimmerX = barX + (fillWidth * ((Date.now() % 2000) / 2000));
+            const shimmerGradient = ctx.createLinearGradient(shimmerX - 100, animatedBarY, shimmerX + 100, animatedBarY);
+            shimmerGradient.addColorStop(0, `rgba(255, 255, 255, 0)`);
+            shimmerGradient.addColorStop(0.5, `rgba(255, 255, 255, ${opacity * 0.3})`);
+            shimmerGradient.addColorStop(1, `rgba(255, 255, 255, 0)`);
+
+            ctx.beginPath();
+            ctx.roundRect(barX, animatedBarY - barHeight / 2, fillWidth, barHeight, borderRadius);
+            ctx.fillStyle = shimmerGradient;
+            ctx.fill();
+          }
+        }
+
+        // Score text - large and centered above bar (with separate entrance timing)
+        const textEntranceDelay = 150; // ms delay for text after bar
+        const textEntranceProgress = entranceStartTime
+          ? Math.min(Math.max((Date.now() - entranceStartTime - textEntranceDelay) / (entranceDuration * 0.8), 0), 1)
+          : 0;
+        const textEntranceEase = 1 - Math.pow(1 - textEntranceProgress, 3);
+        const textOpacity = opacity * textEntranceEase;
+        const textOffsetY = (1 - textEntranceEase) * 30;
+
+        ctx.font = `700 72px "Helvetica Neue", sans-serif`;
+        ctx.fillStyle = isDark ? `rgba(255, 255, 255, ${textOpacity})` : `rgba(0, 0, 0, ${textOpacity})`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText(`${score}`, centerX, centerY - 5);
+        ctx.fillText(`${score}`, canvas.width / 2, animatedBarY - 80 - textOffsetY);
 
-        // Label - larger
-        ctx.font = `500 12px "VCR OSD Mono", monospace`;
-        ctx.fillStyle = isDark ? `rgba(255, 255, 255, ${opacity * 0.7})` : `rgba(0, 0, 0, ${opacity * 0.7})`;
-        ctx.fillText('BRAND SCORE', centerX, centerY + 30);
+        // Percentage symbol next to score
+        ctx.font = `400 32px "Helvetica Neue", sans-serif`;
+        ctx.fillStyle = isDark ? `rgba(255, 255, 255, ${textOpacity * 0.6})` : `rgba(0, 0, 0, ${textOpacity * 0.6})`;
+        ctx.font = `700 72px "Helvetica Neue", sans-serif`;
+        const fullScoreWidth = ctx.measureText(`${score}`).width;
+        ctx.font = `400 32px "Helvetica Neue", sans-serif`;
+        ctx.fillText('%', canvas.width / 2 + fullScoreWidth / 2 + 8, animatedBarY - 90 - textOffsetY);
 
-        // Percentage symbol
-        ctx.font = `400 16px "Helvetica Neue", sans-serif`;
-        ctx.fillStyle = isDark ? `rgba(255, 255, 255, ${opacity * 0.5})` : `rgba(0, 0, 0, ${opacity * 0.5})`;
-        ctx.fillText('%', centerX + 35, centerY - 12);
+        // Label below bar
+        ctx.font = `500 14px "VCR OSD Mono", monospace`;
+        ctx.fillStyle = isDark ? `rgba(255, 255, 255, ${textOpacity * 0.5})` : `rgba(0, 0, 0, ${textOpacity * 0.5})`;
+        ctx.textAlign = 'center';
+        ctx.fillText('BRAND SCORE', canvas.width / 2, animatedBarY + 40 + textOffsetY * 0.5);
+
+        // Min/Max labels at bar ends
+        ctx.font = `400 11px "VCR OSD Mono", monospace`;
+        ctx.fillStyle = isDark ? `rgba(255, 255, 255, ${textOpacity * 0.3})` : `rgba(0, 0, 0, ${textOpacity * 0.3})`;
+        ctx.textAlign = 'left';
+        ctx.fillText('0', barX, animatedBarY + 25);
+        ctx.textAlign = 'right';
+        ctx.fillText('100', barX + barWidth, animatedBarY + 25);
       }
 
       animationId = requestAnimationFrame(animate);
@@ -828,47 +1172,9 @@ export default function LandingPage() {
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Draw grid - subtle lines
       const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
-      const gridSize = 60;
 
-      // Primary grid lines - SUBTLE
-      ctx.strokeStyle = isDark ? 'rgba(255, 255, 255, 0.04)' : 'rgba(0, 0, 0, 0.03)';
-      ctx.lineWidth = 1;
-
-      for (let x = 0; x < canvas.width; x += gridSize) {
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, canvas.height);
-        ctx.stroke();
-      }
-
-      for (let y = 0; y < canvas.height; y += gridSize) {
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(canvas.width, y);
-        ctx.stroke();
-      }
-
-      // Accent grid lines (every 4th line slightly brighter) - Klein Blue
-      ctx.strokeStyle = isDark ? 'rgba(0, 71, 255, 0.08)' : 'rgba(0, 47, 167, 0.05)';
-      ctx.lineWidth = 1;
-
-      for (let x = 0; x < canvas.width; x += gridSize * 4) {
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, canvas.height);
-        ctx.stroke();
-      }
-
-      for (let y = 0; y < canvas.height; y += gridSize * 4) {
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(canvas.height, y);
-        ctx.stroke();
-      }
-
-      // Pixelated gradient wave
+      // Subtle gradient wave effect (no grid lines)
       const gradientInterval = 5500;
       if (time - lastGradientTimeRef.current > gradientInterval) {
         lastGradientTimeRef.current = time;
@@ -976,13 +1282,16 @@ export default function LandingPage() {
       ref={containerRef}
       style={{
         minHeight: '100vh',
-        background: theme === 'dark' ? '#0a0a0a' : '#f5f5f5',
+        background: theme === 'dark' ? '#000000' : '#ffffff',
         position: 'relative',
         overflowX: 'hidden',
         transition: 'background 0.3s ease',
         isolation: 'isolate',
       }}
     >
+      {/* Mesh Gradient Background */}
+      <MeshGradientBg theme={theme} />
+
       {/* Morphing Typography Wave Canvas */}
       <canvas
         ref={typographyCanvasRef}
@@ -1109,7 +1418,7 @@ export default function LandingPage() {
         </button>
 
       {/* Content */}
-      <div style={{ position: 'relative', zIndex: 5, background: 'transparent' }}>
+      <div style={{ position: 'relative', zIndex: 10, background: 'transparent' }}>
         {/* Hero Section */}
         <section
           ref={heroSectionRef}
@@ -1119,13 +1428,7 @@ export default function LandingPage() {
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            background: theme === 'dark'
-              ? `radial-gradient(ellipse 80% 50% at 50% 15%, rgba(0, 47, 167, 0.18) 0%, rgba(0, 24, 71, 0.08) 40%, transparent 70%),
-                 radial-gradient(ellipse 60% 40% at 10% 25%, rgba(0, 71, 255, 0.12) 0%, transparent 50%),
-                 radial-gradient(ellipse 50% 35% at 90% 20%, rgba(0, 47, 167, 0.14) 0%, transparent 50%)`
-              : `radial-gradient(ellipse 80% 50% at 50% 15%, rgba(0, 47, 167, 0.1) 0%, rgba(0, 71, 255, 0.05) 40%, transparent 70%),
-                 radial-gradient(ellipse 60% 40% at 10% 25%, rgba(0, 71, 255, 0.08) 0%, transparent 50%),
-                 radial-gradient(ellipse 50% 35% at 90% 20%, rgba(0, 47, 167, 0.08) 0%, transparent 50%)`,
+            background: 'transparent',
             justifyContent: 'center',
             padding: '48px',
             position: 'relative',
@@ -1184,35 +1487,18 @@ export default function LandingPage() {
           >
             AI-POWERED
               </div>
-              
-          {/* Pain Statement */}
-          <p
-            ref={painStatementRef}
-            style={{
-              fontFamily: "'VCR OSD Mono', monospace",
-              fontSize: 'clamp(12px, 1.5vw, 16px)',
-              fontWeight: 400,
-              letterSpacing: '0.3em',
-              color: theme === 'dark' ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0, 0, 0, 0.3)',
-              textTransform: 'uppercase',
-              margin: 0,
-              marginBottom: '24px',
-            }}
-          >
-            Brand drift kills companies slowly.
-          </p>
 
           {/* Logo */}
           <h1
             ref={heroTitleRef}
             style={{
-              fontSize: 'clamp(72px, 14vw, 180px)',
+              fontSize: 'clamp(90px, 18vw, 240px)',
               lineHeight: 1,
               margin: 0,
               display: 'flex',
               alignItems: 'baseline',
               letterSpacing: '-0.05em',
-              marginBottom: '32px',
+              marginBottom: '48px',
               perspective: '1000px',
             }}
           >
@@ -1234,9 +1520,12 @@ export default function LandingPage() {
               style={{
                 fontFamily: "'VCR OSD Mono', monospace",
                 fontWeight: 400,
+                fontSize: '1.15em',
+                fontStyle: 'italic',
                 position: 'relative',
-                top: '0.05em',
+                top: '0.02em',
                 display: 'inline-block',
+                paddingRight: '0.15em',
               }}
             >
               OS
@@ -1261,64 +1550,23 @@ export default function LandingPage() {
             ref={supportingTextRef}
             style={{
               fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
-              fontSize: 'clamp(14px, 2vw, 20px)',
+              fontSize: 'clamp(18px, 2.5vw, 28px)',
               fontWeight: 400,
               color: theme === 'dark' ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)',
-              maxWidth: '700px',
+              maxWidth: '100%',
               lineHeight: 1.5,
               margin: 0,
               textAlign: 'center',
-              marginBottom: '32px',
+              marginBottom: '48px',
               opacity: 0,
               transform: 'translateY(20px)',
+              whiteSpace: 'nowrap',
             }}
           >
-            Your brand is a promise — customers notice when you break it.
-          </p>
-          <p
-            ref={taglineContainerRef}
-            style={{
-              fontSize: 'clamp(24px, 4vw, 40px)',
-              fontWeight: 600,
-              color: theme === 'dark' ? '#FFFFFF' : '#000000',
-              maxWidth: '700px',
-              lineHeight: 1.3,
-              margin: 0,
-              textAlign: 'center',
-              marginBottom: '48px',
-              display: 'flex',
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '16px',
-            }}
-          >
-            <span
-              ref={oneSystemRef}
-              style={{
-                fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
-                opacity: 0,
-                transform: 'translateY(20px)',
-              }}
-            >
-              One system.
-            </span>
-            <span
-              ref={zeroDriftRef}
-              className="zero-drift-text"
-              style={{
-                fontFamily: "'PP Mondwest', monospace",
-                display: 'inline-block',
-                letterSpacing: '0.05em',
-                opacity: 0,
-                transform: 'translateX(-50px)',
-              }}
-            >
-              Zero Drift.
-            </span>
+            AI-powered brand system that understands, enforces and scales identity.
           </p>
 
-          {/* Scroll indicator */}
+          {/* Pain statement + See how it works CTA */}
           <div
             ref={scrollIndicatorRef}
             className="bounce"
@@ -1326,132 +1574,48 @@ export default function LandingPage() {
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              gap: '8px',
-              marginTop: '48px',
+              gap: '20px',
+              marginTop: '80px',
             }}
           >
-                    <span
+            <p
+              ref={painStatementRef}
               style={{
                 fontFamily: "'VCR OSD Mono', monospace",
-                fontSize: '10px',
+                fontSize: 'clamp(16px, 2vw, 22px)',
+                fontWeight: 400,
                 letterSpacing: '0.2em',
-                color: theme === 'dark' ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0, 0, 0, 0.4)',
+                textTransform: 'uppercase',
+                color: theme === 'dark' ? 'rgba(255, 255, 255, 0.4)' : 'rgba(0, 0, 0, 0.4)',
+                margin: 0,
+                marginBottom: '20px',
+              }}
+            >
+              Brand drift kills companies slowly.
+            </p>
+            <span
+              style={{
+                fontFamily: "'VCR OSD Mono', monospace",
+                fontSize: 'clamp(16px, 2vw, 22px)',
+                letterSpacing: '0.2em',
+                color: theme === 'dark' ? 'rgba(255, 255, 255, 0.4)' : 'rgba(0, 0, 0, 0.4)',
                 textTransform: 'uppercase',
               }}
             >
               See how it works
-                    </span>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={theme === 'dark' ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.4)'} strokeWidth="1.5">
+            </span>
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke={theme === 'dark' ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)'} strokeWidth="1.5">
               <path d="M12 5v14M5 12l7 7 7-7" />
-                      </svg>
-                  </div>
-        </section>
-
-        {/* Social Proof Stats */}
-        <section
-          style={{
-            padding: '64px 48px',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '48px',
-            position: 'relative',
-            zIndex: 10,
-          }}
-        >
-          {/* Stats Row */}
-          <div
-            ref={statsRef}
-            style={{
-              display: 'flex',
-              gap: 'clamp(32px, 8vw, 96px)',
-              flexWrap: 'wrap',
-              justifyContent: 'center',
-            }}
-          >
-            {[
-              { value: '0K', label: 'Brands defined' },
-              { value: '0K', label: 'Content checks' },
-              { value: '0%', label: 'Avg brand score' },
-              { value: '<0s', label: 'Time to check' },
-            ].map((stat, index) => (
-              <div
-                key={stat.label}
-                style={{
-                  textAlign: 'center',
-                }}
-              >
-                <p
-                  ref={(el) => { statValueRefs.current[index] = el; }}
-                  style={{
-                    fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
-                    fontSize: 'clamp(32px, 5vw, 48px)',
-                    fontWeight: 600,
-                    color: theme === 'dark' ? '#FFFFFF' : '#000000',
-                    margin: 0,
-                    letterSpacing: '-0.02em',
-                  }}
-                >
-                  {stat.value}
-                </p>
-                <p
-                  style={{
-                    fontFamily: "'VCR OSD Mono', monospace",
-                    fontSize: '10px',
-                    letterSpacing: '0.15em',
-                    color: theme === 'dark' ? 'rgba(255, 255, 255, 0.4)' : 'rgba(0, 0, 0, 0.5)',
-                    textTransform: 'uppercase',
-                    margin: 0,
-                    marginTop: '8px',
-                  }}
-                >
-                  {stat.label}
-                </p>
-                      </div>
-                    ))}
-                  </div>
-
-          {/* Testimonial */}
-          <div
-            style={{
-              maxWidth: '600px',
-              textAlign: 'center',
-            }}
-          >
-            <p
-              style={{
-                fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
-                fontSize: 'clamp(16px, 2vw, 20px)',
-                fontStyle: 'italic',
-                fontWeight: 400,
-                color: theme === 'dark' ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)',
-                lineHeight: 1.6,
-                margin: 0,
-                marginBottom: '16px',
-              }}
-            >
-              "We used to spend 4 hours a week reviewing agency content. Now it takes 20 minutes."
-            </p>
-            <p
-              style={{
-                fontFamily: "'VCR OSD Mono', monospace",
-                fontSize: '11px',
-                letterSpacing: '0.1em',
-                color: theme === 'dark' ? 'rgba(255, 255, 255, 0.4)' : 'rgba(0, 0, 0, 0.5)',
-                margin: 0,
-              }}
-            >
-              — Head of Brand, Series B Startup
-            </p>
+            </svg>
           </div>
-            </section>
+        </section>
 
         {/* Section Title */}
         <section
           ref={sectionTitleRef}
           className={`section-title-reveal ${sectionTitleVisible ? 'visible' : ''}`}
           style={{
-            padding: '48px 48px 24px',
+            padding: '24px 48px 16px',
             textAlign: 'center',
             position: 'relative',
             zIndex: 10,
@@ -1474,7 +1638,7 @@ export default function LandingPage() {
         {/* Phases Bento Grid */}
         <section
           style={{
-            padding: '24px 48px 48px',
+            padding: '16px 48px 32px',
             maxWidth: '1400px',
             margin: '0 auto',
             position: 'relative',
@@ -1742,38 +1906,123 @@ export default function LandingPage() {
               lineHeight: 1.5,
             }}
           >
-            Stop reviewing. Start trusting.
+            Be first to experience brandOS.
           </p>
 
-          <motion.button
-            onClick={handleGetStarted}
-            className="cta-pulse"
-            whileHover={{ 
-              y: -4, 
-              scale: 1.02,
-              boxShadow: '0 20px 60px rgba(0, 71, 255, 0.5)',
-            }}
-            whileTap={{ scale: 0.96 }}
-            transition={{ 
-              type: "spring", 
-              stiffness: 500, 
-              damping: 30 
-            }}
+          {/* Email Signup Form */}
+          <form
+            onSubmit={handleEmailSignup}
             style={{
-              fontFamily: "'VCR OSD Mono', monospace",
-              fontSize: '14px',
-              letterSpacing: '0.15em',
-              color: '#FFFFFF',
-              background: '#0047FF',
-              border: 'none',
-              padding: '20px 64px',
-              cursor: 'pointer',
-              borderRadius: '16px',
-              boxShadow: '0 0 30px rgba(0, 71, 255, 0.3)',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '16px',
+              width: '100%',
+              maxWidth: '480px',
             }}
           >
-            GET STARTED
-          </motion.button>
+            <div
+              style={{
+                display: 'flex',
+                gap: '12px',
+                width: '100%',
+                flexWrap: 'wrap',
+                justifyContent: 'center',
+              }}
+            >
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter your email"
+                disabled={signupStatus === 'loading' || signupStatus === 'success'}
+                style={{
+                  fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
+                  fontSize: '16px',
+                  padding: '16px 24px',
+                  borderRadius: '12px',
+                  border: `1px solid ${theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.15)'}`,
+                  background: theme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.03)',
+                  color: theme === 'dark' ? '#FFFFFF' : '#000000',
+                  outline: 'none',
+                  flex: '1',
+                  minWidth: '240px',
+                  transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
+                }}
+                onFocus={(e) => {
+                  e.currentTarget.style.borderColor = '#0047FF';
+                  e.currentTarget.style.boxShadow = '0 0 0 3px rgba(0, 71, 255, 0.1)';
+                }}
+                onBlur={(e) => {
+                  e.currentTarget.style.borderColor = theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.15)';
+                  e.currentTarget.style.boxShadow = 'none';
+                }}
+              />
+              <motion.button
+                type="submit"
+                disabled={signupStatus === 'loading' || signupStatus === 'success'}
+                className={signupStatus !== 'success' ? 'cta-pulse' : ''}
+                whileHover={signupStatus !== 'success' ? {
+                  y: -2,
+                  scale: 1.02,
+                  boxShadow: '0 15px 40px rgba(0, 71, 255, 0.4)',
+                } : {}}
+                whileTap={signupStatus !== 'success' ? { scale: 0.98 } : {}}
+                transition={{
+                  type: "spring",
+                  stiffness: 500,
+                  damping: 30
+                }}
+                style={{
+                  fontFamily: "'VCR OSD Mono', monospace",
+                  fontSize: '13px',
+                  letterSpacing: '0.1em',
+                  color: '#FFFFFF',
+                  background: signupStatus === 'success' ? '#10B981' : '#0047FF',
+                  border: 'none',
+                  padding: '16px 32px',
+                  cursor: signupStatus === 'loading' || signupStatus === 'success' ? 'default' : 'pointer',
+                  borderRadius: '12px',
+                  boxShadow: signupStatus === 'success' ? '0 0 20px rgba(16, 185, 129, 0.3)' : '0 0 20px rgba(0, 71, 255, 0.25)',
+                  opacity: signupStatus === 'loading' ? 0.7 : 1,
+                  transition: 'background 0.3s ease, box-shadow 0.3s ease',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {signupStatus === 'loading' ? 'JOINING...' : signupStatus === 'success' ? 'JOINED!' : 'JOIN WAITLIST'}
+              </motion.button>
+            </div>
+
+            {/* Status Message */}
+            {signupMessage && (
+              <p
+                style={{
+                  fontFamily: "'VCR OSD Mono', monospace",
+                  fontSize: '12px',
+                  color: signupStatus === 'success' ? '#10B981' : '#EF4444',
+                  letterSpacing: '0.05em',
+                  margin: 0,
+                }}
+              >
+                {signupMessage}
+              </p>
+            )}
+          </form>
+
+          {/* Signup Count */}
+          {signupCount > 0 && (
+            <p
+              style={{
+                fontFamily: "'VCR OSD Mono', monospace",
+                fontSize: '11px',
+                color: theme === 'dark' ? 'rgba(255, 255, 255, 0.4)' : 'rgba(0, 0, 0, 0.5)',
+                letterSpacing: '0.1em',
+                marginTop: '8px',
+              }}
+            >
+              {signupCount} {signupCount === 1 ? 'person has' : 'people have'} joined
+            </p>
+          )}
 
           <p
             style={{
@@ -1782,7 +2031,7 @@ export default function LandingPage() {
               color: theme === 'dark' ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0, 0, 0, 0.4)',
               letterSpacing: '0.2em',
               textTransform: 'uppercase',
-              marginTop: '16px',
+              marginTop: '24px',
             }}
           >
             One brand. Every channel. Always consistent.
@@ -1802,6 +2051,7 @@ export default function LandingPage() {
           height: 100%;
           width: 100%;
           top: 0;
+          z-index: 5;
           left: 0;
           right: 0;
           bottom: 0;
@@ -1928,8 +2178,8 @@ export default function LandingPage() {
 
         /* Phase card visible state - smooth ease-out curve */
         .phase-card-reveal.visible {
-          animation: phaseDropIn 0.7s cubic-bezier(0.33, 1, 0.68, 1) forwards,
-                     phaseGlowPulse 1.2s ease-out 0.3s forwards;
+          animation: phaseDropIn 0.5s cubic-bezier(0.33, 1, 0.68, 1) forwards,
+                     phaseGlowPulse 0.8s ease-out 0.2s forwards;
           opacity: 1;
         }
         

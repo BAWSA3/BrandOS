@@ -28,7 +28,7 @@ export default function Landing({ onEnter }: LandingProps) {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background relative overflow-hidden">
+    <div className="min-h-screen bg-background relative">
       {/* Layered backgrounds */}
       <PixelatedBackground />
 

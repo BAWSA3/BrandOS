@@ -110,3 +110,13 @@ model HistoryEntry {
   @@index([createdAt])
 }
 
+// Newsletter signup for early access
+model EmailSignup {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  source    String   @default("landing") // where they signed up from
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}
+
