@@ -40,6 +40,8 @@ import {
 
 // Re-export all types for convenience
 export * from './types';
+export * from './chat.types';
+export * from './conductor';
 
 // Re-export individual agent functions for direct use
 export {
