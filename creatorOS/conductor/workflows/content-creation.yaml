@@ -1,0 +1,66 @@
+# Content Creation Workflow
+# Produces publish-ready content from briefs or direct requests
+
+name: Content Creation
+description: >
+  Takes a content brief (from campaign agent or direct request) and produces
+  finished, platform-optimized content ready for publishing.
+
+trigger:
+  intent: content
+  patterns:
+    - "write a..."
+    - "create a post..."
+    - "draft an email..."
+    - "blog post about..."
+    - "thread about..."
+    - "script for..."
+
+# Agent sequence
+agents:
+  - name: campaign
+    purpose: Ensure content aligns with broader strategy (if exists)
+    required: false
+    parallel: false
+    condition: "content is part of an active campaign"
+    
+  - name: trends
+    purpose: Check for relevant formats or cultural moments
+    required: false
+    parallel: true
+    condition: "content is social media or time-sensitive"
+    
+  - name: content
+    purpose: Create the actual content
+    required: true
+    parallel: false
+    
+  - name: review
+    purpose: Quality check before publishing
+    required: false
+    parallel: false
+    condition: "high-stakes content (launch announcements, executive comms)"
+
+# Human approval checkpoints
+checkpoints:
+  - after: content
+    message: "Content ready. Review before publishing?"
+    required: true
+
+# Output
+output:
+  format: markdown
+  sections:
+    - content_piece
+    - posting_notes
+    - variations
+
+# Workflow metadata
+metadata:
+  tier: strategic
+  estimated_duration: "5-15 minutes"
+  human_interaction: "1 checkpoint"
+  artifacts:
+    - type: content
+      format: platform-native
+

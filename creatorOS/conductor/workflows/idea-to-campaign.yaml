@@ -1,0 +1,115 @@
+# Idea to Campaign Workflow
+# Transforms raw ideas into actionable marketing and content strategy plans
+
+name: Idea to Campaign
+description: >
+  Takes a marketing idea, content concept, or launch initiative and produces
+  a structured campaign plan with deliverables, timelines, and success metrics.
+
+trigger:
+  intent: campaign
+  patterns:
+    - "marketing campaign for..."
+    - "content strategy for..."
+    - "how should we promote..."
+    - "launch plan for..."
+    - "I want to market..."
+    - "create a campaign..."
+    - "content calendar for..."
+    - "go-to-market for..."
+
+# Agent sequence with dependencies
+agents:
+  - name: vision
+    purpose: Validate alignment with product roadmap and priorities
+    required: true
+    parallel: false
+    
+  - name: compete
+    purpose: Analyze competitor marketing approaches
+    required: false
+    parallel: true
+    condition: "idea involves differentiation or competitive positioning"
+    
+  - name: trends
+    purpose: Identify relevant content/design trends to incorporate
+    required: false
+    parallel: true
+    condition: "idea involves visual content or current cultural moments"
+    
+  - name: campaign
+    purpose: Transform validated idea into actionable campaign plan
+    required: true
+    parallel: false
+    depends_on: [vision]
+    optional_inputs: [compete, trends]
+    
+  - name: scope
+    purpose: Break campaign deliverables into actionable tasks
+    required: true
+    parallel: false
+    depends_on: [campaign]
+    
+  - name: document
+    purpose: Create campaign brief for team reference
+    required: false
+    parallel: false
+    depends_on: [scope]
+    condition: "campaign spans multiple weeks or involves team coordination"
+
+# Human approval checkpoints
+checkpoints:
+  - after: vision
+    message: "Campaign aligns with priorities. Proceed with planning?"
+    skip_if_confidence: 0.9
+    
+  - after: campaign
+    message: "Campaign plan ready. Review before creating tasks?"
+    required: true
+    
+  - after: scope
+    message: "Task breakdown complete. Ready to start execution?"
+    required: true
+
+# Output aggregation
+output:
+  format: markdown
+  sections:
+    - executive_summary
+    - campaign_plan
+    - content_calendar
+    - deliverables_checklist
+    - task_breakdown
+    - success_metrics
+    - next_steps
+
+# Workflow metadata
+metadata:
+  tier: strategic
+  estimated_duration: "15-30 minutes"
+  human_interaction: "2-3 checkpoints"
+  artifacts:
+    - type: campaign-plan
+      format: markdown
+    - type: content-calendar
+      format: table
+    - type: task-list
+      format: checklist
+
+# Error handling
+on_error:
+  low_confidence:
+    action: ask_clarification
+    message: "I need more context to create an effective campaign. Could you clarify..."
+    
+  missing_context:
+    action: request_minimum
+    required_fields:
+      - idea_description
+      - target_audience
+      - rough_timeline
+      
+  blocked:
+    action: suggest_alternatives
+    message: "I can't proceed with the full workflow, but I can help with..."
+

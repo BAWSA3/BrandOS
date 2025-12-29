@@ -1,0 +1,97 @@
+# Campaign Analytics Workflow
+# Analyzes campaign performance and generates actionable insights
+
+name: Campaign Analytics
+description: >
+  Reviews campaign performance data and produces analysis reports with
+  clear recommendations for optimization or future strategy.
+
+trigger:
+  intent: analytics
+  patterns:
+    - "how did the campaign perform..."
+    - "analyze the results..."
+    - "performance report for..."
+    - "what's working..."
+    - "are we on track..."
+
+# Agent sequence
+agents:
+  - name: analytics
+    purpose: Analyze metrics and produce insights
+    required: true
+    parallel: false
+    
+  - name: campaign
+    purpose: Incorporate insights into updated strategy
+    required: false
+    parallel: false
+    condition: "analytics reveals significant optimization opportunities"
+    
+  - name: content
+    purpose: Create optimized content based on learnings
+    required: false
+    parallel: false
+    condition: "analytics recommends specific content changes"
+    
+  - name: document
+    purpose: Record learnings for future reference
+    required: false
+    parallel: false
+    condition: "end-of-campaign analysis"
+
+# Human approval checkpoints
+checkpoints:
+  - after: analytics
+    message: "Analysis complete. Review findings?"
+    required: true
+    
+  - after: campaign
+    message: "Strategy updates proposed. Approve changes?"
+    required: true
+    condition: "campaign agent was invoked"
+
+# Analysis types
+analysis_types:
+  quick_check:
+    description: "Fast health check during active campaign"
+    agents: [analytics]
+    depth: shallow
+    
+  mid_campaign:
+    description: "Detailed analysis at campaign midpoint"
+    agents: [analytics, campaign]
+    depth: medium
+    
+  post_campaign:
+    description: "Comprehensive review after campaign ends"
+    agents: [analytics, campaign, document]
+    depth: deep
+    
+  ab_test:
+    description: "Analysis of specific A/B test results"
+    agents: [analytics, content]
+    depth: focused
+
+# Output
+output:
+  format: markdown
+  sections:
+    - executive_summary
+    - goal_achievement
+    - channel_performance
+    - content_analysis
+    - recommendations
+    - next_steps
+
+# Workflow metadata
+metadata:
+  tier: strategic
+  estimated_duration: "10-30 minutes"
+  human_interaction: "1-2 checkpoints"
+  artifacts:
+    - type: analysis-report
+      format: markdown
+    - type: recommendations
+      format: action-list
+
