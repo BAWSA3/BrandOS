@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>brandos</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>brandos</h1>
+      <p class="subtitle">Brand Guardian</p>
+    </header>
+
+    <div id="setup-view" class="view">
+      <p class="info">Configure your brandos server URL and API key to get started.</p>
+      
+      <div class="input-group">
+        <label for="server-url">Server URL</label>
+        <input type="url" id="server-url" placeholder="http://localhost:3000">
+      </div>
+
+      <div class="input-group">
+        <label for="api-key">API Key</label>
+        <input type="password" id="api-key" placeholder="Your brandos API key">
+      </div>
+
+      <button id="save-settings" class="primary-btn">Save Settings</button>
+    </div>
+
+    <div id="main-view" class="view hidden">
+      <div class="brand-selector">
+        <label>Current Brand</label>
+        <select id="brand-select">
+          <option value="">Select a brand...</option>
+        </select>
+      </div>
+
+      <div class="content-input">
+        <label>Content to Check</label>
+        <textarea id="content-input" placeholder="Paste or type content to check..."></textarea>
+        <button id="get-selection" class="secondary-btn">Get Selected Text</button>
+      </div>
+
+      <button id="check-btn" class="primary-btn">Check Content</button>
+
+      <div id="result" class="result hidden">
+        <div class="score-display">
+          <div class="score-ring">
+            <svg viewBox="0 0 100 100">
+              <circle class="bg" cx="50" cy="50" r="45"/>
+              <circle class="progress" cx="50" cy="50" r="45" id="score-circle"/>
+            </svg>
+            <span id="score-value">0</span>
+          </div>
+          <span id="score-label">Analyzing...</span>
+        </div>
+        
+        <div id="feedback" class="feedback"></div>
+        
+        <div id="revised" class="revised hidden">
+          <label>Suggested Revision</label>
+          <p id="revised-text"></p>
+          <button id="copy-revised" class="secondary-btn">Copy</button>
+        </div>
+      </div>
+
+      <button id="settings-btn" class="link-btn">Settings</button>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
+

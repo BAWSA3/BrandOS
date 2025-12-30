@@ -1,0 +1,27 @@
+/* Styles for brandos inline elements (if needed in the future) */
+
+.brandos-highlight {
+  background: rgba(99, 102, 241, 0.2);
+  border-bottom: 2px solid #6366f1;
+}
+
+.brandos-tooltip {
+  position: absolute;
+  background: #1d1d1f;
+  color: #ffffff;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+  max-width: 300px;
+  z-index: 999999;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+@media (prefers-color-scheme: dark) {
+  .brandos-tooltip {
+    background: #f5f5f7;
+    color: #1d1d1f;
+  }
+}
+

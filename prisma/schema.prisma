@@ -1,0 +1,122 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  brands       Brand[]
+  teamMembers  TeamMember[]
+  sharedBrands SharedBrand[]
+}
+
+model Brand {
+  id        String   @id @default(cuid())
+  name      String
+  colors    String   // JSON string
+  tone      String   // JSON string
+  keywords  String   // JSON array string
+  doPatterns String  // JSON array string
+  dontPatterns String // JSON array string
+  voiceSamples String // JSON array string
+  isPublic  Boolean  @default(false)
+  shareToken String? @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Owner
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Team access
+  team      Team?    @relation(fields: [teamId], references: [id])
+  teamId    String?
+
+  // Shared access
+  sharedWith SharedBrand[]
+  
+  // History
+  history   HistoryEntry[]
+
+  @@index([userId])
+  @@index([teamId])
+  @@index([shareToken])
+}
+
+model Team {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  members   TeamMember[]
+  brands    Brand[]
+}
+
+model TeamMember {
+  id        String   @id @default(cuid())
+  role      String   @default("member") // "owner", "admin", "member", "viewer"
+  createdAt DateTime @default(now())
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  teamId    String
+  team      Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, teamId])
+  @@index([teamId])
+}
+
+model SharedBrand {
+  id         String   @id @default(cuid())
+  permission String   @default("view") // "view", "edit"
+  createdAt  DateTime @default(now())
+
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  brandId    String
+  brand      Brand    @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, brandId])
+  @@index([brandId])
+}
+
+model HistoryEntry {
+  id          String   @id @default(cuid())
+  type        String   // "check" or "generate"
+  input       String
+  output      String   // JSON string
+  contentType String?
+  score       Int?
+  createdAt   DateTime @default(now())
+
+  brandId     String
+  brand       Brand    @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  @@index([brandId])
+  @@index([createdAt])
+}
+
+// Newsletter signup for early access
+model EmailSignup {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  source    String   @default("landing") // where they signed up from
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}
+

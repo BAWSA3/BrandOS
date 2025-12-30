@@ -1,0 +1,966 @@
+@import "tailwindcss";
+
+/* ============================================
+   CUSTOM FONT FACES
+   ============================================ */
+@font-face {
+  font-family: 'Helvetica Custom';
+  src: url('/fonts/Helvetica.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Helvetica Custom';
+  src: url('/fonts/Helvetica-BoldOblique.ttf') format('truetype');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'PP Mondwest';
+  src: url('/fonts/PPMondwest-Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'VCR OSD Mono';
+  src: url('/fonts/VCR_OSD_MONO_1.001.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'PP NeueBit';
+  src: url('/fonts/PPNeueBit-Bold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ============================================
+   NEW DESIGN SYSTEM - GLASSMORPHIC BLUE
+   ============================================ */
+
+:root {
+  /* Primary Blue Palette - International Klein Blue inspired */
+  --blue-klein: #002FA7;
+  --blue-electric: #0047FF;
+  --blue-deep: #001847;
+  --blue-glow: rgba(0, 71, 255, 0.4);
+  --blue-subtle: rgba(0, 71, 255, 0.1);
+  --blue-hover: #0038CC;
+
+  /* Dark Theme (Primary) */
+  --background: #0a0a0a;
+  --foreground: #ffffff;
+  --muted: rgba(255, 255, 255, 0.5);
+  --border: rgba(255, 255, 255, 0.1);
+  --surface: rgba(255, 255, 255, 0.05);
+  --accent: var(--blue-electric);
+
+  /* Glass Effects */
+  --glass-bg: rgba(255, 255, 255, 0.05);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-hover: rgba(255, 255, 255, 0.08);
+
+  /* Gradients */
+  --gradient-hero: linear-gradient(135deg, #0a0a0a 0%, rgba(0, 71, 255, 0.3) 50%, #0a0a0a 100%);
+  --gradient-card: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
+  --gradient-orb: radial-gradient(circle, var(--blue-electric) 0%, transparent 70%);
+  --gradient-text: linear-gradient(135deg, #ffffff 0%, #0047FF 50%, #ffffff 100%);
+
+  /* Design Tokens */
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
+  --radius-pill: 9999px;
+  
+  --transition-fast: 150ms ease-out;
+  --transition-medium: 300ms ease-out;
+  --transition-slow: 500ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Shadows & Glows */
+  --glow-sm: 0 0 20px rgba(0, 71, 255, 0.2);
+  --glow-md: 0 0 40px rgba(0, 71, 255, 0.3);
+  --glow-lg: 0 0 80px rgba(0, 71, 255, 0.4);
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.3);
+}
+
+/* Light theme override */
+[data-theme="light"] {
+  --background: #f5f5f7;
+  --foreground: #0a0a0a;
+  --muted: rgba(0, 0, 0, 0.5);
+  --border: rgba(0, 0, 0, 0.1);
+  --surface: rgba(0, 0, 0, 0.03);
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(0, 0, 0, 0.1);
+  --glass-hover: rgba(255, 255, 255, 0.9);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-surface: var(--surface);
+  --color-accent: var(--accent);
+}
+
+/* ============================================
+   BASE STYLES
+   ============================================ */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#__next {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: var(--background);
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  color: var(--foreground);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ============================================
+   GLASSMORPHIC COMPONENTS
+   ============================================ */
+
+/* Glass Card - Primary component */
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  transition: all var(--transition-medium);
+}
+
+.glass-card:hover {
+  background: var(--glass-hover);
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: var(--glow-sm);
+}
+
+/* Glass Card with Blue Glow */
+.glass-card-glow {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 0 0 1px rgba(0, 71, 255, 0.1);
+  transition: all var(--transition-medium);
+}
+
+.glass-card-glow:hover {
+  border-color: rgba(0, 71, 255, 0.3);
+  box-shadow: var(--glow-md);
+}
+
+/* Glass Surface */
+.glass-surface {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* ============================================
+   BLUE ORB ANIMATIONS
+   ============================================ */
+
+@keyframes orbPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.8;
+  }
+}
+
+@keyframes orbDrift {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  25% {
+    transform: translate(10px, -10px) rotate(2deg);
+  }
+  50% {
+    transform: translate(0, -20px) rotate(0deg);
+  }
+  75% {
+    transform: translate(-10px, -10px) rotate(-2deg);
+  }
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+}
+
+@keyframes orbGlow {
+  0%, 100% {
+    filter: blur(80px);
+    opacity: 0.5;
+  }
+  50% {
+    filter: blur(100px);
+    opacity: 0.7;
+  }
+}
+
+/* Blue Orb - Hero Element */
+.blue-orb {
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, var(--blue-electric) 0%, rgba(0, 71, 255, 0.5) 30%, transparent 70%);
+  border-radius: 50%;
+  filter: blur(80px);
+  animation: orbPulse 4s ease-in-out infinite, orbDrift 20s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.blue-orb-sm {
+  width: 200px;
+  height: 200px;
+}
+
+.blue-orb-lg {
+  width: 800px;
+  height: 800px;
+}
+
+/* Secondary Orb */
+.blue-orb-secondary {
+  background: radial-gradient(circle, rgba(0, 71, 255, 0.3) 0%, transparent 60%);
+  animation-delay: -2s;
+  animation-duration: 5s, 25s;
+}
+
+/* ============================================
+   NUMBERED PILLS NAVIGATION
+   ============================================ */
+
+.pill-nav {
+  display: flex;
+  gap: 8px;
+}
+
+.pill-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 20px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.pill-item:hover {
+  background: var(--glass-hover);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.pill-item.active {
+  background: var(--blue-electric);
+  border-color: var(--blue-electric);
+  box-shadow: var(--glow-sm);
+}
+
+.pill-number {
+  font-family: 'VCR OSD Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  opacity: 0.6;
+}
+
+.pill-item.active .pill-number {
+  opacity: 1;
+}
+
+.pill-label {
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ============================================
+   SECTION HEADERS WITH ARROWS
+   ============================================ */
+
+.section-header-line {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.section-title {
+  font-family: 'PP Mondwest', sans-serif;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--muted);
+}
+
+.section-arrow {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--border) 0%, transparent 100%);
+}
+
+.section-arrow::after {
+  content: '→';
+  position: relative;
+  left: calc(100% - 20px);
+  color: var(--muted);
+}
+
+/* ============================================
+   TYPOGRAPHY
+   ============================================ */
+
+.font-helvetica {
+  font-family: 'Helvetica Custom', "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.font-pixel {
+  font-family: 'PP Mondwest', monospace;
+}
+
+.font-mono {
+  font-family: 'VCR OSD Mono', monospace;
+}
+
+/* Headline - Bold condensed */
+.headline-xl {
+  font-size: clamp(3rem, 8vw, 6rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 0.95;
+}
+
+.headline-lg {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.headline-md {
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+}
+
+/* Body text */
+.text-light {
+  font-weight: 300;
+  color: var(--muted);
+}
+
+/* Labels */
+.label-mono {
+  font-family: 'VCR OSD Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+/* Gradient text effect */
+.gradient-text {
+  background: var(--gradient-text);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradientShift 6s ease-in-out infinite;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% center; }
+  50% { background-position: 100% center; }
+  100% { background-position: 0% center; }
+}
+
+/* ============================================
+   ENTROPY TO ORDER ANIMATION
+   ============================================ */
+
+/* Individual character styling for chaos animation */
+.brand-char-entropy {
+  display: inline-block;
+  will-change: transform;
+}
+
+/* Snap glow pulse animation */
+@keyframes snapGlow {
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.4;
+    filter: blur(0);
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.snap-glow-active {
+  animation: snapGlow 0.3s ease-out forwards;
+}
+
+/* OS chaos initial state helper */
+.os-chaos {
+  will-change: transform, opacity;
+}
+
+/* Pinned hero section styling during scroll */
+.hero-pinned {
+  will-change: transform;
+}
+
+/* ============================================
+   BUTTONS
+   ============================================ */
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 28px;
+  background: var(--blue-electric);
+  color: white;
+  font-weight: 500;
+  font-size: 14px;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-primary:hover {
+  background: var(--blue-hover);
+  box-shadow: var(--glow-sm);
+  transform: translateY(-1px);
+}
+
+.btn-glass {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 28px;
+  background: var(--glass-bg);
+  color: var(--foreground);
+  font-weight: 500;
+  font-size: 14px;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  backdrop-filter: blur(12px);
+  transition: all var(--transition-fast);
+}
+
+.btn-glass:hover {
+  background: var(--glass-hover);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.btn-pill {
+  padding: 10px 24px;
+  border-radius: var(--radius-pill);
+}
+
+/* ============================================
+   BENTO GRID LAYOUT
+   ============================================ */
+
+.bento-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 16px;
+  padding: 16px;
+}
+
+.bento-item {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: all var(--transition-medium);
+}
+
+.bento-item:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-card), var(--glow-sm);
+}
+
+/* Bento sizing classes */
+.bento-sm { grid-column: span 3; }
+.bento-md { grid-column: span 4; }
+.bento-lg { grid-column: span 6; }
+.bento-xl { grid-column: span 8; }
+.bento-full { grid-column: span 12; }
+.bento-tall { grid-row: span 2; }
+
+@media (max-width: 1024px) {
+  .bento-sm { grid-column: span 6; }
+  .bento-md { grid-column: span 6; }
+  .bento-lg { grid-column: span 12; }
+  .bento-xl { grid-column: span 12; }
+}
+
+@media (max-width: 640px) {
+  .bento-grid {
+    grid-template-columns: 1fr;
+  }
+  .bento-sm, .bento-md, .bento-lg, .bento-xl, .bento-full {
+    grid-column: span 1;
+  }
+}
+
+/* ============================================
+   PAGE ANIMATIONS
+   ============================================ */
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.5s ease-out forwards;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+.animate-slide-in {
+  animation: slideInRight 0.4s ease-out forwards;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.3s ease-out forwards;
+}
+
+/* Staggered animation delays */
+.delay-100 { animation-delay: 100ms; }
+.delay-200 { animation-delay: 200ms; }
+.delay-300 { animation-delay: 300ms; }
+.delay-400 { animation-delay: 400ms; }
+.delay-500 { animation-delay: 500ms; }
+
+/* ============================================
+   SCROLLBAR
+   ============================================ */
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--muted);
+}
+
+/* Hide scrollbar for nav */
+.nav-scroll {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.nav-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* ============================================
+   FORM ELEMENTS
+   ============================================ */
+
+input, textarea, select {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  color: var(--foreground);
+  font-size: 14px;
+  transition: all var(--transition-fast);
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: var(--blue-electric);
+  box-shadow: 0 0 0 3px var(--blue-subtle);
+}
+
+input::placeholder, textarea::placeholder {
+  color: var(--muted);
+}
+
+/* Range slider */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+  width: 100%;
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+  background: var(--border);
+  height: 4px;
+  border-radius: 2px;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  margin-top: -6px;
+  background: var(--blue-electric);
+  height: 16px;
+  width: 16px;
+  border-radius: 50%;
+  box-shadow: 0 0 10px var(--blue-glow);
+  transition: transform 0.15s ease;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
+}
+
+/* ============================================
+   UTILITY CLASSES
+   ============================================ */
+
+/* Selection */
+::selection {
+  background: var(--blue-electric);
+  color: white;
+}
+
+/* Focus visible */
+:focus-visible {
+  outline: 2px solid var(--blue-electric);
+  outline-offset: 2px;
+}
+
+/* Noise texture overlay - disabled to prevent white box issues */
+.noise-overlay {
+  display: none;
+}
+
+/* Screen reader only */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* ============================================
+   BRANDOS SPECIFIC COMPONENTS
+   ============================================ */
+
+/* BrandOS Logo */
+.brandos-logo {
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+}
+
+.brandos-logo .brand {
+  font-family: 'Helvetica Custom', sans-serif;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
+
+.brandos-logo .os {
+  font-family: 'PP Mondwest', monospace;
+  color: var(--blue-electric);
+}
+
+/* Progress ring */
+.progress-ring {
+  transform: rotate(-90deg);
+}
+
+.progress-ring-bg {
+  stroke: var(--border);
+}
+
+.progress-ring-fill {
+  stroke: var(--blue-electric);
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.5s ease-out;
+}
+
+/* Status indicators */
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--blue-electric);
+  box-shadow: 0 0 8px var(--blue-glow);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Tag/Badge */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.tag-blue {
+  background: var(--blue-subtle);
+  border-color: rgba(0, 71, 255, 0.2);
+  color: var(--blue-electric);
+}
+
+/* Divider */
+.divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border), transparent);
+}
+
+/* Code blocks */
+pre, code {
+  font-family: 'VCR OSD Mono', 'SF Mono', Consolas, monospace;
+  font-size: 12px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: var(--radius-sm);
+}
+
+pre {
+  padding: 16px;
+  overflow-x: auto;
+}
+
+code {
+  padding: 2px 6px;
+}
+
+/* ============================================
+   LEGACY SUPPORT (keeping old classes working)
+   ============================================ */
+
+.bg-background { background-color: var(--background); }
+.bg-surface { background-color: var(--surface); }
+.bg-foreground { background-color: var(--foreground); }
+.text-foreground { color: var(--foreground); }
+.text-muted { color: var(--muted); }
+.text-background { color: var(--background); }
+.border-border { border-color: var(--border); }
+.border-foreground { border-color: var(--foreground); }
+
+/* Legacy glass class */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+}
+
+/* VCR label */
+.vcr-label {
+  font-family: 'VCR OSD Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* Phase badge */
+.phase-badge {
+  font-family: 'VCR OSD Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--blue-electric);
+  background: var(--blue-subtle);
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+/* Brand blue CTA button */
+.btn-brand {
+  font-family: 'VCR OSD Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #FFFFFF;
+  background: var(--blue-electric);
+  border: none;
+  padding: 16px 48px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.btn-brand:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--glow-md);
+}
+
+/* Section header */
+.section-header {
+  text-align: center;
+  padding: 64px 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.section-header h2 {
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 300;
+  letter-spacing: -0.02em;
+  margin-bottom: 16px;
+}
+
+.section-header p {
+  color: var(--muted);
+  font-size: 1.125rem;
+  max-width: 28rem;
+  margin: 0 auto;
+}
+
+/* BrandOS Logo shimmer effect - Blue theme */
+.os-shimmer {
+  background: linear-gradient(90deg, #0047FF 0%, #4477FF 25%, #0047FF 50%, #4477FF 75%, #0047FF 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+  animation: shimmer 3s linear infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Tab content animation */
+.tab-content {
+  animation: fadeInUp 0.3s ease-out;
+}
+
+/* Asset card */
+.asset-card {
+  transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
+}
+
+.asset-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-card);
+}
+
+/* Dropzone */
+.dropzone {
+  border: 2px dashed var(--border);
+  transition: border-color 0.2s ease-out, background-color 0.2s ease-out;
+}
+
+.dropzone:hover,
+.dropzone.dragover {
+  border-color: var(--blue-electric);
+  background-color: var(--blue-subtle);
+}
+
+/* Print styles */
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+  }
+}
