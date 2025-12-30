@@ -36,6 +36,14 @@ yarn-error.log*
 # vercel
 .vercel
 
+# IDE and tool configs
+.claude/
+.cursor/
+.playwright-mcp/
+
+# Separate projects
+relique/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
