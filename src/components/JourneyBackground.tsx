@@ -12,110 +12,8 @@ interface JourneyBackgroundProps {
   theme: string;
 }
 
-interface OrbPosition {
-  x: string;
-  y: string;
-}
+export type ParticleAnimationPhase = 'floating' | 'converging' | 'collapsed' | 'dispersing';
 
-// ============================================================================
-// Configuration
-// ============================================================================
-const orbPositions: OrbPosition[] = [
-  { x: '5%', y: '15%' },    // Top-left corner - pushed to edge
-  { x: '95%', y: '10%' },   // Top-right corner - pushed to edge
-  { x: '0%', y: '85%' },    // Bottom-left corner - pushed to edge
-  { x: '90%', y: '90%' },   // Bottom-right corner - pushed to edge
-];
-
-// ============================================================================
-// Reactive Orb Component - DRAMATIC MODE
-// ============================================================================
-function ReactiveOrb({
-  index,
-  progress,
-  theme,
-  position,
-}: {
-  index: number;
-  progress: number;
-  theme: string;
-  position: OrbPosition;
-}) {
-  // Orb appears based on progress threshold
-  const threshold = index * 0.2; // Orbs appear faster (0%, 20%, 40%, 60%)
-  const isVisible = progress >= threshold;
-
-  // DRAMATIC reactive properties
-  const localScale = 1 + (progress * 0.8);           // 1 → 1.8 (80% growth!)
-  const localOpacity = 0.4 + (progress * 0.6);       // 0.4 → 1.0 (full intensity)
-  const duration = Math.max(2, 6 - (progress * 4));  // 6s → 2s (much faster)
-  const blurAmount = 60 - (progress * 30);           // 60px → 30px (much sharper)
-  const gradientStop = 25 + (progress * 30);         // 25% → 55% (solid core)
-  const orbSize = 400 + (progress * 200);            // 400px → 600px (grows!)
-
-  // Movement amplitude increases with progress
-  const moveAmplitude = 20 + (progress * 30);        // 20px → 50px drift
-
-  const staggerDelay = index * 0.1;
-
-  if (!isVisible) return null;
-
-  return (
-    <motion.div
-      key={`orb-${index}`}
-      initial={{ scale: 0, opacity: 0 }}
-      animate={{
-        scale: [localScale, localScale * 1.15, localScale * 0.95, localScale],
-        opacity: localOpacity,
-      }}
-      exit={{ scale: 0, opacity: 0 }}
-      transition={{
-        scale: {
-          duration: duration,
-          repeat: Infinity,
-          ease: "easeInOut",
-          delay: staggerDelay,
-        },
-        opacity: {
-          duration: 0.4,
-          ease: "easeOut",
-        },
-      }}
-      style={{
-        position: 'absolute',
-        left: position.x,
-        top: position.y,
-        width: `${orbSize}px`,
-        height: `${orbSize}px`,
-        borderRadius: '50%',
-        background: `radial-gradient(circle, rgba(0, 71, 255, ${0.7 + progress * 0.3}) ${gradientStop}%, rgba(0, 47, 167, ${0.3 + progress * 0.3}) 60%, transparent 75%)`,
-        filter: `blur(${blurAmount}px)`,
-        transform: 'translate(-50%, -50%)',
-        willChange: 'transform, opacity',
-        pointerEvents: 'none',
-        boxShadow: progress > 0.5 ? `0 0 ${80 + progress * 60}px rgba(0, 71, 255, ${0.3 + progress * 0.4})` : 'none',
-      }}
-    >
-      {/* Inner floating motion - more dramatic movement */}
-      <motion.div
-        animate={{
-          x: [0, moveAmplitude, 0, -moveAmplitude, 0],
-          y: [0, -moveAmplitude * 1.2, 0, moveAmplitude * 1.2, 0],
-          rotate: [0, 5, 0, -5, 0],
-        }}
-        transition={{
-          x: { duration: duration * 1.3, repeat: Infinity, ease: "easeInOut", delay: staggerDelay },
-          y: { duration: duration * 1.1, repeat: Infinity, ease: "easeInOut", delay: staggerDelay + 0.3 },
-          rotate: { duration: duration * 2, repeat: Infinity, ease: "easeInOut" },
-        }}
-        style={{
-          width: '100%',
-          height: '100%',
-        }}
-      />
-    </motion.div>
-  );
-}
 
 // ============================================================================
 // Phase Pulse Component - DRAMATIC MODE
@@ -196,25 +94,146 @@ function PhasePulse({
 }
 
 // ============================================================================
-// COMPLETION ANIMATION 1: Ripple Wave
+// PROGRESSIVE PARTICLES - Unified particle system that evolves with progress
 // ============================================================================
-function RippleWave({ isActive, theme }: { isActive: boolean; theme: string }) {
-  if (!isActive) return null;
+interface ParticleData {
+  id: number;
+  initialX: number;
+  initialY: number;
+  size: number;
+  speedMultiplier: number;
+  phaseOffset: number;
+}
+
+// Generate stable particle data once
+const generateParticles = (count: number): ParticleData[] => {
+  return Array.from({ length: count }, (_, i) => ({
+    id: i,
+    initialX: Math.random() * 100,
+    initialY: Math.random() * 100,
+    size: 0.7 + Math.random() * 0.6, // 0.7 to 1.3 multiplier for organic feel
+    speedMultiplier: 0.8 + Math.random() * 0.4,
+    phaseOffset: Math.random() * Math.PI * 2,
+  }));
+};
+
+const PARTICLE_DATA = generateParticles(50);
+
+function ProgressiveParticles({
+  progress,
+  theme,
+  isComplete,
+  animationPhase,
+}: {
+  progress: number;
+  theme: string;
+  isComplete: boolean;
+  animationPhase: 'floating' | 'converging' | 'collapsed' | 'dispersing';
+}) {
+  // Scale properties with progress
+  const baseSize = 2 + progress * 6;           // 2px → 8px
+  const baseOpacity = 0.3 + progress * 0.5;    // 0.3 → 0.8
+  const glowIntensity = 5 + progress * 20;     // 5px → 25px glow
+  const driftSpeed = 3 + progress * 4;         // Animation duration: 3s → 7s (faster = shorter)
+
+  // Converge factor for 90%+ progress
+  const convergeFactor = progress > 0.9 ? (progress - 0.9) / 0.1 : 0; // 0 → 1 as progress goes 90% → 100%
 
   return (
     <>
-      {[0, 1, 2, 3, 4].map((i) => (
+      {PARTICLE_DATA.map((particle) => {
+        const particleSize = baseSize * particle.size;
+        const duration = (8 - driftSpeed) * particle.speedMultiplier;
+
+        // Calculate position based on animation phase
+        let targetX = particle.initialX;
+        let targetY = particle.initialY;
+
+        if (animationPhase === 'converging' || convergeFactor > 0) {
+          // Lerp toward center (50%, 50%)
+          const factor = animationPhase === 'converging' ? 1 : convergeFactor;
+          targetX = particle.initialX + (50 - particle.initialX) * factor * 0.8;
+          targetY = particle.initialY + (50 - particle.initialY) * factor * 0.8;
+        }
+
+        if (animationPhase === 'collapsed') {
+          targetX = 50;
+          targetY = 50;
+        }
+
+        if (animationPhase === 'dispersing') {
+          // Explode outward from center
+          const angle = (particle.id / PARTICLE_DATA.length) * Math.PI * 2 + particle.phaseOffset;
+          targetX = 50 + Math.cos(angle) * 80;
+          targetY = 50 + Math.sin(angle) * 80;
+        }
+
+        return (
+          <motion.div
+            key={`progressive-particle-${particle.id}`}
+            initial={{
+              left: `${particle.initialX}%`,
+              top: `${particle.initialY}%`,
+              opacity: 0,
+              scale: 0,
+            }}
+            animate={{
+              left: animationPhase === 'floating'
+                ? [
+                    `${targetX}%`,
+                    `${targetX + (Math.sin(particle.phaseOffset) * 8 * (1 - convergeFactor))}%`,
+                    `${targetX + (Math.cos(particle.phaseOffset) * 6 * (1 - convergeFactor))}%`,
+                    `${targetX}%`,
+                  ]
+                : `${targetX}%`,
+              top: animationPhase === 'floating'
+                ? [
+                    `${targetY}%`,
+                    `${targetY + (Math.cos(particle.phaseOffset) * 8 * (1 - convergeFactor))}%`,
+                    `${targetY + (Math.sin(particle.phaseOffset) * 6 * (1 - convergeFactor))}%`,
+                    `${targetY}%`,
+                  ]
+                : `${targetY}%`,
+              opacity: animationPhase === 'dispersing' ? [baseOpacity, 0] : baseOpacity,
+              scale: animationPhase === 'dispersing' ? [1, 2] : 1,
+            }}
+            transition={{
+              left: animationPhase === 'floating'
+                ? { duration: duration, repeat: Infinity, ease: "easeInOut" }
+                : { duration: animationPhase === 'dispersing' ? 0.8 : 0.5, ease: "easeOut" },
+              top: animationPhase === 'floating'
+                ? { duration: duration * 1.1, repeat: Infinity, ease: "easeInOut" }
+                : { duration: animationPhase === 'dispersing' ? 0.8 : 0.5, ease: "easeOut" },
+              opacity: { duration: animationPhase === 'dispersing' ? 0.8 : 0.5 },
+              scale: { duration: animationPhase === 'dispersing' ? 0.8 : 0.3 },
+            }}
+            style={{
+              position: 'absolute',
+              width: `${particleSize}px`,
+              height: `${particleSize}px`,
+              borderRadius: '50%',
+              background: `rgba(0, 71, 255, ${0.7 + progress * 0.3})`,
+              boxShadow: `
+                0 0 ${glowIntensity * particle.size}px rgba(0, 71, 255, ${0.4 + progress * 0.3}),
+                0 0 ${glowIntensity * particle.size * 2}px rgba(0, 71, 255, ${0.2 + progress * 0.2})
+              `,
+              transform: 'translate(-50%, -50%)',
+              pointerEvents: 'none',
+              filter: progress > 0.6 ? `blur(${(1 - particle.size) * 2}px)` : 'none',
+            }}
+          />
+        );
+      })}
+
+      {/* Central glow that appears as particles converge */}
+      {(animationPhase === 'converging' || animationPhase === 'collapsed' || convergeFactor > 0.5) && (
         <motion.div
-          key={`ripple-${i}`}
-          initial={{ scale: 0, opacity: 0.8 }}
-          animate={{ scale: 6, opacity: 0 }}
-          transition={{
-            duration: 2,
-            delay: i * 0.2,
-            ease: [0.25, 0.46, 0.45, 0.94],
-            repeat: Infinity,
-            repeatDelay: 0.5,
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{
+            scale: animationPhase === 'collapsed' ? 1.5 : 1,
+            opacity: animationPhase === 'collapsed' ? 1 : convergeFactor,
           }}
+          transition={{ duration: 0.3 }}
           style={{
             position: 'absolute',
             left: '50%',
@@ -222,228 +241,16 @@ function RippleWave({ isActive, theme }: { isActive: boolean; theme: string }) {
             width: '100px',
             height: '100px',
             borderRadius: '50%',
-            border: `2px solid rgba(0, 71, 255, ${0.6 - i * 0.1})`,
+            background: 'radial-gradient(circle, rgba(255, 255, 255, 0.9) 0%, rgba(0, 71, 255, 0.5) 40%, transparent 70%)',
             transform: 'translate(-50%, -50%)',
-            boxShadow: `0 0 ${30 - i * 5}px rgba(0, 71, 255, 0.4)`,
+            filter: 'blur(10px)',
             pointerEvents: 'none',
           }}
         />
-      ))}
-      {/* Central glow pulse */}
-      <motion.div
-        animate={{
-          scale: [1, 1.3, 1],
-          opacity: [0.6, 1, 0.6],
-        }}
-        transition={{
-          duration: 1.5,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
-        style={{
-          position: 'absolute',
-          left: '50%',
-          top: '50%',
-          width: '80px',
-          height: '80px',
-          borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(0, 71, 255, 0.8) 0%, rgba(0, 71, 255, 0.3) 50%, transparent 70%)',
-          transform: 'translate(-50%, -50%)',
-          filter: 'blur(10px)',
-          pointerEvents: 'none',
-        }}
-      />
+      )}
     </>
   );
 }
-
-// ============================================================================
-// COMPLETION ANIMATION 2: Aurora Effect
-// ============================================================================
-function AuroraEffect({ isActive, theme }: { isActive: boolean; theme: string }) {
-  if (!isActive) return null;
-
-  const auroraColors = [
-    'rgba(0, 71, 255, 0.4)',
-    'rgba(138, 43, 226, 0.35)',
-    'rgba(0, 191, 255, 0.3)',
-    'rgba(75, 0, 130, 0.25)',
-  ];
-
-  return (
-    <>
-      {auroraColors.map((color, i) => (
-        <motion.div
-          key={`aurora-${i}`}
-          animate={{
-            x: ['-20%', '20%', '-10%', '15%', '-20%'],
-            y: [`${-30 + i * 15}%`, `${-20 + i * 10}%`, `${-35 + i * 12}%`, `${-25 + i * 8}%`, `${-30 + i * 15}%`],
-            scaleX: [1, 1.3, 0.9, 1.2, 1],
-            opacity: [0.3, 0.6, 0.4, 0.7, 0.3],
-          }}
-          transition={{
-            duration: 8 + i * 2,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: i * 0.5,
-          }}
-          style={{
-            position: 'absolute',
-            left: '50%',
-            top: '50%',
-            width: '200%',
-            height: '40%',
-            background: `linear-gradient(180deg, transparent 0%, ${color} 50%, transparent 100%)`,
-            filter: 'blur(60px)',
-            transform: 'translate(-50%, -50%) rotate(-15deg)',
-            pointerEvents: 'none',
-            mixBlendMode: 'screen',
-          }}
-        />
-      ))}
-      {/* Shimmering particles */}
-      {[...Array(20)].map((_, i) => (
-        <motion.div
-          key={`shimmer-${i}`}
-          initial={{ opacity: 0 }}
-          animate={{
-            opacity: [0, 1, 0],
-            y: [0, -100],
-          }}
-          transition={{
-            duration: 2 + Math.random() * 2,
-            repeat: Infinity,
-            delay: Math.random() * 3,
-            ease: "easeOut",
-          }}
-          style={{
-            position: 'absolute',
-            left: `${10 + Math.random() * 80}%`,
-            top: `${40 + Math.random() * 40}%`,
-            width: '4px',
-            height: '4px',
-            borderRadius: '50%',
-            background: 'rgba(255, 255, 255, 0.8)',
-            boxShadow: '0 0 10px rgba(0, 71, 255, 0.8)',
-            pointerEvents: 'none',
-          }}
-        />
-      ))}
-    </>
-  );
-}
-
-// ============================================================================
-// COMPLETION ANIMATION 3: Converging Particles
-// ============================================================================
-function ConvergingParticles({ isActive, theme }: { isActive: boolean; theme: string }) {
-  const particleCount = 40;
-
-  if (!isActive) return null;
-
-  return (
-    <>
-      {[...Array(particleCount)].map((_, i) => {
-        const angle = (i / particleCount) * Math.PI * 2;
-        const startX = Math.cos(angle) * 150; // Start from edges (150% from center)
-        const startY = Math.sin(angle) * 150;
-        const size = 3 + Math.random() * 6;
-        const duration = 1.5 + Math.random() * 1;
-        const delay = (i / particleCount) * 0.8;
-
-        return (
-          <motion.div
-            key={`particle-${i}`}
-            initial={{
-              x: `${startX}vw`,
-              y: `${startY}vh`,
-              opacity: 0,
-              scale: 0.5,
-            }}
-            animate={{
-              x: ['0vw'],
-              y: ['0vh'],
-              opacity: [0, 1, 1, 0],
-              scale: [0.5, 1.5, 1, 0],
-            }}
-            transition={{
-              duration: duration,
-              delay: delay,
-              repeat: Infinity,
-              repeatDelay: 0.5,
-              ease: [0.25, 0.1, 0.25, 1],
-            }}
-            style={{
-              position: 'absolute',
-              left: '50%',
-              top: '50%',
-              width: `${size}px`,
-              height: `${size}px`,
-              borderRadius: '50%',
-              background: `rgba(0, 71, 255, ${0.6 + Math.random() * 0.4})`,
-              boxShadow: `0 0 ${size * 2}px rgba(0, 71, 255, 0.8), 0 0 ${size * 4}px rgba(0, 71, 255, 0.4)`,
-              pointerEvents: 'none',
-            }}
-          />
-        );
-      })}
-      {/* Central energy burst on convergence */}
-      <motion.div
-        animate={{
-          scale: [0.8, 1.5, 0.8],
-          opacity: [0.4, 0.9, 0.4],
-        }}
-        transition={{
-          duration: 2,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
-        style={{
-          position: 'absolute',
-          left: '50%',
-          top: '50%',
-          width: '60px',
-          height: '60px',
-          borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(255, 255, 255, 0.9) 0%, rgba(0, 71, 255, 0.6) 40%, transparent 70%)',
-          transform: 'translate(-50%, -50%)',
-          filter: 'blur(5px)',
-          pointerEvents: 'none',
-        }}
-      />
-      {/* Outer glow ring */}
-      <motion.div
-        animate={{
-          scale: [1, 1.2, 1],
-          opacity: [0.3, 0.6, 0.3],
-        }}
-        transition={{
-          duration: 1.5,
-          repeat: Infinity,
-          ease: "easeInOut",
-          delay: 0.5,
-        }}
-        style={{
-          position: 'absolute',
-          left: '50%',
-          top: '50%',
-          width: '120px',
-          height: '120px',
-          borderRadius: '50%',
-          border: '2px solid rgba(0, 71, 255, 0.5)',
-          transform: 'translate(-50%, -50%)',
-          boxShadow: '0 0 40px rgba(0, 71, 255, 0.3), inset 0 0 30px rgba(0, 71, 255, 0.2)',
-          pointerEvents: 'none',
-        }}
-      />
-    </>
-  );
-}
-
-// ============================================================================
-// Completion Animation Type
-// ============================================================================
-export type CompletionAnimationType = 'ripple' | 'aurora' | 'converging' | 'none';
 
 // ============================================================================
 // Main Component
@@ -452,8 +259,12 @@ export default function JourneyBackground({
   progress,
   currentPhase,
   theme,
-  completionAnimation = 'converging',
-}: JourneyBackgroundProps & { completionAnimation?: CompletionAnimationType }) {
+  animationPhase = 'floating',
+  isComplete = false,
+}: JourneyBackgroundProps & {
+  animationPhase?: ParticleAnimationPhase;
+  isComplete?: boolean;
+}) {
   const prevPhaseRef = useRef(currentPhase);
   const [pulseKey, setPulseKey] = useState(0);
 
@@ -517,35 +328,17 @@ export default function JourneyBackground({
         }}
       />
 
-      {/* Reactive orbs */}
-      <AnimatePresence mode="sync">
-        {orbPositions.map((position, index) => (
-          <ReactiveOrb
-            key={`reactive-orb-${index}`}
-            index={index}
-            progress={progress}
-            theme={theme}
-            position={position}
-          />
-        ))}
-      </AnimatePresence>
+      {/* Progressive Particles - unified particle system */}
+      <ProgressiveParticles
+        progress={progress}
+        theme={theme}
+        isComplete={isComplete}
+        animationPhase={animationPhase}
+      />
 
       {/* Phase transition pulse */}
       <AnimatePresence mode="wait">
         <PhasePulse trigger={pulseKey} theme={theme} />
-      </AnimatePresence>
-
-      {/* Completion Animations - triggered when progress > 0.9 */}
-      <AnimatePresence>
-        {progress > 0.9 && completionAnimation === 'ripple' && (
-          <RippleWave isActive={true} theme={theme} />
-        )}
-        {progress > 0.9 && completionAnimation === 'aurora' && (
-          <AuroraEffect isActive={true} theme={theme} />
-        )}
-        {progress > 0.9 && completionAnimation === 'converging' && (
-          <ConvergingParticles isActive={true} theme={theme} />
-        )}
       </AnimatePresence>
 
       {/* Subtle vignette that decreases with progress (more open feel as energy builds) */}

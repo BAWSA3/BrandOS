@@ -425,10 +425,11 @@ function Confetti({ isActive }: { isActive: boolean }) {
             scale: [0, 1, 0.5],
             opacity: [1, 1, 0],
           }}
-          transition={{ 
-            duration: 2, 
+          transition={{
+            type: 'spring',
+            bounce: 0.4,
+            duration: 1.5,
             delay: particle.delay,
-            ease: [0.34, 1.56, 0.64, 1],
           }}
           style={{
             position: 'absolute',
@@ -453,8 +454,9 @@ function ScoreGauge({ score, isVisible, theme }: { score: number; isVisible: boo
       // Delay the animation for dramatic effect
       const timer = setTimeout(() => {
         const controls = animate(motionScore, score, {
-          duration: 2,
-          ease: [0.34, 1.56, 0.64, 1],
+          type: 'spring',
+          bounce: 0.25,
+          duration: 1.8,
         });
         
         const unsubscribe = motionScore.on('change', (v) => {
@@ -552,7 +554,7 @@ function ScoreGauge({ score, isVisible, theme }: { score: number; isVisible: boo
         <motion.div
           initial={{ scale: 0 }}
           animate={isVisible ? { scale: 1 } : {}}
-          transition={{ delay: 0.5, type: 'spring', stiffness: 200, damping: 15 }}
+          transition={{ delay: 0.5, type: 'spring', bounce: 0.35, duration: 0.6 }}
         >
           <span
             style={{
@@ -613,7 +615,7 @@ function PhaseCard({
     <motion.div
       initial={{ opacity: 0, y: 30, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ duration: 0.5, delay, ease: [0.34, 1.56, 0.64, 1] }}
+      transition={{ type: 'spring', bounce: 0.3, duration: 0.6, delay }}
       style={{
         background: theme === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)',
         backdropFilter: 'blur(20px)',
@@ -675,7 +677,7 @@ function PhaseCard({
         <motion.div
           initial={{ width: 0 }}
           animate={{ width: `${score}%` }}
-          transition={{ duration: 0.8, delay: delay + 0.2, ease: [0.34, 1.56, 0.64, 1] }}
+          transition={{ type: 'spring', bounce: 0.2, duration: 0.8, delay: delay + 0.2 }}
           style={{
             height: '100%',
             background: getScoreColor(score),

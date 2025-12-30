@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence, useMotionValue, animate } from 'motion/react';
-import JourneyBackground, { CompletionAnimationType } from './JourneyBackground';
+import JourneyBackground, { ParticleAnimationPhase } from './JourneyBackground';
 import BrandDNAPreview, { GeneratedBrandDNA } from './BrandDNAPreview';
 
 // ============================================================================
@@ -897,7 +897,8 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
   const apiErrorRef = useRef<string | null>(null);
 
   const [isValidating, setIsValidating] = useState(false);
-  const [completionAnimation, setCompletionAnimation] = useState<CompletionAnimationType>('aurora');
+  const [animationPhase, setAnimationPhase] = useState<ParticleAnimationPhase>('floating');
+  const [isComplete, setIsComplete] = useState(false);
 
   // Typing animation for headline
   const fullText = "DOES YOUR BRAND SUCK?";
@@ -1085,16 +1086,39 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
           if (apiCompleteRef.current) {
             clearInterval(interval);
             clearInterval(phaseCheck);
-            if (apiResultRef.current) {
-              // Success - show results
-              setProfile(apiResultRef.current.profile);
-              setBrandScore(apiResultRef.current.brandScore);
-              setFlowState('reveal');
 
-              // Show confetti for high scores
-              if (apiResultRef.current.brandScore.overallScore >= 70) {
-                setTimeout(() => setShowConfetti(true), 1500);
-              }
+            if (apiResultRef.current) {
+              // Success - trigger particle animation sequence
+              setIsComplete(true);
+
+              // Start converging animation
+              setAnimationPhase('converging');
+
+              // After converging, collapse to center
+              setTimeout(() => {
+                setAnimationPhase('collapsed');
+              }, 600);
+
+              // Brief pause at center, then disperse
+              setTimeout(() => {
+                setAnimationPhase('dispersing');
+              }, 1000);
+
+              // After disperse animation, show results
+              setTimeout(() => {
+                setProfile(apiResultRef.current!.profile);
+                setBrandScore(apiResultRef.current!.brandScore);
+                setFlowState('reveal');
+
+                // Reset animation state for next use
+                setAnimationPhase('floating');
+                setIsComplete(false);
+
+                // Show confetti for high scores
+                if (apiResultRef.current!.brandScore.overallScore >= 70) {
+                  setTimeout(() => setShowConfetti(true), 500);
+                }
+              }, 1800);
             } else if (apiErrorRef.current) {
               // API failed - show error and go back to input
               setError(apiErrorRef.current);
@@ -1394,39 +1418,9 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
               progress={((currentPhase - 1) + (itemProgress / 4)) / 4}
               currentPhase={currentPhase}
               theme={theme}
-              completionAnimation={completionAnimation}
+              animationPhase={animationPhase}
+              isComplete={isComplete}
             />
-            {/* Animation Toggle - for testing */}
-            <div style={{
-              position: 'fixed',
-              bottom: '20px',
-              right: '20px',
-              display: 'flex',
-              gap: '8px',
-              zIndex: 100,
-            }}>
-              {(['ripple', 'aurora', 'converging'] as CompletionAnimationType[]).map((type) => (
-                <button
-                  key={type}
-                  onClick={() => setCompletionAnimation(type)}
-                  style={{
-                    padding: '8px 12px',
-                    fontSize: '11px',
-                    fontWeight: 600,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em',
-                    border: completionAnimation === type ? '2px solid #0047FF' : '1px solid rgba(255,255,255,0.2)',
-                    borderRadius: '6px',
-                    background: completionAnimation === type ? 'rgba(0, 71, 255, 0.3)' : 'rgba(0,0,0,0.5)',
-                    color: '#fff',
-                    cursor: 'pointer',
-                    backdropFilter: 'blur(10px)',
-                  }}
-                >
-                  {type}
-                </button>
-              ))}
-            </div>
             <motion.div
               key="journey"
               initial={{ opacity: 0 }}

@@ -23,7 +23,7 @@ export default function JourneyProgress({
     <motion.div
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
+      transition={{ type: 'spring', bounce: 0.25, duration: 0.5 }}
       style={{
         position: 'fixed',
         top: '24px',
@@ -62,7 +62,7 @@ export default function JourneyProgress({
                 scale: isActive ? 1.05 : 1,
                 opacity: isActive || isCompleted ? 1 : 0.4,
               }}
-              transition={{ duration: 0.3 }}
+              transition={{ type: 'spring', bounce: 0.3, duration: 0.4 }}
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -115,7 +115,7 @@ export default function JourneyProgress({
                   width: isActive ? 'auto' : 0,
                   opacity: isActive ? 1 : 0,
                 }}
-                transition={{ duration: 0.3 }}
+                transition={{ type: 'spring', bounce: 0.2, duration: 0.35 }}
                 style={{
                   fontFamily: "'VCR OSD Mono', monospace",
                   fontSize: '10px',
@@ -144,7 +144,7 @@ export default function JourneyProgress({
       >
         <motion.div
           animate={{ width: `${overallProgress * 100}%` }}
-          transition={{ duration: 0.3, ease: 'easeOut' }}
+          transition={{ type: 'spring', bounce: 0.15, duration: 0.4 }}
           style={{
             height: '100%',
             background: 'linear-gradient(90deg, #0047FF 0%, #10B981 100%)',

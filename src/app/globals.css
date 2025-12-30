@@ -91,6 +91,26 @@
   --glow-md: 0 0 40px rgba(0, 71, 255, 0.3);
   --glow-lg: 0 0 80px rgba(0, 71, 255, 0.4);
   --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.3);
+
+  /* ============================================
+     MOTION STUDIO SPRING ANIMATIONS
+     Physics-based easing via linear() function
+     ============================================ */
+
+  /* Snappy spring - Quick micro-interactions (200ms feel, 300ms actual) */
+  --spring-snappy: 300ms linear(0, 0.3601, 0.7689, 0.9599, 1.0117, 1.0133, 1.0062, 1.0017, 1.0001, 1);
+
+  /* Default spring - Buttons, cards, standard interactions (300ms feel, 550ms actual) */
+  --spring-default: 550ms linear(0, 0.1654, 0.4677, 0.7368, 0.9162, 1.0096, 1.043, 1.0437, 1.0315, 1.0177, 1.0074, 1.0012, 0.9985, 1, 0.9982, 0.9989, 0.9995, 1);
+
+  /* Bouncy spring - Modals, reveals, dramatic entrances (500ms feel, 1100ms actual) */
+  --spring-bouncy: 1100ms linear(0, 0.0694, 0.237, 0.4486, 0.6622, 0.8494, 0.9944, 1.0924, 1.146, 1.163, 1.1531, 1.1266, 1.0924, 1.0574, 1.0265, 1.0023, 0.9858, 0.9766, 0.9735, 0.9748, 0.979, 0.9845, 0.9903, 0.9954, 0.9994, 1.0022, 1.0037, 1, 1.0041, 1.0035, 1.0026, 1.0017, 1.0008, 1.0001, 0.9997, 1, 1);
+
+  /* Gentle spring - Subtle, smooth transitions (400ms feel, 650ms actual) */
+  --spring-gentle: 650ms linear(0, 0.1162, 0.3622, 0.6245, 0.8404, 0.9868, 1.0661, 1.0937, 1.0885, 1.0672, 1.042, 1.02, 1.0043, 0.9952, 0.9914, 0.9913, 0.993, 0.9954, 0.9976, 0.9993, 1.0003, 1);
+
+  /* Bounce easing - Ball drop effect for playful animations */
+  --ease-bounce: linear(0, 0.0012, 0.0048, 0.0109, 0.0194, 0.0303, 0.0436, 0.0594, 0.0776, 0.0982, 0.1212, 0.1466, 0.1745, 0.2048, 0.2375, 0.2726, 0.3102, 0.3502, 0.3926, 0.4374, 0.4847, 0.5344, 0.5865, 0.641, 0.698, 0.7573, 0.8191, 0.8834, 0.95, 0.9906, 0.9577, 0.9271, 0.8991, 0.8734, 0.8501, 0.8293, 0.8109, 0.795, 0.7814, 0.7703, 0.7616, 0.7553, 0.7514, 0.75, 0.751, 0.7544, 0.7603, 0.7685, 0.7792, 0.7923, 0.8078, 0.8258, 0.8462, 0.869, 0.8942, 0.9219, 0.9519, 0.9844, 0.9909, 0.976, 0.9635, 0.9535, 0.9459, 0.9407, 0.938, 0.9377, 0.9398, 0.9443, 0.9512, 0.9606, 0.9724, 0.9866, 0.9985, 0.9914, 0.9868, 0.9846, 0.9848, 0.9874, 0.9925, 1);
 }
 
 /* Light theme override */
@@ -466,13 +486,17 @@ body {
   border: none;
   border-radius: var(--radius-md);
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: transform var(--spring-default), box-shadow var(--spring-default), background 150ms ease;
 }
 
 .btn-primary:hover {
   background: var(--blue-hover);
   box-shadow: var(--glow-sm);
-  transform: translateY(-1px);
+  transform: translateY(-2px) scale(1.02);
+}
+
+.btn-primary:active {
+  transform: translateY(0) scale(0.98);
 }
 
 .btn-glass {
@@ -489,12 +513,17 @@ body {
   border-radius: var(--radius-md);
   cursor: pointer;
   backdrop-filter: blur(12px);
-  transition: all var(--transition-fast);
+  transition: transform var(--spring-default), box-shadow var(--spring-default), background 150ms ease, border-color 150ms ease;
 }
 
 .btn-glass:hover {
   background: var(--glass-hover);
   border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px) scale(1.02);
+}
+
+.btn-glass:active {
+  transform: translateY(0) scale(0.98);
 }
 
 .btn-pill {
@@ -519,12 +548,12 @@ body {
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
   overflow: hidden;
-  transition: all var(--transition-medium);
+  transition: transform var(--spring-default), box-shadow var(--spring-default), border-color 150ms ease;
 }
 
 .bento-item:hover {
   border-color: rgba(255, 255, 255, 0.15);
-  transform: translateY(-2px);
+  transform: translateY(-4px) scale(1.01);
   box-shadow: var(--shadow-card), var(--glow-sm);
 }
 
@@ -616,6 +645,114 @@ body {
 .delay-300 { animation-delay: 300ms; }
 .delay-400 { animation-delay: 400ms; }
 .delay-500 { animation-delay: 500ms; }
+
+/* ============================================
+   MOTION STUDIO SPRING UTILITY CLASSES
+   ============================================ */
+
+/* Spring transition utilities */
+.spring-snappy {
+  transition: transform var(--spring-snappy), opacity var(--spring-snappy);
+}
+
+.spring-default {
+  transition: transform var(--spring-default), opacity var(--spring-default);
+}
+
+.spring-bouncy {
+  transition: transform var(--spring-bouncy), opacity var(--spring-bouncy);
+}
+
+.spring-gentle {
+  transition: transform var(--spring-gentle), opacity var(--spring-gentle);
+}
+
+/* Spring hover effects for buttons */
+.btn-spring {
+  transition: transform var(--spring-default), box-shadow var(--spring-default);
+}
+
+.btn-spring:hover {
+  transform: translateY(-2px) scale(1.02);
+}
+
+.btn-spring:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* Spring card hover */
+.card-spring {
+  transition: transform var(--spring-default), box-shadow var(--spring-default), border-color var(--spring-default);
+}
+
+.card-spring:hover {
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: var(--shadow-card), var(--glow-sm);
+}
+
+/* Spring scale animations */
+@keyframes springScaleIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  80% {
+    transform: scale(0.98);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes springFadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(-5px) scale(1.02);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes springBounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.15);
+  }
+  70% {
+    transform: scale(0.95);
+  }
+  85% {
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-spring-scale-in {
+  animation: springScaleIn 550ms linear(0, 0.1654, 0.4677, 0.7368, 0.9162, 1.0096, 1.043, 1.0437, 1.0315, 1.0177, 1.0074, 1.0012, 0.9985, 1) forwards;
+}
+
+.animate-spring-fade-in-up {
+  animation: springFadeInUp 650ms linear(0, 0.1162, 0.3622, 0.6245, 0.8404, 0.9868, 1.0661, 1.0937, 1.0885, 1.0672, 1.042, 1.02, 1.0043, 0.9952, 0.9914, 0.9913, 0.993, 0.9954, 0.9976, 0.9993, 1.0003, 1) forwards;
+}
+
+.animate-spring-bounce-in {
+  animation: springBounceIn 800ms linear(0, 0.0012, 0.0048, 0.0109, 0.0194, 0.0303, 0.0436, 0.0594, 0.0776, 0.0982, 0.1212, 0.1466, 0.1745, 0.2048, 0.2375, 0.2726, 0.3102, 0.3502, 0.3926, 0.4374, 0.4847, 0.5344, 0.5865, 0.641, 0.698, 0.7573, 0.8191, 0.8834, 0.95, 0.9906, 0.9577, 0.9271, 0.8991, 0.8734, 0.8501, 0.8293, 0.8109, 0.795, 0.7814, 0.7703, 0.7616, 0.7553, 0.7514, 0.75, 0.751, 0.7544, 0.7603, 0.7685, 0.7792, 0.7923, 0.8078, 0.8258, 0.8462, 0.869, 0.8942, 0.9219, 0.9519, 0.9844, 0.9909, 0.976, 0.9635, 0.9535, 0.9459, 0.9407, 0.938, 0.9377, 0.9398, 0.9443, 0.9512, 0.9606, 0.9724, 0.9866, 0.9985) forwards;
+}
 
 /* ============================================
    SCROLLBAR
