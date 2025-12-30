@@ -35,6 +35,14 @@
   font-display: swap;
 }
 
+@font-face {
+  font-family: 'PP NeueBit';
+  src: url('/fonts/PPNeueBit-Bold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* ============================================
    NEW DESIGN SYSTEM - GLASSMORPHIC BLUE
    ============================================ */

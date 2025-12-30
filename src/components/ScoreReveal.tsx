@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, useMotionValue, useTransform, animate } from 'motion/react';
+import ShareableScoreCard, { ShareCardData } from './ShareableScoreCard';
 
 // =============================================================================
 // SHARE FUNCTIONALITY
@@ -346,6 +347,15 @@ interface XProfileData {
   url?: string;
 }
 
+interface CreatorArchetype {
+  primary: string;
+  emoji: string;
+  tagline?: string;
+  description?: string;
+  strengths?: string[];
+  growthTip?: string;
+}
+
 interface BrandScoreResult {
   overallScore: number;
   phases: {
@@ -357,6 +367,12 @@ interface BrandScoreResult {
   topStrengths: string[];
   topImprovements: string[];
   summary: string;
+  archetype?: CreatorArchetype;
+  brandKeywords?: string[];
+  brandColors?: {
+    primary: string;
+    secondary: string;
+  };
 }
 
 interface ScoreRevealProps {
@@ -933,30 +949,80 @@ export default function ScoreReveal({ profile, brandScore, isVisible, theme }: S
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          gap: '16px',
+          gap: '20px',
           width: '100%',
-          paddingTop: '24px',
+          paddingTop: '32px',
           borderTop: `1px solid ${theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
         }}
       >
-        <p
-          style={{
-            fontFamily: "'Helvetica Neue', sans-serif",
-            fontSize: '16px',
-            color: theme === 'dark' ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)',
-            margin: 0,
-            textAlign: 'center',
+        <div style={{ textAlign: 'center' }}>
+          <h4
+            style={{
+              fontFamily: "'VCR OSD Mono', monospace",
+              fontSize: '14px',
+              letterSpacing: '0.15em',
+              color: theme === 'dark' ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.8)',
+              margin: 0,
+              marginBottom: '8px',
+            }}
+          >
+            SHARE YOUR SCORE
+          </h4>
+          <p
+            style={{
+              fontFamily: "'Helvetica Neue', sans-serif",
+              fontSize: '15px',
+              color: theme === 'dark' ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)',
+              margin: 0,
+            }}
+          >
+            Copy a personalized image and paste directly into X
+          </p>
+        </div>
+        
+        {/* New Shareable Score Card */}
+        <ShareableScoreCard
+          data={{
+            score: brandScore.overallScore,
+            username: profile.username,
+            topStrength: brandScore.topStrengths[0] || 'Strong brand presence',
+            archetype: brandScore.archetype ? {
+              primary: brandScore.archetype.primary,
+              emoji: brandScore.archetype.emoji,
+              tagline: brandScore.archetype.tagline,
+            } : undefined,
+            keywords: brandScore.brandKeywords,
+            brandColors: brandScore.brandColors,
           }}
-        >
-          Share your score and challenge others
-        </p>
-        <ShareButton
-          score={brandScore.overallScore}
-          username={profile.username}
-          topStrength={brandScore.topStrengths[0] || 'Strong brand presence'}
-          profileImage={profile.profile_image_url}
           theme={theme}
         />
+        
+        {/* Legacy share options */}
+        <div style={{ 
+          marginTop: '16px',
+          paddingTop: '16px',
+          borderTop: `1px dashed ${theme === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'}`,
+        }}>
+          <p
+            style={{
+              fontFamily: "'Helvetica Neue', sans-serif",
+              fontSize: '13px',
+              color: theme === 'dark' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)',
+              margin: 0,
+              marginBottom: '12px',
+              textAlign: 'center',
+            }}
+          >
+            Or share with text only
+          </p>
+          <ShareButton
+            score={brandScore.overallScore}
+            username={profile.username}
+            topStrength={brandScore.topStrengths[0] || 'Strong brand presence'}
+            profileImage={profile.profile_image_url}
+            theme={theme}
+          />
+        </div>
       </motion.div>
     </div>
   );

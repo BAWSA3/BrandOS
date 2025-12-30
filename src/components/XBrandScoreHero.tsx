@@ -776,28 +776,28 @@ function JourneyProgressIndicator({
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.5 }}
       style={{
-        position: 'absolute',
+        position: 'fixed',
         top: '24px',
-        left: '50%',
-        transform: 'translateX(-50%)',
+        left: 0,
+        right: 0,
         zIndex: 100,
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        gap: '12px',
+        gap: '8px',
       }}
     >
       {/* Phase pills */}
       <div
         style={{
           display: 'flex',
-          gap: '8px',
-          padding: '8px 16px',
-          background: theme === 'dark' ? 'rgba(0, 0, 0, 0.6)' : 'rgba(255, 255, 255, 0.8)',
+          gap: '12px',
+          padding: '10px 20px',
+          background: theme === 'dark' ? 'rgba(0, 0, 0, 0.8)' : 'rgba(255, 255, 255, 0.9)',
           backdropFilter: 'blur(20px)',
           borderRadius: '40px',
-          border: `1px solid ${theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
-          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
+          border: `1px solid ${theme === 'dark' ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.1)'}`,
+          boxShadow: '0 4px 24px rgba(0, 0, 0, 0.2)',
         }}
       >
         {phaseConfig.map((phase, index) => {
@@ -858,28 +858,6 @@ function JourneyProgressIndicator({
             </motion.div>
           );
         })}
-      </div>
-
-      {/* Progress bar */}
-      <div
-        style={{
-          width: '200px',
-          height: '3px',
-          background: theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
-          borderRadius: '2px',
-          overflow: 'hidden',
-        }}
-      >
-        <motion.div
-          animate={{ width: `${overallProgress * 100}%` }}
-          transition={{ duration: 0.3, ease: 'easeOut' }}
-          style={{
-            height: '100%',
-            background: 'linear-gradient(90deg, #0047FF 0%, #10B981 100%)',
-            borderRadius: '2px',
-            boxShadow: '0 0 10px rgba(0, 71, 255, 0.5)',
-          }}
-        />
       </div>
 
       <span
@@ -1119,6 +1097,25 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
               width: '100%',
             }}
           >
+            {/* Phase tagline - above logo */}
+            <motion.p
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              style={{
+                fontFamily: "'VCR OSD Mono', monospace",
+                fontSize: 'clamp(10px, 1.5vw, 13px)',
+                fontWeight: 400,
+                letterSpacing: '0.25em',
+                color: theme === 'dark' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)',
+                textAlign: 'center',
+                margin: 0,
+                textTransform: 'uppercase',
+              }}
+            >
+              DEFINE. CHECK. GENERATE. SCALE.
+            </motion.p>
+
             {/* Logo */}
             <motion.h1
               style={{
@@ -1129,6 +1126,7 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                 alignItems: 'baseline',
                 letterSpacing: '-0.05em',
                 overflow: 'visible',
+                marginTop: '-8px',
               }}
             >
               <span
@@ -1171,23 +1169,23 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
               />
             </motion.h1>
 
-            {/* Tagline */}
+            {/* Hook question */}
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.2 }}
               style={{
-                fontFamily: "'VCR OSD Mono', monospace",
-                fontSize: 'clamp(14px, 2vw, 18px)',
-                fontWeight: 400,
-                letterSpacing: '0.15em',
-                color: theme === 'dark' ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)',
+                fontFamily: "'PP NeueBit', monospace",
+                fontSize: 'clamp(28px, 5vw, 48px)',
+                fontWeight: 700,
+                letterSpacing: '0.02em',
+                color: theme === 'dark' ? 'rgba(255,255,255,0.9)' : 'rgba(0,0,0,0.9)',
                 textAlign: 'center',
                 margin: 0,
-                textTransform: 'uppercase',
+                marginTop: '8px',
               }}
             >
-              DEFINE. CHECK. GENERATE. SCALE.
+              DOES YOUR BRAND SUCK?
             </motion.p>
 
             {/* Input Form */}
@@ -1303,7 +1301,9 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              paddingTop: '100px',
+              justifyContent: 'center',
+              width: '100%',
+              paddingTop: '80px',
             }}
           >
             <AnimatePresence mode="wait">

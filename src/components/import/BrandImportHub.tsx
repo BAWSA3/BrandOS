@@ -359,3 +359,10 @@ function countExtractedElements(brand: ExtractedBrand): number {
 
 
 
+
+
+
+
+
+
+

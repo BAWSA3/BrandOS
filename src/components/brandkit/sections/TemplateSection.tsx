@@ -285,3 +285,10 @@ function TemplateCard({ template, onDelete }: TemplateCardProps) {
 
 
 
+
+
+
+
+
+
+
