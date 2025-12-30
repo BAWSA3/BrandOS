@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence, useMotionValue, animate } from 'motion/react';
-import JourneyBackground, { ParticleAnimationPhase } from './JourneyBackground';
+import JourneyBackground from './JourneyBackground';
 import BrandDNAPreview, { GeneratedBrandDNA } from './BrandDNAPreview';
 
 // ============================================================================
@@ -897,8 +897,6 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
   const apiErrorRef = useRef<string | null>(null);
 
   const [isValidating, setIsValidating] = useState(false);
-  const [animationPhase, setAnimationPhase] = useState<ParticleAnimationPhase>('floating');
-  const [isComplete, setIsComplete] = useState(false);
 
   // Typing animation for headline
   const fullText = "DOES YOUR BRAND SUCK?";
@@ -1088,37 +1086,17 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
             clearInterval(phaseCheck);
 
             if (apiResultRef.current) {
-              // Success - trigger particle animation sequence
-              setIsComplete(true);
-
-              // Start converging animation
-              setAnimationPhase('converging');
-
-              // After converging, collapse to center
-              setTimeout(() => {
-                setAnimationPhase('collapsed');
-              }, 600);
-
-              // Brief pause at center, then disperse
-              setTimeout(() => {
-                setAnimationPhase('dispersing');
-              }, 1000);
-
-              // After disperse animation, show results
+              // Success - show results after brief pause
               setTimeout(() => {
                 setProfile(apiResultRef.current!.profile);
                 setBrandScore(apiResultRef.current!.brandScore);
                 setFlowState('reveal');
 
-                // Reset animation state for next use
-                setAnimationPhase('floating');
-                setIsComplete(false);
-
                 // Show confetti for high scores
                 if (apiResultRef.current!.brandScore.overallScore >= 70) {
                   setTimeout(() => setShowConfetti(true), 500);
                 }
-              }, 1800);
+              }, 600);
             } else if (apiErrorRef.current) {
               // API failed - show error and go back to input
               setError(apiErrorRef.current);
@@ -1418,8 +1396,6 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
               progress={((currentPhase - 1) + (itemProgress / 4)) / 4}
               currentPhase={currentPhase}
               theme={theme}
-              animationPhase={animationPhase}
-              isComplete={isComplete}
             />
             <motion.div
               key="journey"
