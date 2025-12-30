@@ -898,37 +898,6 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
 
   const [isValidating, setIsValidating] = useState(false);
 
-  // Typing animation for headline
-  const fullText = "DOES YOUR BRAND SUCK?";
-  const [typedText, setTypedText] = useState('');
-  const [showCursor, setShowCursor] = useState(true);
-
-  useEffect(() => {
-    if (flowState !== 'input') return;
-
-    let currentIndex = 0;
-    const typingInterval = setInterval(() => {
-      if (currentIndex <= fullText.length) {
-        setTypedText(fullText.slice(0, currentIndex));
-        currentIndex++;
-      } else {
-        clearInterval(typingInterval);
-        // Blink cursor a few times then hide
-        setTimeout(() => setShowCursor(false), 2000);
-      }
-    }, 80);
-
-    // Cursor blink effect
-    const cursorInterval = setInterval(() => {
-      setShowCursor(prev => !prev);
-    }, 530);
-
-    return () => {
-      clearInterval(typingInterval);
-      clearInterval(cursorInterval);
-    };
-  }, [flowState]);
-
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -1184,7 +1153,7 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              gap: '32px',
+              gap: '24px',
               maxWidth: '600px',
               width: '100%',
             }}
@@ -1195,14 +1164,13 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
               style={{
-                fontFamily: "'VCR OSD Mono', monospace",
-                fontSize: 'clamp(10px, 1.5vw, 13px)',
-                fontWeight: 400,
-                letterSpacing: '0.25em',
-                color: theme === 'dark' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)',
+                fontFamily: "'PP NeueBit', monospace",
+                fontSize: 'clamp(18px, 3vw, 28px)',
+                fontWeight: 700,
+                letterSpacing: '0.05em',
+                color: theme === 'dark' ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)',
                 textAlign: 'center',
                 margin: 0,
-                textTransform: 'uppercase',
               }}
             >
               DEFINE. CHECK. GENERATE. SCALE.
@@ -1218,7 +1186,7 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                 alignItems: 'baseline',
                 letterSpacing: '-0.05em',
                 overflow: 'visible',
-                marginTop: '-8px',
+                marginTop: '-12px',
               }}
             >
               <span
@@ -1261,28 +1229,25 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
               />
             </motion.h1>
 
-            {/* Hook question */}
+            {/* Description - below logo */}
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.2 }}
+              transition={{ delay: 0.15 }}
               style={{
-                fontFamily: "'PP NeueBit', monospace",
-                fontSize: 'clamp(28px, 5vw, 48px)',
-                fontWeight: 700,
-                letterSpacing: '0.02em',
-                color: theme === 'dark' ? 'rgba(255,255,255,0.9)' : 'rgba(0,0,0,0.9)',
+                fontFamily: "'VCR OSD Mono', monospace",
+                fontSize: 'clamp(11px, 1.5vw, 14px)',
+                fontWeight: 400,
+                letterSpacing: '0.12em',
+                color: theme === 'dark' ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)',
                 textAlign: 'center',
                 margin: 0,
-                marginTop: '8px',
+                marginTop: '-16px',
+                textTransform: 'uppercase',
+                whiteSpace: 'nowrap',
               }}
             >
-              {typedText}
-              <span style={{
-                opacity: showCursor ? 1 : 0,
-                transition: 'opacity 0.1s',
-                marginLeft: '2px'
-              }}>|</span>
+              an AI-powered OS that enforces, scales and understands your brand.
             </motion.p>
 
             {/* Input Form */}
@@ -1290,7 +1255,7 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
               onSubmit={handleSubmit}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
+              transition={{ delay: 0.25 }}
               style={{
                 display: 'flex',
                 flexDirection: 'column',
@@ -1351,7 +1316,7 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                   opacity: isValidating ? 0.7 : 1,
                 }}
               >
-                {isValidating ? 'CHECKING PROFILE...' : "WHAT'S YOUR BRAND SCORE?"}
+                {isValidating ? 'CHECKING PROFILE...' : "WHAT'S YOUR BRAND DNA?"}
               </motion.button>
 
               {error && (
@@ -1374,13 +1339,14 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.6 }}
+              transition={{ delay: 0.4 }}
               style={{
                 fontFamily: "'VCR OSD Mono', monospace",
                 fontSize: '11px',
                 letterSpacing: '0.1em',
                 color: theme === 'dark' ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.4)',
                 textAlign: 'center',
+                marginTop: '-4px',
               }}
             >
               ENTER ANY PUBLIC X PROFILE TO GET STARTED
