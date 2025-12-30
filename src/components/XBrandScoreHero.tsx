@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence, useMotionValue, animate } from 'motion/react';
 import JourneyBackground from './JourneyBackground';
+import BrandDNAPreview, { GeneratedBrandDNA } from './BrandDNAPreview';
 
 // ============================================================================
 // Types
@@ -884,6 +885,7 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
   const [error, setError] = useState('');
   const [profile, setProfile] = useState<XProfileData | null>(null);
   const [brandScore, setBrandScore] = useState<BrandScoreResult | null>(null);
+  const [generatedBrandDNA, setGeneratedBrandDNA] = useState<GeneratedBrandDNA | null>(null);
   const [currentPhase, setCurrentPhase] = useState(1);
   const [itemProgress, setItemProgress] = useState(0);
   const [showConfetti, setShowConfetti] = useState(false);
@@ -893,6 +895,8 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
   const apiResultRef = useRef<{ profile: XProfileData; brandScore: BrandScoreResult } | null>(null);
   const apiCompleteRef = useRef(false);
   const apiErrorRef = useRef<string | null>(null);
+
+  const [isValidating, setIsValidating] = useState(false);
 
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
@@ -904,59 +908,112 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
     }
 
     setError('');
-    setFlowState('journey');
-    setCurrentPhase(1);
-    setItemProgress(0);
-    apiCompleteRef.current = false;
-    apiErrorRef.current = null;
+    setIsValidating(true);
 
-    // First, fetch just the profile data quickly (for display during journey)
-    fetch('/api/x-profile', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username: username.trim() }),
-    })
-      .then(async (response) => {
-        const data = await response.json();
-        if (response.ok && data.profile) {
-          // Flatten the public_metrics into the profile object
-          const flatProfile: XProfileData = {
-            name: data.profile.name,
-            username: data.profile.username,
-            description: data.profile.description,
-            profile_image_url: data.profile.profile_image_url,
-            followers_count: data.profile.public_metrics?.followers_count || 0,
-            following_count: data.profile.public_metrics?.following_count || 0,
-            tweet_count: data.profile.public_metrics?.tweet_count || 0,
-            verified: data.profile.verified || false,
-            location: data.profile.location,
-            url: data.profile.url,
-          };
-          setProfile(flatProfile);
-        }
-      })
-      .catch(() => {
-        // Profile fetch failed, continue anyway
+    // First, validate that the profile exists before starting the journey
+    try {
+      const profileResponse = await fetch('/api/x-profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: username.trim() }),
       });
 
-    // Start full brand score API call in background
-    fetch('/api/x-brand-score', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username: username.trim() }),
-    })
-      .then(async (response) => {
-        const data = await response.json();
-        if (!response.ok) {
-          throw new Error(data.error || 'Failed to analyze profile');
-        }
-        apiResultRef.current = data;
-        apiCompleteRef.current = true;
+      const profileData = await profileResponse.json();
+
+      if (!profileResponse.ok || !profileData.profile) {
+        // Profile doesn't exist - show error immediately
+        setError(`@${username.trim()} not found on X`);
+        setIsValidating(false);
+        return;
+      }
+
+      // Profile exists - flatten and store it
+      const flatProfile: XProfileData = {
+        name: profileData.profile.name,
+        username: profileData.profile.username,
+        description: profileData.profile.description,
+        profile_image_url: profileData.profile.profile_image_url,
+        followers_count: profileData.profile.public_metrics?.followers_count || 0,
+        following_count: profileData.profile.public_metrics?.following_count || 0,
+        tweet_count: profileData.profile.public_metrics?.tweet_count || 0,
+        verified: profileData.profile.verified || false,
+        location: profileData.profile.location,
+        url: profileData.profile.url,
+      };
+      setProfile(flatProfile);
+
+      // Now start the journey
+      setIsValidating(false);
+      setFlowState('journey');
+      setCurrentPhase(1);
+      setItemProgress(0);
+      apiCompleteRef.current = false;
+      apiErrorRef.current = null;
+
+      // Start full brand score API call in background
+      fetch('/api/x-brand-score', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: username.trim() }),
       })
-      .catch((err) => {
-        apiErrorRef.current = err instanceof Error ? err.message : 'Something went wrong';
-        apiCompleteRef.current = true;
-      });
+        .then(async (response) => {
+          const data = await response.json();
+          if (!response.ok) {
+            throw new Error(data.error || 'Failed to analyze profile');
+          }
+          apiResultRef.current = data;
+          apiCompleteRef.current = true;
+          
+          // Also fetch brand identity for Brand DNA generation
+          if (data.profile) {
+            try {
+              const identityResponse = await fetch('/api/x-brand-identity', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  profile: {
+                    ...data.profile,
+                    public_metrics: {
+                      followers_count: data.profile.followers_count,
+                      following_count: data.profile.following_count,
+                      tweet_count: data.profile.tweet_count,
+                    },
+                  },
+                }),
+              });
+              const identityData = await identityResponse.json();
+              
+              if (identityData.success && identityData.analysis) {
+                // Generate store-ready Brand DNA
+                const dnaResponse = await fetch('/api/x-brand-dna/generate', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    profile: data.profile,
+                    brandIdentity: identityData.analysis,
+                  }),
+                });
+                const dnaData = await dnaResponse.json();
+                
+                if (dnaData.success && dnaData.brandDNA) {
+                  setGeneratedBrandDNA(dnaData.brandDNA);
+                }
+              }
+            } catch (identityError) {
+              console.error('Brand identity/DNA generation error:', identityError);
+              // Non-fatal - we still have the score
+            }
+          }
+        })
+        .catch((err) => {
+          apiErrorRef.current = err instanceof Error ? err.message : 'Something went wrong';
+          apiCompleteRef.current = true;
+        });
+
+    } catch {
+      setError('Could not connect. Please try again.');
+      setIsValidating(false);
+    }
   };
 
   // Auto-progress through phases
@@ -1237,8 +1294,9 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
 
               <motion.button
                 type="submit"
-                whileHover={{ scale: 1.02, boxShadow: '0 0 40px rgba(0, 71, 255, 0.5)' }}
-                whileTap={{ scale: 0.98 }}
+                disabled={isValidating}
+                whileHover={!isValidating ? { scale: 1.02, boxShadow: '0 0 40px rgba(0, 71, 255, 0.5)' } : {}}
+                whileTap={!isValidating ? { scale: 0.98 } : {}}
                 style={{
                   width: '100%',
                   fontFamily: "'VCR OSD Mono', monospace",
@@ -1249,11 +1307,12 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                   border: 'none',
                   padding: '20px 32px',
                   borderRadius: '16px',
-                  cursor: 'pointer',
+                  cursor: isValidating ? 'wait' : 'pointer',
                   boxShadow: '0 0 30px rgba(0, 71, 255, 0.3)',
+                  opacity: isValidating ? 0.7 : 1,
                 }}
               >
-                WHAT'S YOUR BRAND SCORE?
+                {isValidating ? 'CHECKING PROFILE...' : "WHAT'S YOUR BRAND SCORE?"}
               </motion.button>
 
               {error && (
@@ -1420,30 +1479,42 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
               {brandScore.summary}
             </motion.p>
 
-            {/* CTA to signup */}
-            <motion.button
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 2.5 }}
-              onClick={() => setFlowState('signup')}
-              whileHover={{ scale: 1.02, boxShadow: '0 0 40px rgba(0, 71, 255, 0.5)' }}
-              whileTap={{ scale: 0.98 }}
-              style={{
-                fontFamily: "'VCR OSD Mono', monospace",
-                fontSize: '14px',
-                letterSpacing: '0.15em',
-                color: '#FFFFFF',
-                background: '#0047FF',
-                border: 'none',
-                padding: '20px 40px',
-                borderRadius: '16px',
-                cursor: 'pointer',
-                boxShadow: '0 0 30px rgba(0, 71, 255, 0.3)',
-                marginTop: '16px',
-              }}
-            >
-              IMPROVE MY BRAND SCORE
-            </motion.button>
+            {/* Brand DNA Preview - Auto-generated from profile */}
+            {generatedBrandDNA && (
+              <BrandDNAPreview
+                generatedDNA={generatedBrandDNA}
+                username={profile.username}
+                onClaim={() => setFlowState('signup')}
+                theme={theme}
+              />
+            )}
+
+            {/* CTA to signup - Only show if no Brand DNA preview */}
+            {!generatedBrandDNA && (
+              <motion.button
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 2.5 }}
+                onClick={() => setFlowState('signup')}
+                whileHover={{ scale: 1.02, boxShadow: '0 0 40px rgba(0, 71, 255, 0.5)' }}
+                whileTap={{ scale: 0.98 }}
+                style={{
+                  fontFamily: "'VCR OSD Mono', monospace",
+                  fontSize: '14px',
+                  letterSpacing: '0.15em',
+                  color: '#FFFFFF',
+                  background: '#0047FF',
+                  border: 'none',
+                  padding: '20px 40px',
+                  borderRadius: '16px',
+                  cursor: 'pointer',
+                  boxShadow: '0 0 30px rgba(0, 71, 255, 0.3)',
+                  marginTop: '16px',
+                }}
+              >
+                IMPROVE MY BRAND SCORE
+              </motion.button>
+            )}
 
             {/* Analyze another */}
             <motion.button
@@ -1455,6 +1526,7 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                 setUsername('');
                 setProfile(null);
                 setBrandScore(null);
+                setGeneratedBrandDNA(null);
                 setShowConfetti(false);
               }}
               style={{

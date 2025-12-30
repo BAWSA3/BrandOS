@@ -1,10 +1,10 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // Initialize Gemini client
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
+const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GEMINI_API_KEY || '');
 
 // Models
-export const geminiFlash = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
+export const geminiFlash = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
 export const geminiPro = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' });
 
 // Types for generation results
@@ -1518,7 +1518,7 @@ export async function analyzeProfileImageWithVision(
     const mimeType = imageResponse.headers.get('content-type') || 'image/jpeg';
     
     // Use Gemini Flash with vision
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
     
     const result = await model.generateContent([
       {
