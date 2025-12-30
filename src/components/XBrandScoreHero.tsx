@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence, useMotionValue, animate } from 'motion/react';
-import JourneyBackground from './JourneyBackground';
+import JourneyBackground, { CompletionAnimationType } from './JourneyBackground';
 import BrandDNAPreview, { GeneratedBrandDNA } from './BrandDNAPreview';
 
 // ============================================================================
@@ -897,6 +897,38 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
   const apiErrorRef = useRef<string | null>(null);
 
   const [isValidating, setIsValidating] = useState(false);
+  const [completionAnimation, setCompletionAnimation] = useState<CompletionAnimationType>('aurora');
+
+  // Typing animation for headline
+  const fullText = "DOES YOUR BRAND SUCK?";
+  const [typedText, setTypedText] = useState('');
+  const [showCursor, setShowCursor] = useState(true);
+
+  useEffect(() => {
+    if (flowState !== 'input') return;
+
+    let currentIndex = 0;
+    const typingInterval = setInterval(() => {
+      if (currentIndex <= fullText.length) {
+        setTypedText(fullText.slice(0, currentIndex));
+        currentIndex++;
+      } else {
+        clearInterval(typingInterval);
+        // Blink cursor a few times then hide
+        setTimeout(() => setShowCursor(false), 2000);
+      }
+    }, 80);
+
+    // Cursor blink effect
+    const cursorInterval = setInterval(() => {
+      setShowCursor(prev => !prev);
+    }, 530);
+
+    return () => {
+      clearInterval(typingInterval);
+      clearInterval(cursorInterval);
+    };
+  }, [flowState]);
 
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
@@ -1243,7 +1275,12 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                 marginTop: '8px',
               }}
             >
-              DOES YOUR BRAND SUCK?
+              {typedText}
+              <span style={{
+                opacity: showCursor ? 1 : 0,
+                transition: 'opacity 0.1s',
+                marginLeft: '2px'
+              }}>|</span>
             </motion.p>
 
             {/* Input Form */}
@@ -1357,7 +1394,39 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
               progress={((currentPhase - 1) + (itemProgress / 4)) / 4}
               currentPhase={currentPhase}
               theme={theme}
+              completionAnimation={completionAnimation}
             />
+            {/* Animation Toggle - for testing */}
+            <div style={{
+              position: 'fixed',
+              bottom: '20px',
+              right: '20px',
+              display: 'flex',
+              gap: '8px',
+              zIndex: 100,
+            }}>
+              {(['ripple', 'aurora', 'converging'] as CompletionAnimationType[]).map((type) => (
+                <button
+                  key={type}
+                  onClick={() => setCompletionAnimation(type)}
+                  style={{
+                    padding: '8px 12px',
+                    fontSize: '11px',
+                    fontWeight: 600,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                    border: completionAnimation === type ? '2px solid #0047FF' : '1px solid rgba(255,255,255,0.2)',
+                    borderRadius: '6px',
+                    background: completionAnimation === type ? 'rgba(0, 71, 255, 0.3)' : 'rgba(0,0,0,0.5)',
+                    color: '#fff',
+                    cursor: 'pointer',
+                    backdropFilter: 'blur(10px)',
+                  }}
+                >
+                  {type}
+                </button>
+              ))}
+            </div>
             <motion.div
               key="journey"
               initial={{ opacity: 0 }}
