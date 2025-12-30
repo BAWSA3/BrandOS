@@ -4,7 +4,9 @@ import { useBrandStore } from '@/lib/store';
 import XBrandScoreHero from '@/components/XBrandScoreHero';
 
 // =============================================================================
-// Landing Page - Lead Magnet (X Brand Score)
+// Landing Page / Lead Magnet
+// This is the main landing page for BrandOS featuring the X Brand Score tool
+// as the primary lead magnet to capture email signups before accessing the app.
 // =============================================================================
 
 export default function LandingPage() {

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence, useMotionValue, animate } from 'motion/react';
+import JourneyBackground from './JourneyBackground';
 
 // ============================================================================
 // Types
@@ -1291,21 +1292,30 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
 
         {/* JOURNEY STATE */}
         {flowState === 'journey' && (
-          <motion.div
-            key="journey"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '100%',
-              paddingTop: '80px',
-            }}
-          >
+          <>
+            {/* Reactive background that builds with progress */}
+            <JourneyBackground
+              progress={((currentPhase - 1) + (itemProgress / 4)) / 4}
+              currentPhase={currentPhase}
+              theme={theme}
+            />
+            <motion.div
+              key="journey"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.5 }}
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '100%',
+                paddingTop: '80px',
+                position: 'relative',
+                zIndex: 1,
+              }}
+            >
             <AnimatePresence mode="wait">
               <JourneyPhaseCard
                 key={currentPhase}
@@ -1319,6 +1329,7 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
               />
             </AnimatePresence>
           </motion.div>
+          </>
         )}
 
         {/* REVEAL STATE */}

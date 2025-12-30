@@ -707,3 +707,4 @@ export default function ShareableScoreCard({ data, theme, onCopied }: ShareableS
   );
 }
 
+
