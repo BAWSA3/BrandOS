@@ -52,7 +52,7 @@ async function generateShareCard(data: ShareData): Promise<Blob | null> {
   // Score circle glow
   const centerX = 300;
   const centerY = canvas.height / 2;
-  const scoreColor = data.score >= 80 ? '#10B981' : data.score >= 60 ? '#0047FF' : data.score >= 40 ? '#F59E0B' : '#EF4444';
+  const scoreColor = data.score >= 80 ? '#10B981' : data.score >= 60 ? '#0047FF' : data.score >= 40 ? '#0047FF' : '#EF4444';
   
   // Outer glow
   const glowGradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, 200);
@@ -346,15 +346,6 @@ interface XProfileData {
   url?: string;
 }
 
-interface CreatorArchetype {
-  primary: string;
-  emoji: string;
-  tagline: string;
-  description: string;
-  strengths: string[];
-  growthTip: string;
-}
-
 interface BrandScoreResult {
   overallScore: number;
   phases: {
@@ -366,8 +357,6 @@ interface BrandScoreResult {
   topStrengths: string[];
   topImprovements: string[];
   summary: string;
-  archetype?: CreatorArchetype;
-  cryptoContext?: boolean;
 }
 
 interface ScoreRevealProps {
@@ -473,7 +462,7 @@ function ScoreGauge({ score, isVisible, theme }: { score: number; isVisible: boo
   const getScoreColor = (s: number) => {
     if (s >= 80) return '#10B981';
     if (s >= 60) return '#0047FF';
-    if (s >= 40) return '#F59E0B';
+    if (s >= 40) return '#0047FF';
     return '#EF4444';
   };
 
@@ -600,7 +589,7 @@ function PhaseCard({
   const getScoreColor = (s: number) => {
     if (s >= 80) return '#10B981';
     if (s >= 60) return '#0047FF';
-    if (s >= 40) return '#F59E0B';
+    if (s >= 40) return '#0047FF';
     return '#EF4444';
   };
 
@@ -794,23 +783,6 @@ export default function ScoreReveal({ profile, brandScore, isVisible, theme }: S
         {brandScore.summary}
       </motion.p>
 
-      {/* Proof point */}
-      <motion.p
-        initial={{ opacity: 0 }}
-        animate={isVisible ? { opacity: 1 } : {}}
-        transition={{ delay: 2.2 }}
-        style={{
-          fontFamily: "'VCR OSD Mono', monospace",
-          fontSize: '11px',
-          letterSpacing: '0.1em',
-          color: theme === 'dark' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)',
-          textAlign: 'center',
-          marginTop: '8px',
-        }}
-      >
-        Brands with consistent presentation see up to 23% more revenue
-      </motion.p>
-
       {/* Phase breakdown */}
       <motion.div
         initial={{ opacity: 0 }}
@@ -924,7 +896,7 @@ export default function ScoreReveal({ profile, brandScore, isVisible, theme }: S
               fontFamily: "'VCR OSD Mono', monospace",
               fontSize: '12px',
               letterSpacing: '0.15em',
-              color: '#F59E0B',
+              color: '#0047FF',
               margin: 0,
               marginBottom: '16px',
             }}
@@ -944,7 +916,7 @@ export default function ScoreReveal({ profile, brandScore, isVisible, theme }: S
                   position: 'relative',
                 }}
               >
-                <span style={{ position: 'absolute', left: 0, color: '#F59E0B' }}>→</span>
+                <span style={{ position: 'absolute', left: 0, color: '#0047FF' }}>→</span>
                 {improvement}
               </li>
             ))}
@@ -976,7 +948,7 @@ export default function ScoreReveal({ profile, brandScore, isVisible, theme }: S
             textAlign: 'center',
           }}
         >
-          Flex your score—or challenge a competitor
+          Share your score and challenge others
         </p>
         <ShareButton
           score={brandScore.overallScore}

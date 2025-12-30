@@ -907,13 +907,13 @@ code {
   margin: 0 auto;
 }
 
-/* BrandOS Logo shimmer effect */
+/* BrandOS Logo shimmer effect - Blue theme */
 .os-shimmer {
   background: linear-gradient(90deg, #0047FF 0%, #4477FF 25%, #0047FF 50%, #4477FF 75%, #0047FF 100%);
   background-size: 200% 100%;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
   animation: shimmer 3s linear infinite;
 }
 

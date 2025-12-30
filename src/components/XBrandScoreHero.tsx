@@ -1,22 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence, useMotionValue, animate } from 'motion/react';
-import Leaderboard from './Leaderboard';
-import ScoreReveal from './ScoreReveal';
-import CompetitorCompare from './CompetitorCompare';
-import BrandDNACard from './BrandDNACard';
-import type { BioLinguistics, NameAnalysis, ProfileImageAnalysis, BrandDNA, BrandImprovements } from '@/lib/gemini';
-
-// Brand Identity Response type
-interface BrandIdentityData {
-  bioLinguistics: BioLinguistics;
-  nameAnalysis: NameAnalysis;
-  profileImage: ProfileImageAnalysis | null;
-  brandDNA: BrandDNA | null;
-  improvements: BrandImprovements | null;
-}
 
 // ============================================================================
 // Types
@@ -34,15 +19,6 @@ interface XProfileData {
   url?: string;
 }
 
-interface CreatorArchetype {
-  primary: string;
-  emoji: string;
-  tagline: string;
-  description: string;
-  strengths: string[];
-  growthTip: string;
-}
-
 interface BrandScoreResult {
   overallScore: number;
   phases: {
@@ -54,15 +30,12 @@ interface BrandScoreResult {
   topStrengths: string[];
   topImprovements: string[];
   summary: string;
-  archetype: CreatorArchetype;
-  cryptoContext?: boolean;
 }
 
 type FlowState = 'input' | 'journey' | 'reveal' | 'signup';
 
 interface XBrandScoreHeroProps {
   theme: string;
-  redirectAfterSignup?: string; // URL to redirect to after signup (e.g., '/thanks')
 }
 
 // ============================================================================
@@ -198,7 +171,7 @@ const phaseConfig: PhaseConfigItem[] = [
 ];
 
 // ============================================================================
-// Confetti Component - Enhanced with Klein Blue palette
+// Confetti Component
 // ============================================================================
 function Confetti({ isActive }: { isActive: boolean }) {
   const [particles, setParticles] = useState<Array<{
@@ -208,24 +181,18 @@ function Confetti({ isActive }: { isActive: boolean }) {
     color: string;
     delay: number;
     rotation: number;
-    size: number;
-    shape: 'circle' | 'square' | 'star';
   }>>([]);
 
   useEffect(() => {
     if (isActive) {
-      // Klein Blue palette for confetti
-      const colors = ['#0047FF', '#1C60FF', '#3C8AFF', '#66B3FF', '#10B981', '#34D399', '#ffffff'];
-      const shapes: ('circle' | 'square' | 'star')[] = ['circle', 'square', 'star'];
-      const newParticles = Array.from({ length: 80 }, (_, i) => ({
+      const colors = ['#0047FF', '#4477FF', '#66a3ff', '#ffffff', '#10B981', '#FFD700'];
+      const newParticles = Array.from({ length: 60 }, (_, i) => ({
         id: i,
-        x: 50 + (Math.random() - 0.5) * 120,
+        x: 50 + (Math.random() - 0.5) * 100,
         y: Math.random() * 100,
         color: colors[Math.floor(Math.random() * colors.length)],
-        delay: Math.random() * 0.6,
-        rotation: Math.random() * 720,
-        size: 6 + Math.random() * 8,
-        shape: shapes[Math.floor(Math.random() * shapes.length)],
+        delay: Math.random() * 0.5,
+        rotation: Math.random() * 360,
       }));
       setParticles(newParticles);
     }
@@ -248,26 +215,21 @@ function Confetti({ isActive }: { isActive: boolean }) {
           animate={{
             x: `${particle.x}%`,
             y: `${particle.y}%`,
-            scale: [0, 1.3, 0.6],
+            scale: [0, 1.2, 0.8],
             opacity: [1, 1, 0],
             rotate: particle.rotation,
           }}
           transition={{
-            duration: 2.8,
+            duration: 2.5,
             delay: particle.delay,
             ease: [0.34, 1.56, 0.64, 1],
           }}
           style={{
             position: 'absolute',
-            width: particle.size,
-            height: particle.size,
-            background: particle.shape === 'star' ? 'transparent' : particle.color,
-            borderRadius: particle.shape === 'circle' ? '50%' : particle.shape === 'square' ? '2px' : '0',
-            boxShadow: `0 0 ${particle.size}px ${particle.color}50`,
-            ...(particle.shape === 'star' && {
-              clipPath: 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)',
-              background: particle.color,
-            }),
+            width: '10px',
+            height: '10px',
+            background: particle.color,
+            borderRadius: particle.id % 2 === 0 ? '50%' : '2px',
           }}
         />
       ))}
@@ -276,18 +238,17 @@ function Confetti({ isActive }: { isActive: boolean }) {
 }
 
 // ============================================================================
-// Score Gauge Component - Enhanced with dramatic entrance and glow
+// Score Gauge Component
 // ============================================================================
 function ScoreGauge({ score, isVisible, theme }: { score: number; isVisible: boolean; theme: string }) {
   const motionScore = useMotionValue(0);
   const [currentScore, setCurrentScore] = useState(0);
-  const [showParticleBurst, setShowParticleBurst] = useState(false);
 
   useEffect(() => {
     if (isVisible) {
       const timer = setTimeout(() => {
         const controls = animate(motionScore, score, {
-          duration: 2.2,
+          duration: 2,
           ease: [0.34, 1.56, 0.64, 1],
         });
 
@@ -295,14 +256,11 @@ function ScoreGauge({ score, isVisible, theme }: { score: number; isVisible: boo
           setCurrentScore(Math.round(v));
         });
 
-        // Show particle burst when animation completes
-        setTimeout(() => setShowParticleBurst(true), 2200);
-
         return () => {
           controls.stop();
           unsubscribe();
         };
-      }, 500);
+      }, 300);
 
       return () => clearTimeout(timer);
     }
@@ -326,96 +284,35 @@ function ScoreGauge({ score, isVisible, theme }: { score: number; isVisible: boo
     return 'CRITICAL';
   };
 
-  // Intensity increases as score fills up
-  const glowIntensity = (currentScore / 100) * 0.6 + 0.2;
-
   return (
-    <motion.div 
-      initial={{ opacity: 0, scale: 0.8, filter: 'blur(10px)' }}
-      animate={isVisible ? { opacity: 1, scale: 1, filter: 'blur(0px)' } : {}}
-      transition={{ duration: 0.8, delay: 0.2, ease: [0.34, 1.56, 0.64, 1] }}
-      style={{ position: 'relative', width: '220px', height: '220px' }}
-    >
-      {/* Animated glow effect - intensity increases with score */}
+    <div style={{ position: 'relative', width: '220px', height: '220px' }}>
+      {/* Glow effect */}
       <motion.div
-        initial={{ opacity: 0, scale: 0.6 }}
-        animate={isVisible ? { 
-          opacity: glowIntensity, 
-          scale: [1, 1.1, 1],
-        } : {}}
-        transition={{ 
-          opacity: { duration: 1, delay: 0.5 },
-          scale: { duration: 2, repeat: Infinity, ease: 'easeInOut' }
-        }}
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={isVisible ? { opacity: 0.4, scale: 1 } : {}}
+        transition={{ duration: 1, delay: 0.3 }}
         style={{
           position: 'absolute',
           top: '50%',
           left: '50%',
           transform: 'translate(-50%, -50%)',
-          width: '300px',
-          height: '300px',
-          background: `radial-gradient(circle, ${getScoreColor(currentScore)}60 0%, ${getScoreColor(currentScore)}20 40%, transparent 70%)`,
-          filter: 'blur(40px)',
+          width: '280px',
+          height: '280px',
+          background: `radial-gradient(circle, ${getScoreColor(currentScore)}50 0%, transparent 70%)`,
+          filter: 'blur(30px)',
           pointerEvents: 'none',
         }}
       />
 
-      {/* Particle burst effect on completion */}
-      {showParticleBurst && (
-        <>
-          {[...Array(8)].map((_, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, scale: 0, x: 0, y: 0 }}
-              animate={{ 
-                opacity: [0, 1, 0],
-                scale: [0, 1, 0.5],
-                x: Math.cos((i * Math.PI * 2) / 8) * 80,
-                y: Math.sin((i * Math.PI * 2) / 8) * 80,
-              }}
-              transition={{ duration: 0.8, delay: i * 0.05 }}
-              style={{
-                position: 'absolute',
-                top: '50%',
-                left: '50%',
-                width: 8,
-                height: 8,
-                background: getScoreColor(currentScore),
-                borderRadius: '50%',
-                boxShadow: `0 0 10px ${getScoreColor(currentScore)}`,
-              }}
-            />
-          ))}
-        </>
-      )}
-
       <svg width="220" height="220" viewBox="0 0 220 220">
-        {/* Background track */}
         <circle
           cx="110"
           cy="110"
           r={radius}
           fill="none"
-          stroke={theme === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'}
+          stroke={theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}
           strokeWidth="14"
         />
-        {/* Shimmer track */}
-        <motion.circle
-          cx="110"
-          cy="110"
-          r={radius}
-          fill="none"
-          stroke="url(#shimmerGradient)"
-          strokeWidth="14"
-          strokeLinecap="round"
-          strokeDasharray={circumference}
-          strokeDashoffset={strokeDashoffset}
-          transform="rotate(-90 110 110)"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: [0.3, 0.6, 0.3] }}
-          transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
-        />
-        {/* Main progress */}
         <motion.circle
           cx="110"
           cy="110"
@@ -428,18 +325,10 @@ function ScoreGauge({ score, isVisible, theme }: { score: number; isVisible: boo
           strokeDashoffset={strokeDashoffset}
           transform="rotate(-90 110 110)"
           style={{
-            filter: `drop-shadow(0 0 25px ${getScoreColor(currentScore)}90)`,
+            filter: `drop-shadow(0 0 20px ${getScoreColor(currentScore)}80)`,
             transition: 'stroke 0.3s ease',
           }}
         />
-        {/* Shimmer gradient definition */}
-        <defs>
-          <linearGradient id="shimmerGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="rgba(255,255,255,0.1)" />
-            <stop offset="50%" stopColor="rgba(255,255,255,0.4)" />
-            <stop offset="100%" stopColor="rgba(255,255,255,0.1)" />
-          </linearGradient>
-        </defs>
       </svg>
 
       <div
@@ -452,9 +341,9 @@ function ScoreGauge({ score, isVisible, theme }: { score: number; isVisible: boo
         }}
       >
         <motion.div
-          initial={{ scale: 0, rotate: -10 }}
-          animate={isVisible ? { scale: 1, rotate: 0 } : {}}
-          transition={{ delay: 0.6, type: 'spring', stiffness: 200, damping: 12 }}
+          initial={{ scale: 0 }}
+          animate={isVisible ? { scale: 1 } : {}}
+          transition={{ delay: 0.5, type: 'spring', stiffness: 200, damping: 15 }}
         >
           <span
             style={{
@@ -463,16 +352,15 @@ function ScoreGauge({ score, isVisible, theme }: { score: number; isVisible: boo
               fontWeight: 700,
               color: theme === 'dark' ? '#FFFFFF' : '#000000',
               lineHeight: 1,
-              textShadow: `0 0 30px ${getScoreColor(currentScore)}40`,
             }}
           >
             {currentScore}
           </span>
         </motion.div>
         <motion.span
-          initial={{ opacity: 0, y: 10 }}
-          animate={isVisible ? { opacity: 1, y: 0 } : {}}
-          transition={{ delay: 1.8, duration: 0.4 }}
+          initial={{ opacity: 0 }}
+          animate={isVisible ? { opacity: 1 } : {}}
+          transition={{ delay: 1.5 }}
           style={{
             fontFamily: "'VCR OSD Mono', monospace",
             fontSize: '11px',
@@ -480,13 +368,12 @@ function ScoreGauge({ score, isVisible, theme }: { score: number; isVisible: boo
             color: getScoreColor(currentScore),
             display: 'block',
             marginTop: '8px',
-            textShadow: `0 0 10px ${getScoreColor(currentScore)}60`,
           }}
         >
           {getScoreLabel(currentScore)}
         </motion.span>
       </div>
-    </motion.div>
+    </div>
   );
 }
 
@@ -533,7 +420,7 @@ function formatProfileValue(
 }
 
 // ============================================================================
-// Journey Phase Card Component - Enhanced with scan line and premium animations
+// Journey Phase Card Component - Enhanced with profile data display
 // ============================================================================
 function JourneyPhaseCard({
   phase,
@@ -561,7 +448,7 @@ function JourneyPhaseCard({
         y: 0,
       }}
       exit={{ opacity: 0, scale: 0.9, y: -30 }}
-      transition={{ duration: 0.6, ease: [0.34, 1.56, 0.64, 1] }}
+      transition={{ duration: 0.5, ease: [0.34, 1.56, 0.64, 1] }}
       style={{
         display: 'flex',
         flexDirection: 'column',
@@ -571,156 +458,99 @@ function JourneyPhaseCard({
         maxWidth: '560px',
       }}
     >
-      {/* Phase header with profile image and title inline */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '20px',
-          marginBottom: '8px',
-        }}
-      >
-        {/* Profile image or placeholder */}
+      {/* Profile image at top during journey */}
+      {profileImage && (
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5, ease: [0.34, 1.56, 0.64, 1] }}
-          style={{ position: 'relative', flexShrink: 0 }}
+          style={{ position: 'relative' }}
         >
-          {profileImage ? (
-            <img
-              src={`${profileImage.replace('_normal', '_200x200')}?v=${Date.now()}`}
-              alt="Profile"
-              style={{
-                width: '56px',
-                height: '56px',
-                borderRadius: '50%',
-                border: `3px solid ${theme === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)'}`,
-              }}
-            />
-          ) : (
-            /* Placeholder when profile not loaded */
-            <div
-              style={{
-                width: '56px',
-                height: '56px',
-                borderRadius: '50%',
-                background: theme === 'dark' 
-                  ? 'linear-gradient(135deg, rgba(0, 71, 255, 0.2) 0%, rgba(0, 71, 255, 0.1) 100%)'
-                  : 'linear-gradient(135deg, rgba(0, 71, 255, 0.15) 0%, rgba(0, 71, 255, 0.05) 100%)',
-                border: `3px solid ${theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)'}`,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <span style={{ fontSize: '20px', opacity: 0.5 }}>👤</span>
-            </div>
-          )}
-          {/* Outer scanning animation ring - refined timing */}
+          <img
+            src={profileImage.replace('_normal', '_200x200')}
+            alt="Profile"
+            style={{
+              width: '64px',
+              height: '64px',
+              borderRadius: '50%',
+              border: `3px solid ${theme === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)'}`,
+            }}
+          />
+          {/* Scanning animation ring */}
           <motion.div
             animate={{
               rotate: 360,
+              borderColor: ['rgba(0, 71, 255, 0.6)', 'rgba(0, 71, 255, 0.2)', 'rgba(0, 71, 255, 0.6)']
             }}
             transition={{
-              rotate: { duration: 3, repeat: Infinity, ease: 'linear' },
+              rotate: { duration: 2, repeat: Infinity, ease: 'linear' },
+              borderColor: { duration: 1, repeat: Infinity }
             }}
             style={{
               position: 'absolute',
-              inset: '-6px',
+              inset: '-4px',
               borderRadius: '50%',
-              border: '2px dashed rgba(0, 71, 255, 0.3)',
-            }}
-          />
-          {/* Inner glow pulse */}
-          <motion.div
-            animate={{
-              opacity: [0.3, 0.6, 0.3],
-              scale: [1, 1.15, 1],
-            }}
-            transition={{
-              duration: 1.5, 
-              repeat: Infinity, 
-              ease: 'easeInOut',
-            }}
-            style={{
-              position: 'absolute',
-              inset: '-3px',
-              borderRadius: '50%',
-              border: '2px solid rgba(0, 71, 255, 0.5)',
-              boxShadow: '0 0 15px rgba(0, 71, 255, 0.3)',
+              border: '2px dashed rgba(0, 71, 255, 0.4)',
             }}
           />
         </motion.div>
+      )}
 
-        {/* Phase title and subtitle */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-          {/* Phase badge - pixel art style */}
-          <motion.div
-            animate={{
-              opacity: isActive ? [0.7, 1, 0.7] : 1,
-            }}
-            transition={{ duration: 1.5, repeat: isActive ? Infinity : 0 }}
-            style={{
-              fontFamily: "'VCR OSD Mono', monospace",
-              fontSize: '10px',
-              letterSpacing: '0.15em',
-              color: isCompleted ? '#10B981' : '#0047FF',
-              marginBottom: '4px',
-              padding: '4px 8px',
-              background: isCompleted 
-                ? 'rgba(16, 185, 129, 0.1)' 
-                : 'rgba(0, 71, 255, 0.1)',
-              borderRadius: '4px',
-              border: `1px solid ${isCompleted ? 'rgba(16, 185, 129, 0.2)' : 'rgba(0, 71, 255, 0.2)'}`,
-            }}
-          >
-            PHASE {phase.number} OF 4
-          </motion.div>
+      {/* Phase badge */}
+      <motion.div
+        animate={{
+          scale: isActive ? [1, 1.05, 1] : 1,
+          boxShadow: isActive ? '0 0 30px rgba(0, 71, 255, 0.3)' : 'none',
+        }}
+        transition={{ duration: 0.5, repeat: isActive ? Infinity : 0, repeatDelay: 1 }}
+        style={{
+          fontFamily: "'VCR OSD Mono', monospace",
+          fontSize: '12px',
+          letterSpacing: '0.2em',
+          color: isCompleted ? '#10B981' : '#0047FF',
+          background: isCompleted ? 'rgba(16, 185, 129, 0.15)' : 'rgba(0, 71, 255, 0.15)',
+          padding: '10px 24px',
+          borderRadius: '30px',
+          border: `1px solid ${isCompleted ? 'rgba(16, 185, 129, 0.3)' : 'rgba(0, 71, 255, 0.3)'}`,
+        }}
+      >
+        PHASE {phase.number} OF 4
+      </motion.div>
 
-          {/* Phase title */}
-          <motion.h2
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.1, duration: 0.4 }}
-            style={{
-              fontFamily: "'VCR OSD Mono', monospace",
-              fontSize: 'clamp(28px, 7vw, 48px)',
-              fontWeight: 400,
-              letterSpacing: '0.08em',
-              color: theme === 'dark' ? '#FFFFFF' : '#000000',
-              margin: 0,
-              lineHeight: 1,
-              textShadow: theme === 'dark' ? '0 0 20px rgba(0, 71, 255, 0.3)' : 'none',
-            }}
-          >
-            {phase.title}
-          </motion.h2>
+      {/* Phase title */}
+      <motion.h2
+        animate={{ scale: isActive ? 1 : 0.9 }}
+        style={{
+          fontFamily: "'VCR OSD Mono', monospace",
+          fontSize: 'clamp(42px, 10vw, 72px)',
+          fontWeight: 400,
+          letterSpacing: '0.1em',
+          color: theme === 'dark' ? '#FFFFFF' : '#000000',
+          margin: 0,
+          textAlign: 'center',
+        }}
+      >
+        {phase.title}
+      </motion.h2>
 
-          {/* Subtitle */}
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2, duration: 0.4 }}
-            style={{
-              fontFamily: "'Helvetica Neue', sans-serif",
-              fontSize: 'clamp(13px, 2.5vw, 16px)',
-              fontWeight: 400,
-              color: theme === 'dark' ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)',
-              margin: '4px 0 0 0',
-              fontStyle: 'italic',
-            }}
-          >
-            {phase.subtitle}
-          </motion.p>
-        </div>
-      </div>
+      {/* Subtitle */}
+      <motion.p
+        style={{
+          fontFamily: "'Helvetica Neue', sans-serif",
+          fontSize: 'clamp(16px, 3vw, 20px)',
+          fontWeight: 400,
+          color: theme === 'dark' ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)',
+          margin: 0,
+          fontStyle: 'italic',
+        }}
+      >
+        {phase.subtitle}
+      </motion.p>
 
       {/* Phase explanation */}
       <motion.p
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 0.3, duration: 0.5 }}
+        transition={{ delay: 0.3 }}
         style={{
           fontFamily: "'Helvetica Neue', sans-serif",
           fontSize: '14px',
@@ -734,51 +564,36 @@ function JourneyPhaseCard({
         {phase.explanation}
       </motion.p>
 
-      {/* Progress ring - enhanced with shimmer */}
-      <div style={{ position: 'relative', width: '100px', height: '100px' }}>
-        {/* Glow background */}
-        <motion.div
-          animate={{
-            opacity: [0.2, 0.4, 0.2],
-            scale: [1, 1.1, 1],
-          }}
-          transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-          style={{
-            position: 'absolute',
-            inset: -10,
-            borderRadius: '50%',
-            background: `radial-gradient(circle, ${isCompleted ? 'rgba(16, 185, 129, 0.3)' : 'rgba(0, 71, 255, 0.3)'} 0%, transparent 70%)`,
-            filter: 'blur(10px)',
-          }}
-        />
-        <svg width="100" height="100" viewBox="0 0 100 100">
+      {/* Progress ring */}
+      <div style={{ position: 'relative', width: '90px', height: '90px' }}>
+        <svg width="90" height="90" viewBox="0 0 90 90">
           <circle
-            cx="50"
-            cy="50"
-            r="42"
+            cx="45"
+            cy="45"
+            r="38"
             fill="none"
-            stroke={theme === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'}
+            stroke={theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}
             strokeWidth="5"
           />
           <motion.circle
-            cx="50"
-            cy="50"
-            r="42"
+            cx="45"
+            cy="45"
+            r="38"
             fill="none"
             stroke={isCompleted ? '#10B981' : '#0047FF'}
             strokeWidth="5"
             strokeLinecap="round"
-            strokeDasharray={2 * Math.PI * 42}
-            initial={{ strokeDashoffset: 2 * Math.PI * 42 }}
+            strokeDasharray={2 * Math.PI * 38}
+            initial={{ strokeDashoffset: 2 * Math.PI * 38 }}
             animate={{
               strokeDashoffset: isCompleted
                 ? 0
-                : 2 * Math.PI * 42 * (1 - itemProgress / phase.items.length)
+                : 2 * Math.PI * 38 * (1 - itemProgress / phase.items.length)
             }}
-            transition={{ duration: 0.4, ease: 'easeOut' }}
-            transform="rotate(-90 50 50)"
+            transition={{ duration: 0.3 }}
+            transform="rotate(-90 45 45)"
             style={{
-              filter: `drop-shadow(0 0 10px ${isCompleted ? '#10B981' : '#0047FF'}90)`,
+              filter: `drop-shadow(0 0 8px ${isCompleted ? '#10B981' : '#0047FF'}80)`,
             }}
           />
         </svg>
@@ -789,8 +604,7 @@ function JourneyPhaseCard({
             left: '50%',
             transform: 'translate(-50%, -50%)',
             fontFamily: "'VCR OSD Mono', monospace",
-            fontSize: '20px',
-            fontWeight: 600,
+            fontSize: '18px',
             color: theme === 'dark' ? '#FFFFFF' : '#000000',
           }}
         >
@@ -798,49 +612,20 @@ function JourneyPhaseCard({
         </div>
       </div>
 
-      {/* Analysis items with scan line effect */}
+      {/* Analysis items with detailed info */}
       <div
         style={{
-          position: 'relative',
           display: 'flex',
           flexDirection: 'column',
           gap: '4px',
           width: '100%',
-          background: theme === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.5)',
+          background: theme === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)',
           backdropFilter: 'blur(20px)',
           border: `1px solid ${theme === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'}`,
           borderRadius: '20px',
           padding: '20px',
-          overflow: 'hidden',
         }}
       >
-        {/* Scan line effect */}
-        <motion.div
-          initial={{ top: '-10%' }}
-          animate={{ top: '110%' }}
-          transition={{ 
-            duration: 2, 
-            repeat: Infinity, 
-            ease: 'linear',
-          }}
-          style={{
-            position: 'absolute',
-            left: 0,
-            right: 0,
-            height: '3px',
-            background: `linear-gradient(90deg, 
-              transparent 0%, 
-              ${theme === 'dark' ? 'rgba(0, 71, 255, 0.4)' : 'rgba(0, 71, 255, 0.3)'} 20%,
-              ${theme === 'dark' ? 'rgba(0, 71, 255, 0.6)' : 'rgba(0, 71, 255, 0.5)'} 50%, 
-              ${theme === 'dark' ? 'rgba(0, 71, 255, 0.4)' : 'rgba(0, 71, 255, 0.3)'} 80%,
-              transparent 100%
-            )`,
-            boxShadow: `0 0 15px ${theme === 'dark' ? 'rgba(0, 71, 255, 0.5)' : 'rgba(0, 71, 255, 0.4)'}`,
-            zIndex: 10,
-            pointerEvents: 'none',
-          }}
-        />
-
         {phase.items.map((item, index) => {
           const isItemComplete = isCompleted || index < itemProgress;
           const isItemActive = !isCompleted && index === Math.floor(itemProgress);
@@ -854,15 +639,14 @@ function JourneyPhaseCard({
                 opacity: 1,
                 x: 0,
               }}
-              transition={{ duration: 0.4, delay: index * 0.08, ease: [0.34, 1.56, 0.64, 1] }}
+              transition={{ duration: 0.3, delay: index * 0.1 }}
               style={{
                 padding: '12px 16px',
                 borderRadius: '12px',
                 background: isItemActive
-                  ? (theme === 'dark' ? 'rgba(0, 71, 255, 0.12)' : 'rgba(0, 71, 255, 0.1)')
+                  ? (theme === 'dark' ? 'rgba(0, 71, 255, 0.1)' : 'rgba(0, 71, 255, 0.08)')
                   : 'transparent',
-                transition: 'background 0.4s ease',
-                position: 'relative',
+                transition: 'background 0.3s ease',
               }}
             >
               <div
@@ -872,24 +656,18 @@ function JourneyPhaseCard({
                   gap: '12px',
                 }}
               >
-                {/* Status indicator - enhanced */}
+                {/* Status indicator */}
                 <motion.div
                   animate={{
                     background: isItemComplete
                       ? '#10B981'
                       : isItemActive
                         ? '#0047FF'
-                        : theme === 'dark' ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)',
-                    scale: isItemActive ? [1, 1.4, 1] : 1,
-                    boxShadow: isItemActive 
-                      ? ['0 0 0px rgba(0, 71, 255, 0.5)', '0 0 12px rgba(0, 71, 255, 0.8)', '0 0 0px rgba(0, 71, 255, 0.5)']
-                      : isItemComplete
-                        ? '0 0 8px rgba(16, 185, 129, 0.5)'
-                        : 'none',
+                        : theme === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)',
+                    scale: isItemActive ? [1, 1.3, 1] : 1,
                   }}
                   transition={{
-                    scale: { duration: 0.8, repeat: isItemActive ? Infinity : 0 },
-                    boxShadow: { duration: 0.8, repeat: isItemActive ? Infinity : 0 },
+                    scale: { duration: 0.6, repeat: isItemActive ? Infinity : 0 },
                   }}
                   style={{
                     width: '10px',
@@ -923,7 +701,7 @@ function JourneyPhaseCard({
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: 'auto' }}
                         exit={{ opacity: 0, height: 0 }}
-                        transition={{ duration: 0.25 }}
+                        transition={{ duration: 0.2 }}
                         style={{
                           fontFamily: "'Helvetica Neue', sans-serif",
                           fontSize: '11px',
@@ -943,25 +721,24 @@ function JourneyPhaseCard({
               <AnimatePresence>
                 {isItemActive && profileValue && (
                   <motion.div
-                    initial={{ opacity: 0, y: -8, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: -8, scale: 0.95 }}
-                    transition={{ duration: 0.35, delay: 0.15, ease: [0.34, 1.56, 0.64, 1] }}
+                    initial={{ opacity: 0, y: -5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -5 }}
+                    transition={{ duration: 0.3, delay: 0.2 }}
                     style={{
-                      marginTop: '10px',
+                      marginTop: '8px',
                       marginLeft: '22px',
-                      padding: '10px 14px',
+                      padding: '8px 12px',
                       background: theme === 'dark' ? 'rgba(0, 71, 255, 0.15)' : 'rgba(0, 71, 255, 0.1)',
-                      borderRadius: '10px',
+                      borderRadius: '8px',
                       border: `1px solid ${theme === 'dark' ? 'rgba(0, 71, 255, 0.25)' : 'rgba(0, 71, 255, 0.2)'}`,
-                      boxShadow: `0 0 15px ${theme === 'dark' ? 'rgba(0, 71, 255, 0.1)' : 'rgba(0, 71, 255, 0.08)'}`,
                     }}
                   >
                     <span
                       style={{
                         fontFamily: "'Helvetica Neue', sans-serif",
                         fontSize: '12px',
-                        color: theme === 'dark' ? 'rgba(255,255,255,0.85)' : 'rgba(0,0,0,0.8)',
+                        color: theme === 'dark' ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.8)',
                         wordBreak: 'break-word',
                       }}
                     >
@@ -979,16 +756,19 @@ function JourneyPhaseCard({
 }
 
 // ============================================================================
-// Journey Progress Indicator - Enhanced with pulsing active state
+// Journey Progress Indicator
 // ============================================================================
 function JourneyProgressIndicator({
   currentPhase,
+  phaseProgress,
   theme
 }: {
   currentPhase: number;
   phaseProgress: number;
   theme: string;
 }) {
+  const overallProgress = ((currentPhase - 1) + phaseProgress) / 4;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: -20 }}
@@ -996,35 +776,28 @@ function JourneyProgressIndicator({
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.5 }}
       style={{
-        position: 'fixed',
+        position: 'absolute',
         top: '24px',
-        left: 0,
-        right: 0,
+        left: '50%',
+        transform: 'translateX(-50%)',
         zIndex: 100,
         display: 'flex',
-        justifyContent: 'center',
+        flexDirection: 'column',
         alignItems: 'center',
-        width: '100%',
-        pointerEvents: 'none',
+        gap: '12px',
       }}
     >
-      {/* Phase pills container */}
-      <motion.div
-        initial={{ scale: 0.9 }}
-        animate={{ scale: 1 }}
-        transition={{ delay: 0.2, type: 'spring', stiffness: 200, damping: 20 }}
+      {/* Phase pills */}
+      <div
         style={{
           display: 'flex',
-          gap: '10px',
-          padding: '12px 24px',
-          background: theme === 'dark' ? 'rgba(0, 0, 0, 0.75)' : 'rgba(255, 255, 255, 0.92)',
+          gap: '8px',
+          padding: '8px 16px',
+          background: theme === 'dark' ? 'rgba(0, 0, 0, 0.6)' : 'rgba(255, 255, 255, 0.8)',
           backdropFilter: 'blur(20px)',
-          borderRadius: '50px',
-          border: `1px solid ${theme === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'}`,
-          boxShadow: theme === 'dark' 
-            ? '0 4px 30px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255,255,255,0.05)' 
-            : '0 4px 30px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0,0,0,0.02)',
-          pointerEvents: 'auto',
+          borderRadius: '40px',
+          border: `1px solid ${theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
+          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
         }}
       >
         {phaseConfig.map((phase, index) => {
@@ -1036,64 +809,48 @@ function JourneyProgressIndicator({
             <motion.div
               key={phase.id}
               animate={{
-                scale: isActive ? [1, 1.08, 1] : 1,
-                opacity: isActive || isCompleted ? 1 : 0.35,
-              }}
-              transition={{
-                scale: { duration: 1.2, repeat: isActive ? Infinity : 0, ease: 'easeInOut' },
+                scale: isActive ? 1.05 : 1,
+                opacity: isActive || isCompleted ? 1 : 0.4,
               }}
               style={{
-                position: 'relative',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center',
-                width: '36px',
-                height: '36px',
-                borderRadius: '50%',
+                gap: '6px',
+                padding: '6px 12px',
+                borderRadius: '20px',
                 background: isActive
                   ? 'rgba(0, 71, 255, 0.15)'
                   : isCompleted
                     ? 'rgba(16, 185, 129, 0.15)'
-                    : theme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+                    : 'transparent',
                 border: isActive
-                  ? '2px solid #0047FF'
+                  ? '1px solid rgba(0, 71, 255, 0.3)'
                   : isCompleted
-                    ? '2px solid #10B981'
-                    : `1px solid ${theme === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)'}`,
-                transition: 'background 0.3s ease, border-color 0.3s ease',
+                    ? '1px solid rgba(16, 185, 129, 0.3)'
+                    : '1px solid transparent',
               }}
             >
-              {/* Pulse ring for active */}
-              {isActive && (
-                <motion.div
-                  animate={{
-                    scale: [1, 1.5, 1.8],
-                    opacity: [0.5, 0.2, 0],
-                  }}
-                  transition={{
-                    duration: 1.5,
-                    repeat: Infinity,
-                    ease: 'easeOut',
-                  }}
-                  style={{
-                    position: 'absolute',
-                    inset: -2,
-                    borderRadius: '50%',
-                    border: '2px solid #0047FF',
-                    pointerEvents: 'none',
-                  }}
-                />
-              )}
               <span
                 style={{
                   fontFamily: "'VCR OSD Mono', monospace",
-                  fontSize: '13px',
-                  fontWeight: 600,
+                  fontSize: '10px',
+                  fontWeight: 500,
                   color: isActive
                     ? '#0047FF'
                     : isCompleted
                       ? '#10B981'
                       : theme === 'dark' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)',
+                  width: '16px',
+                  height: '16px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderRadius: '50%',
+                  background: isActive
+                    ? 'rgba(0, 71, 255, 0.2)'
+                    : isCompleted
+                      ? 'rgba(16, 185, 129, 0.2)'
+                      : theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
                 }}
               >
                 {isCompleted ? '✓' : phaseNum}
@@ -1101,7 +858,40 @@ function JourneyProgressIndicator({
             </motion.div>
           );
         })}
-      </motion.div>
+      </div>
+
+      {/* Progress bar */}
+      <div
+        style={{
+          width: '200px',
+          height: '3px',
+          background: theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+          borderRadius: '2px',
+          overflow: 'hidden',
+        }}
+      >
+        <motion.div
+          animate={{ width: `${overallProgress * 100}%` }}
+          transition={{ duration: 0.3, ease: 'easeOut' }}
+          style={{
+            height: '100%',
+            background: 'linear-gradient(90deg, #0047FF 0%, #10B981 100%)',
+            borderRadius: '2px',
+            boxShadow: '0 0 10px rgba(0, 71, 255, 0.5)',
+          }}
+        />
+      </div>
+
+      <span
+        style={{
+          fontFamily: "'VCR OSD Mono', monospace",
+          fontSize: '10px',
+          letterSpacing: '0.1em',
+          color: theme === 'dark' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)',
+        }}
+      >
+        {Math.round(overallProgress * 100)}% ANALYZED
+      </span>
     </motion.div>
   );
 }
@@ -1109,8 +899,7 @@ function JourneyProgressIndicator({
 // ============================================================================
 // Main Component
 // ============================================================================
-export default function XBrandScoreHero({ theme, redirectAfterSignup }: XBrandScoreHeroProps) {
-  const router = useRouter();
+export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
   const [flowState, setFlowState] = useState<FlowState>('input');
   const [username, setUsername] = useState('');
   const [error, setError] = useState('');
@@ -1121,28 +910,10 @@ export default function XBrandScoreHero({ theme, redirectAfterSignup }: XBrandSc
   const [showConfetti, setShowConfetti] = useState(false);
   const [email, setEmail] = useState('');
   const [signupStatus, setSignupStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
-  const [showLeaderboard, setShowLeaderboard] = useState(false);
-  const [showCompetitorCompare, setShowCompetitorCompare] = useState(false);
-  const [brandIdentity, setBrandIdentity] = useState<BrandIdentityData | null>(null);
-  const [showBrandDNA, setShowBrandDNA] = useState(false);
-  const [brandIdentityLoading, setBrandIdentityLoading] = useState(false);
 
   const apiResultRef = useRef<{ profile: XProfileData; brandScore: BrandScoreResult } | null>(null);
   const apiCompleteRef = useRef(false);
   const apiErrorRef = useRef<string | null>(null);
-
-  // Handle checking another user's score from leaderboard
-  const handleCheckFromLeaderboard = useCallback((leaderboardUsername: string) => {
-    setUsername(leaderboardUsername);
-    setShowLeaderboard(false);
-    // Trigger the form submission with the new username
-    setTimeout(() => {
-      const form = document.querySelector('form');
-      if (form) {
-        form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
-      }
-    }, 100);
-  }, []);
 
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
@@ -1157,7 +928,6 @@ export default function XBrandScoreHero({ theme, redirectAfterSignup }: XBrandSc
     setFlowState('journey');
     setCurrentPhase(1);
     setItemProgress(0);
-    apiResultRef.current = null;
     apiCompleteRef.current = false;
     apiErrorRef.current = null;
 
@@ -1274,48 +1044,6 @@ export default function XBrandScoreHero({ theme, redirectAfterSignup }: XBrandSc
     };
   }, [flowState, currentPhase, itemProgress]);
 
-  // Fetch Brand Identity data when entering reveal state
-  useEffect(() => {
-    if (flowState === 'reveal' && profile && !brandIdentity && !brandIdentityLoading) {
-      setBrandIdentityLoading(true);
-      
-      // Convert flat profile to X API format for the API call
-      const xProfileData = {
-        name: profile.name,
-        username: profile.username,
-        description: profile.description,
-        profile_image_url: profile.profile_image_url,
-        public_metrics: {
-          followers_count: profile.followers_count,
-          following_count: profile.following_count,
-          tweet_count: profile.tweet_count,
-          listed_count: 0, // Not available in flat profile
-        },
-        verified: profile.verified,
-        location: profile.location,
-        url: profile.url,
-      };
-
-      fetch('/api/x-brand-identity', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ profile: xProfileData }),
-      })
-        .then(async (response) => {
-          const data = await response.json();
-          if (data.success && data.analysis) {
-            setBrandIdentity(data.analysis);
-          }
-        })
-        .catch((err) => {
-          console.error('Brand Identity fetch error:', err);
-        })
-        .finally(() => {
-          setBrandIdentityLoading(false);
-        });
-    }
-  }, [flowState, profile, brandIdentity, brandIdentityLoading]);
-
   // Handle signup
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -1342,23 +1070,6 @@ export default function XBrandScoreHero({ theme, redirectAfterSignup }: XBrandSc
       }
 
       setSignupStatus('success');
-
-      // Redirect to thanks page after signup if redirectAfterSignup is set
-      if (redirectAfterSignup && profile && brandScore) {
-        // Build URL with user data
-        const params = new URLSearchParams({
-          username: profile.username,
-          name: profile.name,
-          profile_image: profile.profile_image_url,
-          score: brandScore.overallScore.toString(),
-          scoreData: encodeURIComponent(JSON.stringify(brandScore)),
-        });
-        
-        // Redirect after a short delay to show success state
-        setTimeout(() => {
-          router.push(`${redirectAfterSignup}?${params.toString()}`);
-        }, 1000);
-      }
     } catch {
       setSignupStatus('error');
     }
@@ -1398,7 +1109,7 @@ export default function XBrandScoreHero({ theme, redirectAfterSignup }: XBrandSc
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -30 }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.5 }}
             style={{
               display: 'flex',
               flexDirection: 'column',
@@ -1408,159 +1119,83 @@ export default function XBrandScoreHero({ theme, redirectAfterSignup }: XBrandSc
               width: '100%',
             }}
           >
-            {/* Logo with floating accent shapes */}
-            <div style={{ position: 'relative' }}>
-              {/* Floating accent - top left */}
-              <motion.div
-                animate={{ 
-                  y: [0, -8, 0],
-                  rotate: [0, 5, 0],
-                  opacity: [0.3, 0.5, 0.3],
-                }}
-                transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+            {/* Logo */}
+            <motion.h1
+              style={{
+                fontSize: 'clamp(60px, 14vw, 160px)',
+                lineHeight: 1.1,
+                margin: 0,
+                display: 'flex',
+                alignItems: 'baseline',
+                letterSpacing: '-0.05em',
+                overflow: 'visible',
+              }}
+            >
+              <span
                 style={{
-                  position: 'absolute',
-                  top: '-20px',
-                  left: '-30px',
-                  width: '20px',
-                  height: '20px',
-                  borderRadius: '50%',
-                  border: `2px solid ${theme === 'dark' ? 'rgba(0, 71, 255, 0.4)' : 'rgba(0, 71, 255, 0.3)'}`,
+                  fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
+                  fontWeight: 700,
+                  fontStyle: 'italic',
+                  color: theme === 'dark' ? '#FFFFFF' : '#000000',
                 }}
-              />
-              {/* Floating accent - bottom right */}
-              <motion.div
-                animate={{ 
-                  y: [0, 10, 0],
-                  x: [0, -5, 0],
-                  opacity: [0.2, 0.4, 0.2],
-                }}
-                transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
-                style={{
-                  position: 'absolute',
-                  bottom: '-15px',
-                  right: '-40px',
-                  width: '14px',
-                  height: '14px',
-                  background: theme === 'dark' ? 'rgba(0, 71, 255, 0.4)' : 'rgba(0, 71, 255, 0.3)',
-                  borderRadius: '3px',
-                  transform: 'rotate(45deg)',
-                }}
-              />
-              {/* Pain-point hook */}
-              <motion.p
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4 }}
+              >
+                Brand
+              </span>
+              <span
+                className="os-shimmer"
                 style={{
                   fontFamily: "'VCR OSD Mono', monospace",
-                  fontSize: '12px',
-                  letterSpacing: '0.15em',
-                  color: '#0047FF',
-                  textTransform: 'uppercase',
-                  marginBottom: '16px',
-                  textAlign: 'center',
+                  fontWeight: 400,
+                  fontSize: '1.35em',
+                  fontStyle: 'italic',
+                  display: 'inline-block',
+                  paddingRight: '0.1em',
+                  verticalAlign: 'baseline',
+                  position: 'relative',
+                  top: '0.05em',
                 }}
               >
-                STOP GUESSING IF YOUR CONTENT SOUNDS LIKE YOU
-              </motion.p>
-
-              {/* Floating accent - small dot */}
-              <motion.div
-                animate={{ 
-                  scale: [1, 1.5, 1],
-                  opacity: [0.4, 0.7, 0.4],
-                }}
-                transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
+                OS
+              </span>
+              <span
+                className="typing-cursor"
                 style={{
-                  position: 'absolute',
-                  top: '30%',
-                  right: '-50px',
-                  width: '8px',
-                  height: '8px',
-                  background: '#0047FF',
-                  borderRadius: '50%',
-                  boxShadow: '0 0 10px rgba(0, 71, 255, 0.5)',
+                  display: 'inline-block',
+                  width: '3px',
+                  height: '0.9em',
+                  backgroundColor: '#0047FF',
+                  marginLeft: '4px',
+                  verticalAlign: 'baseline',
+                  animation: 'cursorBlink 0.8s ease-in-out infinite',
                 }}
               />
-              <motion.h1
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.1 }}
-                style={{
-                  fontSize: 'clamp(60px, 14vw, 160px)',
-                  lineHeight: 1.1,
-                  margin: 0,
-                  display: 'flex',
-                  alignItems: 'baseline',
-                  letterSpacing: '-0.05em',
-                  overflow: 'visible',
-                }}
-              >
-                <span
-                  style={{
-                    fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
-                    fontWeight: 700,
-                    fontStyle: 'italic',
-                    color: theme === 'dark' ? '#FFFFFF' : '#000000',
-                  }}
-                >
-                  Brand
-                </span>
-                <span
-                  className="os-shimmer"
-                  style={{
-                    fontFamily: "'VCR OSD Mono', monospace",
-                    fontWeight: 400,
-                    fontSize: '1.25em',
-                    fontStyle: 'italic',
-                    display: 'inline-block',
-                    paddingRight: '0.1em',
-                    position: 'relative',
-                    top: '0.05em',
-                  }}
-                >
-                  OS
-                </span>
-                <motion.span
-                  animate={{ opacity: [1, 0, 1] }}
-                  transition={{ duration: 1, repeat: Infinity, times: [0, 0.5, 1] }}
-                  style={{
-                    display: 'inline-block',
-                    width: '4px',
-                    height: '0.85em',
-                    backgroundColor: '#0047FF',
-                    marginLeft: '6px',
-                    verticalAlign: 'baseline',
-                    boxShadow: '0 0 8px rgba(0, 71, 255, 0.6)',
-                  }}
-                />
-              </motion.h1>
-            </div>
+            </motion.h1>
 
             {/* Tagline */}
             <motion.p
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.25, duration: 0.5 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.2 }}
               style={{
-                fontFamily: "'Helvetica Neue', sans-serif",
-                fontSize: 'clamp(18px, 3vw, 28px)',
+                fontFamily: "'VCR OSD Mono', monospace",
+                fontSize: 'clamp(14px, 2vw, 18px)',
                 fontWeight: 400,
-                color: theme === 'dark' ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)',
+                letterSpacing: '0.15em',
+                color: theme === 'dark' ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)',
                 textAlign: 'center',
                 margin: 0,
+                textTransform: 'uppercase',
               }}
             >
-              The AI operating system that understands, scales and enforces your brand's identity.
+              DEFINE. CHECK. GENERATE. SCALE.
             </motion.p>
 
-            {/* Input Form - Enhanced */}
+            {/* Input Form */}
             <motion.form
               onSubmit={handleSubmit}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4, duration: 0.5 }}
+              transition={{ delay: 0.4 }}
               style={{
                 display: 'flex',
                 flexDirection: 'column',
@@ -1570,9 +1205,7 @@ export default function XBrandScoreHero({ theme, redirectAfterSignup }: XBrandSc
                 maxWidth: '420px',
               }}
             >
-              <motion.div 
-                style={{ position: 'relative', width: '100%' }}
-              >
+              <div style={{ position: 'relative', width: '100%' }}>
                 <input
                   type="text"
                   value={username}
@@ -1583,91 +1216,56 @@ export default function XBrandScoreHero({ theme, redirectAfterSignup }: XBrandSc
                     width: '100%',
                     fontFamily: "'Helvetica Neue', sans-serif",
                     fontSize: '18px',
-                    padding: '20px 24px',
+                    padding: '20px',
+                    textAlign: 'center',
                     borderRadius: '16px',
-                    border: `2px solid ${error ? '#EF4444' : theme === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)'}`,
-                    background: theme === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.6)',
-                    backdropFilter: 'blur(12px)',
-                    color: theme === 'dark' ? '#FFFFFF' : '#1a1a1a',
+                    border: `2px solid ${error ? '#EF4444' : theme === 'dark' ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)'}`,
+                    background: theme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
+                    color: theme === 'dark' ? '#FFFFFF' : '#000000',
                     outline: 'none',
-                    transition: 'all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                    transition: 'all 0.3s ease',
                   }}
                   onFocus={(e) => {
-                    e.currentTarget.style.borderColor = theme === 'dark' ? '#0047FF' : '#3C8AFF';
-                    e.currentTarget.style.boxShadow = theme === 'dark' 
-                      ? '0 0 0 4px rgba(0, 71, 255, 0.2), 0 0 30px rgba(0, 71, 255, 0.15)' 
-                      : '0 0 0 4px rgba(60, 138, 255, 0.2), 0 0 30px rgba(60, 138, 255, 0.1)';
-                    e.currentTarget.style.transform = 'translateY(-2px)';
+                    e.currentTarget.style.borderColor = '#0047FF';
+                    e.currentTarget.style.boxShadow = '0 0 0 4px rgba(0, 71, 255, 0.15)';
                   }}
                   onBlur={(e) => {
-                    e.currentTarget.style.borderColor = theme === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)';
+                    e.currentTarget.style.borderColor = theme === 'dark' ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)';
                     e.currentTarget.style.boxShadow = 'none';
-                    e.currentTarget.style.transform = 'translateY(0)';
                   }}
                 />
-              </motion.div>
+              </div>
 
               <motion.button
                 type="submit"
-                whileHover={{ 
-                  scale: 1.02, 
-                  boxShadow: theme === 'dark' 
-                    ? '0 0 40px rgba(0, 71, 255, 0.5), 0 8px 30px rgba(0, 71, 255, 0.3)' 
-                    : '0 0 40px rgba(60, 138, 255, 0.4), 0 8px 30px rgba(60, 138, 255, 0.25)',
-                  y: -2,
-                }}
-                whileTap={{ scale: 0.98, y: 0 }}
-                transition={{ duration: 0.2, ease: [0.34, 1.56, 0.64, 1] }}
+                whileHover={{ scale: 1.02, boxShadow: '0 0 40px rgba(0, 71, 255, 0.5)' }}
+                whileTap={{ scale: 0.98 }}
                 style={{
                   width: '100%',
                   fontFamily: "'VCR OSD Mono', monospace",
                   fontSize: '14px',
                   letterSpacing: '0.15em',
                   color: '#FFFFFF',
-                  background: theme === 'dark'
-                    ? 'linear-gradient(135deg, #0047FF 0%, #002FA7 100%)'
-                    : 'linear-gradient(135deg, #3C8AFF 0%, #0047FF 100%)',
+                  background: '#0047FF',
                   border: 'none',
                   padding: '20px 32px',
                   borderRadius: '16px',
                   cursor: 'pointer',
-                  boxShadow: theme === 'dark' 
-                    ? '0 0 25px rgba(0, 71, 255, 0.3), 0 4px 15px rgba(0, 71, 255, 0.2)' 
-                    : '0 0 25px rgba(60, 138, 255, 0.25), 0 4px 15px rgba(60, 138, 255, 0.15)',
-                  position: 'relative',
-                  overflow: 'hidden',
+                  boxShadow: '0 0 30px rgba(0, 71, 255, 0.3)',
                 }}
               >
-                {/* Shimmer effect on button */}
-                <motion.div
-                  animate={{ x: ['-100%', '200%'] }}
-                  transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut', repeatDelay: 3 }}
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.2) 50%, transparent 100%)',
-                    pointerEvents: 'none',
-                  }}
-                />
-                <span style={{ position: 'relative', zIndex: 1 }}>GET YOUR BRAND SCORE</span>
+                WHAT'S YOUR BRAND SCORE?
               </motion.button>
 
               {error && (
                 <motion.p
-                  initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
                   style={{
                     fontFamily: "'VCR OSD Mono', monospace",
                     fontSize: '12px',
                     color: '#EF4444',
                     margin: 0,
-                    padding: '8px 16px',
-                    background: 'rgba(239, 68, 68, 0.1)',
-                    borderRadius: '8px',
-                    border: '1px solid rgba(239, 68, 68, 0.2)',
                   }}
                 >
                   {error}
@@ -1690,59 +1288,6 @@ export default function XBrandScoreHero({ theme, redirectAfterSignup }: XBrandSc
             >
               ENTER ANY PUBLIC X PROFILE TO GET STARTED
             </motion.p>
-
-            {/* Leaderboard Toggle */}
-            <motion.button
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.8 }}
-              onClick={() => setShowLeaderboard(!showLeaderboard)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '12px 24px',
-                background: showLeaderboard
-                  ? (theme === 'dark' ? 'rgba(28, 96, 255, 0.15)' : 'rgba(60, 138, 255, 0.15)')
-                  : (theme === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.2)'),
-                backdropFilter: 'blur(12px)',
-                border: `1px solid ${showLeaderboard
-                  ? (theme === 'dark' ? 'rgba(28, 96, 255, 0.3)' : 'rgba(60, 138, 255, 0.3)')
-                  : (theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.4)')}`,
-                borderRadius: '30px',
-                color: showLeaderboard
-                  ? (theme === 'dark' ? '#1C60FF' : '#3C8AFF')
-                  : (theme === 'dark' ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.9)'),
-                fontFamily: "'VCR OSD Mono', monospace",
-                fontSize: '11px',
-                letterSpacing: '0.1em',
-                cursor: 'pointer',
-                transition: 'all 0.35s ease-out',
-              }}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
-              </svg>
-              {showLeaderboard ? 'HIDE LEADERBOARD' : 'VIEW LEADERBOARD'}
-            </motion.button>
-
-            {/* Leaderboard */}
-            <AnimatePresence>
-              {showLeaderboard && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  transition={{ duration: 0.3 }}
-                  style={{ width: '100%', maxWidth: '600px', overflow: 'hidden' }}
-                >
-                  <Leaderboard
-                    theme={theme}
-                    onCheckScore={handleCheckFromLeaderboard}
-                  />
-                </motion.div>
-              )}
-            </AnimatePresence>
           </motion.div>
         )}
 
@@ -1805,7 +1350,7 @@ export default function XBrandScoreHero({ theme, redirectAfterSignup }: XBrandSc
               }}
             >
               <img
-                src={`${profile.profile_image_url.replace('_normal', '_200x200')}?v=${Date.now()}`}
+                src={profile.profile_image_url.replace('_normal', '_200x200')}
                 alt={profile.name}
                 style={{
                   width: '56px',
@@ -1864,417 +1409,30 @@ export default function XBrandScoreHero({ theme, redirectAfterSignup }: XBrandSc
               {brandScore.summary}
             </motion.p>
 
-            {/* Creator Archetype Card - Spring bounce entrance */}
-            {brandScore.archetype && (
-              <motion.div
-                initial={{ opacity: 0, y: 40, scale: 0.9 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                transition={{ 
-                  delay: 2.2, 
-                  type: 'spring', 
-                  stiffness: 200, 
-                  damping: 15,
-                  mass: 0.8,
-                }}
-                style={{
-                  width: '100%',
-                  background: theme === 'dark'
-                    ? 'linear-gradient(135deg, rgba(0, 71, 255, 0.1) 0%, rgba(16, 185, 129, 0.05) 100%)'
-                    : 'linear-gradient(135deg, rgba(60, 138, 255, 0.1) 0%, rgba(16, 185, 129, 0.05) 100%)',
-                  border: `1px solid ${theme === 'dark' ? 'rgba(0, 71, 255, 0.2)' : 'rgba(60, 138, 255, 0.2)'}`,
-                  borderRadius: '16px',
-                  padding: '24px',
-                  marginTop: '8px',
-                }}
-              >
-                {/* Archetype Header */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-                  <span style={{ fontSize: '32px' }}>{brandScore.archetype.emoji}</span>
-                  <div>
-                    <div
-                      style={{
-                        fontFamily: "'VCR OSD Mono', monospace",
-                        fontSize: '10px',
-                        letterSpacing: '0.15em',
-                        color: theme === 'dark' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)',
-                        marginBottom: '4px',
-                      }}
-                    >
-                      YOUR CREATOR ARCHETYPE
-                    </div>
-                    <div
-                      style={{
-                        fontFamily: "'Helvetica Neue', sans-serif",
-                        fontSize: '20px',
-                        fontWeight: 700,
-                        color: theme === 'dark' ? '#FFFFFF' : '#000000',
-                      }}
-                    >
-                      {brandScore.archetype.primary}
-                    </div>
-                    <div
-                      style={{
-                        fontFamily: "'Helvetica Neue', sans-serif",
-                        fontSize: '13px',
-                        fontWeight: 500,
-                        color: '#0047FF',
-                        marginTop: '2px',
-                      }}
-                    >
-                      {brandScore.archetype.tagline}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Archetype Description */}
-                <p
-                  style={{
-                    fontFamily: "'Helvetica Neue', sans-serif",
-                    fontSize: '14px',
-                    lineHeight: 1.6,
-                    color: theme === 'dark' ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)',
-                    margin: '0 0 16px 0',
-                  }}
-                >
-                  {brandScore.archetype.description}
-                </p>
-
-                {/* Archetype Strengths */}
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
-                  {brandScore.archetype.strengths.map((strength, i) => (
-                    <span
-                      key={i}
-                      style={{
-                        fontFamily: "'VCR OSD Mono', monospace",
-                        fontSize: '10px',
-                        letterSpacing: '0.05em',
-                        color: '#10B981',
-                        background: 'rgba(16, 185, 129, 0.1)',
-                        border: '1px solid rgba(16, 185, 129, 0.2)',
-                        padding: '6px 12px',
-                        borderRadius: '20px',
-                      }}
-                    >
-                      ✓ {strength}
-                    </span>
-                  ))}
-                </div>
-
-                {/* Growth Tip */}
-                <div
-                  style={{
-                    background: theme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
-                    borderRadius: '10px',
-                    padding: '12px 16px',
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    gap: '10px',
-                  }}
-                >
-                  <span style={{ fontSize: '16px' }}>💡</span>
-                  <div>
-                    <div
-                      style={{
-                        fontFamily: "'VCR OSD Mono', monospace",
-                        fontSize: '9px',
-                        letterSpacing: '0.1em',
-                        color: theme === 'dark' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)',
-                        marginBottom: '4px',
-                      }}
-                    >
-                      GROWTH TIP FOR {brandScore.archetype.primary.toUpperCase()}S
-                    </div>
-                    <p
-                      style={{
-                        fontFamily: "'Helvetica Neue', sans-serif",
-                        fontSize: '13px',
-                        lineHeight: 1.5,
-                        color: theme === 'dark' ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.8)',
-                        margin: 0,
-                      }}
-                    >
-                      {brandScore.archetype.growthTip}
-                    </p>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-
-            {/* Action Buttons - Enhanced with consistent micro-interactions */}
-            <motion.div
+            {/* CTA to signup */}
+            <motion.button
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 2.5, duration: 0.5 }}
+              transition={{ delay: 2.5 }}
+              onClick={() => setFlowState('signup')}
+              whileHover={{ scale: 1.02, boxShadow: '0 0 40px rgba(0, 71, 255, 0.5)' }}
+              whileTap={{ scale: 0.98 }}
               style={{
-                display: 'flex',
-                gap: '12px',
-                flexWrap: 'wrap',
-                justifyContent: 'center',
+                fontFamily: "'VCR OSD Mono', monospace",
+                fontSize: '14px',
+                letterSpacing: '0.15em',
+                color: '#FFFFFF',
+                background: '#0047FF',
+                border: 'none',
+                padding: '20px 40px',
+                borderRadius: '16px',
+                cursor: 'pointer',
+                boxShadow: '0 0 30px rgba(0, 71, 255, 0.3)',
                 marginTop: '16px',
               }}
             >
-              {/* Share to X - Primary action */}
-              <motion.button
-                onClick={() => {
-                  const tweetText = `Just got my X Brand Score: ${brandScore.overallScore}/100\n\nI'm a ${brandScore.archetype?.primary || 'Creator'} ${brandScore.archetype?.emoji || ''}\n\nCheck yours:`;
-                  const shareUrl = typeof window !== 'undefined' ? window.location.origin : 'https://brandos.ai';
-                  const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(shareUrl)}`;
-                  window.open(twitterUrl, '_blank', 'noopener,noreferrer,width=550,height=420');
-                }}
-                whileHover={{ 
-                  scale: 1.02, 
-                  y: -2,
-                  boxShadow: theme === 'dark' 
-                    ? '0 0 40px rgba(0, 71, 255, 0.5), 0 8px 30px rgba(0, 71, 255, 0.3)' 
-                    : '0 0 40px rgba(60, 138, 255, 0.4), 0 8px 30px rgba(60, 138, 255, 0.25)',
-                }}
-                whileTap={{ scale: 0.98, y: 0 }}
-                transition={{ duration: 0.2, ease: [0.34, 1.56, 0.64, 1] }}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  fontFamily: "'VCR OSD Mono', monospace",
-                  fontSize: '13px',
-                  letterSpacing: '0.1em',
-                  color: '#FFFFFF',
-                  background: theme === 'dark'
-                    ? 'linear-gradient(135deg, #0047FF 0%, #002FA7 100%)'
-                    : 'linear-gradient(135deg, #3C8AFF 0%, #0047FF 100%)',
-                  border: 'none',
-                  padding: '16px 28px',
-                  borderRadius: '14px',
-                  cursor: 'pointer',
-                  boxShadow: theme === 'dark' 
-                    ? '0 0 25px rgba(0, 71, 255, 0.3), 0 4px 15px rgba(0, 71, 255, 0.2)' 
-                    : '0 0 25px rgba(60, 138, 255, 0.25), 0 4px 15px rgba(60, 138, 255, 0.15)',
-                  position: 'relative',
-                  overflow: 'hidden',
-                }}
-              >
-                {/* Shimmer effect */}
-                <motion.div
-                  animate={{ x: ['-100%', '200%'] }}
-                  transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut', repeatDelay: 4 }}
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.2) 50%, transparent 100%)',
-                    pointerEvents: 'none',
-                  }}
-                />
-                {/* X (Twitter) icon */}
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style={{ position: 'relative', zIndex: 1 }}>
-                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-                </svg>
-                <span style={{ position: 'relative', zIndex: 1 }}>BRAG ON X</span>
-              </motion.button>
-
-              {/* CTA to signup - Secondary */}
-              <motion.button
-                onClick={() => setFlowState('signup')}
-                whileHover={{ 
-                  scale: 1.02, 
-                  y: -2,
-                  background: theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.5)',
-                  borderColor: theme === 'dark' ? 'rgba(0, 71, 255, 0.4)' : 'rgba(60, 138, 255, 0.4)',
-                  boxShadow: theme === 'dark' 
-                    ? '0 4px 20px rgba(0, 71, 255, 0.15)' 
-                    : '0 4px 20px rgba(60, 138, 255, 0.1)',
-                }}
-                whileTap={{ scale: 0.98, y: 0 }}
-                transition={{ duration: 0.2, ease: [0.34, 1.56, 0.64, 1] }}
-                style={{
-                  fontFamily: "'VCR OSD Mono', monospace",
-                  fontSize: '13px',
-                  letterSpacing: '0.1em',
-                  color: theme === 'dark' ? '#FFFFFF' : '#1a1a1a',
-                  background: theme === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.35)',
-                  backdropFilter: 'blur(12px)',
-                  border: `1px solid ${theme === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)'}`,
-                  padding: '16px 28px',
-                  borderRadius: '14px',
-                  cursor: 'pointer',
-                }}
-              >
-                GET MY IMPROVEMENT PLAN
-              </motion.button>
-
-              {/* Compare with competitor - Tertiary */}
-              <motion.button
-                onClick={() => setShowCompetitorCompare(true)}
-                whileHover={{ 
-                  scale: 1.02, 
-                  y: -2,
-                  background: theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.5)',
-                  borderColor: theme === 'dark' ? 'rgba(0, 71, 255, 0.4)' : 'rgba(60, 138, 255, 0.4)',
-                  boxShadow: theme === 'dark' 
-                    ? '0 4px 20px rgba(0, 71, 255, 0.15)' 
-                    : '0 4px 20px rgba(60, 138, 255, 0.1)',
-                }}
-                whileTap={{ scale: 0.98, y: 0 }}
-                transition={{ duration: 0.2, ease: [0.34, 1.56, 0.64, 1] }}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  fontFamily: "'VCR OSD Mono', monospace",
-                  fontSize: '13px',
-                  letterSpacing: '0.1em',
-                  color: theme === 'dark' ? '#FFFFFF' : '#1a1a1a',
-                  background: theme === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.35)',
-                  backdropFilter: 'blur(12px)',
-                  border: `1px solid ${theme === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)'}`,
-                  padding: '16px 28px',
-                  borderRadius: '14px',
-                  cursor: 'pointer',
-                }}
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="9" cy="7" r="4" />
-                  <path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2" />
-                  <circle cx="19" cy="11" r="3" />
-                  <path d="M22 21v-1a3 3 0 0 0-3-3h-1" />
-                </svg>
-                COMPARE
-              </motion.button>
-            </motion.div>
-
-            {/* Deep Brand Analysis Toggle */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 3 }}
-              style={{
-                width: '100%',
-                marginTop: '24px',
-                borderTop: `1px solid ${theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
-                paddingTop: '24px',
-              }}
-            >
-              <motion.button
-                onClick={() => setShowBrandDNA(!showBrandDNA)}
-                whileHover={{ scale: 1.01, y: -1 }}
-                whileTap={{ scale: 0.99 }}
-                style={{
-                  width: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: '16px 20px',
-                  background: theme === 'dark' 
-                    ? 'linear-gradient(135deg, rgba(28, 96, 255, 0.1) 0%, rgba(139, 92, 246, 0.05) 100%)'
-                    : 'linear-gradient(135deg, rgba(60, 138, 255, 0.1) 0%, rgba(139, 92, 246, 0.05) 100%)',
-                  border: `1px solid ${theme === 'dark' ? 'rgba(28, 96, 255, 0.2)' : 'rgba(60, 138, 255, 0.2)'}`,
-                  borderRadius: '14px',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <span style={{ fontSize: '24px' }}>🧬</span>
-                  <div style={{ textAlign: 'left' }}>
-                    <div style={{
-                      fontFamily: "'VCR OSD Mono', monospace",
-                      fontSize: '12px',
-                      letterSpacing: '0.1em',
-                      color: theme === 'dark' ? '#FFFFFF' : '#1a1a1a',
-                    }}>
-                      DEEP BRAND DNA ANALYSIS
-                    </div>
-                    <div style={{
-                      fontFamily: "'Helvetica Neue', sans-serif",
-                      fontSize: '12px',
-                      color: theme === 'dark' ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)',
-                      marginTop: '2px',
-                    }}>
-                      {brandIdentityLoading ? 'Analyzing...' : 'Voice profile, colors, bio rewrites & more'}
-                    </div>
-                  </div>
-                </div>
-                <motion.div
-                  animate={{ rotate: showBrandDNA ? 180 : 0 }}
-                  transition={{ duration: 0.3 }}
-                  style={{ color: '#1C60FF' }}
-                >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M6 9l6 6 6-6" />
-                  </svg>
-                </motion.div>
-              </motion.button>
-
-              {/* Brand DNA Card */}
-              <AnimatePresence>
-                {showBrandDNA && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0, marginTop: 0 }}
-                    animate={{ opacity: 1, height: 'auto', marginTop: 16 }}
-                    exit={{ opacity: 0, height: 0, marginTop: 0 }}
-                    transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
-                    style={{ overflow: 'hidden' }}
-                  >
-                    {brandIdentityLoading ? (
-                      <div style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        gap: '16px',
-                        padding: '40px',
-                        background: theme === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
-                        borderRadius: '16px',
-                      }}>
-                        <motion.div
-                          animate={{ rotate: 360 }}
-                          transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }}
-                          style={{
-                            width: '32px',
-                            height: '32px',
-                            border: '3px solid transparent',
-                            borderTopColor: '#1C60FF',
-                            borderRadius: '50%',
-                          }}
-                        />
-                        <div style={{
-                          fontFamily: "'VCR OSD Mono', monospace",
-                          fontSize: '11px',
-                          letterSpacing: '0.1em',
-                          color: theme === 'dark' ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)',
-                        }}>
-                          EXTRACTING BRAND DNA...
-                        </div>
-                      </div>
-                    ) : brandIdentity && brandIdentity.brandDNA ? (
-                      <BrandDNACard
-                        brandDNA={brandIdentity.brandDNA}
-                        bioLinguistics={brandIdentity.bioLinguistics}
-                        nameAnalysis={brandIdentity.nameAnalysis}
-                        profileImage={brandIdentity.profileImage}
-                        improvements={brandIdentity.improvements}
-                        theme={theme as 'light' | 'dark'}
-                        profileName={profile.name}
-                        profileHandle={profile.username}
-                        profileImageUrl={profile.profile_image_url}
-                      />
-                    ) : (
-                      <div style={{
-                        padding: '40px',
-                        textAlign: 'center',
-                        background: theme === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
-                        borderRadius: '16px',
-                        color: theme === 'dark' ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)',
-                        fontFamily: "'Helvetica Neue', sans-serif",
-                        fontSize: '14px',
-                      }}>
-                        Unable to generate brand DNA. Try again later.
-                      </div>
-                    )}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </motion.div>
+              IMPROVE MY BRAND SCORE
+            </motion.button>
 
             {/* Analyze another */}
             <motion.button
@@ -2287,11 +1445,6 @@ export default function XBrandScoreHero({ theme, redirectAfterSignup }: XBrandSc
                 setProfile(null);
                 setBrandScore(null);
                 setShowConfetti(false);
-                setBrandIdentity(null);
-                setShowBrandDNA(false);
-                apiResultRef.current = null;
-                apiCompleteRef.current = false;
-                apiErrorRef.current = null;
               }}
               style={{
                 fontFamily: "'VCR OSD Mono', monospace",
@@ -2337,7 +1490,7 @@ export default function XBrandScoreHero({ theme, redirectAfterSignup }: XBrandSc
                 lineHeight: 1.3,
               }}
             >
-              Ready to stop guessing, @{profile.username}?
+              Ready to improve your brand, @{profile.username}?
             </motion.h2>
 
             <motion.p
@@ -2349,7 +1502,7 @@ export default function XBrandScoreHero({ theme, redirectAfterSignup }: XBrandSc
                 lineHeight: 1.6,
               }}
             >
-              Join 1,000+ creators who stopped winging their brand. Get your personalized improvement plan, consistency alerts, and AI-powered content checks—free.
+              Join early access to get AI-powered brand improvement suggestions, consistency monitoring, and more.
             </motion.p>
 
             {signupStatus === 'success' ? (
@@ -2386,7 +1539,7 @@ export default function XBrandScoreHero({ theme, redirectAfterSignup }: XBrandSc
                     margin: 0,
                   }}
                 >
-                  Check your email for your personalized brand improvement guide.
+                  We'll reach out when brandOS is ready for you.
                 </p>
               </motion.div>
             ) : (
@@ -2411,19 +1564,18 @@ export default function XBrandScoreHero({ theme, redirectAfterSignup }: XBrandSc
                     fontSize: '16px',
                     padding: '18px 20px',
                     borderRadius: '14px',
-                    border: `2px solid ${theme === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.5)'}`,
-                    background: theme === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.25)',
-                    backdropFilter: 'blur(12px)',
-                    color: theme === 'dark' ? '#FFFFFF' : '#1a1a1a',
+                    border: `2px solid ${theme === 'dark' ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)'}`,
+                    background: theme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
+                    color: theme === 'dark' ? '#FFFFFF' : '#000000',
                     outline: 'none',
-                    transition: 'all 0.35s ease-out',
+                    transition: 'all 0.3s ease',
                   }}
                   onFocus={(e) => {
-                    e.currentTarget.style.borderColor = theme === 'dark' ? '#1C60FF' : '#3C8AFF';
-                    e.currentTarget.style.boxShadow = theme === 'dark' ? '0 0 0 4px rgba(28, 96, 255, 0.15)' : '0 0 0 4px rgba(60, 138, 255, 0.15)';
+                    e.currentTarget.style.borderColor = '#0047FF';
+                    e.currentTarget.style.boxShadow = '0 0 0 4px rgba(0, 71, 255, 0.15)';
                   }}
                   onBlur={(e) => {
-                    e.currentTarget.style.borderColor = theme === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.5)';
+                    e.currentTarget.style.borderColor = theme === 'dark' ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)';
                     e.currentTarget.style.boxShadow = 'none';
                   }}
                 />
@@ -2431,27 +1583,24 @@ export default function XBrandScoreHero({ theme, redirectAfterSignup }: XBrandSc
                 <motion.button
                   type="submit"
                   disabled={signupStatus === 'loading'}
-                  whileHover={{ scale: 1.01, boxShadow: theme === 'dark' ? '0 0 30px rgba(28, 96, 255, 0.4)' : '0 0 30px rgba(60, 138, 255, 0.35)' }}
-                  whileTap={{ scale: 0.99 }}
-                  transition={{ duration: 0.25, ease: 'easeOut' }}
+                  whileHover={{ scale: 1.02, boxShadow: '0 0 40px rgba(0, 71, 255, 0.5)' }}
+                  whileTap={{ scale: 0.98 }}
                   style={{
                     width: '100%',
                     fontFamily: "'VCR OSD Mono', monospace",
                     fontSize: '14px',
                     letterSpacing: '0.15em',
                     color: '#FFFFFF',
-                    background: theme === 'dark'
-                      ? 'linear-gradient(135deg, #1C60FF 0%, #0D1EB8 100%)'
-                      : 'linear-gradient(135deg, #3C8AFF 0%, #D0BBEB 100%)',
+                    background: '#0047FF',
                     border: 'none',
                     padding: '18px 32px',
                     borderRadius: '14px',
                     cursor: signupStatus === 'loading' ? 'wait' : 'pointer',
-                    boxShadow: theme === 'dark' ? '0 0 20px rgba(28, 96, 255, 0.25)' : '0 0 20px rgba(60, 138, 255, 0.2)',
+                    boxShadow: '0 0 30px rgba(0, 71, 255, 0.3)',
                     opacity: signupStatus === 'loading' ? 0.7 : 1,
                   }}
                 >
-                  {signupStatus === 'loading' ? 'JOINING...' : 'CLAIM YOUR SPOT'}
+                  {signupStatus === 'loading' ? 'JOINING...' : 'JOIN EARLY ACCESS'}
                 </motion.button>
               </motion.form>
             )}
@@ -2474,22 +1623,6 @@ export default function XBrandScoreHero({ theme, redirectAfterSignup }: XBrandSc
               ← BACK TO RESULTS
             </motion.button>
           </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Competitor Compare Modal */}
-      <AnimatePresence>
-        {showCompetitorCompare && profile && brandScore && (
-          <CompetitorCompare
-            yourProfile={{
-              name: profile.name,
-              username: profile.username,
-              profile_image_url: profile.profile_image_url,
-            }}
-            yourScore={brandScore}
-            theme={theme}
-            onClose={() => setShowCompetitorCompare(false)}
-          />
         )}
       </AnimatePresence>
 

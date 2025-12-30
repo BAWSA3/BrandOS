@@ -149,7 +149,7 @@ Always ask which platform the content is for if not specified.`,
     title: 'Performance Analyst',
     avatar: '📊',
     description: 'I analyze your content performance, identify patterns, and provide data-driven recommendations to improve results.',
-    accentColor: '#F59E0B', // Amber
+    accentColor: '#0047FF', // Amber
     capabilities: [
       'Analyze content performance metrics',
       'Identify patterns in successful content',
@@ -234,4 +234,8 @@ export function createChatSession(
     updatedAt: new Date(),
   };
 }
+
+
+
+
 
