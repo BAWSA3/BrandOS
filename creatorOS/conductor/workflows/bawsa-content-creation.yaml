@@ -1,0 +1,156 @@
+# BAWSA Content Creation Workflow
+# Transforms raw ideas into Typefully drafts for @BawsaXBT
+
+name: BAWSA Content Creation
+description: |
+  Takes a raw content idea, transforms it into on-brand BAWSA content,
+  and creates a Typefully draft for review and publishing.
+
+# Trigger patterns
+trigger:
+  intent: bawsa_content
+  patterns:
+    - "bawsa post about"
+    - "bawsa tweet about"
+    - "bawsa thread on"
+    - "write for bawsa"
+    - "@bawsaxbt post"
+    - "create bawsa content"
+    - "bawsa hot take"
+
+# Project adapter
+adapter: bawsa
+
+# Context to load before workflow
+context:
+  load:
+    - adapters/bawsa/context.md
+    - adapters/bawsa/voice.md
+    - adapters/bawsa/pillars.md
+    - adapters/bawsa/audience.md
+    - adapters/bawsa/typefully.md
+
+# Workflow stages
+stages:
+  # Stage 1: Classify the idea
+  - name: classify
+    description: Determine content pillar and format
+    agent: null  # Handled by conductor
+    actions:
+      - analyze_idea
+      - determine_pillar
+      - recommend_format
+    outputs:
+      - pillar: "[crypto | tech | personal | cross]"
+      - format: "[tweet | thread]"
+      - audience: "[crypto_native | tech_founder | creator]"
+
+  # Stage 2: Generate content
+  - name: generate
+    description: Create on-brand content
+    agent: content-bawsa
+    depends_on: [classify]
+    inputs:
+      - raw_idea
+      - pillar
+      - format
+    outputs:
+      - content_preview
+      - typefully_payload
+      - posting_notes
+
+  # Stage 3: Human approval
+  - name: approve
+    description: User reviews content before Typefully
+    type: checkpoint
+    depends_on: [generate]
+    message: |
+      ## Content Ready for @BawsaXBT
+
+      ### Preview
+      {content_preview}
+
+      ### Details
+      - **Pillar**: {pillar}
+      - **Format**: {format}
+      - **Target**: {audience}
+
+      ### Actions
+      - **Approve**: Create Typefully draft
+      - **Modify**: Adjust content first
+      - **Reject**: Start over
+    options:
+      - approve
+      - modify
+      - reject
+
+  # Stage 4: Create Typefully draft
+  - name: publish
+    description: Push to Typefully as draft
+    depends_on: [approve]
+    condition: "approve.result == 'approve'"
+    tool: typefully_create_draft
+    params:
+      social_set_id: 127543
+      requestBody:
+        platforms:
+          x:
+            enabled: true
+            posts: "{typefully_payload.posts}"
+        draft_title: "{typefully_payload.draft_title}"
+        publish_at: null
+        share: false
+
+  # Stage 5: Confirm
+  - name: confirm
+    description: Confirm draft creation
+    depends_on: [publish]
+    message: |
+      ## Draft Created Successfully
+
+      - **Draft ID**: {publish.result.id}
+      - **Title**: {typefully_payload.draft_title}
+      - **Status**: Draft (ready for review)
+
+      **Next Steps:**
+      1. Review at Typefully
+      2. Edit if needed
+      3. Schedule or publish when ready
+
+# Error handling
+on_error:
+  pillar_unclear:
+    action: ask_clarification
+    message: |
+      This idea could fit multiple pillars:
+      - **Crypto/Web3**: CT culture, building in crypto
+      - **Tech/Building**: Tools, vibe coding, shipping
+      - **Personal**: Journey, reflections, lessons
+
+      Which angle works best?
+
+  content_rejected:
+    action: restart
+    from: classify
+
+  typefully_error:
+    action: fallback
+    message: |
+      Couldn't create Typefully draft. Here's your content to copy:
+
+      ---
+      {content_preview}
+      ---
+
+      Paste this directly into typefully.com
+
+# Metadata
+metadata:
+  tier: strategic
+  estimated_duration: "3-8 minutes"
+  human_checkpoints: 1
+  artifacts:
+    - type: content
+      format: twitter-native
+    - type: typefully-draft
+      format: api-response

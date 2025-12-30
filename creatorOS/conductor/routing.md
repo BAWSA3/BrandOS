@@ -43,6 +43,30 @@ Patterns:
 
 ---
 
+### BAWSA_CONTENT Intent
+**Triggers:** BAWSA-specific content creation for @BawsaXBT
+```
+Patterns:
+- "bawsa post about..."
+- "bawsa tweet about..."
+- "bawsa thread on..."
+- "write for bawsa..."
+- "@bawsaxbt post..."
+- "create bawsa content..."
+- "bawsa hot take..."
+- "bawsa content about..."
+```
+
+**Route to:** `bawsa-content-creation` workflow
+
+**Adapter:** `bawsa` (loads brand context, voice, pillars, audience)
+
+**Agent:** `content-bawsa` (BAWSA-specialized content agent)
+
+**Output:** Typefully draft for @BawsaXBT
+
+---
+
 ### ANALYTICS Intent
 **Triggers:** Performance analysis, metrics review, campaign reporting
 ```
@@ -204,6 +228,22 @@ checkpoints:
     message: "Content ready. Review before publishing?"
 ```
 
+### bawsa-content-creation
+```yaml
+name: BAWSA Content Creation
+trigger: bawsa_content intent
+adapter: bawsa
+agents:
+  - content-bawsa    # BAWSA-specialized content agent
+integration:
+  - typefully        # Push to Typefully as draft
+checkpoints:
+  - after: content-bawsa
+    message: "Content ready for @BawsaXBT. Approve?"
+output:
+  - typefully_draft  # Draft created for review
+```
+
 ### campaign-analytics
 ```yaml
 name: Campaign Analytics
@@ -275,6 +315,7 @@ When multiple agents could handle a request, use these heuristics:
 
 | Signal | Agent |
 |--------|-------|
+| Mentions "bawsa" or "@bawsaxbt" | content-bawsa |
 | Mentions "priority" or "should we" | vision |
 | Mentions "campaign" or "marketing" or "promote" | campaign |
 | Mentions "content strategy" or "launch plan" | campaign |

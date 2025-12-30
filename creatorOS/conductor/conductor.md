@@ -15,6 +15,7 @@ When a user provides input, classify it into one of these categories:
 | `task` | Specific action to take | "Update the...", "Change...", "Add a..." |
 | `exploration` | Research/discovery | "Show me...", "Find...", "What are the options for..." |
 | `audit` | System health check | "Check the codebase", "Run audit", "Health report" |
+| `bawsa_content` | BAWSA content for @BawsaXBT | "bawsa post about...", "bawsa thread on...", "@bawsaxbt..." |
 
 ### 2. Workflow Selection
 Based on intent, select the appropriate workflow:
@@ -24,6 +25,7 @@ idea → idea-to-impl.yaml
 campaign → idea-to-campaign.yaml
 bug → bug-to-fix.yaml
 audit → weekly-audit.yaml
+bawsa_content → bawsa-content-creation.yaml
 question → direct response (no workflow)
 task → scope → build → review (mini workflow)
 exploration → relevant strategic agents
@@ -83,6 +85,7 @@ After all agents complete, synthesize into a coherent deliverable:
 | `vision` | Product strategy, prioritization | New ideas, roadmap questions |
 | `campaign` | Marketing & content strategy | Launch plans, content calendars, promotional campaigns |
 | `content` | Content creation & copywriting | Writing social posts, emails, blogs, video scripts |
+| `content-bawsa` | BAWSA-specific content for @BawsaXBT | Creating on-brand content for BAWSA Typefully drafts |
 | `analytics` | Performance tracking & optimization | Campaign reports, A/B tests, metric interpretation |
 | `audit` | Codebase health analysis | Scheduled or on-demand health checks |
 | `compete` | Market intelligence | Competitive analysis needed |

@@ -311,3 +311,8 @@ Before completing output, verify:
 - [ ] Next steps are immediately actionable
 - [ ] Output follows project brand voice (from adapter context)
 
+
+
+
+
+
