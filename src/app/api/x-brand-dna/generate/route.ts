@@ -13,6 +13,7 @@ import {
   analyzeBioLinguistics,
 } from '@/lib/gemini';
 import { BrandDNA as StoreBrandDNA } from '@/lib/types';
+import { ExtractedColors } from '@/lib/color-extraction';
 
 // Types for the response
 export interface GeneratedBrandDNA {
@@ -72,10 +73,21 @@ export interface GenerateBrandDNAResponse {
 
 // Helper: Extract dominant color from profile image analysis
 function extractColors(
+  extractedColors: ExtractedColors | null,
   imageAnalysis: ProfileImageAnalysis | null,
   geminiBrandDNA: GeminiBrandDNA | null
 ): { primary: string; secondary: string; accent: string } {
-  // Priority 1: From image analysis
+  // Priority 1: From programmatic color extraction (node-vibrant)
+  if (extractedColors && extractedColors.primary !== '#0047FF') {
+    console.log('=== USING EXTRACTED COLORS FROM PFP ===');
+    return {
+      primary: extractedColors.primary,
+      secondary: extractedColors.secondary,
+      accent: extractedColors.accent,
+    };
+  }
+
+  // Priority 2: From Gemini image analysis
   if (imageAnalysis?.dominantColors?.length >= 2) {
     const colors = imageAnalysis.dominantColors;
     return {
@@ -85,7 +97,7 @@ function extractColors(
     };
   }
 
-  // Priority 2: From Gemini brand DNA analysis
+  // Priority 3: From Gemini brand DNA analysis
   if (geminiBrandDNA?.primaryColor?.hex) {
     return {
       primary: geminiBrandDNA.primaryColor.hex,
@@ -327,6 +339,7 @@ export async function POST(request: NextRequest) {
       brandIdentity: {
         bioLinguistics: BioLinguistics;
         profileImage: ProfileImageAnalysis | null;
+        extractedColors?: ExtractedColors | null;
         brandDNA: GeminiBrandDNA | null;
         tweetVoice?: TweetVoiceAnalysis | null;
       };
@@ -339,10 +352,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { bioLinguistics, profileImage, brandDNA: geminiBrandDNA, tweetVoice } = brandIdentity;
+    const { bioLinguistics, profileImage, extractedColors, brandDNA: geminiBrandDNA, tweetVoice } = brandIdentity;
 
     // Generate store-compatible Brand DNA
-    const colors = extractColors(profileImage, geminiBrandDNA);
+    const colors = extractColors(extractedColors || null, profileImage, geminiBrandDNA);
     let tone = mapToToneSliders(bioLinguistics, profileImage, geminiBrandDNA);
 
     // If tweet voice analysis available, use it for more accurate tone

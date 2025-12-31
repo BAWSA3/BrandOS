@@ -19,6 +19,7 @@ import {
   TweetVoiceAnalysis,
 } from '@/lib/gemini';
 import { features } from '@/lib/features';
+import { extractColorsFromImage, ExtractedColors } from '@/lib/color-extraction';
 
 export interface BrandIdentityResponse {
   success: boolean;
@@ -35,6 +36,7 @@ export interface BrandIdentityResponse {
     bioLinguistics: BioLinguistics;
     nameAnalysis: NameAnalysis;
     profileImage: ProfileImageAnalysis | null;
+    extractedColors: ExtractedColors | null;
     brandDNA: BrandDNA | null;
     improvements: BrandImprovements | null;
     tweetVoice: TweetVoiceAnalysis | null;
@@ -107,10 +109,13 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Run image analysis and brand DNA generation in parallel
-    const [profileImageAnalysis, brandDNA] = await Promise.all([
+    // Run image analysis, color extraction, and brand DNA generation in parallel
+    const [profileImageAnalysis, extractedColors, brandDNA] = await Promise.all([
       profile.profile_image_url
         ? analyzeProfileImageWithVision(profile.profile_image_url, profileContext)
+        : Promise.resolve(null),
+      profile.profile_image_url
+        ? extractColorsFromImage(profile.profile_image_url)
         : Promise.resolve(null),
       generateBrandDNA(profile),
     ]);
@@ -136,6 +141,7 @@ export async function POST(request: NextRequest) {
         bioLinguistics,
         nameAnalysis,
         profileImage: profileImageAnalysis,
+        extractedColors,
         brandDNA,
         improvements,
         tweetVoice: tweetVoiceAnalysis,
