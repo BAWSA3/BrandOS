@@ -3,6 +3,8 @@
 // Extracts dominant colors from profile pictures using node-vibrant
 // =============================================================================
 
+import { Vibrant } from 'node-vibrant/node';
+
 export interface ExtractedColors {
   primary: string;
   secondary: string;
@@ -53,9 +55,6 @@ export async function extractColorsFromImage(
     // Convert to buffer for node-vibrant
     const arrayBuffer = await response.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
-
-    // Dynamically import node-vibrant (ESM compatibility)
-    const Vibrant = (await import('node-vibrant')).default;
 
     // Extract palette using Vibrant
     const palette = await Vibrant.from(buffer).getPalette();
