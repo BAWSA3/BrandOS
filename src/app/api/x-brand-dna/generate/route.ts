@@ -77,9 +77,10 @@ function extractColors(
   imageAnalysis: ProfileImageAnalysis | null,
   geminiBrandDNA: GeminiBrandDNA | null
 ): { primary: string; secondary: string; accent: string } {
-  // Priority 1: From programmatic color extraction (node-vibrant)
-  if (extractedColors && extractedColors.primary !== '#0047FF') {
+  // Priority 1: From programmatic color extraction (colorthief)
+  if (extractedColors && extractedColors.palette && extractedColors.palette.length > 0) {
     console.log('=== USING EXTRACTED COLORS FROM PFP ===');
+    console.log('Extracted palette:', extractedColors.palette);
     return {
       primary: extractedColors.primary,
       secondary: extractedColors.secondary,
