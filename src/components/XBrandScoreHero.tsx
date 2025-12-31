@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence, useMotionValue, animate } from 'motion/react';
 import JourneyBackground from './JourneyBackground';
 import BrandDNAPreview, { GeneratedBrandDNA } from './BrandDNAPreview';
+import ShareableScoreCard, { ShareCardData } from './ShareableScoreCard';
 
 // ============================================================================
 // Types
@@ -63,8 +64,8 @@ const phaseConfig: PhaseConfigItem[] = [
     id: 'define',
     number: 1,
     title: 'DEFINE',
-    subtitle: 'Analyzing brand identity',
-    explanation: 'We examine how clearly your profile communicates who you are and what value you provide to your audience.',
+    subtitle: 'Extracting your brand DNA',
+    explanation: 'Identifying the patterns, voice, and signals in your profile that make your content recognizably yours.',
     items: [
       {
         label: 'Display name alignment',
@@ -90,8 +91,8 @@ const phaseConfig: PhaseConfigItem[] = [
     id: 'check',
     number: 2,
     title: 'CHECK',
-    subtitle: 'Checking consistency',
-    explanation: 'We verify that your brand elements work together cohesively and present a unified professional image.',
+    subtitle: 'Checking brand coherence',
+    explanation: 'Measuring how consistently your profile projects a unified brand—not scattered or contradictory signals.',
     items: [
       {
         label: 'Username/name alignment',
@@ -117,8 +118,8 @@ const phaseConfig: PhaseConfigItem[] = [
     id: 'generate',
     number: 3,
     title: 'GENERATE',
-    subtitle: 'Evaluating content quality',
-    explanation: 'We assess your profile completeness and how well you\'ve optimized every element for maximum impact.',
+    subtitle: 'Assessing content readiness',
+    explanation: 'Determining how ready your brand profile is to power generation that actually sounds like you.',
     items: [
       {
         label: 'Profile completeness',
@@ -145,8 +146,8 @@ const phaseConfig: PhaseConfigItem[] = [
     id: 'scale',
     number: 4,
     title: 'SCALE',
-    subtitle: 'Measuring growth readiness',
-    explanation: 'We evaluate your growth metrics and identify opportunities for expanding your brand reach.',
+    subtitle: 'Activating your system',
+    explanation: 'Your Brand DNA is ready to run. Now it can power automations, enforce standards, and scale your brand while you focus on what\'s next.',
     items: [
       {
         label: 'Follower/following ratio',
@@ -1316,7 +1317,7 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                   opacity: isValidating ? 0.7 : 1,
                 }}
               >
-                {isValidating ? 'CHECKING PROFILE...' : "WHAT'S YOUR BRAND DNA?"}
+                {isValidating ? 'CHECKING PROFILE...' : "FIND YOUR BRAND DNA"}
               </motion.button>
 
               {error && (
@@ -1493,6 +1494,58 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                 theme={theme}
               />
             )}
+
+            {/* Share Your Score Card */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 2.2 }}
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '12px',
+                marginTop: '24px',
+                padding: '24px',
+                background: theme === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)',
+                borderRadius: '20px',
+                border: `1px solid ${theme === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'}`,
+                width: '100%',
+              }}
+            >
+              <span
+                style={{
+                  fontFamily: "'VCR OSD Mono', monospace",
+                  fontSize: '11px',
+                  letterSpacing: '0.15em',
+                  color: theme === 'dark' ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)',
+                }}
+              >
+                SHARE YOUR BRAND DNA
+              </span>
+              <ShareableScoreCard
+                data={{
+                  score: brandScore.overallScore,
+                  username: profile.username,
+                  displayName: profile.name,
+                  profileImageUrl: profile.profile_image_url,
+                  topStrength: brandScore.topStrengths[0] || '',
+                  summary: brandScore.summary,
+                  archetype: generatedBrandDNA ? {
+                    primary: generatedBrandDNA.archetype,
+                    emoji: generatedBrandDNA.archetypeEmoji,
+                    tagline: generatedBrandDNA.voiceProfile,
+                  } : undefined,
+                  keywords: generatedBrandDNA?.keywords,
+                  brandColors: generatedBrandDNA ? {
+                    primary: generatedBrandDNA.colors.primary,
+                    secondary: generatedBrandDNA.colors.secondary,
+                  } : undefined,
+                  voiceProfile: generatedBrandDNA?.voiceProfile,
+                } as ShareCardData}
+                theme={theme}
+              />
+            </motion.div>
 
             {/* CTA to signup - Only show if no Brand DNA preview */}
             {!generatedBrandDNA && (

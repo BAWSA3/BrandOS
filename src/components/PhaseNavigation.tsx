@@ -29,7 +29,7 @@ const phases: PhaseConfig[] = [
     id: 'define',
     label: 'Define',
     number: '01',
-    description: 'Set up your brand DNA',
+    description: 'Build your system',
     tabs: [
       { id: 'brand', label: 'Brand DNA', description: 'Name, colors, tone, keywords' },
       { id: 'safezones', label: 'Safe Zones', description: 'Lock/unlock elements' },
@@ -41,7 +41,7 @@ const phases: PhaseConfig[] = [
     id: 'check',
     label: 'Check',
     number: '02',
-    description: 'Analyze content alignment',
+    description: 'Score against your DNA',
     tabs: [
       { id: 'check', label: 'Content Check', description: 'Score your content' },
       { id: 'cohesion', label: 'Cohesion', description: 'Analyze consistency' },
@@ -55,7 +55,7 @@ const phases: PhaseConfig[] = [
     id: 'generate',
     label: 'Generate',
     number: '03',
-    description: 'Create on-brand content',
+    description: 'Create from your DNA',
     tabs: [
       { id: 'generate', label: 'Generate', description: 'AI content creation' },
       { id: 'platforms', label: 'Platforms', description: 'Adapt for channels' },
@@ -76,7 +76,7 @@ const phases: PhaseConfig[] = [
     id: 'scale',
     label: 'Scale',
     number: '04',
-    description: 'Track and export',
+    description: 'Let your system run',
     tabs: [
       { id: 'dashboard', label: 'Dashboard', description: 'Brand analytics' },
       { id: 'history', label: 'History', description: 'Past activity' },

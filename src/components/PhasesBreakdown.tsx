@@ -22,8 +22,8 @@ const phases: Phase[] = [
   {
     number: 1,
     title: 'DEFINE',
-    subtitle: 'Brand DNA',
-    description: 'Capture the essence of your brand identity. Set the foundation that guides every piece of content.',
+    subtitle: 'Build Your System',
+    description: 'Turn your intuition into rules AI can follow. Define what makes your brand yours—so it stays consistent whether you\'re creating or someone else is.',
     features: ['Brand Identity', 'Safe Zones', 'Design Intents', 'Voice & Tone'],
     details: [
       { title: 'Brand Identity', description: 'Define your name, colors, and core visual elements that make your brand recognizable.' },
@@ -41,8 +41,8 @@ const phases: Phase[] = [
   {
     number: 2,
     title: 'CHECK',
-    subtitle: 'Content Analysis',
-    description: 'Analyze any content against your brand guidelines. Get instant feedback and suggestions.',
+    subtitle: 'Score Against Your DNA',
+    description: 'Run any content through your DNA. Get a score, see what\'s off, and know exactly what to fix—before it goes live.',
     features: ['Content Scoring', 'Brand Cohesion', 'Guardrails', 'Consistency'],
     details: [
       { title: 'Content Scoring', description: 'Get a 0-100 score showing how well your content aligns with your brand.' },
@@ -61,8 +61,8 @@ const phases: Phase[] = [
   {
     number: 3,
     title: 'GENERATE',
-    subtitle: 'Create Content',
-    description: 'Create on-brand content for any channel. From social posts to full campaigns.',
+    subtitle: 'Create From Your DNA',
+    description: 'Generate content that sounds like you from the start. Your DNA shapes every output—so you create faster without losing your voice.',
     features: ['Multi-format', 'Platform Adapt', 'Visual Concepts', 'Templates'],
     details: [
       { title: 'Multi-format Output', description: 'Generate tweets, emails, headlines, taglines, and more.' },
@@ -81,8 +81,8 @@ const phases: Phase[] = [
   {
     number: 4,
     title: 'SCALE',
-    subtitle: 'Track & Export',
-    description: 'Monitor brand consistency over time. Export guidelines and share with your team.',
+    subtitle: 'Let Your System Run',
+    description: 'You\'ve built the system. Now let it work. Automate content, enforce your DNA across tools, and watch your brand scale—without you in the middle of every decision.',
     features: ['Dashboard', 'History', 'Export', 'Compare'],
     details: [
       { title: 'Analytics Dashboard', description: 'Track content checks, scores, and brand health over time.' },
