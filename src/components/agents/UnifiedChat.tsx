@@ -148,13 +148,15 @@ export default function UnifiedChat({ brandDNA, brandId }: UnifiedChatProps) {
                 <div
                   key={persona.name}
                   className={`w-8 h-8 rounded-full flex items-center justify-center text-sm border-2 border-neutral-950 transition-all ${
-                    currentAgent === persona.name 
-                      ? 'ring-2 ring-offset-2 ring-offset-neutral-950 z-10' 
+                    currentAgent === persona.name
+                      ? 'z-10'
                       : 'opacity-60'
                   }`}
-                  style={{ 
+                  style={{
                     backgroundColor: `${persona.accentColor}30`,
-                    ringColor: currentAgent === persona.name ? persona.accentColor : undefined,
+                    boxShadow: currentAgent === persona.name
+                      ? `0 0 0 2px #0a0a0a, 0 0 0 4px ${persona.accentColor}`
+                      : undefined,
                   }}
                 >
                   {persona.avatar}

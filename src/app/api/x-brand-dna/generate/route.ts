@@ -89,7 +89,7 @@ function extractColors(
   }
 
   // Priority 2: From Gemini image analysis
-  if (imageAnalysis?.dominantColors?.length >= 2) {
+  if (imageAnalysis?.dominantColors && imageAnalysis.dominantColors.length >= 2) {
     const colors = imageAnalysis.dominantColors;
     return {
       primary: colors[0]?.hex || '#0047FF',

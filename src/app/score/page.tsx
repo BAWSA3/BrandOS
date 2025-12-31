@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion, useMotionValue, useSpring, useTransform } from 'motion/react';
+import { motion, useMotionValue, useSpring, useTransform, MotionValue } from 'motion/react';
 import { useBrandStore } from '@/lib/store';
 import XBrandScoreHero from '@/components/XBrandScoreHero';
 
@@ -263,12 +263,12 @@ function CursorGlow({
   mouseY,
 }: {
   theme: string;
-  mouseX: ReturnType<typeof useMotionValue>;
-  mouseY: ReturnType<typeof useMotionValue>;
+  mouseX: MotionValue<number>;
+  mouseY: MotionValue<number>;
 }) {
   // Direct transform to screen position
-  const glowX = useTransform(mouseX, (v) => `${v * 100}%`);
-  const glowY = useTransform(mouseY, (v) => `${v * 100}%`);
+  const glowX = useTransform(mouseX, (v: number) => `${v * 100}%`);
+  const glowY = useTransform(mouseY, (v: number) => `${v * 100}%`);
 
   return (
     <motion.div
@@ -488,7 +488,7 @@ export default function ScorePage() {
 
       {/* Main Content */}
       <div style={{ position: 'relative', zIndex: 10 }}>
-        <XBrandScoreHero theme={theme} redirectAfterSignup="/thanks" />
+        <XBrandScoreHero theme={theme} />
       </div>
     </div>
   );

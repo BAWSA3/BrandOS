@@ -94,7 +94,7 @@ const iconCategoryOptions: { id: IconCategory; label: string }[] = [
 
 export default function AIStudio() {
   const brandDNA = useCurrentBrand();
-  const { addLogo, addColor, addImage } = useBrandKitStore();
+  const { addLogo, addColor, addImagery } = useBrandKitStore();
 
   const [activeTab, setActiveTab] = useState<GenerationType>('logo');
   const [isConnected, setIsConnected] = useState<boolean | null>(null);
@@ -499,26 +499,34 @@ export default function AIStudio() {
   const saveToKit = (asset: GeneratedAsset) => {
     switch (asset.type) {
       case 'logo':
-        addLogo({
+        addLogo(brandDNA?.id || '', {
           url: asset.data as string,
           name: `AI Generated Logo - ${new Date().toLocaleDateString()}`,
           type: 'primary',
+          fileType: 'png',
+          clearSpace: 10,
+          minSize: 32,
+          usageNotes: 'AI-generated logo',
         });
         break;
       case 'imagery':
-        addImage({
+        addImagery(brandDNA?.id || '', {
           url: asset.data as string,
           name: `AI Generated Imagery - ${new Date().toLocaleDateString()}`,
-          category: 'ai-generated',
+          category: 'abstract',
+          type: 'illustration',
+          tags: ['ai-generated'],
+          notes: 'AI-generated brand imagery',
         });
         break;
       case 'colors':
         const palette = asset.data as { colors: { name: string; hex: string; role: string }[] };
         palette.colors.forEach(color => {
-          addColor({
+          addColor(brandDNA?.id || '', {
             name: color.name,
             hex: color.hex,
-            role: color.role,
+            category: 'primary',
+            usage: color.role || 'General use',
           });
         });
         break;

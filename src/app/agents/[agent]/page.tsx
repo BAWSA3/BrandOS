@@ -7,14 +7,14 @@ import AgentChat from '@/components/agents/AgentChat';
 import { AgentSelectorMini } from '@/components/agents/AgentSelector';
 import { getAgentPersona, agentPersonas } from '@/lib/agents/chat.types';
 import { AgentName } from '@/lib/agents/types';
-import { useBrandStore } from '@/lib/store';
+import { useCurrentBrand } from '@/lib/store';
 import Link from 'next/link';
 
 export default function AgentChatPage() {
   const params = useParams();
   const router = useRouter();
   const agentParam = params.agent as string;
-  const brand = useBrandStore((state) => state.brand);
+  const brand = useCurrentBrand();
 
   // Validate agent name
   const isValidAgent = agentParam in agentPersonas;

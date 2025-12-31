@@ -149,12 +149,14 @@ export function AgentSelectorMini({
           onClick={() => onSelectAgent(persona.name)}
           className={`w-10 h-10 rounded-lg flex items-center justify-center text-xl transition-all ${
             selectedAgent === persona.name
-              ? 'ring-2'
+              ? ''
               : 'opacity-50 hover:opacity-100'
           }`}
           style={{
             backgroundColor: `${persona.accentColor}20`,
-            ringColor: selectedAgent === persona.name ? persona.accentColor : undefined,
+            boxShadow: selectedAgent === persona.name
+              ? `0 0 0 2px ${persona.accentColor}`
+              : undefined,
           }}
           title={`${persona.displayName} - ${persona.title}`}
         >

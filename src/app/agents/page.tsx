@@ -7,7 +7,7 @@ import AgentChat from '@/components/agents/AgentChat';
 import AgentSelector from '@/components/agents/AgentSelector';
 import { getAgentPersona, getAllAgentPersonas } from '@/lib/agents/chat.types';
 import { AgentName } from '@/lib/agents/types';
-import { useBrandStore } from '@/lib/store';
+import { useCurrentBrand } from '@/lib/store';
 import Link from 'next/link';
 
 type ChatMode = 'unified' | 'specific';
@@ -15,7 +15,7 @@ type ChatMode = 'unified' | 'specific';
 export default function AgentsPage() {
   const [chatMode, setChatMode] = useState<ChatMode>('unified');
   const [selectedAgent, setSelectedAgent] = useState<AgentName | null>(null);
-  const brand = useBrandStore((state) => state.brand);
+  const brand = useCurrentBrand();
 
   // Check if brand is loaded
   const hasBrand = brand && brand.name;
@@ -159,12 +159,14 @@ export default function AgentsPage() {
                       onClick={() => setSelectedAgent(persona.name)}
                       className={`w-9 h-9 rounded-lg flex items-center justify-center text-lg transition-all ${
                         selectedAgent === persona.name
-                          ? 'ring-2 ring-offset-2 ring-offset-black'
+                          ? ''
                           : 'opacity-40 hover:opacity-100'
                       }`}
                       style={{
                         backgroundColor: `${persona.accentColor}20`,
-                        ringColor: selectedAgent === persona.name ? persona.accentColor : undefined,
+                        boxShadow: selectedAgent === persona.name
+                          ? `0 0 0 2px black, 0 0 0 4px ${persona.accentColor}`
+                          : undefined,
                       }}
                     >
                       {persona.avatar}

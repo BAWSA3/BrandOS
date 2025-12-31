@@ -206,7 +206,7 @@ export async function POST(request: NextRequest) {
         });
         responseContent = `I've created a campaign plan for you: **${result.data.name}**\n\n${result.data.summary}\n\nThe plan includes ${result.data.phases.length} phases over ${result.data.contentCalendar.length} weeks. Click below to see the full details.`;
       } else {
-        responseContent = `I had trouble creating that campaign. ${result.error || 'Could you provide more details about what you're trying to achieve?'}`;
+        responseContent = `I had trouble creating that campaign. ${result.error || "Could you provide more details about what you're trying to achieve?"}`;
       }
     } else if (action === 'create_content' && agentName === 'content') {
       const result = await agents.createContent({

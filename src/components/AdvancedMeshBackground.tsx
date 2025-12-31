@@ -60,7 +60,7 @@ const CONFIG = {
 // =============================================================================
 function AnimatedGrain() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const animationRef = useRef<number>();
+  const animationRef = useRef<number | undefined>(undefined);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -223,16 +223,17 @@ function MorphingBlob({
 
   // Animate path morphing
   useEffect(() => {
-    if (!pathRef.current) return;
-    
+    const pathElement = pathRef.current;
+    if (!pathElement) return;
+
     let currentIndex = 0;
-    
+
     const morphToNext = () => {
       currentIndex = (currentIndex + 1) % blobPaths.length;
-      
-      animate(pathRef.current, 
+
+      animate(pathElement,
         { d: blobPaths[currentIndex] },
-        { 
+        {
           duration: CONFIG.blobs.morphSpeed,
           ease: "easeInOut",
         }

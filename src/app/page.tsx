@@ -113,7 +113,7 @@ export default function LandingPage() {
       </button>
 
       {/* Main Content - X Brand Score Lead Magnet */}
-      <XBrandScoreHero theme={theme} redirectAfterSignup="/thanks" />
+      <XBrandScoreHero theme={theme} />
     </div>
   );
 }

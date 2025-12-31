@@ -4,11 +4,11 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { ConductorChat } from '@/components/conductor';
-import { useBrandStore } from '@/lib/store';
+import { useCurrentBrand } from '@/lib/store';
 import { conductorPersona } from '@/lib/agents/conductor.types';
 
 export default function ConductorPage() {
-  const brand = useBrandStore((state) => state.brand);
+  const brand = useCurrentBrand();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
