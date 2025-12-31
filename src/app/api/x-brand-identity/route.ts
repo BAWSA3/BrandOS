@@ -10,12 +10,15 @@ import {
   analyzeProfileImageWithVision,
   generateBrandDNA,
   generateBrandImprovements,
+  analyzeTweetVoice,
   BioLinguistics,
   NameAnalysis,
   ProfileImageAnalysis,
   BrandDNA,
   BrandImprovements,
+  TweetVoiceAnalysis,
 } from '@/lib/gemini';
+import { features } from '@/lib/features';
 
 export interface BrandIdentityResponse {
   success: boolean;
@@ -34,6 +37,11 @@ export interface BrandIdentityResponse {
     profileImage: ProfileImageAnalysis | null;
     brandDNA: BrandDNA | null;
     improvements: BrandImprovements | null;
+    tweetVoice: TweetVoiceAnalysis | null;
+  };
+  meta?: {
+    enhanced: boolean;
+    tier: string;
   };
   error?: string;
 }
@@ -63,6 +71,41 @@ export async function POST(request: NextRequest) {
       bio: profile.description || '',
       followers: profile.public_metrics.followers_count,
     };
+
+    // Step 2.5: Fetch tweets if Basic tier available
+    let tweetVoiceAnalysis: TweetVoiceAnalysis | null = null;
+
+    if (features.tweetAnalysis) {
+      try {
+        console.log('=== FETCHING TWEETS (Basic tier enabled) ===');
+        const origin = request.nextUrl.origin;
+        const tweetsResponse = await fetch(`${origin}/api/x-tweets`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            username: profile.username,
+            maxResults: 100,
+          }),
+        });
+
+        if (tweetsResponse.ok) {
+          const tweetsData = await tweetsResponse.json();
+          console.log(`Fetched ${tweetsData.tweets?.length || 0} tweets for voice analysis`);
+
+          if (tweetsData.tweets && tweetsData.tweets.length > 0) {
+            tweetVoiceAnalysis = await analyzeTweetVoice(
+              tweetsData.tweets,
+              tweetsData.analysis.stats
+            );
+          }
+        } else {
+          console.warn('Tweet fetch failed:', tweetsResponse.status);
+        }
+      } catch (tweetError) {
+        console.warn('Tweet analysis unavailable:', tweetError);
+        // Non-fatal - continue without tweet analysis
+      }
+    }
 
     // Run image analysis and brand DNA generation in parallel
     const [profileImageAnalysis, brandDNA] = await Promise.all([
@@ -95,6 +138,11 @@ export async function POST(request: NextRequest) {
         profileImage: profileImageAnalysis,
         brandDNA,
         improvements,
+        tweetVoice: tweetVoiceAnalysis,
+      },
+      meta: {
+        enhanced: !!tweetVoiceAnalysis,
+        tier: features.xApiTier,
       },
     };
 

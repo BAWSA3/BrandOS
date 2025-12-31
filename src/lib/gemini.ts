@@ -1583,17 +1583,193 @@ export async function generateBrandImprovements(
   try {
     const bioLinguistics = analyzeBioLinguistics(profile.description || '', profile.name);
     const prompt = brandImprovementsPrompt(profile, brandDNA, bioLinguistics);
-    
+
     const result = await geminiFlash.generateContent(prompt);
     const response = await result.response;
     const text = response.text();
-    
+
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (!jsonMatch) return null;
-    
+
     return JSON.parse(jsonMatch[0]) as BrandImprovements;
   } catch (error) {
     console.error('Brand improvements generation error:', error);
+    return null;
+  }
+}
+
+// =============================================================================
+// TWEET VOICE ANALYSIS (Requires X API Basic Tier)
+// =============================================================================
+
+export interface TweetVoiceAnalysis {
+  // Writing style patterns
+  writingStyle: {
+    sentenceStructure: 'short_punchy' | 'long_narrative' | 'mixed';
+    hookPatterns: string[];
+    closingPatterns: string[];
+    signaturePhrases: string[];
+    readingLevel: 'simple' | 'moderate' | 'sophisticated';
+  };
+
+  // Voice spectrum (refined from actual content)
+  voiceSpectrum: {
+    professional: number;
+    casual: number;
+    authoritative: number;
+    approachable: number;
+    educational: number;
+    promotional: number;
+    personal: number;
+    opinionated: number;
+  };
+
+  // Content themes derived from tweets
+  contentThemes: {
+    pillar: string;
+    frequency: number;
+    avgEngagement: number;
+    exampleTweets: string[];
+  }[];
+
+  // High-performing content patterns
+  performancePatterns: {
+    bestFormats: ('thread' | 'single' | 'quote' | 'media' | 'question')[];
+    optimalLength: { min: number; max: number };
+    highEngagementTopics: string[];
+    bestPostingTimes: { day: string; hour: number }[];
+    viralCharacteristics: string[];
+  };
+
+  // Voice consistency
+  consistencyScore: number;
+  toneVariations: string[];
+}
+
+export const tweetVoiceAnalysisPrompt = (tweets: { text: string; likes: number; retweets: number; replies: number }[], stats: TweetAnalysisStats) => `
+You are a brand voice analyst examining a creator's tweet history to extract their authentic voice DNA.
+
+TWEET CORPUS (${tweets.length} tweets):
+${tweets.slice(0, 30).map((t, i) => `
+[${i + 1}] "${t.text.substring(0, 280)}"
+    Metrics: ${t.likes} likes | ${t.retweets} RTs | ${t.replies} replies
+`).join('\n')}
+
+ENGAGEMENT STATS:
+- Avg Engagement Rate: ${stats.avgEngagementRate.toFixed(2)}%
+- Avg Likes: ${stats.avgLikes.toFixed(1)}
+- Posting Frequency: ${stats.postingFrequency}
+- Top Hashtags: ${stats.topHashtags.join(', ') || 'None'}
+
+ANALYZE FOR:
+
+1. WRITING STYLE PATTERNS
+   - Sentence structure preferences (short_punchy, long_narrative, or mixed)
+   - Common opening hooks (first 5-10 words patterns)
+   - Closing patterns (CTAs, questions, statements)
+   - Signature phrases they repeatedly use (2-4 distinct phrases)
+   - Reading level complexity (simple, moderate, sophisticated)
+
+2. VOICE SPECTRUM (score each 0-100)
+   - Professional vs Casual balance
+   - Authoritative vs Approachable
+   - Educational vs Promotional
+   - Personal vs Opinionated
+
+3. CONTENT THEMES (identify 3-5 recurring pillars)
+   - What topics appear repeatedly?
+   - Which topics get best engagement?
+   - Include 1-2 example tweet snippets for each pillar
+
+4. PERFORMANCE PATTERNS
+   - What formats work best? (thread, single, quote, media, question)
+   - Optimal tweet length range
+   - Topics that drive highest engagement
+   - Any viral content characteristics
+
+5. VOICE CONSISTENCY
+   - How consistent is their tone across tweets? (0-100)
+   - Note any significant variations
+
+Return ONLY valid JSON:
+{
+  "writingStyle": {
+    "sentenceStructure": "short_punchy|long_narrative|mixed",
+    "hookPatterns": ["pattern1", "pattern2"],
+    "closingPatterns": ["pattern1", "pattern2"],
+    "signaturePhrases": ["phrase1", "phrase2", "phrase3"],
+    "readingLevel": "simple|moderate|sophisticated"
+  },
+  "voiceSpectrum": {
+    "professional": 0-100,
+    "casual": 0-100,
+    "authoritative": 0-100,
+    "approachable": 0-100,
+    "educational": 0-100,
+    "promotional": 0-100,
+    "personal": 0-100,
+    "opinionated": 0-100
+  },
+  "contentThemes": [
+    {
+      "pillar": "Theme name",
+      "frequency": 0-100,
+      "avgEngagement": <number>,
+      "exampleTweets": ["snippet1", "snippet2"]
+    }
+  ],
+  "performancePatterns": {
+    "bestFormats": ["thread", "single", "quote", "media", "question"],
+    "optimalLength": { "min": <number>, "max": <number> },
+    "highEngagementTopics": ["topic1", "topic2"],
+    "bestPostingTimes": [{ "day": "Monday", "hour": 14 }],
+    "viralCharacteristics": ["characteristic1"]
+  },
+  "consistencyScore": 0-100,
+  "toneVariations": ["variation1"]
+}`;
+
+/**
+ * Analyze tweet voice using Gemini AI
+ * Requires X API Basic tier for tweet access
+ */
+export async function analyzeTweetVoice(
+  tweets: { text: string; public_metrics: { like_count: number; retweet_count: number; reply_count: number } }[],
+  stats: TweetAnalysisStats
+): Promise<TweetVoiceAnalysis | null> {
+  try {
+    // Transform tweets to simpler format for prompt
+    const simpleTweets = tweets.map(t => ({
+      text: t.text,
+      likes: t.public_metrics.like_count,
+      retweets: t.public_metrics.retweet_count,
+      replies: t.public_metrics.reply_count,
+    }));
+
+    const prompt = tweetVoiceAnalysisPrompt(simpleTweets, stats);
+
+    const result = await geminiFlash.generateContent(prompt);
+    const response = await result.response;
+    const text = response.text();
+
+    // Extract JSON from response
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      console.error('No JSON found in tweet voice analysis response');
+      return null;
+    }
+
+    const analysis = JSON.parse(jsonMatch[0]) as TweetVoiceAnalysis;
+
+    console.log('=== TWEET VOICE ANALYSIS COMPLETE ===');
+    console.log(`Writing Style: ${analysis.writingStyle.sentenceStructure}`);
+    console.log(`Content Themes: ${analysis.contentThemes.map(t => t.pillar).join(', ')}`);
+    console.log(`Voice Consistency: ${analysis.consistencyScore}/100`);
+    console.log('=====================================');
+
+    return analysis;
+  } catch (error) {
+    console.error('Tweet voice analysis error:', error);
     return null;
   }
 }

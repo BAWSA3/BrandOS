@@ -30,6 +30,28 @@ export interface GeneratedBrandDNA {
   voiceProfile: string;
   targetAudience: string;
   inferredMission: string;
+  // Tweet-enhanced fields (optional)
+  contentPillars?: {
+    name: string;
+    frequency: number;
+    avgEngagement: number;
+  }[];
+  performanceInsights?: {
+    bestFormats: string[];
+    optimalLength: { min: number; max: number };
+    highEngagementTopics: string[];
+    signaturePhrases: string[];
+    hookPatterns: string[];
+    voiceConsistency: number;
+  };
+  tweetDerivedVoice?: {
+    professional: number;
+    casual: number;
+    authoritative: number;
+    educational: number;
+    personal: number;
+  };
+  dataSource?: 'profile-only' | 'profile-and-tweets';
 }
 
 interface BrandDNAPreviewProps {
@@ -159,6 +181,38 @@ export default function BrandDNAPreview({
         marginTop: '32px',
       }}
     >
+      {/* Enhanced Badge (shows when tweet analysis is available) */}
+      {generatedDNA.dataSource === 'profile-and-tweets' && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.1 }}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+            padding: '8px 16px',
+            background: 'linear-gradient(135deg, rgba(16,185,129,0.15), rgba(0,71,255,0.15))',
+            border: '1px solid rgba(16,185,129,0.3)',
+            borderRadius: '20px',
+            marginBottom: '16px',
+          }}
+        >
+          <span style={{ fontSize: '14px' }}>✨</span>
+          <span
+            style={{
+              fontFamily: "'VCR OSD Mono', monospace",
+              fontSize: '10px',
+              letterSpacing: '0.1em',
+              color: '#10B981',
+            }}
+          >
+            ENHANCED WITH TWEET ANALYSIS
+          </span>
+        </motion.div>
+      )}
+
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
@@ -186,7 +240,7 @@ export default function BrandDNAPreview({
             margin: 0,
           }}
         >
-          Based on @{username}'s profile, here's what makes your brand uniquely yours.
+          Based on @{username}'s profile{generatedDNA.dataSource === 'profile-and-tweets' ? ' & tweets' : ''}, here's what makes your brand uniquely yours.
         </p>
       </motion.div>
 
@@ -406,6 +460,226 @@ export default function BrandDNAPreview({
         </div>
       </motion.div>
 
+      {/* Content Pillars (Tweet-Enhanced) */}
+      {generatedDNA.contentPillars && generatedDNA.contentPillars.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.75 }}
+          style={{ marginBottom: '24px' }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+            <span
+              style={{
+                fontFamily: "'VCR OSD Mono', monospace",
+                fontSize: '10px',
+                letterSpacing: '0.1em',
+                color: theme === 'dark' ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)',
+              }}
+            >
+              YOUR CONTENT PILLARS
+            </span>
+            <span
+              style={{
+                fontFamily: "'VCR OSD Mono', monospace",
+                fontSize: '8px',
+                padding: '2px 6px',
+                background: 'linear-gradient(135deg, rgba(16,185,129,0.2), rgba(0,71,255,0.2))',
+                border: '1px solid rgba(16,185,129,0.3)',
+                borderRadius: '10px',
+                color: '#10B981',
+              }}
+            >
+              FROM TWEETS
+            </span>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {generatedDNA.contentPillars.map((pillar, index) => (
+              <motion.div
+                key={pillar.name}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.75 + index * 0.1 }}
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  padding: '12px',
+                  background: theme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
+                  borderRadius: '8px',
+                }}
+              >
+                <span
+                  style={{
+                    fontFamily: "'Helvetica Neue', sans-serif",
+                    fontSize: '13px',
+                    fontWeight: 500,
+                    color: theme === 'dark' ? '#FFFFFF' : '#000000',
+                  }}
+                >
+                  {pillar.name}
+                </span>
+                <div style={{ display: 'flex', gap: '16px' }}>
+                  <span
+                    style={{
+                      fontFamily: "'Helvetica Neue', sans-serif",
+                      fontSize: '11px',
+                      color: theme === 'dark' ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)',
+                    }}
+                  >
+                    {pillar.frequency}% of content
+                  </span>
+                  <span
+                    style={{
+                      fontFamily: "'Helvetica Neue', sans-serif",
+                      fontSize: '11px',
+                      color: '#10B981',
+                      fontWeight: 500,
+                    }}
+                  >
+                    {pillar.avgEngagement.toLocaleString()} avg engagement
+                  </span>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+      )}
+
+      {/* Performance Insights (Tweet-Enhanced) */}
+      {generatedDNA.performanceInsights && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.8 }}
+          style={{ marginBottom: '24px' }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+            <span
+              style={{
+                fontFamily: "'VCR OSD Mono', monospace",
+                fontSize: '10px',
+                letterSpacing: '0.1em',
+                color: theme === 'dark' ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)',
+              }}
+            >
+              WHAT WORKS FOR YOU
+            </span>
+          </div>
+
+          {/* Best Formats */}
+          <div style={{ marginBottom: '16px' }}>
+            <span
+              style={{
+                fontFamily: "'VCR OSD Mono', monospace",
+                fontSize: '9px',
+                color: theme === 'dark' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)',
+                display: 'block',
+                marginBottom: '8px',
+              }}
+            >
+              BEST FORMATS
+            </span>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              {generatedDNA.performanceInsights.bestFormats.slice(0, 4).map((format) => (
+                <span
+                  key={format}
+                  style={{
+                    fontFamily: "'Helvetica Neue', sans-serif",
+                    fontSize: '11px',
+                    padding: '4px 10px',
+                    background: '#0047FF20',
+                    border: '1px solid #0047FF40',
+                    borderRadius: '12px',
+                    color: '#0047FF',
+                    textTransform: 'capitalize',
+                  }}
+                >
+                  {format}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* Signature Phrases */}
+          {generatedDNA.performanceInsights.signaturePhrases.length > 0 && (
+            <div style={{ marginBottom: '16px' }}>
+              <span
+                style={{
+                  fontFamily: "'VCR OSD Mono', monospace",
+                  fontSize: '9px',
+                  color: theme === 'dark' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)',
+                  display: 'block',
+                  marginBottom: '8px',
+                }}
+              >
+                YOUR SIGNATURE PHRASES
+              </span>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                {generatedDNA.performanceInsights.signaturePhrases.slice(0, 3).map((phrase, i) => (
+                  <span
+                    key={i}
+                    style={{
+                      fontFamily: "'Helvetica Neue', sans-serif",
+                      fontSize: '12px',
+                      fontStyle: 'italic',
+                      padding: '8px 12px',
+                      background: theme === 'dark' ? 'rgba(0,71,255,0.1)' : 'rgba(0,71,255,0.05)',
+                      borderRadius: '8px',
+                      color: theme === 'dark' ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.8)',
+                    }}
+                  >
+                    "{phrase}"
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Voice Consistency */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              padding: '12px',
+              background: generatedDNA.performanceInsights.voiceConsistency >= 70
+                ? 'rgba(16,185,129,0.1)'
+                : 'rgba(245,158,11,0.1)',
+              borderRadius: '8px',
+            }}
+          >
+            <span style={{ fontSize: '20px' }}>
+              {generatedDNA.performanceInsights.voiceConsistency >= 70 ? '✓' : '⚠️'}
+            </span>
+            <div>
+              <span
+                style={{
+                  fontFamily: "'Helvetica Neue', sans-serif",
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  color: theme === 'dark' ? '#FFFFFF' : '#000000',
+                  display: 'block',
+                }}
+              >
+                Voice Consistency: {generatedDNA.performanceInsights.voiceConsistency}%
+              </span>
+              <span
+                style={{
+                  fontFamily: "'Helvetica Neue', sans-serif",
+                  fontSize: '11px',
+                  color: theme === 'dark' ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)',
+                }}
+              >
+                {generatedDNA.performanceInsights.voiceConsistency >= 70
+                  ? 'Your content maintains a consistent voice'
+                  : 'Consider strengthening your voice consistency'}
+              </span>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
       {/* Voice Sample Preview */}
       {generatedDNA.voiceSamples.length > 0 && (
         <motion.div
@@ -478,23 +752,8 @@ export default function BrandDNAPreview({
         CLAIM YOUR BRAND DNA
       </motion.button>
 
-      {/* Sub-CTA */}
-      <motion.p
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1 }}
-        style={{
-          fontFamily: "'Helvetica Neue', sans-serif",
-          fontSize: '12px',
-          color: theme === 'dark' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)',
-          textAlign: 'center',
-          margin: 0,
-          marginTop: '12px',
-        }}
-      >
-        Start checking content instantly. No credit card required.
-      </motion.p>
     </motion.div>
   );
 }
+
 

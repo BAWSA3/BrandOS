@@ -9,6 +9,7 @@ import {
   BrandDNA as GeminiBrandDNA,
   BioLinguistics,
   ProfileImageAnalysis,
+  TweetVoiceAnalysis,
   analyzeBioLinguistics,
 } from '@/lib/gemini';
 import { BrandDNA as StoreBrandDNA } from '@/lib/types';
@@ -39,6 +40,28 @@ export interface GeneratedBrandDNA {
   voiceProfile: string;
   targetAudience: string;
   inferredMission: string;
+  // NEW: Tweet-enhanced fields (optional)
+  contentPillars?: {
+    name: string;
+    frequency: number;
+    avgEngagement: number;
+  }[];
+  performanceInsights?: {
+    bestFormats: string[];
+    optimalLength: { min: number; max: number };
+    highEngagementTopics: string[];
+    signaturePhrases: string[];
+    hookPatterns: string[];
+    voiceConsistency: number;
+  };
+  tweetDerivedVoice?: {
+    professional: number;
+    casual: number;
+    authoritative: number;
+    educational: number;
+    personal: number;
+  };
+  dataSource: 'profile-only' | 'profile-and-tweets';
 }
 
 export interface GenerateBrandDNAResponse {
@@ -236,6 +259,62 @@ function generateVoiceSamples(
   return samples.filter((s) => s && s.length > 10).slice(0, 3);
 }
 
+// Helper: Map tweet voice to enhanced tone sliders
+function mapTweetVoiceToTone(
+  tweetVoice: TweetVoiceAnalysis,
+  baseTone: { minimal: number; playful: number; bold: number; experimental: number }
+): { minimal: number; playful: number; bold: number; experimental: number } {
+  const voice = tweetVoice.voiceSpectrum;
+
+  return {
+    minimal: Math.round(
+      voice.professional * 0.6 +
+      (100 - voice.casual) * 0.4
+    ),
+    playful: Math.round(
+      voice.casual * 0.5 +
+      voice.approachable * 0.3 +
+      (100 - voice.professional) * 0.2
+    ),
+    bold: Math.round(
+      voice.authoritative * 0.5 +
+      voice.opinionated * 0.5
+    ),
+    experimental: Math.round(
+      (100 - voice.professional) * 0.4 +
+      baseTone.experimental * 0.6
+    ),
+  };
+}
+
+// Helper: Extract content pillars from tweet voice analysis
+function extractContentPillars(tweetVoice: TweetVoiceAnalysis | null): GeneratedBrandDNA['contentPillars'] {
+  if (!tweetVoice?.contentThemes?.length) return undefined;
+
+  return tweetVoice.contentThemes
+    .sort((a, b) => b.avgEngagement - a.avgEngagement)
+    .slice(0, 5)
+    .map(theme => ({
+      name: theme.pillar,
+      frequency: theme.frequency,
+      avgEngagement: theme.avgEngagement,
+    }));
+}
+
+// Helper: Extract performance insights from tweet voice analysis
+function extractPerformanceInsights(tweetVoice: TweetVoiceAnalysis | null): GeneratedBrandDNA['performanceInsights'] {
+  if (!tweetVoice) return undefined;
+
+  return {
+    bestFormats: tweetVoice.performancePatterns.bestFormats,
+    optimalLength: tweetVoice.performancePatterns.optimalLength,
+    highEngagementTopics: tweetVoice.performancePatterns.highEngagementTopics,
+    signaturePhrases: tweetVoice.writingStyle.signaturePhrases,
+    hookPatterns: tweetVoice.writingStyle.hookPatterns,
+    voiceConsistency: tweetVoice.consistencyScore,
+  };
+}
+
 // Main handler
 export async function POST(request: NextRequest) {
   try {
@@ -249,6 +328,7 @@ export async function POST(request: NextRequest) {
         bioLinguistics: BioLinguistics;
         profileImage: ProfileImageAnalysis | null;
         brandDNA: GeminiBrandDNA | null;
+        tweetVoice?: TweetVoiceAnalysis | null;
       };
     } = body;
 
@@ -259,14 +339,32 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { bioLinguistics, profileImage, brandDNA: geminiBrandDNA } = brandIdentity;
+    const { bioLinguistics, profileImage, brandDNA: geminiBrandDNA, tweetVoice } = brandIdentity;
 
     // Generate store-compatible Brand DNA
     const colors = extractColors(profileImage, geminiBrandDNA);
-    const tone = mapToToneSliders(bioLinguistics, profileImage, geminiBrandDNA);
+    let tone = mapToToneSliders(bioLinguistics, profileImage, geminiBrandDNA);
+
+    // If tweet voice analysis available, use it for more accurate tone
+    if (tweetVoice) {
+      tone = mapTweetVoiceToTone(tweetVoice, tone);
+      console.log('=== USING TWEET-ENHANCED TONE ===');
+    }
+
     const keywords = extractKeywords(bioLinguistics, geminiBrandDNA, profile);
     const { doPatterns, dontPatterns } = generatePatterns(bioLinguistics, geminiBrandDNA);
     const voiceSamples = generateVoiceSamples(profile, geminiBrandDNA);
+
+    // Extract tweet-enhanced data
+    const contentPillars = extractContentPillars(tweetVoice || null);
+    const performanceInsights = extractPerformanceInsights(tweetVoice || null);
+    const tweetDerivedVoice = tweetVoice ? {
+      professional: tweetVoice.voiceSpectrum.professional,
+      casual: tweetVoice.voiceSpectrum.casual,
+      authoritative: tweetVoice.voiceSpectrum.authoritative,
+      educational: tweetVoice.voiceSpectrum.educational,
+      personal: tweetVoice.voiceSpectrum.personal,
+    } : undefined;
 
     const generatedBrandDNA: GeneratedBrandDNA = {
       id: `brand-${profile.username}-${Date.now()}`,
@@ -283,6 +381,11 @@ export async function POST(request: NextRequest) {
       voiceProfile: geminiBrandDNA?.voiceProfile?.primary || 'Authentic Voice',
       targetAudience: geminiBrandDNA?.targetAudience || 'Your community',
       inferredMission: geminiBrandDNA?.inferredMission || '',
+      // Tweet-enhanced fields
+      contentPillars,
+      performanceInsights,
+      tweetDerivedVoice,
+      dataSource: tweetVoice ? 'profile-and-tweets' : 'profile-only',
     };
 
     return NextResponse.json({
@@ -301,4 +404,5 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
 
