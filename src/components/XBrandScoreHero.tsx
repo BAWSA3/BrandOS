@@ -1191,8 +1191,8 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
             >
               <span
                 style={{
-                  fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
-                  fontWeight: 700,
+                  fontFamily: "'Russo One', sans-serif",
+                  fontWeight: 400,
                   fontStyle: 'italic',
                   color: theme === 'dark' ? '#FFFFFF' : '#000000',
                 }}
@@ -1247,7 +1247,7 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                 whiteSpace: 'nowrap',
               }}
             >
-              an AI-powered OS that enforces, scales and understands your brand.
+              an AI-powered OS that builds your brand's DNA.
             </motion.p>
 
             {/* Input Form */}
