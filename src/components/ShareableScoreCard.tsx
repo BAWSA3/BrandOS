@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 
 // =============================================================================
@@ -10,7 +10,10 @@ import { motion, AnimatePresence } from 'motion/react';
 export interface ShareCardData {
   score: number;
   username: string;
+  displayName?: string;
+  profileImageUrl?: string;
   topStrength: string;
+  summary?: string;
   archetype?: {
     primary: string;
     emoji: string;
@@ -21,6 +24,7 @@ export interface ShareCardData {
     primary: string;
     secondary: string;
   };
+  voiceProfile?: string;
 }
 
 interface ShareableScoreCardProps {
@@ -74,6 +78,21 @@ function darkenColor(hex: string, percent: number): string {
 }
 
 // =============================================================================
+// LOAD IMAGE HELPER
+// =============================================================================
+
+async function loadImage(url: string): Promise<HTMLImageElement | null> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => resolve(img);
+    img.onerror = () => resolve(null);
+    // Use a proxy or direct URL - Twitter images should work with crossOrigin
+    img.src = url;
+  });
+}
+
+// =============================================================================
 // CANVAS IMAGE GENERATOR
 // =============================================================================
 
@@ -89,6 +108,14 @@ export async function generateShareableImage(data: ShareCardData): Promise<Blob 
   const scoreColors = getScoreColors(data.score);
   const primaryColor = data.brandColors?.primary || scoreColors.primary;
   const secondaryColor = data.brandColors?.secondary || scoreColors.secondary;
+
+  // Load profile image if available
+  let profileImage: HTMLImageElement | null = null;
+  if (data.profileImageUrl) {
+    // Get higher resolution image
+    const highResUrl = data.profileImageUrl.replace('_normal', '_200x200');
+    profileImage = await loadImage(highResUrl);
+  }
 
   // ==========================================================================
   // BACKGROUND - Gradient with user's brand colors
@@ -153,22 +180,65 @@ export async function generateShareableImage(data: ShareCardData): Promise<Blob 
   }
 
   // ==========================================================================
-  // USERNAME - Top left
+  // PROFILE IMAGE + NAME - Top left
   // ==========================================================================
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-  ctx.font = '600 28px "Helvetica Neue", Arial, sans-serif';
-  ctx.textAlign = 'left';
-  ctx.fillText(`@${data.username}`, 60, 70);
+  const headerY = 55;
+  let textStartX = 60;
+  
+  if (profileImage) {
+    const imgSize = 56;
+    const imgX = 60;
+    const imgY = headerY - imgSize / 2;
+    
+    // Draw circular profile image
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(imgX + imgSize / 2, imgY + imgSize / 2, imgSize / 2, 0, Math.PI * 2);
+    ctx.closePath();
+    ctx.clip();
+    ctx.drawImage(profileImage, imgX, imgY, imgSize, imgSize);
+    ctx.restore();
+    
+    // Add subtle border around profile image
+    ctx.beginPath();
+    ctx.arc(imgX + imgSize / 2, imgY + imgSize / 2, imgSize / 2 + 2, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    
+    textStartX = imgX + imgSize + 16;
+  }
+  
+  // Display name
+  if (data.displayName) {
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = '600 26px "Helvetica Neue", Arial, sans-serif';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(data.displayName, textStartX, headerY - 12);
+    
+    // Username below
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+    ctx.font = '400 20px "Helvetica Neue", Arial, sans-serif';
+    ctx.fillText(`@${data.username}`, textStartX, headerY + 16);
+  } else {
+    // Just username
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+    ctx.font = '600 28px "Helvetica Neue", Arial, sans-serif';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(`@${data.username}`, textStartX, headerY);
+  }
 
   // ==========================================================================
   // BRANDOS LOGO - Top right
   // ==========================================================================
+  ctx.textBaseline = 'alphabetic';
   ctx.textAlign = 'right';
   ctx.font = 'italic 700 32px "Helvetica Neue", Arial, sans-serif';
   ctx.fillStyle = '#FFFFFF';
   ctx.fillText('Brand', canvas.width - 60, 70);
   
-  const brandWidth = ctx.measureText('Brand').width;
   ctx.font = '700 32px "VCR OSD Mono", "Courier New", monospace';
   ctx.fillStyle = primaryColor;
   ctx.fillText('OS', canvas.width - 60, 70);
@@ -176,8 +246,8 @@ export async function generateShareableImage(data: ShareCardData): Promise<Blob 
   // ==========================================================================
   // SCORE SECTION - Center left
   // ==========================================================================
-  const scoreX = 280;
-  const scoreY = canvas.height / 2 - 20;
+  const scoreX = 240;
+  const scoreY = canvas.height / 2 + 20;
 
   // Score circle glow
   const glowGradient = ctx.createRadialGradient(scoreX, scoreY, 0, scoreX, scoreY, 180);
@@ -189,13 +259,13 @@ export async function generateShareableImage(data: ShareCardData): Promise<Blob 
 
   // Score circle background
   ctx.beginPath();
-  ctx.arc(scoreX, scoreY, 130, 0, Math.PI * 2);
+  ctx.arc(scoreX, scoreY, 120, 0, Math.PI * 2);
   ctx.fillStyle = 'rgba(255, 255, 255, 0.04)';
   ctx.fill();
   
   // Inner ring
   ctx.beginPath();
-  ctx.arc(scoreX, scoreY, 115, 0, Math.PI * 2);
+  ctx.arc(scoreX, scoreY, 105, 0, Math.PI * 2);
   ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
   ctx.lineWidth = 2;
   ctx.stroke();
@@ -203,87 +273,105 @@ export async function generateShareableImage(data: ShareCardData): Promise<Blob 
   // Score progress arc
   const progressAngle = (data.score / 100) * Math.PI * 2;
   ctx.beginPath();
-  ctx.arc(scoreX, scoreY, 130, -Math.PI / 2, -Math.PI / 2 + progressAngle);
+  ctx.arc(scoreX, scoreY, 120, -Math.PI / 2, -Math.PI / 2 + progressAngle);
   ctx.strokeStyle = scoreColors.primary;
-  ctx.lineWidth = 14;
+  ctx.lineWidth = 12;
   ctx.lineCap = 'round';
   ctx.stroke();
 
   // Score number
   ctx.fillStyle = '#FFFFFF';
-  ctx.font = 'bold 84px "Helvetica Neue", Arial, sans-serif';
+  ctx.font = 'bold 72px "Helvetica Neue", Arial, sans-serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.fillText(String(data.score), scoreX, scoreY - 8);
 
   // /100 text
   ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-  ctx.font = '24px "Helvetica Neue", Arial, sans-serif';
-  ctx.fillText('/100', scoreX, scoreY + 45);
+  ctx.font = '22px "Helvetica Neue", Arial, sans-serif';
+  ctx.fillText('/100', scoreX, scoreY + 38);
 
   // Score label (EXCELLENT, etc.)
   ctx.fillStyle = scoreColors.primary;
-  ctx.font = '600 16px "VCR OSD Mono", "Courier New", monospace';
-  ctx.letterSpacing = '0.15em';
-  ctx.fillText(getScoreLabel(data.score), scoreX, scoreY + 85);
+  ctx.font = '600 14px "VCR OSD Mono", "Courier New", monospace';
+  ctx.fillText(getScoreLabel(data.score), scoreX, scoreY + 75);
 
   // ==========================================================================
-  // ARCHETYPE SECTION - Right side
+  // RIGHT SIDE CONTENT
   // ==========================================================================
-  const rightX = 580;
-  const rightStartY = 180;
+  const rightX = 480;
+  let currentY = 150;
 
+  // Archetype section
   if (data.archetype) {
     // Archetype emoji (large)
-    ctx.font = '72px Arial';
+    ctx.font = '56px Arial';
     ctx.textAlign = 'left';
-    ctx.fillText(data.archetype.emoji, rightX, rightStartY + 10);
+    ctx.textBaseline = 'middle';
+    ctx.fillText(data.archetype.emoji, rightX, currentY + 5);
 
     // Archetype name
     ctx.fillStyle = '#FFFFFF';
-    ctx.font = 'bold 36px "Helvetica Neue", Arial, sans-serif';
-    ctx.fillText(data.archetype.primary, rightX + 90, rightStartY);
+    ctx.font = 'bold 32px "Helvetica Neue", Arial, sans-serif';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillText(data.archetype.primary.toUpperCase(), rightX + 75, currentY + 10);
 
-    // Archetype tagline
-    if (data.archetype.tagline) {
+    currentY += 50;
+
+    // Archetype tagline or voice profile
+    const descriptionText = data.archetype.tagline || data.voiceProfile;
+    if (descriptionText) {
       ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-      ctx.font = '20px "Helvetica Neue", Arial, sans-serif';
-      const taglineLines = wrapText(ctx, data.archetype.tagline, 480);
+      ctx.font = '18px "Helvetica Neue", Arial, sans-serif';
+      const taglineLines = wrapText(ctx, descriptionText, 600);
       taglineLines.forEach((line, i) => {
-        ctx.fillText(line, rightX, rightStartY + 45 + (i * 28));
+        ctx.fillText(line, rightX, currentY + (i * 26));
       });
+      currentY += taglineLines.length * 26 + 30;
     }
   }
 
-  // ==========================================================================
-  // TOP STRENGTH - Right side, below archetype
-  // ==========================================================================
-  const strengthY = data.archetype ? rightStartY + 130 : rightStartY;
+  // Summary / Brand DNA description
+  if (data.summary) {
+    ctx.fillStyle = scoreColors.primary;
+    ctx.font = '600 12px "VCR OSD Mono", "Courier New", monospace';
+    ctx.fillText('BRAND DNA', rightX, currentY);
+    currentY += 28;
 
-  // Label
-  ctx.fillStyle = scoreColors.primary;
-  ctx.font = '600 14px "VCR OSD Mono", "Courier New", monospace';
-  ctx.textAlign = 'left';
-  ctx.fillText('TOP STRENGTH', rightX, strengthY);
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
+    ctx.font = '18px "Helvetica Neue", Arial, sans-serif';
+    const summaryLines = wrapText(ctx, data.summary, 620);
+    summaryLines.slice(0, 3).forEach((line, i) => {
+      ctx.fillText(line, rightX, currentY + (i * 26));
+    });
+    currentY += Math.min(summaryLines.length, 3) * 26 + 30;
+  }
 
-  // Strength text
-  ctx.fillStyle = '#FFFFFF';
-  ctx.font = '24px "Helvetica Neue", Arial, sans-serif';
-  const strengthLines = wrapText(ctx, `"${data.topStrength}"`, 520);
-  strengthLines.forEach((line, i) => {
-    ctx.fillText(line, rightX, strengthY + 35 + (i * 32));
-  });
+  // Top Strength
+  if (data.topStrength && !data.summary) {
+    ctx.fillStyle = scoreColors.primary;
+    ctx.font = '600 12px "VCR OSD Mono", "Courier New", monospace';
+    ctx.fillText('TOP STRENGTH', rightX, currentY);
+    currentY += 28;
+
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = '20px "Helvetica Neue", Arial, sans-serif';
+    const strengthLines = wrapText(ctx, `"${data.topStrength}"`, 600);
+    strengthLines.forEach((line, i) => {
+      ctx.fillText(line, rightX, currentY + (i * 28));
+    });
+  }
 
   // ==========================================================================
   // KEYWORDS - Bottom section
   // ==========================================================================
   if (data.keywords && data.keywords.length > 0) {
-    const keywordsY = canvas.height - 100;
+    const keywordsY = canvas.height - 85;
     ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
-    ctx.font = '18px "Helvetica Neue", Arial, sans-serif';
+    ctx.font = '16px "Helvetica Neue", Arial, sans-serif';
     ctx.textAlign = 'left';
     
-    const keywordText = data.keywords.slice(0, 5).map(k => `#${k}`).join('  ');
+    const keywordText = data.keywords.slice(0, 5).map(k => `#${k.replace(/\s+/g, '')}`).join('  ');
     ctx.fillText(keywordText, 60, keywordsY);
   }
 
@@ -291,13 +379,13 @@ export async function generateShareableImage(data: ShareCardData): Promise<Blob 
   // CTA - Bottom right
   // ==========================================================================
   ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
-  ctx.font = '20px "Helvetica Neue", Arial, sans-serif';
+  ctx.font = '18px "Helvetica Neue", Arial, sans-serif';
   ctx.textAlign = 'right';
-  ctx.fillText('Get your brand score →', canvas.width - 60, canvas.height - 100);
+  ctx.fillText('Get your brand score →', canvas.width - 60, canvas.height - 85);
   
   ctx.fillStyle = '#FFFFFF';
-  ctx.font = 'bold 22px "Helvetica Neue", Arial, sans-serif';
-  ctx.fillText('brandos.xyz', canvas.width - 60, canvas.height - 65);
+  ctx.font = 'bold 20px "Helvetica Neue", Arial, sans-serif';
+  ctx.fillText('brandos.xyz', canvas.width - 60, canvas.height - 55);
 
   // ==========================================================================
   // DECORATIVE ELEMENTS
@@ -306,12 +394,12 @@ export async function generateShareableImage(data: ShareCardData): Promise<Blob 
   // Small accent dots
   ctx.fillStyle = scoreColors.primary;
   ctx.beginPath();
-  ctx.arc(60, canvas.height - 60, 4, 0, Math.PI * 2);
+  ctx.arc(60, canvas.height - 50, 4, 0, Math.PI * 2);
   ctx.fill();
 
   ctx.fillStyle = secondaryColor;
   ctx.beginPath();
-  ctx.arc(80, canvas.height - 60, 3, 0, Math.PI * 2);
+  ctx.arc(80, canvas.height - 50, 3, 0, Math.PI * 2);
   ctx.fill();
 
   // Convert to blob
@@ -321,7 +409,7 @@ export async function generateShareableImage(data: ShareCardData): Promise<Blob 
 }
 
 // Helper to wrap text
-function wrapText(ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string[] {
+function wrapText(ctx: CanvasRenderingContext2D, text: string, maxWidth: number, maxLines: number = 3): string[] {
   const words = text.split(' ');
   const lines: string[] = [];
   let currentLine = '';
@@ -337,7 +425,7 @@ function wrapText(ctx: CanvasRenderingContext2D, text: string, maxWidth: number)
     }
   });
   if (currentLine) lines.push(currentLine);
-  return lines.slice(0, 2); // Max 2 lines
+  return lines.slice(0, maxLines);
 }
 
 // =============================================================================

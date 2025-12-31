@@ -2,9 +2,9 @@
   {
     "username": "banditxbt",
     "displayName": "banditxbt",
-    "score": 87,
-    "profileImage": "https://pbs.twimg.com/profile_images/1923661282206511104/miKN7Xm8_normal.jpg",
-    "timestamp": 1767024525253,
+    "score": 86,
+    "profileImage": "",
+    "timestamp": 1767179277872,
     "isCrypto": false
   },
   {
@@ -29,6 +29,22 @@
     "score": 98,
     "profileImage": "",
     "timestamp": 1767073957630,
+    "isCrypto": false
+  },
+  {
+    "username": "thedev",
+    "displayName": "thedev",
+    "score": 87,
+    "profileImage": "",
+    "timestamp": 1767174789561,
+    "isCrypto": false
+  },
+  {
+    "username": "thedankoe",
+    "displayName": "thedankoe",
+    "score": 93,
+    "profileImage": "",
+    "timestamp": 1767178874863,
     "isCrypto": false
   }
 ]
