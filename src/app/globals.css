@@ -43,6 +43,14 @@
   font-display: swap;
 }
 
+@font-face {
+  font-family: 'Russo One';
+  src: url('/fonts/RussoOne-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* ============================================
    NEW DESIGN SYSTEM - GLASSMORPHIC BLUE
    ============================================ */
@@ -377,6 +385,10 @@ body {
 
 .font-mono {
   font-family: 'VCR OSD Mono', monospace;
+}
+
+.font-russo {
+  font-family: 'Russo One', sans-serif;
 }
 
 /* Headline - Bold condensed */
