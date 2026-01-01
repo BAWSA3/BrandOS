@@ -7,6 +7,7 @@ import { BlendFunction } from 'postprocessing';
 import { OrbitControls } from '@react-three/drei';
 import GlassDNA from './GlassDNA';
 import AutoOrbitCamera from './AutoOrbitCamera';
+import JourneyCameraController from './JourneyCameraController';
 import { FlowState } from '@/lib/useDNAJourneySync';
 
 interface DNAJourneySceneProps {
@@ -24,9 +25,6 @@ export default function DNAJourneyScene({
   theme = 'dark',
   onPhaseChange,
 }: DNAJourneySceneProps) {
-  // Determine camera mode: auto-orbit on landing, interactive during journey
-  const isInteractive = flowState === 'journey' || flowState === 'reveal' || flowState === 'signup';
-
   // Increase bloom during journey for dramatic effect
   const bloomIntensity = flowState === 'journey' ? 0.25 : 0.15;
 
@@ -58,8 +56,19 @@ export default function DNAJourneyScene({
         style={{ background: 'transparent' }}
         shadows
       >
-        {/* Auto-orbit on landing, manual controls during journey */}
-        {isInteractive ? (
+        {/* Camera control based on flow state */}
+        {flowState === 'input' ? (
+          // Landing page: auto-orbit camera
+          <AutoOrbitCamera radius={45} speed={0.03} topDown={true} />
+        ) : flowState === 'journey' || flowState === 'reveal' ? (
+          // Journey/Reveal: animated camera following phases
+          <JourneyCameraController
+            currentPhase={currentPhase}
+            flowState={flowState}
+            lerpSpeed={0.03}
+          />
+        ) : (
+          // Signup: manual controls
           <OrbitControls
             enableZoom={true}
             enablePan={false}
@@ -67,8 +76,6 @@ export default function DNAJourneyScene({
             minDistance={20}
             maxDistance={80}
           />
-        ) : (
-          <AutoOrbitCamera radius={45} speed={0.03} topDown={true} />
         )}
 
         {/* DNA with external phase control */}
@@ -76,7 +83,8 @@ export default function DNAJourneyScene({
           onPhaseChange={onPhaseChange}
           rotationMultiplier={rotationMultiplier}
           highlightIntensity={flowState === 'journey' ? 1.2 : 1}
-          interactive={isInteractive}
+          interactive={flowState === 'signup'}
+          activePhase={flowState === 'journey' ? currentPhase - 1 : undefined}
         />
 
         {/* Post-processing effects */}
