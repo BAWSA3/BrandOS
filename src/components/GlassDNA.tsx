@@ -15,7 +15,7 @@ const STYLE: 'chrome' | 'pearl' | 'hybrid' = 'hybrid';
 
 // Phase colors
 const PHASE_COLORS = [
-  new THREE.Color(0x00d4ff), // Cyan - Define
+  new THREE.Color(0xE8A838), // Golden Amber - Define
   new THREE.Color(0x00ff88), // Green - Check
   new THREE.Color(0x9d4edd), // Purple - Generate
   new THREE.Color(0xff6b35), // Orange - Scale
@@ -119,34 +119,94 @@ export default function GlassDNA({
     return rungData;
   }, [curve1, curve2]);
 
+  // Iridescent/Holographic shader material
+  const iridescenceShader = useMemo(() => {
+    return new THREE.ShaderMaterial({
+      uniforms: {
+        uTime: { value: 0 },
+        uBaseColor: { value: new THREE.Color(0xd4d4d8) },
+      },
+      vertexShader: `
+        varying vec3 vNormal;
+        varying vec3 vViewPosition;
+        varying vec2 vUv;
+
+        void main() {
+          vNormal = normalize(normalMatrix * normal);
+          vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+          vViewPosition = -mvPosition.xyz;
+          vUv = uv;
+          gl_Position = projectionMatrix * mvPosition;
+        }
+      `,
+      fragmentShader: `
+        uniform float uTime;
+        uniform vec3 uBaseColor;
+        varying vec3 vNormal;
+        varying vec3 vViewPosition;
+        varying vec2 vUv;
+
+        vec3 hsv2rgb(vec3 c) {
+          vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+          vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
+          return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+        }
+
+        void main() {
+          vec3 viewDir = normalize(vViewPosition);
+          vec3 normal = normalize(vNormal);
+
+          // Enhanced Fresnel effect - more visible across surface
+          float fresnel = 1.0 - abs(dot(viewDir, normal));
+          fresnel = pow(fresnel, 1.2); // Lower power = more visible effect
+
+          // Secondary fresnel for edge glow
+          float edgeFresnel = pow(1.0 - abs(dot(viewDir, normal)), 3.0);
+
+          // Create rainbow shift based on viewing angle, position, and time
+          float hue = fract(fresnel * 1.2 + uTime * 0.08 + vUv.y * 0.5 + vUv.x * 0.3);
+          float hue2 = fract(fresnel * 0.8 + uTime * 0.12 - vUv.y * 0.4);
+
+          // More saturated iridescence colors
+          vec3 iridescence1 = hsv2rgb(vec3(hue, 0.7, 0.95));
+          vec3 iridescence2 = hsv2rgb(vec3(hue2, 0.6, 0.9));
+          vec3 iridescence = mix(iridescence1, iridescence2, 0.4);
+
+          // Stronger blend with base - more holographic
+          vec3 finalColor = mix(uBaseColor, iridescence, fresnel * 0.85 + 0.15);
+
+          // Add rainbow edge glow
+          vec3 edgeColor = hsv2rgb(vec3(fract(uTime * 0.1 + vUv.y), 0.8, 1.0));
+          finalColor += edgeColor * edgeFresnel * 0.3;
+
+          // Add specular highlight with color tint
+          vec3 lightDir = normalize(vec3(1.0, 1.0, 1.0));
+          float specular = pow(max(dot(reflect(-lightDir, normal), viewDir), 0.0), 24.0);
+          vec3 specColor = hsv2rgb(vec3(fract(uTime * 0.05), 0.3, 1.0));
+          finalColor += specColor * specular * 0.6;
+
+          // Subtle ambient
+          finalColor += uBaseColor * 0.15;
+
+          gl_FragColor = vec4(finalColor, 1.0);
+        }
+      `,
+      side: THREE.DoubleSide,
+    });
+  }, []);
+
   // Strand material - pearl/white for hybrid, or style-specific
   const strandMaterial = useMemo(() => {
-    if (STYLE === 'chrome') {
-      return new THREE.MeshPhysicalMaterial({
-        color: 0x888899,
-        metalness: 1.0,
-        roughness: 0.15,
-        clearcoat: 1.0,
-        clearcoatRoughness: 0.1,
-        side: THREE.DoubleSide,
-        reflectivity: 1.0,
-        emissive: 0x222233,
-        emissiveIntensity: 0.3,
-      });
-    } else {
-      // Brushed metal style - stainless steel look
-      return new THREE.MeshPhysicalMaterial({
-        color: 0xc8ccd0,
-        metalness: 0.92,
-        roughness: 0.32,
-        clearcoat: 0.2,
-        clearcoatRoughness: 0.35,
-        emissive: 0x404048,
-        emissiveIntensity: 0.15,
-        side: THREE.DoubleSide,
-      });
+    // Use iridescent shader for holographic effect
+    return iridescenceShader;
+  }, [iridescenceShader]);
+
+  // Update shader time uniform
+  useFrame((state) => {
+    if (iridescenceShader) {
+      iridescenceShader.uniforms.uTime.value = state.clock.elapsedTime;
     }
-  }, []);
+  });
 
   // Animation with controllable rotation speed + float effect (Design #2)
   useFrame((state, delta) => {
@@ -179,8 +239,7 @@ export default function GlassDNA({
 
   return (
     <>
-      {/* Background - stays fixed */}
-      <MeshGradientBackground />
+      {/* Background removed - using page's grainy aura background instead */}
 
       {/* DNA Group - rotates upright */}
       <group ref={groupRef} rotation={[0, 0, 0]} position={[0, 0, 0]}>

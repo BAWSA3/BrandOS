@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { motion, AnimatePresence, useMotionValue, animate } from 'motion/react';
+import { useState, useEffect, useRef, useCallback, MouseEvent as ReactMouseEvent } from 'react';
+import { motion, AnimatePresence, useMotionValue, useSpring, animate } from 'motion/react';
 import dynamic from 'next/dynamic';
 import BrandDNAPreview, { GeneratedBrandDNA } from './BrandDNAPreview';
 import ShareableScoreCard, { ShareCardData } from './ShareableScoreCard';
@@ -45,6 +45,132 @@ type FlowState = 'input' | 'journey' | 'reveal' | 'signup';
 
 interface XBrandScoreHeroProps {
   theme: string;
+}
+
+// ============================================================================
+// Magnetic Button Component - Premium hover effect
+// ============================================================================
+interface MagneticButtonProps {
+  children: React.ReactNode;
+  className?: string;
+  style?: React.CSSProperties;
+  onClick?: () => void;
+  type?: 'button' | 'submit';
+  disabled?: boolean;
+}
+
+function MagneticButton({ children, style, onClick, type = 'button', disabled }: MagneticButtonProps) {
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+
+  const springConfig = { damping: 15, stiffness: 150 };
+  const springX = useSpring(x, springConfig);
+  const springY = useSpring(y, springConfig);
+
+  const handleMouseMove = (e: ReactMouseEvent<HTMLButtonElement>) => {
+    if (!buttonRef.current || disabled) return;
+
+    const rect = buttonRef.current.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+
+    const deltaX = e.clientX - centerX;
+    const deltaY = e.clientY - centerY;
+
+    // Magnetic pull strength (adjust for more/less effect)
+    const strength = 0.3;
+    x.set(deltaX * strength);
+    y.set(deltaY * strength);
+  };
+
+  const handleMouseLeave = () => {
+    x.set(0);
+    y.set(0);
+  };
+
+  return (
+    <motion.button
+      ref={buttonRef}
+      type={type}
+      disabled={disabled}
+      onClick={onClick}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      style={{
+        ...style,
+        x: springX,
+        y: springY,
+      }}
+      whileHover={!disabled ? { scale: 1.02 } : {}}
+      whileTap={!disabled ? { scale: 0.98 } : {}}
+    >
+      {children}
+    </motion.button>
+  );
+}
+
+// ============================================================================
+// Animated Text Reveal Component - Letter by letter animation
+// ============================================================================
+interface AnimatedTextProps {
+  text: string;
+  className?: string;
+  style?: React.CSSProperties;
+  delay?: number;
+  staggerDelay?: number;
+}
+
+function AnimatedText({ text, style, delay = 0, staggerDelay = 0.03 }: AnimatedTextProps) {
+  const letters = text.split('');
+
+  const container = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        delay,
+        staggerChildren: staggerDelay,
+      },
+    },
+  };
+
+  const child = {
+    hidden: {
+      opacity: 0,
+      y: 20,
+      filter: 'blur(10px)',
+    },
+    visible: {
+      opacity: 1,
+      y: 0,
+      filter: 'blur(0px)',
+      transition: {
+        type: 'spring',
+        damping: 12,
+        stiffness: 100,
+      },
+    },
+  };
+
+  return (
+    <motion.span
+      style={{ display: 'inline-flex', ...style }}
+      variants={container}
+      initial="hidden"
+      animate="visible"
+    >
+      {letters.map((letter, index) => (
+        <motion.span
+          key={index}
+          variants={child}
+          style={{ display: 'inline-block' }}
+        >
+          {letter === ' ' ? '\u00A0' : letter}
+        </motion.span>
+      ))}
+    </motion.span>
+  );
 }
 
 // ============================================================================
@@ -194,7 +320,7 @@ function Confetti({ isActive }: { isActive: boolean }) {
 
   useEffect(() => {
     if (isActive) {
-      const colors = ['#0047FF', '#4477FF', '#66a3ff', '#ffffff', '#10B981', '#FFD700'];
+      const colors = ['#D4A574', '#E8A838', '#F5DEB3', '#ffffff', '#10B981', '#FFD700'];
       const newParticles = Array.from({ length: 60 }, (_, i) => ({
         id: i,
         x: 50 + (Math.random() - 0.5) * 100,
@@ -281,7 +407,7 @@ function ScoreGauge({ score, isVisible, theme }: { score: number; isVisible: boo
 
   const getScoreColor = (s: number) => {
     if (s >= 80) return '#10B981';
-    if (s >= 60) return '#0047FF';
+    if (s >= 60) return '#D4A574';
     if (s >= 40) return '#F59E0B';
     return '#EF4444';
   };
@@ -488,7 +614,7 @@ function JourneyPhaseCard({
           <motion.div
             animate={{
               rotate: 360,
-              borderColor: ['rgba(0, 71, 255, 0.6)', 'rgba(0, 71, 255, 0.2)', 'rgba(0, 71, 255, 0.6)']
+              borderColor: ['rgba(212, 165, 116, 0.6)', 'rgba(212, 165, 116, 0.2)', 'rgba(212, 165, 116, 0.6)']
             }}
             transition={{
               rotate: { duration: 2, repeat: Infinity, ease: 'linear' },
@@ -498,7 +624,7 @@ function JourneyPhaseCard({
               position: 'absolute',
               inset: '-4px',
               borderRadius: '50%',
-              border: '2px dashed rgba(0, 71, 255, 0.4)',
+              border: '2px dashed rgba(212, 165, 116, 0.4)',
             }}
           />
         </motion.div>
@@ -508,18 +634,18 @@ function JourneyPhaseCard({
       <motion.div
         animate={{
           scale: isActive ? [1, 1.05, 1] : 1,
-          boxShadow: isActive ? '0 0 30px rgba(0, 71, 255, 0.3)' : 'none',
+          boxShadow: isActive ? '0 0 30px rgba(212, 165, 116, 0.3)' : 'none',
         }}
         transition={{ duration: 0.5, repeat: isActive ? Infinity : 0, repeatDelay: 1 }}
         style={{
           fontFamily: "'VCR OSD Mono', monospace",
           fontSize: '12px',
           letterSpacing: '0.2em',
-          color: isCompleted ? '#10B981' : '#0047FF',
-          background: isCompleted ? 'rgba(16, 185, 129, 0.15)' : 'rgba(0, 71, 255, 0.15)',
+          color: isCompleted ? '#10B981' : '#D4A574',
+          background: isCompleted ? 'rgba(16, 185, 129, 0.15)' : 'rgba(212, 165, 116, 0.15)',
           padding: '10px 24px',
           borderRadius: '30px',
-          border: `1px solid ${isCompleted ? 'rgba(16, 185, 129, 0.3)' : 'rgba(0, 71, 255, 0.3)'}`,
+          border: `1px solid ${isCompleted ? 'rgba(16, 185, 129, 0.3)' : 'rgba(212, 165, 116, 0.3)'}`,
         }}
       >
         PHASE {phase.number} OF 4
@@ -589,7 +715,7 @@ function JourneyPhaseCard({
             cy="45"
             r="38"
             fill="none"
-            stroke={isCompleted ? '#10B981' : '#0047FF'}
+            stroke={isCompleted ? '#10B981' : '#D4A574'}
             strokeWidth="5"
             strokeLinecap="round"
             strokeDasharray={2 * Math.PI * 38}
@@ -602,7 +728,7 @@ function JourneyPhaseCard({
             transition={{ duration: 0.3 }}
             transform="rotate(-90 45 45)"
             style={{
-              filter: `drop-shadow(0 0 8px ${isCompleted ? '#10B981' : '#0047FF'}80)`,
+              filter: `drop-shadow(0 0 8px ${isCompleted ? '#10B981' : '#D4A574'}80)`,
             }}
           />
         </svg>
@@ -653,7 +779,7 @@ function JourneyPhaseCard({
                 padding: '12px 16px',
                 borderRadius: '12px',
                 background: isItemActive
-                  ? (theme === 'dark' ? 'rgba(0, 71, 255, 0.1)' : 'rgba(0, 71, 255, 0.08)')
+                  ? (theme === 'dark' ? 'rgba(212, 165, 116, 0.1)' : 'rgba(212, 165, 116, 0.08)')
                   : 'transparent',
                 transition: 'background 0.3s ease',
               }}
@@ -671,7 +797,7 @@ function JourneyPhaseCard({
                     background: isItemComplete
                       ? '#10B981'
                       : isItemActive
-                        ? '#0047FF'
+                        ? '#D4A574'
                         : theme === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)',
                     scale: isItemActive ? [1, 1.3, 1] : 1,
                   }}
@@ -738,9 +864,9 @@ function JourneyPhaseCard({
                       marginTop: '8px',
                       marginLeft: '22px',
                       padding: '8px 12px',
-                      background: theme === 'dark' ? 'rgba(0, 71, 255, 0.15)' : 'rgba(0, 71, 255, 0.1)',
+                      background: theme === 'dark' ? 'rgba(212, 165, 116, 0.15)' : 'rgba(212, 165, 116, 0.1)',
                       borderRadius: '8px',
-                      border: `1px solid ${theme === 'dark' ? 'rgba(0, 71, 255, 0.25)' : 'rgba(0, 71, 255, 0.2)'}`,
+                      border: `1px solid ${theme === 'dark' ? 'rgba(212, 165, 116, 0.25)' : 'rgba(212, 165, 116, 0.2)'}`,
                     }}
                   >
                     <span
@@ -828,12 +954,12 @@ function JourneyProgressIndicator({
                 padding: '6px 12px',
                 borderRadius: '20px',
                 background: isActive
-                  ? 'rgba(0, 71, 255, 0.15)'
+                  ? 'rgba(212, 165, 116, 0.15)'
                   : isCompleted
                     ? 'rgba(16, 185, 129, 0.15)'
                     : 'transparent',
                 border: isActive
-                  ? '1px solid rgba(0, 71, 255, 0.3)'
+                  ? '1px solid rgba(212, 165, 116, 0.3)'
                   : isCompleted
                     ? '1px solid rgba(16, 185, 129, 0.3)'
                     : '1px solid transparent',
@@ -845,7 +971,7 @@ function JourneyProgressIndicator({
                   fontSize: '10px',
                   fontWeight: 500,
                   color: isActive
-                    ? '#0047FF'
+                    ? '#D4A574'
                     : isCompleted
                       ? '#10B981'
                       : theme === 'dark' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)',
@@ -856,7 +982,7 @@ function JourneyProgressIndicator({
                   justifyContent: 'center',
                   borderRadius: '50%',
                   background: isActive
-                    ? 'rgba(0, 71, 255, 0.2)'
+                    ? 'rgba(212, 165, 116, 0.2)'
                     : isCompleted
                       ? 'rgba(16, 185, 129, 0.2)'
                       : theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
@@ -1193,10 +1319,10 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
               transition={{ delay: 0.1 }}
               style={{
                 fontFamily: "'Courier New', Courier, monospace",
-                fontSize: '0.75rem',
+                fontSize: '1rem',
                 fontWeight: 400,
-                letterSpacing: '0.15em',
-                color: 'rgba(255,255,255,0.6)',
+                letterSpacing: '0.2em',
+                color: 'rgba(255,255,255,0.7)',
                 textAlign: 'center',
                 margin: 0,
                 marginBottom: '2rem',
@@ -1207,7 +1333,7 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
               Define. Check. Generate. Scale.
             </motion.p>
 
-            {/* Logo - Design #2 Style */}
+            {/* Logo - Animated Text Reveal */}
             <motion.div
               style={{
                 display: 'flex',
@@ -1215,29 +1341,31 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                 marginBottom: '0.5rem',
               }}
             >
-              <span
+              <AnimatedText
+                text="Brand"
+                delay={0.2}
+                staggerDelay={0.05}
                 style={{
                   fontFamily: "'Inter', sans-serif",
                   fontWeight: 800,
                   fontStyle: 'italic',
-                  fontSize: '4rem',
-                  letterSpacing: '-2px',
-                  marginRight: '5px',
+                  fontSize: '5.5rem',
+                  letterSpacing: '-3px',
+                  marginRight: '8px',
                   color: '#ffffff',
                 }}
-              >
-                Brand
-              </span>
-              <span
+              />
+              <AnimatedText
+                text="OS"
+                delay={0.5}
+                staggerDelay={0.08}
                 style={{
                   fontFamily: "'Press Start 2P', cursive",
-                  fontSize: '3rem',
-                  color: '#2b7fff',
-                  textShadow: '0 0 20px #006eff',
+                  fontSize: '4.5rem',
+                  color: '#000000',
+                  textShadow: '0 0 25px rgba(0, 0, 0, 0.3)',
                 }}
-              >
-                OS
-              </span>
+              />
             </motion.div>
 
             {/* Sub-head - Design #2 Style */}
@@ -1247,10 +1375,10 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
               transition={{ delay: 0.15 }}
               style={{
                 fontFamily: "'Press Start 2P', cursive",
-                fontSize: '0.7rem',
+                fontSize: '1rem',
                 fontWeight: 400,
-                letterSpacing: '0.1em',
-                color: '#555',
+                letterSpacing: '0.12em',
+                color: '#000000',
                 textAlign: 'center',
                 margin: 0,
                 marginBottom: '4rem',
@@ -1270,9 +1398,9 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                gap: '16px',
+                gap: '20px',
                 width: '100%',
-                maxWidth: '420px',
+                maxWidth: '500px',
               }}
             >
               {/* Glassmorphic Input - Design #2 */}
@@ -1286,10 +1414,10 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                   style={{
                     width: '100%',
                     fontFamily: "'Courier New', monospace",
-                    fontSize: '1rem',
-                    padding: '1.2rem',
+                    fontSize: '1.3rem',
+                    padding: '1.5rem',
                     textAlign: 'center',
-                    borderRadius: '12px',
+                    borderRadius: '14px',
                     border: `1px solid ${error ? '#EF4444' : 'rgba(255, 255, 255, 0.15)'}`,
                     background: 'rgba(255, 255, 255, 0.03)',
                     backdropFilter: 'blur(12px)',
@@ -1300,8 +1428,8 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                   }}
                   onFocus={(e) => {
                     e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)';
-                    e.currentTarget.style.borderColor = 'rgba(0, 110, 255, 0.5)';
-                    e.currentTarget.style.boxShadow = '0 0 30px rgba(0, 110, 255, 0.2)';
+                    e.currentTarget.style.borderColor = 'rgba(232, 168, 56, 0.5)';
+                    e.currentTarget.style.boxShadow = '0 0 30px rgba(232, 168, 56, 0.2)';
                   }}
                   onBlur={(e) => {
                     e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)';
@@ -1311,31 +1439,27 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                 />
               </div>
 
-              {/* CTA Button - Design #2 Style */}
+              {/* CTA Button */}
               <motion.button
                 type="submit"
                 disabled={isValidating}
-                whileHover={!isValidating ? {
-                  scale: 1.02,
-                  boxShadow: '0 0 50px rgba(0, 110, 255, 0.8)',
-                  translateY: -2,
-                } : {}}
+                whileHover={!isValidating ? { scale: 1.02, boxShadow: '0 15px 50px -10px rgba(0, 0, 0, 0.5)' } : {}}
                 whileTap={!isValidating ? { scale: 0.98 } : {}}
                 style={{
                   width: '100%',
                   fontFamily: "'Courier New', monospace",
-                  fontSize: '0.9rem',
+                  fontSize: '1.15rem',
                   fontWeight: 'bold',
-                  letterSpacing: '0.1em',
+                  letterSpacing: '0.12em',
                   color: '#ffffff',
-                  background: '#0055ff',
+                  background: '#000000',
                   border: 'none',
-                  padding: '1.2rem',
-                  borderRadius: '8px',
+                  padding: '1.5rem',
+                  borderRadius: '10px',
                   cursor: isValidating ? 'wait' : 'pointer',
-                  boxShadow: '0 10px 40px -10px rgba(0, 85, 255, 0.5)',
+                  boxShadow: '0 10px 40px -10px rgba(0, 0, 0, 0.4)',
                   opacity: isValidating ? 0.7 : 1,
-                  transition: 'all 0.3s ease',
+                  transition: 'background 0.3s ease',
                 }}
               >
                 {isValidating ? 'CHECKING PROFILE...' : "FIND YOUR BRAND DNA"}
@@ -1364,11 +1488,11 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
               transition={{ delay: 0.4 }}
               style={{
                 fontFamily: "'Courier New', monospace",
-                fontSize: '0.6rem',
-                letterSpacing: '0.05em',
-                color: 'rgba(255, 255, 255, 0.4)',
+                fontSize: '0.8rem',
+                letterSpacing: '0.08em',
+                color: 'rgba(255, 255, 255, 0.5)',
                 textAlign: 'center',
-                marginTop: '-4px',
+                marginTop: '8px',
               }}
             >
               ENTER ANY PUBLIC X PROFILE TO GET STARTED
@@ -1489,7 +1613,7 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                     {profile.name}
                   </span>
                   {profile.verified && (
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="#0047FF">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="#D4A574">
                       <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
                     </svg>
                   )}
@@ -1595,19 +1719,19 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 2.5 }}
                 onClick={() => setFlowState('signup')}
-                whileHover={{ scale: 1.02, boxShadow: '0 0 40px rgba(0, 71, 255, 0.5)' }}
+                whileHover={{ scale: 1.02, boxShadow: '0 0 40px rgba(212, 165, 116, 0.5)' }}
                 whileTap={{ scale: 0.98 }}
                 style={{
                   fontFamily: "'VCR OSD Mono', monospace",
                   fontSize: '14px',
                   letterSpacing: '0.15em',
                   color: '#FFFFFF',
-                  background: '#0047FF',
+                  background: '#D4A574',
                   border: 'none',
                   padding: '20px 40px',
                   borderRadius: '16px',
                   cursor: 'pointer',
-                  boxShadow: '0 0 30px rgba(0, 71, 255, 0.3)',
+                  boxShadow: '0 0 30px rgba(212, 165, 116, 0.3)',
                   marginTop: '16px',
                 }}
               >
@@ -1755,8 +1879,8 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                     transition: 'all 0.3s ease',
                   }}
                   onFocus={(e) => {
-                    e.currentTarget.style.borderColor = '#0047FF';
-                    e.currentTarget.style.boxShadow = '0 0 0 4px rgba(0, 71, 255, 0.15)';
+                    e.currentTarget.style.borderColor = '#D4A574';
+                    e.currentTarget.style.boxShadow = '0 0 0 4px rgba(212, 165, 116, 0.15)';
                   }}
                   onBlur={(e) => {
                     e.currentTarget.style.borderColor = theme === 'dark' ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)';
@@ -1767,7 +1891,7 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                 <motion.button
                   type="submit"
                   disabled={signupStatus === 'loading'}
-                  whileHover={{ scale: 1.02, boxShadow: '0 0 40px rgba(0, 71, 255, 0.5)' }}
+                  whileHover={{ scale: 1.02, boxShadow: '0 0 40px rgba(212, 165, 116, 0.5)' }}
                   whileTap={{ scale: 0.98 }}
                   style={{
                     width: '100%',
@@ -1775,12 +1899,12 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                     fontSize: '14px',
                     letterSpacing: '0.15em',
                     color: '#FFFFFF',
-                    background: '#0047FF',
+                    background: '#D4A574',
                     border: 'none',
                     padding: '18px 32px',
                     borderRadius: '14px',
                     cursor: signupStatus === 'loading' ? 'wait' : 'pointer',
-                    boxShadow: '0 0 30px rgba(0, 71, 255, 0.3)',
+                    boxShadow: '0 0 30px rgba(212, 165, 116, 0.3)',
                     opacity: signupStatus === 'loading' ? 0.7 : 1,
                   }}
                 >

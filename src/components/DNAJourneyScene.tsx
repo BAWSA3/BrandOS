@@ -4,9 +4,10 @@ import * as THREE from 'three';
 import { Canvas } from '@react-three/fiber';
 import { EffectComposer, Bloom, ChromaticAberration, Vignette } from '@react-three/postprocessing';
 import { BlendFunction } from 'postprocessing';
+import { OrbitControls } from '@react-three/drei';
 import GlassDNA from './GlassDNA';
-import AnimatedCamera from './AnimatedCamera';
-import { useDNAJourneySync, FlowState } from '@/lib/useDNAJourneySync';
+import AutoOrbitCamera from './AutoOrbitCamera';
+import { FlowState } from '@/lib/useDNAJourneySync';
 
 interface DNAJourneySceneProps {
   flowState: FlowState;
@@ -23,14 +24,14 @@ export default function DNAJourneyScene({
   theme = 'dark',
   onPhaseChange,
 }: DNAJourneySceneProps) {
-  const { cameraTarget, highlightPhase, rotationMultiplier } = useDNAJourneySync(
-    flowState,
-    currentPhase,
-    itemProgress
-  );
+  // Determine camera mode: auto-orbit on landing, interactive during journey
+  const isInteractive = flowState === 'journey' || flowState === 'reveal' || flowState === 'signup';
 
   // Increase bloom during journey for dramatic effect
   const bloomIntensity = flowState === 'journey' ? 0.25 : 0.15;
+
+  // Rotation speed: slower during journey for focus
+  const rotationMultiplier = flowState === 'journey' ? 0.2 : flowState === 'reveal' ? 0.5 : 1;
 
   return (
     <div
@@ -40,8 +41,8 @@ export default function DNAJourneyScene({
         position: 'absolute',
         inset: 0,
         zIndex: 1,
-        // Bioluminescent glow effect (Design #2)
-        filter: 'drop-shadow(0 0 20px rgba(0, 200, 255, 0.4))',
+        // Warm amber glow effect
+        filter: 'drop-shadow(0 0 20px rgba(232, 168, 56, 0.4))',
       }}
     >
       <Canvas
@@ -51,16 +52,27 @@ export default function DNAJourneyScene({
           powerPreference: 'high-performance',
           toneMapping: THREE.ACESFilmicToneMapping,
           toneMappingExposure: 1.0,
+          alpha: true,
         }}
+        style={{ background: 'transparent' }}
         shadows
       >
-        {/* Animated camera that moves between phases */}
-        <AnimatedCamera target={cameraTarget} transitionDuration={1.0} />
+        {/* Auto-orbit on landing, manual controls during journey */}
+        {isInteractive ? (
+          <OrbitControls
+            enableZoom={true}
+            enablePan={false}
+            enableRotate={true}
+            minDistance={20}
+            maxDistance={80}
+          />
+        ) : (
+          <AutoOrbitCamera radius={40} speed={0.15} height={5} />
+        )}
 
         {/* DNA with external phase control */}
         <GlassDNA
           onPhaseChange={onPhaseChange}
-          activePhase={highlightPhase}
           rotationMultiplier={rotationMultiplier}
           highlightIntensity={flowState === 'journey' ? 1.2 : 1}
         />

@@ -2,10 +2,140 @@
 
 import { useBrandStore } from '@/lib/store';
 import XBrandScoreHero from '@/components/XBrandScoreHero';
+import { useEffect, useRef, useState, useCallback } from 'react';
 
 // =============================================================================
-// Landing Page / Lead Magnet - Design #2
-// Deep void background with perspective grid and atmosphere bloom
+// Interactive Particles Component - Mouse-reactive floating orbs
+// =============================================================================
+function InteractiveParticles() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const mouseRef = useRef({ x: 0, y: 0 });
+  const particlesRef = useRef<Array<{
+    x: number;
+    y: number;
+    vx: number;
+    vy: number;
+    size: number;
+    opacity: number;
+    baseX: number;
+    baseY: number;
+  }>>([]);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // Set canvas size
+    const resize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    resize();
+    window.addEventListener('resize', resize);
+
+    // Initialize particles
+    const particleCount = 50;
+    particlesRef.current = Array.from({ length: particleCount }, () => ({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      vx: 0,
+      vy: 0,
+      size: Math.random() * 4 + 2,
+      opacity: Math.random() * 0.3 + 0.1,
+      baseX: Math.random() * canvas.width,
+      baseY: Math.random() * canvas.height,
+    }));
+
+    // Mouse move handler
+    const handleMouseMove = (e: MouseEvent) => {
+      mouseRef.current = { x: e.clientX, y: e.clientY };
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+
+    // Animation loop
+    let animationId: number;
+    const animate = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      particlesRef.current.forEach((particle) => {
+        // Calculate distance from mouse
+        const dx = mouseRef.current.x - particle.x;
+        const dy = mouseRef.current.y - particle.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        // Spread effect - all particles react to cursor
+        // Force decreases with distance (inverse square for natural feel)
+        const minDistance = 50; // Prevent extreme forces when very close
+        const effectiveDistance = Math.max(distance, minDistance);
+        const spreadForce = 800 / (effectiveDistance * effectiveDistance) * 10;
+
+        // Push particles away from cursor
+        const angle = Math.atan2(dy, dx);
+        particle.vx -= Math.cos(angle) * spreadForce;
+        particle.vy -= Math.sin(angle) * spreadForce;
+
+        // Return to base position (gentler for spread effect)
+        const returnForce = 0.015;
+        particle.vx += (particle.baseX - particle.x) * returnForce;
+        particle.vy += (particle.baseY - particle.y) * returnForce;
+
+        // Apply friction
+        particle.vx *= 0.92;
+        particle.vy *= 0.92;
+
+        // Update position
+        particle.x += particle.vx;
+        particle.y += particle.vy;
+
+        // Draw particle
+        ctx.beginPath();
+        ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255, 220, 180, ${particle.opacity})`;
+        ctx.fill();
+
+        // Draw glow
+        const gradient = ctx.createRadialGradient(
+          particle.x, particle.y, 0,
+          particle.x, particle.y, particle.size * 3
+        );
+        gradient.addColorStop(0, `rgba(255, 200, 150, ${particle.opacity * 0.5})`);
+        gradient.addColorStop(1, 'rgba(255, 200, 150, 0)');
+        ctx.beginPath();
+        ctx.arc(particle.x, particle.y, particle.size * 3, 0, Math.PI * 2);
+        ctx.fillStyle = gradient;
+        ctx.fill();
+      });
+
+      animationId = requestAnimationFrame(animate);
+    };
+    animate();
+
+    return () => {
+      window.removeEventListener('resize', resize);
+      window.removeEventListener('mousemove', handleMouseMove);
+      cancelAnimationFrame(animationId);
+    };
+  }, []);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 4,
+        pointerEvents: 'none',
+      }}
+    />
+  );
+}
+
+// =============================================================================
+// Landing Page / Lead Magnet - Grainy Aura Aesthetic
+// Warm gradient with vignette and film grain texture
 // =============================================================================
 
 export default function LandingPage() {
@@ -13,67 +143,73 @@ export default function LandingPage() {
 
   return (
     <div
+      className="aura-background"
       style={{
         minHeight: '100vh',
-        background: '#020205', // Deep void
+        background: '#2e2e2e', // Mid-grey base
         position: 'relative',
         overflowX: 'hidden',
         overflowY: 'auto',
       }}
     >
-      {/* Perspective Grid Layer - Space Curvature Effect */}
+      {/* Warm Orange Glow (Top Center) */}
       <div
-        className="grid-layer"
         style={{
           position: 'fixed',
-          width: '200vw',
-          height: '200vh',
-          left: '-50vw',
-          top: '-50vh',
-          backgroundImage: `
-            linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px)
-          `,
-          backgroundSize: '50px 50px',
-          transform: 'perspective(500px) rotateX(60deg) translateY(-100px) translateZ(-200px)',
-          opacity: 0.4,
+          top: '-10%',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: '120vh',
+          height: '100vh',
+          background: 'radial-gradient(circle, rgba(215, 120, 60, 0.7) 0%, rgba(215, 120, 60, 0) 70%)',
+          filter: 'blur(60px)',
+          opacity: 0.8,
           zIndex: 1,
-          maskImage: 'radial-gradient(circle, black 30%, transparent 70%)',
-          WebkitMaskImage: 'radial-gradient(circle, black 30%, transparent 70%)',
           pointerEvents: 'none',
         }}
       />
 
-      {/* Atmosphere Bloom - Blue Glow at Bottom */}
+      {/* White/Beige Horizontal Streak (Middle) - Softened for DNA visibility */}
       <div
-        className="atmosphere-bloom"
         style={{
           position: 'fixed',
-          bottom: '-10%',
+          top: '40%',
           left: '50%',
-          transform: 'translateX(-50%)',
-          width: '60vw',
-          height: '50vh',
-          background: 'radial-gradient(circle, rgba(0, 110, 255, 0.25) 0%, rgba(0,0,0,0) 70%)',
+          transform: 'translate(-50%, -50%)',
+          width: '150vw',
+          height: '60vh',
+          background: 'radial-gradient(ellipse at center, rgba(255, 235, 210, 0.18) 0%, rgba(255, 235, 210, 0) 60%)',
           filter: 'blur(80px)',
           zIndex: 2,
           pointerEvents: 'none',
-          animation: 'breathe 6s infinite ease-in-out',
         }}
       />
 
-      {/* Subtle grain texture */}
+      {/* Dark Vignette (Edges) */}
       <div
         style={{
           position: 'fixed',
           inset: 0,
-          opacity: 0.15,
-          pointerEvents: 'none',
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
-          backgroundRepeat: 'repeat',
-          backgroundSize: '150px 150px',
-          mixBlendMode: 'overlay',
+          background: 'radial-gradient(circle at 50% 45%, transparent 40%, rgba(10, 10, 10, 0.9) 100%)',
           zIndex: 3,
+          mixBlendMode: 'multiply',
+          pointerEvents: 'none',
+        }}
+      />
+
+      {/* Interactive Particles - Mouse reactive */}
+      <InteractiveParticles />
+
+      {/* Film Grain Texture */}
+      <div
+        style={{
+          position: 'fixed',
+          inset: 0,
+          opacity: 0.18,
+          pointerEvents: 'none',
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+          backgroundSize: '150px 150px',
+          zIndex: 10,
         }}
       />
 
