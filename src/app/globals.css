@@ -1201,3 +1201,9 @@ code {
   color: #2b7fff;
   text-shadow: 0 0 20px #006eff;
 }
+
+/* Landing page username input - off-white placeholder */
+.landing-input::placeholder {
+  color: #f5f0e8 !important;
+  opacity: 0.7;
+}

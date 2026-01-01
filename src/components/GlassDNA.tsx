@@ -44,13 +44,15 @@ interface GlassDNAProps {
   activePhase?: number | null;
   rotationMultiplier?: number;
   highlightIntensity?: number;
+  interactive?: boolean;
 }
 
 export default function GlassDNA({
   onPhaseChange,
   activePhase,
   rotationMultiplier = 1,
-  highlightIntensity = 1
+  highlightIntensity = 1,
+  interactive = true
 }: GlassDNAProps) {
   const groupRef = useRef<THREE.Group>(null);
   const [hoveredPhase, setHoveredPhase] = useState<number | null>(null);
@@ -119,12 +121,12 @@ export default function GlassDNA({
     return rungData;
   }, [curve1, curve2]);
 
-  // Iridescent/Holographic shader material
+  // Rainbow Iridescent shader material - vivid holographic effect
   const iridescenceShader = useMemo(() => {
     return new THREE.ShaderMaterial({
       uniforms: {
         uTime: { value: 0 },
-        uBaseColor: { value: new THREE.Color(0xd4d4d8) },
+        uBaseColor: { value: new THREE.Color(0xe8e8ec) }, // Light metallic base
       },
       vertexShader: `
         varying vec3 vNormal;
@@ -156,37 +158,45 @@ export default function GlassDNA({
           vec3 viewDir = normalize(vViewPosition);
           vec3 normal = normalize(vNormal);
 
-          // Enhanced Fresnel effect - more visible across surface
+          // Rainbow fresnel effect - visible across more of surface
           float fresnel = 1.0 - abs(dot(viewDir, normal));
-          fresnel = pow(fresnel, 1.2); // Lower power = more visible effect
+          fresnel = pow(fresnel, 1.3);
 
-          // Secondary fresnel for edge glow
-          float edgeFresnel = pow(1.0 - abs(dot(viewDir, normal)), 3.0);
+          // Secondary fresnel for intense edge glow
+          float edgeFresnel = pow(1.0 - abs(dot(viewDir, normal)), 2.5);
 
-          // Create rainbow shift based on viewing angle, position, and time
-          float hue = fract(fresnel * 1.2 + uTime * 0.08 + vUv.y * 0.5 + vUv.x * 0.3);
-          float hue2 = fract(fresnel * 0.8 + uTime * 0.12 - vUv.y * 0.4);
+          // Rainbow hue shifts based on angle, position, and time
+          float hue1 = fract(fresnel * 1.5 + uTime * 0.06 + vUv.y * 0.6 + vUv.x * 0.4);
+          float hue2 = fract(fresnel * 0.9 + uTime * 0.1 - vUv.y * 0.5);
 
-          // More saturated iridescence colors
-          vec3 iridescence1 = hsv2rgb(vec3(hue, 0.7, 0.95));
-          vec3 iridescence2 = hsv2rgb(vec3(hue2, 0.6, 0.9));
-          vec3 iridescence = mix(iridescence1, iridescence2, 0.4);
+          // Vivid rainbow iridescence colors
+          vec3 rainbow1 = hsv2rgb(vec3(hue1, 0.85, 1.0));
+          vec3 rainbow2 = hsv2rgb(vec3(hue2, 0.75, 0.95));
+          vec3 iridescence = mix(rainbow1, rainbow2, 0.35);
 
-          // Stronger blend with base - more holographic
-          vec3 finalColor = mix(uBaseColor, iridescence, fresnel * 0.85 + 0.15);
+          // Strong blend for visible rainbow effect
+          vec3 finalColor = mix(uBaseColor, iridescence, fresnel * 0.9 + 0.2);
 
-          // Add rainbow edge glow
-          vec3 edgeColor = hsv2rgb(vec3(fract(uTime * 0.1 + vUv.y), 0.8, 1.0));
-          finalColor += edgeColor * edgeFresnel * 0.3;
+          // Intense rainbow edge glow
+          vec3 edgeColor = hsv2rgb(vec3(fract(uTime * 0.08 + vUv.y * 0.8), 0.9, 1.0));
+          finalColor += edgeColor * edgeFresnel * 0.5;
 
-          // Add specular highlight with color tint
+          // Bright specular highlights
           vec3 lightDir = normalize(vec3(1.0, 1.0, 1.0));
-          float specular = pow(max(dot(reflect(-lightDir, normal), viewDir), 0.0), 24.0);
-          vec3 specColor = hsv2rgb(vec3(fract(uTime * 0.05), 0.3, 1.0));
-          finalColor += specColor * specular * 0.6;
+          float specular = pow(max(dot(reflect(-lightDir, normal), viewDir), 0.0), 32.0);
+          vec3 specColor = hsv2rgb(vec3(fract(uTime * 0.04), 0.4, 1.0));
+          finalColor += specColor * specular * 0.8;
 
-          // Subtle ambient
-          finalColor += uBaseColor * 0.15;
+          // Add second specular for more shine
+          vec3 lightDir2 = normalize(vec3(-0.5, 0.8, 0.5));
+          float specular2 = pow(max(dot(reflect(-lightDir2, normal), viewDir), 0.0), 48.0);
+          finalColor += vec3(1.0, 1.0, 1.0) * specular2 * 0.6;
+
+          // Subtle ambient boost
+          finalColor += uBaseColor * 0.12;
+
+          // Slight tone mapping for richness
+          finalColor = pow(finalColor, vec3(0.95));
 
           gl_FragColor = vec4(finalColor, 1.0);
         }
@@ -208,13 +218,10 @@ export default function GlassDNA({
     }
   });
 
-  // Animation with controllable rotation speed + float effect (Design #2)
-  useFrame((state, delta) => {
+  // Animation - continuous 360° rotation on Y axis, fixed position
+  useFrame((_, delta) => {
     if (!groupRef.current) return;
-    // Rotation
-    groupRef.current.rotation.y += delta * 0.1 * rotationMultiplier;
-    // Subtle float animation
-    groupRef.current.position.y = Math.sin(state.clock.elapsedTime * 0.5) * 0.3;
+    groupRef.current.rotation.y += delta * 0.15 * rotationMultiplier;
   });
 
   // Get phase based on t value
@@ -241,10 +248,10 @@ export default function GlassDNA({
     <>
       {/* Background removed - using page's grainy aura background instead */}
 
-      {/* DNA Group - rotates upright */}
-      <group ref={groupRef} rotation={[0, 0, 0]} position={[0, 0, 0]}>
-        {/* Lighting Setup - Style dependent */}
-        <ambientLight intensity={0.35} />
+      {/* DNA Group - upright with subtle tilt, spinning 360° */}
+      <group ref={groupRef} rotation={[0.35, 0, 0]} position={[0, 0, 0]} scale={[1.4, 1.4, 1.4]}>
+        {/* Lighting Setup - Enhanced for rainbow DNA visibility */}
+        <ambientLight intensity={0.3} />
 
       {STYLE === 'pearl' ? (
         <>
@@ -257,12 +264,19 @@ export default function GlassDNA({
         </>
       ) : STYLE === 'hybrid' ? (
         <>
-          {/* Hybrid style: Balanced lights - no harsh reflections */}
-          <directionalLight position={[10, 10, 10]} intensity={1.5} color="#ffffff" />
-          <directionalLight position={[-10, 10, 10]} intensity={1.5} color="#ffffff" />
-          <directionalLight position={[0, -10, 15]} intensity={1} color="#ffffff" />
-          <pointLight position={[0, 0, 20]} intensity={4} color="#ffffff" />
-          <pointLight position={[0, 10, -10]} intensity={2} color="#aaaaff" />
+          {/* Hybrid style: Bright studio lighting for DNA visibility */}
+          {/* Key light - strong front-right */}
+          <directionalLight position={[5, 10, 8]} intensity={2.5} color="#ffffff" />
+          {/* Fill light - left side */}
+          <directionalLight position={[-8, 5, 10]} intensity={2.0} color="#ffffff" />
+          {/* Rim light - back edge definition */}
+          <pointLight position={[-5, 0, -10]} intensity={3} color="#ffffff" />
+          {/* Top accent */}
+          <pointLight position={[0, 15, 5]} intensity={4} color="#ffffff" />
+          {/* Front fill - increased for better visibility */}
+          <pointLight position={[0, 0, 20]} intensity={6} color="#ffffff" />
+          {/* Bottom fill to reduce dark shadows */}
+          <pointLight position={[0, -10, 10]} intensity={2} color="#ffffff" />
         </>
       ) : (
         <>
@@ -314,67 +328,67 @@ export default function GlassDNA({
               quaternion={quaternion}
               castShadow
               receiveShadow
-              onPointerOver={(e) => {
+              onPointerOver={interactive ? (e) => {
                 e.stopPropagation();
                 handlePointerOver(phase);
-              }}
-              onPointerOut={handlePointerOut}
+              } : undefined}
+              onPointerOut={interactive ? handlePointerOut : undefined}
             >
               <cylinderGeometry args={[0.12, 0.12, rung.distance, 16]} />
-              {/* Brushed metal rungs - darker tone */}
+              {/* High-shine metallic rungs */}
               <meshPhysicalMaterial
                 color={isHighlighted ? color : 0x555560}
-                metalness={0.88}
-                roughness={0.35}
-                clearcoat={0.15}
-                clearcoatRoughness={0.4}
+                metalness={0.98}
+                roughness={0.12}
+                clearcoat={0.6}
+                clearcoatRoughness={0.15}
                 emissive={isHighlighted ? color : 0x282830}
-                emissiveIntensity={isHighlighted ? 0.4 * currentIntensity : 0.1}
+                emissiveIntensity={isHighlighted ? 0.5 * currentIntensity : 0.15}
                 side={THREE.DoubleSide}
               />
             </mesh>
 
-            {/* Endpoint sphere 1 - brushed metal */}
+            {/* Endpoint sphere 1 - high-shine metal */}
             <mesh
               position={rung.p1}
               castShadow
-              onPointerOver={(e) => {
+              onPointerOver={interactive ? (e) => {
                 e.stopPropagation();
                 handlePointerOver(phase);
-              }}
-              onPointerOut={handlePointerOut}
+              } : undefined}
+              onPointerOut={interactive ? handlePointerOut : undefined}
             >
               <sphereGeometry args={[0.2, 16, 16]} />
               <meshPhysicalMaterial
                 color={isHighlighted ? color : 0x606570}
-                metalness={0.9}
-                roughness={0.38}
-                clearcoat={0.12}
-                clearcoatRoughness={0.45}
+                metalness={0.98}
+                roughness={0.1}
+                clearcoat={0.7}
+                clearcoatRoughness={0.1}
                 emissive={isHighlighted ? color : 0x252530}
-                emissiveIntensity={isHighlighted ? 0.4 * currentIntensity : 0.08}
+                emissiveIntensity={isHighlighted ? 0.5 * currentIntensity : 0.12}
               />
             </mesh>
 
-            {/* Endpoint sphere 2 - brushed metal */}
+            {/* Endpoint sphere 2 - high-shine metal */}
             <mesh
               position={rung.p2}
               castShadow
-              onPointerOver={(e) => {
+              onPointerOver={interactive ? (e) => {
                 e.stopPropagation();
                 handlePointerOver(phase);
-              }}
-              onPointerOut={handlePointerOut}
+              } : undefined}
+              onPointerOut={interactive ? handlePointerOut : undefined}
             >
               <sphereGeometry args={[0.2, 16, 16]} />
               <meshPhysicalMaterial
                 color={isHighlighted ? color : 0x606570}
-                metalness={0.9}
-                roughness={0.38}
-                clearcoat={0.12}
-                clearcoatRoughness={0.45}
+                metalness={0.98}
+                roughness={0.1}
+                clearcoat={0.7}
+                clearcoatRoughness={0.1}
                 emissive={isHighlighted ? color : 0x252530}
-                emissiveIntensity={isHighlighted ? 0.4 * currentIntensity : 0.08}
+                emissiveIntensity={isHighlighted ? 0.5 * currentIntensity : 0.12}
               />
             </mesh>
           </group>

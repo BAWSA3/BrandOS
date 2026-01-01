@@ -1320,14 +1320,14 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
               style={{
                 fontFamily: "'Courier New', Courier, monospace",
                 fontSize: '1rem',
-                fontWeight: 400,
+                fontWeight: 500,
                 letterSpacing: '0.2em',
-                color: 'rgba(255,255,255,0.7)',
+                color: '#f5f0e8',
                 textAlign: 'center',
                 margin: 0,
                 marginBottom: '2rem',
                 textTransform: 'uppercase',
-                textShadow: '0 0 10px rgba(255,255,255,0.2)',
+                textShadow: '0 2px 8px rgba(0,0,0,0.8), 0 0 20px rgba(0,0,0,0.5)',
               }}
             >
               Define. Check. Generate. Scale.
@@ -1362,8 +1362,8 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                 style={{
                   fontFamily: "'Press Start 2P', cursive",
                   fontSize: '4.5rem',
-                  color: '#000000',
-                  textShadow: '0 0 25px rgba(0, 0, 0, 0.3)',
+                  color: '#0047FF',
+                  textShadow: '0 0 25px rgba(0, 71, 255, 0.4)',
                 }}
               />
             </motion.div>
@@ -1378,11 +1378,12 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                 fontSize: '1rem',
                 fontWeight: 400,
                 letterSpacing: '0.12em',
-                color: '#000000',
+                color: '#f5f0e8',
                 textAlign: 'center',
                 margin: 0,
                 marginBottom: '4rem',
                 textTransform: 'uppercase',
+                textShadow: '0 2px 8px rgba(0,0,0,0.8), 0 0 20px rgba(0,0,0,0.5)',
               }}
             >
               AN AI-POWERED OS THAT BUILDS YOUR BRAND'S DNA.
@@ -1403,7 +1404,7 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                 maxWidth: '500px',
               }}
             >
-              {/* Glassmorphic Input - Design #2 */}
+              {/* Glassmorphic Input - More visible */}
               <div style={{ position: 'relative', width: '100%' }}>
                 <input
                   type="text"
@@ -1411,6 +1412,7 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                   onChange={(e) => setUsername(e.target.value.replace(/^@/, ''))}
                   placeholder="@username"
                   maxLength={15}
+                  className="landing-input"
                   style={{
                     width: '100%',
                     fontFamily: "'Courier New', monospace",
@@ -1418,23 +1420,24 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                     padding: '1.5rem',
                     textAlign: 'center',
                     borderRadius: '14px',
-                    border: `1px solid ${error ? '#EF4444' : 'rgba(255, 255, 255, 0.15)'}`,
-                    background: 'rgba(255, 255, 255, 0.03)',
-                    backdropFilter: 'blur(12px)',
-                    WebkitBackdropFilter: 'blur(12px)',
+                    border: `2px solid ${error ? '#EF4444' : 'rgba(255, 255, 255, 0.35)'}`,
+                    background: 'rgba(0, 0, 0, 0.6)',
+                    backdropFilter: 'blur(16px)',
+                    WebkitBackdropFilter: 'blur(16px)',
                     color: '#ffffff',
                     outline: 'none',
                     transition: 'all 0.3s ease',
+                    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
                   }}
                   onFocus={(e) => {
-                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)';
-                    e.currentTarget.style.borderColor = 'rgba(232, 168, 56, 0.5)';
-                    e.currentTarget.style.boxShadow = '0 0 30px rgba(232, 168, 56, 0.2)';
+                    e.currentTarget.style.background = 'rgba(0, 0, 0, 0.75)';
+                    e.currentTarget.style.borderColor = 'rgba(0, 71, 255, 0.7)';
+                    e.currentTarget.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.4), 0 0 30px rgba(0, 71, 255, 0.3)';
                   }}
                   onBlur={(e) => {
-                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)';
-                    e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.15)';
-                    e.currentTarget.style.boxShadow = 'none';
+                    e.currentTarget.style.background = 'rgba(0, 0, 0, 0.6)';
+                    e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.35)';
+                    e.currentTarget.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)';
                   }}
                 />
               </div>
@@ -1443,7 +1446,7 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
               <motion.button
                 type="submit"
                 disabled={isValidating}
-                whileHover={!isValidating ? { scale: 1.02, boxShadow: '0 15px 50px -10px rgba(0, 0, 0, 0.5)' } : {}}
+                whileHover={!isValidating ? { scale: 1.02, boxShadow: '0 15px 50px -10px rgba(0, 71, 255, 0.5)' } : {}}
                 whileTap={!isValidating ? { scale: 0.98 } : {}}
                 style={{
                   width: '100%',
@@ -1452,12 +1455,12 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                   fontWeight: 'bold',
                   letterSpacing: '0.12em',
                   color: '#ffffff',
-                  background: '#000000',
+                  background: '#0047FF',
                   border: 'none',
                   padding: '1.5rem',
                   borderRadius: '10px',
                   cursor: isValidating ? 'wait' : 'pointer',
-                  boxShadow: '0 10px 40px -10px rgba(0, 0, 0, 0.4)',
+                  boxShadow: '0 10px 40px -10px rgba(0, 71, 255, 0.4)',
                   opacity: isValidating ? 0.7 : 1,
                   transition: 'background 0.3s ease',
                 }}
@@ -1488,11 +1491,12 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
               transition={{ delay: 0.4 }}
               style={{
                 fontFamily: "'Courier New', monospace",
-                fontSize: '0.8rem',
+                fontSize: '0.85rem',
                 letterSpacing: '0.08em',
-                color: 'rgba(255, 255, 255, 0.5)',
+                color: '#f5f0e8',
                 textAlign: 'center',
                 marginTop: '8px',
+                textShadow: '0 2px 8px rgba(0,0,0,0.8), 0 0 15px rgba(0,0,0,0.5)',
               }}
             >
               ENTER ANY PUBLIC X PROFILE TO GET STARTED

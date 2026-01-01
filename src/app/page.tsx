@@ -146,13 +146,13 @@ export default function LandingPage() {
       className="aura-background"
       style={{
         minHeight: '100vh',
-        background: '#2e2e2e', // Mid-grey base
+        background: '#0f0f0f', // Very dark grey
         position: 'relative',
         overflowX: 'hidden',
         overflowY: 'auto',
       }}
     >
-      {/* Warm Orange Glow (Top Center) */}
+      {/* Warm Orange Glow (Top Center) - Disabled for black background */}
       <div
         style={{
           position: 'fixed',
@@ -163,13 +163,13 @@ export default function LandingPage() {
           height: '100vh',
           background: 'radial-gradient(circle, rgba(215, 120, 60, 0.7) 0%, rgba(215, 120, 60, 0) 70%)',
           filter: 'blur(60px)',
-          opacity: 0.8,
+          opacity: 0, // Disabled for pure black background
           zIndex: 1,
           pointerEvents: 'none',
         }}
       />
 
-      {/* White/Beige Horizontal Streak (Middle) - Softened for DNA visibility */}
+      {/* White/Beige Horizontal Streak (Middle) - Disabled for black background */}
       <div
         style={{
           position: 'fixed',
@@ -182,10 +182,11 @@ export default function LandingPage() {
           filter: 'blur(80px)',
           zIndex: 2,
           pointerEvents: 'none',
+          opacity: 0, // Disabled for pure black background
         }}
       />
 
-      {/* Dark Vignette (Edges) */}
+      {/* Dark Vignette (Edges) - Disabled for black background */}
       <div
         style={{
           position: 'fixed',
@@ -194,18 +195,19 @@ export default function LandingPage() {
           zIndex: 3,
           mixBlendMode: 'multiply',
           pointerEvents: 'none',
+          opacity: 0, // Disabled - not needed on pure black
         }}
       />
 
       {/* Interactive Particles - Mouse reactive */}
       <InteractiveParticles />
 
-      {/* Film Grain Texture */}
+      {/* Film Grain Texture - Subtle for black background */}
       <div
         style={{
           position: 'fixed',
           inset: 0,
-          opacity: 0.18,
+          opacity: 0.05, // Reduced for subtle texture on black
           pointerEvents: 'none',
           backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
           backgroundSize: '150px 150px',

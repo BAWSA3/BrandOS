@@ -67,7 +67,7 @@ export default function DNAJourneyScene({
             maxDistance={80}
           />
         ) : (
-          <AutoOrbitCamera radius={40} speed={0.15} height={5} />
+          <AutoOrbitCamera radius={45} speed={0.03} topDown={true} />
         )}
 
         {/* DNA with external phase control */}
@@ -75,6 +75,7 @@ export default function DNAJourneyScene({
           onPhaseChange={onPhaseChange}
           rotationMultiplier={rotationMultiplier}
           highlightIntensity={flowState === 'journey' ? 1.2 : 1}
+          interactive={isInteractive}
         />
 
         {/* Post-processing effects */}
