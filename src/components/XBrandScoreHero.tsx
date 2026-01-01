@@ -2,9 +2,15 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence, useMotionValue, animate } from 'motion/react';
-import JourneyBackground from './JourneyBackground';
+import dynamic from 'next/dynamic';
 import BrandDNAPreview, { GeneratedBrandDNA } from './BrandDNAPreview';
 import ShareableScoreCard, { ShareCardData } from './ShareableScoreCard';
+
+// Dynamically import DNA scene to avoid SSR issues with Three.js
+const DNAJourneyScene = dynamic(() => import('./DNAJourneyScene'), {
+  ssr: false,
+  loading: () => null,
+});
 
 // ============================================================================
 // Types
@@ -1123,10 +1129,29 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
         flexDirection: 'column',
         justifyContent: 'center',
         alignItems: 'center',
-        padding: '48px 24px',
+        padding: flowState === 'journey' ? '0' : '48px 24px',
         position: 'relative',
+        overflow: 'hidden',
       }}
     >
+      {/* DNA Background - Always visible */}
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          zIndex: 0,
+          opacity: flowState === 'journey' ? 1 : 0.6,
+          transition: 'opacity 0.5s ease',
+        }}
+      >
+        <DNAJourneyScene
+          flowState={flowState}
+          currentPhase={currentPhase}
+          itemProgress={itemProgress}
+          theme={theme}
+        />
+      </div>
+
       {/* Journey Progress */}
       <AnimatePresence>
         {flowState === 'journey' && (
@@ -1157,6 +1182,8 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
               gap: '24px',
               maxWidth: '600px',
               width: '100%',
+              position: 'relative',
+              zIndex: 2,
             }}
           >
             {/* Phase tagline - above logo */}
@@ -1355,46 +1382,64 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
           </motion.div>
         )}
 
-        {/* JOURNEY STATE */}
+        {/* JOURNEY STATE - Split screen layout */}
         {flowState === 'journey' && (
-          <>
-            {/* Reactive background that builds with progress */}
-            <JourneyBackground
-              progress={((currentPhase - 1) + (itemProgress / 4)) / 4}
-              currentPhase={currentPhase}
-              theme={theme}
-            />
-            <motion.div
-              key="journey"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.5 }}
+          <motion.div
+            key="journey"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+            style={{
+              display: 'flex',
+              width: '100%',
+              height: '100vh',
+              position: 'relative',
+              zIndex: 1,
+            }}
+          >
+            {/* DNA takes left 60% - handled by DNAJourneyScene in background */}
+            <div
               style={{
+                width: '60%',
+                height: '100%',
+                position: 'relative',
+              }}
+            />
+
+            {/* Analysis panel - Right 40% */}
+            <motion.div
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              style={{
+                width: '40%',
+                height: '100%',
                 display: 'flex',
                 flexDirection: 'column',
-                alignItems: 'center',
                 justifyContent: 'center',
-                width: '100%',
-                paddingTop: '80px',
-                position: 'relative',
-                zIndex: 1,
+                alignItems: 'center',
+                padding: '80px 32px 48px 32px',
+                background: theme === 'dark'
+                  ? 'linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.7) 30%, rgba(0,0,0,0.85) 100%)'
+                  : 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.7) 30%, rgba(255,255,255,0.85) 100%)',
+                backdropFilter: 'blur(8px)',
               }}
             >
-            <AnimatePresence mode="wait">
-              <JourneyPhaseCard
-                key={currentPhase}
-                phase={phaseConfig[currentPhase - 1]}
-                isActive={true}
-                isCompleted={false}
-                itemProgress={itemProgress}
-                theme={theme}
-                profile={profile}
-                profileImage={profile?.profile_image_url}
-              />
-            </AnimatePresence>
+              <AnimatePresence mode="wait">
+                <JourneyPhaseCard
+                  key={currentPhase}
+                  phase={phaseConfig[currentPhase - 1]}
+                  isActive={true}
+                  isCompleted={false}
+                  itemProgress={itemProgress}
+                  theme={theme}
+                  profile={profile}
+                  profileImage={profile?.profile_image_url}
+                />
+              </AnimatePresence>
+            </motion.div>
           </motion.div>
-          </>
         )}
 
         {/* REVEAL STATE */}
@@ -1412,6 +1457,8 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
               gap: '32px',
               maxWidth: '600px',
               width: '100%',
+              position: 'relative',
+              zIndex: 2,
             }}
           >
             {/* Profile header */}
@@ -1619,6 +1666,8 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
               maxWidth: '500px',
               width: '100%',
               textAlign: 'center',
+              position: 'relative',
+              zIndex: 2,
             }}
           >
             <motion.h2

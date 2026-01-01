@@ -11,7 +11,7 @@ const RADIUS = 3.5;
 const TWISTS = 2;
 
 // Style: 'chrome', 'pearl', or 'hybrid'
-const STYLE = 'hybrid';
+const STYLE: 'chrome' | 'pearl' | 'hybrid' = 'hybrid';
 
 // Phase colors
 const PHASE_COLORS = [
@@ -41,9 +41,17 @@ class DNACurve extends THREE.Curve<THREE.Vector3> {
 
 interface GlassDNAProps {
   onPhaseChange?: (phase: number | null) => void;
+  activePhase?: number | null;
+  rotationMultiplier?: number;
+  highlightIntensity?: number;
 }
 
-export default function GlassDNA({ onPhaseChange }: GlassDNAProps) {
+export default function GlassDNA({
+  onPhaseChange,
+  activePhase,
+  rotationMultiplier = 1,
+  highlightIntensity = 1
+}: GlassDNAProps) {
   const groupRef = useRef<THREE.Group>(null);
   const [hoveredPhase, setHoveredPhase] = useState<number | null>(null);
 
@@ -140,10 +148,10 @@ export default function GlassDNA({ onPhaseChange }: GlassDNAProps) {
     }
   }, []);
 
-  // Animation
+  // Animation with controllable rotation speed
   useFrame((state, delta) => {
     if (!groupRef.current) return;
-    groupRef.current.rotation.y += delta * 0.1;
+    groupRef.current.rotation.y += delta * 0.1 * rotationMultiplier;
   });
 
   // Get phase based on t value
@@ -226,7 +234,11 @@ export default function GlassDNA({ onPhaseChange }: GlassDNAProps) {
       {rungs.map((rung) => {
         const phase = getPhase(rung.t);
         const color = PHASE_COLORS[phase];
-        const isHovered = hoveredPhase === phase;
+        // Check both external activePhase and hover state
+        const isHighlighted = activePhase !== undefined && activePhase !== null
+          ? activePhase === phase
+          : hoveredPhase === phase;
+        const currentIntensity = isHighlighted ? highlightIntensity : 1;
 
         const quaternion = new THREE.Quaternion();
         const up = new THREE.Vector3(0, 1, 0);
@@ -249,13 +261,13 @@ export default function GlassDNA({ onPhaseChange }: GlassDNAProps) {
               <cylinderGeometry args={[0.12, 0.12, rung.distance, 16]} />
               {/* Brushed metal rungs - darker tone */}
               <meshPhysicalMaterial
-                color={isHovered ? color : 0x555560}
+                color={isHighlighted ? color : 0x555560}
                 metalness={0.88}
                 roughness={0.35}
                 clearcoat={0.15}
                 clearcoatRoughness={0.4}
-                emissive={isHovered ? color : 0x282830}
-                emissiveIntensity={isHovered ? 0.4 : 0.1}
+                emissive={isHighlighted ? color : 0x282830}
+                emissiveIntensity={isHighlighted ? 0.4 * currentIntensity : 0.1}
                 side={THREE.DoubleSide}
               />
             </mesh>
@@ -272,13 +284,13 @@ export default function GlassDNA({ onPhaseChange }: GlassDNAProps) {
             >
               <sphereGeometry args={[0.2, 16, 16]} />
               <meshPhysicalMaterial
-                color={isHovered ? color : 0x606570}
+                color={isHighlighted ? color : 0x606570}
                 metalness={0.9}
                 roughness={0.38}
                 clearcoat={0.12}
                 clearcoatRoughness={0.45}
-                emissive={isHovered ? color : 0x252530}
-                emissiveIntensity={isHovered ? 0.4 : 0.08}
+                emissive={isHighlighted ? color : 0x252530}
+                emissiveIntensity={isHighlighted ? 0.4 * currentIntensity : 0.08}
               />
             </mesh>
 
@@ -294,13 +306,13 @@ export default function GlassDNA({ onPhaseChange }: GlassDNAProps) {
             >
               <sphereGeometry args={[0.2, 16, 16]} />
               <meshPhysicalMaterial
-                color={isHovered ? color : 0x606570}
+                color={isHighlighted ? color : 0x606570}
                 metalness={0.9}
                 roughness={0.38}
                 clearcoat={0.12}
                 clearcoatRoughness={0.45}
-                emissive={isHovered ? color : 0x252530}
-                emissiveIntensity={isHovered ? 0.4 : 0.08}
+                emissive={isHighlighted ? color : 0x252530}
+                emissiveIntensity={isHighlighted ? 0.4 * currentIntensity : 0.08}
               />
             </mesh>
           </group>
