@@ -9,6 +9,7 @@ interface AutoOrbitCameraProps {
   height?: number;        // Camera Y position (default: 5)
   topDown?: boolean;      // Start from top-down view (default: false)
   tiltAngle?: number;     // Angle from horizontal in radians (default: 0.3)
+  initialAngle?: number;  // Starting orbit angle in radians (default: 0.8)
 }
 
 export default function AutoOrbitCamera({
@@ -16,10 +17,11 @@ export default function AutoOrbitCamera({
   speed = 0.15,
   height = 5,
   topDown = false,
-  tiltAngle = 0.3
+  tiltAngle = 0.3,
+  initialAngle = 0.8     // ~46 degrees - nice diagonal starting view
 }: AutoOrbitCameraProps) {
   const { camera } = useThree();
-  const angleRef = useRef(0);
+  const angleRef = useRef(initialAngle);
 
   useFrame((_, delta) => {
     angleRef.current += delta * speed;
