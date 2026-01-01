@@ -15,6 +15,11 @@ export default function RootLayout({
   return (
     <html lang="en" data-theme="dark" suppressHydrationWarning>
       <head>
+        {/* Google Fonts for Design #2 */}
+        <link
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Press+Start+2P&display=swap"
+          rel="stylesheet"
+        />
         {/* Custom fonts loaded via @font-face in globals.css */}
       </head>
       <body>

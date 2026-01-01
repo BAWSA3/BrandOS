@@ -26,11 +26,13 @@ export default function DNAScene({ onPhaseChange }: DNASceneProps) {
       >
         {/* Background handled by GradientSphere inside GlassDNA */}
         <GlassDNA onPhaseChange={onPhaseChange} />
-        {/* Camera stays fixed - DNA rotates on its own */}
+        {/* User can rotate camera around DNA */}
         <OrbitControls
-          enableZoom={false}
+          enableZoom={true}
           enablePan={false}
-          enableRotate={false}
+          enableRotate={true}
+          minDistance={20}
+          maxDistance={80}
         />
 
         {/* Post-processing - subtle effects only */}

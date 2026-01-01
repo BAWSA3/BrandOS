@@ -33,7 +33,17 @@ export default function DNAJourneyScene({
   const bloomIntensity = flowState === 'journey' ? 0.25 : 0.15;
 
   return (
-    <div style={{ width: '100%', height: '100%', position: 'absolute', inset: 0, zIndex: 1 }}>
+    <div
+      style={{
+        width: '100%',
+        height: '100%',
+        position: 'absolute',
+        inset: 0,
+        zIndex: 1,
+        // Bioluminescent glow effect (Design #2)
+        filter: 'drop-shadow(0 0 20px rgba(0, 200, 255, 0.4))',
+      }}
+    >
       <Canvas
         camera={{ position: [0, 0, 40], fov: 45 }}
         gl={{

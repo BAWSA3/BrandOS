@@ -1186,96 +1186,78 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
               zIndex: 2,
             }}
           >
-            {/* Phase tagline - above logo */}
+            {/* Phase tagline - micro copy style */}
             <motion.p
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
               style={{
-                fontFamily: "'PP NeueBit', monospace",
-                fontSize: 'clamp(18px, 3vw, 28px)',
-                fontWeight: 700,
-                letterSpacing: '0.05em',
-                color: theme === 'dark' ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)',
+                fontFamily: "'Courier New', Courier, monospace",
+                fontSize: '0.75rem',
+                fontWeight: 400,
+                letterSpacing: '0.15em',
+                color: 'rgba(255,255,255,0.6)',
                 textAlign: 'center',
                 margin: 0,
+                marginBottom: '2rem',
+                textTransform: 'uppercase',
+                textShadow: '0 0 10px rgba(255,255,255,0.2)',
               }}
             >
-              DEFINE. CHECK. GENERATE. SCALE.
+              Define. Check. Generate. Scale.
             </motion.p>
 
-            {/* Logo */}
-            <motion.h1
+            {/* Logo - Design #2 Style */}
+            <motion.div
               style={{
-                fontSize: 'clamp(60px, 14vw, 160px)',
-                lineHeight: 1.1,
-                margin: 0,
                 display: 'flex',
-                alignItems: 'baseline',
-                letterSpacing: '-0.05em',
-                overflow: 'visible',
-                marginTop: '-12px',
+                alignItems: 'center',
+                marginBottom: '0.5rem',
               }}
             >
               <span
                 style={{
-                  fontFamily: "'Russo One', sans-serif",
-                  fontWeight: 400,
+                  fontFamily: "'Inter', sans-serif",
+                  fontWeight: 800,
                   fontStyle: 'italic',
-                  color: theme === 'dark' ? '#FFFFFF' : '#000000',
+                  fontSize: '4rem',
+                  letterSpacing: '-2px',
+                  marginRight: '5px',
+                  color: '#ffffff',
                 }}
               >
                 Brand
               </span>
               <span
-                className="os-shimmer"
                 style={{
-                  fontFamily: "'VCR OSD Mono', monospace",
-                  fontWeight: 400,
-                  fontSize: '1.35em',
-                  fontStyle: 'italic',
-                  display: 'inline-block',
-                  paddingRight: '0.1em',
-                  verticalAlign: 'baseline',
-                  position: 'relative',
-                  top: '0.05em',
+                  fontFamily: "'Press Start 2P', cursive",
+                  fontSize: '3rem',
+                  color: '#2b7fff',
+                  textShadow: '0 0 20px #006eff',
                 }}
               >
                 OS
               </span>
-              <span
-                className="typing-cursor"
-                style={{
-                  display: 'inline-block',
-                  width: '3px',
-                  height: '0.9em',
-                  backgroundColor: '#0047FF',
-                  marginLeft: '4px',
-                  verticalAlign: 'baseline',
-                  animation: 'cursorBlink 0.8s ease-in-out infinite',
-                }}
-              />
-            </motion.h1>
+            </motion.div>
 
-            {/* Description - below logo */}
+            {/* Sub-head - Design #2 Style */}
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.15 }}
               style={{
-                fontFamily: "'VCR OSD Mono', monospace",
-                fontSize: 'clamp(11px, 1.5vw, 14px)',
+                fontFamily: "'Press Start 2P', cursive",
+                fontSize: '0.7rem',
                 fontWeight: 400,
-                letterSpacing: '0.12em',
-                color: theme === 'dark' ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)',
+                letterSpacing: '0.1em',
+                color: '#555',
                 textAlign: 'center',
                 margin: 0,
-                marginTop: '-16px',
+                marginBottom: '4rem',
                 textTransform: 'uppercase',
-                whiteSpace: 'nowrap',
               }}
             >
-              an AI-powered OS that builds your brand's DNA.
+              AN AI-POWERED OS THAT BUILDS YOUR BRAND'S DNA.
             </motion.p>
 
             {/* Input Form */}
@@ -1293,6 +1275,7 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                 maxWidth: '420px',
               }}
             >
+              {/* Glassmorphic Input - Design #2 */}
               <div style={{ position: 'relative', width: '100%' }}>
                 <input
                   type="text"
@@ -1302,46 +1285,57 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                   maxLength={15}
                   style={{
                     width: '100%',
-                    fontFamily: "'Helvetica Neue', sans-serif",
-                    fontSize: '18px',
-                    padding: '20px',
+                    fontFamily: "'Courier New', monospace",
+                    fontSize: '1rem',
+                    padding: '1.2rem',
                     textAlign: 'center',
-                    borderRadius: '16px',
-                    border: `2px solid ${error ? '#EF4444' : theme === 'dark' ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)'}`,
-                    background: theme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
-                    color: theme === 'dark' ? '#FFFFFF' : '#000000',
+                    borderRadius: '12px',
+                    border: `1px solid ${error ? '#EF4444' : 'rgba(255, 255, 255, 0.15)'}`,
+                    background: 'rgba(255, 255, 255, 0.03)',
+                    backdropFilter: 'blur(12px)',
+                    WebkitBackdropFilter: 'blur(12px)',
+                    color: '#ffffff',
                     outline: 'none',
                     transition: 'all 0.3s ease',
                   }}
                   onFocus={(e) => {
-                    e.currentTarget.style.borderColor = '#0047FF';
-                    e.currentTarget.style.boxShadow = '0 0 0 4px rgba(0, 71, 255, 0.15)';
+                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)';
+                    e.currentTarget.style.borderColor = 'rgba(0, 110, 255, 0.5)';
+                    e.currentTarget.style.boxShadow = '0 0 30px rgba(0, 110, 255, 0.2)';
                   }}
                   onBlur={(e) => {
-                    e.currentTarget.style.borderColor = theme === 'dark' ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)';
+                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)';
+                    e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.15)';
                     e.currentTarget.style.boxShadow = 'none';
                   }}
                 />
               </div>
 
+              {/* CTA Button - Design #2 Style */}
               <motion.button
                 type="submit"
                 disabled={isValidating}
-                whileHover={!isValidating ? { scale: 1.02, boxShadow: '0 0 40px rgba(0, 71, 255, 0.5)' } : {}}
+                whileHover={!isValidating ? {
+                  scale: 1.02,
+                  boxShadow: '0 0 50px rgba(0, 110, 255, 0.8)',
+                  translateY: -2,
+                } : {}}
                 whileTap={!isValidating ? { scale: 0.98 } : {}}
                 style={{
                   width: '100%',
-                  fontFamily: "'VCR OSD Mono', monospace",
-                  fontSize: '14px',
-                  letterSpacing: '0.15em',
-                  color: '#FFFFFF',
-                  background: '#0047FF',
+                  fontFamily: "'Courier New', monospace",
+                  fontSize: '0.9rem',
+                  fontWeight: 'bold',
+                  letterSpacing: '0.1em',
+                  color: '#ffffff',
+                  background: '#0055ff',
                   border: 'none',
-                  padding: '20px 32px',
-                  borderRadius: '16px',
+                  padding: '1.2rem',
+                  borderRadius: '8px',
                   cursor: isValidating ? 'wait' : 'pointer',
-                  boxShadow: '0 0 30px rgba(0, 71, 255, 0.3)',
+                  boxShadow: '0 10px 40px -10px rgba(0, 85, 255, 0.5)',
                   opacity: isValidating ? 0.7 : 1,
+                  transition: 'all 0.3s ease',
                 }}
               >
                 {isValidating ? 'CHECKING PROFILE...' : "FIND YOUR BRAND DNA"}
@@ -1363,16 +1357,16 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
               )}
             </motion.form>
 
-            {/* Hint */}
+            {/* Footer hint - Design #2 Style */}
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.4 }}
               style={{
-                fontFamily: "'VCR OSD Mono', monospace",
-                fontSize: '11px',
-                letterSpacing: '0.1em',
-                color: theme === 'dark' ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.4)',
+                fontFamily: "'Courier New', monospace",
+                fontSize: '0.6rem',
+                letterSpacing: '0.05em',
+                color: 'rgba(255, 255, 255, 0.4)',
                 textAlign: 'center',
                 marginTop: '-4px',
               }}

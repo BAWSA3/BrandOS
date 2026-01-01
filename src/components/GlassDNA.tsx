@@ -148,10 +148,13 @@ export default function GlassDNA({
     }
   }, []);
 
-  // Animation with controllable rotation speed
+  // Animation with controllable rotation speed + float effect (Design #2)
   useFrame((state, delta) => {
     if (!groupRef.current) return;
+    // Rotation
     groupRef.current.rotation.y += delta * 0.1 * rotationMultiplier;
+    // Subtle float animation
+    groupRef.current.position.y = Math.sin(state.clock.elapsedTime * 0.5) * 0.3;
   });
 
   // Get phase based on t value

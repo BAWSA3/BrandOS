@@ -4,9 +4,8 @@ import { useBrandStore } from '@/lib/store';
 import XBrandScoreHero from '@/components/XBrandScoreHero';
 
 // =============================================================================
-// Landing Page / Lead Magnet
-// This is the main landing page for BrandOS featuring the X Brand Score tool
-// as the primary lead magnet to capture email signups before accessing the app.
+// Landing Page / Lead Magnet - Design #2
+// Deep void background with perspective grid and atmosphere bloom
 // =============================================================================
 
 export default function LandingPage() {
@@ -16,59 +15,65 @@ export default function LandingPage() {
     <div
       style={{
         minHeight: '100vh',
-        background: theme === 'dark'
-          ? 'linear-gradient(160deg, #141414 0%, #141414 50%, #1a1a2e 75%, #252545 100%)'
-          : 'linear-gradient(160deg, #EAB27A 0%, #D0BBEB 45%, #3C8AFF 100%)',
+        background: '#020205', // Deep void
         position: 'relative',
         overflowX: 'hidden',
         overflowY: 'auto',
       }}
     >
-      {/* Gradient color blobs */}
+      {/* Perspective Grid Layer - Space Curvature Effect */}
       <div
+        className="grid-layer"
         style={{
           position: 'fixed',
-          inset: 0,
-          background: theme === 'dark'
-            ? `
-              radial-gradient(ellipse 70% 50% at 80% 15%, rgba(69, 92, 255, 0.2) 0%, transparent 55%),
-              radial-gradient(ellipse 60% 60% at 15% 85%, rgba(69, 92, 255, 0.15) 0%, transparent 50%),
-              radial-gradient(ellipse 80% 50% at 50% 50%, rgba(69, 92, 255, 0.08) 0%, transparent 50%)
-            `
-            : `
-              radial-gradient(ellipse 70% 50% at 80% 15%, rgba(60, 138, 255, 0.5) 0%, transparent 55%),
-              radial-gradient(ellipse 60% 50% at 15% 75%, rgba(234, 178, 122, 0.5) 0%, transparent 50%),
-              radial-gradient(ellipse 50% 50% at 50% 45%, rgba(208, 187, 235, 0.4) 0%, transparent 50%)
-            `,
+          width: '200vw',
+          height: '200vh',
+          left: '-50vw',
+          top: '-50vh',
+          backgroundImage: `
+            linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px)
+          `,
+          backgroundSize: '50px 50px',
+          transform: 'perspective(500px) rotateX(60deg) translateY(-100px) translateZ(-200px)',
+          opacity: 0.4,
+          zIndex: 1,
+          maskImage: 'radial-gradient(circle, black 30%, transparent 70%)',
+          WebkitMaskImage: 'radial-gradient(circle, black 30%, transparent 70%)',
           pointerEvents: 'none',
         }}
       />
 
-      {/* Grainy texture overlay */}
+      {/* Atmosphere Bloom - Blue Glow at Bottom */}
+      <div
+        className="atmosphere-bloom"
+        style={{
+          position: 'fixed',
+          bottom: '-10%',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: '60vw',
+          height: '50vh',
+          background: 'radial-gradient(circle, rgba(0, 110, 255, 0.25) 0%, rgba(0,0,0,0) 70%)',
+          filter: 'blur(80px)',
+          zIndex: 2,
+          pointerEvents: 'none',
+          animation: 'breathe 6s infinite ease-in-out',
+        }}
+      />
+
+      {/* Subtle grain texture */}
       <div
         style={{
           position: 'fixed',
           inset: 0,
-          opacity: theme === 'dark' ? 0.35 : 0.25,
+          opacity: 0.15,
           pointerEvents: 'none',
           backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
           backgroundRepeat: 'repeat',
           backgroundSize: '150px 150px',
           mixBlendMode: 'overlay',
-        }}
-      />
-
-      {/* Subtle grid overlay */}
-      <div
-        style={{
-          position: 'fixed',
-          inset: 0,
-          backgroundImage: `
-            linear-gradient(to right, ${theme === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.08)'} 1px, transparent 1px),
-            linear-gradient(to bottom, ${theme === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.08)'} 1px, transparent 1px)
-          `,
-          backgroundSize: '80px 80px',
-          pointerEvents: 'none',
+          zIndex: 3,
         }}
       />
 

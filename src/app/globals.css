@@ -1113,3 +1113,91 @@ code {
     color: black !important;
   }
 }
+
+/* ============================================
+   DESIGN #2 - DNA INTERFACE ANIMATIONS
+   ============================================ */
+
+/* Atmosphere bloom breathing animation */
+@keyframes breathe {
+  0%, 100% {
+    opacity: 0.6;
+    transform: translateX(-50%) scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: translateX(-50%) scale(1.1);
+  }
+}
+
+/* DNA float animation */
+@keyframes dnaFloat {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-15px);
+  }
+}
+
+/* Grid pulse animation (subtle) */
+@keyframes gridPulse {
+  0%, 100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Panel slide in from right */
+@keyframes slideInFromRight {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-breathe {
+  animation: breathe 6s infinite ease-in-out;
+}
+
+.animate-dna-float {
+  animation: dnaFloat 8s infinite ease-in-out;
+}
+
+.animate-grid-pulse {
+  animation: gridPulse 8s infinite ease-in-out;
+}
+
+.animate-slide-in-right {
+  animation: slideInFromRight 0.6s ease-out forwards;
+}
+
+/* Design #2 Typography */
+.font-inter {
+  font-family: 'Inter', sans-serif;
+}
+
+.font-pixel {
+  font-family: 'Press Start 2P', cursive;
+}
+
+/* Logo Brand text - Inter 800 italic */
+.logo-brand-text {
+  font-family: 'Inter', sans-serif;
+  font-weight: 800;
+  font-style: italic;
+  letter-spacing: -2px;
+}
+
+/* Logo OS text - Press Start 2P with glow */
+.logo-os-text {
+  font-family: 'Press Start 2P', cursive;
+  color: #2b7fff;
+  text-shadow: 0 0 20px #006eff;
+}
