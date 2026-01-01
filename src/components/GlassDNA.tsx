@@ -348,7 +348,7 @@ export default function GlassDNA({
               />
             </mesh>
 
-            {/* Endpoint sphere 1 - high-shine metal */}
+            {/* Endpoint sphere 1 */}
             <mesh
               position={rung.p1}
               castShadow
@@ -370,7 +370,7 @@ export default function GlassDNA({
               />
             </mesh>
 
-            {/* Endpoint sphere 2 - high-shine metal */}
+            {/* Endpoint sphere 2 */}
             <mesh
               position={rung.p2}
               castShadow
@@ -398,7 +398,7 @@ export default function GlassDNA({
       {/* Floating particles */}
       <ChromeParticles count={40} />
 
-      {/* Decorative rings - brushed metal */}
+      {/* Decorative rings */}
       {[-8, 0, 8].map((y, i) => (
         <mesh key={i} position={[0, y, 0]} rotation={[Math.PI / 2, 0, 0]}>
           <torusGeometry args={[5.5, 0.035, 12, 64]} />
