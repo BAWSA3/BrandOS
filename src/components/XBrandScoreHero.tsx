@@ -1260,7 +1260,7 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
         overflow: 'hidden',
       }}
     >
-      {/* DNA Background - Always visible */}
+      {/* DNA Background - Always visible, behind UI */}
       <div
         style={{
           position: 'absolute',
@@ -1268,6 +1268,7 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
           zIndex: 0,
           opacity: flowState === 'journey' ? 1 : 0.6,
           transition: 'opacity 0.5s ease',
+          pointerEvents: 'none',
         }}
       >
         <DNAJourneyScene
@@ -1309,7 +1310,7 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
               maxWidth: '600px',
               width: '100%',
               position: 'relative',
-              zIndex: 2,
+              zIndex: 10,
             }}
           >
             {/* Phase tagline - micro copy style */}
@@ -1580,7 +1581,7 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
               maxWidth: '600px',
               width: '100%',
               position: 'relative',
-              zIndex: 2,
+              zIndex: 10,
             }}
           >
             {/* Profile header */}
@@ -1789,7 +1790,7 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
               width: '100%',
               textAlign: 'center',
               position: 'relative',
-              zIndex: 2,
+              zIndex: 10,
             }}
           >
             <motion.h2

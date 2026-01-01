@@ -25,8 +25,8 @@ export default function AutoOrbitCamera({
     angleRef.current += delta * speed;
 
     if (topDown) {
-      // Top-down orbital view - camera looks down at an angle while orbiting
-      const elevationAngle = Math.PI / 3; // 60 degrees from horizontal (looking down)
+      // Diagonal orbital view - camera looks down at an angle while orbiting
+      const elevationAngle = Math.PI / 4; // 45 degrees from horizontal (more diagonal)
       const orbitRadius = radius * Math.cos(elevationAngle);
       const cameraHeight = radius * Math.sin(elevationAngle);
 

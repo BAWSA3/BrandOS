@@ -40,9 +40,10 @@ export default function DNAJourneyScene({
         height: '100%',
         position: 'absolute',
         inset: 0,
-        zIndex: 1,
-        // Warm amber glow effect
-        filter: 'drop-shadow(0 0 20px rgba(232, 168, 56, 0.4))',
+        zIndex: 0,
+        // White bloom glow effect
+        filter: 'drop-shadow(0 0 25px rgba(255, 255, 255, 0.5))',
+        pointerEvents: 'none',
       }}
     >
       <Canvas
