@@ -233,17 +233,26 @@ function HeroScoreCard({
 }
 
 // =============================================================================
-// Tone Card Component (Deep Blue - Bar Chart)
+// Content Pillars Card Component (Deep Blue - Pillar Tags)
 // =============================================================================
-function ToneCard({ tone }: { tone: BentoShareCardData['tone'] }) {
-  const bars = [
-    { key: 'formality', value: tone.formality },
-    { key: 'energy', value: tone.energy },
-    { key: 'confidence', value: tone.confidence },
-    { key: 'style', value: tone.style },
-  ];
+function ContentPillarsCard({ contentPillars }: { contentPillars?: BentoShareCardData['contentPillars'] }) {
+  // Default pillars if none provided
+  const pillars = contentPillars && contentPillars.length > 0
+    ? contentPillars
+    : [
+        { name: 'Insights', frequency: 40, avgEngagement: 0 },
+        { name: 'Stories', frequency: 30, avgEngagement: 0 },
+        { name: 'Tips', frequency: 20, avgEngagement: 0 },
+        { name: 'News', frequency: 10, avgEngagement: 0 },
+      ];
 
-  const avgTone = Math.round(bars.reduce((sum, b) => sum + b.value, 0) / bars.length);
+  // DNA rainbow colors for pillars
+  const pillarColors = [
+    '#E8A838', // Golden Amber
+    '#00ff88', // Green
+    '#9d4edd', // Purple
+    '#ff6b35', // Orange
+  ];
 
   return (
     <motion.div
@@ -278,7 +287,7 @@ function ToneCard({ tone }: { tone: BentoShareCardData['tone'] }) {
             fontFamily: "'Helvetica Neue', sans-serif",
           }}
         >
-          Tone
+          Content Pillars
         </div>
         <div
           style={{
@@ -290,8 +299,7 @@ function ToneCard({ tone }: { tone: BentoShareCardData['tone'] }) {
             fontFamily: "'Helvetica Neue', sans-serif",
           }}
         >
-          <span style={{ opacity: 0.5 }}>Weekly</span>{' '}
-          <span>Daily</span>
+          {pillars.length} pillars
         </div>
       </div>
 
@@ -300,57 +308,92 @@ function ToneCard({ tone }: { tone: BentoShareCardData['tone'] }) {
         style={{
           fontSize: '14px',
           color: COLORS.textMuted,
-          marginBottom: '40px',
+          marginBottom: '24px',
           lineHeight: 1.4,
           fontFamily: "'Helvetica Neue', sans-serif",
         }}
       >
-        Calculated on average engagement, we use AI to get these numbers.
+        Core topics that define your brand&apos;s content strategy.
       </p>
 
-      {/* Bar Chart */}
+      {/* Pillar Tags */}
       <div
         style={{
           flexGrow: 1,
           display: 'flex',
-          alignItems: 'flex-end',
-          gap: '8px',
-          justifyContent: 'space-around',
+          flexDirection: 'column',
+          gap: '12px',
         }}
       >
-        {bars.map((bar, index) => (
+        {pillars.slice(0, 4).map((pillar, index) => (
           <motion.div
-            key={bar.key}
-            initial={{ height: 0 }}
-            animate={{ height: `${bar.value * 2}px` }}
-            transition={{ duration: 0.6, delay: 0.4 + index * 0.1 }}
+            key={pillar.name}
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.4, delay: 0.3 + index * 0.1 }}
             style={{
-              background: `linear-gradient(180deg, ${COLORS.accentBlue}, ${COLORS.cardFollowers})`,
-              width: '20px',
-              borderRadius: '4px',
-              minHeight: '20px',
-              boxShadow: `0 0 15px ${COLORS.accentGlow}`,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
             }}
-          />
+          >
+            {/* Color indicator */}
+            <div
+              style={{
+                width: '8px',
+                height: '8px',
+                borderRadius: '50%',
+                backgroundColor: pillarColors[index % pillarColors.length],
+                boxShadow: `0 0 10px ${pillarColors[index % pillarColors.length]}`,
+              }}
+            />
+            {/* Pillar name */}
+            <div
+              style={{
+                flex: 1,
+                fontSize: '15px',
+                fontWeight: 500,
+                fontFamily: "'Helvetica Neue', sans-serif",
+              }}
+            >
+              {pillar.name}
+            </div>
+            {/* Frequency bar */}
+            <div
+              style={{
+                width: '80px',
+                height: '6px',
+                backgroundColor: 'rgba(255,255,255,0.1)',
+                borderRadius: '3px',
+                overflow: 'hidden',
+              }}
+            >
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: `${pillar.frequency}%` }}
+                transition={{ duration: 0.6, delay: 0.4 + index * 0.1 }}
+                style={{
+                  height: '100%',
+                  backgroundColor: pillarColors[index % pillarColors.length],
+                  borderRadius: '3px',
+                }}
+              />
+            </div>
+          </motion.div>
         ))}
       </div>
 
-      {/* Floating Tag */}
+      {/* Bottom label */}
       <div
         style={{
-          background: COLORS.accentBlue,
-          color: '#fff',
-          padding: '6px 12px',
-          borderRadius: '10px',
+          marginTop: '20px',
           fontSize: '12px',
-          position: 'absolute',
-          top: '45%',
-          left: '35%',
+          color: COLORS.textMuted,
           fontFamily: "'Helvetica Neue', sans-serif",
-          boxShadow: `0 0 20px ${COLORS.accentGlow}`,
+          textAlign: 'center',
         }}
       >
-        {avgTone}% avg
+        Based on your content themes
       </div>
     </motion.div>
   );
@@ -788,7 +831,7 @@ export default function BentoRevealGrid({
             gap: '20px',
           }}
         >
-          <ToneCard tone={data.tone} />
+          <ContentPillarsCard contentPillars={data.contentPillars} />
           <FollowersCard count={data.followersCount} />
           <ArchetypeCard
             emoji={data.archetypeEmoji}
