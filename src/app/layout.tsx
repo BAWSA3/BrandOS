@@ -1,10 +1,50 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import ThemeProvider from "@/components/ThemeProvider";
+import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 export const metadata: Metadata = {
-  title: "brandos — Brand Guardian",
-  description: "AI-powered brand consistency and content generation",
+  title: "BrandOS — Discover Your Brand DNA",
+  description: "AI-powered brand analysis that reveals your unique creator identity. Get your Brand Score, discover your archetype, and unlock personalized growth insights.",
+  keywords: ["brand", "AI", "creator", "brand score", "brand DNA", "personal branding", "content strategy"],
+  authors: [{ name: "BrandOS" }],
+  creator: "BrandOS",
+  metadataBase: new URL("https://mybrandos.app"),
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "https://mybrandos.app",
+    siteName: "BrandOS",
+    title: "BrandOS — Discover Your Brand DNA",
+    description: "AI-powered brand analysis that reveals your unique creator identity. Get your Brand Score and unlock personalized growth insights.",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "BrandOS - Discover Your Brand DNA",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "BrandOS — Discover Your Brand DNA",
+    description: "AI-powered brand analysis that reveals your unique creator identity. Get your Brand Score and unlock personalized growth insights.",
+    images: ["/og-image.png"],
+    creator: "@mybrandos",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
 };
 
 export default function RootLayout({
@@ -24,6 +64,8 @@ export default function RootLayout({
       </head>
       <body>
         <ThemeProvider>{children}</ThemeProvider>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
