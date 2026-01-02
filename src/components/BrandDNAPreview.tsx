@@ -27,6 +27,10 @@ export interface GeneratedBrandDNA {
   voiceSamples: string[];
   archetype: string;
   archetypeEmoji: string;
+  // Personality system (Brand Guardian)
+  personalityType?: string;
+  personalityEmoji?: string;
+  personalitySummary?: string;
   voiceProfile: string;
   targetAudience: string;
   inferredMission: string;
@@ -755,6 +759,7 @@ export default function BrandDNAPreview({
     </motion.div>
   );
 }
+
 
 
 

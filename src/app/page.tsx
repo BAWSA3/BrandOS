@@ -3,6 +3,7 @@
 import { useBrandStore } from '@/lib/store';
 import XBrandScoreHero from '@/components/XBrandScoreHero';
 import { useEffect, useRef, useState, useCallback } from 'react';
+import { scroll, animate } from 'motion';
 
 // =============================================================================
 // Interactive Particles Component - Mouse-reactive floating orbs
@@ -134,6 +135,93 @@ function InteractiveParticles() {
 }
 
 // =============================================================================
+// Scroll-Linked Parallax Component - Premium depth effect
+// =============================================================================
+function ScrollParallax() {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    // Parallax layers - different speeds create depth
+    const heroTitle = document.querySelector('.hero-parallax-title');
+    const heroSubtitle = document.querySelector('.hero-parallax-subtitle');
+    const heroOrbs = document.querySelector('.hero-parallax-orbs');
+    const heroForm = document.querySelector('.hero-parallax-form');
+
+    const cleanups: (() => void)[] = [];
+
+    // Title moves fastest (closest to viewer)
+    if (heroTitle) {
+      const cleanup = scroll(
+        animate(heroTitle, {
+          y: [0, -120],
+          opacity: [1, 0],
+          scale: [1, 0.95],
+        }),
+        {
+          target: containerRef.current,
+          offset: ['start start', 'end start'],
+        }
+      );
+      if (cleanup) cleanups.push(cleanup);
+    }
+
+    // Subtitle follows title
+    if (heroSubtitle) {
+      const cleanup = scroll(
+        animate(heroSubtitle, {
+          y: [0, -80],
+          opacity: [1, 0],
+        }),
+        {
+          target: containerRef.current,
+          offset: ['start start', '0.6 start'],
+        }
+      );
+      if (cleanup) cleanups.push(cleanup);
+    }
+
+    // Form moves slower (further back)
+    if (heroForm) {
+      const cleanup = scroll(
+        animate(heroForm, {
+          y: [0, -40],
+          opacity: [1, 0.3],
+        }),
+        {
+          target: containerRef.current,
+          offset: ['start start', '0.8 start'],
+        }
+      );
+      if (cleanup) cleanups.push(cleanup);
+    }
+
+    // Background orbs move slowest and scale up (furthest back)
+    if (heroOrbs) {
+      const cleanup = scroll(
+        animate(heroOrbs, {
+          y: [0, 80],
+          scale: [1, 1.2],
+          opacity: [0.6, 0.2],
+        }),
+        {
+          target: containerRef.current,
+          offset: ['start start', 'end start'],
+        }
+      );
+      if (cleanup) cleanups.push(cleanup);
+    }
+
+    return () => {
+      cleanups.forEach(cleanup => cleanup?.());
+    };
+  }, []);
+
+  return <div ref={containerRef} className="scroll-parallax-container" style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }} />;
+}
+
+// =============================================================================
 // Landing Page / Lead Magnet - Grainy Aura Aesthetic
 // Warm gradient with vignette and film grain texture
 // =============================================================================
@@ -201,6 +289,62 @@ export default function LandingPage() {
 
       {/* Interactive Particles - Mouse reactive */}
       <InteractiveParticles />
+
+      {/* Scroll-Linked Parallax */}
+      <ScrollParallax />
+
+      {/* Parallax Background Orbs - Move on scroll */}
+      <div
+        className="hero-parallax-orbs"
+        style={{
+          position: 'fixed',
+          inset: 0,
+          zIndex: 2,
+          pointerEvents: 'none',
+          willChange: 'transform',
+        }}
+      >
+        {/* Large ambient orb - top right */}
+        <div
+          style={{
+            position: 'absolute',
+            top: '10%',
+            right: '15%',
+            width: '400px',
+            height: '400px',
+            background: 'radial-gradient(circle, rgba(0, 71, 255, 0.15) 0%, transparent 70%)',
+            filter: 'blur(60px)',
+            borderRadius: '50%',
+          }}
+        />
+        {/* Medium orb - bottom left */}
+        <div
+          style={{
+            position: 'absolute',
+            bottom: '20%',
+            left: '10%',
+            width: '300px',
+            height: '300px',
+            background: 'radial-gradient(circle, rgba(212, 165, 116, 0.12) 0%, transparent 70%)',
+            filter: 'blur(50px)',
+            borderRadius: '50%',
+          }}
+        />
+        {/* Small accent orb - center */}
+        <div
+          style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: '200px',
+            height: '200px',
+            background: 'radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 70%)',
+            filter: 'blur(40px)',
+            borderRadius: '50%',
+          }}
+        />
+      </div>
 
       {/* Film Grain Texture - Subtle for black background */}
       <div

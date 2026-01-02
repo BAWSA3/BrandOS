@@ -15,6 +15,54 @@ import {
 import { BrandDNA as StoreBrandDNA } from '@/lib/types';
 import { ExtractedColors } from '@/lib/color-extraction';
 
+// =============================================================================
+// CRYPTO TWITTER PERSONALITY TYPES
+// =============================================================================
+const PERSONALITY_TYPES = {
+  alpha: {
+    name: 'The Alpha',
+    emoji: '👑',
+    traits: ['confident', 'bold predictions', 'market caller', 'trend setter'],
+  },
+  builder: {
+    name: 'The Builder',
+    emoji: '🛠️',
+    traits: ['ships products', 'technical', 'creation focused', 'pragmatic'],
+  },
+  educator: {
+    name: 'The Educator',
+    emoji: '📚',
+    traits: ['breaks down complex topics', 'thread master', 'helpful', 'patient'],
+  },
+  degen: {
+    name: 'The Degen',
+    emoji: '🎰',
+    traits: ['high risk', 'ape mentality', 'meme-friendly', 'YOLO'],
+  },
+  analyst: {
+    name: 'The Analyst',
+    emoji: '📊',
+    traits: ['data-driven', 'charts', 'technical analysis', 'methodical'],
+  },
+  philosopher: {
+    name: 'The Philosopher',
+    emoji: '🧠',
+    traits: ['big picture', 'macro views', 'thought leader', 'visionary'],
+  },
+  networker: {
+    name: 'The Networker',
+    emoji: '🤝',
+    traits: ['community builder', 'connects people', 'social glue', 'collaborative'],
+  },
+  contrarian: {
+    name: 'The Contrarian',
+    emoji: '🔥',
+    traits: ['against the crowd', 'unpopular opinions', 'provocative', 'independent'],
+  },
+} as const;
+
+type PersonalityType = keyof typeof PERSONALITY_TYPES;
+
 // Types for the response
 export interface GeneratedBrandDNA {
   // Store-compatible format
@@ -38,6 +86,10 @@ export interface GeneratedBrandDNA {
   // Extra metadata from analysis
   archetype: string;
   archetypeEmoji: string;
+  // NEW: Personality system
+  personalityType: string;
+  personalityEmoji: string;
+  personalitySummary: string;
   voiceProfile: string;
   targetAudience: string;
   inferredMission: string;
@@ -69,6 +121,171 @@ export interface GenerateBrandDNAResponse {
   success: boolean;
   brandDNA: GeneratedBrandDNA | null;
   error?: string;
+}
+
+// =============================================================================
+// PERSONALITY DETECTION & SUMMARY GENERATION
+// =============================================================================
+
+// Detect personality type based on tone and content analysis
+function detectPersonalityType(
+  bioLinguistics: BioLinguistics,
+  tweetVoice: TweetVoiceAnalysis | null,
+  geminiBrandDNA: GeminiBrandDNA | null
+): PersonalityType {
+  const voice = bioLinguistics.voiceSpectrum;
+  const tweetSpectrum = tweetVoice?.voiceSpectrum;
+
+  // Score each personality type
+  const scores: Record<PersonalityType, number> = {
+    alpha: 0,
+    builder: 0,
+    educator: 0,
+    degen: 0,
+    analyst: 0,
+    philosopher: 0,
+    networker: 0,
+    contrarian: 0,
+  };
+
+  // Alpha: High confidence, authoritative, bold
+  scores.alpha = (voice.authoritative * 0.4) +
+    (tweetSpectrum?.opinionated || 50) * 0.3 +
+    (bioLinguistics.ctaStrength * 0.3);
+
+  // Builder: Technical, professional, practical
+  scores.builder = (voice.professional * 0.4) +
+    ((100 - voice.playful) * 0.3) +
+    (geminiBrandDNA?.differentiationScore || 50) * 0.3;
+
+  // Educator: Educational content, helpful, clear
+  scores.educator = (tweetSpectrum?.educational || 40) * 0.5 +
+    (voice.professional * 0.25) +
+    ((100 - voice.authoritative) * 0.25);
+
+  // Degen: Playful, casual, high energy
+  scores.degen = (voice.playful * 0.4) +
+    (bioLinguistics.emojiAnalysis.count * 8) +
+    ((100 - voice.professional) * 0.3);
+
+  // Analyst: Data-focused, methodical, professional
+  scores.analyst = (voice.professional * 0.5) +
+    ((100 - voice.playful) * 0.3) +
+    (tweetSpectrum?.authoritative || 50) * 0.2;
+
+  // Philosopher: Big picture, thoughtful, visionary
+  scores.philosopher = (tweetSpectrum?.educational || 40) * 0.3 +
+    (voice.authoritative * 0.3) +
+    (geminiBrandDNA?.differentiationScore || 50) * 0.4;
+
+  // Networker: Community-focused, approachable, collaborative
+  scores.networker = (tweetSpectrum?.approachable || 50) * 0.4 +
+    (voice.playful * 0.3) +
+    ((100 - voice.authoritative) * 0.3);
+
+  // Contrarian: Opinionated, independent, provocative
+  scores.contrarian = (tweetSpectrum?.opinionated || 50) * 0.5 +
+    (voice.authoritative * 0.3) +
+    ((100 - (tweetSpectrum?.approachable || 50)) * 0.2);
+
+  // Find highest scoring personality
+  let maxScore = 0;
+  let detected: PersonalityType = 'builder';
+
+  for (const [type, score] of Object.entries(scores)) {
+    if (score > maxScore) {
+      maxScore = score;
+      detected = type as PersonalityType;
+    }
+  }
+
+  return detected;
+}
+
+// Generate AI personality summary using Claude API
+async function generatePersonalitySummary(
+  profile: XProfileData,
+  personalityType: PersonalityType,
+  bioLinguistics: BioLinguistics,
+  tweetVoice: TweetVoiceAnalysis | null,
+  tone: { minimal: number; playful: number; bold: number; experimental: number }
+): Promise<string> {
+  const personality = PERSONALITY_TYPES[personalityType];
+  const voice = bioLinguistics.voiceSpectrum;
+
+  // Build context for AI
+  const context = {
+    name: profile.name || profile.username,
+    personality: personality.name,
+    traits: personality.traits,
+    voice: {
+      formality: voice.professional > 60 ? 'formal' : 'casual',
+      energy: voice.authoritative > 60 ? 'high-energy' : 'measured',
+      style: voice.playful > 50 ? 'playful' : 'serious',
+    },
+    followers: profile.public_metrics?.followers_count || 0,
+    voiceConsistency: tweetVoice?.consistencyScore || 75,
+    tone,
+  };
+
+  try {
+    // Call Claude API for summary generation
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': process.env.ANTHROPIC_API_KEY || '',
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: 'claude-3-haiku-20240307',
+        max_tokens: 200,
+        messages: [
+          {
+            role: 'user',
+            content: `You are BrandOS, a Brand Guardian AI. Write a 3-sentence personality summary for ${context.name} that makes them feel deeply understood and empowered.
+
+Their personality type: ${context.personality}
+Key traits: ${context.traits.join(', ')}
+Voice style: ${context.voice.formality}, ${context.voice.energy}, ${context.voice.style}
+Follower count: ${context.followers.toLocaleString()}
+Voice consistency: ${context.voiceConsistency}%
+
+Write in second person ("You..."). Be specific, insightful, and make them feel like "Wow, this OS really knows me." No quotes around the response. Keep it punchy and confident.`,
+          },
+        ],
+      }),
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      return data.content?.[0]?.text || generateFallbackSummary(personalityType, context);
+    }
+  } catch (error) {
+    console.error('Claude API error:', error);
+  }
+
+  // Fallback to template-based summary
+  return generateFallbackSummary(personalityType, context);
+}
+
+// Fallback summary templates
+function generateFallbackSummary(
+  personalityType: PersonalityType,
+  context: { name: string; followers: number; voiceConsistency: number }
+): string {
+  const templates: Record<PersonalityType, string> = {
+    alpha: `You lead with conviction, and your audience follows. Your bold takes cut through the noise—${context.voiceConsistency}% voice consistency means people know exactly what they're getting. You're not here to blend in; you're here to set the pace.`,
+    builder: `You ship while others talk. Your technical depth and pragmatic approach have built real credibility with your ${context.followers.toLocaleString()} followers. Every post adds value—no fluff, just substance.`,
+    educator: `You turn complexity into clarity. Your patient, methodical breakdowns have made you a trusted voice in the space. People don't just follow you—they learn from you.`,
+    degen: `You embrace the chaos and your community loves you for it. High risk, high energy, high engagement—you've turned the degen lifestyle into a brand. WAGMI isn't just a motto, it's your vibe.`,
+    analyst: `Data doesn't lie, and neither do you. Your methodical, chart-driven approach has built serious credibility. When you speak, people listen—because you've done the homework.`,
+    philosopher: `You see the forest while others argue about trees. Your macro perspective and visionary thinking set you apart from the daily noise. You're building a narrative, not just posting.`,
+    networker: `You're the connective tissue of crypto twitter. Your approachable style and community-first mindset have made you a hub for meaningful conversations. People trust you to amplify what matters.`,
+    contrarian: `You say what others won't. Your willingness to challenge consensus has built a loyal following who value independent thinking. Unpopular opinions today, proven right tomorrow.`,
+  };
+
+  return templates[personalityType];
 }
 
 // Helper: Extract dominant color from profile image analysis
@@ -380,6 +597,22 @@ export async function POST(request: NextRequest) {
       personal: tweetVoice.voiceSpectrum.personal,
     } : undefined;
 
+    // Detect personality type and generate AI summary
+    const personalityType = detectPersonalityType(bioLinguistics, tweetVoice || null, geminiBrandDNA);
+    const personality = PERSONALITY_TYPES[personalityType];
+    const personalitySummary = await generatePersonalitySummary(
+      profile,
+      personalityType,
+      bioLinguistics,
+      tweetVoice || null,
+      tone
+    );
+
+    console.log('=== PERSONALITY DETECTED ===');
+    console.log('Type:', personality.name);
+    console.log('Emoji:', personality.emoji);
+    console.log('Summary:', personalitySummary.substring(0, 100) + '...');
+
     const generatedBrandDNA: GeneratedBrandDNA = {
       id: `brand-${profile.username}-${Date.now()}`,
       name: profile.name || profile.username,
@@ -392,6 +625,10 @@ export async function POST(request: NextRequest) {
       // Extra metadata
       archetype: geminiBrandDNA?.archetype || 'Creator',
       archetypeEmoji: geminiBrandDNA?.archetypeEmoji || '✨',
+      // Personality system (Brand Guardian)
+      personalityType: personality.name,
+      personalityEmoji: personality.emoji,
+      personalitySummary,
       voiceProfile: geminiBrandDNA?.voiceProfile?.primary || 'Authentic Voice',
       targetAudience: geminiBrandDNA?.targetAudience || 'Your community',
       inferredMission: geminiBrandDNA?.inferredMission || '',
@@ -418,6 +655,7 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
 
 
 

@@ -24,6 +24,10 @@ export interface BentoShareCardData {
   };
   archetype: string;
   archetypeEmoji: string;
+  // Personality system (Brand Guardian)
+  personalityType: string;
+  personalityEmoji: string;
+  personalitySummary: string;
   influenceTier: 'Nano' | 'Micro' | 'Mid' | 'Macro' | 'Mega';
   brandColors: {
     primary: string;
@@ -1047,6 +1051,9 @@ export function mapToBentoData(
     tone?: { minimal: number; playful: number; bold: number; experimental: number };
     archetype?: string;
     archetypeEmoji?: string;
+    personalityType?: string;
+    personalityEmoji?: string;
+    personalitySummary?: string;
     colors?: { primary: string; secondary: string; accent: string };
     contentPillars?: { name: string; frequency: number; avgEngagement: number }[];
     performanceInsights?: { voiceConsistency?: number };
@@ -1078,6 +1085,10 @@ export function mapToBentoData(
     },
     archetype: generatedDNA.archetype || 'Creator',
     archetypeEmoji: generatedDNA.archetypeEmoji || '✨',
+    // Personality system
+    personalityType: generatedDNA.personalityType || 'The Builder',
+    personalityEmoji: generatedDNA.personalityEmoji || '🛠️',
+    personalitySummary: generatedDNA.personalitySummary || 'You bring ideas to life with precision and purpose. Your community trusts you to deliver substance over hype. Keep building—the market rewards those who ship.',
     influenceTier,
     brandColors: generatedDNA.colors || {
       primary: '#0047FF',

@@ -79,6 +79,83 @@ const CARD_COLORS = {
   archetype: '#EAB308',
 };
 
+// =============================================================================
+// Theme Presets for Style Randomizer
+// =============================================================================
+interface ThemePreset {
+  name: string;
+  background: string;
+  accent: string;
+  cardBg: string;
+  textPrimary: string;
+  textSecondary: string;
+  borderColor: string;
+  glowColor: string;
+}
+
+const THEME_PRESETS: ThemePreset[] = [
+  {
+    name: 'Metallic',
+    background: 'linear-gradient(145deg, rgba(42, 42, 48, 0.98) 0%, rgba(58, 58, 66, 0.95) 25%, rgba(48, 48, 56, 0.97) 50%, rgba(38, 38, 46, 0.98) 75%, rgba(32, 32, 40, 0.99) 100%)',
+    accent: '#0047FF',
+    cardBg: 'rgba(255, 255, 255, 0.04)',
+    textPrimary: '#FFFFFF',
+    textSecondary: 'rgba(255,255,255,0.5)',
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+    glowColor: 'rgba(0, 71, 255, 0.3)',
+  },
+  {
+    name: 'Sunset',
+    background: 'url("/backgrounds/warm-peach.jpg")',
+    accent: '#FF6B35',
+    cardBg: 'rgba(255, 255, 255, 0.75)',
+    textPrimary: '#1a1a1a',
+    textSecondary: 'rgba(0,0,0,0.5)',
+    borderColor: 'rgba(0, 0, 0, 0.08)',
+    glowColor: 'rgba(255, 107, 53, 0.4)',
+  },
+  {
+    name: 'Electric',
+    background: 'url("/backgrounds/electric-blue.jpg")',
+    accent: '#00D4FF',
+    cardBg: 'rgba(0, 20, 40, 0.85)',
+    textPrimary: '#FFFFFF',
+    textSecondary: 'rgba(255,255,255,0.6)',
+    borderColor: 'rgba(0, 212, 255, 0.2)',
+    glowColor: 'rgba(0, 212, 255, 0.4)',
+  },
+  {
+    name: 'Lavender',
+    background: 'url("/backgrounds/soft-lavender.jpg")',
+    accent: '#A855F7',
+    cardBg: 'rgba(255, 255, 255, 0.8)',
+    textPrimary: '#1a1a1a',
+    textSecondary: 'rgba(0,0,0,0.5)',
+    borderColor: 'rgba(168, 85, 247, 0.15)',
+    glowColor: 'rgba(168, 85, 247, 0.35)',
+  },
+  {
+    name: 'Noir',
+    background: 'url("/backgrounds/dark-glow.jpg")',
+    accent: '#EF4444',
+    cardBg: 'rgba(10, 10, 15, 0.9)',
+    textPrimary: '#FFFFFF',
+    textSecondary: 'rgba(255,255,255,0.5)',
+    borderColor: 'rgba(239, 68, 68, 0.2)',
+    glowColor: 'rgba(239, 68, 68, 0.4)',
+  },
+  {
+    name: 'Silk',
+    background: 'url("/backgrounds/metallic-silk.jpg")',
+    accent: '#3B82F6',
+    cardBg: 'rgba(255, 255, 255, 0.85)',
+    textPrimary: '#0f172a',
+    textSecondary: 'rgba(15, 23, 42, 0.5)',
+    borderColor: 'rgba(59, 130, 246, 0.15)',
+    glowColor: 'rgba(59, 130, 246, 0.35)',
+  },
+];
+
 // Score label based on value
 function getScoreLabel(score: number): string {
   if (score >= 90) return 'EXCELLENT';
@@ -198,10 +275,8 @@ function VoiceConsistencyCard({ voiceConsistency, theme }: { voiceConsistency: n
 
   return (
     <motion.div
-      style={{ ...cardBaseStyle(theme), alignItems: 'center', justifyContent: 'center' }}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.2 }}
+      style={{ ...cardBaseStyle(theme), alignItems: 'center', justifyContent: 'center', perspective: '1000px' }}
+      variants={cardRevealVariants}
     >
       <span style={{
         fontFamily: "'VCR OSD Mono', monospace",
@@ -288,10 +363,8 @@ function EngagementCard({
 
   return (
     <motion.div
-      style={{ ...cardBaseStyle(theme, CARD_COLORS.engagement), alignItems: 'center' }}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.3 }}
+      style={{ ...cardBaseStyle(theme, CARD_COLORS.engagement), alignItems: 'center', perspective: '1000px' }}
+      variants={cardRevealVariants}
     >
       <span style={{
         fontFamily: "'VCR OSD Mono', monospace",
@@ -363,17 +436,15 @@ function InfluenceTierCard({
 
   return (
     <motion.div
-      style={{ ...cardBaseStyle(theme, CARD_COLORS.influence), alignItems: 'center' }}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.4 }}
+      style={{ ...cardBaseStyle(theme, CARD_COLORS.influence), alignItems: 'center', perspective: '1000px' }}
+      variants={cardRevealVariants}
     >
       <span style={{
         fontFamily: "'VCR OSD Mono', monospace",
         fontSize: '9px',
         letterSpacing: '0.15em',
         color: theme === 'dark' ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)',
-        marginBottom: '8px',
+        marginBottom: '14px',
       }}>
         INFLUENCE
       </span>
@@ -381,8 +452,8 @@ function InfluenceTierCard({
         display: 'flex',
         alignItems: 'flex-end',
         gap: '6px',
-        height: '40px',
-        marginBottom: '8px',
+        height: '36px',
+        marginBottom: '10px',
       }}>
         {tiers.map((tier, i) => (
           <motion.div
@@ -431,9 +502,9 @@ function BrandScoreCard({
   theme: string;
 }) {
   const arcs = [
-    { value: tone.formality, radius: 70, color: '#10B981' },
-    { value: tone.energy, radius: 58, color: '#22C55E' },
-    { value: tone.confidence, radius: 46, color: '#34D399' },
+    { value: tone.formality, radius: 58, color: '#10B981' },
+    { value: tone.energy, radius: 50, color: '#22C55E' },
+    { value: tone.confidence, radius: 42, color: '#34D399' },
     { value: tone.style, radius: 34, color: '#6EE7B7' },
   ];
 
@@ -445,10 +516,10 @@ function BrandScoreCard({
         justifyContent: 'center',
         position: 'relative',
         overflow: 'hidden',
+        perspective: '1000px',
+        height: '100%',
       }}
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ delay: 0.2, duration: 0.5 }}
+      variants={heroCardVariants}
     >
       {/* Glow effect */}
       <div style={{
@@ -470,17 +541,17 @@ function BrandScoreCard({
         BRAND SCORE
       </span>
 
-      <svg width="160" height="160" viewBox="0 0 160 160" style={{ zIndex: 1 }}>
+      <svg width="140" height="140" viewBox="0 0 140 140" style={{ zIndex: 1 }}>
         {/* Background arcs */}
         {arcs.map((arc, i) => (
           <circle
             key={`bg-${i}`}
-            cx="80"
-            cy="80"
+            cx="70"
+            cy="70"
             r={arc.radius}
             fill="none"
             stroke={theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}
-            strokeWidth="5"
+            strokeWidth="4"
           />
         ))}
         {/* Progress arcs */}
@@ -490,25 +561,25 @@ function BrandScoreCard({
           return (
             <motion.circle
               key={`progress-${i}`}
-              cx="80"
-              cy="80"
+              cx="70"
+              cy="70"
               r={arc.radius}
               fill="none"
               stroke={arc.color}
-              strokeWidth="5"
+              strokeWidth="4"
               strokeLinecap="round"
               strokeDasharray={circumference}
               initial={{ strokeDashoffset: circumference }}
               animate={{ strokeDashoffset: circumference - progress }}
               transition={{ duration: 1, delay: 0.4 + i * 0.15 }}
-              transform="rotate(-90 80 80)"
+              transform="rotate(-90 70 70)"
             />
           );
         })}
         {/* Score number */}
         <motion.text
-          x="80"
-          y="75"
+          x="70"
+          y="62"
           textAnchor="middle"
           dominantBaseline="middle"
           initial={{ opacity: 0, scale: 0.5 }}
@@ -516,7 +587,7 @@ function BrandScoreCard({
           transition={{ delay: 0.8, duration: 0.4 }}
           style={{
             fontFamily: "'Helvetica Neue', sans-serif",
-            fontSize: '42px',
+            fontSize: '32px',
             fontWeight: 700,
             fill: theme === 'dark' ? '#FFFFFF' : '#000000',
           }}
@@ -525,34 +596,21 @@ function BrandScoreCard({
         </motion.text>
         {/* Label */}
         <motion.text
-          x="80"
-          y="100"
+          x="70"
+          y="85"
           textAnchor="middle"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1 }}
           style={{
             fontFamily: "'VCR OSD Mono', monospace",
-            fontSize: '10px',
+            fontSize: '11px',
             letterSpacing: '0.1em',
             fill: CARD_COLORS.brandScore,
           }}
         >
           {getScoreLabel(brandScore)}
         </motion.text>
-        {/* /100 */}
-        <text
-          x="80"
-          y="118"
-          textAnchor="middle"
-          style={{
-            fontFamily: "'Helvetica Neue', sans-serif",
-            fontSize: '11px',
-            fill: theme === 'dark' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)',
-          }}
-        >
-          /100
-        </text>
       </svg>
     </motion.div>
   );
@@ -562,10 +620,8 @@ function BrandScoreCard({
 function FollowersCard({ followersCount, theme }: { followersCount: number; theme: string }) {
   return (
     <motion.div
-      style={{ ...cardBaseStyle(theme, CARD_COLORS.followers), justifyContent: 'center', alignItems: 'center' }}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.5 }}
+      style={{ ...cardBaseStyle(theme, CARD_COLORS.followers), justifyContent: 'center', alignItems: 'center', perspective: '1000px' }}
+      variants={cardRevealVariants}
     >
       <span style={{
         fontFamily: "'VCR OSD Mono', monospace",
@@ -601,14 +657,16 @@ function FollowersCard({ followersCount, theme }: { followersCount: number; them
   );
 }
 
-// Archetype Card - Emoji + CTA
-function ArchetypeCard({
-  archetype,
-  archetypeEmoji,
+// Personality Card - Extended layout with AI summary (Brand Guardian)
+function PersonalityCard({
+  personalityType,
+  personalityEmoji,
+  personalitySummary,
   theme,
 }: {
-  archetype: string;
-  archetypeEmoji: string;
+  personalityType: string;
+  personalityEmoji: string;
+  personalitySummary: string;
   theme: string;
 }) {
   return (
@@ -617,46 +675,80 @@ function ArchetypeCard({
         ...cardBaseStyle(theme, CARD_COLORS.archetype),
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'space-between',
+        gap: '16px',
+        perspective: '1000px',
+        height: '100%',
+        padding: '20px',
       }}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.6 }}
+      variants={cardRevealVariants}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+      {/* Left side: Emoji + Type */}
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minWidth: '80px',
+      }}>
         <motion.span
           initial={{ scale: 0, rotate: -180 }}
           animate={{ scale: 1, rotate: 0 }}
           transition={{ delay: 0.7, type: 'spring' }}
-          style={{ fontSize: '36px' }}
+          style={{ fontSize: '48px', marginBottom: '6px' }}
         >
-          {archetypeEmoji}
+          {personalityEmoji}
         </motion.span>
-        <div>
-          <div style={{
-            fontFamily: "'Helvetica Neue', sans-serif",
-            fontSize: '18px',
-            fontWeight: 700,
-            color: theme === 'dark' ? '#FFFFFF' : '#000000',
-          }}>
-            {archetype}
-          </div>
-          <div style={{
-            fontFamily: "'Helvetica Neue', sans-serif",
-            fontSize: '12px',
-            color: CARD_COLORS.archetype,
-          }}>
-            brandos.xyz
-          </div>
+        <div style={{
+          fontFamily: "'VCR OSD Mono', monospace",
+          fontSize: '10px',
+          fontWeight: 700,
+          letterSpacing: '0.05em',
+          color: CARD_COLORS.archetype,
+          textAlign: 'center',
+          textTransform: 'uppercase',
+        }}>
+          {personalityType}
         </div>
       </div>
-      <span style={{
-        fontFamily: "'Helvetica Neue', sans-serif",
-        fontSize: '14px',
-        color: theme === 'dark' ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)',
-      }}>
-        Get yours →
-      </span>
+
+      {/* Divider line */}
+      <div style={{
+        width: '1px',
+        height: '80%',
+        background: theme === 'dark' ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.1)',
+      }} />
+
+      {/* Right side: AI Summary */}
+      <motion.div
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ delay: 0.9, duration: 0.5 }}
+        style={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+        }}
+      >
+        <span style={{
+          fontFamily: "'VCR OSD Mono', monospace",
+          fontSize: '8px',
+          letterSpacing: '0.15em',
+          color: theme === 'dark' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)',
+          marginBottom: '8px',
+        }}>
+          BRAND GUARDIAN ANALYSIS
+        </span>
+        <p style={{
+          fontFamily: "'Helvetica Neue', sans-serif",
+          fontSize: '13px',
+          lineHeight: 1.5,
+          color: theme === 'dark' ? 'rgba(255,255,255,0.85)' : 'rgba(0,0,0,0.85)',
+          margin: 0,
+        }}>
+          {personalitySummary}
+        </p>
+      </motion.div>
     </motion.div>
   );
 }
@@ -679,6 +771,19 @@ export default function BentoRevealGrid({
   const [copying, setCopying] = useState(false);
   const [copied, setCopied] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [themeIndex, setThemeIndex] = useState(0);
+  const [isShuffling, setIsShuffling] = useState(false);
+
+  const currentTheme = THEME_PRESETS[themeIndex];
+
+  // Shuffle to next theme with smooth transition
+  const handleShuffleTheme = () => {
+    setIsShuffling(true);
+    setTimeout(() => {
+      setThemeIndex((prev) => (prev + 1) % THEME_PRESETS.length);
+      setTimeout(() => setIsShuffling(false), 300);
+    }, 150);
+  };
 
   // Generate and copy image to clipboard
   const handleCopyToX = async () => {
@@ -722,9 +827,10 @@ export default function BentoRevealGrid({
 
   return (
     <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: isShuffling ? 0.7 : 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
       style={{
         display: 'flex',
         flexDirection: 'column',
@@ -735,18 +841,32 @@ export default function BentoRevealGrid({
         padding: '32px',
         position: 'relative',
         zIndex: 10,
-        // Add background container for better readability
-        background: theme === 'dark'
-          ? 'linear-gradient(135deg, rgba(10, 10, 18, 0.95) 0%, rgba(15, 15, 24, 0.92) 50%, rgba(10, 10, 18, 0.95) 100%)'
-          : 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(250, 250, 252, 0.92) 50%, rgba(255, 255, 255, 0.95) 100%)',
-        backdropFilter: 'blur(20px)',
+        // Dynamic theme background
+        background: currentTheme.background,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backdropFilter: 'blur(30px)',
         borderRadius: '24px',
-        border: `1px solid ${theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'}`,
-        boxShadow: theme === 'dark'
-          ? '0 20px 60px rgba(0, 0, 0, 0.5), 0 0 80px rgba(0, 0, 0, 0.3)'
-          : '0 20px 60px rgba(0, 0, 0, 0.1)',
+        border: `1px solid ${currentTheme.borderColor}`,
+        boxShadow: `0 25px 80px rgba(0, 0, 0, 0.4), 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 40px ${currentTheme.glowColor}`,
+        overflow: 'hidden',
+        transition: 'background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease',
       }}
     >
+      {/* Brushed metal highlight streak */}
+      <div
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: '10%',
+          right: '10%',
+          height: '1px',
+          background: theme === 'dark'
+            ? 'linear-gradient(90deg, transparent, rgba(255,255,255,0.15) 30%, rgba(255,255,255,0.25) 50%, rgba(255,255,255,0.15) 70%, transparent)'
+            : 'linear-gradient(90deg, transparent, rgba(255,255,255,0.7) 30%, rgba(255,255,255,0.9) 50%, rgba(255,255,255,0.7) 70%, transparent)',
+          borderRadius: '24px 24px 0 0',
+        }}
+      />
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
@@ -790,25 +910,48 @@ export default function BentoRevealGrid({
             </div>
           </div>
         </div>
-        {/* BrandOS Logo */}
+        {/* BrandOS Logo - Matching landing page style */}
         <div style={{
-          fontFamily: "'Helvetica Neue', sans-serif",
-          fontSize: '20px',
-          fontWeight: 700,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '2px',
         }}>
-          <span style={{ color: theme === 'dark' ? '#FFFFFF' : '#000000', fontStyle: 'italic' }}>Brand</span>
-          <span style={{ color: data.brandColors.primary }}>OS</span>
+          <span style={{
+            fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
+            fontSize: '22px',
+            fontWeight: 800,
+            fontStyle: 'italic',
+            letterSpacing: '-1px',
+            color: theme === 'dark' ? '#FFFFFF' : '#000000',
+          }}>
+            Brand
+          </span>
+          <span style={{
+            fontFamily: "'Press Start 2P', 'VCR OSD Mono', monospace",
+            fontSize: '18px',
+            color: '#0047FF',
+            textShadow: '0 0 15px rgba(0, 71, 255, 0.4)',
+          }}>
+            OS
+          </span>
         </div>
       </motion.div>
 
-      {/* Bento Grid */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(4, 1fr) 1.4fr',
-        gridTemplateRows: '160px 160px',
-        gap: '12px',
-        width: '100%',
-      }}>
+      {/* Bento Grid - Staggered reveal with 3D perspective */}
+      <motion.div
+        variants={gridContainerVariants}
+        initial="hidden"
+        animate="visible"
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(4, 1fr) 1.4fr',
+          gridTemplateRows: '160px 160px',
+          gap: '12px',
+          width: '100%',
+          perspective: '1200px',
+          transformStyle: 'preserve-3d',
+        }}
+      >
         {/* Row 1: 4 small cards + Brand Score (spans 2 rows) */}
         <ToneProfileCard tone={data.tone} theme={theme} />
         <VoiceConsistencyCard voiceConsistency={data.voiceConsistency} theme={theme} />
@@ -818,20 +961,21 @@ export default function BentoRevealGrid({
           followersCount={data.followersCount}
           theme={theme}
         />
-        <div style={{ gridRow: '1 / 3' }}>
+        <motion.div style={{ gridRow: '1 / 3' }} variants={heroCardVariants}>
           <BrandScoreCard brandScore={data.brandScore} tone={data.tone} theme={theme} />
-        </div>
+        </motion.div>
 
-        {/* Row 2: Followers + Archetype */}
+        {/* Row 2: Followers + Personality Card (spans cols 2-4 to align with Influence) */}
         <FollowersCard followersCount={data.followersCount} theme={theme} />
-        <div style={{ gridColumn: '2 / 5' }}>
-          <ArchetypeCard
-            archetype={data.archetype}
-            archetypeEmoji={data.archetypeEmoji}
+        <motion.div style={{ gridColumn: '2 / 5' }} variants={cardRevealVariants}>
+          <PersonalityCard
+            personalityType={data.personalityType}
+            personalityEmoji={data.personalityEmoji}
+            personalitySummary={data.personalitySummary}
             theme={theme}
           />
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
       {/* Action Buttons */}
       <motion.div
@@ -909,6 +1053,31 @@ export default function BentoRevealGrid({
             }}
           >
             DOWNLOAD
+          </motion.button>
+
+          {/* Theme Shuffle Button */}
+          <motion.button
+            whileHover={{ scale: 1.05, rotate: 15 }}
+            whileTap={{ scale: 0.95, rotate: -15 }}
+            onClick={handleShuffleTheme}
+            style={{
+              fontFamily: "'VCR OSD Mono', monospace",
+              fontSize: '12px',
+              letterSpacing: '0.1em',
+              color: currentTheme.textPrimary,
+              background: currentTheme.cardBg,
+              border: `1px solid ${currentTheme.accent}`,
+              padding: '14px 24px',
+              borderRadius: '12px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              boxShadow: `0 0 15px ${currentTheme.glowColor}`,
+              transition: 'all 0.3s ease',
+            }}
+          >
+            🎲 {currentTheme.name.toUpperCase()}
           </motion.button>
         </div>
 
