@@ -11,26 +11,28 @@ interface CameraTarget {
 }
 
 // Camera positions for each phase (front-facing view, camera on right looking left at DNA)
+// Positive lookAt x shifts DNA to the left on screen to make room for journey card
+// Progressive offset compensates for DNA tilt as we move down
 const PHASE_CAMERA_POSITIONS: Record<string, CameraTarget> = {
   // Phase 1: DEFINE - Top section of DNA
   '1': {
-    position: new THREE.Vector3(25, 7, 0),
-    lookAt: new THREE.Vector3(0, 7, 0),
+    position: new THREE.Vector3(25, 7, 8),
+    lookAt: new THREE.Vector3(10, 7, 0),
   },
   // Phase 2: CHECK - Upper-middle section
   '2': {
-    position: new THREE.Vector3(25, 2.5, 0),
-    lookAt: new THREE.Vector3(0, 2.5, 0),
+    position: new THREE.Vector3(25, 2.5, 8),
+    lookAt: new THREE.Vector3(12, 2.5, 0),
   },
   // Phase 3: GENERATE - Lower-middle section
   '3': {
-    position: new THREE.Vector3(25, -2.5, 0),
-    lookAt: new THREE.Vector3(0, -2.5, 0),
+    position: new THREE.Vector3(25, -2.5, 8),
+    lookAt: new THREE.Vector3(14, -2.5, 0),
   },
   // Phase 4: SCALE - Bottom section
   '4': {
-    position: new THREE.Vector3(25, -7, 0),
-    lookAt: new THREE.Vector3(0, -7, 0),
+    position: new THREE.Vector3(25, -7, 8),
+    lookAt: new THREE.Vector3(16, -7, 0),
   },
   // Reveal - Full DNA view (zoomed out)
   'reveal': {

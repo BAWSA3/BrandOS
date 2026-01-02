@@ -38,10 +38,12 @@ export default function DNAJourneyScene({
         height: '100%',
         position: 'absolute',
         inset: 0,
-        zIndex: 0,
+        // Higher z-index during journey to capture pointer events
+        zIndex: flowState === 'journey' ? 5 : 0,
         // White bloom glow effect
         filter: 'drop-shadow(0 0 25px rgba(255, 255, 255, 0.5))',
-        pointerEvents: 'none',
+        // Enable pointer events during journey for hover interactions
+        pointerEvents: flowState === 'journey' ? 'auto' : 'none',
       }}
     >
       <Canvas
@@ -83,7 +85,7 @@ export default function DNAJourneyScene({
           onPhaseChange={onPhaseChange}
           rotationMultiplier={rotationMultiplier}
           highlightIntensity={flowState === 'journey' ? 1.2 : 1}
-          interactive={flowState === 'signup'}
+          interactive={flowState === 'signup' || flowState === 'journey'}
           activePhase={flowState === 'journey' ? currentPhase - 1 : undefined}
         />
 

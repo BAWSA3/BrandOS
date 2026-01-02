@@ -200,22 +200,22 @@ const phaseConfig: PhaseConfigItem[] = [
     explanation: 'Identifying the patterns, voice, and signals in your profile that make your content recognizably yours.',
     items: [
       {
-        label: 'Display name alignment',
-        description: 'Checking if your name reflects your brand identity',
+        label: 'Name Sync',
+        description: 'Locking onto identity... confirming brand-name alignment.',
         dataKey: 'name'
       },
       {
-        label: 'Bio clarity & messaging',
-        description: 'Analyzing your bio for clear value proposition',
+        label: 'Bio Extract',
+        description: 'Parsing bio data... isolating core value proposition.',
         dataKey: 'description'
       },
       {
-        label: 'Value proposition',
-        description: 'Identifying what makes you unique and valuable'
+        label: 'Edge Finder',
+        description: 'Scanning for differentiators... what makes you, you.'
       },
       {
-        label: 'Target audience signals',
-        description: 'Detecting who your content speaks to'
+        label: 'Audience Ping',
+        description: 'Triangulating audience... mapping who\'s listening.'
       },
     ],
   },
@@ -815,7 +815,7 @@ function JourneyPhaseCard({
                   <span
                     style={{
                       fontFamily: "'VCR OSD Mono', monospace",
-                      fontSize: '12px',
+                      fontSize: '14px',
                       letterSpacing: '0.05em',
                       color: isItemComplete
                         ? '#10B981'
@@ -839,7 +839,7 @@ function JourneyPhaseCard({
                         transition={{ duration: 0.2 }}
                         style={{
                           fontFamily: "'Helvetica Neue', sans-serif",
-                          fontSize: '11px',
+                          fontSize: '13px',
                           color: theme === 'dark' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)',
                           margin: '4px 0 0 0',
                           lineHeight: 1.4,
@@ -954,12 +954,12 @@ function JourneyProgressIndicator({
                 padding: '6px 12px',
                 borderRadius: '20px',
                 background: isActive
-                  ? 'rgba(212, 165, 116, 0.15)'
+                  ? 'rgba(0, 71, 255, 0.15)'
                   : isCompleted
                     ? 'rgba(16, 185, 129, 0.15)'
                     : 'transparent',
                 border: isActive
-                  ? '1px solid rgba(212, 165, 116, 0.3)'
+                  ? '1px solid rgba(0, 71, 255, 0.3)'
                   : isCompleted
                     ? '1px solid rgba(16, 185, 129, 0.3)'
                     : '1px solid transparent',
@@ -971,7 +971,7 @@ function JourneyProgressIndicator({
                   fontSize: '10px',
                   fontWeight: 500,
                   color: isActive
-                    ? '#D4A574'
+                    ? '#0047FF'
                     : isCompleted
                       ? '#10B981'
                       : theme === 'dark' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)',
@@ -982,7 +982,7 @@ function JourneyProgressIndicator({
                   justifyContent: 'center',
                   borderRadius: '50%',
                   background: isActive
-                    ? 'rgba(212, 165, 116, 0.2)'
+                    ? 'rgba(0, 71, 255, 0.2)'
                     : isCompleted
                       ? 'rgba(16, 185, 129, 0.2)'
                       : theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
@@ -1265,10 +1265,11 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
         style={{
           position: 'absolute',
           inset: 0,
-          zIndex: 0,
+          zIndex: flowState === 'journey' ? 5 : 0,
           opacity: flowState === 'journey' ? 1 : 0.6,
           transition: 'opacity 0.5s ease',
-          pointerEvents: 'none',
+          // Enable pointer events during journey for DNA hover interactions
+          pointerEvents: flowState === 'journey' ? 'auto' : 'none',
         }}
       >
         <DNAJourneyScene

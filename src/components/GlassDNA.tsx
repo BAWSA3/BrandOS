@@ -56,6 +56,7 @@ export default function GlassDNA({
 }: GlassDNAProps) {
   const groupRef = useRef<THREE.Group>(null);
   const [hoveredPhase, setHoveredPhase] = useState<number | null>(null);
+  const [hoveredRungId, setHoveredRungId] = useState<number | null>(null);
 
   // Create curves
   const curve1 = useMemo(() => new DNACurve(0), []);
@@ -224,22 +225,24 @@ export default function GlassDNA({
     groupRef.current.rotation.y += delta * 0.15 * rotationMultiplier;
   });
 
-  // Get phase based on t value
+  // Get phase based on t value (top to bottom: Define, Check, Generate, Scale)
   const getPhase = (t: number): number => {
-    if (t < 0.25) return 0;
-    if (t < 0.5) return 1;
-    if (t < 0.75) return 2;
-    return 3;
+    if (t >= 0.75) return 0;  // Top: Define (amber)
+    if (t >= 0.5) return 1;   // Upper-middle: Check (green)
+    if (t >= 0.25) return 2;  // Lower-middle: Generate (purple)
+    return 3;                  // Bottom: Scale (orange)
   };
 
-  const handlePointerOver = (phase: number) => {
+  const handlePointerOver = (phase: number, rungId?: number) => {
     setHoveredPhase(phase);
+    setHoveredRungId(rungId ?? null);
     if (onPhaseChange) onPhaseChange(phase);
     document.body.style.cursor = 'pointer';
   };
 
   const handlePointerOut = () => {
     setHoveredPhase(null);
+    setHoveredRungId(null);
     if (onPhaseChange) onPhaseChange(null);
     document.body.style.cursor = 'auto';
   };
@@ -297,12 +300,31 @@ export default function GlassDNA({
       )}
 
       {/* DNA Strand 1 - White/Pearl ribbon */}
-      <mesh geometry={geometry1} castShadow receiveShadow>
+      {/* Strands block pointer events to prevent triggering ladder glow when hovering through them */}
+      <mesh
+        geometry={geometry1}
+        castShadow
+        receiveShadow
+        onPointerOver={(e) => {
+          e.stopPropagation();
+          handlePointerOut(); // Clear any hover state
+        }}
+        onPointerOut={(e) => e.stopPropagation()}
+      >
         <primitive object={strandMaterial} attach="material" />
       </mesh>
 
       {/* DNA Strand 2 - White/Pearl ribbon */}
-      <mesh geometry={geometry2} castShadow receiveShadow>
+      <mesh
+        geometry={geometry2}
+        castShadow
+        receiveShadow
+        onPointerOver={(e) => {
+          e.stopPropagation();
+          handlePointerOut(); // Clear any hover state
+        }}
+        onPointerOut={(e) => e.stopPropagation()}
+      >
         <primitive object={strandMaterial} attach="material" />
       </mesh>
 
@@ -316,34 +338,46 @@ export default function GlassDNA({
           : hoveredPhase === phase;
         const currentIntensity = isHighlighted ? highlightIntensity : 1;
 
+        // Only allow interaction with rungs in the current active phase
+        const canInteract = interactive && (activePhase === undefined || activePhase === null || activePhase === phase);
+
+        // Check if ANY rung in this phase is being hovered - all rungs in phase glow together
+        const isPhaseHovered = hoveredPhase === phase && canInteract;
+
+        // DRAMATIC glow intensity - all rungs in hovered phase glow together
+        const hoverGlowIntensity = isPhaseHovered
+          ? 3.0  // Bright glow when any rung in this phase is hovered
+          : (isHighlighted ? 0.8 * currentIntensity : 0.15);
+
         const quaternion = new THREE.Quaternion();
         const up = new THREE.Vector3(0, 1, 0);
         quaternion.setFromUnitVectors(up, rung.direction);
 
         return (
           <group key={rung.id}>
+
             {/* Main rung cylinder */}
             <mesh
               position={rung.position}
               quaternion={quaternion}
               castShadow
               receiveShadow
-              onPointerOver={interactive ? (e) => {
+              onPointerOver={canInteract ? (e) => {
                 e.stopPropagation();
-                handlePointerOver(phase);
+                handlePointerOver(phase, rung.id);
               } : undefined}
-              onPointerOut={interactive ? handlePointerOut : undefined}
+              onPointerOut={canInteract ? handlePointerOut : undefined}
             >
               <cylinderGeometry args={[0.12, 0.12, rung.distance, 16]} />
               {/* High-shine metallic rungs */}
               <meshPhysicalMaterial
-                color={isHighlighted ? color : 0x555560}
+                color={isHighlighted || isPhaseHovered ? color : 0x555560}
                 metalness={0.98}
-                roughness={0.12}
-                clearcoat={0.6}
-                clearcoatRoughness={0.15}
-                emissive={isHighlighted ? color : 0x282830}
-                emissiveIntensity={isHighlighted ? 0.5 * currentIntensity : 0.15}
+                roughness={isPhaseHovered ? 0.02 : 0.12}
+                clearcoat={isPhaseHovered ? 1.0 : 0.6}
+                clearcoatRoughness={isPhaseHovered ? 0.02 : 0.15}
+                emissive={isHighlighted || isPhaseHovered ? color : 0x282830}
+                emissiveIntensity={hoverGlowIntensity}
                 side={THREE.DoubleSide}
               />
             </mesh>
@@ -352,21 +386,21 @@ export default function GlassDNA({
             <mesh
               position={rung.p1}
               castShadow
-              onPointerOver={interactive ? (e) => {
+              onPointerOver={canInteract ? (e) => {
                 e.stopPropagation();
-                handlePointerOver(phase);
+                handlePointerOver(phase, rung.id);
               } : undefined}
-              onPointerOut={interactive ? handlePointerOut : undefined}
+              onPointerOut={canInteract ? handlePointerOut : undefined}
             >
               <sphereGeometry args={[0.2, 16, 16]} />
               <meshPhysicalMaterial
-                color={isHighlighted ? color : 0x606570}
+                color={isHighlighted || isPhaseHovered ? color : 0x606570}
                 metalness={0.98}
-                roughness={0.1}
-                clearcoat={0.7}
-                clearcoatRoughness={0.1}
-                emissive={isHighlighted ? color : 0x252530}
-                emissiveIntensity={isHighlighted ? 0.5 * currentIntensity : 0.12}
+                roughness={isPhaseHovered ? 0.02 : 0.1}
+                clearcoat={isPhaseHovered ? 1.0 : 0.7}
+                clearcoatRoughness={isPhaseHovered ? 0.02 : 0.1}
+                emissive={isHighlighted || isPhaseHovered ? color : 0x252530}
+                emissiveIntensity={hoverGlowIntensity}
               />
             </mesh>
 
@@ -374,21 +408,21 @@ export default function GlassDNA({
             <mesh
               position={rung.p2}
               castShadow
-              onPointerOver={interactive ? (e) => {
+              onPointerOver={canInteract ? (e) => {
                 e.stopPropagation();
-                handlePointerOver(phase);
+                handlePointerOver(phase, rung.id);
               } : undefined}
-              onPointerOut={interactive ? handlePointerOut : undefined}
+              onPointerOut={canInteract ? handlePointerOut : undefined}
             >
               <sphereGeometry args={[0.2, 16, 16]} />
               <meshPhysicalMaterial
-                color={isHighlighted ? color : 0x606570}
+                color={isHighlighted || isPhaseHovered ? color : 0x606570}
                 metalness={0.98}
-                roughness={0.1}
-                clearcoat={0.7}
-                clearcoatRoughness={0.1}
-                emissive={isHighlighted ? color : 0x252530}
-                emissiveIntensity={isHighlighted ? 0.5 * currentIntensity : 0.12}
+                roughness={isPhaseHovered ? 0.02 : 0.1}
+                clearcoat={isPhaseHovered ? 1.0 : 0.7}
+                clearcoatRoughness={isPhaseHovered ? 0.02 : 0.1}
+                emissive={isHighlighted || isPhaseHovered ? color : 0x252530}
+                emissiveIntensity={hoverGlowIntensity}
               />
             </mesh>
           </group>
