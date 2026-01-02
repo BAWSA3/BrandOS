@@ -6,6 +6,7 @@ import dynamic from 'next/dynamic';
 import BrandDNAPreview, { GeneratedBrandDNA } from './BrandDNAPreview';
 import ShareableScoreCard, { ShareCardData } from './ShareableScoreCard';
 import ShareableBentoCard, { mapToBentoData } from './ShareableBentoCard';
+import BentoRevealGrid from './BentoRevealGrid';
 
 // Dynamically import DNA scene to avoid SSR issues with Three.js
 const DNAJourneyScene = dynamic(() => import('./DNAJourneyScene'), {
@@ -1396,10 +1397,12 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
 
             {/* Logo - Animated Text Reveal */}
             <motion.div
+              className="hero-parallax-title"
               style={{
                 display: 'flex',
                 alignItems: 'center',
                 marginBottom: '0.5rem',
+                willChange: 'transform',
               }}
             >
               <AnimatedText
@@ -1431,6 +1434,7 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
 
             {/* Sub-head - Design #2 Style */}
             <motion.p
+              className="hero-parallax-subtitle"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.15 }}
@@ -1445,6 +1449,7 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                 marginBottom: '4rem',
                 textTransform: 'uppercase',
                 textShadow: '0 2px 8px rgba(0,0,0,0.8), 0 0 20px rgba(0,0,0,0.5)',
+                willChange: 'transform',
               }}
             >
               AN AI-POWERED OS THAT BUILDS YOUR BRAND'S DNA.
@@ -1452,6 +1457,7 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
 
             {/* Input Form */}
             <motion.form
+              className="hero-parallax-form"
               onSubmit={handleSubmit}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -1463,6 +1469,7 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                 gap: '20px',
                 width: '100%',
                 maxWidth: '500px',
+                willChange: 'transform',
               }}
             >
               {/* Glassmorphic Input - More visible */}
@@ -1625,10 +1632,47 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
           </motion.div>
         )}
 
-        {/* REVEAL STATE */}
-        {flowState === 'reveal' && brandScore && profile && (
+        {/* REVEAL STATE - Bento Grid UI */}
+        {flowState === 'reveal' && brandScore && profile && generatedBrandDNA && (
+          <BentoRevealGrid
+            data={mapToBentoData(
+              {
+                username: profile.username,
+                name: profile.name,
+                profile_image_url: profile.profile_image_url,
+                public_metrics: {
+                  followers_count: profile.public_metrics?.followers_count || 0,
+                  following_count: profile.public_metrics?.following_count || 0,
+                  tweet_count: profile.public_metrics?.tweet_count || 0,
+                },
+              },
+              brandScore.overallScore,
+              {
+                tone: generatedBrandDNA.tone,
+                archetype: generatedBrandDNA.archetype,
+                archetypeEmoji: generatedBrandDNA.archetypeEmoji,
+                colors: generatedBrandDNA.colors,
+                contentPillars: generatedBrandDNA.contentPillars,
+                performanceInsights: generatedBrandDNA.performanceInsights,
+              }
+            )}
+            theme={theme as 'light' | 'dark'}
+            onClaim={() => setFlowState('signup')}
+            onAnalyzeAnother={() => {
+              setFlowState('input');
+              setUsername('');
+              setProfile(null);
+              setBrandScore(null);
+              setGeneratedBrandDNA(null);
+              setShowConfetti(false);
+            }}
+          />
+        )}
+
+        {/* REVEAL STATE - Fallback for no DNA */}
+        {flowState === 'reveal' && brandScore && profile && !generatedBrandDNA && (
           <motion.div
-            key="reveal"
+            key="reveal-fallback"
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0 }}
@@ -1644,207 +1688,26 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
               zIndex: 10,
             }}
           >
-            {/* Profile header */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '16px',
-              }}
-            >
-              <img
-                src={profile.profile_image_url.replace('_normal', '_200x200')}
-                alt={profile.name}
-                style={{
-                  width: '56px',
-                  height: '56px',
-                  borderRadius: '50%',
-                  border: `2px solid ${theme === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)'}`,
-                }}
-              />
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span
-                    style={{
-                      fontFamily: "'Helvetica Neue', sans-serif",
-                      fontSize: '20px',
-                      fontWeight: 600,
-                      color: theme === 'dark' ? '#FFFFFF' : '#000000',
-                    }}
-                  >
-                    {profile.name}
-                  </span>
-                  {profile.verified && (
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="#D4A574">
-                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-                    </svg>
-                  )}
-                </div>
-                <span
-                  style={{
-                    fontFamily: "'Helvetica Neue', sans-serif",
-                    fontSize: '14px',
-                    color: theme === 'dark' ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)',
-                  }}
-                >
-                  @{profile.username}
-                </span>
-              </div>
-            </motion.div>
-
-            {/* Score gauge */}
             <ScoreGauge score={brandScore.overallScore} isVisible={true} theme={theme} />
-
-            {/* Summary */}
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 2 }}
-              style={{
-                fontFamily: "'Helvetica Neue', sans-serif",
-                fontSize: '16px',
-                lineHeight: 1.6,
-                color: theme === 'dark' ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)',
-                textAlign: 'center',
-                margin: 0,
-              }}
-            >
-              {brandScore.summary}
-            </motion.p>
-
-            {/* Brand DNA Preview - Auto-generated from profile */}
-            {generatedBrandDNA && (
-              <BrandDNAPreview
-                generatedDNA={generatedBrandDNA}
-                username={profile.username}
-                onClaim={() => setFlowState('signup')}
-                theme={theme}
-              />
-            )}
-
-            {/* Share Your Score Card */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 2.2 }}
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: '12px',
-                marginTop: '24px',
-                padding: '24px',
-                background: theme === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)',
-                borderRadius: '20px',
-                border: `1px solid ${theme === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'}`,
-                width: '100%',
-              }}
-            >
-              <span
-                style={{
-                  fontFamily: "'VCR OSD Mono', monospace",
-                  fontSize: '11px',
-                  letterSpacing: '0.15em',
-                  color: theme === 'dark' ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)',
-                }}
-              >
-                SHARE YOUR BRAND DNA
-              </span>
-              {/* Bento Card - Primary sharing option */}
-              {generatedBrandDNA && (
-                <ShareableBentoCard
-                  data={mapToBentoData(
-                    {
-                      username: profile.username,
-                      name: profile.name,
-                      profile_image_url: profile.profile_image_url,
-                      public_metrics: {
-                        followers_count: profile.public_metrics?.followers_count || 0,
-                        following_count: profile.public_metrics?.following_count || 0,
-                        tweet_count: profile.public_metrics?.tweet_count || 0,
-                      },
-                    },
-                    brandScore.overallScore,
-                    {
-                      tone: generatedBrandDNA.tone,
-                      archetype: generatedBrandDNA.archetype,
-                      archetypeEmoji: generatedBrandDNA.archetypeEmoji,
-                      colors: generatedBrandDNA.colors,
-                      contentPillars: generatedBrandDNA.contentPillars,
-                      performanceInsights: generatedBrandDNA.performanceInsights,
-                    }
-                  )}
-                  theme={theme}
-                />
-              )}
-              {/* Score Card - Fallback if no DNA */}
-              {!generatedBrandDNA && (
-                <ShareableScoreCard
-                  data={{
-                    score: brandScore.overallScore,
-                    username: profile.username,
-                    displayName: profile.name,
-                    profileImageUrl: profile.profile_image_url,
-                    topStrength: brandScore.topStrengths[0] || '',
-                    summary: brandScore.summary,
-                    archetype: generatedBrandDNA ? {
-                      primary: generatedBrandDNA.archetype,
-                      emoji: generatedBrandDNA.archetypeEmoji,
-                      tagline: generatedBrandDNA.voiceProfile,
-                    } : undefined,
-                    keywords: generatedBrandDNA?.keywords,
-                    brandColors: generatedBrandDNA ? {
-                      primary: generatedBrandDNA.colors.primary,
-                      secondary: generatedBrandDNA.colors.secondary,
-                    } : undefined,
-                    voiceProfile: generatedBrandDNA?.voiceProfile,
-                  } as ShareCardData}
-                  theme={theme}
-                />
-              )}
-            </motion.div>
-
-            {/* CTA to signup - Only show if no Brand DNA preview */}
-            {!generatedBrandDNA && (
-              <motion.button
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 2.5 }}
-                onClick={() => setFlowState('signup')}
-                whileHover={{ scale: 1.02, boxShadow: '0 0 40px rgba(212, 165, 116, 0.5)' }}
-                whileTap={{ scale: 0.98 }}
-                style={{
-                  fontFamily: "'VCR OSD Mono', monospace",
-                  fontSize: '14px',
-                  letterSpacing: '0.15em',
-                  color: '#FFFFFF',
-                  background: '#D4A574',
-                  border: 'none',
-                  padding: '20px 40px',
-                  borderRadius: '16px',
-                  cursor: 'pointer',
-                  boxShadow: '0 0 30px rgba(212, 165, 116, 0.3)',
-                  marginTop: '16px',
-                }}
-              >
-                IMPROVE MY BRAND SCORE
-              </motion.button>
-            )}
-
-            {/* Analyze another */}
+            <ShareableScoreCard
+              data={{
+                score: brandScore.overallScore,
+                username: profile.username,
+                displayName: profile.name,
+                profileImageUrl: profile.profile_image_url,
+                topStrength: brandScore.topStrengths[0] || '',
+                summary: brandScore.summary,
+              } as ShareCardData}
+              theme={theme}
+            />
             <motion.button
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 2.8 }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => {
                 setFlowState('input');
                 setUsername('');
                 setProfile(null);
                 setBrandScore(null);
-                setGeneratedBrandDNA(null);
                 setShowConfetti(false);
               }}
               style={{
