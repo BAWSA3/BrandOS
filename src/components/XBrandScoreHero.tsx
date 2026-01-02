@@ -1558,7 +1558,7 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                   transition: 'background 0.3s ease',
                 }}
               >
-                {isValidating ? 'CHECKING PROFILE...' : "FIND YOUR BRAND DNA"}
+                {isValidating ? 'CHECKING...' : "ENTER"}
               </motion.button>
 
               {error && (
@@ -1592,7 +1592,7 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                 textShadow: '0 2px 8px rgba(0,0,0,0.8), 0 0 15px rgba(0,0,0,0.5)',
               }}
             >
-              ENTER ANY PUBLIC X PROFILE TO GET STARTED
+              SEARCH ANY PUBLIC X PROFILE TO GET STARTED
             </motion.p>
           </motion.div>
         )}
