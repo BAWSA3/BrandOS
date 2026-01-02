@@ -1,0 +1,10 @@
+# Ignore separate projects
+relique/
+
+# IDE and tool configs
+.claude/
+.cursor/
+.playwright-mcp/
+
+# CreatorOS docs (not needed for build)
+creatorOS/
