@@ -1262,7 +1262,10 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
               // Success - show results after brief pause
               setTimeout(() => {
                 // Flatten the profile to match XProfileData interface
-                const apiProfile = apiResultRef.current!.profile;
+                // API returns profile with public_metrics nested, we flatten it
+                const apiProfile = apiResultRef.current!.profile as XProfileData & {
+                  public_metrics?: { followers_count?: number; following_count?: number; tweet_count?: number };
+                };
                 const flatProfile: XProfileData = {
                   name: apiProfile.name,
                   username: apiProfile.username,

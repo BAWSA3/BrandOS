@@ -2,6 +2,7 @@
 
 import { motion, Variants } from 'framer-motion';
 import { useState } from 'react';
+import { AnimateNumber } from 'motion-plus/react';
 import { BentoShareCardData, generateBentoShareImage } from './ShareableBentoCard';
 
 // =============================================================================
@@ -223,9 +224,12 @@ function HeroScoreCard({
             lineHeight: 1,
             fontFamily: "'Helvetica Neue', sans-serif",
             textShadow: `0 0 40px ${COLORS.accentGlow}, 0 0 80px ${COLORS.accentGlow}`,
+            display: 'flex',
+            alignItems: 'baseline',
           }}
         >
-          +{brandScore}
+          <span>+</span>
+          <AnimateNumber>{brandScore}</AnimateNumber>
         </motion.div>
       </div>
     </motion.div>
@@ -450,9 +454,19 @@ function FollowersCard({ count }: { count: number }) {
           letterSpacing: '-2px',
           marginBottom: '5px',
           fontFamily: "'Helvetica Neue', sans-serif",
+          display: 'flex',
+          alignItems: 'baseline',
         }}
       >
-        +{formatFollowers(count)}
+        <span>+</span>
+        <AnimateNumber
+          format={{
+            notation: 'compact',
+            maximumFractionDigits: 1,
+          }}
+        >
+          {count}
+        </AnimateNumber>
       </motion.div>
       <div
         style={{
