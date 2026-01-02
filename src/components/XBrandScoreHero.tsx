@@ -241,6 +241,14 @@ interface PhaseConfigItem {
   items: PhaseItem[];
 }
 
+// Phase colors matching DNA ladder rungs in GlassDNA.tsx
+const PHASE_COLORS = [
+  '#E8A838', // Phase 1 (Define) - Golden Amber
+  '#00ff88', // Phase 2 (Check) - Green
+  '#9d4edd', // Phase 3 (Generate) - Purple
+  '#ff6b35', // Phase 4 (Scale) - Orange
+];
+
 const phaseConfig: PhaseConfigItem[] = [
   {
     id: 'define',
@@ -630,6 +638,9 @@ function JourneyPhaseCard({
   profile: XProfileData | null;
   profileImage?: string;
 }) {
+  // Get phase-specific color matching DNA ladder rungs
+  const phaseColor = PHASE_COLORS[phase.number - 1] || PHASE_COLORS[0];
+
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.9, y: 30 }}
@@ -663,14 +674,14 @@ function JourneyPhaseCard({
               width: '64px',
               height: '64px',
               borderRadius: '50%',
-              border: `3px solid ${theme === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)'}`,
+              border: '3px solid rgba(255,255,255,0.4)',
             }}
           />
-          {/* Scanning animation ring */}
+          {/* Scanning animation ring - uses phase color */}
           <motion.div
             animate={{
               rotate: 360,
-              borderColor: ['rgba(212, 165, 116, 0.6)', 'rgba(212, 165, 116, 0.2)', 'rgba(212, 165, 116, 0.6)']
+              borderColor: [`${phaseColor}99`, `${phaseColor}33`, `${phaseColor}99`]
             }}
             transition={{
               rotate: { duration: 2, repeat: Infinity, ease: 'linear' },
@@ -680,28 +691,28 @@ function JourneyPhaseCard({
               position: 'absolute',
               inset: '-4px',
               borderRadius: '50%',
-              border: '2px dashed rgba(212, 165, 116, 0.4)',
+              border: `2px dashed ${phaseColor}66`,
             }}
           />
         </motion.div>
       )}
 
-      {/* Phase badge */}
+      {/* Phase badge - uses phase-specific color */}
       <motion.div
         animate={{
           scale: isActive ? [1, 1.05, 1] : 1,
-          boxShadow: isActive ? '0 0 30px rgba(212, 165, 116, 0.3)' : 'none',
+          boxShadow: isActive ? `0 0 30px ${phaseColor}4D` : 'none',
         }}
         transition={{ duration: 0.5, repeat: isActive ? Infinity : 0, repeatDelay: 1 }}
         style={{
           fontFamily: "'VCR OSD Mono', monospace",
           fontSize: '12px',
           letterSpacing: '0.2em',
-          color: isCompleted ? '#10B981' : '#D4A574',
-          background: isCompleted ? 'rgba(16, 185, 129, 0.15)' : 'rgba(212, 165, 116, 0.15)',
+          color: phaseColor,
+          background: `${phaseColor}26`,
           padding: '10px 24px',
           borderRadius: '30px',
-          border: `1px solid ${isCompleted ? 'rgba(16, 185, 129, 0.3)' : 'rgba(212, 165, 116, 0.3)'}`,
+          border: `1px solid ${phaseColor}4D`,
         }}
       >
         PHASE {phase.number} OF 4
@@ -715,7 +726,7 @@ function JourneyPhaseCard({
           fontSize: 'clamp(42px, 10vw, 72px)',
           fontWeight: 400,
           letterSpacing: '0.1em',
-          color: theme === 'dark' ? '#FFFFFF' : '#000000',
+          color: '#FFFFFF',
           margin: 0,
           textAlign: 'center',
         }}
@@ -729,7 +740,7 @@ function JourneyPhaseCard({
           fontFamily: "'Helvetica Neue', sans-serif",
           fontSize: 'clamp(16px, 3vw, 20px)',
           fontWeight: 400,
-          color: theme === 'dark' ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)',
+          color: theme === 'dark' ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.8)',
           margin: 0,
           fontStyle: 'italic',
         }}
@@ -746,7 +757,7 @@ function JourneyPhaseCard({
           fontFamily: "'Helvetica Neue', sans-serif",
           fontSize: '14px',
           lineHeight: 1.6,
-          color: theme === 'dark' ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)',
+          color: theme === 'dark' ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.7)',
           margin: 0,
           textAlign: 'center',
           maxWidth: '420px',
@@ -755,7 +766,7 @@ function JourneyPhaseCard({
         {phase.explanation}
       </motion.p>
 
-      {/* Progress ring */}
+      {/* Progress ring - uses phase-specific color */}
       <div style={{ position: 'relative', width: '90px', height: '90px' }}>
         <svg width="90" height="90" viewBox="0 0 90 90">
           <circle
@@ -763,7 +774,7 @@ function JourneyPhaseCard({
             cy="45"
             r="38"
             fill="none"
-            stroke={theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}
+            stroke="rgba(255,255,255,0.2)"
             strokeWidth="5"
           />
           <motion.circle
@@ -771,7 +782,7 @@ function JourneyPhaseCard({
             cy="45"
             r="38"
             fill="none"
-            stroke={isCompleted ? '#10B981' : '#D4A574'}
+            stroke={phaseColor}
             strokeWidth="5"
             strokeLinecap="round"
             strokeDasharray={2 * Math.PI * 38}
@@ -784,7 +795,7 @@ function JourneyPhaseCard({
             transition={{ duration: 0.3 }}
             transform="rotate(-90 45 45)"
             style={{
-              filter: `drop-shadow(0 0 8px ${isCompleted ? '#10B981' : '#D4A574'}80)`,
+              filter: `drop-shadow(0 0 8px ${phaseColor}80)`,
             }}
           />
         </svg>
@@ -796,7 +807,7 @@ function JourneyPhaseCard({
             transform: 'translate(-50%, -50%)',
             fontFamily: "'VCR OSD Mono', monospace",
             fontSize: '18px',
-            color: theme === 'dark' ? '#FFFFFF' : '#000000',
+            color: '#FFFFFF',
           }}
         >
           {isCompleted ? '100' : Math.round((itemProgress / phase.items.length) * 100)}%
@@ -810,9 +821,9 @@ function JourneyPhaseCard({
           flexDirection: 'column',
           gap: '4px',
           width: '100%',
-          background: theme === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)',
+          background: theme === 'dark' ? 'rgba(0,0,0,0.4)' : 'rgba(0,0,0,0.3)',
           backdropFilter: 'blur(20px)',
-          border: `1px solid ${theme === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'}`,
+          border: `1px solid ${theme === 'dark' ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.1)'}`,
           borderRadius: '20px',
           padding: '20px',
         }}
@@ -854,7 +865,7 @@ function JourneyPhaseCard({
                       ? '#10B981'
                       : isItemActive
                         ? '#D4A574'
-                        : theme === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)',
+                        : 'rgba(255,255,255,0.35)',
                     scale: isItemActive ? [1, 1.3, 1] : 1,
                   }}
                   transition={{
@@ -876,8 +887,8 @@ function JourneyPhaseCard({
                       color: isItemComplete
                         ? '#10B981'
                         : isItemActive
-                          ? (theme === 'dark' ? '#FFFFFF' : '#000000')
-                          : (theme === 'dark' ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)'),
+                          ? '#FFFFFF'
+                          : 'rgba(255,255,255,0.7)',
                       transition: 'color 0.3s ease',
                     }}
                   >
@@ -896,7 +907,7 @@ function JourneyPhaseCard({
                         style={{
                           fontFamily: "'Helvetica Neue', sans-serif",
                           fontSize: '13px',
-                          color: theme === 'dark' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)',
+                          color: 'rgba(255,255,255,0.6)',
                           margin: '4px 0 0 0',
                           lineHeight: 1.4,
                         }}
@@ -1611,9 +1622,9 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                 alignItems: 'center',
                 padding: '80px 32px 48px 32px',
                 background: theme === 'dark'
-                  ? 'linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.7) 30%, rgba(0,0,0,0.85) 100%)'
-                  : 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.7) 30%, rgba(255,255,255,0.85) 100%)',
-                backdropFilter: 'blur(8px)',
+                  ? 'linear-gradient(90deg, transparent 0%, rgba(10, 10, 18, 0.85) 20%, rgba(10, 10, 18, 0.95) 100%)'
+                  : 'linear-gradient(90deg, transparent 0%, rgba(20, 20, 30, 0.85) 20%, rgba(20, 20, 30, 0.95) 100%)',
+                backdropFilter: 'blur(12px)',
               }}
             >
               <AnimatePresence mode="wait">
