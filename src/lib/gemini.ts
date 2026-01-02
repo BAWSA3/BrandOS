@@ -533,10 +533,11 @@ interface InfluenceAnalysis {
 }
 
 function analyzeInfluence(profile: XProfileData): InfluenceAnalysis {
-  const followers = profile.public_metrics.followers_count;
-  const following = profile.public_metrics.following_count;
-  const tweets = profile.public_metrics.tweet_count;
-  const listed = profile.public_metrics.listed_count;
+  // Support both flat and nested metrics properties
+  const followers = (profile as any).followers_count || profile.public_metrics?.followers_count || 0;
+  const following = (profile as any).following_count || profile.public_metrics?.following_count || 0;
+  const tweets = (profile as any).tweet_count || profile.public_metrics?.tweet_count || 0;
+  const listed = (profile as any).listed_count || profile.public_metrics?.listed_count || 0;
   const bioLength = (profile.description || '').length;
   
   const signals: string[] = [];
@@ -1074,7 +1075,7 @@ PROFILE CONTEXT:
 - Name: ${profileContext.name}
 - Handle: @${profileContext.username}
 - Bio: ${profileContext.bio || '(No bio)'}
-- Followers: ${profileContext.followers.toLocaleString()}
+- Followers: ${(profileContext.followers || 0).toLocaleString()}
 
 ANALYZE THE PROFILE IMAGE:
 ${imageDescription}
@@ -1339,14 +1340,16 @@ export function analyzeNameHandle(name: string, handle: string): NameAnalysis {
 
 export const brandDNAPrompt = (profile: XProfileData, bioLinguistics: BioLinguistics, nameAnalysis: NameAnalysis, imageAnalysis?: ProfileImageAnalysis) => {
   const influenceAnalysis = analyzeInfluence(profile);
-  
+  // Support both flat and nested follower count properties
+  const followersCount = (profile as any).followers_count || profile.public_metrics?.followers_count || 0;
+
   return `You are an expert brand strategist creating a comprehensive Brand DNA profile.
 
 PROFILE DATA:
 - Name: ${profile.name}
 - Handle: @${profile.username}
 - Bio: ${profile.description || '(No bio)'}
-- Followers: ${profile.public_metrics.followers_count.toLocaleString()}
+- Followers: ${followersCount.toLocaleString()}
 - Influence Tier: ${influenceAnalysis.tierLabel}
 
 BIO LINGUISTICS ANALYSIS:
