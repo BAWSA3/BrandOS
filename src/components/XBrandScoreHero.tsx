@@ -944,7 +944,7 @@ function JourneyPhaseCard({
                       style={{
                         fontFamily: "'Helvetica Neue', sans-serif",
                         fontSize: '12px',
-                        color: theme === 'dark' ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.8)',
+                        color: 'rgba(255,255,255,0.8)',
                         wordBreak: 'break-word',
                       }}
                     >
@@ -993,16 +993,16 @@ function JourneyProgressIndicator({
         gap: '8px',
       }}
     >
-      {/* Phase pills */}
+      {/* Phase pills - always dark bg since journey has dark DNA background */}
       <div
         style={{
           display: 'flex',
           gap: '12px',
           padding: '10px 20px',
-          background: theme === 'dark' ? 'rgba(0, 0, 0, 0.8)' : 'rgba(255, 255, 255, 0.9)',
+          background: 'rgba(0, 0, 0, 0.8)',
           backdropFilter: 'blur(20px)',
           borderRadius: '40px',
-          border: `1px solid ${theme === 'dark' ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.1)'}`,
+          border: '1px solid rgba(255,255,255,0.15)',
           boxShadow: '0 4px 24px rgba(0, 0, 0, 0.2)',
         }}
       >
@@ -1045,7 +1045,7 @@ function JourneyProgressIndicator({
                     ? '#0047FF'
                     : isCompleted
                       ? '#10B981'
-                      : theme === 'dark' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)',
+                      : 'rgba(255,255,255,0.5)',
                   width: '16px',
                   height: '16px',
                   display: 'flex',
@@ -1056,7 +1056,7 @@ function JourneyProgressIndicator({
                     ? 'rgba(0, 71, 255, 0.2)'
                     : isCompleted
                       ? 'rgba(16, 185, 129, 0.2)'
-                      : theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+                      : 'rgba(255,255,255,0.1)',
                 }}
               >
                 {isCompleted ? '✓' : phaseNum}
@@ -1071,7 +1071,7 @@ function JourneyProgressIndicator({
           fontFamily: "'VCR OSD Mono', monospace",
           fontSize: '10px',
           letterSpacing: '0.1em',
-          color: theme === 'dark' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)',
+          color: 'rgba(255,255,255,0.5)',
         }}
       >
         {Math.round(overallProgress * 100)}% ANALYZED
