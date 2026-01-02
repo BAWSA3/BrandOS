@@ -1,7 +1,7 @@
 'use client';
 
-import { motion, Variants } from 'framer-motion';
-import { useState } from 'react';
+import { motion, Variants, AnimatePresence } from 'framer-motion';
+import { useState, useEffect } from 'react';
 import { AnimateNumber } from 'motion-plus/react';
 import { BentoShareCardData, generateBentoShareImage } from './ShareableBentoCard';
 
@@ -682,7 +682,32 @@ export default function BentoRevealGrid({
 }: BentoRevealGridProps) {
   const [copying, setCopying] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [isGeneratingPreview, setIsGeneratingPreview] = useState(false);
+
+  // Pre-generate preview image when entering preview mode
+  useEffect(() => {
+    if (isPreviewMode && !previewUrl) {
+      setIsGeneratingPreview(true);
+      generateBentoShareImage(data).then((blob) => {
+        if (blob) {
+          const url = URL.createObjectURL(blob);
+          setPreviewUrl(url);
+        }
+        setIsGeneratingPreview(false);
+      });
+    }
+  }, [isPreviewMode, previewUrl, data]);
+
+  // Cleanup preview URL on unmount
+  useEffect(() => {
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
 
   // Generate and copy image to clipboard
   const handleCopyToX = async () => {
@@ -702,13 +727,9 @@ export default function BentoRevealGrid({
     setCopying(false);
   };
 
-  // Generate preview
-  const handlePreview = async () => {
-    const blob = await generateBentoShareImage(data);
-    if (blob) {
-      const url = URL.createObjectURL(blob);
-      setPreviewUrl(url);
-    }
+  // Toggle preview mode
+  const handleTogglePreview = () => {
+    setIsPreviewMode(!isPreviewMode);
   };
 
   // Download image
@@ -828,34 +849,231 @@ export default function BentoRevealGrid({
           </div>
         </motion.div>
 
-        {/* Hero Score Card */}
-        <HeroScoreCard
-          brandScore={data.brandScore}
-          voiceConsistency={data.voiceConsistency}
-          engagement={calculateEngagement(data.tone)}
-          influence={mapInfluenceToPercent(data.influenceTier)}
-        />
-
-        {/* Grid Section */}
+        {/* Content Container with Toggle Animation */}
         <motion.div
-          variants={containerVariants}
+          layout
           style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: '20px',
+            position: 'relative',
+            minHeight: '500px',
           }}
         >
-          <ContentPillarsCard contentPillars={data.contentPillars} />
-          <FollowersCard count={data.followersCount} />
-          <ArchetypeCard
-            emoji={data.archetypeEmoji}
-            name={data.archetype}
-            summary={data.personalitySummary}
-            onClaim={onClaim}
-          />
+          <AnimatePresence mode="wait">
+            {!isPreviewMode ? (
+              /* Interactive Bento Grid */
+              <motion.div
+                key="interactive"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95, y: -20 }}
+                transition={{
+                  duration: 0.4,
+                  ease: [0.25, 0.46, 0.45, 0.94]
+                }}
+                style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}
+              >
+                {/* Hero Score Card */}
+                <HeroScoreCard
+                  brandScore={data.brandScore}
+                  voiceConsistency={data.voiceConsistency}
+                  engagement={calculateEngagement(data.tone)}
+                  influence={mapInfluenceToPercent(data.influenceTier)}
+                />
+
+                {/* Grid Section */}
+                <motion.div
+                  variants={containerVariants}
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(3, 1fr)',
+                    gap: '20px',
+                  }}
+                >
+                  <ContentPillarsCard contentPillars={data.contentPillars} />
+                  <FollowersCard count={data.followersCount} />
+                  <ArchetypeCard
+                    emoji={data.archetypeEmoji}
+                    name={data.archetype}
+                    summary={data.personalitySummary}
+                    onClaim={onClaim}
+                  />
+                </motion.div>
+              </motion.div>
+            ) : (
+              /* Preview Mode - Share Card */
+              <motion.div
+                key="preview"
+                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                transition={{
+                  duration: 0.4,
+                  ease: [0.25, 0.46, 0.45, 0.94]
+                }}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: '24px',
+                  padding: '40px 0',
+                }}
+              >
+                {/* Preview Label */}
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                  }}
+                >
+                  <div
+                    style={{
+                      fontFamily: "'VCR OSD Mono', monospace",
+                      fontSize: '12px',
+                      letterSpacing: '0.1em',
+                      color: COLORS.accentBlue,
+                      background: `${COLORS.accentBlue}20`,
+                      padding: '8px 16px',
+                      borderRadius: '20px',
+                      border: `1px solid ${COLORS.accentBlue}40`,
+                    }}
+                  >
+                    SHARE PREVIEW
+                  </div>
+                  <span
+                    style={{
+                      fontFamily: "'VCR OSD Mono', monospace",
+                      fontSize: '11px',
+                      color: COLORS.textMuted,
+                    }}
+                  >
+                    1200 × 630 px
+                  </span>
+                </motion.div>
+
+                {/* Preview Image Container */}
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.1, duration: 0.3 }}
+                  style={{
+                    position: 'relative',
+                    borderRadius: '16px',
+                    overflow: 'hidden',
+                    boxShadow: `0 20px 60px rgba(0, 0, 0, 0.5), 0 0 40px ${COLORS.accentGlow}`,
+                    border: `1px solid ${COLORS.glassBorder}`,
+                  }}
+                >
+                  {isGeneratingPreview ? (
+                    <div
+                      style={{
+                        width: '600px',
+                        height: '315px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        background: COLORS.cardHero,
+                      }}
+                    >
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                        style={{
+                          width: '40px',
+                          height: '40px',
+                          border: `3px solid ${COLORS.glassBorder}`,
+                          borderTopColor: COLORS.accentBlue,
+                          borderRadius: '50%',
+                        }}
+                      />
+                    </div>
+                  ) : previewUrl ? (
+                    <img
+                      src={previewUrl}
+                      alt="Share card preview"
+                      style={{
+                        maxWidth: '100%',
+                        width: '600px',
+                        height: 'auto',
+                        display: 'block',
+                      }}
+                    />
+                  ) : null}
+                </motion.div>
+
+                {/* Preview Actions */}
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                  style={{
+                    display: 'flex',
+                    gap: '12px',
+                    alignItems: 'center',
+                  }}
+                >
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handleCopyToX}
+                    disabled={copying}
+                    style={{
+                      fontFamily: "'Helvetica Neue', sans-serif",
+                      fontSize: '14px',
+                      color: '#FFFFFF',
+                      background: copied ? '#10B981' : COLORS.accentBlue,
+                      border: 'none',
+                      padding: '12px 24px',
+                      borderRadius: '12px',
+                      cursor: 'pointer',
+                      fontWeight: 500,
+                      boxShadow: `0 4px 20px ${COLORS.accentGlow}`,
+                    }}
+                  >
+                    {copied ? '✓ Copied to Clipboard!' : copying ? 'Copying...' : 'Copy to Clipboard'}
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handleDownload}
+                    style={{
+                      fontFamily: "'Helvetica Neue', sans-serif",
+                      fontSize: '14px',
+                      color: COLORS.textLight,
+                      background: 'transparent',
+                      border: `1px solid ${COLORS.glassBorder}`,
+                      padding: '12px 24px',
+                      borderRadius: '12px',
+                      cursor: 'pointer',
+                      fontWeight: 500,
+                    }}
+                  >
+                    Download PNG
+                  </motion.button>
+                </motion.div>
+
+                {/* Tip */}
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.4 }}
+                  style={{
+                    fontFamily: "'Helvetica Neue', sans-serif",
+                    fontSize: '13px',
+                    color: COLORS.textMuted,
+                    textAlign: 'center',
+                  }}
+                >
+                  This is exactly how your brand card will appear when shared on X
+                </motion.p>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </motion.div>
 
-        {/* Additional Action Row */}
+        {/* Toggle Button */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -870,127 +1088,52 @@ export default function BentoRevealGrid({
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            onClick={handlePreview}
+            onClick={handleTogglePreview}
             style={{
-              background: 'transparent',
-              border: '1px solid #444',
+              background: isPreviewMode ? COLORS.accentBlue : 'transparent',
+              border: `1px solid ${isPreviewMode ? COLORS.accentBlue : '#444'}`,
               color: 'white',
               padding: '10px 24px',
               borderRadius: '20px',
               cursor: 'pointer',
               fontSize: '14px',
               fontFamily: "'Helvetica Neue', sans-serif",
-            }}
-          >
-            Preview Card
-          </motion.button>
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={handleDownload}
-            style={{
-              background: 'transparent',
-              border: '1px solid #444',
-              color: 'white',
-              padding: '10px 24px',
-              borderRadius: '20px',
-              cursor: 'pointer',
-              fontSize: '14px',
-              fontFamily: "'Helvetica Neue', sans-serif",
-            }}
-          >
-            Download
-          </motion.button>
-        </motion.div>
-
-        {/* Preview Modal */}
-        {previewUrl && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            style={{
-              position: 'fixed',
-              inset: 0,
-              background: 'rgba(0,0,0,0.9)',
               display: 'flex',
-              flexDirection: 'column',
               alignItems: 'center',
-              justifyContent: 'center',
-              zIndex: 100,
-              padding: '20px',
-            }}
-            onClick={() => {
-              URL.revokeObjectURL(previewUrl);
-              setPreviewUrl(null);
+              gap: '8px',
+              transition: 'all 0.3s ease',
             }}
           >
-            <img
-              src={previewUrl}
-              alt="Bento card preview"
+            {isPreviewMode ? (
+              <>
+                <span>←</span> Back to Details
+              </>
+            ) : (
+              <>
+                Preview Share Card <span>→</span>
+              </>
+            )}
+          </motion.button>
+          {!isPreviewMode && (
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={handleDownload}
               style={{
-                maxWidth: '100%',
-                maxHeight: '80vh',
-                borderRadius: '16px',
-                boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
-              }}
-            />
-            <div
-              style={{
-                marginTop: '16px',
-                display: 'flex',
-                gap: '12px',
-                alignItems: 'center',
+                background: 'transparent',
+                border: '1px solid #444',
+                color: 'white',
+                padding: '10px 24px',
+                borderRadius: '20px',
+                cursor: 'pointer',
+                fontSize: '14px',
+                fontFamily: "'Helvetica Neue', sans-serif",
               }}
             >
-              <span
-                style={{
-                  fontFamily: "'VCR OSD Mono', monospace",
-                  fontSize: '11px',
-                  color: 'rgba(255,255,255,0.5)',
-                }}
-              >
-                1200 x 630 px - Bento Card
-              </span>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleCopyToX();
-                }}
-                style={{
-                  fontFamily: "'Helvetica Neue', sans-serif",
-                  fontSize: '12px',
-                  color: '#FFFFFF',
-                  background: '#0047FF',
-                  border: 'none',
-                  padding: '8px 16px',
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                }}
-              >
-                Copy
-              </button>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  URL.revokeObjectURL(previewUrl);
-                  setPreviewUrl(null);
-                }}
-                style={{
-                  fontFamily: "'Helvetica Neue', sans-serif",
-                  fontSize: '12px',
-                  color: 'rgba(255,255,255,0.8)',
-                  background: 'transparent',
-                  border: '1px solid rgba(255,255,255,0.3)',
-                  padding: '8px 16px',
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                }}
-              >
-                Close
-              </button>
-            </div>
-          </motion.div>
-        )}
+              Download
+            </motion.button>
+          )}
+        </motion.div>
       </div>
     </motion.div>
   );
