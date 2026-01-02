@@ -5,17 +5,31 @@ import { useState } from 'react';
 import { BentoShareCardData, generateBentoShareImage } from './ShareableBentoCard';
 
 // =============================================================================
-// Color Scheme (Financial Dashboard Style)
+// Color Scheme (BrandOS Brand Kit)
 // =============================================================================
 const COLORS = {
-  bgColor: '#000000',
-  cardMint: '#E2EFE1',
-  cardOlive: '#B6B228',
-  cardLavender: '#AFA8C9',
-  cardOrange: '#FF5E3A',
-  textDark: '#1A1A1A',
+  // Background
+  bgColor: '#0a0a0a',
+
+  // Card backgrounds (BrandOS blue gradient)
+  cardHero: 'rgba(0, 71, 255, 0.06)',       // Glassmorphic with blue tint
+  cardTone: '#001847',                       // Deep blue
+  cardFollowers: '#002FA7',                  // Klein blue
+  cardArchetype: '#0047FF',                  // Electric blue (primary)
+
+  // Text
   textLight: '#FFFFFF',
-  textGrey: '#888888',
+  textMuted: 'rgba(255, 255, 255, 0.6)',
+  textDark: '#1A1A1A',
+
+  // Accents
+  accentBlue: '#0047FF',
+  accentGlow: 'rgba(0, 71, 255, 0.4)',
+
+  // Glass effects
+  glassBg: 'rgba(255, 255, 255, 0.05)',
+  glassBorder: 'rgba(255, 255, 255, 0.1)',
+  glowBorder: 'rgba(0, 71, 255, 0.3)',
 };
 
 // =============================================================================
@@ -67,7 +81,7 @@ const heroVariants: Variants = {
 };
 
 // =============================================================================
-// Hero Score Card Component
+// Hero Score Card Component (Glassmorphic with Blue Glow)
 // =============================================================================
 function HeroScoreCard({
   brandScore,
@@ -90,8 +104,11 @@ function HeroScoreCard({
     <motion.div
       variants={heroVariants}
       style={{
-        backgroundColor: COLORS.cardMint,
-        color: COLORS.textDark,
+        backgroundColor: COLORS.cardHero,
+        backdropFilter: 'blur(20px)',
+        border: `1px solid ${COLORS.glowBorder}`,
+        boxShadow: `0 0 40px ${COLORS.accentGlow}, inset 0 0 60px rgba(0, 71, 255, 0.03)`,
+        color: COLORS.textLight,
         borderRadius: '30px',
         padding: '30px',
         display: 'flex',
@@ -105,13 +122,14 @@ function HeroScoreCard({
       <div style={{ width: '45%' }}>
         <div
           style={{
-            border: `1px solid ${COLORS.textDark}`,
+            border: `1px solid ${COLORS.glassBorder}`,
             padding: '6px 16px',
             borderRadius: '20px',
             display: 'inline-block',
             marginBottom: '25px',
             fontSize: '14px',
             fontFamily: "'Helvetica Neue', sans-serif",
+            background: COLORS.glassBg,
           }}
         >
           Your Brand Score
@@ -126,6 +144,7 @@ function HeroScoreCard({
                 display: 'block',
                 fontWeight: 500,
                 fontFamily: "'Helvetica Neue', sans-serif",
+                color: COLORS.textMuted,
               }}
             >
               {bar.label}
@@ -133,7 +152,7 @@ function HeroScoreCard({
             <div
               style={{
                 height: '6px',
-                background: 'rgba(0,0,0,0.1)',
+                background: 'rgba(255,255,255,0.1)',
                 borderRadius: '3px',
                 width: '100%',
                 maxWidth: '300px',
@@ -146,8 +165,9 @@ function HeroScoreCard({
                 transition={{ duration: 0.8, delay: 0.3 + index * 0.15 }}
                 style={{
                   height: '100%',
-                  background: COLORS.textDark,
+                  background: `linear-gradient(90deg, ${COLORS.cardTone}, ${COLORS.accentBlue})`,
                   borderRadius: '3px',
+                  boxShadow: `0 0 10px ${COLORS.accentGlow}`,
                 }}
               />
             </div>
@@ -173,12 +193,13 @@ function HeroScoreCard({
             fontWeight: 600,
             marginBottom: '20px',
             fontFamily: "'Helvetica Neue', sans-serif",
+            color: COLORS.textMuted,
           }}
         >
           BRAND DNA
           <div
             style={{
-              background: COLORS.textDark,
+              background: COLORS.accentBlue,
               color: 'white',
               padding: '4px 12px',
               borderRadius: '15px',
@@ -201,6 +222,7 @@ function HeroScoreCard({
             letterSpacing: '-4px',
             lineHeight: 1,
             fontFamily: "'Helvetica Neue', sans-serif",
+            textShadow: `0 0 40px ${COLORS.accentGlow}, 0 0 80px ${COLORS.accentGlow}`,
           }}
         >
           +{brandScore}
@@ -211,7 +233,7 @@ function HeroScoreCard({
 }
 
 // =============================================================================
-// Tone Card Component (Olive - Bar Chart)
+// Tone Card Component (Deep Blue - Bar Chart)
 // =============================================================================
 function ToneCard({ tone }: { tone: BentoShareCardData['tone'] }) {
   const bars = [
@@ -227,14 +249,15 @@ function ToneCard({ tone }: { tone: BentoShareCardData['tone'] }) {
     <motion.div
       variants={cardVariants}
       style={{
-        backgroundColor: COLORS.cardOlive,
-        color: COLORS.textDark,
+        backgroundColor: COLORS.cardTone,
+        color: COLORS.textLight,
         borderRadius: '30px',
         padding: '25px',
         display: 'flex',
         flexDirection: 'column',
         minHeight: '400px',
         position: 'relative',
+        border: `1px solid ${COLORS.glassBorder}`,
       }}
     >
       {/* Header */}
@@ -248,7 +271,7 @@ function ToneCard({ tone }: { tone: BentoShareCardData['tone'] }) {
       >
         <div
           style={{
-            border: '1px solid rgba(0,0,0,0.3)',
+            border: `1px solid ${COLORS.glassBorder}`,
             padding: '6px 14px',
             borderRadius: '20px',
             fontSize: '14px',
@@ -259,7 +282,7 @@ function ToneCard({ tone }: { tone: BentoShareCardData['tone'] }) {
         </div>
         <div
           style={{
-            background: '#1a1a1a',
+            background: COLORS.accentBlue,
             fontSize: '10px',
             padding: '4px 8px',
             borderRadius: '8px',
@@ -267,8 +290,8 @@ function ToneCard({ tone }: { tone: BentoShareCardData['tone'] }) {
             fontFamily: "'Helvetica Neue', sans-serif",
           }}
         >
-          <span style={{ color: '#888' }}>Weekly</span>{' '}
-          <span style={{ color: '#fff' }}>Daily</span>
+          <span style={{ opacity: 0.5 }}>Weekly</span>{' '}
+          <span>Daily</span>
         </div>
       </div>
 
@@ -276,7 +299,7 @@ function ToneCard({ tone }: { tone: BentoShareCardData['tone'] }) {
       <p
         style={{
           fontSize: '14px',
-          opacity: 0.8,
+          color: COLORS.textMuted,
           marginBottom: '40px',
           lineHeight: 1.4,
           fontFamily: "'Helvetica Neue', sans-serif",
@@ -302,10 +325,11 @@ function ToneCard({ tone }: { tone: BentoShareCardData['tone'] }) {
             animate={{ height: `${bar.value * 2}px` }}
             transition={{ duration: 0.6, delay: 0.4 + index * 0.1 }}
             style={{
-              background: '#1a1a1a',
+              background: `linear-gradient(180deg, ${COLORS.accentBlue}, ${COLORS.cardFollowers})`,
               width: '20px',
               borderRadius: '4px',
               minHeight: '20px',
+              boxShadow: `0 0 15px ${COLORS.accentGlow}`,
             }}
           />
         ))}
@@ -314,7 +338,7 @@ function ToneCard({ tone }: { tone: BentoShareCardData['tone'] }) {
       {/* Floating Tag */}
       <div
         style={{
-          background: '#1a1a1a',
+          background: COLORS.accentBlue,
           color: '#fff',
           padding: '6px 12px',
           borderRadius: '10px',
@@ -323,6 +347,7 @@ function ToneCard({ tone }: { tone: BentoShareCardData['tone'] }) {
           top: '45%',
           left: '35%',
           fontFamily: "'Helvetica Neue', sans-serif",
+          boxShadow: `0 0 20px ${COLORS.accentGlow}`,
         }}
       >
         {avgTone}% avg
@@ -332,20 +357,21 @@ function ToneCard({ tone }: { tone: BentoShareCardData['tone'] }) {
 }
 
 // =============================================================================
-// Followers Card Component (Lavender)
+// Followers Card Component (Klein Blue)
 // =============================================================================
 function FollowersCard({ count }: { count: number }) {
   return (
     <motion.div
       variants={cardVariants}
       style={{
-        backgroundColor: COLORS.cardLavender,
-        color: COLORS.textDark,
+        backgroundColor: COLORS.cardFollowers,
+        color: COLORS.textLight,
         borderRadius: '30px',
         padding: '25px',
         display: 'flex',
         flexDirection: 'column',
         minHeight: '400px',
+        border: `1px solid ${COLORS.glassBorder}`,
       }}
     >
       {/* Header */}
@@ -359,7 +385,7 @@ function FollowersCard({ count }: { count: number }) {
       >
         <div
           style={{
-            border: '1px solid rgba(0,0,0,0.3)',
+            border: `1px solid ${COLORS.glassBorder}`,
             padding: '6px 14px',
             borderRadius: '20px',
             fontSize: '14px',
@@ -388,7 +414,7 @@ function FollowersCard({ count }: { count: number }) {
       <div
         style={{
           fontSize: '14px',
-          opacity: 0.7,
+          color: COLORS.textMuted,
           marginBottom: '40px',
           fontFamily: "'Helvetica Neue', sans-serif",
         }}
@@ -410,13 +436,22 @@ function FollowersCard({ count }: { count: number }) {
           initial={{ height: 0 }}
           animate={{ height: '80px' }}
           transition={{ duration: 0.5, delay: 0.7 }}
-          style={{ background: '#000', width: '60%', borderRadius: '4px' }}
+          style={{
+            background: COLORS.accentBlue,
+            width: '60%',
+            borderRadius: '4px',
+            boxShadow: `0 0 15px ${COLORS.accentGlow}`,
+          }}
         />
         <motion.div
           initial={{ height: 0 }}
           animate={{ height: '40px' }}
           transition={{ duration: 0.5, delay: 0.8 }}
-          style={{ background: 'rgba(0,0,0,0.2)', width: '40%', borderRadius: '4px' }}
+          style={{
+            background: COLORS.cardTone,
+            width: '40%',
+            borderRadius: '4px',
+          }}
         />
       </div>
       <div
@@ -426,10 +461,11 @@ function FollowersCard({ count }: { count: number }) {
           fontSize: '10px',
           marginTop: '5px',
           fontFamily: "'Helvetica Neue', sans-serif",
+          color: COLORS.textMuted,
         }}
       >
-        <span>+18.56%</span>
-        <span style={{ opacity: 0.5, textAlign: 'right' }}>
+        <span style={{ color: COLORS.textLight }}>+18.56%</span>
+        <span style={{ textAlign: 'right' }}>
           Estimated
           <br />
           +15.78%
@@ -443,10 +479,11 @@ function FollowersCard({ count }: { count: number }) {
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          borderTop: '1px solid rgba(0,0,0,0.1)',
+          borderTop: `1px solid ${COLORS.glassBorder}`,
           paddingTop: '15px',
           fontSize: '14px',
           fontFamily: "'Helvetica Neue', sans-serif",
+          color: COLORS.textMuted,
         }}
       >
         <span>←</span>
@@ -458,7 +495,7 @@ function FollowersCard({ count }: { count: number }) {
 }
 
 // =============================================================================
-// Archetype Card Component (Orange)
+// Archetype Card Component (Electric Blue)
 // =============================================================================
 function ArchetypeCard({
   emoji,
@@ -475,13 +512,15 @@ function ArchetypeCard({
     <motion.div
       variants={cardVariants}
       style={{
-        backgroundColor: COLORS.cardOrange,
-        color: COLORS.textDark,
+        backgroundColor: COLORS.cardArchetype,
+        color: COLORS.textLight,
         borderRadius: '30px',
         padding: '25px',
         display: 'flex',
         flexDirection: 'column',
         minHeight: '400px',
+        border: `1px solid ${COLORS.glassBorder}`,
+        boxShadow: `0 0 30px ${COLORS.accentGlow}`,
       }}
     >
       {/* Header */}
@@ -495,7 +534,7 @@ function ArchetypeCard({
       >
         <div
           style={{
-            border: '1px solid #000',
+            border: `1px solid ${COLORS.glassBorder}`,
             padding: '6px 14px',
             borderRadius: '20px',
             fontSize: '14px',
@@ -504,7 +543,7 @@ function ArchetypeCard({
         >
           Archetype
         </div>
-        <div style={{ fontSize: '20px', cursor: 'pointer' }}>⚙</div>
+        <div style={{ fontSize: '20px', cursor: 'pointer', opacity: 0.8 }}>⚙</div>
       </div>
 
       {/* Archetype Display */}
@@ -533,7 +572,7 @@ function ArchetypeCard({
         style={{
           fontSize: '14px',
           lineHeight: 1.5,
-          opacity: 0.85,
+          color: 'rgba(255, 255, 255, 0.85)',
           marginBottom: '20px',
           fontFamily: "'Helvetica Neue', sans-serif",
           flex: 1,
@@ -544,20 +583,22 @@ function ArchetypeCard({
 
       {/* CTA Button */}
       <motion.button
-        whileHover={{ scale: 1.02 }}
+        whileHover={{ scale: 1.02, background: 'rgba(255,255,255,0.15)' }}
         whileTap={{ scale: 0.98 }}
         onClick={onClaim}
         style={{
           marginTop: 'auto',
           width: '100%',
           padding: '14px',
-          border: `1px solid ${COLORS.textDark}`,
-          background: 'transparent',
+          border: `1px solid ${COLORS.glassBorder}`,
+          background: COLORS.glassBg,
           borderRadius: '25px',
           fontSize: '16px',
           cursor: 'pointer',
           fontFamily: "'Helvetica Neue', sans-serif",
           fontWeight: 500,
+          color: COLORS.textLight,
+          backdropFilter: 'blur(10px)',
         }}
       >
         Claim Your Brand
@@ -686,7 +727,7 @@ export default function BentoRevealGrid({
                 />
                 <div>
                   <div style={{ fontSize: '14px', fontWeight: 600 }}>{data.displayName}</div>
-                  <div style={{ fontSize: '12px', color: COLORS.textGrey }}>@{data.username}</div>
+                  <div style={{ fontSize: '12px', color: COLORS.textMuted }}>@{data.username}</div>
                 </div>
               </div>
             )}

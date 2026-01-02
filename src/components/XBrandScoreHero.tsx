@@ -1331,13 +1331,13 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
         overflow: 'hidden',
       }}
     >
-      {/* DNA Background - Always visible, behind UI */}
+      {/* DNA Background - Visible during input & journey, hidden during reveal */}
       <div
         style={{
           position: 'absolute',
           inset: 0,
           zIndex: flowState === 'journey' ? 5 : 0,
-          opacity: flowState === 'journey' ? 1 : 0.6,
+          opacity: flowState === 'journey' ? 1 : flowState === 'reveal' ? 0 : 0.6,
           transition: 'opacity 0.5s ease',
           // Enable pointer events during journey for DNA hover interactions
           pointerEvents: flowState === 'journey' ? 'auto' : 'none',
