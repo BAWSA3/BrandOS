@@ -1652,10 +1652,9 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                 name: profile.name,
                 profile_image_url: profile.profile_image_url,
                 public_metrics: {
-                  // Support both flat and nested metrics properties
-                  followers_count: (profile as any).followers_count || profile.public_metrics?.followers_count || 0,
-                  following_count: (profile as any).following_count || profile.public_metrics?.following_count || 0,
-                  tweet_count: (profile as any).tweet_count || profile.public_metrics?.tweet_count || 0,
+                  followers_count: profile.followers_count || 0,
+                  following_count: profile.following_count || 0,
+                  tweet_count: profile.tweet_count || 0,
                 },
               },
               brandScore.overallScore,
