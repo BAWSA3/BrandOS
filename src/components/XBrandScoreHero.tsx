@@ -5,6 +5,7 @@ import { motion, AnimatePresence, useMotionValue, useSpring, animate } from 'mot
 import dynamic from 'next/dynamic';
 import BrandDNAPreview, { GeneratedBrandDNA } from './BrandDNAPreview';
 import ShareableScoreCard, { ShareCardData } from './ShareableScoreCard';
+import ShareableBentoCard, { mapToBentoData } from './ShareableBentoCard';
 
 // Dynamically import DNA scene to avoid SSR issues with Three.js
 const DNAJourneyScene = dynamic(() => import('./DNAJourneyScene'), {
@@ -1752,28 +1753,58 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
               >
                 SHARE YOUR BRAND DNA
               </span>
-              <ShareableScoreCard
-                data={{
-                  score: brandScore.overallScore,
-                  username: profile.username,
-                  displayName: profile.name,
-                  profileImageUrl: profile.profile_image_url,
-                  topStrength: brandScore.topStrengths[0] || '',
-                  summary: brandScore.summary,
-                  archetype: generatedBrandDNA ? {
-                    primary: generatedBrandDNA.archetype,
-                    emoji: generatedBrandDNA.archetypeEmoji,
-                    tagline: generatedBrandDNA.voiceProfile,
-                  } : undefined,
-                  keywords: generatedBrandDNA?.keywords,
-                  brandColors: generatedBrandDNA ? {
-                    primary: generatedBrandDNA.colors.primary,
-                    secondary: generatedBrandDNA.colors.secondary,
-                  } : undefined,
-                  voiceProfile: generatedBrandDNA?.voiceProfile,
-                } as ShareCardData}
-                theme={theme}
-              />
+              {/* Bento Card - Primary sharing option */}
+              {generatedBrandDNA && (
+                <ShareableBentoCard
+                  data={mapToBentoData(
+                    {
+                      username: profile.username,
+                      name: profile.name,
+                      profile_image_url: profile.profile_image_url,
+                      public_metrics: {
+                        followers_count: profile.public_metrics?.followers_count || 0,
+                        following_count: profile.public_metrics?.following_count || 0,
+                        tweet_count: profile.public_metrics?.tweet_count || 0,
+                      },
+                    },
+                    brandScore.overallScore,
+                    {
+                      tone: generatedBrandDNA.tone,
+                      archetype: generatedBrandDNA.archetype,
+                      archetypeEmoji: generatedBrandDNA.archetypeEmoji,
+                      colors: generatedBrandDNA.colors,
+                      contentPillars: generatedBrandDNA.contentPillars,
+                      performanceInsights: generatedBrandDNA.performanceInsights,
+                    }
+                  )}
+                  theme={theme}
+                />
+              )}
+              {/* Score Card - Fallback if no DNA */}
+              {!generatedBrandDNA && (
+                <ShareableScoreCard
+                  data={{
+                    score: brandScore.overallScore,
+                    username: profile.username,
+                    displayName: profile.name,
+                    profileImageUrl: profile.profile_image_url,
+                    topStrength: brandScore.topStrengths[0] || '',
+                    summary: brandScore.summary,
+                    archetype: generatedBrandDNA ? {
+                      primary: generatedBrandDNA.archetype,
+                      emoji: generatedBrandDNA.archetypeEmoji,
+                      tagline: generatedBrandDNA.voiceProfile,
+                    } : undefined,
+                    keywords: generatedBrandDNA?.keywords,
+                    brandColors: generatedBrandDNA ? {
+                      primary: generatedBrandDNA.colors.primary,
+                      secondary: generatedBrandDNA.colors.secondary,
+                    } : undefined,
+                    voiceProfile: generatedBrandDNA?.voiceProfile,
+                  } as ShareCardData}
+                  theme={theme}
+                />
+              )}
             </motion.div>
 
             {/* CTA to signup - Only show if no Brand DNA preview */}
