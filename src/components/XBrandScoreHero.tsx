@@ -1261,7 +1261,21 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
             if (apiResultRef.current) {
               // Success - show results after brief pause
               setTimeout(() => {
-                setProfile(apiResultRef.current!.profile);
+                // Flatten the profile to match XProfileData interface
+                const apiProfile = apiResultRef.current!.profile;
+                const flatProfile: XProfileData = {
+                  name: apiProfile.name,
+                  username: apiProfile.username,
+                  description: apiProfile.description,
+                  profile_image_url: apiProfile.profile_image_url,
+                  followers_count: apiProfile.public_metrics?.followers_count || apiProfile.followers_count || 0,
+                  following_count: apiProfile.public_metrics?.following_count || apiProfile.following_count || 0,
+                  tweet_count: apiProfile.public_metrics?.tweet_count || apiProfile.tweet_count || 0,
+                  verified: apiProfile.verified || false,
+                  location: apiProfile.location,
+                  url: apiProfile.url,
+                };
+                setProfile(flatProfile);
                 setBrandScore(apiResultRef.current!.brandScore);
                 setFlowState('reveal');
 
