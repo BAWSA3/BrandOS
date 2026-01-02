@@ -174,12 +174,60 @@ function AnimatedText({ text, style, delay = 0, staggerDelay = 0.03 }: AnimatedT
 }
 
 // ============================================================================
+// Typewriter Effect Component - Character-by-character animation
+// ============================================================================
+interface TypewriterTextProps {
+  text: string;
+  speed?: number;
+}
+
+function TypewriterText({ text, speed = 25 }: TypewriterTextProps) {
+  const [displayText, setDisplayText] = useState('');
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [cursorVisible, setCursorVisible] = useState(true);
+
+  useEffect(() => {
+    setDisplayText('');
+    setCurrentIndex(0);
+  }, [text]);
+
+  useEffect(() => {
+    if (currentIndex < text.length) {
+      const timeout = setTimeout(() => {
+        setDisplayText(prev => prev + text[currentIndex]);
+        setCurrentIndex(prev => prev + 1);
+      }, speed);
+      return () => clearTimeout(timeout);
+    }
+  }, [currentIndex, text, speed]);
+
+  // Blinking cursor effect
+  useEffect(() => {
+    if (currentIndex < text.length) {
+      const blinkInterval = setInterval(() => {
+        setCursorVisible(prev => !prev);
+      }, 400);
+      return () => clearInterval(blinkInterval);
+    }
+  }, [currentIndex, text.length]);
+
+  return (
+    <>
+      {displayText}
+      {currentIndex < text.length && (
+        <span style={{ opacity: cursorVisible ? 0.7 : 0 }}>|</span>
+      )}
+    </>
+  );
+}
+
+// ============================================================================
 // Phase Configuration - Enhanced with detailed analysis items
 // ============================================================================
 interface PhaseItem {
   label: string;
   description: string;
-  dataKey?: keyof XProfileData | 'ratio' | 'account_age';
+  dataKey?: keyof XProfileData | 'ratio' | 'account_age' | 'influence_tier';
 }
 
 interface PhaseConfigItem {
@@ -227,22 +275,21 @@ const phaseConfig: PhaseConfigItem[] = [
     explanation: 'Measuring how consistently your profile projects a unified brand—not scattered or contradictory signals.',
     items: [
       {
-        label: 'Username/name alignment',
-        description: 'Matching @handle with display name for recognition',
+        label: 'Handle Lock',
+        description: 'Syncing handle to identity... confirming recognition match.',
         dataKey: 'username'
       },
       {
-        label: 'Tone consistency',
-        description: 'Evaluating voice consistency in your messaging'
+        label: 'Tone Scan',
+        description: 'Analyzing voice patterns... measuring consistency levels.'
       },
       {
-        label: 'Professional presentation',
-        description: 'Assessing overall profile polish and quality'
+        label: 'Polish Check',
+        description: 'Scanning presentation metrics... assessing brand polish.'
       },
       {
-        label: 'Verification status',
-        description: 'Checking account verification and credibility',
-        dataKey: 'verified'
+        label: 'Content Flow',
+        description: 'Reviewing post patterns... detecting consistency signals.'
       },
     ],
   },
@@ -250,26 +297,26 @@ const phaseConfig: PhaseConfigItem[] = [
     id: 'generate',
     number: 3,
     title: 'GENERATE',
-    subtitle: 'Assessing content readiness',
-    explanation: 'Determining how ready your brand profile is to power generation that actually sounds like you.',
+    subtitle: 'Priming content engine',
+    explanation: 'Calibrating your profile data to power AI generation that captures your authentic voice—not generic outputs.',
     items: [
       {
-        label: 'Profile completeness',
-        description: 'Checking all profile fields are filled',
+        label: 'Field Scan',
+        description: 'Verifying profile data points... checking completion status.',
         dataKey: 'location'
       },
       {
-        label: 'Bio formatting',
-        description: 'Analyzing structure, emojis, and readability'
+        label: 'Bio Parse',
+        description: 'Deconstructing bio structure... analyzing readability index.'
       },
       {
-        label: 'Link presence',
-        description: 'Verifying external links drive traffic',
+        label: 'Link Trace',
+        description: 'Tracing external pathways... confirming traffic routes.',
         dataKey: 'url'
       },
       {
-        label: 'Content activity',
-        description: 'Reviewing your posting history and engagement',
+        label: 'Activity Pulse',
+        description: 'Measuring content cadence... evaluating engagement signals.',
         dataKey: 'tweet_count'
       },
     ],
@@ -278,27 +325,27 @@ const phaseConfig: PhaseConfigItem[] = [
     id: 'scale',
     number: 4,
     title: 'SCALE',
-    subtitle: 'Activating your system',
-    explanation: 'Your Brand DNA is ready to run. Now it can power automations, enforce standards, and scale your brand while you focus on what\'s next.',
+    subtitle: 'Initializing growth protocols',
+    explanation: 'Your Brand DNA is compiled and ready. Activating the systems that will scale your presence while maintaining brand integrity.',
     items: [
       {
-        label: 'Follower/following ratio',
-        description: 'Calculating audience-to-following balance',
-        dataKey: 'ratio'
+        label: 'Tier Scan',
+        description: 'Classifying influence level... determining account tier.',
+        dataKey: 'influence_tier'
       },
       {
-        label: 'Community size',
-        description: 'Measuring your current audience reach',
+        label: 'Reach Scan',
+        description: 'Mapping audience perimeter... quantifying brand reach.',
         dataKey: 'followers_count'
       },
       {
-        label: 'Network engagement',
-        description: 'Analyzing your connections and interactions',
+        label: 'Network Ping',
+        description: 'Pinging connection nodes... measuring interaction density.',
         dataKey: 'following_count'
       },
       {
-        label: 'Account maturity',
-        description: 'Evaluating account age and establishment',
+        label: 'Age Verify',
+        description: 'Validating account tenure... confirming establishment level.',
         dataKey: 'account_age'
       },
     ],
@@ -549,6 +596,13 @@ function formatProfileValue(
       return `${ratio.toFixed(2)}:1 ratio`;
     case 'account_age':
       return 'Established account';
+    case 'influence_tier':
+      const followers = profile.followers_count;
+      if (followers >= 1000000) return 'Mega Influencer';
+      if (followers >= 100000) return 'Macro Influencer';
+      if (followers >= 10000) return 'Mid-Tier';
+      if (followers >= 1000) return 'Micro Influencer';
+      return 'Nano Creator';
     default:
       return null;
   }
@@ -845,7 +899,11 @@ function JourneyPhaseCard({
                           lineHeight: 1.4,
                         }}
                       >
-                        {item.description}
+                        {isItemActive ? (
+                          <TypewriterText text={item.description} speed={25} />
+                        ) : (
+                          item.description
+                        )}
                       </motion.p>
                     )}
                   </AnimatePresence>
