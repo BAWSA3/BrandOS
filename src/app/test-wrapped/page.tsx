@@ -8,7 +8,7 @@ const mockData: WrappedRevealData = {
   // Profile
   username: 'buildwithai',
   displayName: 'BuildWithAI',
-  profileImageUrl: 'https://pbs.twimg.com/profile_images/1234567890/avatar_400x400.jpg',
+  profileImageUrl: 'https://api.dicebear.com/7.x/avataaars/png?seed=buildwithai&size=200',
   followersCount: 48500,
   
   // Score
@@ -52,7 +52,7 @@ const mockData: WrappedRevealData = {
 const altMockData: WrappedRevealData = {
   username: 'elonmusk',
   displayName: 'Elon Musk',
-  profileImageUrl: 'https://pbs.twimg.com/profile_images/1234567890/elon_400x400.jpg',
+  profileImageUrl: 'https://api.dicebear.com/7.x/avataaars/png?seed=elonmusk&size=200',
   followersCount: 185000000,
   brandScore: 94,
   voiceConsistency: 65,
