@@ -25,6 +25,10 @@ export interface ShareCardData {
     secondary: string;
   };
   voiceProfile?: string;
+  // New metrics for redesigned card
+  voiceConsistency?: number;      // 0-100
+  engagementScore?: number;       // 0-100
+  influenceTier?: string;         // 'Nano' | 'Micro' | 'Mid' | 'Macro' | 'Mega'
 }
 
 interface ShareableScoreCardProps {
@@ -77,6 +81,27 @@ function darkenColor(hex: string, percent: number): string {
   return `rgb(${r}, ${g}, ${b})`;
 }
 
+function lightenColor(hex: string, percent: number): string {
+  const rgb = hexToRgb(hex);
+  if (!rgb) return hex;
+  const factor = percent / 100;
+  const r = Math.round(rgb.r + (255 - rgb.r) * factor);
+  const g = Math.round(rgb.g + (255 - rgb.g) * factor);
+  const b = Math.round(rgb.b + (255 - rgb.b) * factor);
+  return `rgb(${r}, ${g}, ${b})`;
+}
+
+function getInfluenceTierWidth(tier?: string): number {
+  switch (tier) {
+    case 'Mega': return 100;
+    case 'Macro': return 85;
+    case 'Mid': return 65;
+    case 'Micro': return 45;
+    case 'Nano':
+    default: return 25;
+  }
+}
+
 // =============================================================================
 // LOAD IMAGE HELPER
 // =============================================================================
@@ -106,90 +131,136 @@ export async function generateShareableImage(data: ShareCardData): Promise<Blob 
   canvas.height = 630;
 
   const scoreColors = getScoreColors(data.score);
-  const primaryColor = data.brandColors?.primary || scoreColors.primary;
-  const secondaryColor = data.brandColors?.secondary || scoreColors.secondary;
+
+  // Use brand colors for right panel gradient, fallback to purple/indigo
+  const primaryColor = data.brandColors?.primary || '#6366f1';
+  const secondaryColor = data.brandColors?.secondary || '#a855f7';
 
   // Load profile image if available
   let profileImage: HTMLImageElement | null = null;
   if (data.profileImageUrl) {
-    // Get higher resolution image
     const highResUrl = data.profileImageUrl.replace('_normal', '_200x200');
     profileImage = await loadImage(highResUrl);
   }
 
-  // ==========================================================================
-  // BACKGROUND - Gradient with user's brand colors
-  // ==========================================================================
-  
-  // Main gradient background
-  const bgGradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-  bgGradient.addColorStop(0, '#0a0a12');
-  bgGradient.addColorStop(0.3, '#0f0f1a');
-  bgGradient.addColorStop(0.7, '#0a0a14');
-  bgGradient.addColorStop(1, '#050508');
-  ctx.fillStyle = bgGradient;
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  // Panel dimensions
+  const leftPanelWidth = Math.floor(canvas.width * 0.55); // 660px
+  const rightPanelWidth = canvas.width - leftPanelWidth;  // 540px
+  const cornerRadius = 32;
 
-  // Color accent blobs (using brand colors)
-  const primaryRgb = hexToRgb(primaryColor);
-  const secondaryRgb = hexToRgb(secondaryColor);
-  
-  if (primaryRgb) {
-    // Top right accent blob
-    const blob1 = ctx.createRadialGradient(canvas.width - 100, 80, 0, canvas.width - 100, 80, 400);
-    blob1.addColorStop(0, `rgba(${primaryRgb.r}, ${primaryRgb.g}, ${primaryRgb.b}, 0.3)`);
-    blob1.addColorStop(0.5, `rgba(${primaryRgb.r}, ${primaryRgb.g}, ${primaryRgb.b}, 0.1)`);
-    blob1.addColorStop(1, 'transparent');
-    ctx.fillStyle = blob1;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-  }
-  
-  if (secondaryRgb) {
-    // Bottom left accent blob
-    const blob2 = ctx.createRadialGradient(100, canvas.height - 100, 0, 100, canvas.height - 100, 350);
-    blob2.addColorStop(0, `rgba(${secondaryRgb.r}, ${secondaryRgb.g}, ${secondaryRgb.b}, 0.25)`);
-    blob2.addColorStop(0.5, `rgba(${secondaryRgb.r}, ${secondaryRgb.g}, ${secondaryRgb.b}, 0.08)`);
-    blob2.addColorStop(1, 'transparent');
-    ctx.fillStyle = blob2;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-  }
+  // ==========================================================================
+  // LEFT PANEL - Dark background
+  // ==========================================================================
 
-  // Subtle grid pattern
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
+  // Draw left panel background with rounded left corners
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(cornerRadius, 0);
+  ctx.lineTo(leftPanelWidth, 0);
+  ctx.lineTo(leftPanelWidth, canvas.height);
+  ctx.lineTo(cornerRadius, canvas.height);
+  ctx.arcTo(0, canvas.height, 0, canvas.height - cornerRadius, cornerRadius);
+  ctx.lineTo(0, cornerRadius);
+  ctx.arcTo(0, 0, cornerRadius, 0, cornerRadius);
+  ctx.closePath();
+  ctx.fillStyle = '#0F1115';
+  ctx.fill();
+  ctx.restore();
+
+  // Subtle border on right edge of left panel
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
   ctx.lineWidth = 1;
-  const gridSize = 50;
-  for (let x = 0; x < canvas.width; x += gridSize) {
-    ctx.beginPath();
-    ctx.moveTo(x, 0);
-    ctx.lineTo(x, canvas.height);
-    ctx.stroke();
-  }
-  for (let y = 0; y < canvas.height; y += gridSize) {
-    ctx.beginPath();
-    ctx.moveTo(0, y);
-    ctx.lineTo(canvas.width, y);
-    ctx.stroke();
-  }
-
-  // Noise texture simulation (dots)
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.015)';
-  for (let i = 0; i < 2000; i++) {
-    const x = Math.random() * canvas.width;
-    const y = Math.random() * canvas.height;
-    ctx.fillRect(x, y, 1, 1);
-  }
+  ctx.beginPath();
+  ctx.moveTo(leftPanelWidth, 0);
+  ctx.lineTo(leftPanelWidth, canvas.height);
+  ctx.stroke();
 
   // ==========================================================================
-  // PROFILE IMAGE + NAME - Top left
+  // RIGHT PANEL - Brand color gradient
   // ==========================================================================
-  const headerY = 55;
-  let textStartX = 60;
-  
+
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(leftPanelWidth, 0);
+  ctx.lineTo(canvas.width - cornerRadius, 0);
+  ctx.arcTo(canvas.width, 0, canvas.width, cornerRadius, cornerRadius);
+  ctx.lineTo(canvas.width, canvas.height - cornerRadius);
+  ctx.arcTo(canvas.width, canvas.height, canvas.width - cornerRadius, canvas.height, cornerRadius);
+  ctx.lineTo(leftPanelWidth, canvas.height);
+  ctx.closePath();
+  ctx.clip();
+
+  // Main gradient
+  const gradient = ctx.createLinearGradient(leftPanelWidth, 0, canvas.width, canvas.height);
+  gradient.addColorStop(0, primaryColor);
+  gradient.addColorStop(0.5, secondaryColor);
+  gradient.addColorStop(1, darkenColor(secondaryColor, 20));
+  ctx.fillStyle = gradient;
+  ctx.fillRect(leftPanelWidth, 0, rightPanelWidth, canvas.height);
+
+  // Top-right light leak effect
+  const primaryRgb = hexToRgb(primaryColor);
+  if (primaryRgb) {
+    const lightLeak = ctx.createRadialGradient(
+      canvas.width + 50, -50, 0,
+      canvas.width + 50, -50, 300
+    );
+    lightLeak.addColorStop(0, `rgba(${Math.min(255, primaryRgb.r + 100)}, ${Math.min(255, primaryRgb.g + 100)}, ${Math.min(255, primaryRgb.b + 100)}, 0.4)`);
+    lightLeak.addColorStop(1, 'transparent');
+    ctx.fillStyle = lightLeak;
+    ctx.fillRect(leftPanelWidth, 0, rightPanelWidth, canvas.height);
+  }
+
+  // Bottom-left depth effect
+  const secondaryRgb = hexToRgb(secondaryColor);
+  if (secondaryRgb) {
+    const depthEffect = ctx.createRadialGradient(
+      leftPanelWidth - 50, canvas.height + 50, 0,
+      leftPanelWidth - 50, canvas.height + 50, 250
+    );
+    depthEffect.addColorStop(0, `rgba(${Math.max(0, secondaryRgb.r - 80)}, ${Math.max(0, secondaryRgb.g - 80)}, ${Math.max(0, secondaryRgb.b - 80)}, 0.4)`);
+    depthEffect.addColorStop(1, 'transparent');
+    ctx.fillStyle = depthEffect;
+    ctx.fillRect(leftPanelWidth, 0, rightPanelWidth, canvas.height);
+  }
+
+  ctx.restore();
+
+  // ==========================================================================
+  // LEFT PANEL CONTENT
+  // ==========================================================================
+
+  const leftPadding = 60;
+  let currentY = 70;
+
+  // BrandOS Logo
+  ctx.textBaseline = 'alphabetic';
+  ctx.textAlign = 'left';
+  ctx.font = 'bold 36px "Helvetica Neue", Arial, sans-serif';
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillText('Brand', leftPadding, currentY);
+
+  const brandWidth = ctx.measureText('Brand').width;
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+  ctx.fillText('OS', leftPadding + brandWidth, currentY);
+
+  // Subtitle
+  currentY += 28;
+  ctx.font = '600 11px "Courier New", monospace';
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+  ctx.letterSpacing = '0.15em';
+  ctx.fillText('AI-POWERED BRAND DNA', leftPadding, currentY);
+
+  // ==========================================================================
+  // PROFILE SECTION
+  // ==========================================================================
+  currentY += 55;
+
   if (profileImage) {
-    const imgSize = 56;
-    const imgX = 60;
-    const imgY = headerY - imgSize / 2;
-    
+    const imgSize = 52;
+    const imgX = leftPadding;
+    const imgY = currentY;
+
     // Draw circular profile image
     ctx.save();
     ctx.beginPath();
@@ -198,209 +269,181 @@ export async function generateShareableImage(data: ShareCardData): Promise<Blob 
     ctx.clip();
     ctx.drawImage(profileImage, imgX, imgY, imgSize, imgSize);
     ctx.restore();
-    
-    // Add subtle border around profile image
+
+    // Subtle border
     ctx.beginPath();
-    ctx.arc(imgX + imgSize / 2, imgY + imgSize / 2, imgSize / 2 + 2, 0, Math.PI * 2);
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
-    ctx.lineWidth = 2;
+    ctx.arc(imgX + imgSize / 2, imgY + imgSize / 2, imgSize / 2 + 1.5, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+    ctx.lineWidth = 1.5;
     ctx.stroke();
-    
-    textStartX = imgX + imgSize + 16;
-  }
-  
-  // Display name
-  if (data.displayName) {
-    ctx.fillStyle = '#FFFFFF';
-    ctx.font = '600 26px "Helvetica Neue", Arial, sans-serif';
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(data.displayName, textStartX, headerY - 12);
-    
-    // Username below
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
-    ctx.font = '400 20px "Helvetica Neue", Arial, sans-serif';
-    ctx.fillText(`@${data.username}`, textStartX, headerY + 16);
+
+    // Name and handle next to image
+    const textX = imgX + imgSize + 16;
+    if (data.displayName) {
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = '600 22px "Helvetica Neue", Arial, sans-serif';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(data.displayName, textX, imgY + 16);
+
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+      ctx.font = '400 16px "Helvetica Neue", Arial, sans-serif';
+      ctx.fillText(`@${data.username}`, textX, imgY + 40);
+    } else {
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = '600 22px "Helvetica Neue", Arial, sans-serif';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(`@${data.username}`, textX, imgY + imgSize / 2);
+    }
+
+    currentY += imgSize + 45;
   } else {
-    // Just username
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-    ctx.font = '600 28px "Helvetica Neue", Arial, sans-serif';
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(`@${data.username}`, textStartX, headerY);
+    // Just name/handle without image
+    if (data.displayName) {
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = '600 22px "Helvetica Neue", Arial, sans-serif';
+      ctx.textBaseline = 'alphabetic';
+      ctx.fillText(data.displayName, leftPadding, currentY);
+      currentY += 24;
+
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+      ctx.font = '400 16px "Helvetica Neue", Arial, sans-serif';
+      ctx.fillText(`@${data.username}`, leftPadding, currentY);
+    } else {
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = '600 22px "Helvetica Neue", Arial, sans-serif';
+      ctx.textBaseline = 'alphabetic';
+      ctx.fillText(`@${data.username}`, leftPadding, currentY);
+    }
+    currentY += 45;
   }
 
   // ==========================================================================
-  // BRANDOS LOGO - Top right
+  // METRICS SECTION
   // ==========================================================================
-  ctx.textBaseline = 'alphabetic';
-  ctx.textAlign = 'right';
-  ctx.font = 'italic 700 32px "Helvetica Neue", Arial, sans-serif';
-  ctx.fillStyle = '#FFFFFF';
-  ctx.fillText('Brand', canvas.width - 60, 70);
-  
-  ctx.font = '700 32px "VCR OSD Mono", "Courier New", monospace';
-  ctx.fillStyle = primaryColor;
-  ctx.fillText('OS', canvas.width - 60, 70);
+
+  const metricBarWidth = leftPanelWidth - leftPadding * 2 - 20;
+  const metricBarHeight = 10;
+  const metricSpacing = 70;
+
+  // Helper function to draw a metric
+  const drawMetric = (label: string, value: string, widthPercent: number, color: string, y: number) => {
+    // Label
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+    ctx.font = '500 14px "Helvetica Neue", Arial, sans-serif';
+    ctx.textBaseline = 'alphabetic';
+    ctx.textAlign = 'left';
+    ctx.fillText(label, leftPadding, y);
+
+    // Value
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = 'bold 22px "Helvetica Neue", Arial, sans-serif';
+    ctx.fillText(value, leftPadding, y + 28);
+
+    // Progress bar background
+    const barY = y + 42;
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+    ctx.beginPath();
+    ctx.roundRect(leftPadding, barY, metricBarWidth, metricBarHeight, metricBarHeight / 2);
+    ctx.fill();
+
+    // Progress bar fill
+    const fillWidth = (widthPercent / 100) * metricBarWidth;
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.roundRect(leftPadding, barY, fillWidth, metricBarHeight, metricBarHeight / 2);
+    ctx.fill();
+  };
+
+  // Metric 1: Voice Consistency
+  const voiceConsistency = data.voiceConsistency ?? 85;
+  drawMetric('Voice Consistency', `${voiceConsistency}%`, voiceConsistency, '#10B981', currentY);
+  currentY += metricSpacing;
+
+  // Metric 2: Engagement
+  const engagementScore = data.engagementScore ?? 72;
+  drawMetric('Engagement', `${engagementScore}%`, engagementScore, '#0047FF', currentY);
+  currentY += metricSpacing;
+
+  // Metric 3: Influence Tier
+  const influenceTier = data.influenceTier || 'Micro';
+  const tierWidth = getInfluenceTierWidth(influenceTier);
+  drawMetric('Influence', influenceTier, tierWidth, '#9d4edd', currentY);
 
   // ==========================================================================
-  // SCORE SECTION - Center left
+  // ANALYSIS COMPLETE INDICATOR
   // ==========================================================================
-  const scoreX = 240;
-  const scoreY = canvas.height / 2 + 20;
 
-  // Score circle glow
-  const glowGradient = ctx.createRadialGradient(scoreX, scoreY, 0, scoreX, scoreY, 180);
-  glowGradient.addColorStop(0, scoreColors.glow);
-  glowGradient.addColorStop(0.5, 'rgba(0, 0, 0, 0)');
-  glowGradient.addColorStop(1, 'transparent');
-  ctx.fillStyle = glowGradient;
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  const bottomY = canvas.height - 50;
 
-  // Score circle background
+  // Pulsing dot (static for image)
+  ctx.fillStyle = '#10B981';
   ctx.beginPath();
-  ctx.arc(scoreX, scoreY, 120, 0, Math.PI * 2);
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.04)';
+  ctx.arc(leftPadding + 5, bottomY, 5, 0, Math.PI * 2);
   ctx.fill();
-  
-  // Inner ring
-  ctx.beginPath();
-  ctx.arc(scoreX, scoreY, 105, 0, Math.PI * 2);
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
-  ctx.lineWidth = 2;
-  ctx.stroke();
 
-  // Score progress arc
-  const progressAngle = (data.score / 100) * Math.PI * 2;
-  ctx.beginPath();
-  ctx.arc(scoreX, scoreY, 120, -Math.PI / 2, -Math.PI / 2 + progressAngle);
-  ctx.strokeStyle = scoreColors.primary;
-  ctx.lineWidth = 12;
-  ctx.lineCap = 'round';
-  ctx.stroke();
+  // Status text
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+  ctx.font = '600 10px "Courier New", monospace';
+  ctx.textBaseline = 'middle';
+  ctx.textAlign = 'left';
+  ctx.fillText('ANALYSIS COMPLETE', leftPadding + 20, bottomY);
 
-  // Score number
+  // ==========================================================================
+  // RIGHT PANEL - SCORE DISPLAY
+  // ==========================================================================
+
+  const rightCenterX = leftPanelWidth + rightPanelWidth / 2;
+  const rightCenterY = canvas.height / 2;
+
+  // Large score number
   ctx.fillStyle = '#FFFFFF';
-  ctx.font = 'bold 72px "Helvetica Neue", Arial, sans-serif';
+  ctx.font = 'bold 120px "Helvetica Neue", Arial, sans-serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText(String(data.score), scoreX, scoreY - 8);
+  ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+  ctx.shadowBlur = 20;
+  ctx.shadowOffsetX = 0;
+  ctx.shadowOffsetY = 4;
+  ctx.fillText(String(data.score), rightCenterX, rightCenterY - 20);
 
-  // /100 text
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-  ctx.font = '22px "Helvetica Neue", Arial, sans-serif';
-  ctx.fillText('/100', scoreX, scoreY + 38);
+  // Reset shadow
+  ctx.shadowColor = 'transparent';
+  ctx.shadowBlur = 0;
+  ctx.shadowOffsetX = 0;
+  ctx.shadowOffsetY = 0;
 
-  // Score label (EXCELLENT, etc.)
-  ctx.fillStyle = scoreColors.primary;
-  ctx.font = '600 14px "VCR OSD Mono", "Courier New", monospace';
-  ctx.fillText(getScoreLabel(data.score), scoreX, scoreY + 75);
+  // Score label badge
+  const label = getScoreLabel(data.score);
+  const badgeWidth = ctx.measureText(label).width + 40;
+  const badgeHeight = 36;
+  const badgeX = rightCenterX - badgeWidth / 2;
+  const badgeY = rightCenterY + 50;
 
-  // ==========================================================================
-  // RIGHT SIDE CONTENT
-  // ==========================================================================
-  const rightX = 480;
-  let currentY = 150;
+  // Badge background (glass effect)
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.roundRect(badgeX, badgeY, badgeWidth, badgeHeight, badgeHeight / 2);
+  ctx.fill();
+  ctx.stroke();
 
-  // Archetype section
-  if (data.archetype) {
-    // Archetype emoji (large)
-    ctx.font = '56px Arial';
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(data.archetype.emoji, rightX, currentY + 5);
-
-    // Archetype name
-    ctx.fillStyle = '#FFFFFF';
-    ctx.font = 'bold 32px "Helvetica Neue", Arial, sans-serif';
-    ctx.textBaseline = 'alphabetic';
-    ctx.fillText(data.archetype.primary.toUpperCase(), rightX + 75, currentY + 10);
-
-    currentY += 50;
-
-    // Archetype tagline or voice profile
-    const descriptionText = data.archetype.tagline || data.voiceProfile;
-    if (descriptionText) {
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-      ctx.font = '18px "Helvetica Neue", Arial, sans-serif';
-      const taglineLines = wrapText(ctx, descriptionText, 600);
-      taglineLines.forEach((line, i) => {
-        ctx.fillText(line, rightX, currentY + (i * 26));
-      });
-      currentY += taglineLines.length * 26 + 30;
-    }
-  }
-
-  // Summary / Brand DNA description
-  if (data.summary) {
-    ctx.fillStyle = scoreColors.primary;
-    ctx.font = '600 12px "VCR OSD Mono", "Courier New", monospace';
-    ctx.fillText('BRAND DNA', rightX, currentY);
-    currentY += 28;
-
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
-    ctx.font = '18px "Helvetica Neue", Arial, sans-serif';
-    const summaryLines = wrapText(ctx, data.summary, 620);
-    summaryLines.slice(0, 3).forEach((line, i) => {
-      ctx.fillText(line, rightX, currentY + (i * 26));
-    });
-    currentY += Math.min(summaryLines.length, 3) * 26 + 30;
-  }
-
-  // Top Strength
-  if (data.topStrength && !data.summary) {
-    ctx.fillStyle = scoreColors.primary;
-    ctx.font = '600 12px "VCR OSD Mono", "Courier New", monospace';
-    ctx.fillText('TOP STRENGTH', rightX, currentY);
-    currentY += 28;
-
-    ctx.fillStyle = '#FFFFFF';
-    ctx.font = '20px "Helvetica Neue", Arial, sans-serif';
-    const strengthLines = wrapText(ctx, `"${data.topStrength}"`, 600);
-    strengthLines.forEach((line, i) => {
-      ctx.fillText(line, rightX, currentY + (i * 28));
-    });
-  }
-
-  // ==========================================================================
-  // KEYWORDS - Bottom section
-  // ==========================================================================
-  if (data.keywords && data.keywords.length > 0) {
-    const keywordsY = canvas.height - 85;
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
-    ctx.font = '16px "Helvetica Neue", Arial, sans-serif';
-    ctx.textAlign = 'left';
-    
-    const keywordText = data.keywords.slice(0, 5).map(k => `#${k.replace(/\s+/g, '')}`).join('  ');
-    ctx.fillText(keywordText, 60, keywordsY);
-  }
-
-  // ==========================================================================
-  // CTA - Bottom right
-  // ==========================================================================
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
-  ctx.font = '18px "Helvetica Neue", Arial, sans-serif';
-  ctx.textAlign = 'right';
-  ctx.fillText('Get your brand score →', canvas.width - 60, canvas.height - 85);
-  
+  // Badge text
   ctx.fillStyle = '#FFFFFF';
-  ctx.font = 'bold 20px "Helvetica Neue", Arial, sans-serif';
-  ctx.fillText('brandos.xyz', canvas.width - 60, canvas.height - 55);
+  ctx.font = 'bold 14px "Courier New", monospace';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(label, rightCenterX, badgeY + badgeHeight / 2);
 
   // ==========================================================================
-  // DECORATIVE ELEMENTS
+  // CTA at bottom of right panel
   // ==========================================================================
-  
-  // Small accent dots
-  ctx.fillStyle = scoreColors.primary;
-  ctx.beginPath();
-  ctx.arc(60, canvas.height - 50, 4, 0, Math.PI * 2);
-  ctx.fill();
 
-  ctx.fillStyle = secondaryColor;
-  ctx.beginPath();
-  ctx.arc(80, canvas.height - 50, 3, 0, Math.PI * 2);
-  ctx.fill();
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+  ctx.font = '500 14px "Helvetica Neue", Arial, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'alphabetic';
+  ctx.fillText('brandos.xyz', rightCenterX, canvas.height - 40);
 
   // Convert to blob
   return new Promise((resolve) => {

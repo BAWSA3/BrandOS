@@ -7,6 +7,7 @@ import BrandDNAPreview, { GeneratedBrandDNA } from './BrandDNAPreview';
 import ShareableScoreCard, { ShareCardData } from './ShareableScoreCard';
 import ShareableBentoCard, { mapToBentoData } from './ShareableBentoCard';
 import BentoRevealGrid from './BentoRevealGrid';
+import WrappedReveal, { WrappedRevealData } from './WrappedReveal';
 
 // Dynamically import DNA scene to avoid SSR issues with Three.js
 const DNAJourneyScene = dynamic(() => import('./DNAJourneyScene'), {
@@ -567,6 +568,17 @@ function ScoreGauge({ score, isVisible, theme }: { score: number; isVisible: boo
       </div>
     </div>
   );
+}
+
+// ============================================================================
+// Helper function to get influence tier
+// ============================================================================
+function getInfluenceTier(followers: number): 'Nano' | 'Micro' | 'Mid' | 'Macro' | 'Mega' {
+  if (followers >= 1000000) return 'Mega';
+  if (followers >= 100000) return 'Macro';
+  if (followers >= 10000) return 'Mid';
+  if (followers >= 1000) return 'Micro';
+  return 'Nano';
 }
 
 // ============================================================================
@@ -1660,34 +1672,38 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
           </motion.div>
         )}
 
-        {/* REVEAL STATE - Bento Grid UI */}
+        {/* REVEAL STATE - Wrapped Reveal Experience */}
         {flowState === 'reveal' && brandScore && profile && generatedBrandDNA && (
-          <BentoRevealGrid
-            data={mapToBentoData(
-              {
-                username: profile.username,
-                name: profile.name,
-                profile_image_url: profile.profile_image_url,
-                public_metrics: {
-                  followers_count: profile.followers_count || 0,
-                  following_count: profile.following_count || 0,
-                  tweet_count: profile.tweet_count || 0,
-                },
+          <WrappedReveal
+            data={{
+              username: profile.username,
+              displayName: profile.name,
+              profileImageUrl: profile.profile_image_url,
+              followersCount: profile.followers_count || 0,
+              brandScore: brandScore.overallScore,
+              voiceConsistency: generatedBrandDNA.tone?.formality || 75,
+              archetype: generatedBrandDNA.archetype || 'The Creator',
+              archetypeEmoji: generatedBrandDNA.archetypeEmoji || '🎯',
+              personalityType: generatedBrandDNA.personalityType || 'Creative',
+              personalitySummary: generatedBrandDNA.personalitySummary || 'You bring ideas to life with precision and purpose. Your community trusts you to deliver substance over hype.',
+              tone: {
+                formality: generatedBrandDNA.tone?.formality || 70,
+                energy: generatedBrandDNA.tone?.energy || 65,
+                confidence: generatedBrandDNA.tone?.confidence || 80,
+                style: generatedBrandDNA.tone?.humor || 60,
               },
-              brandScore.overallScore,
-              {
-                tone: generatedBrandDNA.tone,
-                archetype: generatedBrandDNA.archetype,
-                archetypeEmoji: generatedBrandDNA.archetypeEmoji,
-                personalityType: generatedBrandDNA.personalityType,
-                personalityEmoji: generatedBrandDNA.personalityEmoji,
-                personalitySummary: generatedBrandDNA.personalitySummary,
-                colors: generatedBrandDNA.colors,
-                contentPillars: generatedBrandDNA.contentPillars,
-                performanceInsights: generatedBrandDNA.performanceInsights,
-              }
-            )}
-            theme={theme as 'light' | 'dark'}
+              influenceTier: getInfluenceTier(profile.followers_count || 0),
+              brandColors: {
+                primary: generatedBrandDNA.colors?.primary || '#0047FF',
+                secondary: generatedBrandDNA.colors?.secondary || '#9d4edd',
+                accent: generatedBrandDNA.colors?.accent || '#10B981',
+              },
+              contentPillars: generatedBrandDNA.contentPillars?.map(pillar => ({
+                name: pillar.name,
+                frequency: pillar.frequency,
+                avgEngagement: pillar.avgEngagement || 0,
+              })) || [],
+            } as WrappedRevealData}
             onClaim={() => setFlowState('signup')}
             onAnalyzeAnother={() => {
               setFlowState('input');

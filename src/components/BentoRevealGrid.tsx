@@ -4,6 +4,8 @@ import { motion, Variants, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { AnimateNumber } from 'motion-plus/react';
 import { BentoShareCardData, generateBentoShareImage } from './ShareableBentoCard';
+import CardPreviewSelector from './CardPreviewSelector';
+import { ShareCardData, CardStyle } from './ShareCardPrototypes';
 
 // =============================================================================
 // Color Scheme (BrandOS Brand Kit)
@@ -685,8 +687,26 @@ export default function BentoRevealGrid({
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isGeneratingPreview, setIsGeneratingPreview] = useState(false);
+  const [selectedCardStyle, setSelectedCardStyle] = useState<CardStyle>('billboard');
 
-  // Pre-generate preview image when entering preview mode
+  // Map BentoShareCardData to ShareCardData for the new card prototypes
+  const shareCardData: ShareCardData = {
+    brandScore: data.brandScore,
+    voiceConsistency: data.voiceConsistency,
+    username: data.username,
+    displayName: data.displayName,
+    profileImageUrl: data.profileImageUrl,
+    followersCount: data.followersCount,
+    influenceTier: data.influenceTier,
+    archetype: data.archetype,
+    archetypeEmoji: data.archetypeEmoji,
+    personalityType: data.personalityType,
+    personalitySummary: data.personalitySummary,
+    tone: data.tone,
+    brandColors: data.brandColors,
+  };
+
+  // Pre-generate preview image when entering preview mode (legacy fallback)
   useEffect(() => {
     if (isPreviewMode && !previewUrl) {
       setIsGeneratingPreview(true);
@@ -709,7 +729,7 @@ export default function BentoRevealGrid({
     };
   }, [previewUrl]);
 
-  // Generate and copy image to clipboard
+  // Generate and copy image to clipboard (legacy - kept for top nav button)
   const handleCopyToX = async () => {
     setCopying(true);
     try {
@@ -732,7 +752,7 @@ export default function BentoRevealGrid({
     setIsPreviewMode(!isPreviewMode);
   };
 
-  // Download image
+  // Download image (legacy)
   const handleDownload = async () => {
     const blob = await generateBentoShareImage(data);
     if (blob) {
@@ -743,6 +763,17 @@ export default function BentoRevealGrid({
       a.click();
       URL.revokeObjectURL(url);
     }
+  };
+
+  // Handle card style change from selector
+  const handleCardStyleChange = (style: CardStyle) => {
+    setSelectedCardStyle(style);
+  };
+
+  // Handle copy success from new selector
+  const handleCopySuccess = () => {
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
@@ -899,7 +930,7 @@ export default function BentoRevealGrid({
                 </motion.div>
               </motion.div>
             ) : (
-              /* Preview Mode - Share Card */
+              /* Preview Mode - New Card Selector with Multiple Styles */
               <motion.div
                 key="preview"
                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -940,7 +971,7 @@ export default function BentoRevealGrid({
                       border: `1px solid ${COLORS.accentBlue}40`,
                     }}
                   >
-                    SHARE PREVIEW
+                    CHOOSE YOUR STYLE
                   </div>
                   <span
                     style={{
@@ -949,110 +980,18 @@ export default function BentoRevealGrid({
                       color: COLORS.textMuted,
                     }}
                   >
-                    1200 × 630 px
+                    Pick the card that matches your vibe
                   </span>
                 </motion.div>
 
-                {/* Preview Image Container */}
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.1, duration: 0.3 }}
-                  style={{
-                    position: 'relative',
-                    borderRadius: '16px',
-                    overflow: 'hidden',
-                    boxShadow: `0 20px 60px rgba(0, 0, 0, 0.5), 0 0 40px ${COLORS.accentGlow}`,
-                    border: `1px solid ${COLORS.glassBorder}`,
-                  }}
-                >
-                  {isGeneratingPreview ? (
-                    <div
-                      style={{
-                        width: '600px',
-                        height: '315px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        background: COLORS.cardHero,
-                      }}
-                    >
-                      <motion.div
-                        animate={{ rotate: 360 }}
-                        transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-                        style={{
-                          width: '40px',
-                          height: '40px',
-                          border: `3px solid ${COLORS.glassBorder}`,
-                          borderTopColor: COLORS.accentBlue,
-                          borderRadius: '50%',
-                        }}
-                      />
-                    </div>
-                  ) : previewUrl ? (
-                    <img
-                      src={previewUrl}
-                      alt="Share card preview"
-                      style={{
-                        maxWidth: '100%',
-                        width: '600px',
-                        height: 'auto',
-                        display: 'block',
-                      }}
-                    />
-                  ) : null}
-                </motion.div>
-
-                {/* Preview Actions */}
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 }}
-                  style={{
-                    display: 'flex',
-                    gap: '12px',
-                    alignItems: 'center',
-                  }}
-                >
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={handleCopyToX}
-                    disabled={copying}
-                    style={{
-                      fontFamily: "'Helvetica Neue', sans-serif",
-                      fontSize: '14px',
-                      color: '#FFFFFF',
-                      background: copied ? '#10B981' : COLORS.accentBlue,
-                      border: 'none',
-                      padding: '12px 24px',
-                      borderRadius: '12px',
-                      cursor: 'pointer',
-                      fontWeight: 500,
-                      boxShadow: `0 4px 20px ${COLORS.accentGlow}`,
-                    }}
-                  >
-                    {copied ? '✓ Copied to Clipboard!' : copying ? 'Copying...' : 'Copy to Clipboard'}
-                  </motion.button>
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={handleDownload}
-                    style={{
-                      fontFamily: "'Helvetica Neue', sans-serif",
-                      fontSize: '14px',
-                      color: COLORS.textLight,
-                      background: 'transparent',
-                      border: `1px solid ${COLORS.glassBorder}`,
-                      padding: '12px 24px',
-                      borderRadius: '12px',
-                      cursor: 'pointer',
-                      fontWeight: 500,
-                    }}
-                  >
-                    Download PNG
-                  </motion.button>
-                </motion.div>
+                {/* New Card Preview Selector */}
+                <CardPreviewSelector
+                  data={shareCardData}
+                  theme={theme}
+                  onCopied={handleCopySuccess}
+                  onStyleChange={handleCardStyleChange}
+                  defaultStyle={selectedCardStyle}
+                />
 
                 {/* Tip */}
                 <motion.p
@@ -1064,9 +1003,10 @@ export default function BentoRevealGrid({
                     fontSize: '13px',
                     color: COLORS.textMuted,
                     textAlign: 'center',
+                    maxWidth: '500px',
                   }}
                 >
-                  This is exactly how your brand card will appear when shared on X
+                  Select your favorite style, then copy to clipboard and paste directly into X
                 </motion.p>
               </motion.div>
             )}
