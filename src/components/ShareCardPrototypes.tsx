@@ -47,6 +47,59 @@ function hexToRgb(hex: string): { r: number; g: number; b: number } {
     : { r: 0, g: 71, b: 255 };
 }
 
+// Check if a color is too light (for gradients - light colors wash out)
+function isColorTooLight(hex: string): boolean {
+  const { r, g, b } = hexToRgb(hex);
+  // Calculate relative luminance
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance > 0.75; // If luminance > 75%, it's too light for a vibrant gradient
+}
+
+// Check if a color is too dark (makes gradients look dull)
+function isColorTooDark(hex: string): boolean {
+  const { r, g, b } = hexToRgb(hex);
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance < 0.25; // If luminance < 25%, it's too dark
+}
+
+// Boost a dark color to make it more vibrant
+function boostDarkColor(hex: string): string {
+  const { r, g, b } = hexToRgb(hex);
+  // Increase saturation and brightness while preserving hue
+  const boost = 1.8;
+  const minValue = 60;
+  const newR = Math.min(255, Math.max(minValue, Math.round(r * boost)));
+  const newG = Math.min(255, Math.max(minValue, Math.round(g * boost)));
+  const newB = Math.min(255, Math.max(minValue, Math.round(b * boost)));
+  return `#${newR.toString(16).padStart(2, '0')}${newG.toString(16).padStart(2, '0')}${newB.toString(16).padStart(2, '0')}`;
+}
+
+// Get the best gradient colors from brand colors
+function getGradientColors(brandColors: ShareCardData['brandColors']): { color1: string; color2: string } {
+  let primary = brandColors?.primary || '#0047FF';
+  const secondary = brandColors?.secondary || '#9d4edd';
+  const accent = brandColors?.accent || '#10B981';
+
+  // If primary is too dark, boost it for better visibility
+  if (isColorTooDark(primary)) {
+    primary = boostDarkColor(primary);
+  }
+
+  // If secondary is too light (like white/cream backgrounds), use accent instead
+  // If secondary is too dark, boost it
+  let gradientSecondary = secondary;
+  if (isColorTooLight(secondary)) {
+    gradientSecondary = accent;
+  } else if (isColorTooDark(secondary)) {
+    gradientSecondary = boostDarkColor(secondary);
+  }
+
+  return {
+    color1: primary,
+    color2: gradientSecondary,
+  };
+}
+
 function getScoreLabel(score: number): string {
   if (score >= 90) return 'EXCEPTIONAL';
   if (score >= 80) return 'EXCELLENT';
@@ -86,9 +139,7 @@ export async function generateBillboardCard(data: ShareCardData): Promise<Blob |
   canvas.width = 1200;
   canvas.height = 630;
 
-  const primary = data.brandColors?.primary || '#0047FF';
-  const secondary = data.brandColors?.secondary || '#9d4edd';
-  const { r, g, b } = hexToRgb(primary);
+  const { color1: primary, color2: secondary } = getGradientColors(data.brandColors);
   const { r: r2, g: g2, b: b2 } = hexToRgb(secondary);
 
   // Background gradient (user's brand colors)
@@ -216,8 +267,7 @@ export async function generateSplitCard(data: ShareCardData): Promise<Blob | nul
   canvas.width = 1200;
   canvas.height = 630;
 
-  const primary = data.brandColors?.primary || '#0047FF';
-  const secondary = data.brandColors?.secondary || '#9d4edd';
+  const { color1: primary, color2: secondary } = getGradientColors(data.brandColors);
   const { r: r2, g: g2, b: b2 } = hexToRgb(secondary);
 
   const splitX = Math.floor(canvas.width * 0.45);
@@ -413,8 +463,7 @@ export async function generateWrappedCard(data: ShareCardData): Promise<Blob | n
   canvas.width = 1200;
   canvas.height = 630;
 
-  const primary = data.brandColors?.primary || '#0047FF';
-  const secondary = data.brandColors?.secondary || '#9d4edd';
+  const { color1: primary, color2: secondary } = getGradientColors(data.brandColors);
   const { r, g, b } = hexToRgb(primary);
   const { r: r2, g: g2, b: b2 } = hexToRgb(secondary);
 
