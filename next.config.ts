@@ -19,9 +19,13 @@ export default withSentryConfig(nextConfig, {
   // Route browser requests to Sentry through Next.js rewrite
   tunnelRoute: "/monitoring",
 
-  // Hide source maps from browser devtools
-  hideSourceMaps: true,
+  // Source map settings
+  sourcemaps: {
+    deleteSourcemapsAfterUpload: true,
+  },
 
-  // Automatically tree-shake Sentry SDK
-  disableLogger: true,
+  // Automatically tree-shake Sentry SDK debug statements
+  bundleSizeOptimizations: {
+    excludeDebugStatements: true,
+  },
 });

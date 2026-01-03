@@ -295,8 +295,3 @@ function ScrollProgressIndicator({ progress }: ScrollProgressIndicatorProps) {
   );
 }
 
-// =============================================================================
-// EXPORTS
-// =============================================================================
-
-export type { WrappedRevealData };
