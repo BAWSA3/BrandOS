@@ -355,40 +355,49 @@ export async function generateSplitCard(data: ShareCardData): Promise<Blob | nul
 
   // Archetype with emoji
   ctx.fillStyle = '#FFFFFF';
-  ctx.font = '700 28px "Helvetica Neue", Arial, sans-serif';
+  ctx.font = '700 32px "Helvetica Neue", Arial, sans-serif';
   ctx.textBaseline = 'alphabetic';
-  ctx.fillText(`${data.archetypeEmoji} ${data.archetype}`, leftPadding, textStartY + 30);
+  ctx.fillText(`${data.archetypeEmoji} ${data.archetype}`, leftPadding, textStartY + 35);
 
-  // Personality summary (word wrapped)
-  ctx.fillStyle = 'rgba(255,255,255,0.6)';
-  ctx.font = '400 14px "Helvetica Neue", Arial, sans-serif';
-  const summary = data.personalitySummary || 'You bring ideas to life with precision and purpose. Your community trusts you to deliver.';
+  // Personality summary (word wrapped, limited to 4 lines max)
+  ctx.fillStyle = 'rgba(255,255,255,0.7)';
+  ctx.font = '400 15px "Helvetica Neue", Arial, sans-serif';
+  // Truncate summary to ~180 chars to prevent overflow
+  const fullSummary = data.personalitySummary || 'You bring ideas to life with precision and purpose. Your community trusts you to deliver.';
+  const summary = fullSummary.length > 180 ? fullSummary.substring(0, 180) + '...' : fullSummary;
   const words = summary.split(' ');
   let line = '';
-  let lineY = textStartY + 80;
+  let lineY = textStartY + 90;
   const maxWidth = splitX - leftPadding * 2;
+  const maxLines = 4;
+  let lineCount = 0;
 
   for (const word of words) {
     const testLine = line + word + ' ';
     if (ctx.measureText(testLine).width > maxWidth) {
+      lineCount++;
+      if (lineCount > maxLines) break;
       ctx.fillText(line.trim(), leftPadding, lineY);
       line = word + ' ';
-      lineY += 22;
+      lineY += 24;
     } else {
       line = testLine;
     }
   }
-  ctx.fillText(line.trim(), leftPadding, lineY);
+  if (lineCount <= maxLines && line.trim()) {
+    ctx.fillText(line.trim(), leftPadding, lineY);
+  }
 
-  // Divider line
+  // Divider line - positioned after summary with proper spacing
+  const dividerY = 360;
   ctx.strokeStyle = 'rgba(255,255,255,0.1)';
   ctx.lineWidth = 1;
   ctx.beginPath();
-  ctx.moveTo(leftPadding, 340);
-  ctx.lineTo(splitX - leftPadding, 340);
+  ctx.moveTo(leftPadding, dividerY);
+  ctx.lineTo(splitX - leftPadding, dividerY);
   ctx.stroke();
 
-  // Metrics on left
+  // Metrics on left - start below divider
   const engagement = Math.round((data.tone.formality + data.tone.energy + data.tone.confidence + data.tone.style) / 4);
   const metrics = [
     { label: 'Voice Consistency', value: `${data.voiceConsistency}%` },
@@ -396,16 +405,16 @@ export async function generateSplitCard(data: ShareCardData): Promise<Blob | nul
     { label: 'Engagement', value: `${engagement}%` },
   ];
 
-  let metricY = 380;
+  let metricY = dividerY + 35;
   metrics.forEach((m) => {
     ctx.fillStyle = 'rgba(255,255,255,0.5)';
-    ctx.font = '400 12px "Helvetica Neue", Arial, sans-serif';
+    ctx.font = '400 13px "Helvetica Neue", Arial, sans-serif';
     ctx.textAlign = 'left';
     ctx.fillText(m.label, leftPadding, metricY);
     ctx.fillStyle = '#FFFFFF';
-    ctx.font = '600 16px "Helvetica Neue", Arial, sans-serif';
-    ctx.fillText(m.value, leftPadding, metricY + 22);
-    metricY += 60;
+    ctx.font = '600 20px "Helvetica Neue", Arial, sans-serif';
+    ctx.fillText(m.value, leftPadding, metricY + 24);
+    metricY += 65;
   });
 
   // brandos.xyz at bottom left
