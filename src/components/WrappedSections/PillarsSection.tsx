@@ -87,10 +87,10 @@ export default function PillarsSection({ contentPillars }: PillarsSectionProps) 
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
           gap: '16px',
           width: '100%',
-          maxWidth: '500px',
+          maxWidth: '600px',
         }}
       >
         {topPillars.map((pillar, index) => {
@@ -115,13 +115,13 @@ export default function PillarsSection({ contentPillars }: PillarsSectionProps) 
                 background: 'rgba(255, 255, 255, 0.03)',
                 border: '1px solid rgba(255, 255, 255, 0.08)',
                 borderRadius: '20px',
-                padding: '24px 20px',
+                padding: '24px 16px',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                gap: '12px',
+                gap: '10px',
                 position: 'relative',
-                overflow: 'hidden',
+                overflow: 'visible',
               }}
             >
               {/* Color accent line at top */}
@@ -140,11 +140,19 @@ export default function PillarsSection({ contentPillars }: PillarsSectionProps) 
               {/* Pillar Name */}
               <span
                 style={{
-                  fontSize: '16px',
+                  fontSize: pillar.name.length > 20 ? '13px' : '15px',
                   fontWeight: 600,
                   color: '#FFFFFF',
                   fontFamily: "'Helvetica Neue', Arial, sans-serif",
                   textAlign: 'center',
+                  lineHeight: 1.3,
+                  wordBreak: 'break-word',
+                  hyphens: 'auto',
+                  maxWidth: '100%',
+                  minHeight: '40px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                 }}
               >
                 {pillar.name}
