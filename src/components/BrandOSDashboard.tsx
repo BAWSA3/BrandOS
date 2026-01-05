@@ -19,7 +19,7 @@ export interface BrandOSDashboardData {
   };
   personality: {
     archetype: string;
-    emoji: string;
+    emoji: string; // Can be native emoji character or path to SVG (e.g., "/emojis/...")
     type: string;
   };
   tone: {
@@ -153,8 +153,16 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({ data }) => {
           <div className="flex justify-between items-start z-10">
             <span className="font-os text-[10px] text-black/70 font-bold border border-black/10 px-1.5 py-0.5 rounded-[2px]">ARCHETYPE</span>
           </div>
-          <div className="absolute -right-4 top-6 text-[85px] leading-none opacity-100 transform rotate-12 drop-shadow-lg filter hover:rotate-0 transition-transform duration-300">
-            {data.personality.emoji}
+          <div className="absolute -right-4 top-6 leading-none opacity-100 transform rotate-12 drop-shadow-lg filter hover:rotate-0 transition-transform duration-300">
+            {data.personality.emoji.startsWith('/') ? (
+              <img
+                src={data.personality.emoji}
+                alt={data.personality.archetype}
+                className="w-[85px] h-[85px] object-contain"
+              />
+            ) : (
+              <span className="text-[85px]">{data.personality.emoji}</span>
+            )}
           </div>
           <div className="z-10 mt-auto">
             <h3 className="text-2xl font-brand font-black italic text-black leading-tight max-w-[80%]">

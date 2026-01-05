@@ -17,7 +17,7 @@ const mockData: BrandOSDashboardData = {
   },
   personality: {
     archetype: 'The Philosopher',
-    emoji: '🧠',
+    emoji: '/emojis/Faces & Emotions/🤓 - Nerd Face.svg',
     type: 'INTJ',
   },
   tone: {
