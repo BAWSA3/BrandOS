@@ -64,6 +64,13 @@
   --blue-subtle: rgba(0, 71, 255, 0.1);
   --blue-hover: #0038CC;
 
+  /* Dashboard "Digital Brutalism" Palette */
+  --brand-black: #050505;
+  --brand-blue: #2E6AFF;
+  --brand-green: #00FF41;
+  --brand-yellow: #FFD700;
+  --brand-gray: #1A1A1A;
+
   /* Dark Theme (Primary) */
   --background: #0a0a0a;
   --foreground: #ffffff;
@@ -149,6 +156,13 @@
   --color-border: var(--border);
   --color-surface: var(--surface);
   --color-accent: var(--accent);
+
+  /* Dashboard Colors */
+  --color-brand-black: var(--brand-black);
+  --color-brand-blue: var(--brand-blue);
+  --color-brand-green: var(--brand-green);
+  --color-brand-yellow: var(--brand-yellow);
+  --color-brand-gray: var(--brand-gray);
 }
 
 /* ============================================
