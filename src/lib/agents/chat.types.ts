@@ -206,7 +206,7 @@ export function createChatMessage(
   metadata?: ChatMessage['metadata']
 ): ChatMessage {
   return {
-    id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    id: `msg_${crypto.randomUUID()}`,
     role,
     content,
     timestamp: new Date(),
@@ -221,7 +221,7 @@ export function createChatSession(
   const persona = getAgentPersona(agentName);
   
   return {
-    id: `chat_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    id: `chat_${crypto.randomUUID()}`,
     agentName,
     brandId,
     messages: [

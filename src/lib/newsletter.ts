@@ -45,7 +45,7 @@ export async function addEmailSignup(email: string, source: string = 'landing'):
 
   // Add new signup
   const newSignup: EmailSignup = {
-    id: `signup_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    id: `signup_${crypto.randomUUID()}`,
     email: email.toLowerCase().trim(),
     source,
     createdAt: new Date().toISOString(),

@@ -120,10 +120,17 @@ export async function POST(request: NextRequest) {
 
 // OPTIONS for CORS preflight
 export async function OPTIONS() {
+  // Use configured allowed origins, or fall back to restrictive default in production
+  const allowedOrigins = process.env.CORS_ALLOWED_ORIGINS?.split(',') || [];
+  const isDev = process.env.NODE_ENV === 'development';
+
+  // In development, allow all origins. In production, require explicit config.
+  const corsOrigin = isDev ? '*' : (allowedOrigins[0] || 'https://brandos.app');
+
   return new NextResponse(null, {
     status: 200,
     headers: {
-      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Origin': corsOrigin,
       'Access-Control-Allow-Methods': 'POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, x-api-key',
     },

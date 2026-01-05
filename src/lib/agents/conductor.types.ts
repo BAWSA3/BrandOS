@@ -152,7 +152,7 @@ export function createConductorMessage(
   metadata?: ConductorMessage['metadata']
 ): ConductorMessage {
   return {
-    id: `cmsg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    id: `cmsg_${crypto.randomUUID()}`,
     role,
     content,
     timestamp: new Date(),
@@ -167,7 +167,7 @@ export function createWorkflowPlan(
   steps: Omit<WorkflowStep, 'status'>[]
 ): WorkflowPlan {
   return {
-    id: `wf_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    id: `wf_${crypto.randomUUID()}`,
     type,
     name,
     description,

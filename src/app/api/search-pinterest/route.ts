@@ -12,7 +12,6 @@ export async function POST(request: NextRequest) {
     }
 
     const apiKey = process.env.SERPER_API_KEY;
-    console.log('SERPER_API_KEY present:', !!apiKey, 'length:', apiKey?.length);
     
     if (!apiKey) {
       // Return mock results if no API key (for demo purposes)
@@ -22,7 +21,9 @@ export async function POST(request: NextRequest) {
       });
     }
     
-    console.log('Searching for:', query);
+    // Sanitize query for logging (prevent log injection)
+    const sanitizedQuery = query.replace(/[\n\r]/g, ' ').slice(0, 100);
+    console.log('Searching for:', sanitizedQuery);
 
     // Search Google Images filtered to Pinterest
     const response = await fetch('https://google.serper.dev/images', {

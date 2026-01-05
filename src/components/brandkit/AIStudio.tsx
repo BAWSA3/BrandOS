@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import DOMPurify from 'dompurify';
 import { useCurrentBrand } from '@/lib/store';
 import { useBrandKitStore } from '@/lib/brandKitStore';
 import { 
@@ -1075,9 +1076,9 @@ export default function AIStudio() {
           <div className="grid grid-cols-5 gap-2">
             {iconSet.icons.map((icon, i) => (
               <div key={i} className="p-3 bg-background rounded-lg text-center group cursor-pointer" onClick={() => copyToClipboard(icon.svgCode)}>
-                <div 
+                <div
                   className="w-8 h-8 mx-auto mb-1"
-                  dangerouslySetInnerHTML={{ __html: icon.svgCode }}
+                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(icon.svgCode, { USE_PROFILES: { svg: true } }) }}
                 />
                 <span className="text-xs text-muted group-hover:text-foreground">{icon.name}</span>
               </div>
