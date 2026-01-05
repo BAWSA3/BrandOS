@@ -109,6 +109,8 @@ export default function InfluenceSection({
           display: 'flex',
           gap: '8px',
           marginBottom: '24px',
+          alignItems: 'flex-end',
+          height: '52px',
         }}
       >
         {TIER_ORDER.map((tier, index) => (

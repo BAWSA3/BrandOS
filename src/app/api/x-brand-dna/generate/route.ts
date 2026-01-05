@@ -13,7 +13,7 @@ import {
   analyzeBioLinguistics,
 } from '@/lib/gemini';
 import { BrandDNA as StoreBrandDNA } from '@/lib/types';
-import { ExtractedColors } from '@/lib/color-extraction';
+import { ExtractedColors, generateHarmoniousColors } from '@/lib/color-extraction';
 
 // =============================================================================
 // CRYPTO TWITTER PERSONALITY TYPES
@@ -305,22 +305,29 @@ function extractColors(
     };
   }
 
-  // Priority 2: From Gemini image analysis
-  if (imageAnalysis?.dominantColors && imageAnalysis.dominantColors.length >= 2) {
-    const colors = imageAnalysis.dominantColors;
+  // Priority 2: From Gemini image analysis - use harmonious color generation
+  if (imageAnalysis?.dominantColors && imageAnalysis.dominantColors.length >= 1) {
+    const primaryHex = imageAnalysis.dominantColors[0]?.hex || '#0047FF';
+    const { secondary, accent } = generateHarmoniousColors(primaryHex);
+    console.log('=== USING GEMINI COLORS WITH HARMONIOUS GENERATION ===');
+    console.log('Primary:', primaryHex, 'Secondary:', secondary, 'Accent:', accent);
     return {
-      primary: colors[0]?.hex || '#0047FF',
-      secondary: colors[1]?.hex || '#1a1a1a',
-      accent: colors[2]?.hex || generateAccentColor(colors[0]?.hex || '#0047FF'),
+      primary: primaryHex,
+      secondary,
+      accent,
     };
   }
 
-  // Priority 3: From Gemini brand DNA analysis
+  // Priority 3: From Gemini brand DNA analysis - use harmonious color generation
   if (geminiBrandDNA?.primaryColor?.hex) {
+    const primaryHex = geminiBrandDNA.primaryColor.hex;
+    const { secondary, accent } = generateHarmoniousColors(primaryHex);
+    console.log('=== USING BRAND DNA COLORS WITH HARMONIOUS GENERATION ===');
+    console.log('Primary:', primaryHex, 'Secondary:', secondary, 'Accent:', accent);
     return {
-      primary: geminiBrandDNA.primaryColor.hex,
-      secondary: geminiBrandDNA.secondaryColor?.hex || '#1a1a1a',
-      accent: generateAccentColor(geminiBrandDNA.primaryColor.hex),
+      primary: primaryHex,
+      secondary,
+      accent,
     };
   }
 

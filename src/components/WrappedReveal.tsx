@@ -116,11 +116,44 @@ export default function WrappedReveal({
       transition={{ duration: 0.5 }}
       style={{
         minHeight: '100vh',
+        width: '100vw',
         background: '#0a0a0a',
-        position: 'relative',
-        overflow: 'hidden',
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        overflow: 'auto',
+        zIndex: 50,
       }}
     >
+      {/* Left gradient glow */}
+      <div
+        style={{
+          position: 'fixed',
+          left: 0,
+          top: 0,
+          bottom: 0,
+          width: '350px',
+          background: `radial-gradient(ellipse at left center, ${primaryColor}20 0%, transparent 70%)`,
+          pointerEvents: 'none',
+          zIndex: 2,
+        }}
+      />
+
+      {/* Right gradient glow */}
+      <div
+        style={{
+          position: 'fixed',
+          right: 0,
+          top: 0,
+          bottom: 0,
+          width: '350px',
+          background: `radial-gradient(ellipse at right center, ${secondaryColor}20 0%, transparent 70%)`,
+          pointerEvents: 'none',
+          zIndex: 2,
+        }}
+      />
       {/* Animated Background Gradient */}
       <motion.div
         style={{

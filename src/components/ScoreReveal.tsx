@@ -714,6 +714,13 @@ export default function ScoreReveal({ profile, brandScore, isVisible, theme }: S
     }
   }, [isVisible, brandScore.overallScore]);
 
+  // Get brand colors for gradient glows
+  const brandColors = brandScore.brandColors || {
+    primary: '#0047FF',
+    secondary: '#10B981',
+    accent: '#8B5CF6',
+  };
+
   return (
     <div
       style={{
@@ -722,10 +729,37 @@ export default function ScoreReveal({ profile, brandScore, isVisible, theme }: S
         alignItems: 'center',
         gap: '48px',
         width: '100%',
-        maxWidth: '900px',
         position: 'relative',
       }}
     >
+      {/* Left gradient glow */}
+      <div
+        style={{
+          position: 'fixed',
+          left: 0,
+          top: 0,
+          bottom: 0,
+          width: '300px',
+          background: `radial-gradient(ellipse at left center, ${brandColors.primary}15 0%, transparent 70%)`,
+          pointerEvents: 'none',
+          zIndex: 1,
+        }}
+      />
+
+      {/* Right gradient glow */}
+      <div
+        style={{
+          position: 'fixed',
+          right: 0,
+          top: 0,
+          bottom: 0,
+          width: '300px',
+          background: `radial-gradient(ellipse at right center, ${brandColors.secondary}15 0%, transparent 70%)`,
+          pointerEvents: 'none',
+          zIndex: 1,
+        }}
+      />
+
       {/* Confetti for high scores */}
       <Confetti isActive={showConfetti} />
 
