@@ -2,33 +2,33 @@
   {
     "username": "banditxbt",
     "displayName": "banditxbt",
-    "score": 83,
+    "score": 86,
     "profileImage": "",
-    "timestamp": 1767265719863,
+    "timestamp": 1767640265653,
     "isCrypto": false
   },
   {
     "username": "BawsaXBT",
     "displayName": "BawsaXBT",
-    "score": 88,
+    "score": 78,
     "profileImage": "",
-    "timestamp": 1767357939664,
+    "timestamp": 1767641991229,
     "isCrypto": false
   },
   {
     "username": "naval",
     "displayName": "naval",
-    "score": 94,
+    "score": 98,
     "profileImage": "",
-    "timestamp": 1767374006701,
+    "timestamp": 1767637358758,
     "isCrypto": false
   },
   {
     "username": "elonmusk",
     "displayName": "elonmusk",
-    "score": 98,
+    "score": 95,
     "profileImage": "",
-    "timestamp": 1767363785361,
+    "timestamp": 1767633508196,
     "isCrypto": false
   },
   {
@@ -84,7 +84,23 @@
     "displayName": "MKBHD",
     "score": 94,
     "profileImage": "",
-    "timestamp": 1767359930359,
+    "timestamp": 1767632554232,
+    "isCrypto": false
+  },
+  {
+    "username": "0xDesigner",
+    "displayName": "0xDesigner",
+    "score": 72,
+    "profileImage": "",
+    "timestamp": 1767633062134,
+    "isCrypto": false
+  },
+  {
+    "username": "web3rj",
+    "displayName": "web3rj",
+    "score": 72,
+    "profileImage": "",
+    "timestamp": 1767642543688,
     "isCrypto": false
   }
 ]
