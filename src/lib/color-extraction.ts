@@ -193,11 +193,33 @@ function colorDistance(hex1: string, hex2: string): number {
 }
 
 /**
+ * Calculate average saturation of a palette to detect grayscale images
+ */
+function getAverageSaturation(palette: string[]): number {
+  if (palette.length === 0) return 0;
+
+  let totalSat = 0;
+  for (const color of palette) {
+    const [r, g, b] = hexToRgb(color);
+    const [, s] = rgbToHsl(r, g, b);
+    totalSat += s;
+  }
+  return totalSat / palette.length;
+}
+
+/**
  * Find the most vibrant usable color from palette
+ * For grayscale images (low saturation), prefer muted colors
  */
 function findBestPrimaryColor(palette: string[]): string {
   let bestColor = palette[0];
   let bestScore = -1;
+
+  // Detect if image is mostly grayscale
+  const avgSat = getAverageSaturation(palette);
+  const isGrayscaleImage = avgSat < 25; // Below 25% average saturation = mostly grayscale
+
+  console.log('Average palette saturation:', avgSat.toFixed(1) + '%', isGrayscaleImage ? '(grayscale detected)' : '');
 
   for (const color of palette) {
     if (!isUsableColor(color)) continue;
@@ -207,7 +229,17 @@ function findBestPrimaryColor(palette: string[]): string {
 
     // Score based on saturation and avoid extreme lightness
     const lightnessScore = 1 - Math.abs(l - 50) / 50;
-    const score = s * lightnessScore;
+
+    let score: number;
+    if (isGrayscaleImage) {
+      // For grayscale images, PENALIZE high saturation (likely artifacts)
+      // Prefer colors with saturation close to the average
+      const saturationPenalty = s > 30 ? 0.3 : 1; // Penalize saturated colors in grayscale images
+      score = lightnessScore * saturationPenalty;
+    } else {
+      // For colorful images, prefer vibrant colors
+      score = s * lightnessScore;
+    }
 
     if (score > bestScore) {
       bestScore = score;
@@ -300,31 +332,54 @@ export async function extractColorsFromImage(
       return DEFAULT_COLORS;
     }
 
-    // Build hex palette from vibrant swatches
-    const swatches = [
+    // Separate vibrant and muted swatches to detect grayscale images
+    const vibrantSwatches = [
       palette.Vibrant,
       palette.DarkVibrant,
       palette.LightVibrant,
+    ].filter(Boolean);
+
+    const mutedSwatches = [
       palette.Muted,
       palette.DarkMuted,
       palette.LightMuted,
     ].filter(Boolean);
 
-    if (swatches.length === 0) {
+    const allSwatches = [...vibrantSwatches, ...mutedSwatches];
+
+    if (allSwatches.length === 0) {
       console.warn('No valid swatches found');
       return DEFAULT_COLORS;
     }
 
-    // Convert swatches to hex colors
-    const hexPalette = swatches.map(swatch => swatch!.hex);
+    // Convert to hex colors
+    const vibrantHex = vibrantSwatches.map(s => s!.hex);
+    const mutedHex = mutedSwatches.map(s => s!.hex);
+    const hexPalette = allSwatches.map(swatch => swatch!.hex);
+
     console.log('=== EXTRACTED COLORS FROM PFP (node-vibrant) ===');
     console.log('Raw Palette:', hexPalette);
+    console.log('Vibrant swatches:', vibrantHex);
+    console.log('Muted swatches:', mutedHex);
+
+    // Detect grayscale images by checking if MUTED swatches are low saturation
+    // This is more reliable because Vibrant swatches can pick up artifacts
+    const mutedSaturation = getAverageSaturation(mutedHex);
+    const vibrantSaturation = getAverageSaturation(vibrantHex);
+    const isGrayscaleImage = mutedSaturation < 15; // Muted swatches < 15% saturation = grayscale
+
+    console.log('Muted saturation:', mutedSaturation.toFixed(1) + '%');
+    console.log('Vibrant saturation:', vibrantSaturation.toFixed(1) + '%');
+    console.log('Grayscale detected:', isGrayscaleImage);
+
+    // For grayscale images, prefer muted palette; otherwise use all
+    const paletteToUse = isGrayscaleImage && mutedHex.length > 0 ? mutedHex : hexPalette;
 
     // Find the best primary color (most vibrant and usable)
-    const primary = findBestPrimaryColor(hexPalette) || DEFAULT_COLORS.primary;
+    const primary = findBestPrimaryColor(paletteToUse) || DEFAULT_COLORS.primary;
 
     // Find the secondary color from the palette (different from primary)
-    const secondary = findSecondaryColor(hexPalette, primary);
+    const secondary = findSecondaryColor(paletteToUse, primary);
 
     // Generate only the accent color harmoniously based on primary
     const accent = generateHarmoniousAccent(primary);
