@@ -25,9 +25,10 @@ export default function DNAPage() {
         height: '100vh',
         background: theme === 'dark'
           ? 'linear-gradient(180deg, #0a0a0f 0%, #0d0d18 50%, #141428 100%)'
-          : 'linear-gradient(180deg, #f0e6d8 0%, #e0d0e8 50%, #d0e0f8 100%)',
+          : 'linear-gradient(180deg, #faf8f5 0%, #f5f0e8 50%, #efe8df 100%)',
         position: 'relative',
         overflow: 'hidden',
+        transition: 'background 0.3s ease',
       }}
     >
       {/* Theme Toggle */}
@@ -38,17 +39,18 @@ export default function DNAPage() {
           top: '24px',
           right: '24px',
           zIndex: 100,
-          background: theme === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)',
+          background: theme === 'dark' ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.06)',
           backdropFilter: 'blur(12px)',
-          border: `1px solid ${theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'}`,
+          border: `1px solid ${theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'}`,
           borderRadius: '12px',
           padding: '12px',
           cursor: 'pointer',
+          transition: 'all 0.3s ease',
         }}
         aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
       >
         {theme === 'dark' ? (
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.8)" strokeWidth="1.5">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2">
             <circle cx="12" cy="12" r="5" />
             <line x1="12" y1="1" x2="12" y2="3" />
             <line x1="12" y1="21" x2="12" y2="23" />
@@ -60,7 +62,7 @@ export default function DNAPage() {
             <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
           </svg>
         ) : (
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(0,0,0,0.8)" strokeWidth="1.5">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" strokeWidth="2">
             <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
           </svg>
         )}

@@ -1424,12 +1424,14 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                 fontSize: '1rem',
                 fontWeight: 500,
                 letterSpacing: '0.2em',
-                color: '#f5f0e8',
+                color: theme === 'dark' ? '#ffffff' : '#1a1a1a',
                 textAlign: 'center',
                 margin: 0,
                 marginBottom: '2rem',
                 textTransform: 'uppercase',
-                textShadow: '0 2px 8px rgba(0,0,0,0.8), 0 0 20px rgba(0,0,0,0.5)',
+                textShadow: theme === 'dark'
+                  ? '0 2px 8px rgba(0,0,0,0.8), 0 0 20px rgba(0,0,0,0.5)'
+                  : 'none',
               }}
             >
               Define. Check. Generate. Scale.
@@ -1456,7 +1458,7 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                   fontSize: '5.5rem',
                   letterSpacing: '-3px',
                   marginRight: '8px',
-                  color: '#ffffff',
+                  color: theme === 'dark' ? '#ffffff' : '#1a1a1a',
                 }}
               />
               <AnimatedText
@@ -1483,12 +1485,14 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                 fontSize: '1rem',
                 fontWeight: 400,
                 letterSpacing: '0.12em',
-                color: '#f5f0e8',
+                color: theme === 'dark' ? '#ffffff' : '#1a1a1a',
                 textAlign: 'center',
                 margin: 0,
                 marginBottom: '4rem',
                 textTransform: 'uppercase',
-                textShadow: '0 2px 8px rgba(0,0,0,0.8), 0 0 20px rgba(0,0,0,0.5)',
+                textShadow: theme === 'dark'
+                  ? '0 2px 8px rgba(0,0,0,0.8), 0 0 20px rgba(0,0,0,0.5)'
+                  : 'none',
                 willChange: 'transform',
               }}
             >
@@ -1520,7 +1524,7 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                   onChange={(e) => setUsername(e.target.value.replace(/^@/, ''))}
                   placeholder="@username"
                   maxLength={15}
-                  className="landing-input"
+                  className={theme === 'dark' ? 'landing-input' : 'landing-input-light'}
                   style={{
                     width: '100%',
                     fontFamily: "'Courier New', monospace",
@@ -1528,24 +1532,38 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                     padding: '1.5rem',
                     textAlign: 'center',
                     borderRadius: '14px',
-                    border: `2px solid ${error ? '#EF4444' : 'rgba(255, 255, 255, 0.35)'}`,
-                    background: 'rgba(0, 0, 0, 0.6)',
+                    border: `2px solid ${error ? '#EF4444' : theme === 'dark' ? 'rgba(255, 255, 255, 0.35)' : 'rgba(0, 0, 0, 0.15)'}`,
+                    background: theme === 'dark' ? 'rgba(0, 0, 0, 0.6)' : 'rgba(255, 255, 255, 0.9)',
                     backdropFilter: 'blur(16px)',
                     WebkitBackdropFilter: 'blur(16px)',
-                    color: '#ffffff',
+                    color: theme === 'dark' ? '#ffffff' : '#1a1a1a',
                     outline: 'none',
                     transition: 'all 0.3s ease',
-                    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+                    boxShadow: theme === 'dark'
+                      ? '0 4px 20px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
+                      : '0 4px 20px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.5)',
                   }}
                   onFocus={(e) => {
-                    e.currentTarget.style.background = 'rgba(0, 0, 0, 0.75)';
-                    e.currentTarget.style.borderColor = 'rgba(0, 71, 255, 0.7)';
-                    e.currentTarget.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.4), 0 0 30px rgba(0, 71, 255, 0.3)';
+                    if (theme === 'dark') {
+                      e.currentTarget.style.background = 'rgba(0, 0, 0, 0.75)';
+                      e.currentTarget.style.borderColor = 'rgba(0, 71, 255, 0.7)';
+                      e.currentTarget.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.4), 0 0 30px rgba(0, 71, 255, 0.3)';
+                    } else {
+                      e.currentTarget.style.background = 'rgba(255, 255, 255, 1)';
+                      e.currentTarget.style.borderColor = 'rgba(0, 71, 255, 0.6)';
+                      e.currentTarget.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.08), 0 0 20px rgba(0, 71, 255, 0.15)';
+                    }
                   }}
                   onBlur={(e) => {
-                    e.currentTarget.style.background = 'rgba(0, 0, 0, 0.6)';
-                    e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.35)';
-                    e.currentTarget.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)';
+                    if (theme === 'dark') {
+                      e.currentTarget.style.background = 'rgba(0, 0, 0, 0.6)';
+                      e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.35)';
+                      e.currentTarget.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)';
+                    } else {
+                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.9)';
+                      e.currentTarget.style.borderColor = 'rgba(0, 0, 0, 0.15)';
+                      e.currentTarget.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.5)';
+                    }
                   }}
                 />
               </div>
@@ -1601,10 +1619,12 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                 fontFamily: "'Courier New', monospace",
                 fontSize: '0.85rem',
                 letterSpacing: '0.08em',
-                color: '#f5f0e8',
+                color: theme === 'dark' ? '#ffffff' : '#2a2a2a',
                 textAlign: 'center',
                 marginTop: '8px',
-                textShadow: '0 2px 8px rgba(0,0,0,0.8), 0 0 15px rgba(0,0,0,0.5)',
+                textShadow: theme === 'dark'
+                  ? '0 2px 8px rgba(0,0,0,0.8), 0 0 15px rgba(0,0,0,0.5)'
+                  : 'none',
               }}
             >
               SEARCH ANY PUBLIC X PROFILE TO GET STARTED

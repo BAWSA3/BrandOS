@@ -106,10 +106,13 @@ export default function LandingPage() {
       className="aura-background"
       style={{
         minHeight: '100vh',
-        background: '#0f0f0f', // Very dark grey
+        background: theme === 'dark'
+          ? '#0f0f0f'
+          : 'linear-gradient(180deg, #faf8f5 0%, #f5f0e8 50%, #efe8df 100%)',
         position: 'relative',
         overflowX: 'hidden',
         overflowY: 'auto',
+        transition: 'background 0.3s ease',
       }}
     >
       {/* Warm Orange Glow (Top Center) - Disabled for black background */}
@@ -172,6 +175,7 @@ export default function LandingPage() {
           zIndex: 2,
           pointerEvents: 'none',
           willChange: 'transform',
+          opacity: theme === 'dark' ? 1 : 0.7,
         }}
       >
         {/* Large ambient orb - top right */}
@@ -182,7 +186,9 @@ export default function LandingPage() {
             right: '15%',
             width: '400px',
             height: '400px',
-            background: 'radial-gradient(circle, rgba(0, 71, 255, 0.15) 0%, transparent 70%)',
+            background: theme === 'dark'
+              ? 'radial-gradient(circle, rgba(0, 71, 255, 0.15) 0%, transparent 70%)'
+              : 'radial-gradient(circle, rgba(0, 71, 255, 0.12) 0%, transparent 70%)',
             filter: 'blur(60px)',
             borderRadius: '50%',
           }}
@@ -195,7 +201,9 @@ export default function LandingPage() {
             left: '10%',
             width: '300px',
             height: '300px',
-            background: 'radial-gradient(circle, rgba(212, 165, 116, 0.12) 0%, transparent 70%)',
+            background: theme === 'dark'
+              ? 'radial-gradient(circle, rgba(212, 165, 116, 0.12) 0%, transparent 70%)'
+              : 'radial-gradient(circle, rgba(212, 165, 116, 0.15) 0%, transparent 70%)',
             filter: 'blur(50px)',
             borderRadius: '50%',
           }}
@@ -209,19 +217,21 @@ export default function LandingPage() {
             transform: 'translate(-50%, -50%)',
             width: '200px',
             height: '200px',
-            background: 'radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 70%)',
+            background: theme === 'dark'
+              ? 'radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 70%)'
+              : 'radial-gradient(circle, rgba(139, 92, 246, 0.08) 0%, transparent 70%)',
             filter: 'blur(40px)',
             borderRadius: '50%',
           }}
         />
       </div>
 
-      {/* Film Grain Texture - Subtle for black background */}
+      {/* Film Grain Texture */}
       <div
         style={{
           position: 'fixed',
           inset: 0,
-          opacity: 0.05, // Reduced for subtle texture on black
+          opacity: theme === 'dark' ? 0.05 : 0.03,
           pointerEvents: 'none',
           backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
           backgroundSize: '150px 150px',
@@ -237,9 +247,9 @@ export default function LandingPage() {
           top: '24px',
           right: '24px',
           zIndex: 100,
-          background: theme === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)',
+          background: theme === 'dark' ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.06)',
           backdropFilter: 'blur(12px)',
-          border: `1px solid ${theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'}`,
+          border: `1px solid ${theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'}`,
           borderRadius: '12px',
           padding: '12px',
           cursor: 'pointer',
@@ -251,7 +261,7 @@ export default function LandingPage() {
         aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
       >
         {theme === 'dark' ? (
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.8)" strokeWidth="1.5">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2">
             <circle cx="12" cy="12" r="5" />
             <line x1="12" y1="1" x2="12" y2="3" />
             <line x1="12" y1="21" x2="12" y2="23" />
@@ -263,7 +273,7 @@ export default function LandingPage() {
             <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
           </svg>
         ) : (
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(0,0,0,0.8)" strokeWidth="1.5">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" strokeWidth="2">
             <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
           </svg>
         )}

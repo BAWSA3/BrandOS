@@ -538,7 +538,7 @@ function HomeContent() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white relative overflow-hidden">
+    <div className={`min-h-screen relative overflow-hidden transition-colors duration-300 ${theme === 'dark' ? 'bg-[#0a0a0a] text-white' : 'bg-[#faf8f5] text-[#1a1a1a]'}`}>
       {/* Animated Background with Blue Orbs */}
       <AnimatedBackground variant="default" orbCount={3} />
       
@@ -561,7 +561,7 @@ function HomeContent() {
         <div className="relative">
           <button
             onClick={() => setShowBrandMenu(!showBrandMenu)}
-            className="flex items-center gap-2 px-4 py-2.5 text-sm bg-[rgba(255,255,255,0.05)] backdrop-blur-xl border border-[rgba(255,255,255,0.1)] rounded-full hover:bg-[rgba(255,255,255,0.1)] hover:border-[rgba(255,255,255,0.2)] transition-all"
+            className={`flex items-center gap-2 px-4 py-2.5 text-sm backdrop-blur-xl rounded-full transition-all ${theme === 'dark' ? 'bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.1)] hover:bg-[rgba(255,255,255,0.1)] hover:border-[rgba(255,255,255,0.2)]' : 'bg-[rgba(0,0,0,0.03)] border border-[rgba(0,0,0,0.08)] hover:bg-[rgba(0,0,0,0.06)] hover:border-[rgba(0,0,0,0.12)]'}`}
           >
             <span className="text-white/50 text-xs font-mono uppercase tracking-wider">Brand</span>
             <span className="font-medium text-white">{brandDNA?.name || 'Select'}</span>
@@ -628,16 +628,16 @@ function HomeContent() {
         {/* Theme Toggle */}
         <button
           onClick={toggleTheme}
-          className="p-2.5 text-white/50 hover:text-white transition-colors bg-[rgba(255,255,255,0.05)] backdrop-blur-xl border border-[rgba(255,255,255,0.1)] rounded-full hover:bg-[rgba(255,255,255,0.1)]"
+          className={`p-2.5 transition-colors backdrop-blur-xl rounded-full ${theme === 'dark' ? 'text-white/70 hover:text-white bg-[rgba(255,255,255,0.08)] border border-[rgba(255,255,255,0.12)] hover:bg-[rgba(255,255,255,0.12)]' : 'text-black/60 hover:text-black bg-[rgba(0,0,0,0.04)] border border-[rgba(0,0,0,0.08)] hover:bg-[rgba(0,0,0,0.08)]'}`}
           aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
         >
           {theme === 'dark' ? (
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
             </svg>
           ) : (
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
             </svg>
           )}
         </button>
