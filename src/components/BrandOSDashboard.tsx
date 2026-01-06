@@ -36,9 +36,9 @@ const TypewriterText: React.FC<TypewriterTextProps> = ({ text, speed = 20 }) => 
   }, [formattedText, speed]);
 
   return (
-    <pre className="font-os text-sm text-[#E0E0E0] leading-relaxed whitespace-pre-wrap">
+    <pre className="font-os text-xs md:text-sm text-[#E0E0E0] leading-relaxed whitespace-pre-wrap">
       {displayedText}
-      <span className={`inline-block w-2 h-4 bg-[#E0E0E0] ml-0.5 align-middle ${isComplete ? 'animate-pulse' : ''}`} />
+      <span className={`inline-block w-1.5 md:w-2 h-3 md:h-4 bg-[#E0E0E0] ml-0.5 align-middle ${isComplete ? 'animate-pulse' : ''}`} />
     </pre>
   );
 };
@@ -101,7 +101,7 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({ data }) => {
       `}</style>
 
       {/* BENTO GRID LAYOUT */}
-      <div className="w-full max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-4 auto-rows-[minmax(180px,auto)]">
+      <div className="w-full max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-3 md:gap-4 auto-rows-[minmax(140px,auto)] md:auto-rows-[minmax(180px,auto)]">
 
         {/* --- CARD 1: HERO SCORE --- */}
         <div className="md:col-span-2 md:row-span-2 bg-[#2E6AFF] rounded-[4px] relative p-6 md:p-10 flex flex-col justify-between overflow-hidden group hover:brightness-110 transition-all duration-500">
@@ -167,9 +167,9 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({ data }) => {
         </div>
 
         {/* --- CARD 3: TONE ANALYZER --- */}
-        <div className="md:col-span-1 bg-[#1A1A1A] rounded-[4px] p-5 flex flex-col relative overflow-hidden border border-white/5">
-          <span className="font-os text-[10px] text-[#666] mb-4 block border-b border-[#333] pb-2 tracking-widest">TONE_MIXER</span>
-          <div className="flex-1 flex justify-between items-end gap-3 px-1">
+        <div className="md:col-span-1 bg-[#1A1A1A] rounded-[4px] p-4 md:p-5 flex flex-col relative overflow-hidden border border-white/5">
+          <span className="font-os text-[10px] text-[#666] mb-3 md:mb-4 block border-b border-[#333] pb-2 tracking-widest">TONE_MIXER</span>
+          <div className="flex-1 flex justify-between items-end gap-2 md:gap-3 px-1">
             <div className="w-full h-full flex flex-col justify-end group">
               <div style={{height: `${data.tone.formality}%`}} className="w-full bg-gray-600 rounded-[2px] mb-2 transition-all duration-700 group-hover:bg-white" />
               <span className="font-os text-[9px] text-gray-500 text-center cursor-help relative group/tooltip">
@@ -230,38 +230,38 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({ data }) => {
         </div>
 
         {/* --- CARD 5: DNA TERMINAL --- */}
-        <div className="md:col-span-2 bg-[#F0F0F0] rounded-[4px] p-5 flex flex-col justify-between border-l-[6px] border-[#2E6AFF]">
-           <div className="flex items-center gap-2 mb-3">
-             <Terminal size={14} className="text-black" strokeWidth={3} />
-             <span className="font-os text-xs text-black font-bold tracking-wider">&gt; EXECUTE_DNA_SEQUENCE</span>
+        <div className="md:col-span-2 bg-[#F0F0F0] rounded-[4px] p-4 md:p-5 flex flex-col justify-between border-l-[4px] md:border-l-[6px] border-[#2E6AFF]">
+           <div className="flex items-center gap-2 mb-2 md:mb-3">
+             <Terminal size={12} className="text-black md:w-[14px] md:h-[14px]" strokeWidth={3} />
+             <span className="font-os text-[10px] md:text-xs text-black font-bold tracking-wider">&gt; EXECUTE_DNA_SEQUENCE</span>
            </div>
-           <div className="flex flex-wrap gap-2 mb-4">
+           <div className="flex flex-wrap gap-1.5 md:gap-2 mb-3 md:mb-4">
              {data.dna.keywords.map((word, i) => (
-               <span key={i} className="bg-black text-white px-2 py-1 text-[10px] md:text-xs font-os rounded-[2px] hover:bg-[#2E6AFF] hover:translate-y-[-2px] transition-all cursor-crosshair">
+               <span key={i} className="bg-black text-white px-1.5 md:px-2 py-0.5 md:py-1 text-[9px] md:text-xs font-os rounded-[2px] hover:bg-[#2E6AFF] hover:translate-y-[-2px] transition-all cursor-crosshair">
                  [{word.toLowerCase()}]
                </span>
              ))}
            </div>
-           <div className="bg-black/90 p-4 rounded-[2px] min-h-[120px]">
+           <div className="bg-black/90 p-3 md:p-4 rounded-[2px] min-h-[100px] md:min-h-[120px]">
              <TypewriterText text={data.dna.voice} speed={15} />
            </div>
         </div>
 
         {/* --- CARD 6: CONTENT PILLARS --- */}
-        <div className="md:col-span-2 bg-black border border-[#333] rounded-[4px] p-6 flex flex-col justify-center relative overflow-hidden">
+        <div className="md:col-span-2 bg-black border border-[#333] rounded-[4px] p-4 md:p-6 flex flex-col justify-center relative overflow-hidden">
            <div className="absolute inset-0 opacity-20 pointer-events-none"
                style={{backgroundImage: 'linear-gradient(#222 1px, transparent 1px), linear-gradient(90deg, #222 1px, transparent 1px)', backgroundSize: '20px 20px'}}></div>
-           <div className="flex justify-between items-center mb-6 z-10">
-              <span className="font-os text-xs text-gray-500 tracking-widest">CONTENT_DISTRIBUTION</span>
+           <div className="flex justify-between items-center mb-4 md:mb-6 z-10">
+              <span className="font-os text-[10px] md:text-xs text-gray-500 tracking-widest">CONTENT_DISTRIBUTION</span>
               <BarChart3 size={16} className="text-gray-600" />
            </div>
-           <div className="grid grid-cols-3 gap-4 h-full items-end z-10">
+           <div className="grid grid-cols-3 gap-2 md:gap-4 h-full items-end z-10">
              {data.pillars.slice(0, 3).map((pillar, i) => (
-               <div key={i} className="flex flex-col gap-2 h-full justify-end group">
-                 <div className="text-xs text-gray-400 font-os text-center opacity-0 group-hover:opacity-100 transition-opacity translate-y-2 group-hover:translate-y-0">
+               <div key={i} className="flex flex-col gap-1 md:gap-2 h-full justify-end group">
+                 <div className="text-[10px] md:text-xs text-gray-400 font-os text-center opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity md:translate-y-2 md:group-hover:translate-y-0">
                    {pillar.value}%
                  </div>
-                 <div className="w-full bg-[#111] rounded-[2px] relative overflow-hidden border border-[#333]" style={{height: '100px'}}>
+                 <div className="w-full bg-[#111] rounded-[2px] relative overflow-hidden border border-[#333] h-[70px] md:h-[100px]">
                    <div
                     style={{height: `${pillar.value}%`}}
                     className={`absolute bottom-0 w-full transition-all duration-1000 ease-out
@@ -269,7 +269,7 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({ data }) => {
                     `}
                    ></div>
                  </div>
-                 <span className={`text-center text-xs font-brand font-bold italic tracking-wider ${i === 0 ? 'text-white' : i === 1 ? 'text-[#2E6AFF]' : 'text-[#FF6B00]'}`}>
+                 <span className={`text-center text-[8px] md:text-xs font-brand font-bold italic tracking-wider leading-tight ${i === 0 ? 'text-white' : i === 1 ? 'text-[#2E6AFF]' : 'text-[#FF6B00]'}`}>
                    {pillar.label}
                  </span>
                </div>

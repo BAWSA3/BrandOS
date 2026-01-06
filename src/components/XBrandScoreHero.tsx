@@ -1812,13 +1812,7 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.8 }}
-              style={{
-                display: 'flex',
-                justifyContent: 'center',
-                gap: '16px',
-                padding: '16px 24px',
-                background: 'transparent',
-              }}
+              className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 px-4 sm:px-6 py-4 w-full sm:w-auto"
             >
               <motion.button
                 onClick={async () => {
@@ -1855,23 +1849,14 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                 }}
                 whileHover={{ scale: 1.02, y: -2 }}
                 whileTap={{ scale: 0.98 }}
+                className="flex items-center justify-center gap-2 py-3 px-6 sm:py-3.5 sm:px-7 bg-[#2E6AFF] border-none rounded text-white font-bold cursor-pointer w-full sm:w-auto"
                 style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  padding: '14px 28px',
-                  background: '#2E6AFF',
-                  border: 'none',
-                  borderRadius: '4px',
-                  color: '#FFFFFF',
                   fontFamily: "'JetBrains Mono', monospace",
-                  fontSize: '12px',
+                  fontSize: '11px',
                   letterSpacing: '0.1em',
-                  cursor: 'pointer',
-                  fontWeight: 700,
                 }}
               >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
                   <circle cx="8.5" cy="8.5" r="1.5"/>
                   <polyline points="21 15 16 10 5 21"/>
@@ -1889,16 +1874,11 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                 }}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
+                className="py-3 px-6 sm:py-3.5 sm:px-7 bg-transparent border border-[#333] rounded text-[#888] cursor-pointer w-full sm:w-auto"
                 style={{
-                  padding: '14px 28px',
-                  background: 'transparent',
-                  border: '1px solid #333',
-                  borderRadius: '4px',
-                  color: '#888',
                   fontFamily: "'JetBrains Mono', monospace",
-                  fontSize: '12px',
+                  fontSize: '11px',
                   letterSpacing: '0.1em',
-                  cursor: 'pointer',
                 }}
               >
                 ANALYZE ANOTHER
