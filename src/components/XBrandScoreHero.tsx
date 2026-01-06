@@ -1679,7 +1679,7 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
           </motion.div>
         )}
 
-        {/* JOURNEY STATE - Split screen layout */}
+        {/* JOURNEY STATE - Split screen layout (responsive) */}
         {flowState === 'journey' && (
           <motion.div
             key="journey"
@@ -1687,39 +1687,21 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.5 }}
-            style={{
-              display: 'flex',
-              width: '100%',
-              height: '100vh',
-              position: 'relative',
-              zIndex: 1,
-            }}
+            className="flex flex-col md:flex-row w-full min-h-screen md:h-screen relative z-[1]"
           >
-            {/* DNA takes left 60% - handled by DNAJourneyScene in background */}
-            <div
-              style={{
-                width: '60%',
-                height: '100%',
-                position: 'relative',
-              }}
-            />
+            {/* DNA takes left portion - hidden on mobile, 60% on desktop */}
+            <div className="hidden md:block md:w-[60%] h-full relative" />
 
-            {/* Analysis panel - Right 40% */}
+            {/* Analysis panel - Full width on mobile, 40% on desktop */}
             <motion.div
               initial={{ opacity: 0, x: 50 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
+              className="w-full md:w-[40%] min-h-screen md:h-full flex flex-col justify-center items-center px-4 py-20 md:px-8 md:py-20"
               style={{
-                width: '40%',
-                height: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center',
-                alignItems: 'center',
-                padding: '80px 32px 48px 32px',
                 background: theme === 'dark'
-                  ? 'linear-gradient(90deg, transparent 0%, rgba(10, 10, 18, 0.85) 20%, rgba(10, 10, 18, 0.95) 100%)'
-                  : 'linear-gradient(90deg, transparent 0%, rgba(20, 20, 30, 0.85) 20%, rgba(20, 20, 30, 0.95) 100%)',
+                  ? 'linear-gradient(180deg, rgba(10, 10, 18, 0.95) 0%, rgba(10, 10, 18, 0.98) 100%)'
+                  : 'linear-gradient(180deg, rgba(20, 20, 30, 0.95) 0%, rgba(20, 20, 30, 0.98) 100%)',
                 backdropFilter: 'blur(12px)',
               }}
             >
@@ -1820,11 +1802,24 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                   if (!element) return;
 
                   try {
+                    // Store original styles to restore later
+                    const originalWidth = element.style.width;
+                    const originalMinWidth = element.style.minWidth;
+
+                    // Force desktop dimensions for consistent capture
+                    element.style.width = '1200px';
+                    element.style.minWidth = '1200px';
+
                     const dataUrl = await domToPng(element, {
                       backgroundColor: '#050505',
                       scale: 2,
                       quality: 1,
+                      width: 1200,
                     });
+
+                    // Restore original styles
+                    element.style.width = originalWidth;
+                    element.style.minWidth = originalMinWidth;
 
                     // Convert data URL to blob
                     const response = await fetch(dataUrl);
