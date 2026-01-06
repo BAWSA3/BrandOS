@@ -1789,6 +1789,79 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
               />
             </div>
 
+            {/* Waitlist Banner */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6, duration: 0.5 }}
+              onClick={() => setFlowState('signup')}
+              className="w-full max-w-[600px] mx-4 mt-6 cursor-pointer group"
+            >
+              <div
+                className="relative overflow-hidden rounded-xl p-6 sm:p-8"
+                style={{
+                  background: 'linear-gradient(135deg, rgba(212, 165, 116, 0.08) 0%, rgba(212, 165, 116, 0.02) 100%)',
+                  border: '1px solid rgba(212, 165, 116, 0.25)',
+                  boxShadow: '0 0 40px rgba(212, 165, 116, 0.1)',
+                }}
+              >
+                {/* Glow effect on hover */}
+                <div
+                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                  style={{
+                    background: 'radial-gradient(circle at center, rgba(212, 165, 116, 0.15) 0%, transparent 70%)',
+                  }}
+                />
+
+                <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6">
+                  <div className="text-center sm:text-left">
+                    <h3
+                      style={{
+                        fontFamily: "'VCR OSD Mono', monospace",
+                        fontSize: '14px',
+                        letterSpacing: '0.15em',
+                        color: '#D4A574',
+                        marginBottom: '8px',
+                      }}
+                    >
+                      BE FIRST IN LINE
+                    </h3>
+                    <p
+                      style={{
+                        fontFamily: "'Helvetica Neue', sans-serif",
+                        fontSize: '14px',
+                        color: 'rgba(255, 255, 255, 0.6)',
+                        lineHeight: 1.5,
+                        margin: 0,
+                      }}
+                    >
+                      Be among the first to access AI-powered brand management when we launch.
+                    </p>
+                  </div>
+
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="flex-shrink-0"
+                  >
+                    <div
+                      className="px-6 py-3 rounded-lg"
+                      style={{
+                        fontFamily: "'VCR OSD Mono', monospace",
+                        fontSize: '11px',
+                        letterSpacing: '0.1em',
+                        color: '#050505',
+                        background: '#D4A574',
+                        boxShadow: '0 0 20px rgba(212, 165, 116, 0.4)',
+                      }}
+                    >
+                      JOIN THE WAITLIST
+                    </div>
+                  </motion.div>
+                </div>
+              </div>
+            </motion.div>
+
             {/* Action Buttons Below Dashboard */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -1969,7 +2042,7 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                 lineHeight: 1.3,
               }}
             >
-              Ready to improve your brand, @{profile.username}?
+              You're almost in, @{profile.username}
             </motion.h2>
 
             <motion.p
@@ -1981,7 +2054,7 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                 lineHeight: 1.6,
               }}
             >
-              Join early access to get AI-powered brand improvement suggestions, consistency monitoring, and more.
+              Drop your email to secure your spot. We'll notify you the moment BrandOS is ready.
             </motion.p>
 
             {signupStatus === 'success' ? (
@@ -2079,7 +2152,7 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                     opacity: signupStatus === 'loading' ? 0.7 : 1,
                   }}
                 >
-                  {signupStatus === 'loading' ? 'JOINING...' : 'JOIN EARLY ACCESS'}
+                  {signupStatus === 'loading' ? 'JOINING...' : 'JOIN THE WAITLIST'}
                 </motion.button>
               </motion.form>
             )}
