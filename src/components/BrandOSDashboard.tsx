@@ -269,8 +269,12 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({ data }) => {
                     `}
                    ></div>
                  </div>
-                 <span className={`text-center text-[8px] md:text-xs font-brand font-bold italic tracking-wider leading-tight ${i === 0 ? 'text-white' : i === 1 ? 'text-[#2E6AFF]' : 'text-[#FF6B00]'}`}>
-                   {pillar.label}
+                 <span
+                   className={`text-center text-[7px] md:text-xs font-brand font-bold italic tracking-wider leading-tight overflow-hidden ${i === 0 ? 'text-white' : i === 1 ? 'text-[#2E6AFF]' : 'text-[#FF6B00]'}`}
+                   title={pillar.label}
+                 >
+                   <span className="hidden md:inline">{pillar.label}</span>
+                   <span className="md:hidden line-clamp-2">{pillar.label.split('(')[0].trim()}</span>
                  </span>
                </div>
              ))}
