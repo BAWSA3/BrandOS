@@ -97,6 +97,11 @@ function getPersonalityTypeCode(archetype?: string): string {
   return typeMap[archetype || ''] || 'INTJ';
 }
 
+// Strip emoji characters from archetype names (AI sometimes includes them)
+function stripEmoji(str: string): string {
+  return str.replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu, '').trim();
+}
+
 // ============================================================================
 // Magnetic Button Component - Premium hover effect
 // ============================================================================
@@ -1764,9 +1769,9 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                     engagementScore: brandScore.phases.scale.score,
                   },
                   personality: {
-                    archetype: generatedBrandDNA.archetype || 'The Creator',
-                    emoji: getArchetypePixelEmoji(generatedBrandDNA.archetype),
-                    type: getPersonalityTypeCode(generatedBrandDNA.archetype),
+                    archetype: stripEmoji(generatedBrandDNA.archetype || 'The Creator'),
+                    emoji: getArchetypePixelEmoji(stripEmoji(generatedBrandDNA.archetype || '')),
+                    type: getPersonalityTypeCode(stripEmoji(generatedBrandDNA.archetype || '')),
                   },
                   tone: {
                     formality: generatedBrandDNA.tone?.minimal || Math.round((brandScore.phases.define.score + brandScore.phases.check.score) / 2),
