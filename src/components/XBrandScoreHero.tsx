@@ -8,6 +8,7 @@ import ShareableScoreCard, { ShareCardData } from './ShareableScoreCard';
 import ShareableBentoCard, { mapToBentoData } from './ShareableBentoCard';
 import BentoRevealGrid from './BentoRevealGrid';
 import BrandOSDashboard, { BrandOSDashboardData } from './BrandOSDashboard';
+import html2canvas from 'html2canvas';
 
 // Dynamically import DNA scene to avoid SSR issues with Three.js
 const DNAJourneyScene = dynamic(() => import('./DNAJourneyScene'), {
@@ -1746,46 +1747,58 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.6 }}
-            style={{ width: '100%', position: 'relative', zIndex: 10 }}
+            style={{
+              width: '100%',
+              minHeight: '100vh',
+              position: 'relative',
+              zIndex: 10,
+              background: theme === 'dark' ? '#050505' : '#050505',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
           >
-            <BrandOSDashboard
-              data={{
-                profile: {
-                  username: profile.username,
-                  displayName: profile.name,
-                  profileImageUrl: profile.profile_image_url?.replace('_normal', '_200x200') || '',
-                  followersCount: formatFollowersDisplay(profile.followers_count || 0),
-                  verified: profile.verified,
-                },
-                scores: {
-                  brandScore: brandScore.overallScore,
-                  voiceConsistency: generatedBrandDNA.performanceInsights?.voiceConsistency || brandScore.phases.check.score,
-                  engagementScore: brandScore.phases.scale.score,
-                },
-                personality: {
-                  archetype: generatedBrandDNA.archetype || 'The Creator',
-                  emoji: getArchetypePixelEmoji(generatedBrandDNA.archetype),
-                  type: getPersonalityTypeCode(generatedBrandDNA.archetype),
-                },
-                tone: {
-                  formality: generatedBrandDNA.tone?.minimal || Math.round((brandScore.phases.define.score + brandScore.phases.check.score) / 2),
-                  energy: generatedBrandDNA.tone?.playful || Math.round(brandScore.phases.generate.score * 0.8),
-                  confidence: generatedBrandDNA.tone?.bold || Math.round((brandScore.phases.scale.score + brandScore.phases.define.score) / 2),
-                },
-                pillars: generatedBrandDNA.contentPillars?.slice(0, 3).map(pillar => ({
-                  label: pillar.name,
-                  value: pillar.frequency,
-                })) || [
-                  { label: 'Expertise', value: brandScore.phases.define.score },
-                  { label: 'Consistency', value: brandScore.phases.check.score },
-                  { label: 'Content', value: brandScore.phases.generate.score },
-                ],
-                dna: {
-                  keywords: generatedBrandDNA.keywords?.slice(0, 5) || brandScore.topStrengths.slice(0, 5).map(s => s.split(' ').filter(w => w.length > 4)[0] || s.split(' ')[0]),
-                  voice: generatedBrandDNA.personalitySummary || brandScore.summary || 'Authentic voice that resonates with your audience.',
-                },
-              } as BrandOSDashboardData}
-            />
+            <div id="brandos-dashboard-capture">
+              <BrandOSDashboard
+                data={{
+                  profile: {
+                    username: profile.username,
+                    displayName: profile.name,
+                    profileImageUrl: profile.profile_image_url?.replace('_normal', '_200x200') || '',
+                    followersCount: formatFollowersDisplay(profile.followers_count || 0),
+                    verified: profile.verified,
+                  },
+                  scores: {
+                    brandScore: brandScore.overallScore,
+                    voiceConsistency: generatedBrandDNA.performanceInsights?.voiceConsistency || brandScore.phases.check.score,
+                    engagementScore: brandScore.phases.scale.score,
+                  },
+                  personality: {
+                    archetype: generatedBrandDNA.archetype || 'The Creator',
+                    emoji: getArchetypePixelEmoji(generatedBrandDNA.archetype),
+                    type: getPersonalityTypeCode(generatedBrandDNA.archetype),
+                  },
+                  tone: {
+                    formality: generatedBrandDNA.tone?.minimal || Math.round((brandScore.phases.define.score + brandScore.phases.check.score) / 2),
+                    energy: generatedBrandDNA.tone?.playful || Math.round(brandScore.phases.generate.score * 0.8),
+                    confidence: generatedBrandDNA.tone?.bold || Math.round((brandScore.phases.scale.score + brandScore.phases.define.score) / 2),
+                  },
+                  pillars: generatedBrandDNA.contentPillars?.slice(0, 3).map(pillar => ({
+                    label: pillar.name,
+                    value: pillar.frequency,
+                  })) || [
+                    { label: 'Expertise', value: brandScore.phases.define.score },
+                    { label: 'Consistency', value: brandScore.phases.check.score },
+                    { label: 'Content', value: brandScore.phases.generate.score },
+                  ],
+                  dna: {
+                    keywords: generatedBrandDNA.keywords?.slice(0, 5) || brandScore.topStrengths.slice(0, 5).map(s => s.split(' ').filter(w => w.length > 4)[0] || s.split(' ')[0]),
+                    voice: generatedBrandDNA.personalitySummary || brandScore.summary || 'Authentic voice that resonates with your audience.',
+                  },
+                } as BrandOSDashboardData}
+              />
+            </div>
 
             {/* Action Buttons Below Dashboard */}
             <motion.div
@@ -1794,114 +1807,97 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
               transition={{ delay: 0.8 }}
               style={{
                 display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: '24px',
-                padding: '48px 24px',
-                background: '#050505',
-                borderTop: '1px solid #222',
+                justifyContent: 'center',
+                gap: '16px',
+                padding: '16px 24px',
+                background: 'transparent',
               }}
             >
-              <div style={{ textAlign: 'center' }}>
-                <span style={{
-                  fontFamily: "'JetBrains Mono', monospace",
-                  fontSize: '10px',
-                  letterSpacing: '0.2em',
-                  color: '#666',
-                  display: 'block',
-                  marginBottom: '8px',
-                }}>
-                  SHARE_RESULTS
-                </span>
-                <h3 style={{
-                  fontFamily: "'Inter', sans-serif",
-                  fontSize: '24px',
-                  fontWeight: 900,
-                  fontStyle: 'italic',
+              <motion.button
+                onClick={async () => {
+                  const element = document.getElementById('brandos-dashboard-capture');
+                  if (!element) return;
+
+                  try {
+                    const canvas = await html2canvas(element, {
+                      backgroundColor: '#050505',
+                      scale: 2,
+                      useCORS: true,
+                      allowTaint: true,
+                    });
+
+                    canvas.toBlob(async (blob) => {
+                      if (!blob) return;
+
+                      try {
+                        await navigator.clipboard.write([
+                          new ClipboardItem({ 'image/png': blob })
+                        ]);
+                        alert('Image copied to clipboard! Paste it on X to share.');
+                      } catch {
+                        // Fallback: download the image
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `brandos-score-${profile.username}.png`;
+                        a.click();
+                        URL.revokeObjectURL(url);
+                      }
+                    }, 'image/png');
+                  } catch (err) {
+                    console.error('Screenshot failed:', err);
+                  }
+                }}
+                whileHover={{ scale: 1.02, y: -2 }}
+                whileTap={{ scale: 0.98 }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '14px 28px',
+                  background: '#2E6AFF',
+                  border: 'none',
+                  borderRadius: '4px',
                   color: '#FFFFFF',
-                  margin: 0,
-                }}>
-                  Flex your Brand DNA
-                </h3>
-              </div>
-
-              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
-                <motion.button
-                  onClick={() => {
-                    const tweetText = `My @BrandOS_xyz brand score: ${brandScore.overallScore}/100\n\n"${brandScore.topStrengths[0] || 'Strong brand presence'}"\n\nCheck yours → brandos.xyz`;
-                    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`, '_blank', 'noopener,noreferrer');
-                  }}
-                  whileHover={{ scale: 1.02, y: -2 }}
-                  whileTap={{ scale: 0.98 }}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    padding: '14px 28px',
-                    background: '#2E6AFF',
-                    border: 'none',
-                    borderRadius: '4px',
-                    color: '#FFFFFF',
-                    fontFamily: "'JetBrains Mono', monospace",
-                    fontSize: '12px',
-                    letterSpacing: '0.1em',
-                    cursor: 'pointer',
-                    fontWeight: 700,
-                  }}
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-                  </svg>
-                  SHARE ON X
-                </motion.button>
-              </div>
-
-              <div style={{ display: 'flex', gap: '16px', marginTop: '16px' }}>
-                <motion.button
-                  onClick={() => {
-                    setFlowState('input');
-                    setUsername('');
-                    setProfile(null);
-                    setBrandScore(null);
-                    setGeneratedBrandDNA(null);
-                    setShowConfetti(false);
-                  }}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  style={{
-                    padding: '12px 24px',
-                    background: 'transparent',
-                    border: '1px solid #333',
-                    borderRadius: '4px',
-                    color: '#888',
-                    fontFamily: "'JetBrains Mono', monospace",
-                    fontSize: '11px',
-                    letterSpacing: '0.1em',
-                    cursor: 'pointer',
-                  }}
-                >
-                  ANALYZE ANOTHER
-                </motion.button>
-                <motion.button
-                  onClick={() => setFlowState('signup')}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  style={{
-                    padding: '12px 24px',
-                    background: '#2E6AFF',
-                    border: 'none',
-                    borderRadius: '4px',
-                    color: '#FFFFFF',
-                    fontFamily: "'JetBrains Mono', monospace",
-                    fontSize: '11px',
-                    letterSpacing: '0.1em',
-                    cursor: 'pointer',
-                    fontWeight: 700,
-                  }}
-                >
-                  CLAIM YOUR BRAND
-                </motion.button>
-              </div>
+                  fontFamily: "'JetBrains Mono', monospace",
+                  fontSize: '12px',
+                  letterSpacing: '0.1em',
+                  cursor: 'pointer',
+                  fontWeight: 700,
+                }}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                  <circle cx="8.5" cy="8.5" r="1.5"/>
+                  <polyline points="21 15 16 10 5 21"/>
+                </svg>
+                FLEX YOUR SCORE
+              </motion.button>
+              <motion.button
+                onClick={() => {
+                  setFlowState('input');
+                  setUsername('');
+                  setProfile(null);
+                  setBrandScore(null);
+                  setGeneratedBrandDNA(null);
+                  setShowConfetti(false);
+                }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                style={{
+                  padding: '14px 28px',
+                  background: 'transparent',
+                  border: '1px solid #333',
+                  borderRadius: '4px',
+                  color: '#888',
+                  fontFamily: "'JetBrains Mono', monospace",
+                  fontSize: '12px',
+                  letterSpacing: '0.1em',
+                  cursor: 'pointer',
+                }}
+              >
+                ANALYZE ANOTHER
+              </motion.button>
             </motion.div>
           </motion.div>
         )}

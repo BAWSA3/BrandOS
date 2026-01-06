@@ -1,7 +1,47 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Terminal, Shield, BarChart3, Activity } from 'lucide-react';
+
+/* TYPEWRITER TEXT COMPONENT */
+interface TypewriterTextProps {
+  text: string;
+  speed?: number;
+}
+
+const TypewriterText: React.FC<TypewriterTextProps> = ({ text, speed = 20 }) => {
+  const [displayedText, setDisplayedText] = useState('');
+  const [isComplete, setIsComplete] = useState(false);
+
+  // Split text into sentences and format with > prefix
+  const sentences = text.split(/(?<=[.!?])\s+/).filter(s => s.trim());
+  const formattedText = sentences.map(s => `> ${s}`).join('\n');
+
+  useEffect(() => {
+    setDisplayedText('');
+    setIsComplete(false);
+    let currentIndex = 0;
+
+    const interval = setInterval(() => {
+      if (currentIndex < formattedText.length) {
+        setDisplayedText(formattedText.slice(0, currentIndex + 1));
+        currentIndex++;
+      } else {
+        setIsComplete(true);
+        clearInterval(interval);
+      }
+    }, speed);
+
+    return () => clearInterval(interval);
+  }, [formattedText, speed]);
+
+  return (
+    <pre className="font-os text-sm text-[#E0E0E0] leading-relaxed whitespace-pre-wrap">
+      {displayedText}
+      <span className={`inline-block w-2 h-4 bg-[#E0E0E0] ml-0.5 align-middle ${isComplete ? 'animate-pulse' : ''}`} />
+    </pre>
+  );
+};
 
 /* DATA STRUCTURE TYPES */
 export interface BrandOSDashboardData {
@@ -43,7 +83,7 @@ interface BrandOSDashboardProps {
 
 const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({ data }) => {
   return (
-    <div className="min-h-screen bg-[#050505] text-white p-4 md:p-8 font-sans selection:bg-[#2E6AFF] selection:text-white flex items-center justify-center">
+    <div className="text-white p-4 md:p-8 font-sans selection:bg-[#2E6AFF] selection:text-white flex items-center justify-center">
 
       {/* GLOBAL STYLES FOR FONTS */}
       <style>{`
@@ -132,18 +172,33 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({ data }) => {
           <div className="flex-1 flex justify-between items-end gap-3 px-1">
             <div className="w-full h-full flex flex-col justify-end group">
               <div style={{height: `${data.tone.formality}%`}} className="w-full bg-gray-600 rounded-[2px] mb-2 transition-all duration-700 group-hover:bg-white" />
-              <span className="font-os text-[9px] text-gray-500 text-center">FORM</span>
+              <span className="font-os text-[9px] text-gray-500 text-center cursor-help relative group/tooltip">
+                FRM
+                <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-white text-black text-[10px] rounded whitespace-nowrap opacity-0 group-hover/tooltip:opacity-100 transition-opacity pointer-events-none">
+                  Formality
+                </span>
+              </span>
             </div>
              <div className="w-full h-full flex flex-col justify-end group">
               <div
                 style={{height: `${data.tone.energy}%`}}
                 className="w-full bg-[#00FF41] rounded-[2px] mb-2 transition-all duration-700 shadow-[0_0_15px_rgba(0,255,65,0.4)] group-hover:shadow-[0_0_20px_rgba(0,255,65,0.8)]"
               />
-              <span className="font-os text-[9px] text-[#00FF41] text-center font-bold">NRGY</span>
+              <span className="font-os text-[9px] text-[#00FF41] text-center font-bold cursor-help relative group/tooltip">
+                NRG
+                <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-white text-black text-[10px] rounded whitespace-nowrap opacity-0 group-hover/tooltip:opacity-100 transition-opacity pointer-events-none">
+                  Energy
+                </span>
+              </span>
             </div>
              <div className="w-full h-full flex flex-col justify-end group">
               <div style={{height: `${data.tone.confidence}%`}} className="w-full bg-[#2E6AFF] rounded-[2px] mb-2 transition-all duration-700 group-hover:brightness-125" />
-              <span className="font-os text-[9px] text-[#2E6AFF] text-center font-bold">CONF</span>
+              <span className="font-os text-[9px] text-[#2E6AFF] text-center font-bold cursor-help relative group/tooltip">
+                CNF
+                <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-white text-black text-[10px] rounded whitespace-nowrap opacity-0 group-hover/tooltip:opacity-100 transition-opacity pointer-events-none">
+                  Confidence
+                </span>
+              </span>
             </div>
           </div>
         </div>
@@ -187,10 +242,8 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({ data }) => {
                </span>
              ))}
            </div>
-           <div className="bg-white/50 p-3 rounded-[2px] border border-gray-200">
-             <p className="font-brand text-sm text-gray-800 leading-snug italic font-medium">
-               &quot;{data.dna.voice}&quot;
-             </p>
+           <div className="bg-black/90 p-4 rounded-[2px] min-h-[120px]">
+             <TypewriterText text={data.dna.voice} speed={15} />
            </div>
         </div>
 
@@ -212,11 +265,11 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({ data }) => {
                    <div
                     style={{height: `${pillar.value}%`}}
                     className={`absolute bottom-0 w-full transition-all duration-1000 ease-out
-                      ${i === 0 ? 'bg-white' : i === 1 ? 'bg-[#2E6AFF]' : 'bg-transparent border-t-2 border-x-2 border-white/50'}
+                      ${i === 0 ? 'bg-white' : i === 1 ? 'bg-[#2E6AFF]' : 'bg-[#FF6B00] shadow-[0_0_15px_rgba(255,107,0,0.4)]'}
                     `}
                    ></div>
                  </div>
-                 <span className={`text-center text-xs font-brand font-bold italic tracking-wider ${i===1 ? 'text-[#2E6AFF]' : 'text-white'}`}>
+                 <span className={`text-center text-xs font-brand font-bold italic tracking-wider ${i === 0 ? 'text-white' : i === 1 ? 'text-[#2E6AFF]' : 'text-[#FF6B00]'}`}>
                    {pillar.label}
                  </span>
                </div>
@@ -225,9 +278,6 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({ data }) => {
         </div>
 
       </div>
-
-      {/* CRT Scanline Effect Overlay */}
-      <div className="fixed inset-0 pointer-events-none opacity-[0.03] z-50" style={{background: 'linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06))', backgroundSize: '100% 2px, 3px 100%'}}></div>
     </div>
   );
 };
