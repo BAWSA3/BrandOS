@@ -238,7 +238,7 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({ data }) => {
            <div className="flex flex-wrap gap-2 mb-4">
              {data.dna.keywords.map((word, i) => (
                <span key={i} className="bg-black text-white px-2 py-1 text-[10px] md:text-xs font-os rounded-[2px] hover:bg-[#2E6AFF] hover:translate-y-[-2px] transition-all cursor-crosshair">
-                 [{word}]
+                 [{word.toLowerCase()}]
                </span>
              ))}
            </div>
