@@ -8,7 +8,7 @@ import ShareableScoreCard, { ShareCardData } from './ShareableScoreCard';
 import ShareableBentoCard, { mapToBentoData } from './ShareableBentoCard';
 import BentoRevealGrid from './BentoRevealGrid';
 import BrandOSDashboard, { BrandOSDashboardData } from './BrandOSDashboard';
-import html2canvas from 'html2canvas';
+import { domToPng } from 'modern-screenshot';
 
 // Dynamically import DNA scene to avoid SSR issues with Three.js
 const DNAJourneyScene = dynamic(() => import('./DNAJourneyScene'), {
@@ -1752,14 +1752,21 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
               minHeight: '100vh',
               position: 'relative',
               zIndex: 10,
-              background: theme === 'dark' ? '#050505' : '#050505',
+              background: '#050505',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
             }}
           >
-            <div id="brandos-dashboard-capture">
+            <div
+              id="brandos-dashboard-capture"
+              style={{
+                background: '#050505',
+                padding: '24px',
+                borderRadius: '8px',
+              }}
+            >
               <BrandOSDashboard
                 data={{
                   profile: {
@@ -1819,33 +1826,31 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                   if (!element) return;
 
                   try {
-                    const canvas = await html2canvas(element, {
+                    const dataUrl = await domToPng(element, {
                       backgroundColor: '#050505',
                       scale: 2,
-                      useCORS: true,
-                      allowTaint: true,
+                      quality: 1,
                     });
 
-                    canvas.toBlob(async (blob) => {
-                      if (!blob) return;
+                    // Convert data URL to blob
+                    const response = await fetch(dataUrl);
+                    const blob = await response.blob();
 
-                      try {
-                        await navigator.clipboard.write([
-                          new ClipboardItem({ 'image/png': blob })
-                        ]);
-                        alert('Image copied to clipboard! Paste it on X to share.');
-                      } catch {
-                        // Fallback: download the image
-                        const url = URL.createObjectURL(blob);
-                        const a = document.createElement('a');
-                        a.href = url;
-                        a.download = `brandos-score-${profile.username}.png`;
-                        a.click();
-                        URL.revokeObjectURL(url);
-                      }
-                    }, 'image/png');
+                    try {
+                      await navigator.clipboard.write([
+                        new ClipboardItem({ 'image/png': blob })
+                      ]);
+                      alert('Image copied to clipboard! Paste it on X to share.');
+                    } catch {
+                      // Fallback: download the image
+                      const a = document.createElement('a');
+                      a.href = dataUrl;
+                      a.download = `brandos-score-${profile.username}.png`;
+                      a.click();
+                    }
                   } catch (err) {
                     console.error('Screenshot failed:', err);
+                    alert('Could not capture screenshot. Please try again or use your browser\'s screenshot feature.');
                   }
                 }}
                 whileHover={{ scale: 1.02, y: -2 }}
