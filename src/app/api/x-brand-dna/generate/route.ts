@@ -63,6 +63,26 @@ const PERSONALITY_TYPES = {
 
 type PersonalityType = keyof typeof PERSONALITY_TYPES;
 
+// Map Gemini archetypes to personality types for consistency
+function mapArchetypeToPersonalityType(archetype: string | undefined): PersonalityType {
+  if (!archetype) return 'builder';
+
+  const lower = archetype.toLowerCase();
+
+  // Direct mappings
+  if (lower.includes('alpha') || lower.includes('leader') || lower.includes('king')) return 'alpha';
+  if (lower.includes('builder') || lower.includes('ship') || lower.includes('maker') || lower.includes('creator')) return 'builder';
+  if (lower.includes('professor') || lower.includes('educator') || lower.includes('teacher') || lower.includes('mentor')) return 'educator';
+  if (lower.includes('degen') || lower.includes('ape') || lower.includes('gambler')) return 'degen';
+  if (lower.includes('analyst') || lower.includes('data') || lower.includes('chart') || lower.includes('quant')) return 'analyst';
+  if (lower.includes('prophet') || lower.includes('philosopher') || lower.includes('visionary') || lower.includes('sage') || lower.includes('oracle')) return 'philosopher';
+  if (lower.includes('networker') || lower.includes('connector') || lower.includes('plug') || lower.includes('community')) return 'networker';
+  if (lower.includes('contrarian') || lower.includes('rebel') || lower.includes('provocateur')) return 'contrarian';
+
+  // Default fallback
+  return 'builder';
+}
+
 // Types for the response
 export interface GeneratedBrandDNA {
   // Store-compatible format
@@ -616,20 +636,22 @@ export async function POST(request: NextRequest) {
       personal: tweetVoice.voiceSpectrum.personal,
     } : undefined;
 
-    // Detect personality type and generate AI summary
-    const personalityType = detectPersonalityType(bioLinguistics, tweetVoice || null, geminiBrandDNA);
-    const personality = PERSONALITY_TYPES[personalityType];
+    // Map Gemini archetype to personality type for consistency between card display and DNA text
+    const mappedPersonalityType = mapArchetypeToPersonalityType(geminiBrandDNA?.archetype);
+    const personality = PERSONALITY_TYPES[mappedPersonalityType];
+
+    // Generate AI summary using the MAPPED personality type (matches the displayed archetype)
     const personalitySummary = await generatePersonalitySummary(
       profile,
-      personalityType,
+      mappedPersonalityType,
       bioLinguistics,
       tweetVoice || null,
       tone
     );
 
-    console.log('=== PERSONALITY DETECTED ===');
-    console.log('Type:', personality.name);
-    console.log('Emoji:', personality.emoji);
+    console.log('=== PERSONALITY MAPPED FROM ARCHETYPE ===');
+    console.log('Gemini Archetype:', geminiBrandDNA?.archetype);
+    console.log('Mapped To:', personality.name);
     console.log('Summary:', personalitySummary.substring(0, 100) + '...');
 
     const generatedBrandDNA: GeneratedBrandDNA = {
