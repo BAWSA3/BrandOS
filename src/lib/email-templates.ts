@@ -80,35 +80,27 @@ But even strong brands have room to grow.`,
 
 export const email1ScoreExplainer: EmailTemplate = {
   id: 'score-explainer',
-  name: 'Your Score + What It Means',
+  name: 'Thanks for trying BrandOS',
   sendDelay: 'immediate',
   subjectLines: [
-    'Your Brand Score: {{score}}/100 — here\'s what it means',
-    '@{{username}}, here\'s your brand breakdown',
-    '{{score}}/100 — is your brand helping or hurting you?',
+    'Thanks for trying BrandOS, {{username}}!',
+    'You scored {{score}}/100 — here\'s what\'s next',
+    'Hey {{username}}, thanks for checking out BrandOS',
   ],
   body: (data) => {
-    const scoreMsg = getScoreMessage(data.score);
-    
-    return `Hey ${data.name},
+    return `Hey ${data.name}!
 
-You just scored ${data.score}/100 on your X Brand Score.
+This is Bawsa, the man behind BrandOS. I just wanted to say thank you for trying my first ever vibe coded product. What you just experienced is simply the tip of the iceberg. I have a ton of new ideas I already wanted to implement, but it's important for me to gauge interest at first right?
 
-${scoreMsg.intro}
+By the way, you scored ${data.score}/100 on your Brand Score — not bad! Your archetype is ${data.archetype} ${data.archetypeEmoji}
 
-${scoreMsg.advice}
-→ ${data.topImprovement}
+Anyways, expect updates from me and how we can better and improve your brand.
 
-Your archetype: ${data.archetype} ${data.archetypeEmoji}
-"${data.archetypeTagline}"
+Have a good one!
 
-This matters because ${data.archetypeDescription}
+- Bawsa
 
-Tomorrow, I'll send you a specific tactic to improve your score. No fluff—just one thing you can do in 10 minutes.
-
-— BrandOS
-
-P.S. Want to see how you stack up? Compare with a competitor at brandos.xyz`;
+"brick by brick"`;
   }
 };
 
