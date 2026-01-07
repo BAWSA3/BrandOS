@@ -300,7 +300,9 @@ Rules:
 - Quick Wins: max 4, all doable in under 15 minutes
 - Weekly Focus: ONE clear, achievable goal
 - Use their archetype (${input.archetype}) to frame advice
-- No fluff, no generic platitudes`,
+- No fluff, no generic platitudes
+- NEVER recommend getting verified or mention verification status - it's paid and not relevant to brand building
+- NEVER recommend buying followers or engagement`,
           },
         ],
       }),
