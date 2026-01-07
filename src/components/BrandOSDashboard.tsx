@@ -255,30 +255,47 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({ data }) => {
               <span className="font-os text-[10px] md:text-xs text-gray-500 tracking-widest">CONTENT_DISTRIBUTION</span>
               <BarChart3 size={16} className="text-gray-600" />
            </div>
-           <div className="grid grid-cols-3 gap-2 md:gap-4 h-full items-end z-10">
-             {data.pillars.slice(0, 3).map((pillar, i) => (
-               <div key={i} className="flex flex-col gap-1 md:gap-2 h-full justify-end group">
-                 <div className="text-[10px] md:text-xs text-gray-400 font-os text-center opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity md:translate-y-2 md:group-hover:translate-y-0">
-                   {pillar.value}%
+           {data.pillars.length > 0 ? (
+             <div className="grid grid-cols-3 gap-2 md:gap-4 h-full items-end z-10">
+               {data.pillars.slice(0, 3).map((pillar, i) => (
+                 <div key={i} className="flex flex-col gap-1 md:gap-2 h-full justify-end group">
+                   <div className="text-[10px] md:text-xs text-gray-400 font-os text-center opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity md:translate-y-2 md:group-hover:translate-y-0">
+                     {pillar.value}%
+                   </div>
+                   <div className="w-full bg-[#111] rounded-[2px] relative overflow-hidden border border-[#333] h-[70px] md:h-[100px]">
+                     <div
+                      style={{height: `${pillar.value}%`}}
+                      className={`absolute bottom-0 w-full transition-all duration-1000 ease-out
+                        ${i === 0 ? 'bg-white' : i === 1 ? 'bg-[#2E6AFF]' : 'bg-[#FF6B00] shadow-[0_0_15px_rgba(255,107,0,0.4)]'}
+                      `}
+                     ></div>
+                   </div>
+                   <span
+                     className={`text-center text-[7px] md:text-xs font-brand font-bold italic tracking-wider leading-tight overflow-hidden ${i === 0 ? 'text-white' : i === 1 ? 'text-[#2E6AFF]' : 'text-[#FF6B00]'}`}
+                     title={pillar.label}
+                   >
+                     <span className="hidden md:inline">{pillar.label}</span>
+                     <span className="md:hidden line-clamp-2">{pillar.label.split('(')[0].trim()}</span>
+                   </span>
                  </div>
-                 <div className="w-full bg-[#111] rounded-[2px] relative overflow-hidden border border-[#333] h-[70px] md:h-[100px]">
-                   <div
-                    style={{height: `${pillar.value}%`}}
-                    className={`absolute bottom-0 w-full transition-all duration-1000 ease-out
-                      ${i === 0 ? 'bg-white' : i === 1 ? 'bg-[#2E6AFF]' : 'bg-[#FF6B00] shadow-[0_0_15px_rgba(255,107,0,0.4)]'}
-                    `}
-                   ></div>
-                 </div>
-                 <span
-                   className={`text-center text-[7px] md:text-xs font-brand font-bold italic tracking-wider leading-tight overflow-hidden ${i === 0 ? 'text-white' : i === 1 ? 'text-[#2E6AFF]' : 'text-[#FF6B00]'}`}
-                   title={pillar.label}
-                 >
-                   <span className="hidden md:inline">{pillar.label}</span>
-                   <span className="md:hidden line-clamp-2">{pillar.label.split('(')[0].trim()}</span>
-                 </span>
-               </div>
-             ))}
-           </div>
+               ))}
+             </div>
+           ) : (
+             <div className="flex flex-col items-center justify-center h-full z-10 py-4">
+               <p
+                 className="text-[9px] md:text-[11px] text-gray-500 text-center leading-relaxed"
+                 style={{ fontFamily: "'VCR OSD Mono', monospace", letterSpacing: '0.1em' }}
+               >
+                 NOT ENOUGH DATA TO IDENTIFY YOUR CONTENT PILLARS.
+               </p>
+               <p
+                 className="text-[9px] md:text-[11px] text-[#D4A574] text-center mt-2"
+                 style={{ fontFamily: "'VCR OSD Mono', monospace", letterSpacing: '0.1em' }}
+               >
+                 POST MORE TO UNLOCK THIS INSIGHT.
+               </p>
+             </div>
+           )}
         </div>
 
       </div>

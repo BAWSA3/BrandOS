@@ -1800,11 +1800,7 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                   pillars: generatedBrandDNA.contentPillars?.slice(0, 3).map(pillar => ({
                     label: pillar.name,
                     value: pillar.frequency,
-                  })) || [
-                    { label: 'Expertise', value: brandScore.phases.define.score },
-                    { label: 'Consistency', value: brandScore.phases.check.score },
-                    { label: 'Content', value: brandScore.phases.generate.score },
-                  ],
+                  })) || [],
                   dna: {
                     keywords: generatedBrandDNA.keywords?.slice(0, 5) || brandScore.topStrengths.slice(0, 5).map(s => s.split(' ').filter(w => w.length > 4)[0] || s.split(' ')[0]),
                     voice: generatedBrandDNA.personalitySummary || brandScore.summary || 'Authentic voice that resonates with your audience.',
