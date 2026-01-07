@@ -1903,6 +1903,12 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                     const originalWidth = element.style.width;
                     const originalMinWidth = element.style.minWidth;
 
+                    // Remove grayscale from profile image for capture (show in full color)
+                    const profileImg = element.querySelector('img.grayscale');
+                    if (profileImg) {
+                      profileImg.classList.remove('grayscale');
+                    }
+
                     // Force desktop dimensions for consistent capture
                     element.style.width = '1200px';
                     element.style.minWidth = '1200px';
@@ -1917,6 +1923,11 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                     // Restore original styles
                     element.style.width = originalWidth;
                     element.style.minWidth = originalMinWidth;
+
+                    // Restore grayscale class on profile image
+                    if (profileImg) {
+                      profileImg.classList.add('grayscale');
+                    }
 
                     // Convert data URL to blob
                     const response = await fetch(dataUrl);
