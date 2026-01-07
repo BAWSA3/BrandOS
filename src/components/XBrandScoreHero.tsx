@@ -1904,9 +1904,11 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                     const originalMinWidth = element.style.minWidth;
 
                     // Remove grayscale from profile image for capture (show in full color)
-                    const profileImg = element.querySelector('img.grayscale');
+                    const profileImg = element.querySelector('img.grayscale') as HTMLImageElement | null;
+                    const originalFilter = profileImg?.style.filter || '';
                     if (profileImg) {
-                      profileImg.classList.remove('grayscale');
+                      // Override the Tailwind grayscale with inline style
+                      profileImg.style.filter = 'none';
                     }
 
                     // Force desktop dimensions for consistent capture
@@ -1924,9 +1926,9 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                     element.style.width = originalWidth;
                     element.style.minWidth = originalMinWidth;
 
-                    // Restore grayscale class on profile image
+                    // Restore grayscale filter on profile image
                     if (profileImg) {
-                      profileImg.classList.add('grayscale');
+                      profileImg.style.filter = originalFilter;
                     }
 
                     // Convert data URL to blob
