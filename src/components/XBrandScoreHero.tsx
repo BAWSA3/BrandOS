@@ -1497,7 +1497,7 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                 color: theme === 'dark' ? '#ffffff' : '#1a1a1a',
                 textAlign: 'center',
                 margin: 0,
-                marginBottom: '1rem',
+                marginBottom: '0.25rem',
                 textTransform: 'uppercase',
                 textShadow: theme === 'dark'
                   ? '0 2px 8px rgba(0,0,0,0.8), 0 0 20px rgba(0,0,0,0.5)'
