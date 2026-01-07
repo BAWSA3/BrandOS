@@ -243,7 +243,7 @@ async function generatePersonalitySummary(
         messages: [
           {
             role: 'user',
-            content: `You are BrandOS, a Brand Guardian AI. Write a 3-sentence personality summary for ${context.name} that makes them feel deeply understood and empowered.
+            content: `You are BrandOS, a Brand Guardian AI. Write a 3-sentence brand analysis for ${context.name}:
 
 Their personality type: ${context.personality}
 Key traits: ${context.traits.join(', ')}
@@ -251,7 +251,12 @@ Voice style: ${context.voice.formality}, ${context.voice.energy}, ${context.voic
 Follower count: ${context.followers.toLocaleString()}
 Voice consistency: ${context.voiceConsistency}%
 
-Write in second person ("You..."). Be specific, insightful, and make them feel like "Wow, this OS really knows me." No quotes around the response. Keep it punchy and confident.`,
+Structure your 3 sentences exactly like this:
+Sentence 1: A positive observation about their personality type and what makes them effective (e.g., "You are the Builder, the pragmatic powerhouse who brings ideas to life.")
+Sentence 2: Point out ONE specific weakness or gap in their brand presence based on their metrics above. Be direct about what's holding them back.
+Sentence 3: Give ONE concrete, actionable step they can take THIS WEEK to fix that weakness. Be specific (e.g., "Pin your best thread to your profile" not "improve your content").
+
+Write in second person ("You..."). Be direct and specific—no fluff. This should feel like tough love from a mentor who genuinely wants them to succeed. No quotes around the response.`,
           },
         ],
       }),
@@ -269,20 +274,27 @@ Write in second person ("You..."). Be specific, insightful, and make them feel l
   return generateFallbackSummary(personalityType, context);
 }
 
-// Fallback summary templates
+// Fallback summary templates with criticism and actionable steps
 function generateFallbackSummary(
   personalityType: PersonalityType,
   context: { name: string; followers: number; voiceConsistency: number }
 ): string {
+  // Determine the weakness based on voice consistency
+  const consistencyIssue = context.voiceConsistency < 70
+    ? `your ${context.voiceConsistency}% voice consistency signals scattered messaging—people can't pin down what you're about`
+    : context.voiceConsistency < 85
+    ? `at ${context.voiceConsistency}% voice consistency, there's room to sharpen your message for stronger recall`
+    : `even with ${context.voiceConsistency}% consistency, your growth has plateaued—time to expand your reach`;
+
   const templates: Record<PersonalityType, string> = {
-    alpha: `You lead with conviction, and your audience follows. Your bold takes cut through the noise—${context.voiceConsistency}% voice consistency means people know exactly what they're getting. You're not here to blend in; you're here to set the pace.`,
-    builder: `You ship while others talk. Your technical depth and pragmatic approach have built real credibility with your ${context.followers.toLocaleString()} followers. Every post adds value—no fluff, just substance.`,
-    educator: `You turn complexity into clarity. Your patient, methodical breakdowns have made you a trusted voice in the space. People don't just follow you—they learn from you.`,
-    degen: `You embrace the chaos and your community loves you for it. High risk, high energy, high engagement—you've turned the degen lifestyle into a brand. WAGMI isn't just a motto, it's your vibe.`,
-    analyst: `Data doesn't lie, and neither do you. Your methodical, chart-driven approach has built serious credibility. When you speak, people listen—because you've done the homework.`,
-    philosopher: `You see the forest while others argue about trees. Your macro perspective and visionary thinking set you apart from the daily noise. You're building a narrative, not just posting.`,
-    networker: `You're the connective tissue of crypto twitter. Your approachable style and community-first mindset have made you a hub for meaningful conversations. People trust you to amplify what matters.`,
-    contrarian: `You say what others won't. Your willingness to challenge consensus has built a loyal following who value independent thinking. Unpopular opinions today, proven right tomorrow.`,
+    alpha: `You lead with conviction and your bold takes cut through the noise—people follow because you don't hedge. But ${consistencyIssue}. Fix this: Write down your 3 non-negotiable topics and delete any draft that doesn't hit one of them.`,
+    builder: `You ship while others talk—your technical depth has built real credibility with your ${context.followers.toLocaleString()} followers. But ${consistencyIssue}. Fix this: Create a pinned thread showcasing your 3 best builds with clear before/after results.`,
+    educator: `You turn complexity into clarity, and people trust you to break things down without dumbing them down. But ${consistencyIssue}. Fix this: Batch your educational threads into a series with consistent formatting—same hook style, same structure, same CTA.`,
+    degen: `You embrace the chaos and your community loves the energy—high risk, high engagement, authentic vibes. But ${consistencyIssue}. Fix this: Pick ONE chain or protocol to be known for this month. Go deep, not wide.`,
+    analyst: `Data doesn't lie and neither do you—your methodical, chart-driven approach has built serious credibility. But ${consistencyIssue}. Fix this: Start every analysis with a TL;DR prediction at the top. Make your stance impossible to miss.`,
+    philosopher: `You see the forest while others argue about trees—your macro perspective sets you apart from daily noise. But ${consistencyIssue}. Fix this: Turn your biggest idea into a 10-tweet thread with one clear takeaway. Repeat it weekly until it sticks.`,
+    networker: `You're the connective tissue of the timeline—approachable, community-first, the person who makes introductions happen. But ${consistencyIssue}. Fix this: Create a "People to follow" thread featuring 5 accounts weekly. Become the curator, not just the connector.`,
+    contrarian: `You say what others won't and your audience values your independent thinking—unpopular opinions today, proven right tomorrow. But ${consistencyIssue}. Fix this: Keep a "receipts" doc of your past calls. When one hits, quote-tweet yourself with proof.`,
   };
 
   return templates[personalityType];
