@@ -1525,9 +1525,9 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                   fontFamily: "'Inter', sans-serif",
                   fontWeight: 800,
                   fontStyle: 'italic',
-                  fontSize: '7rem',
-                  letterSpacing: '-3px',
-                  marginRight: '10px',
+                  fontSize: '9rem',
+                  letterSpacing: '-4px',
+                  marginRight: '12px',
                   color: theme === 'dark' ? '#ffffff' : '#1a1a1a',
                 }}
               />
@@ -1537,7 +1537,7 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                 staggerDelay={0.08}
                 style={{
                   fontFamily: "'Press Start 2P', cursive",
-                  fontSize: '5.5rem',
+                  fontSize: '7rem',
                   color: '#0047FF',
                   textShadow: '0 0 35px rgba(0, 71, 255, 0.4)',
                 }}
@@ -1558,8 +1558,8 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                 color: theme === 'dark' ? '#ffffff' : '#1a1a1a',
                 textAlign: 'center',
                 margin: 0,
-                marginTop: '-32px',
-                marginBottom: '2rem',
+                marginTop: '-44px',
+                marginBottom: '1.5rem',
                 textTransform: 'uppercase',
                 textShadow: theme === 'dark'
                   ? '0 2px 8px rgba(0,0,0,0.8), 0 0 20px rgba(0,0,0,0.5)'
