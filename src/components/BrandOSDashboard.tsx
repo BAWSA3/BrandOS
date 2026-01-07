@@ -142,7 +142,7 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({ data }) => {
                 <img
                   src={data.profile.profileImageUrl}
                   alt={data.profile.displayName}
-                  className="w-full h-full rounded-full object-cover"
+                  className="w-full h-full rounded-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
                 />
               </div>
               {data.profile.verified && (

@@ -1247,3 +1247,9 @@ code {
   color: #666666 !important;
   opacity: 0.8;
 }
+
+/* Remove grayscale filter when capturing for clipboard */
+.capturing .grayscale,
+.capturing img.grayscale {
+  filter: none !important;
+}

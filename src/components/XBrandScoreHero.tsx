@@ -1903,6 +1903,9 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                     const originalWidth = element.style.width;
                     const originalMinWidth = element.style.minWidth;
 
+                    // Add capturing class to remove grayscale filter
+                    element.classList.add('capturing');
+
                     // Force desktop dimensions for consistent capture
                     element.style.width = '1200px';
                     element.style.minWidth = '1200px';
@@ -1917,6 +1920,9 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                     // Restore original styles
                     element.style.width = originalWidth;
                     element.style.minWidth = originalMinWidth;
+
+                    // Remove capturing class to restore grayscale
+                    element.classList.remove('capturing');
 
                     // Convert data URL to blob
                     const response = await fetch(dataUrl);
