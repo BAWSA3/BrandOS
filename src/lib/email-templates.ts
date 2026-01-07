@@ -110,48 +110,31 @@ Have a good one!
 
 export const email2ClarityFix: EmailTemplate = {
   id: 'clarity-fix',
-  name: 'How to Improve (Clarity Focus)',
+  name: 'Quick tip for your brand',
   sendDelay: '24h',
   subjectLines: [
-    'The 10-minute fix for @{{username}}\'s brand',
-    'Your bio is leaking followers. Here\'s why.',
-    'One change. More clarity. Let\'s go.',
+    'Quick thought about your brand, {{username}}',
+    'Hey {{username}}, one thing I noticed',
+    'A small tip that could help your brand',
   ],
-  body: (data) => `${data.name},
+  body: (data) => `Hey ${data.name}!
 
-Yesterday I showed you your score. Today, let's fix something.
+It's Bawsa again. I was thinking about your Brand Score and wanted to share a quick thought.
 
-Your Define score was ${data.defineScore}/100.
+One thing I've noticed with a lot of creators is that their bio doesn't really tell people what they're about. Like, if someone lands on your profile for the first time, would they instantly get what you do?
 
-Here's why that matters: 37% of people say mixed messaging confuses them enough to unfollow. If your bio doesn't instantly communicate who you are and what you do, you're losing people before they even see your content.
+Here's a simple format that works:
+- What you do
+- Who you help
+- Something that shows you're legit
 
-**The 10-Minute Bio Fix:**
+Just something to think about. Small tweaks can make a big difference.
 
-1. Open your X profile
-2. Look at your bio
-3. Ask: "Would a stranger know what I do in 5 seconds?"
+Anyway, I'm working on some new features for BrandOS that I think you'll love. Stay tuned!
 
-If the answer is "maybe" or "no," try this format:
+- Bawsa
 
-[What you do] for [who you help]
-[Credibility signal or result]
-[Optional: personality/vibe]
-
-**Example:**
-Before: "Thoughts on tech, life, and building things. DMs open."
-After: "Helping founders ship faster with AI tools. Built 3 products to $10K MRR. Always building, always shipping."
-
-The first one could be anyone. The second one is memorable.
-
-**Your brand DNA says you're a ${data.archetype}.**
-
-That means your bio should signal: ${data.archetypeStrengths[0] || 'authority'} and ${data.archetypeStrengths[1] || 'expertise'}.
-
-Reply to this email with your current bio and I'll give you a quick rewrite suggestion.
-
-— BrandOS
-
-Re-check your score after updating: brandos.xyz?username=${data.username}`
+"brick by brick"`
 };
 
 // =============================================================================
@@ -160,45 +143,32 @@ Re-check your score after updating: brandos.xyz?username=${data.username}`
 
 export const email3TimeSaver: EmailTemplate = {
   id: 'time-saver',
-  name: 'Time-Saving Angle (Overwhelm Focus)',
+  name: 'What I\'m building next',
   sendDelay: '48h',
   subjectLines: [
-    'You\'re spending 8+ hours/week on this. Stop.',
-    'What if your brand ran on autopilot?',
-    'The "does this sound like me?" problem, solved',
+    'What I\'m working on next, {{username}}',
+    'Sneak peek at what\'s coming',
+    'You\'re gonna love this, {{username}}',
   ],
-  body: (data) => `${data.name},
+  body: (data) => `Hey ${data.name}!
 
-Quick question: How much time do you spend second-guessing your content?
+Bawsa here. Just wanted to give you a quick update on what I'm cooking up.
 
-"Does this sound like me?"
-"Is this on-brand?"
-"Should I post this or rewrite it... again?"
+So BrandOS right now just shows you your score, right? But I'm working on something way bigger. Imagine being able to:
 
-Creators spend an average of 8+ hours per week on content for just ONE platform. And a huge chunk of that time is spent wondering if it "sounds right."
+- Check if your tweets are on-brand before you post
+- Get AI rewrites that actually sound like YOU
+- Track how consistent your brand is over time
 
-Here's the problem: Your brain can't objectively evaluate your own voice. You're too close to it.
+That's the vision. And honestly, I'm building this because I needed it myself. Figuring out your brand is hard, and I want to make it easier for everyone.
 
-**That's why we built BrandOS.**
+You're one of the early people who tried BrandOS, so you'll be first to know when the new stuff drops.
 
-Instead of guessing, you get:
-✓ A score (0-100) for any draft in seconds
-✓ Specific feedback on what's off
-✓ AI-suggested rewrites that sound like you
+Thanks for being here!
 
-No more "does this work?" paralysis. Just write, check, post.
+- Bawsa
 
-**Early access is opening soon.**
-
-You're on the list, which means you'll get first access + founding member pricing.
-
-But here's the thing—we're limiting the first batch to creators who actually care about their brand (not just want another AI tool).
-
-Reply "I'm in" if you want to be in the first group.
-
-— BrandOS
-
-P.S. Your score was ${data.score}/100. Imagine what it'd be if every post was on-brand. See your full breakdown: brandos.xyz?username=${data.username}`
+"brick by brick"`
 };
 
 // =============================================================================
@@ -207,53 +177,31 @@ P.S. Your score was ${data.score}/100. Imagine what it'd be if every post was on
 
 export const email4UpgradeCTA: EmailTemplate = {
   id: 'upgrade-cta',
-  name: 'Social Proof + Upgrade CTA (Budget Focus)',
+  name: 'Stay connected',
   sendDelay: '72h',
   subjectLines: [
-    '@{{username}}, you\'re in (if you want it)',
-    'This costs less than your coffee. Seriously.',
-    'Founders are paying $10K for this. You won\'t.',
+    'Let\'s stay connected, {{username}}',
+    'One last thing from me',
+    'Thanks again, {{username}}!',
   ],
   body: (data) => {
-    const scoreContext = data.score >= 60 ? 'solid' : 'leaving points on the table';
-    
-    return `${data.name},
+    return `Hey ${data.name}!
 
-Real talk about brand strategy:
+Last email from me for now, I promise haha.
 
-→ Brand agencies charge $10,000 - $80,000 for a brand system
-→ Freelance brand strategists charge $2,000 - $5,000 per project
-→ Most creators? They wing it and hope for the best
+I just wanted to say thanks again for checking out BrandOS. It means a lot that you took the time to try something I built.
 
-Here's what "winging it" actually costs:
+If you want to stay in the loop on updates, new features, or just see what I'm building next, feel free to follow me on X: @baborismus
 
-• 56% drop in brand recognition from inconsistency
-• Followers who can't remember what you're about
-• Engagement that flatlines because your voice keeps shifting
-• Opportunities that go to creators with clearer positioning
+And hey, if you ever have feedback or ideas for BrandOS, just reply to this email. I read everything and I'm always looking to make this better.
 
-You scored ${data.score}/100. That's ${scoreContext}.
+Alright, that's it from me. Go build something great!
 
-**BrandOS gives you the brand infrastructure of a well-funded startup—for less than your monthly coffee budget.**
+- Bawsa
 
-What you get:
-✓ Your complete Brand DNA (captured from your best content)
-✓ Real-time content checking (know if it's on-brand before you post)
-✓ AI content generation (that actually sounds like you)
-✓ Consistency monitoring (catch drift before it hurts you)
+"brick by brick"
 
-**Early access pricing: $9/month**
-*(Normal price will be $29/month)*
-
-Claim Your Early Access: brandos.xyz/early-access
-
-Limited spots. We're opening access in batches to keep quality high.
-
-— BrandOS
-
-P.S. Not ready yet? No worries. You can always re-check your score when you are: brandos.xyz?username=${data.username}
-
-Your brand isn't going anywhere—but your audience might be.`;
+P.S. You can always check your brand score again at mybrandos.app`;
   }
 };
 
