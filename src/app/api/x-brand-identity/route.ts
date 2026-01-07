@@ -92,16 +92,25 @@ export async function POST(request: NextRequest) {
 
         if (tweetsResponse.ok) {
           const tweetsData = await tweetsResponse.json();
-          console.log(`Fetched ${tweetsData.tweets?.length || 0} tweets for voice analysis`);
+          console.log(`=== TWEETS RECEIVED: ${tweetsData.tweets?.length || 0} tweets ===`);
 
           if (tweetsData.tweets && tweetsData.tweets.length > 0) {
+            console.log('=== STARTING TWEET VOICE ANALYSIS ===');
             tweetVoiceAnalysis = await analyzeTweetVoice(
               tweetsData.tweets,
               tweetsData.analysis.stats
             );
+            console.log('=== TWEET VOICE ANALYSIS RESULT ===');
+            console.log('Content Themes:', tweetVoiceAnalysis?.contentThemes?.length || 0);
+            console.log('Themes:', tweetVoiceAnalysis?.contentThemes?.map(t => t.pillar).join(', ') || 'None');
+          } else {
+            console.log('=== NO TWEETS RETURNED ===');
           }
         } else {
-          console.warn('Tweet fetch failed:', tweetsResponse.status);
+          const errorBody = await tweetsResponse.text();
+          console.error('=== TWEET FETCH FAILED ===');
+          console.error('Status:', tweetsResponse.status);
+          console.error('Body:', errorBody);
         }
       } catch (tweetError) {
         console.warn('Tweet analysis unavailable:', tweetError);
