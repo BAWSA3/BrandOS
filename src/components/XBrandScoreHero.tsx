@@ -1379,6 +1379,23 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
     setSignupStatus('loading');
 
     try {
+      // Build brand data for email templates
+      const brandData = brandScore && generatedBrandDNA ? {
+        displayName: profile?.name || username,
+        score: brandScore.overallScore,
+        defineScore: brandScore.phases.define.score,
+        checkScore: brandScore.phases.check.score,
+        generateScore: brandScore.phases.generate.score,
+        scaleScore: brandScore.phases.scale.score,
+        archetype: generatedBrandDNA.archetype || 'The Creator',
+        archetypeEmoji: '✨',
+        archetypeTagline: generatedBrandDNA.personalitySummary?.split('.')[0] || '',
+        archetypeDescription: generatedBrandDNA.personalitySummary || '',
+        archetypeStrengths: brandScore.topStrengths?.slice(0, 3) || [],
+        topImprovement: brandScore.topImprovements?.[0] || '',
+        topStrength: brandScore.topStrengths?.[0] || '',
+      } : undefined;
+
       const response = await fetch('/api/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1386,6 +1403,7 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
           email: email.trim(),
           source: 'x-brand-score',
           xUsername: username,
+          brandData,
         }),
       });
 
