@@ -1513,7 +1513,7 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                marginBottom: '0.5rem',
+                marginBottom: '0',
                 willChange: 'transform',
               }}
             >
