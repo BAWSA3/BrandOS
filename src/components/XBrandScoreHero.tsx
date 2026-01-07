@@ -1491,13 +1491,13 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
               transition={{ delay: 0.1 }}
               style={{
                 fontFamily: "'Courier New', Courier, monospace",
-                fontSize: '0.85rem',
+                fontSize: '1.1rem',
                 fontWeight: 500,
                 letterSpacing: '0.2em',
                 color: theme === 'dark' ? '#ffffff' : '#1a1a1a',
                 textAlign: 'center',
                 margin: 0,
-                marginBottom: '1.7rem',
+                marginBottom: '1rem',
                 textTransform: 'uppercase',
                 textShadow: theme === 'dark'
                   ? '0 2px 8px rgba(0,0,0,0.8), 0 0 20px rgba(0,0,0,0.5)'
@@ -1525,9 +1525,9 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                   fontFamily: "'Inter', sans-serif",
                   fontWeight: 800,
                   fontStyle: 'italic',
-                  fontSize: '4.5rem',
-                  letterSpacing: '-2px',
-                  marginRight: '7px',
+                  fontSize: '7rem',
+                  letterSpacing: '-3px',
+                  marginRight: '10px',
                   color: theme === 'dark' ? '#ffffff' : '#1a1a1a',
                 }}
               />
@@ -1537,7 +1537,7 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                 staggerDelay={0.08}
                 style={{
                   fontFamily: "'Press Start 2P', cursive",
-                  fontSize: '3.65rem',
+                  fontSize: '5.5rem',
                   color: '#0047FF',
                   textShadow: '0 0 35px rgba(0, 71, 255, 0.4)',
                 }}

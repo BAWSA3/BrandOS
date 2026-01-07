@@ -107,7 +107,7 @@ export default function LandingPage() {
       style={{
         minHeight: '100vh',
         background: theme === 'dark'
-          ? '#0f0f0f'
+          ? '#000000'
           : 'linear-gradient(180deg, #faf8f5 0%, #f5f0e8 50%, #efe8df 100%)',
         position: 'relative',
         overflowX: 'hidden',
