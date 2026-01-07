@@ -226,6 +226,7 @@ function detectPersonalityType(
 async function generatePersonalitySummary(
   profile: XProfileData,
   personalityType: PersonalityType,
+  archetypeName: string, // The actual Gemini archetype name to use in the summary
   bioLinguistics: BioLinguistics,
   tweetVoice: TweetVoiceAnalysis | null,
   tone: { minimal: number; playful: number; bold: number; experimental: number }
@@ -233,10 +234,10 @@ async function generatePersonalitySummary(
   const personality = PERSONALITY_TYPES[personalityType];
   const voice = bioLinguistics.voiceSpectrum;
 
-  // Build context for AI
+  // Build context for AI - use the actual archetype name for consistency with the displayed card
   const context = {
     name: profile.name || profile.username,
-    personality: personality.name,
+    personality: archetypeName, // Use actual Gemini archetype name, not personality type name
     traits: personality.traits,
     voice: {
       formality: voice.professional > 60 ? 'formal' : 'casual',
@@ -284,19 +285,20 @@ Write in second person ("You..."). Be direct and specific—no fluff. This shoul
 
     if (response.ok) {
       const data = await response.json();
-      return data.content?.[0]?.text || generateFallbackSummary(personalityType, context);
+      return data.content?.[0]?.text || generateFallbackSummary(personalityType, archetypeName, context);
     }
   } catch (error) {
     console.error('Claude API error:', error);
   }
 
   // Fallback to template-based summary
-  return generateFallbackSummary(personalityType, context);
+  return generateFallbackSummary(personalityType, archetypeName, context);
 }
 
 // Fallback summary templates with criticism and actionable steps
 function generateFallbackSummary(
   personalityType: PersonalityType,
+  archetypeName: string, // Use actual archetype name in the summary
   context: { name: string; followers: number; voiceConsistency: number }
 ): string {
   // Determine the weakness based on voice consistency
@@ -306,15 +308,16 @@ function generateFallbackSummary(
     ? `at ${context.voiceConsistency}% voice consistency, there's room to sharpen your message for stronger recall`
     : `even with ${context.voiceConsistency}% consistency, your growth has plateaued—time to expand your reach`;
 
+  // Templates use the actual archetype name for consistency with displayed card
   const templates: Record<PersonalityType, string> = {
-    alpha: `You lead with conviction and your bold takes cut through the noise—people follow because you don't hedge. But ${consistencyIssue}. Fix this: Write down your 3 non-negotiable topics and delete any draft that doesn't hit one of them.`,
-    builder: `You ship while others talk—your technical depth has built real credibility with your ${context.followers.toLocaleString()} followers. But ${consistencyIssue}. Fix this: Create a pinned thread showcasing your 3 best builds with clear before/after results.`,
-    educator: `You turn complexity into clarity, and people trust you to break things down without dumbing them down. But ${consistencyIssue}. Fix this: Batch your educational threads into a series with consistent formatting—same hook style, same structure, same CTA.`,
-    degen: `You embrace the chaos and your community loves the energy—high risk, high engagement, authentic vibes. But ${consistencyIssue}. Fix this: Pick ONE chain or protocol to be known for this month. Go deep, not wide.`,
-    analyst: `Data doesn't lie and neither do you—your methodical, chart-driven approach has built serious credibility. But ${consistencyIssue}. Fix this: Start every analysis with a TL;DR prediction at the top. Make your stance impossible to miss.`,
-    philosopher: `You see the forest while others argue about trees—your macro perspective sets you apart from daily noise. But ${consistencyIssue}. Fix this: Turn your biggest idea into a 10-tweet thread with one clear takeaway. Repeat it weekly until it sticks.`,
-    networker: `You're the connective tissue of the timeline—approachable, community-first, the person who makes introductions happen. But ${consistencyIssue}. Fix this: Create a "People to follow" thread featuring 5 accounts weekly. Become the curator, not just the connector.`,
-    contrarian: `You say what others won't and your audience values your independent thinking—unpopular opinions today, proven right tomorrow. But ${consistencyIssue}. Fix this: Keep a "receipts" doc of your past calls. When one hits, quote-tweet yourself with proof.`,
+    alpha: `You are ${archetypeName}—you lead with conviction and your bold takes cut through the noise. But ${consistencyIssue}. Fix this: Write down your 3 non-negotiable topics and delete any draft that doesn't hit one of them.`,
+    builder: `You are ${archetypeName}—you ship while others talk, and your technical depth has built real credibility. But ${consistencyIssue}. Fix this: Create a pinned thread showcasing your 3 best builds with clear before/after results.`,
+    educator: `You are ${archetypeName}—you turn complexity into clarity, and people trust you to break things down. But ${consistencyIssue}. Fix this: Batch your educational threads into a series with consistent formatting—same hook style, same structure, same CTA.`,
+    degen: `You are ${archetypeName}—you embrace the chaos and your community loves the energy. But ${consistencyIssue}. Fix this: Pick ONE chain or protocol to be known for this month. Go deep, not wide.`,
+    analyst: `You are ${archetypeName}—data doesn't lie and neither do you, your methodical approach has built serious credibility. But ${consistencyIssue}. Fix this: Start every analysis with a TL;DR prediction at the top. Make your stance impossible to miss.`,
+    philosopher: `You are ${archetypeName}—you see the forest while others argue about trees, your macro perspective sets you apart. But ${consistencyIssue}. Fix this: Turn your biggest idea into a 10-tweet thread with one clear takeaway. Repeat it weekly until it sticks.`,
+    networker: `You are ${archetypeName}—you're the connective tissue of the timeline, approachable and community-first. But ${consistencyIssue}. Fix this: Create a "People to follow" thread featuring 5 accounts weekly. Become the curator, not just the connector.`,
+    contrarian: `You are ${archetypeName}—you say what others won't and your audience values your independent thinking. But ${consistencyIssue}. Fix this: Keep a "receipts" doc of your past calls. When one hits, quote-tweet yourself with proof.`,
   };
 
   return templates[personalityType];
@@ -639,11 +642,13 @@ export async function POST(request: NextRequest) {
     // Map Gemini archetype to personality type for consistency between card display and DNA text
     const mappedPersonalityType = mapArchetypeToPersonalityType(geminiBrandDNA?.archetype);
     const personality = PERSONALITY_TYPES[mappedPersonalityType];
+    const archetypeName = geminiBrandDNA?.archetype || personality.name; // Use actual Gemini archetype name
 
-    // Generate AI summary using the MAPPED personality type (matches the displayed archetype)
+    // Generate AI summary using the EXACT archetype name shown in the card
     const personalitySummary = await generatePersonalitySummary(
       profile,
       mappedPersonalityType,
+      archetypeName, // Pass the actual archetype name for the summary text
       bioLinguistics,
       tweetVoice || null,
       tone
