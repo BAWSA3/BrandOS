@@ -1477,8 +1477,8 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              gap: '24px',
-              maxWidth: '600px',
+              gap: '36px',
+              maxWidth: '900px',
               width: '100%',
               position: 'relative',
               zIndex: 10,
@@ -1491,13 +1491,13 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
               transition={{ delay: 0.1 }}
               style={{
                 fontFamily: "'Courier New', Courier, monospace",
-                fontSize: '1rem',
+                fontSize: '1.5rem',
                 fontWeight: 500,
                 letterSpacing: '0.2em',
                 color: theme === 'dark' ? '#ffffff' : '#1a1a1a',
                 textAlign: 'center',
                 margin: 0,
-                marginBottom: '2rem',
+                marginBottom: '3rem',
                 textTransform: 'uppercase',
                 textShadow: theme === 'dark'
                   ? '0 2px 8px rgba(0,0,0,0.8), 0 0 20px rgba(0,0,0,0.5)'
@@ -1525,9 +1525,9 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                   fontFamily: "'Inter', sans-serif",
                   fontWeight: 800,
                   fontStyle: 'italic',
-                  fontSize: '5.5rem',
-                  letterSpacing: '-3px',
-                  marginRight: '8px',
+                  fontSize: '8rem',
+                  letterSpacing: '-4px',
+                  marginRight: '12px',
                   color: theme === 'dark' ? '#ffffff' : '#1a1a1a',
                 }}
               />
@@ -1537,9 +1537,9 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                 staggerDelay={0.08}
                 style={{
                   fontFamily: "'Press Start 2P', cursive",
-                  fontSize: '4.5rem',
+                  fontSize: '6.5rem',
                   color: '#0047FF',
-                  textShadow: '0 0 25px rgba(0, 71, 255, 0.4)',
+                  textShadow: '0 0 35px rgba(0, 71, 255, 0.4)',
                 }}
               />
             </motion.div>
@@ -1552,13 +1552,13 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
               transition={{ delay: 0.15 }}
               style={{
                 fontFamily: "'Press Start 2P', cursive",
-                fontSize: '1rem',
+                fontSize: '1.5rem',
                 fontWeight: 400,
                 letterSpacing: '0.12em',
                 color: theme === 'dark' ? '#ffffff' : '#1a1a1a',
                 textAlign: 'center',
                 margin: 0,
-                marginBottom: '4rem',
+                marginBottom: '5rem',
                 textTransform: 'uppercase',
                 textShadow: theme === 'dark'
                   ? '0 2px 8px rgba(0,0,0,0.8), 0 0 20px rgba(0,0,0,0.5)'
@@ -1580,9 +1580,9 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                gap: '20px',
+                gap: '30px',
                 width: '100%',
-                maxWidth: '500px',
+                maxWidth: '750px',
                 willChange: 'transform',
               }}
             >
@@ -1598,10 +1598,10 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                   style={{
                     width: '100%',
                     fontFamily: "'Courier New', monospace",
-                    fontSize: '1.3rem',
-                    padding: '1.5rem',
+                    fontSize: '2rem',
+                    padding: '2rem',
                     textAlign: 'center',
-                    borderRadius: '14px',
+                    borderRadius: '20px',
                     border: `2px solid ${error ? '#EF4444' : theme === 'dark' ? 'rgba(255, 255, 255, 0.35)' : 'rgba(0, 0, 0, 0.15)'}`,
                     background: theme === 'dark' ? 'rgba(0, 0, 0, 0.6)' : 'rgba(255, 255, 255, 0.9)',
                     backdropFilter: 'blur(16px)',
@@ -1647,14 +1647,14 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                 style={{
                   width: '100%',
                   fontFamily: "'Courier New', monospace",
-                  fontSize: '1.15rem',
+                  fontSize: '1.75rem',
                   fontWeight: 'bold',
                   letterSpacing: '0.12em',
                   color: '#ffffff',
                   background: '#0047FF',
                   border: 'none',
-                  padding: '1.5rem',
-                  borderRadius: '10px',
+                  padding: '2rem',
+                  borderRadius: '15px',
                   cursor: isValidating ? 'wait' : 'pointer',
                   boxShadow: '0 10px 40px -10px rgba(0, 71, 255, 0.4)',
                   opacity: isValidating ? 0.7 : 1,
@@ -1687,11 +1687,11 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
               transition={{ delay: 0.4 }}
               style={{
                 fontFamily: "'Courier New', monospace",
-                fontSize: '0.85rem',
+                fontSize: '1.25rem',
                 letterSpacing: '0.08em',
                 color: theme === 'dark' ? '#ffffff' : '#2a2a2a',
                 textAlign: 'center',
-                marginTop: '8px',
+                marginTop: '12px',
                 textShadow: theme === 'dark'
                   ? '0 2px 8px rgba(0,0,0,0.8), 0 0 15px rgba(0,0,0,0.5)'
                   : 'none',
