@@ -8,6 +8,7 @@ import ShareableScoreCard, { ShareCardData } from './ShareableScoreCard';
 import ShareableBentoCard, { mapToBentoData } from './ShareableBentoCard';
 import BentoRevealGrid from './BentoRevealGrid';
 import BrandOSDashboard, { BrandOSDashboardData } from './BrandOSDashboard';
+import ImprovementRoadmap, { ImprovementRoadmapData } from './ImprovementRoadmap';
 import { domToPng } from 'modern-screenshot';
 
 // Dynamically import DNA scene to avoid SSR issues with Three.js
@@ -1154,6 +1155,7 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
   const [profile, setProfile] = useState<XProfileData | null>(null);
   const [brandScore, setBrandScore] = useState<BrandScoreResult | null>(null);
   const [generatedBrandDNA, setGeneratedBrandDNA] = useState<GeneratedBrandDNA | null>(null);
+  const [recommendations, setRecommendations] = useState<ImprovementRoadmapData | null>(null);
   const [currentPhase, setCurrentPhase] = useState(1);
   const [itemProgress, setItemProgress] = useState(0);
   const [showConfetti, setShowConfetti] = useState(false);
@@ -1265,6 +1267,38 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                 
                 if (dnaData.success && dnaData.brandDNA) {
                   setGeneratedBrandDNA(dnaData.brandDNA);
+
+                  // Fetch improvement recommendations
+                  try {
+                    const recommendationsResponse = await fetch('/api/x-brand-dna/recommendations', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        username: data.profile.username,
+                        displayName: data.profile.name,
+                        brandScore: data.brandScore.overallScore,
+                        archetype: dnaData.brandDNA.archetype,
+                        voiceConsistency: dnaData.brandDNA.performanceInsights?.voiceConsistency || data.brandScore.phases.check.score,
+                        personalitySummary: dnaData.brandDNA.personalitySummary,
+                        keywords: dnaData.brandDNA.keywords || [],
+                        contentPillars: dnaData.brandDNA.contentPillars,
+                        performanceInsights: dnaData.brandDNA.performanceInsights,
+                        phases: data.brandScore.phases,
+                        topStrengths: data.brandScore.topStrengths,
+                        topImprovements: data.brandScore.topImprovements,
+                        bio: data.profile.description,
+                        followersCount: data.profile.public_metrics?.followers_count || 0,
+                      }),
+                    });
+                    const recommendationsData = await recommendationsResponse.json();
+
+                    if (recommendationsData.success && recommendationsData.recommendations) {
+                      setRecommendations(recommendationsData.recommendations);
+                    }
+                  } catch (recError) {
+                    console.error('Recommendations fetch error:', recError);
+                    // Non-fatal - we still have the score and DNA
+                  }
                 }
               }
             } catch (identityError) {
@@ -1809,6 +1843,21 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
               />
             </div>
 
+            {/* Improvement Roadmap */}
+            {recommendations && (
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4, duration: 0.5 }}
+                className="w-full"
+              >
+                <ImprovementRoadmap
+                  data={recommendations}
+                  onJoinWaitlist={() => setFlowState('signup')}
+                />
+              </motion.div>
+            )}
+
             {/* Waitlist Banner */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
@@ -1964,6 +2013,7 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                   setProfile(null);
                   setBrandScore(null);
                   setGeneratedBrandDNA(null);
+                  setRecommendations(null);
                   setShowConfetti(false);
                 }}
                 whileHover={{ scale: 1.02 }}
@@ -2020,6 +2070,8 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                 setUsername('');
                 setProfile(null);
                 setBrandScore(null);
+                setGeneratedBrandDNA(null);
+                setRecommendations(null);
                 setShowConfetti(false);
               }}
               style={{
