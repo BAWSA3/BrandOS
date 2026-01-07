@@ -18,9 +18,9 @@
   {
     "username": "naval",
     "displayName": "naval",
-    "score": 98,
+    "score": 93,
     "profileImage": "",
-    "timestamp": 1767637358758,
+    "timestamp": 1767728100607,
     "isCrypto": false
   },
   {
@@ -101,6 +101,14 @@
     "score": 72,
     "profileImage": "",
     "timestamp": 1767642543688,
+    "isCrypto": false
+  },
+  {
+    "username": "Kurogod",
+    "displayName": "Kurogod",
+    "score": 79,
+    "profileImage": "",
+    "timestamp": 1767729216418,
     "isCrypto": false
   }
 ]

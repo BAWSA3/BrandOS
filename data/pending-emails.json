@@ -1,0 +1,239 @@
+[
+  {
+    "id": "email_706f444d-b8b2-47cc-8215-dbf205ec5029",
+    "to": "bawsamgmt@gmail.com",
+    "templateId": "clarity-fix",
+    "data": {
+      "name": "Test User",
+      "username": "testuser",
+      "score": 85,
+      "defineScore": 80,
+      "checkScore": 90,
+      "generateScore": 85,
+      "scaleScore": 82,
+      "archetype": "The Builder",
+      "archetypeEmoji": "hammer",
+      "archetypeTagline": "Creating the future one project at a time",
+      "archetypeDescription": "you have a relentless drive to build and ship",
+      "archetypeStrengths": [
+        "execution",
+        "vision",
+        "persistence"
+      ],
+      "topImprovement": "Optimize your bio for clarity",
+      "topStrength": "Your authentic voice"
+    },
+    "scheduledFor": "2026-01-08T09:08:23.618Z",
+    "createdAt": "2026-01-07T09:08:23.618Z",
+    "status": "pending"
+  },
+  {
+    "id": "email_41e6b72d-8a5d-4d8d-b4c2-310c2430b28a",
+    "to": "bawsamgmt@gmail.com",
+    "templateId": "time-saver",
+    "data": {
+      "name": "Test User",
+      "username": "testuser",
+      "score": 85,
+      "defineScore": 80,
+      "checkScore": 90,
+      "generateScore": 85,
+      "scaleScore": 82,
+      "archetype": "The Builder",
+      "archetypeEmoji": "hammer",
+      "archetypeTagline": "Creating the future one project at a time",
+      "archetypeDescription": "you have a relentless drive to build and ship",
+      "archetypeStrengths": [
+        "execution",
+        "vision",
+        "persistence"
+      ],
+      "topImprovement": "Optimize your bio for clarity",
+      "topStrength": "Your authentic voice"
+    },
+    "scheduledFor": "2026-01-09T09:08:23.622Z",
+    "createdAt": "2026-01-07T09:08:23.622Z",
+    "status": "pending"
+  },
+  {
+    "id": "email_defdcce9-055c-4017-a201-b592082d5d90",
+    "to": "bawsamgmt@gmail.com",
+    "templateId": "upgrade-cta",
+    "data": {
+      "name": "Test User",
+      "username": "testuser",
+      "score": 85,
+      "defineScore": 80,
+      "checkScore": 90,
+      "generateScore": 85,
+      "scaleScore": 82,
+      "archetype": "The Builder",
+      "archetypeEmoji": "hammer",
+      "archetypeTagline": "Creating the future one project at a time",
+      "archetypeDescription": "you have a relentless drive to build and ship",
+      "archetypeStrengths": [
+        "execution",
+        "vision",
+        "persistence"
+      ],
+      "topImprovement": "Optimize your bio for clarity",
+      "topStrength": "Your authentic voice"
+    },
+    "scheduledFor": "2026-01-10T09:08:23.623Z",
+    "createdAt": "2026-01-07T09:08:23.623Z",
+    "status": "pending"
+  },
+  {
+    "id": "email_3d92adc5-3d40-4aec-8b54-bd8749191add",
+    "to": "bawsamgmt+test1767776963@gmail.com",
+    "templateId": "clarity-fix",
+    "data": {
+      "name": "Test User",
+      "username": "testuser",
+      "score": 85,
+      "defineScore": 80,
+      "checkScore": 90,
+      "generateScore": 85,
+      "scaleScore": 82,
+      "archetype": "The Builder",
+      "archetypeEmoji": "✨",
+      "archetypeTagline": "Creating the future",
+      "archetypeDescription": "you have a relentless drive to build",
+      "archetypeStrengths": [
+        "execution",
+        "vision"
+      ],
+      "topImprovement": "Optimize your bio",
+      "topStrength": "Authentic voice"
+    },
+    "scheduledFor": "2026-01-08T09:09:24.202Z",
+    "createdAt": "2026-01-07T09:09:24.202Z",
+    "status": "pending"
+  },
+  {
+    "id": "email_3312792c-535e-42c8-a7c9-90d74dd13652",
+    "to": "bawsamgmt+test1767776963@gmail.com",
+    "templateId": "time-saver",
+    "data": {
+      "name": "Test User",
+      "username": "testuser",
+      "score": 85,
+      "defineScore": 80,
+      "checkScore": 90,
+      "generateScore": 85,
+      "scaleScore": 82,
+      "archetype": "The Builder",
+      "archetypeEmoji": "✨",
+      "archetypeTagline": "Creating the future",
+      "archetypeDescription": "you have a relentless drive to build",
+      "archetypeStrengths": [
+        "execution",
+        "vision"
+      ],
+      "topImprovement": "Optimize your bio",
+      "topStrength": "Authentic voice"
+    },
+    "scheduledFor": "2026-01-09T09:09:24.204Z",
+    "createdAt": "2026-01-07T09:09:24.204Z",
+    "status": "pending"
+  },
+  {
+    "id": "email_b0819f76-3bf5-4fe6-a947-6852ed5713c8",
+    "to": "bawsamgmt+test1767776963@gmail.com",
+    "templateId": "upgrade-cta",
+    "data": {
+      "name": "Test User",
+      "username": "testuser",
+      "score": 85,
+      "defineScore": 80,
+      "checkScore": 90,
+      "generateScore": 85,
+      "scaleScore": 82,
+      "archetype": "The Builder",
+      "archetypeEmoji": "✨",
+      "archetypeTagline": "Creating the future",
+      "archetypeDescription": "you have a relentless drive to build",
+      "archetypeStrengths": [
+        "execution",
+        "vision"
+      ],
+      "topImprovement": "Optimize your bio",
+      "topStrength": "Authentic voice"
+    },
+    "scheduledFor": "2026-01-10T09:09:24.205Z",
+    "createdAt": "2026-01-07T09:09:24.205Z",
+    "status": "pending"
+  },
+  {
+    "id": "email_d113d006-e539-46b3-923f-a9c964eb3e1e",
+    "to": "bawsamgmt+newtemplate@gmail.com",
+    "templateId": "clarity-fix",
+    "data": {
+      "name": "Bawsa",
+      "username": "bawsa",
+      "score": 92,
+      "defineScore": 0,
+      "checkScore": 0,
+      "generateScore": 0,
+      "scaleScore": 0,
+      "archetype": "The Builder",
+      "archetypeEmoji": "??",
+      "archetypeTagline": "",
+      "archetypeDescription": "",
+      "archetypeStrengths": [],
+      "topImprovement": "",
+      "topStrength": ""
+    },
+    "scheduledFor": "2026-01-08T09:24:42.099Z",
+    "createdAt": "2026-01-07T09:24:42.099Z",
+    "status": "pending"
+  },
+  {
+    "id": "email_9aa09523-d259-4f42-9c5e-a4fefb0f2b34",
+    "to": "bawsamgmt+newtemplate@gmail.com",
+    "templateId": "time-saver",
+    "data": {
+      "name": "Bawsa",
+      "username": "bawsa",
+      "score": 92,
+      "defineScore": 0,
+      "checkScore": 0,
+      "generateScore": 0,
+      "scaleScore": 0,
+      "archetype": "The Builder",
+      "archetypeEmoji": "??",
+      "archetypeTagline": "",
+      "archetypeDescription": "",
+      "archetypeStrengths": [],
+      "topImprovement": "",
+      "topStrength": ""
+    },
+    "scheduledFor": "2026-01-09T09:24:42.101Z",
+    "createdAt": "2026-01-07T09:24:42.101Z",
+    "status": "pending"
+  },
+  {
+    "id": "email_2faf1291-432c-4116-b6f8-d2641bd42742",
+    "to": "bawsamgmt+newtemplate@gmail.com",
+    "templateId": "upgrade-cta",
+    "data": {
+      "name": "Bawsa",
+      "username": "bawsa",
+      "score": 92,
+      "defineScore": 0,
+      "checkScore": 0,
+      "generateScore": 0,
+      "scaleScore": 0,
+      "archetype": "The Builder",
+      "archetypeEmoji": "??",
+      "archetypeTagline": "",
+      "archetypeDescription": "",
+      "archetypeStrengths": [],
+      "topImprovement": "",
+      "topStrength": ""
+    },
+    "scheduledFor": "2026-01-10T09:24:42.103Z",
+    "createdAt": "2026-01-07T09:24:42.103Z",
+    "status": "pending"
+  }
+]
