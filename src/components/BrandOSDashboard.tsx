@@ -110,7 +110,7 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({ data }) => {
       <div className="w-full max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-3 md:gap-4 auto-rows-[minmax(140px,auto)] md:auto-rows-[minmax(180px,auto)]">
 
         {/* --- CARD 1: HERO SCORE --- */}
-        <div className="md:col-span-2 md:row-span-2 bg-[#2E6AFF] rounded-[4px] relative p-6 md:p-10 flex flex-col justify-between overflow-hidden group hover:brightness-110 transition-all duration-500">
+        <div className="md:col-span-2 md:row-span-2 bg-[#2E6AFF] rounded-[4px] relative p-6 md:p-10 flex flex-col justify-between overflow-visible group hover:brightness-110 transition-all duration-500">
           <div className="absolute inset-0 bg-grid-pattern opacity-30 pointer-events-none" />
           <div className="flex justify-between items-start z-10">
             <span className="font-os text-xs md:text-sm text-white/90 tracking-widest border border-white/40 px-2 py-1 rounded-[2px] bg-[#2E6AFF] relative group/info inline-flex items-center gap-1.5">
@@ -145,7 +145,7 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({ data }) => {
         </div>
 
         {/* --- CARD 2: IDENTITY --- */}
-        <div className="md:col-span-2 bg-white rounded-[4px] p-6 flex flex-col sm:flex-row items-center justify-between relative group overflow-hidden">
+        <div className="md:col-span-2 bg-white rounded-[4px] p-6 flex flex-col sm:flex-row items-center justify-between relative group overflow-visible">
           <div className="flex items-center gap-5 z-10 w-full sm:w-auto">
             <div className="relative shrink-0">
               <div className="w-20 h-20 rounded-full bg-gray-100 border-[3px] border-black p-0.5">
@@ -177,7 +177,7 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({ data }) => {
         </div>
 
         {/* --- CARD 3: TONE ANALYZER --- */}
-        <div className="md:col-span-1 bg-[#1A1A1A] rounded-[4px] p-4 md:p-5 flex flex-col relative overflow-hidden border border-white/5">
+        <div className="md:col-span-1 bg-[#1A1A1A] rounded-[4px] p-4 md:p-5 flex flex-col relative overflow-visible border border-white/5">
           <span className="font-os text-[10px] text-[#666] mb-3 md:mb-4 border-b border-[#333] pb-2 tracking-widest relative group/info inline-flex items-center gap-1.5">
               TONE_MIXER
               <Info className="w-3 h-3 text-[#666] hover:text-white cursor-help" />
@@ -220,7 +220,7 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({ data }) => {
         </div>
 
         {/* --- CARD 4: ARCHETYPE --- */}
-        <div className="md:col-span-1 bg-[#FFD700] rounded-[4px] p-4 flex flex-col justify-between relative overflow-hidden hover:bg-[#FFC000] transition-colors cursor-default">
+        <div className="md:col-span-1 bg-[#FFD700] rounded-[4px] p-4 flex flex-col justify-between relative overflow-visible hover:bg-[#FFC000] transition-colors cursor-default">
           <div className="flex justify-between items-start z-10">
             <span className="font-os text-[10px] text-black/70 font-bold border border-black/10 px-1.5 py-0.5 rounded-[2px] relative group/info inline-flex items-center gap-1">
               ARCHETYPE
@@ -276,7 +276,7 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({ data }) => {
         </div>
 
         {/* --- CARD 6: CONTENT PILLARS --- */}
-        <div className="md:col-span-2 bg-black border border-[#333] rounded-[4px] p-4 md:p-6 flex flex-col justify-center relative overflow-hidden">
+        <div className="md:col-span-2 bg-black border border-[#333] rounded-[4px] p-4 md:p-6 flex flex-col justify-center relative overflow-visible">
            <div className="absolute inset-0 opacity-20 pointer-events-none"
                style={{backgroundImage: 'linear-gradient(#222 1px, transparent 1px), linear-gradient(90deg, #222 1px, transparent 1px)', backgroundSize: '20px 20px'}}></div>
            <div className="flex justify-between items-center mb-4 md:mb-6 z-10">
@@ -290,26 +290,33 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({ data }) => {
               <BarChart3 size={16} className="text-gray-600" />
            </div>
            {data.pillars.length > 0 ? (
-             <div className="grid grid-cols-3 gap-2 md:gap-4 h-full items-end z-10">
+             <div className="grid grid-cols-3 gap-2 md:gap-4 z-10">
                {data.pillars.slice(0, 3).map((pillar, i) => (
-                 <div key={i} className="flex flex-col gap-1 md:gap-2 h-full justify-end group">
-                   <div className="text-[10px] md:text-xs text-gray-400 font-os text-center opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity md:translate-y-2 md:group-hover:translate-y-0">
+                 <div key={i} className="flex flex-col h-full group">
+                   {/* Fixed height for percentage */}
+                   <div className="h-5 flex items-center justify-center text-[10px] md:text-xs text-gray-400 font-os opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                      {pillar.value}%
                    </div>
-                   <div className="w-full bg-[#111] rounded-[2px] relative overflow-hidden border border-[#333] h-[70px] md:h-[100px]">
-                     <div
-                      style={{height: `${pillar.value}%`}}
-                      className={`absolute bottom-0 w-full transition-all duration-1000 ease-out
-                        ${i === 0 ? 'bg-white' : i === 1 ? 'bg-[#2E6AFF]' : 'bg-[#FF6B00] shadow-[0_0_15px_rgba(255,107,0,0.4)]'}
-                      `}
-                     ></div>
+                   {/* Bar container with fixed height */}
+                   <div className="h-[60px] md:h-[80px] relative">
+                     <div className="absolute inset-0 bg-[#111] rounded-[2px] border border-[#333] overflow-hidden">
+                       <div
+                        style={{height: `${pillar.value}%`}}
+                        className={`absolute bottom-0 w-full transition-all duration-1000 ease-out
+                          ${i === 0 ? 'bg-white' : i === 1 ? 'bg-[#2E6AFF]' : 'bg-[#FF6B00] shadow-[0_0_15px_rgba(255,107,0,0.4)]'}
+                        `}
+                       ></div>
+                     </div>
                    </div>
-                   <span
-                     className={`text-center text-[7px] md:text-xs font-brand font-bold italic tracking-wider leading-tight overflow-hidden ${i === 0 ? 'text-white' : i === 1 ? 'text-[#2E6AFF]' : 'text-[#FF6B00]'}`}
-                     title={pillar.label}
-                   >
-                     {truncateToTwoWords(pillar.label)}
-                   </span>
+                   {/* Fixed height for 2-line labels */}
+                   <div className="h-8 md:h-10 flex items-start justify-center pt-1">
+                     <span
+                       className={`text-center text-[8px] md:text-[10px] font-brand font-bold italic tracking-wider leading-tight line-clamp-2 ${i === 0 ? 'text-white' : i === 1 ? 'text-[#2E6AFF]' : 'text-[#FF6B00]'}`}
+                       title={pillar.label}
+                     >
+                       {truncateToTwoWords(pillar.label)}
+                     </span>
+                   </div>
                  </div>
                ))}
              </div>
