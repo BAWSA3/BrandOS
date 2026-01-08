@@ -9,6 +9,7 @@ import ShareableBentoCard, { mapToBentoData } from './ShareableBentoCard';
 import BentoRevealGrid from './BentoRevealGrid';
 import BrandOSDashboard, { BrandOSDashboardData } from './BrandOSDashboard';
 import ImprovementRoadmap, { ImprovementRoadmapData } from './ImprovementRoadmap';
+import ShareableBadge, { BadgeData } from './ShareableBadge';
 import { domToPng } from 'modern-screenshot';
 
 // Dynamically import DNA scene to avoid SSR issues with Three.js
@@ -1854,6 +1855,31 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                 <ImprovementRoadmap
                   data={recommendations}
                   onJoinWaitlist={() => setFlowState('signup')}
+                />
+              </motion.div>
+            )}
+
+            {/* Shareable Badge Section */}
+            {generatedBrandDNA?.archetype?.primary && (
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5, duration: 0.5 }}
+                className="w-full max-w-[520px] mx-4 mt-8"
+              >
+                <ShareableBadge
+                  data={{
+                    username: profile.username,
+                    displayName: profile.name,
+                    profileImageUrl: profile.profile_image_url,
+                    score: brandScore.overallScore,
+                    archetype: {
+                      name: stripEmoji(generatedBrandDNA.archetype || 'The Creator'),
+                      emoji: generatedBrandDNA.archetypeEmoji || '🚀',
+                    },
+                    voiceConsistency: brandScore.phases.check.score,
+                    topKeywords: generatedBrandDNA.keywords?.slice(0, 3),
+                  } as BadgeData}
                 />
               </motion.div>
             )}
