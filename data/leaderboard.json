@@ -10,9 +10,9 @@
   {
     "username": "BawsaXBT",
     "displayName": "BawsaXBT",
-    "score": 78,
+    "score": 79,
     "profileImage": "",
-    "timestamp": 1767641991229,
+    "timestamp": 1767862111465,
     "isCrypto": false
   },
   {
@@ -20,7 +20,7 @@
     "displayName": "naval",
     "score": 93,
     "profileImage": "",
-    "timestamp": 1767728100607,
+    "timestamp": 1767863637488,
     "isCrypto": false
   },
   {
@@ -109,6 +109,14 @@
     "score": 79,
     "profileImage": "",
     "timestamp": 1767729216418,
+    "isCrypto": false
+  },
+  {
+    "username": "Carlitoswa_y",
+    "displayName": "Carlitoswa_y",
+    "score": 78,
+    "profileImage": "",
+    "timestamp": 1767806479700,
     "isCrypto": false
   }
 ]
