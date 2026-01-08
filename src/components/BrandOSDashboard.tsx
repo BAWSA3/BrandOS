@@ -3,9 +3,9 @@
 import React, { useState, useEffect } from 'react';
 import { Terminal, Shield, BarChart3, Activity, Info } from 'lucide-react';
 
-// Helper to truncate pillar labels to max 2 words
+// Helper to truncate pillar labels to max 2 words (split by space or slash)
 const truncateToTwoWords = (text: string): string => {
-  const words = text.split(' ').filter(w => w.length > 0);
+  const words = text.split(/[\s\/]+/).filter(w => w.length > 0);
   return words.slice(0, 2).join(' ');
 };
 
