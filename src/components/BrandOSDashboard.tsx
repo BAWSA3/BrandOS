@@ -1,7 +1,13 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Terminal, Shield, BarChart3, Activity } from 'lucide-react';
+import { Terminal, Shield, BarChart3, Activity, Info } from 'lucide-react';
+
+// Helper to truncate pillar labels to max 2 words
+const truncateToTwoWords = (text: string): string => {
+  const words = text.split(' ').filter(w => w.length > 0);
+  return words.slice(0, 2).join(' ');
+};
 
 /* TYPEWRITER TEXT COMPONENT */
 interface TypewriterTextProps {
@@ -107,8 +113,12 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({ data }) => {
         <div className="md:col-span-2 md:row-span-2 bg-[#2E6AFF] rounded-[4px] relative p-6 md:p-10 flex flex-col justify-between overflow-hidden group hover:brightness-110 transition-all duration-500">
           <div className="absolute inset-0 bg-grid-pattern opacity-30 pointer-events-none" />
           <div className="flex justify-between items-start z-10">
-            <span className="font-os text-xs md:text-sm text-white/90 tracking-widest border border-white/40 px-2 py-1 rounded-[2px] bg-[#2E6AFF]">
+            <span className="font-os text-xs md:text-sm text-white/90 tracking-widest border border-white/40 px-2 py-1 rounded-[2px] bg-[#2E6AFF] relative group/info inline-flex items-center gap-1.5">
               SYSTEM_SCORE
+              <Info className="w-3 h-3 text-white/50 hover:text-white/80 cursor-help" />
+              <span className="absolute bottom-full left-0 mb-2 px-2 py-1 bg-white text-black text-[10px] font-normal rounded whitespace-nowrap opacity-0 group-hover/info:opacity-100 transition-opacity pointer-events-none z-50 shadow-lg">
+                Your brand strength (0-100)
+              </span>
             </span>
             <Activity className="text-white/80 w-6 h-6 animate-pulse" />
           </div>
@@ -168,7 +178,13 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({ data }) => {
 
         {/* --- CARD 3: TONE ANALYZER --- */}
         <div className="md:col-span-1 bg-[#1A1A1A] rounded-[4px] p-4 md:p-5 flex flex-col relative overflow-hidden border border-white/5">
-          <span className="font-os text-[10px] text-[#666] mb-3 md:mb-4 block border-b border-[#333] pb-2 tracking-widest">TONE_MIXER</span>
+          <span className="font-os text-[10px] text-[#666] mb-3 md:mb-4 border-b border-[#333] pb-2 tracking-widest relative group/info inline-flex items-center gap-1.5">
+              TONE_MIXER
+              <Info className="w-3 h-3 text-[#666] hover:text-white cursor-help" />
+              <span className="absolute bottom-full left-0 mb-2 px-2 py-1 bg-white text-black text-[10px] font-normal rounded whitespace-nowrap opacity-0 group-hover/info:opacity-100 transition-opacity pointer-events-none z-50 shadow-lg">
+                Your voice balance
+              </span>
+            </span>
           <div className="flex-1 flex justify-between items-end gap-2 md:gap-3 px-1">
             <div className="w-full h-full flex flex-col justify-end group">
               <div style={{height: `${data.tone.formality}%`}} className="w-full bg-gray-600 rounded-[2px] mb-2 transition-all duration-700 group-hover:bg-white" />
@@ -206,7 +222,13 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({ data }) => {
         {/* --- CARD 4: ARCHETYPE --- */}
         <div className="md:col-span-1 bg-[#FFD700] rounded-[4px] p-4 flex flex-col justify-between relative overflow-hidden hover:bg-[#FFC000] transition-colors cursor-default">
           <div className="flex justify-between items-start z-10">
-            <span className="font-os text-[10px] text-black/70 font-bold border border-black/10 px-1.5 py-0.5 rounded-[2px]">ARCHETYPE</span>
+            <span className="font-os text-[10px] text-black/70 font-bold border border-black/10 px-1.5 py-0.5 rounded-[2px] relative group/info inline-flex items-center gap-1">
+              ARCHETYPE
+              <Info className="w-3 h-3 text-black/50 hover:text-black/70 cursor-help" />
+              <span className="absolute bottom-full left-0 mb-2 px-2 py-1 bg-black text-white text-[10px] font-normal rounded whitespace-nowrap opacity-0 group-hover/info:opacity-100 transition-opacity pointer-events-none z-50 shadow-lg">
+                Your brand personality
+              </span>
+            </span>
           </div>
           <div className="absolute -right-4 top-6 leading-none opacity-100 transform rotate-12 drop-shadow-lg filter hover:rotate-0 transition-transform duration-300">
             {data.personality.emoji.startsWith('/') ? (
@@ -233,7 +255,13 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({ data }) => {
         <div className="md:col-span-2 bg-[#F0F0F0] rounded-[4px] p-4 md:p-5 flex flex-col justify-between border-l-[4px] md:border-l-[6px] border-[#2E6AFF]">
            <div className="flex items-center gap-2 mb-2 md:mb-3">
              <Terminal size={12} className="text-black md:w-[14px] md:h-[14px]" strokeWidth={3} />
-             <span className="font-os text-[10px] md:text-xs text-black font-bold tracking-wider">&gt; EXECUTE_DNA_SEQUENCE</span>
+             <span className="font-os text-[10px] md:text-xs text-black font-bold tracking-wider relative group/info inline-flex items-center gap-1">
+               &gt; EXECUTE_DNA_SEQUENCE
+               <Info className="w-3 h-3 text-black/50 hover:text-black cursor-help" />
+               <span className="absolute bottom-full left-0 mb-2 px-2 py-1 bg-black text-white text-[10px] font-normal rounded whitespace-nowrap opacity-0 group-hover/info:opacity-100 transition-opacity pointer-events-none z-50 shadow-lg">
+                 Your brand DNA keywords
+               </span>
+             </span>
            </div>
            <div className="flex flex-wrap gap-1.5 md:gap-2 mb-3 md:mb-4">
              {data.dna.keywords.map((word, i) => (
@@ -252,7 +280,13 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({ data }) => {
            <div className="absolute inset-0 opacity-20 pointer-events-none"
                style={{backgroundImage: 'linear-gradient(#222 1px, transparent 1px), linear-gradient(90deg, #222 1px, transparent 1px)', backgroundSize: '20px 20px'}}></div>
            <div className="flex justify-between items-center mb-4 md:mb-6 z-10">
-              <span className="font-os text-[10px] md:text-xs text-gray-500 tracking-widest">CONTENT_DISTRIBUTION</span>
+              <span className="font-os text-[10px] md:text-xs text-gray-500 tracking-widest relative group/info inline-flex items-center gap-1.5">
+                CONTENT_DISTRIBUTION
+                <Info className="w-3 h-3 text-gray-500 hover:text-white cursor-help" />
+                <span className="absolute bottom-full left-0 mb-2 px-2 py-1 bg-white text-black text-[10px] font-normal rounded whitespace-nowrap opacity-0 group-hover/info:opacity-100 transition-opacity pointer-events-none z-50 shadow-lg">
+                  Your top content themes
+                </span>
+              </span>
               <BarChart3 size={16} className="text-gray-600" />
            </div>
            {data.pillars.length > 0 ? (
@@ -274,8 +308,7 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({ data }) => {
                      className={`text-center text-[7px] md:text-xs font-brand font-bold italic tracking-wider leading-tight overflow-hidden ${i === 0 ? 'text-white' : i === 1 ? 'text-[#2E6AFF]' : 'text-[#FF6B00]'}`}
                      title={pillar.label}
                    >
-                     <span className="hidden md:inline">{pillar.label}</span>
-                     <span className="md:hidden line-clamp-2">{pillar.label.split('(')[0].trim()}</span>
+                     {truncateToTwoWords(pillar.label)}
                    </span>
                  </div>
                ))}
