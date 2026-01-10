@@ -31,7 +31,6 @@
     "lucide-react": "^0.562.0",
     "modern-screenshot": "^4.6.7",
     "motion": "^12.23.26",
-    "motion-plus": "https://api.motion.dev/registry.tgz?package=motion-plus&version=2.0.2&token=2f23dc8f258f78641060a1e9cecb3128f5666739e8f80de0395388fc82e2b78f",
     "next": "16.0.10",
     "node-vibrant": "^4.0.3",
     "pdf-parse": "^2.4.5",
