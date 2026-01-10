@@ -636,6 +636,239 @@ function analyzeInfluence(profile: XProfileData): InfluenceAnalysis {
   };
 }
 
+// ============================================================================
+// Account Authenticity Analysis (Bot Detection)
+// ============================================================================
+
+export type AuthenticityTier = 'authentic' | 'some_signals' | 'suspicious' | 'likely_botted';
+
+export interface AuthenticityAnalysis {
+  score: number; // 0-100 (0 = authentic, 100 = likely bot)
+  tier: AuthenticityTier;
+  tierLabel: string;
+  signals: {
+    followerRatio: { score: number; detail: string };
+    accountAge: { score: number; detail: string };
+    engagement: { score: number; detail: string };
+  };
+  isWarning: boolean;
+}
+
+export function analyzeAccountAuthenticity(
+  profile: XProfileData,
+  engagementRate?: number // Optional: avg engagement rate from tweets
+): AuthenticityAnalysis {
+  const followers = (profile as any).followers_count || profile.public_metrics?.followers_count || 0;
+  const following = (profile as any).following_count || profile.public_metrics?.following_count || 0;
+  const tweets = (profile as any).tweet_count || profile.public_metrics?.tweet_count || 0;
+  const createdAt = (profile as any).created_at || profile.created_at;
+
+  let totalScore = 0;
+  const signals = {
+    followerRatio: { score: 0, detail: '' },
+    accountAge: { score: 0, detail: '' },
+    engagement: { score: 0, detail: '' },
+  };
+
+  // Signal 1: Follower/Following Ratio (0-30 points)
+  // Suspicious if following >> followers
+  const ratio = following / Math.max(followers, 1);
+  if (ratio > 10) {
+    signals.followerRatio.score = 30;
+    signals.followerRatio.detail = `Following ${following.toLocaleString()} but only ${followers.toLocaleString()} followers (${ratio.toFixed(1)}:1 ratio)`;
+  } else if (ratio > 5) {
+    signals.followerRatio.score = 20;
+    signals.followerRatio.detail = `High following/follower ratio (${ratio.toFixed(1)}:1)`;
+  } else if (ratio > 3) {
+    signals.followerRatio.score = 10;
+    signals.followerRatio.detail = `Elevated following/follower ratio (${ratio.toFixed(1)}:1)`;
+  } else {
+    signals.followerRatio.score = 0;
+    signals.followerRatio.detail = 'Healthy follower/following ratio';
+  }
+  totalScore += signals.followerRatio.score;
+
+  // Signal 2: Account Age vs Followers (0-30 points)
+  // Suspicious if new account with very high followers
+  if (createdAt) {
+    const accountAgeMs = Date.now() - new Date(createdAt).getTime();
+    const accountAgeMonths = accountAgeMs / (1000 * 60 * 60 * 24 * 30);
+    const followersPerMonth = followers / Math.max(accountAgeMonths, 1);
+
+    if (accountAgeMonths < 6 && followers > 10000) {
+      signals.accountAge.score = 30;
+      signals.accountAge.detail = `Account is ${Math.floor(accountAgeMonths)} months old with ${followers.toLocaleString()} followers (unusually fast growth)`;
+    } else if (followersPerMonth > 5000 && followers > 50000) {
+      signals.accountAge.score = 25;
+      signals.accountAge.detail = `Gaining ~${Math.floor(followersPerMonth).toLocaleString()} followers/month (very rapid growth)`;
+    } else if (followersPerMonth > 2000 && followers > 20000) {
+      signals.accountAge.score = 15;
+      signals.accountAge.detail = `Rapid follower growth (~${Math.floor(followersPerMonth).toLocaleString()}/month)`;
+    } else {
+      signals.accountAge.score = 0;
+      signals.accountAge.detail = 'Normal growth pattern for account age';
+    }
+  } else {
+    signals.accountAge.score = 0;
+    signals.accountAge.detail = 'Account age unavailable';
+  }
+  totalScore += signals.accountAge.score;
+
+  // Signal 3: Engagement Rate (0-40 points)
+  // Suspicious if high followers but very low engagement
+  if (engagementRate !== undefined && followers >= 10000) {
+    if (engagementRate < 0.1) {
+      signals.engagement.score = 40;
+      signals.engagement.detail = `Very low engagement (${engagementRate.toFixed(2)}%) for ${followers.toLocaleString()} followers`;
+    } else if (engagementRate < 0.5) {
+      signals.engagement.score = 25;
+      signals.engagement.detail = `Low engagement rate (${engagementRate.toFixed(2)}%)`;
+    } else if (engagementRate < 1) {
+      signals.engagement.score = 10;
+      signals.engagement.detail = `Below average engagement (${engagementRate.toFixed(2)}%)`;
+    } else {
+      signals.engagement.score = 0;
+      signals.engagement.detail = `Healthy engagement rate (${engagementRate.toFixed(2)}%)`;
+    }
+  } else if (followers >= 10000 && tweets > 0) {
+    // Estimate based on no engagement data available
+    signals.engagement.score = 0;
+    signals.engagement.detail = 'Engagement rate requires tweet analysis';
+  } else {
+    signals.engagement.score = 0;
+    signals.engagement.detail = 'Account too small for engagement analysis';
+  }
+  totalScore += signals.engagement.score;
+
+  // Determine tier
+  let tier: AuthenticityTier;
+  let tierLabel: string;
+
+  if (totalScore <= 20) {
+    tier = 'authentic';
+    tierLabel = 'Likely Authentic';
+  } else if (totalScore <= 50) {
+    tier = 'some_signals';
+    tierLabel = 'Some Suspicious Signals';
+  } else if (totalScore <= 75) {
+    tier = 'suspicious';
+    tierLabel = 'Possibly Botted';
+  } else {
+    tier = 'likely_botted';
+    tierLabel = 'Likely Botted';
+  }
+
+  return {
+    score: totalScore,
+    tier,
+    tierLabel,
+    signals,
+    isWarning: totalScore > 50,
+  };
+}
+
+// ============================================================================
+// Activity Level Analysis
+// ============================================================================
+
+export type ActivityLevel = 'very_active' | 'active' | 'moderate' | 'inactive' | 'dormant';
+
+export interface ActivityAnalysis {
+  level: ActivityLevel;
+  levelLabel: string;
+  postsPerWeek: number;
+  detail: string;
+}
+
+export function analyzeActivityLevel(profile: XProfileData): ActivityAnalysis {
+  const tweets = (profile as any).tweet_count || profile.public_metrics?.tweet_count || 0;
+  const createdAtRaw = (profile as any).created_at || profile.created_at;
+  
+  // Validate created_at date
+  const createdAtDate = createdAtRaw ? new Date(createdAtRaw) : null;
+  const isValidDate = createdAtDate && !isNaN(createdAtDate.getTime());
+
+  // If no valid date, estimate activity based on tweet count alone
+  if (!isValidDate) {
+    // Fallback: estimate based on total tweet count
+    // These thresholds assume typical account ages
+    if (tweets >= 10000) {
+      return {
+        level: 'very_active',
+        levelLabel: 'Very Active',
+        postsPerWeek: 0,
+        detail: `${tweets.toLocaleString()} total posts (highly active creator)`,
+      };
+    } else if (tweets >= 3000) {
+      return {
+        level: 'active',
+        levelLabel: 'Active',
+        postsPerWeek: 0,
+        detail: `${tweets.toLocaleString()} total posts (established creator)`,
+      };
+    } else if (tweets >= 500) {
+      return {
+        level: 'moderate',
+        levelLabel: 'Moderate',
+        postsPerWeek: 0,
+        detail: `${tweets.toLocaleString()} total posts`,
+      };
+    } else if (tweets >= 50) {
+      return {
+        level: 'inactive',
+        levelLabel: 'Light',
+        postsPerWeek: 0,
+        detail: `${tweets.toLocaleString()} total posts (occasional poster)`,
+      };
+    } else {
+      return {
+        level: 'dormant',
+        levelLabel: 'New/Dormant',
+        postsPerWeek: 0,
+        detail: tweets === 0 ? 'No posts yet' : `Only ${tweets} posts`,
+      };
+    }
+  }
+
+  // Calculate with valid date
+  const accountAgeMs = Date.now() - createdAtDate.getTime();
+  const accountAgeWeeks = accountAgeMs / (1000 * 60 * 60 * 24 * 7);
+  const postsPerWeek = tweets / Math.max(accountAgeWeeks, 1);
+
+  let level: ActivityLevel;
+  let levelLabel: string;
+  let detail: string;
+
+  if (postsPerWeek >= 7) {
+    level = 'very_active';
+    levelLabel = 'Very Active';
+    detail = `Averaging ${postsPerWeek.toFixed(1)} posts/week (daily poster)`;
+  } else if (postsPerWeek >= 3) {
+    level = 'active';
+    levelLabel = 'Active';
+    detail = `Averaging ${postsPerWeek.toFixed(1)} posts/week`;
+  } else if (postsPerWeek >= 1) {
+    level = 'moderate';
+    levelLabel = 'Moderate';
+    detail = `Averaging ${postsPerWeek.toFixed(1)} posts/week`;
+  } else if (postsPerWeek >= 0.25) {
+    level = 'inactive';
+    levelLabel = 'Light';
+    detail = `About ${(postsPerWeek * 4).toFixed(1)} posts/month`;
+  } else {
+    level = 'dormant';
+    levelLabel = 'Dormant';
+    detail = 'Rarely posts (less than monthly)';
+  }
+
+  return {
+    level,
+    levelLabel,
+    postsPerWeek,
+    detail,
+  };
+}
+
 export const xBrandScorePrompt = (profile: XProfileData) => {
   const cryptoAnalysis = detectCryptoSignals(profile);
   const influenceAnalysis = analyzeInfluence(profile);

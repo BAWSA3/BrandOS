@@ -1,13 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Terminal, Shield, BarChart3, Activity, Info } from 'lucide-react';
+import { Terminal, Shield, BarChart3, Activity, Info, AlertTriangle } from 'lucide-react';
+import { AuthenticityAnalysis, ActivityAnalysis } from '@/lib/gemini';
 
-// Helper to truncate pillar labels to max 2 words (split by space or slash)
-const truncateToTwoWords = (text: string): string => {
-  const words = text.split(/[\s\/]+/).filter(w => w.length > 0);
-  return words.slice(0, 2).join(' ');
-};
 
 /* TYPEWRITER TEXT COMPONENT */
 interface TypewriterTextProps {
@@ -85,9 +81,35 @@ export interface BrandOSDashboardData {
 
 interface BrandOSDashboardProps {
   data: BrandOSDashboardData;
+  authenticity?: AuthenticityAnalysis | null;
+  activity?: ActivityAnalysis | null;
+  onCopyToClipboard?: () => Promise<void>;
+  onDownload?: () => Promise<void>;
+  onShareToX?: () => void;
 }
 
-const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({ data }) => {
+const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({
+  data,
+  authenticity,
+  activity,
+  onCopyToClipboard,
+  onDownload,
+  onShareToX
+}) => {
+  const [copyStatus, setCopyStatus] = useState<'idle' | 'copying' | 'copied'>('idle');
+
+  const handleCopy = async () => {
+    if (!onCopyToClipboard) return;
+    setCopyStatus('copying');
+    try {
+      await onCopyToClipboard();
+      setCopyStatus('copied');
+      setTimeout(() => setCopyStatus('idle'), 2000);
+    } catch {
+      setCopyStatus('idle');
+    }
+  };
+
   return (
     <div className="text-white p-4 md:p-8 font-sans selection:bg-[#2E6AFF] selection:text-white flex items-center justify-center">
 
@@ -146,7 +168,16 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({ data }) => {
 
         {/* --- CARD 2: IDENTITY --- */}
         <div className="md:col-span-2 bg-white rounded-[4px] p-6 flex flex-col sm:flex-row items-center justify-between relative group overflow-visible">
-          <div className="flex items-center gap-5 z-10 w-full sm:w-auto">
+          {/* Authenticity Warning Banner */}
+          {authenticity?.isWarning && (
+            <div className="absolute top-0 left-0 right-0 bg-amber-500 text-black px-3 py-1.5 rounded-t-[4px] flex items-center gap-2 z-20">
+              <AlertTriangle size={14} strokeWidth={2.5} />
+              <span className="font-os text-[10px] font-bold tracking-wider">
+                {authenticity.tier === 'likely_botted' ? 'SUSPICIOUS ACCOUNT SIGNALS DETECTED' : 'SOME UNUSUAL ACCOUNT PATTERNS'}
+              </span>
+            </div>
+          )}
+          <div className={`flex items-center gap-5 z-10 w-full sm:w-auto ${authenticity?.isWarning ? 'mt-6' : ''}`}>
             <div className="relative shrink-0">
               <div className="w-20 h-20 rounded-full bg-gray-100 border-[3px] border-black p-0.5">
                 <img
@@ -165,10 +196,23 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({ data }) => {
               <h2 className="text-3xl md:text-4xl font-brand font-black italic text-black tracking-tight leading-none">
                 {data.profile.displayName}
               </h2>
-              <p className="font-os text-sm text-gray-500 mt-1 font-bold">@{data.profile.username}</p>
+              <div className="flex items-center gap-2 mt-1">
+                <p className="font-os text-sm text-gray-500 font-bold">@{data.profile.username}</p>
+                {activity && (
+                  <span className={`font-os text-[9px] px-1.5 py-0.5 rounded-[2px] font-bold tracking-wider ${
+                    activity.level === 'very_active' ? 'bg-emerald-100 text-emerald-700' :
+                    activity.level === 'active' ? 'bg-blue-100 text-blue-700' :
+                    activity.level === 'moderate' ? 'bg-amber-100 text-amber-700' :
+                    activity.level === 'inactive' ? 'bg-gray-200 text-gray-600' :
+                    'bg-red-100 text-red-600'
+                  }`}>
+                    {activity.levelLabel.toUpperCase()}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
-          <div className="mt-4 sm:mt-0 text-center sm:text-right border-t sm:border-t-0 sm:border-l border-gray-200 pt-4 sm:pt-0 sm:pl-6 w-full sm:w-auto">
+          <div className={`mt-4 sm:mt-0 text-center sm:text-right border-t sm:border-t-0 sm:border-l border-gray-200 pt-4 sm:pt-0 sm:pl-6 w-full sm:w-auto ${authenticity?.isWarning ? 'mt-6 sm:mt-0' : ''}`}>
             <span className="font-os text-[10px] text-gray-400 block uppercase tracking-widest mb-1">Audience</span>
             <span className="text-4xl md:text-5xl font-brand font-black italic text-black tracking-tighter">
               {data.profile.followersCount}
@@ -314,7 +358,7 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({ data }) => {
                        className={`text-center text-[8px] md:text-[10px] font-brand font-bold italic tracking-wider leading-tight line-clamp-2 ${i === 0 ? 'text-white' : i === 1 ? 'text-[#2E6AFF]' : 'text-[#FF6B00]'}`}
                        title={pillar.label}
                      >
-                       {truncateToTwoWords(pillar.label)}
+                       {pillar.label}
                      </span>
                    </div>
                  </div>
@@ -337,6 +381,62 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({ data }) => {
              </div>
            )}
         </div>
+
+        {/* --- SHARE ROW --- */}
+        {(onCopyToClipboard || onDownload || onShareToX) && (
+          <div className="md:col-span-4 flex flex-col sm:flex-row justify-center items-center gap-3 mt-2 pt-4 border-t border-[#222]">
+            <span className="font-os text-[10px] text-gray-500 tracking-widest mr-2 hidden sm:inline">
+              SHARE_DNA
+            </span>
+            <div className="flex gap-2">
+              {onCopyToClipboard && (
+                <button
+                  onClick={handleCopy}
+                  disabled={copyStatus === 'copying'}
+                  className="flex items-center gap-2 px-4 py-2.5 bg-[#1A1A1A] hover:bg-[#2E6AFF] border border-[#333] hover:border-[#2E6AFF] rounded-[4px] text-white font-os text-[11px] tracking-wider transition-all duration-300 disabled:opacity-50"
+                >
+                  {copyStatus === 'copying' ? (
+                    <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  ) : copyStatus === 'copied' ? (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  ) : (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                    </svg>
+                  )}
+                  {copyStatus === 'copied' ? 'COPIED!' : copyStatus === 'copying' ? 'COPYING...' : 'COPY'}
+                </button>
+              )}
+              {onDownload && (
+                <button
+                  onClick={onDownload}
+                  className="flex items-center gap-2 px-4 py-2.5 bg-[#1A1A1A] hover:bg-[#2E6AFF] border border-[#333] hover:border-[#2E6AFF] rounded-[4px] text-white font-os text-[11px] tracking-wider transition-all duration-300"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                  </svg>
+                  DOWNLOAD
+                </button>
+              )}
+              {onShareToX && (
+                <button
+                  onClick={onShareToX}
+                  className="flex items-center gap-2 px-4 py-2.5 bg-[#2E6AFF] hover:bg-[#1E4BC8] border border-[#2E6AFF] rounded-[4px] text-white font-os text-[11px] tracking-wider transition-all duration-300"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                  </svg>
+                  SHARE TO X
+                </button>
+              )}
+            </div>
+          </div>
+        )}
 
       </div>
     </div>

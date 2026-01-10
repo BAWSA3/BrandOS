@@ -5,12 +5,10 @@ import { motion, AnimatePresence, useMotionValue, useSpring, animate } from 'mot
 import dynamic from 'next/dynamic';
 import BrandDNAPreview, { GeneratedBrandDNA } from './BrandDNAPreview';
 import ShareableScoreCard, { ShareCardData } from './ShareableScoreCard';
-import ShareableBentoCard, { mapToBentoData } from './ShareableBentoCard';
-import BentoRevealGrid from './BentoRevealGrid';
 import BrandOSDashboard, { BrandOSDashboardData } from './BrandOSDashboard';
-import ImprovementRoadmap, { ImprovementRoadmapData } from './ImprovementRoadmap';
-import ShareableBadge, { BadgeData } from './ShareableBadge';
+import BrandIssuesSection from './BrandIssuesSection';
 import { domToPng } from 'modern-screenshot';
+import { AuthenticityAnalysis, ActivityAnalysis } from '@/lib/gemini';
 
 // Dynamically import DNA scene to avoid SSR issues with Three.js
 const DNAJourneyScene = dynamic(() => import('./DNAJourneyScene'), {
@@ -47,10 +45,12 @@ interface BrandScoreResult {
   summary: string;
 }
 
-type FlowState = 'input' | 'journey' | 'reveal' | 'signup';
+type FlowState = 'input' | 'journey' | 'reveal' | 'signup' | 'insufficient_data';
 
 interface XBrandScoreHeroProps {
   theme: string;
+  initialUsername?: string;
+  autoStart?: boolean;
 }
 
 // ============================================================================
@@ -1149,14 +1149,15 @@ function JourneyProgressIndicator({
 // ============================================================================
 // Main Component
 // ============================================================================
-export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
+export default function XBrandScoreHero({ theme, initialUsername, autoStart }: XBrandScoreHeroProps) {
   const [flowState, setFlowState] = useState<FlowState>('input');
-  const [username, setUsername] = useState('');
+  const [username, setUsername] = useState(initialUsername || '');
   const [error, setError] = useState('');
   const [profile, setProfile] = useState<XProfileData | null>(null);
   const [brandScore, setBrandScore] = useState<BrandScoreResult | null>(null);
   const [generatedBrandDNA, setGeneratedBrandDNA] = useState<GeneratedBrandDNA | null>(null);
-  const [recommendations, setRecommendations] = useState<ImprovementRoadmapData | null>(null);
+  const [accountAuthenticity, setAccountAuthenticity] = useState<AuthenticityAnalysis | null>(null);
+  const [accountActivity, setAccountActivity] = useState<ActivityAnalysis | null>(null);
   const [currentPhase, setCurrentPhase] = useState(1);
   const [itemProgress, setItemProgress] = useState(0);
   const [showConfetti, setShowConfetti] = useState(false);
@@ -1166,6 +1167,7 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
   const apiResultRef = useRef<{ profile: XProfileData; brandScore: BrandScoreResult } | null>(null);
   const apiCompleteRef = useRef(false);
   const apiErrorRef = useRef<string | null>(null);
+  const autoStartTriggered = useRef(false);
 
   const [isValidating, setIsValidating] = useState(false);
 
@@ -1213,6 +1215,13 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
       };
       setProfile(flatProfile);
 
+      // Check for fresh accounts with no posts - show insufficient data state
+      if (flatProfile.tweet_count === 0) {
+        setIsValidating(false);
+        setFlowState('insufficient_data');
+        return;
+      }
+
       // Now start the journey
       setIsValidating(false);
       setFlowState('journey');
@@ -1255,6 +1264,14 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
               const identityData = await identityResponse.json();
               
               if (identityData.success && identityData.analysis) {
+                // Store authenticity and activity analysis
+                if (identityData.analysis.authenticity) {
+                  setAccountAuthenticity(identityData.analysis.authenticity);
+                }
+                if (identityData.analysis.activity) {
+                  setAccountActivity(identityData.analysis.activity);
+                }
+
                 // Generate store-ready Brand DNA
                 const dnaResponse = await fetch('/api/x-brand-dna/generate', {
                   method: 'POST',
@@ -1268,38 +1285,6 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                 
                 if (dnaData.success && dnaData.brandDNA) {
                   setGeneratedBrandDNA(dnaData.brandDNA);
-
-                  // Fetch improvement recommendations
-                  try {
-                    const recommendationsResponse = await fetch('/api/x-brand-dna/recommendations', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({
-                        username: data.profile.username,
-                        displayName: data.profile.name,
-                        brandScore: data.brandScore.overallScore,
-                        archetype: dnaData.brandDNA.archetype,
-                        voiceConsistency: dnaData.brandDNA.performanceInsights?.voiceConsistency || data.brandScore.phases.check.score,
-                        personalitySummary: dnaData.brandDNA.personalitySummary,
-                        keywords: dnaData.brandDNA.keywords || [],
-                        contentPillars: dnaData.brandDNA.contentPillars,
-                        performanceInsights: dnaData.brandDNA.performanceInsights,
-                        phases: data.brandScore.phases,
-                        topStrengths: data.brandScore.topStrengths,
-                        topImprovements: data.brandScore.topImprovements,
-                        bio: data.profile.description,
-                        followersCount: data.profile.public_metrics?.followers_count || 0,
-                      }),
-                    });
-                    const recommendationsData = await recommendationsResponse.json();
-
-                    if (recommendationsData.success && recommendationsData.recommendations) {
-                      setRecommendations(recommendationsData.recommendations);
-                    }
-                  } catch (recError) {
-                    console.error('Recommendations fetch error:', recError);
-                    // Non-fatal - we still have the score and DNA
-                  }
                 }
               }
             } catch (identityError) {
@@ -1318,6 +1303,20 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
       setIsValidating(false);
     }
   };
+
+  // Auto-start analysis when initialUsername is provided
+  useEffect(() => {
+    if (initialUsername && autoStart && !autoStartTriggered.current && flowState === 'input') {
+      autoStartTriggered.current = true;
+      // Small delay to ensure component is fully mounted
+      const timer = setTimeout(() => {
+        // Create a synthetic form event and trigger submission
+        const syntheticEvent = { preventDefault: () => {} } as React.FormEvent;
+        handleSubmit(syntheticEvent);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [initialUsername, autoStart, flowState]);
 
   // Auto-progress through phases
   useEffect(() => {
@@ -1841,219 +1840,308 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
                     voice: generatedBrandDNA.personalitySummary || brandScore.summary || 'Authentic voice that resonates with your audience.',
                   },
                 } as BrandOSDashboardData}
+                authenticity={accountAuthenticity}
+                activity={accountActivity}
+                onCopyToClipboard={async () => {
+                  const element = document.getElementById('brandos-dashboard-capture');
+                  if (!element) return;
+                  const originalWidth = element.style.width;
+                  const originalMinWidth = element.style.minWidth;
+                  element.classList.add('capturing');
+                  element.style.width = '1200px';
+                  element.style.minWidth = '1200px';
+                  const dataUrl = await domToPng(element, {
+                    backgroundColor: '#050505',
+                    scale: 2,
+                    quality: 1,
+                    width: 1200,
+                  });
+                  element.style.width = originalWidth;
+                  element.style.minWidth = originalMinWidth;
+                  element.classList.remove('capturing');
+                  const response = await fetch(dataUrl);
+                  const blob = await response.blob();
+                  await navigator.clipboard.write([
+                    new ClipboardItem({ 'image/png': blob })
+                  ]);
+                }}
+                onDownload={async () => {
+                  const element = document.getElementById('brandos-dashboard-capture');
+                  if (!element) return;
+                  const originalWidth = element.style.width;
+                  const originalMinWidth = element.style.minWidth;
+                  element.classList.add('capturing');
+                  element.style.width = '1200px';
+                  element.style.minWidth = '1200px';
+                  const dataUrl = await domToPng(element, {
+                    backgroundColor: '#050505',
+                    scale: 2,
+                    quality: 1,
+                    width: 1200,
+                  });
+                  element.style.width = originalWidth;
+                  element.style.minWidth = originalMinWidth;
+                  element.classList.remove('capturing');
+                  const a = document.createElement('a');
+                  a.href = dataUrl;
+                  a.download = `brandos-dna-${profile.username}.png`;
+                  a.click();
+                }}
+                onShareToX={() => {
+                  const archetype = stripEmoji(generatedBrandDNA?.archetype || 'The Creator');
+                  const tweetText = `Just discovered I'm "${archetype}" on @BrandOS_xyz
+
+Brand Score: ${brandScore.overallScore}/100
+
+What's YOUR brand archetype?
+Get yours → mybrandos.app`;
+                  window.open(
+                    `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`,
+                    '_blank',
+                    'noopener,noreferrer,width=600,height=400'
+                  );
+                }}
               />
             </div>
 
-            {/* Improvement Roadmap */}
-            {recommendations && (
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4, duration: 0.5 }}
-                className="w-full"
-              >
-                <ImprovementRoadmap
-                  data={recommendations}
-                  onJoinWaitlist={() => setFlowState('signup')}
-                />
-              </motion.div>
-            )}
+            {/* Brand Issues Section */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4, duration: 0.5 }}
+              className="w-full mt-8"
+            >
+              <BrandIssuesSection
+                voiceConsistency={generatedBrandDNA?.performanceInsights?.voiceConsistency || brandScore.phases.check.score}
+                engagementScore={brandScore.phases.scale.score}
+                brandScore={brandScore.overallScore}
+                followersCount={profile.followers_count}
+                followingCount={profile.following_count}
+                hasBio={!!profile.description && profile.description.length > 0}
+                bioLength={profile.description?.length || 0}
+                hasContentPillars={!!generatedBrandDNA?.contentPillars && generatedBrandDNA.contentPillars.length > 0}
+                contentPillarsCount={generatedBrandDNA?.contentPillars?.length || 0}
+                authenticityScore={accountAuthenticity?.score}
+                isWarning={accountAuthenticity?.isWarning}
+              />
+            </motion.div>
 
-            {/* Shareable Badge Section */}
-            {generatedBrandDNA?.archetype && (
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5, duration: 0.5 }}
-                className="w-full max-w-[520px] mx-4 mt-8"
-              >
-                <ShareableBadge
-                  data={{
-                    username: profile.username,
-                    displayName: profile.name,
-                    profileImageUrl: profile.profile_image_url,
-                    score: brandScore.overallScore,
-                    archetype: {
-                      name: stripEmoji(generatedBrandDNA.archetype || 'The Creator'),
-                      emoji: generatedBrandDNA.archetypeEmoji || '🚀',
-                    },
-                    voiceConsistency: brandScore.phases.check.score,
-                    topKeywords: generatedBrandDNA.keywords?.slice(0, 3),
-                  } as BadgeData}
-                />
-              </motion.div>
-            )}
 
-            {/* Waitlist Banner */}
+            {/* Hybrid CTA Panel - Brand DNA Preview + Waitlist */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6, duration: 0.5 }}
-              onClick={() => setFlowState('signup')}
-              className="w-full max-w-[600px] mx-4 mt-6 cursor-pointer group"
+              className="w-full max-w-[600px] mx-4 mt-10"
             >
               <div
-                className="relative overflow-hidden rounded-xl p-6 sm:p-8"
+                className="relative overflow-hidden rounded-2xl"
                 style={{
-                  background: 'linear-gradient(135deg, rgba(212, 165, 116, 0.08) 0%, rgba(212, 165, 116, 0.02) 100%)',
+                  background: 'linear-gradient(135deg, rgba(212, 165, 116, 0.08) 0%, rgba(46, 106, 255, 0.05) 100%)',
                   border: '1px solid rgba(212, 165, 116, 0.25)',
-                  boxShadow: '0 0 40px rgba(212, 165, 116, 0.1)',
+                  boxShadow: '0 0 80px rgba(212, 165, 116, 0.1)',
                 }}
               >
-                {/* Glow effect on hover */}
-                <div
-                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                  style={{
-                    background: 'radial-gradient(circle at center, rgba(212, 165, 116, 0.15) 0%, transparent 70%)',
+                {/* Header */}
+                <div 
+                  className="px-6 py-4 border-b"
+                  style={{ 
+                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                    background: 'rgba(212, 165, 116, 0.05)',
                   }}
-                />
-
-                <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6">
-                  <div className="text-center sm:text-left">
-                    <h3
-                      style={{
-                        fontFamily: "'VCR OSD Mono', monospace",
-                        fontSize: '14px',
-                        letterSpacing: '0.15em',
-                        color: '#D4A574',
-                        marginBottom: '8px',
+                >
+                  <div className="flex items-center gap-3">
+                    <div 
+                      className="w-10 h-10 rounded-lg flex items-center justify-center"
+                      style={{ 
+                        background: 'linear-gradient(135deg, rgba(212, 165, 116, 0.3) 0%, rgba(212, 165, 116, 0.1) 100%)',
+                        border: '1px solid rgba(212, 165, 116, 0.3)',
                       }}
                     >
-                      BE FIRST IN LINE
-                    </h3>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#D4A574" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <h3
+                        style={{
+                          fontFamily: "'VCR OSD Mono', monospace",
+                          fontSize: '13px',
+                          letterSpacing: '0.12em',
+                          color: '#D4A574',
+                          marginBottom: '2px',
+                        }}
+                      >
+                        YOUR BRAND DNA CAPTURED
+                      </h3>
+                      <p style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.5)', margin: 0 }}>
+                        Join the beta to unlock the full toolkit
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* DNA Preview (Locked) */}
+                <div className="p-6 relative">
+                  {/* Blur overlay for locked effect */}
+                  <div 
+                    className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none"
+                    style={{
+                      background: 'linear-gradient(180deg, transparent 0%, rgba(5, 5, 5, 0.3) 100%)',
+                    }}
+                  />
+                  
+                  {/* Mini DNA Preview Grid */}
+                  <div className="grid grid-cols-3 gap-3 opacity-70">
+                    {/* Colors */}
+                    <div className="bg-black/30 rounded-lg p-3 border border-white/5">
+                      <span className="text-[9px] text-gray-500 font-mono tracking-wider block mb-2">COLORS</span>
+                      <div className="flex gap-1.5">
+                        <div 
+                          className="w-6 h-6 rounded"
+                          style={{ background: generatedBrandDNA?.colors?.primary || '#2E6AFF' }}
+                        />
+                        <div 
+                          className="w-6 h-6 rounded"
+                          style={{ background: generatedBrandDNA?.colors?.secondary || '#1a1a1a' }}
+                        />
+                        <div 
+                          className="w-6 h-6 rounded"
+                          style={{ background: generatedBrandDNA?.colors?.accent || '#D4A574' }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Tone */}
+                    <div className="bg-black/30 rounded-lg p-3 border border-white/5">
+                      <span className="text-[9px] text-gray-500 font-mono tracking-wider block mb-2">TONE</span>
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <div className="h-1 flex-1 bg-white/10 rounded overflow-hidden">
+                            <div 
+                              className="h-full bg-[#2E6AFF]" 
+                              style={{ width: `${generatedBrandDNA?.tone?.bold || 50}%` }}
+                            />
+                          </div>
+                          <span className="text-[8px] text-gray-600 w-6">BLD</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="h-1 flex-1 bg-white/10 rounded overflow-hidden">
+                            <div 
+                              className="h-full bg-emerald-500" 
+                              style={{ width: `${generatedBrandDNA?.tone?.playful || 50}%` }}
+                            />
+                          </div>
+                          <span className="text-[8px] text-gray-600 w-6">PLY</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Keywords */}
+                    <div className="bg-black/30 rounded-lg p-3 border border-white/5">
+                      <span className="text-[9px] text-gray-500 font-mono tracking-wider block mb-2">KEYWORDS</span>
+                      <div className="flex flex-wrap gap-1">
+                        {(generatedBrandDNA?.keywords || ['brand', 'voice']).slice(0, 3).map((kw, i) => (
+                          <span 
+                            key={i}
+                            className="px-1.5 py-0.5 bg-white/5 rounded text-[8px] text-gray-400 truncate max-w-[50px]"
+                          >
+                            {kw}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* CTA Section */}
+                <div className="p-6 pt-0">
+                  <div className="flex flex-col items-center text-center gap-4">
                     <p
                       style={{
                         fontFamily: "'Helvetica Neue', sans-serif",
                         fontSize: '14px',
-                        color: 'rgba(255, 255, 255, 0.6)',
-                        lineHeight: 1.5,
+                        color: 'rgba(255, 255, 255, 0.7)',
+                        lineHeight: 1.6,
                         margin: 0,
                       }}
                     >
-                      Be among the first to access AI-powered brand management when we launch.
+                      Your brand identity has been captured. Join the beta waitlist to access the full BrandOS toolkit.
                     </p>
-                  </div>
 
-                  <motion.div
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.98 }}
-                    className="flex-shrink-0"
-                  >
-                    <div
-                      className="px-6 py-3 rounded-lg"
+                    {/* Primary CTA - Join Beta Waitlist */}
+                    <motion.button
+                      onClick={() => setFlowState('signup')}
+                      whileHover={{ scale: 1.03, y: -2 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="w-full px-8 py-4 rounded-xl cursor-pointer border-none"
                       style={{
                         fontFamily: "'VCR OSD Mono', monospace",
-                        fontSize: '11px',
-                        letterSpacing: '0.1em',
+                        fontSize: '12px',
+                        letterSpacing: '0.12em',
                         color: '#050505',
-                        background: '#D4A574',
-                        boxShadow: '0 0 20px rgba(212, 165, 116, 0.4)',
+                        fontWeight: 600,
+                        background: 'linear-gradient(135deg, #E8C49A 0%, #D4A574 100%)',
+                        boxShadow: '0 4px 24px rgba(212, 165, 116, 0.4), inset 0 1px 0 rgba(255,255,255,0.2)',
                       }}
                     >
-                      JOIN THE WAITLIST
+                      JOIN BETA WAITLIST →
+                    </motion.button>
+
+                    {/* Social Proof */}
+                    <div 
+                      className="flex items-center gap-2 px-4 py-2 rounded-full"
+                      style={{ background: 'rgba(255, 255, 255, 0.03)' }}
+                    >
+                      <div className="flex -space-x-2">
+                        {[1, 2, 3, 4].map((i) => (
+                          <div 
+                            key={i}
+                            className="w-6 h-6 rounded-full border-2 border-[#050505]"
+                            style={{ 
+                              background: `linear-gradient(135deg, hsl(${i * 60}, 70%, 50%) 0%, hsl(${i * 60 + 30}, 70%, 40%) 100%)`,
+                            }}
+                          />
+                        ))}
+                      </div>
+                      <span 
+                        className="text-[11px]"
+                        style={{ 
+                          color: 'rgba(255, 255, 255, 0.5)',
+                          fontFamily: "'VCR OSD Mono', monospace",
+                        }}
+                      >
+                        <span style={{ color: '#D4A574' }}>234</span> creators ahead of you
+                      </span>
                     </div>
-                  </motion.div>
+
+                    {/* Secondary Action */}
+                    <button
+                      onClick={() => {
+                        setFlowState('input');
+                        setUsername('');
+                        setProfile(null);
+                        setBrandScore(null);
+                        setGeneratedBrandDNA(null);
+                        setShowConfetti(false);
+                      }}
+                      className="text-[11px] cursor-pointer bg-transparent border-none transition-colors"
+                      style={{
+                        fontFamily: "'VCR OSD Mono', monospace",
+                        letterSpacing: '0.08em',
+                        color: 'rgba(255, 255, 255, 0.4)',
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)'}
+                      onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255, 255, 255, 0.4)'}
+                    >
+                      ANALYZE ANOTHER PROFILE
+                    </button>
+                  </div>
                 </div>
               </div>
             </motion.div>
 
-            {/* Action Buttons Below Dashboard */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.8 }}
-              className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 px-4 sm:px-6 py-4 w-full sm:w-auto"
-            >
-              <motion.button
-                onClick={async () => {
-                  const element = document.getElementById('brandos-dashboard-capture');
-                  if (!element) return;
-
-                  try {
-                    // Store original styles to restore later
-                    const originalWidth = element.style.width;
-                    const originalMinWidth = element.style.minWidth;
-
-                    // Add capturing class to remove grayscale filter
-                    element.classList.add('capturing');
-
-                    // Force desktop dimensions for consistent capture
-                    element.style.width = '1200px';
-                    element.style.minWidth = '1200px';
-
-                    const dataUrl = await domToPng(element, {
-                      backgroundColor: '#050505',
-                      scale: 2,
-                      quality: 1,
-                      width: 1200,
-                    });
-
-                    // Restore original styles
-                    element.style.width = originalWidth;
-                    element.style.minWidth = originalMinWidth;
-
-                    // Remove capturing class to restore grayscale
-                    element.classList.remove('capturing');
-
-                    // Convert data URL to blob
-                    const response = await fetch(dataUrl);
-                    const blob = await response.blob();
-
-                    try {
-                      await navigator.clipboard.write([
-                        new ClipboardItem({ 'image/png': blob })
-                      ]);
-                      alert('Image copied to clipboard! Paste it on X to share.');
-                    } catch {
-                      // Fallback: download the image
-                      const a = document.createElement('a');
-                      a.href = dataUrl;
-                      a.download = `brandos-score-${profile.username}.png`;
-                      a.click();
-                    }
-                  } catch (err) {
-                    console.error('Screenshot failed:', err);
-                    alert('Could not capture screenshot. Please try again or use your browser\'s screenshot feature.');
-                  }
-                }}
-                whileHover={{ scale: 1.02, y: -2 }}
-                whileTap={{ scale: 0.98 }}
-                className="flex items-center justify-center gap-2 py-3 px-6 sm:py-3.5 sm:px-7 bg-[#2E6AFF] border-none rounded text-white font-bold cursor-pointer w-full sm:w-auto"
-                style={{
-                  fontFamily: "'JetBrains Mono', monospace",
-                  fontSize: '11px',
-                  letterSpacing: '0.1em',
-                }}
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                  <circle cx="8.5" cy="8.5" r="1.5"/>
-                  <polyline points="21 15 16 10 5 21"/>
-                </svg>
-                FLEX YOUR SCORE
-              </motion.button>
-              <motion.button
-                onClick={() => {
-                  setFlowState('input');
-                  setUsername('');
-                  setProfile(null);
-                  setBrandScore(null);
-                  setGeneratedBrandDNA(null);
-                  setRecommendations(null);
-                  setShowConfetti(false);
-                }}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="py-3 px-6 sm:py-3.5 sm:px-7 bg-transparent border border-[#333] rounded text-[#888] cursor-pointer w-full sm:w-auto"
-                style={{
-                  fontFamily: "'JetBrains Mono', monospace",
-                  fontSize: '11px',
-                  letterSpacing: '0.1em',
-                }}
-              >
-                ANALYZE ANOTHER
-              </motion.button>
-            </motion.div>
           </motion.div>
         )}
 
@@ -2088,30 +2176,208 @@ export default function XBrandScoreHero({ theme }: XBrandScoreHeroProps) {
               } as ShareCardData}
               theme={theme}
             />
+            <div className="flex gap-3">
+              <motion.button
+                onClick={async () => {
+                  const shareUrl = `${window.location.origin}/score/${profile.username}`;
+                  try {
+                    await navigator.clipboard.writeText(shareUrl);
+                    const btn = document.activeElement as HTMLButtonElement;
+                    const originalText = btn.innerText;
+                    btn.innerText = '✓ COPIED!';
+                    setTimeout(() => {
+                      btn.innerText = originalText;
+                    }, 2000);
+                  } catch {
+                    window.open(shareUrl, '_blank');
+                  }
+                }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                style={{
+                  fontFamily: "'VCR OSD Mono', monospace",
+                  fontSize: '12px',
+                  letterSpacing: '0.1em',
+                  color: '#000',
+                  background: '#D4A574',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: '12px 20px',
+                  borderRadius: '6px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                </svg>
+                SHARE URL
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => {
+                  setFlowState('input');
+                  setUsername('');
+                  setProfile(null);
+                  setBrandScore(null);
+                  setGeneratedBrandDNA(null);
+                  setShowConfetti(false);
+                }}
+                style={{
+                  fontFamily: "'VCR OSD Mono', monospace",
+                  fontSize: '12px',
+                  letterSpacing: '0.1em',
+                  color: theme === 'dark' ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)',
+                  background: 'transparent',
+                  border: `1px solid ${theme === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)'}`,
+                  cursor: 'pointer',
+                  padding: '12px 20px',
+                  borderRadius: '6px',
+                }}
+              >
+                ANALYZE ANOTHER
+              </motion.button>
+            </div>
+          </motion.div>
+        )}
+
+        {/* INSUFFICIENT DATA STATE - Fresh accounts with no posts */}
+        {flowState === 'insufficient_data' && profile && (
+          <motion.div
+            key="insufficient-data"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '24px',
+              maxWidth: '500px',
+              width: '100%',
+              textAlign: 'center',
+              position: 'relative',
+              zIndex: 10,
+              padding: '40px 20px',
+            }}
+          >
+            {/* Profile Preview */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+              {profile.profile_image_url && (
+                <img
+                  src={profile.profile_image_url.replace('_normal', '_200x200')}
+                  alt={profile.name}
+                  style={{
+                    width: '80px',
+                    height: '80px',
+                    borderRadius: '50%',
+                    border: '3px solid rgba(212, 165, 116, 0.3)',
+                  }}
+                />
+              )}
+              <div>
+                <h3
+                  style={{
+                    fontFamily: "'Helvetica Neue', sans-serif",
+                    fontSize: '20px',
+                    fontWeight: 600,
+                    color: theme === 'dark' ? '#FFFFFF' : '#000000',
+                    margin: 0,
+                  }}
+                >
+                  {profile.name}
+                </h3>
+                <span
+                  style={{
+                    fontFamily: "'JetBrains Mono', monospace",
+                    fontSize: '14px',
+                    color: theme === 'dark' ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)',
+                  }}
+                >
+                  @{profile.username}
+                </span>
+              </div>
+            </div>
+
+            {/* Message */}
+            <div
+              style={{
+                padding: '32px',
+                background: theme === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)',
+                border: `1px solid ${theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
+                borderRadius: '16px',
+              }}
+            >
+              <div style={{ fontSize: '48px', marginBottom: '16px' }}>📝</div>
+              <h2
+                style={{
+                  fontFamily: "'VCR OSD Mono', monospace",
+                  fontSize: '14px',
+                  letterSpacing: '0.1em',
+                  color: '#D4A574',
+                  margin: '0 0 12px 0',
+                }}
+              >
+                NOT ENOUGH DATA
+              </h2>
+              <p
+                style={{
+                  fontFamily: "'Helvetica Neue', sans-serif",
+                  fontSize: '16px',
+                  color: theme === 'dark' ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)',
+                  margin: 0,
+                  lineHeight: 1.6,
+                }}
+              >
+                We need some posts to analyze your brand DNA. Come back after you've shared some content!
+              </p>
+            </div>
+
+            {/* Stats */}
+            <div
+              style={{
+                display: 'flex',
+                gap: '32px',
+                fontFamily: "'JetBrains Mono', monospace",
+                fontSize: '12px',
+              }}
+            >
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ color: theme === 'dark' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)', marginBottom: '4px' }}>POSTS</div>
+                <div style={{ color: '#D4A574', fontSize: '20px', fontWeight: 700 }}>0</div>
+              </div>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ color: theme === 'dark' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)', marginBottom: '4px' }}>FOLLOWERS</div>
+                <div style={{ color: theme === 'dark' ? '#FFFFFF' : '#000000', fontSize: '20px', fontWeight: 700 }}>{formatFollowersDisplay(profile.followers_count)}</div>
+              </div>
+            </div>
+
+            {/* CTA */}
             <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
               onClick={() => {
                 setFlowState('input');
                 setUsername('');
                 setProfile(null);
-                setBrandScore(null);
-                setGeneratedBrandDNA(null);
-                setRecommendations(null);
-                setShowConfetti(false);
               }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               style={{
                 fontFamily: "'VCR OSD Mono', monospace",
                 fontSize: '12px',
                 letterSpacing: '0.1em',
-                color: theme === 'dark' ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)',
+                color: theme === 'dark' ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)',
                 background: 'transparent',
-                border: 'none',
+                border: `1px solid ${theme === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)'}`,
                 cursor: 'pointer',
-                padding: '8px 16px',
+                padding: '14px 24px',
+                borderRadius: '8px',
               }}
             >
-              ANALYZE ANOTHER PROFILE
+              ANALYZE ANOTHER ACCOUNT
             </motion.button>
           </motion.div>
         )}

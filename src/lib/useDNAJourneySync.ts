@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 
 export type CameraTarget = 'landing' | 'DEFINE' | 'CHECK' | 'GENERATE' | 'SCALE' | 'reveal';
-export type FlowState = 'input' | 'journey' | 'reveal' | 'signup';
+export type FlowState = 'input' | 'journey' | 'reveal' | 'signup' | 'insufficient_data';
 
 export const PHASE_CAMERA_TARGETS: Record<CameraTarget, { position: [number, number, number]; target: [number, number, number] }> = {
   landing: { position: [0, 0, 40], target: [0, 0, 0] },

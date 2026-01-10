@@ -115,7 +115,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Fetch user's tweets (requires Basic tier)
-    const tweetsUrl = `https://api.twitter.com/2/users/${targetUserId}/tweets?max_results=${Math.min(maxResults, 100)}&tweet.fields=${TWEET_FIELDS}`;
+    // exclude=replies,retweets to get only original posts for better content pillar analysis
+    const tweetsUrl = `https://api.twitter.com/2/users/${targetUserId}/tweets?max_results=${Math.min(maxResults, 100)}&tweet.fields=${TWEET_FIELDS}&exclude=replies,retweets`;
 
     const tweetsResponse = await fetch(tweetsUrl, {
       headers: {

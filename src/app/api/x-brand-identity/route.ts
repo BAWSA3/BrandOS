@@ -11,12 +11,16 @@ import {
   generateBrandDNA,
   generateBrandImprovements,
   analyzeTweetVoice,
+  analyzeAccountAuthenticity,
+  analyzeActivityLevel,
   BioLinguistics,
   NameAnalysis,
   ProfileImageAnalysis,
   BrandDNA,
   BrandImprovements,
   TweetVoiceAnalysis,
+  AuthenticityAnalysis,
+  ActivityAnalysis,
 } from '@/lib/gemini';
 import { features } from '@/lib/features';
 import { extractColorsFromImage, ExtractedColors } from '@/lib/color-extraction';
@@ -40,6 +44,8 @@ export interface BrandIdentityResponse {
     brandDNA: BrandDNA | null;
     improvements: BrandImprovements | null;
     tweetVoice: TweetVoiceAnalysis | null;
+    authenticity: AuthenticityAnalysis | null;
+    activity: ActivityAnalysis | null;
   };
   meta?: {
     enhanced: boolean;
@@ -135,6 +141,17 @@ export async function POST(request: NextRequest) {
       improvements = await generateBrandImprovements(profile, brandDNA);
     }
 
+    // Step 4: Analyze account authenticity and activity
+    // Note: Engagement rate analysis requires raw tweet stats which we don't have here
+    // The bot detection will use other signals (follower ratio, account age)
+    const authenticityAnalysis = analyzeAccountAuthenticity(profile);
+    const activityAnalysis = analyzeActivityLevel(profile);
+
+    console.log('=== ACCOUNT ANALYSIS ===');
+    console.log(`Authenticity: ${authenticityAnalysis.tierLabel} (score: ${authenticityAnalysis.score})`);
+    console.log(`Activity: ${activityAnalysis.levelLabel} (${activityAnalysis.detail})`);
+    console.log('========================');
+
     const response: BrandIdentityResponse = {
       success: true,
       profile: {
@@ -154,6 +171,8 @@ export async function POST(request: NextRequest) {
         brandDNA,
         improvements,
         tweetVoice: tweetVoiceAnalysis,
+        authenticity: authenticityAnalysis,
+        activity: activityAnalysis,
       },
       meta: {
         enhanced: !!tweetVoiceAnalysis,
