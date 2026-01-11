@@ -13,6 +13,26 @@ interface PhaseProgress {
   lastActivePhase: 'define' | 'check' | 'generate' | 'scale';
 }
 
+// Type for importing generated Brand DNA from X Brand Score analysis
+export interface ImportableBrandDNA {
+  name: string;
+  colors: {
+    primary: string;
+    secondary: string;
+    accent: string;
+  };
+  tone: {
+    minimal: number;
+    playful: number;
+    bold: number;
+    experimental: number;
+  };
+  keywords: string[];
+  doPatterns: string[];
+  dontPatterns: string[];
+  voiceSamples: string[];
+}
+
 interface BrandStore {
   // Theme
   theme: Theme;
@@ -28,6 +48,7 @@ interface BrandStore {
   createBrand: (name?: string) => void;
   deleteBrand: (id: string) => void;
   switchBrand: (id: string) => void;
+  importBrandFromDNA: (dna: ImportableBrandDNA, twitterUsername: string) => string;
   
   // History
   history: HistoryItem[];
@@ -144,6 +165,42 @@ export const useBrandStore = create<BrandStore>()(
       
       switchBrand: (id) =>
         set({ currentBrandId: id }),
+      
+      importBrandFromDNA: (dna, twitterUsername) => {
+        const newBrand: BrandDNA = {
+          id: uuidv4(),
+          name: dna.name || `@${twitterUsername}`,
+          colors: dna.colors || {
+            primary: '#000000',
+            secondary: '#ffffff',
+            accent: '#6366f1',
+          },
+          tone: dna.tone || {
+            minimal: 50,
+            playful: 50,
+            bold: 50,
+            experimental: 30,
+          },
+          keywords: dna.keywords || [],
+          doPatterns: dna.doPatterns || [],
+          dontPatterns: dna.dontPatterns || [],
+          voiceSamples: dna.voiceSamples || [],
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        };
+        
+        set((state) => ({
+          brands: [...state.brands, newBrand],
+          currentBrandId: newBrand.id,
+          // Mark onboarding as complete since they have real brand data
+          phaseProgress: {
+            ...state.phaseProgress,
+            hasCompletedOnboarding: true,
+          },
+        }));
+        
+        return newBrand.id;
+      },
       
       addHistoryItem: (item) =>
         set((state) => ({

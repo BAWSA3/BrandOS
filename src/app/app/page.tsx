@@ -53,6 +53,8 @@ function HomeContent() {
 
   // Check for phases breakdown query param (from landing page)
   const showPhasesParam = searchParams.get('showPhases') === 'true';
+  // Check for imported param (from X Brand Score claim flow)
+  const importedParam = searchParams.get('imported') === 'true';
 
   // Phase-based navigation
   const [activePhase, setActivePhase] = useState<Phase>(phaseProgress.lastActivePhase || 'define');
@@ -62,6 +64,7 @@ function HomeContent() {
   const [showOnboarding, setShowOnboarding] = useState(!phaseProgress.hasCompletedOnboarding);
   const [showImportHub, setShowImportHub] = useState(false);
   const [showPhasesBreakdown, setShowPhasesBreakdown] = useState(showPhasesParam && !phaseProgress.hasCompletedOnboarding);
+  const [showImportedWelcome, setShowImportedWelcome] = useState(importedParam);
   
   // Check state
   const [contentToCheck, setContentToCheck] = useState('');
@@ -147,6 +150,26 @@ function HomeContent() {
     setShowPhasesBreakdown(false);
     setShowImportHub(true);
   };
+
+  // Handle imported brand DNA welcome
+  useEffect(() => {
+    if (importedParam && showImportedWelcome) {
+      // Ensure we're on the Define phase to show the imported data
+      setActivePhase('define');
+      setActiveTab('brand');
+      // Don't show regular onboarding since they already have data
+      setShowOnboarding(false);
+      
+      // Auto-dismiss the welcome message after 5 seconds
+      const timer = setTimeout(() => {
+        setShowImportedWelcome(false);
+        // Clean up the URL param without refreshing
+        window.history.replaceState({}, '', '/app');
+      }, 5000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [importedParam, showImportedWelcome]);
 
   // Import handlers
   const handleStartFresh = () => {
@@ -541,6 +564,66 @@ function HomeContent() {
     <div className={`min-h-screen relative overflow-hidden transition-colors duration-300 ${theme === 'dark' ? 'bg-[#0a0a0a] text-white' : 'bg-[#faf8f5] text-[#1a1a1a]'}`}>
       {/* Animated Background with Blue Orbs */}
       <AnimatedBackground variant="default" orbCount={3} />
+      
+      {/* Imported Brand DNA Welcome Toast */}
+      {showImportedWelcome && (
+        <div 
+          className="fixed top-4 left-1/2 -translate-x-1/2 z-50 animate-fade-in"
+          style={{ animation: 'slideDown 0.5s ease-out' }}
+        >
+          <div 
+            className="flex items-center gap-4 px-6 py-4 rounded-2xl shadow-lg"
+            style={{
+              background: 'linear-gradient(135deg, rgba(212, 165, 116, 0.15) 0%, rgba(212, 165, 116, 0.05) 100%)',
+              border: '1px solid rgba(212, 165, 116, 0.3)',
+              backdropFilter: 'blur(20px)',
+            }}
+          >
+            <div 
+              className="w-10 h-10 rounded-full flex items-center justify-center"
+              style={{ background: 'rgba(212, 165, 116, 0.2)' }}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#D4A574" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            </div>
+            <div>
+              <h4 
+                className="font-semibold mb-0.5"
+                style={{ 
+                  fontFamily: "'VCR OSD Mono', monospace",
+                  fontSize: '13px',
+                  letterSpacing: '0.1em',
+                  color: '#D4A574',
+                }}
+              >
+                BRAND DNA IMPORTED
+              </h4>
+              <p 
+                className="text-sm"
+                style={{ 
+                  color: 'rgba(255, 255, 255, 0.7)',
+                  fontFamily: "'Helvetica Neue', sans-serif",
+                }}
+              >
+                Welcome to BrandOS! Your brand identity is ready to use.
+              </p>
+            </div>
+            <button
+              onClick={() => {
+                setShowImportedWelcome(false);
+                window.history.replaceState({}, '', '/app');
+              }}
+              className="ml-4 p-1 rounded-lg hover:bg-white/10 transition-colors"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
       
       {/* Subtle noise overlay */}
       <div className="noise-overlay" />
