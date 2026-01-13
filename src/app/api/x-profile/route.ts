@@ -161,8 +161,8 @@ export async function POST(request: NextRequest) {
     console.log(`Username: @${profile.username}`);
     console.log(`Display Name: ${profile.name}`);
     console.log(`Verified: ${profile.verified}`);
-    console.log(`Raw verified value from API: ${data.data.verified}`);
     console.log(`Followers: ${profile.public_metrics.followers_count}`);
+    console.log(`Tweet Count: ${profile.public_metrics.tweet_count}`);
     console.log(`Bio: ${profile.description?.substring(0, 100)}...`);
     console.log('======================');
 

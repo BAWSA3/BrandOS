@@ -1251,14 +1251,7 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                  profile: {
-                    ...data.profile,
-                    public_metrics: {
-                      followers_count: data.profile.followers_count,
-                      following_count: data.profile.following_count,
-                      tweet_count: data.profile.tweet_count,
-                    },
-                  },
+                  profile: data.profile,
                 }),
               });
               const identityData = await identityResponse.json();

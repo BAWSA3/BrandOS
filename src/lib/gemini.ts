@@ -833,13 +833,33 @@ export function analyzeActivityLevel(profile: XProfileData): ActivityAnalysis {
   // Calculate with valid date
   const accountAgeMs = Date.now() - createdAtDate.getTime();
   const accountAgeWeeks = accountAgeMs / (1000 * 60 * 60 * 24 * 7);
-  const postsPerWeek = tweets / Math.max(accountAgeWeeks, 1);
+
+  // Cap account age at 2 years (104 weeks) to avoid penalizing old accounts
+  // that may have become active more recently
+  const cappedAgeWeeks = Math.min(accountAgeWeeks, 104);
+  const postsPerWeek = tweets / Math.max(cappedAgeWeeks, 1);
 
   let level: ActivityLevel;
   let levelLabel: string;
   let detail: string;
 
-  if (postsPerWeek >= 7) {
+  // First check total tweet volume - high volume indicates active creator regardless of rate
+  if (tweets >= 5000) {
+    // High volume creators - use boosted thresholds
+    if (postsPerWeek >= 5) {
+      level = 'very_active';
+      levelLabel = 'Very Active';
+      detail = `${tweets.toLocaleString()} posts (highly active creator)`;
+    } else if (postsPerWeek >= 2) {
+      level = 'active';
+      levelLabel = 'Active';
+      detail = `${tweets.toLocaleString()} posts (established creator)`;
+    } else {
+      level = 'moderate';
+      levelLabel = 'Moderate';
+      detail = `${tweets.toLocaleString()} posts (consistent creator)`;
+    }
+  } else if (postsPerWeek >= 7) {
     level = 'very_active';
     levelLabel = 'Very Active';
     detail = `Averaging ${postsPerWeek.toFixed(1)} posts/week (daily poster)`;
@@ -1220,6 +1240,20 @@ export interface BioLinguistics {
   firstPersonUsage: 'I' | 'we' | 'none' | 'mixed';
 }
 
+// Vibe-only analysis for personality detection (content-primary approach)
+// Unlike BioLinguistics, this excludes brand positioning signals
+export interface BioVibeAnalysis {
+  emojiCount: number;
+  emojiPersonality: 'minimal' | 'balanced' | 'expressive' | 'highly expressive';
+  vibeSpectrum: {
+    playful: number;  // 0-100
+    casual: number;   // 0-100
+    serious: number;  // 0-100
+  };
+  toneHint: 'casual' | 'playful' | 'neutral' | 'serious';
+  firstPersonUsage: 'I' | 'we' | 'none' | 'mixed';
+}
+
 export interface NameAnalysis {
   displayName: {
     length: number;
@@ -1502,6 +1536,66 @@ export function analyzeBioLinguistics(bio: string, name: string): BioLinguistics
 }
 
 // =============================================================================
+// BIO VIBE ANALYSIS (Vibe/Personality Only - No Brand Positioning)
+// Used for content-primary DNA analysis where tweets are the main signal
+// =============================================================================
+
+export function analyzeBioVibe(bio: string): BioVibeAnalysis {
+  const trimmedBio = bio?.trim() || '';
+  const bioLower = trimmedBio.toLowerCase();
+
+  // Emoji analysis (personality/vibe indicator)
+  const emojiRegex = /[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{1F600}-\u{1F64F}]|[\u{1F680}-\u{1F6FF}]/gu;
+  const emojis = trimmedBio.match(emojiRegex) || [];
+  const emojiCount = emojis.length;
+
+  // Emoji personality classification
+  let emojiPersonality: BioVibeAnalysis['emojiPersonality'] = 'minimal';
+  if (emojiCount === 0) emojiPersonality = 'minimal';
+  else if (emojiCount <= 2) emojiPersonality = 'balanced';
+  else if (emojiCount <= 5) emojiPersonality = 'expressive';
+  else emojiPersonality = 'highly expressive';
+
+  // Casual/playful indicators (vibe signals, NOT professional signals)
+  const casualIndicators = ['lol', 'btw', 'tbh', 'vibes', 'ngl', 'idk', 'imo', 'fwiw', 'icymi'];
+  const playfulIndicators = ['chaos', 'shitpost', 'degen', 'ape', 'anon', 'fren', 'gm', 'wagmi', 'ngmi', 'probably nothing'];
+
+  const hasCasualIndicators = casualIndicators.some(ind => bioLower.includes(ind)) || emojiCount > 2;
+  const hasPlayfulIndicators = playfulIndicators.some(ind => bioLower.includes(ind)) ||
+    bioLower.includes('!') || emojiCount > 3;
+  const hasSeriousIndicators = emojiCount === 0 && !hasCasualIndicators && !hasPlayfulIndicators;
+
+  // Vibe spectrum (personality only - NOT professional/authority signals)
+  const vibeSpectrum = {
+    playful: hasPlayfulIndicators ? 80 : (emojiCount > 0 ? 50 : 20),
+    casual: hasCasualIndicators ? 75 : (emojiCount > 0 ? 40 : 25),
+    serious: hasSeriousIndicators ? 75 : (emojiCount === 0 ? 50 : 25),
+  };
+
+  // Tone hint - overall vibe classification
+  let toneHint: BioVibeAnalysis['toneHint'] = 'neutral';
+  if (hasPlayfulIndicators) toneHint = 'playful';
+  else if (hasCasualIndicators) toneHint = 'casual';
+  else if (hasSeriousIndicators) toneHint = 'serious';
+
+  // First person usage
+  let firstPersonUsage: BioVibeAnalysis['firstPersonUsage'] = 'none';
+  const hasI = /\bi\b/i.test(trimmedBio);
+  const hasWe = /\bwe\b/i.test(trimmedBio);
+  if (hasI && hasWe) firstPersonUsage = 'mixed';
+  else if (hasI) firstPersonUsage = 'I';
+  else if (hasWe) firstPersonUsage = 'we';
+
+  return {
+    emojiCount,
+    emojiPersonality,
+    vibeSpectrum,
+    toneHint,
+    firstPersonUsage,
+  };
+}
+
+// =============================================================================
 // NAME ANALYSIS (Algorithmic)
 // =============================================================================
 
@@ -1571,26 +1665,48 @@ export function analyzeNameHandle(name: string, handle: string): NameAnalysis {
 // BRAND DNA GENERATION (AI-powered)
 // =============================================================================
 
-export const brandDNAPrompt = (profile: XProfileData, bioLinguistics: BioLinguistics, nameAnalysis: NameAnalysis, imageAnalysis?: ProfileImageAnalysis) => {
+export const brandDNAPrompt = (
+  profile: XProfileData,
+  bioLinguistics: BioLinguistics,
+  nameAnalysis: NameAnalysis,
+  imageAnalysis?: ProfileImageAnalysis,
+  tweetVoice?: TweetVoiceAnalysis | null
+) => {
   const influenceAnalysis = analyzeInfluence(profile);
   // Support both flat and nested follower count properties
   const followersCount = (profile as any).followers_count || profile.public_metrics?.followers_count || 0;
 
-  return `You are an expert brand strategist creating a comprehensive Brand DNA profile.
+  // Build content analysis section if tweets available (CONTENT-PRIMARY)
+  const contentAnalysisSection = tweetVoice ? `
+CONTENT ANALYSIS (PRIMARY - Base your analysis on this):
+- Writing Style: ${tweetVoice.writingStyle?.sentenceStructure || 'varied'}
+- Voice Spectrum: Professional ${tweetVoice.voiceSpectrum.professional}/100, Casual ${tweetVoice.voiceSpectrum.casual}/100, Authoritative ${tweetVoice.voiceSpectrum.authoritative}/100
+- Educational Content: ${tweetVoice.voiceSpectrum.educational}/100
+- Content Themes: ${tweetVoice.contentThemes?.map(t => t.pillar).join(', ') || 'Various topics'}
+- High Engagement Topics: ${tweetVoice.performancePatterns?.highEngagementTopics?.join(', ') || 'Various'}
+- Signature Phrases: ${tweetVoice.writingStyle?.signaturePhrases?.join(', ') || 'None detected'}
+- Voice Consistency: ${tweetVoice.consistencyScore}/100
+` : '';
 
+  const contentPrimaryNote = tweetVoice ? `
+IMPORTANT: This analysis should be CONTENT-PRIMARY. Base the archetype, voice profile, and positioning primarily on the CONTENT ANALYSIS section above, which reflects what this creator actually posts about. The bio should only be used for context - many X creators have personality-driven bios that don't reflect their professional brand.
+` : '';
+
+  return `You are an expert brand strategist creating a comprehensive Brand DNA profile.
+${contentPrimaryNote}
+${contentAnalysisSection}
 PROFILE DATA:
 - Name: ${profile.name}
 - Handle: @${profile.username}
-- Bio: ${profile.description || '(No bio)'}
+- Bio: ${profile.description || '(No bio)'}${tweetVoice ? ' [Use for personality context only]' : ''}
 - Followers: ${followersCount.toLocaleString()}
 - Influence Tier: ${influenceAnalysis.tierLabel}
 
-BIO LINGUISTICS ANALYSIS:
+BIO ANALYSIS${tweetVoice ? ' (Secondary - personality hints only)' : ''}:
 - Structure: ${bioLinguistics.structure}
 - Word Count: ${bioLinguistics.wordCount}
 - Power Words: ${bioLinguistics.powerWords.map(p => p.word).join(', ') || 'None detected'}
 - Voice: Professional ${bioLinguistics.voiceSpectrum.professional}/100, Casual ${bioLinguistics.voiceSpectrum.casual}/100
-- CTA Type: ${bioLinguistics.ctaType} (Strength: ${bioLinguistics.ctaStrength}/100)
 - Emoji Personality: ${bioLinguistics.emojiAnalysis.personality}
 
 NAME ANALYSIS:
@@ -1786,13 +1902,15 @@ export async function analyzeProfileImageWithVision(
 
 export async function generateBrandDNA(
   profile: XProfileData,
-  imageAnalysis?: ProfileImageAnalysis
+  imageAnalysis?: ProfileImageAnalysis,
+  tweetVoice?: TweetVoiceAnalysis | null
 ): Promise<BrandDNA | null> {
   try {
     const bioLinguistics = analyzeBioLinguistics(profile.description || '', profile.name);
     const nameAnalysis = analyzeNameHandle(profile.name, profile.username);
-    
-    const prompt = brandDNAPrompt(profile, bioLinguistics, nameAnalysis, imageAnalysis);
+
+    // CONTENT-PRIMARY: Pass tweet voice to prompt if available
+    const prompt = brandDNAPrompt(profile, bioLinguistics, nameAnalysis, imageAnalysis, tweetVoice);
     
     const result = await geminiFlash.generateContent(prompt);
     const response = await result.response;
