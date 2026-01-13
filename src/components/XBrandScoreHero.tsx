@@ -1968,88 +1968,12 @@ Get yours → mybrandos.app`;
                       >
                         YOUR BRAND DNA CAPTURED
                       </h3>
-                      <p style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.5)', margin: 0 }}>
-                        Join the beta to unlock the full toolkit
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* DNA Preview (Locked) */}
-                <div className="p-6 relative">
-                  {/* Blur overlay for locked effect */}
-                  <div 
-                    className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none"
-                    style={{
-                      background: 'linear-gradient(180deg, transparent 0%, rgba(5, 5, 5, 0.3) 100%)',
-                    }}
-                  />
-                  
-                  {/* Mini DNA Preview Grid */}
-                  <div className="grid grid-cols-3 gap-3 opacity-70">
-                    {/* Colors */}
-                    <div className="bg-black/30 rounded-lg p-3 border border-white/5">
-                      <span className="text-[9px] text-gray-500 font-mono tracking-wider block mb-2">COLORS</span>
-                      <div className="flex gap-1.5">
-                        <div 
-                          className="w-6 h-6 rounded"
-                          style={{ background: generatedBrandDNA?.colors?.primary || '#2E6AFF' }}
-                        />
-                        <div 
-                          className="w-6 h-6 rounded"
-                          style={{ background: generatedBrandDNA?.colors?.secondary || '#1a1a1a' }}
-                        />
-                        <div 
-                          className="w-6 h-6 rounded"
-                          style={{ background: generatedBrandDNA?.colors?.accent || '#D4A574' }}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Tone */}
-                    <div className="bg-black/30 rounded-lg p-3 border border-white/5">
-                      <span className="text-[9px] text-gray-500 font-mono tracking-wider block mb-2">TONE</span>
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <div className="h-1 flex-1 bg-white/10 rounded overflow-hidden">
-                            <div 
-                              className="h-full bg-[#2E6AFF]" 
-                              style={{ width: `${generatedBrandDNA?.tone?.bold || 50}%` }}
-                            />
-                          </div>
-                          <span className="text-[8px] text-gray-600 w-6">BLD</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <div className="h-1 flex-1 bg-white/10 rounded overflow-hidden">
-                            <div 
-                              className="h-full bg-emerald-500" 
-                              style={{ width: `${generatedBrandDNA?.tone?.playful || 50}%` }}
-                            />
-                          </div>
-                          <span className="text-[8px] text-gray-600 w-6">PLY</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Keywords */}
-                    <div className="bg-black/30 rounded-lg p-3 border border-white/5">
-                      <span className="text-[9px] text-gray-500 font-mono tracking-wider block mb-2">KEYWORDS</span>
-                      <div className="flex flex-wrap gap-1">
-                        {(generatedBrandDNA?.keywords || ['brand', 'voice']).slice(0, 3).map((kw, i) => (
-                          <span 
-                            key={i}
-                            className="px-1.5 py-0.5 bg-white/5 rounded text-[8px] text-gray-400 truncate max-w-[50px]"
-                          >
-                            {kw}
-                          </span>
-                        ))}
-                      </div>
                     </div>
                   </div>
                 </div>
 
                 {/* CTA Section */}
-                <div className="p-6 pt-0">
+                <div className="p-6">
                   <div className="flex flex-col items-center text-center gap-4">
                     <p
                       style={{
@@ -2060,7 +1984,7 @@ Get yours → mybrandos.app`;
                         margin: 0,
                       }}
                     >
-                      Your brand identity has been captured. Join the beta waitlist to access the full BrandOS toolkit.
+                      Your brand identity has been captured. Join the waitlist to access the full BrandOS toolkit.
                     </p>
 
                     {/* Primary CTA - Join Beta Waitlist */}
@@ -2079,28 +2003,35 @@ Get yours → mybrandos.app`;
                         boxShadow: '0 4px 24px rgba(212, 165, 116, 0.4), inset 0 1px 0 rgba(255,255,255,0.2)',
                       }}
                     >
-                      JOIN BETA WAITLIST →
+                      JOIN WAITLIST →
                     </motion.button>
 
-                    {/* Social Proof */}
-                    <div 
+                    {/* Social Proof - Using actual X profile pictures */}
+                    <div
                       className="flex items-center gap-2 px-4 py-2 rounded-full"
                       style={{ background: 'rgba(255, 255, 255, 0.03)' }}
                     >
                       <div className="flex -space-x-2">
-                        {[1, 2, 3, 4].map((i) => (
-                          <div 
-                            key={i}
-                            className="w-6 h-6 rounded-full border-2 border-[#050505]"
-                            style={{ 
-                              background: `linear-gradient(135deg, hsl(${i * 60}, 70%, 50%) 0%, hsl(${i * 60 + 30}, 70%, 40%) 100%)`,
+                        {['banditxbt', 'AndrewAsksHow', 'balloondogs', 'BawsaXBT'].map((username, i) => (
+                          <img
+                            key={username}
+                            src={`https://unavatar.io/twitter/${username}`}
+                            alt={username}
+                            className="w-6 h-6 rounded-full border-2 border-[#050505] object-cover"
+                            style={{
+                              zIndex: 4 - i,
+                            }}
+                            onError={(e) => {
+                              // Fallback to gradient if image fails to load
+                              const target = e.target as HTMLImageElement;
+                              target.style.display = 'none';
                             }}
                           />
                         ))}
                       </div>
-                      <span 
+                      <span
                         className="text-[11px]"
-                        style={{ 
+                        style={{
                           color: 'rgba(255, 255, 255, 0.5)',
                           fontFamily: "'VCR OSD Mono', monospace",
                         }}
