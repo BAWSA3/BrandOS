@@ -56,6 +56,10 @@ export interface GeneratedBrandDNA {
     personal: number;
   };
   dataSource?: 'profile-only' | 'profile-and-tweets';
+  // Analysis metadata
+  analysisMode?: 'content-primary' | 'limited-tweets' | 'profile-only';
+  analysisConfidence?: 'high' | 'medium' | 'low';
+  dataLimitations?: string[];
 }
 
 interface BrandDNAPreviewProps {

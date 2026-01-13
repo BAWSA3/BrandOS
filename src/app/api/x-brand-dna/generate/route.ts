@@ -8,9 +8,11 @@ import {
   XProfileData,
   BrandDNA as GeminiBrandDNA,
   BioLinguistics,
+  BioVibeAnalysis,
   ProfileImageAnalysis,
   TweetVoiceAnalysis,
   analyzeBioLinguistics,
+  analyzeBioVibe,
 } from '@/lib/gemini';
 import { BrandDNA as StoreBrandDNA } from '@/lib/types';
 import { ExtractedColors, generateHarmoniousColors } from '@/lib/color-extraction';
@@ -135,6 +137,10 @@ export interface GeneratedBrandDNA {
     personal: number;
   };
   dataSource: 'profile-only' | 'profile-and-tweets';
+  // CONTENT-PRIMARY: Analysis reliability indicators
+  analysisMode: 'content-primary' | 'limited-tweets' | 'profile-only';
+  analysisConfidence: 'high' | 'medium' | 'low';
+  dataLimitations?: string[];
 }
 
 export interface GenerateBrandDNAResponse {
@@ -147,16 +153,34 @@ export interface GenerateBrandDNAResponse {
 // PERSONALITY DETECTION & SUMMARY GENERATION
 // =============================================================================
 
-// Detect personality type based on tone and content analysis
+// Detect personality type based on CONTENT (tweets) as primary signal
+// Bio vibe is used only for personality hints, not brand positioning
 function detectPersonalityType(
-  bioLinguistics: BioLinguistics,
+  bioVibe: BioVibeAnalysis,
   tweetVoice: TweetVoiceAnalysis | null,
   geminiBrandDNA: GeminiBrandDNA | null
 ): PersonalityType {
-  const voice = bioLinguistics.voiceSpectrum;
-  const tweetSpectrum = tweetVoice?.voiceSpectrum;
+  // CONTENT-PRIMARY: Use tweet voice as the main signal
+  // If no tweets, use neutral defaults (don't infer from bio)
+  const tv = tweetVoice?.voiceSpectrum || {
+    professional: 50,
+    casual: 50,
+    authoritative: 50,
+    approachable: 50,
+    educational: 40,
+    promotional: 30,
+    personal: 50,
+    opinionated: 50,
+  };
 
-  // Score each personality type
+  // Bio vibe only contributes minor hints (10% weight)
+  const vibeBonus = {
+    playful: bioVibe.vibeSpectrum.playful > 60 ? 10 : 0,
+    serious: bioVibe.vibeSpectrum.serious > 60 ? 10 : 0,
+    casual: bioVibe.vibeSpectrum.casual > 60 ? 10 : 0,
+  };
+
+  // Score each personality type - TWEET VOICE IS PRIMARY (70%), Gemini DNA (20%), Bio Vibe (10%)
   const scores: Record<PersonalityType, number> = {
     alpha: 0,
     builder: 0,
@@ -168,45 +192,46 @@ function detectPersonalityType(
     contrarian: 0,
   };
 
-  // Alpha: High confidence, authoritative, bold
-  scores.alpha = (voice.authoritative * 0.4) +
-    (tweetSpectrum?.opinionated || 50) * 0.3 +
-    (bioLinguistics.ctaStrength * 0.3);
+  // Alpha: High confidence, authoritative, opinionated content
+  scores.alpha = (tv.authoritative * 0.50) +
+    (tv.opinionated * 0.35) +
+    (vibeBonus.serious * 0.15);
 
-  // Builder: Technical, professional, practical
-  scores.builder = (voice.professional * 0.4) +
-    ((100 - voice.playful) * 0.3) +
-    (geminiBrandDNA?.differentiationScore || 50) * 0.3;
+  // Builder: Technical, professional, practical content
+  scores.builder = (tv.professional * 0.50) +
+    ((100 - tv.casual) * 0.30) +
+    (geminiBrandDNA?.differentiationScore || 50) * 0.20;
 
-  // Educator: Educational content, helpful, clear
-  scores.educator = (tweetSpectrum?.educational || 40) * 0.5 +
-    (voice.professional * 0.25) +
-    ((100 - voice.authoritative) * 0.25);
+  // Educator: Educational content, helpful, clear explanations
+  scores.educator = (tv.educational * 0.60) +
+    (tv.approachable * 0.25) +
+    ((100 - tv.promotional) * 0.15);
 
-  // Degen: Playful, casual, high energy
-  scores.degen = (voice.playful * 0.4) +
-    (bioLinguistics.emojiAnalysis.count * 8) +
-    ((100 - voice.professional) * 0.3);
+  // Degen: Playful, casual, high energy content
+  scores.degen = (tv.casual * 0.40) +
+    ((100 - tv.professional) * 0.30) +
+    (vibeBonus.playful * 0.20) +
+    (bioVibe.emojiCount * 5);
 
-  // Analyst: Data-focused, methodical, professional
-  scores.analyst = (voice.professional * 0.5) +
-    ((100 - voice.playful) * 0.3) +
-    (tweetSpectrum?.authoritative || 50) * 0.2;
+  // Analyst: Data-focused, methodical, professional content
+  scores.analyst = (tv.professional * 0.45) +
+    ((100 - tv.casual) * 0.30) +
+    (tv.authoritative * 0.25);
 
-  // Philosopher: Big picture, thoughtful, visionary
-  scores.philosopher = (tweetSpectrum?.educational || 40) * 0.3 +
-    (voice.authoritative * 0.3) +
-    (geminiBrandDNA?.differentiationScore || 50) * 0.4;
+  // Philosopher: Big picture, thoughtful, visionary content
+  scores.philosopher = (tv.educational * 0.35) +
+    (tv.authoritative * 0.35) +
+    (geminiBrandDNA?.differentiationScore || 50) * 0.30;
 
-  // Networker: Community-focused, approachable, collaborative
-  scores.networker = (tweetSpectrum?.approachable || 50) * 0.4 +
-    (voice.playful * 0.3) +
-    ((100 - voice.authoritative) * 0.3);
+  // Networker: Community-focused, approachable, collaborative content
+  scores.networker = (tv.approachable * 0.50) +
+    (tv.personal * 0.30) +
+    ((100 - tv.authoritative) * 0.20);
 
-  // Contrarian: Opinionated, independent, provocative
-  scores.contrarian = (tweetSpectrum?.opinionated || 50) * 0.5 +
-    (voice.authoritative * 0.3) +
-    ((100 - (tweetSpectrum?.approachable || 50)) * 0.2);
+  // Contrarian: Opinionated, independent, provocative content
+  scores.contrarian = (tv.opinionated * 0.55) +
+    (tv.authoritative * 0.25) +
+    ((100 - tv.approachable) * 0.20);
 
   // Find highest scoring personality
   let maxScore = 0;
@@ -223,29 +248,46 @@ function detectPersonalityType(
 }
 
 // Generate AI personality summary using Claude API
+// CONTENT-PRIMARY: Uses tweet voice for context, not bio
 async function generatePersonalitySummary(
   profile: XProfileData,
   personalityType: PersonalityType,
   archetypeName: string, // The actual Gemini archetype name to use in the summary
-  bioLinguistics: BioLinguistics,
+  bioVibe: BioVibeAnalysis,
   tweetVoice: TweetVoiceAnalysis | null,
   tone: { minimal: number; playful: number; bold: number; experimental: number }
 ): Promise<string> {
   const personality = PERSONALITY_TYPES[personalityType];
-  const voice = bioLinguistics.voiceSpectrum;
 
-  // Build context for AI - use the actual archetype name for consistency with the displayed card
+  // CONTENT-PRIMARY: Derive voice context from tweets, not bio
+  const tv = tweetVoice?.voiceSpectrum;
+  const voiceContext = tv ? {
+    formality: tv.professional > 60 ? 'formal' : 'casual',
+    energy: tv.authoritative > 60 ? 'high-energy' : 'measured',
+    style: tv.casual > 50 ? 'conversational' : 'polished',
+  } : {
+    // Fallback to neutral if no tweets (don't use bio)
+    formality: 'balanced',
+    energy: 'measured',
+    style: 'varied',
+  };
+
+  // Extract content-specific signals
+  const contentPillars = tweetVoice?.contentThemes?.map(t => t.pillar).slice(0, 3) || [];
+  const signaturePhrases = tweetVoice?.writingStyle?.signaturePhrases?.slice(0, 3) || [];
+  const highEngagementTopics = tweetVoice?.performancePatterns?.highEngagementTopics?.slice(0, 3) || [];
+
+  // Build context for AI - CONTENT-PRIMARY
   const context = {
     name: profile.name || profile.username,
-    personality: archetypeName, // Use actual Gemini archetype name, not personality type name
+    personality: archetypeName,
     traits: personality.traits,
-    voice: {
-      formality: voice.professional > 60 ? 'formal' : 'casual',
-      energy: voice.authoritative > 60 ? 'high-energy' : 'measured',
-      style: voice.playful > 50 ? 'playful' : 'serious',
-    },
+    voice: voiceContext,
     followers: profile.public_metrics?.followers_count || 0,
     voiceConsistency: tweetVoice?.consistencyScore || 75,
+    contentPillars,
+    signaturePhrases,
+    highEngagementTopics,
     tone,
   };
 
@@ -260,7 +302,7 @@ async function generatePersonalitySummary(
       },
       body: JSON.stringify({
         model: 'claude-3-haiku-20240307',
-        max_tokens: 200,
+        max_tokens: 250,
         messages: [
           {
             role: 'user',
@@ -268,16 +310,19 @@ async function generatePersonalitySummary(
 
 Their personality type: ${context.personality}
 Key traits: ${context.traits.join(', ')}
-Voice style: ${context.voice.formality}, ${context.voice.energy}, ${context.voice.style}
+Voice style (from their CONTENT): ${context.voice.formality}, ${context.voice.energy}, ${context.voice.style}
+Content pillars (what they post about): ${context.contentPillars.length > 0 ? context.contentPillars.join(', ') : 'varied topics'}
+Signature phrases they use: ${context.signaturePhrases.length > 0 ? context.signaturePhrases.join(', ') : 'none detected'}
+High engagement topics: ${context.highEngagementTopics.length > 0 ? context.highEngagementTopics.join(', ') : 'varied'}
 Follower count: ${context.followers.toLocaleString()}
 Voice consistency: ${context.voiceConsistency}%
 
 Structure your 3 sentences exactly like this:
-Sentence 1: A positive observation about their personality type and what makes them effective (e.g., "You are the Builder, the pragmatic powerhouse who brings ideas to life.")
-Sentence 2: Point out ONE specific weakness or gap in their brand presence based on their metrics above. Be direct about what's holding them back.
+Sentence 1: A positive observation about their CONTENT patterns and what makes them effective (reference their actual content themes, not their bio)
+Sentence 2: Point out ONE specific weakness or gap in their CONTENT strategy based on their metrics. Be direct about what's holding them back.
 Sentence 3: Give ONE concrete, actionable step they can take THIS WEEK to fix that weakness. Be specific (e.g., "Pin your best thread to your profile" not "improve your content").
 
-Write in second person ("You..."). Be direct and specific—no fluff. This should feel like tough love from a mentor who genuinely wants them to succeed. No quotes around the response.`,
+Write in second person ("You..."). Be direct and specific—no fluff. Reference their actual content patterns, NOT their bio text. No quotes around the response.`,
           },
         ],
       }),
@@ -299,7 +344,7 @@ Write in second person ("You..."). Be direct and specific—no fluff. This shoul
 function generateFallbackSummary(
   personalityType: PersonalityType,
   archetypeName: string, // Use actual archetype name in the summary
-  context: { name: string; followers: number; voiceConsistency: number }
+  context: { name: string; followers: number; voiceConsistency: number; contentPillars?: string[]; signaturePhrases?: string[]; highEngagementTopics?: string[] }
 ): string {
   // Determine the weakness based on voice consistency
   const consistencyIssue = context.voiceConsistency < 70
@@ -639,17 +684,24 @@ export async function POST(request: NextRequest) {
       personal: tweetVoice.voiceSpectrum.personal,
     } : undefined;
 
-    // Map Gemini archetype to personality type for consistency between card display and DNA text
-    const mappedPersonalityType = mapArchetypeToPersonalityType(geminiBrandDNA?.archetype);
-    const personality = PERSONALITY_TYPES[mappedPersonalityType];
+    // CONTENT-PRIMARY: Generate bio vibe for personality hints only (not brand positioning)
+    const bioVibe = analyzeBioVibe(profile.description || '');
+
+    // Detect personality type - CONTENT-PRIMARY approach
+    // If tweets available, use content-based detection; otherwise fall back to Gemini archetype
+    const detectedPersonalityType = tweetVoice
+      ? detectPersonalityType(bioVibe, tweetVoice, geminiBrandDNA)
+      : mapArchetypeToPersonalityType(geminiBrandDNA?.archetype);
+
+    const personality = PERSONALITY_TYPES[detectedPersonalityType];
     const archetypeName = geminiBrandDNA?.archetype || personality.name; // Use actual Gemini archetype name
 
-    // Generate AI summary using the EXACT archetype name shown in the card
+    // Generate AI summary using content context (not bio)
     const personalitySummary = await generatePersonalitySummary(
       profile,
-      mappedPersonalityType,
-      archetypeName, // Pass the actual archetype name for the summary text
-      bioLinguistics,
+      detectedPersonalityType,
+      archetypeName,
+      bioVibe, // CONTENT-PRIMARY: Use bio vibe, not bio linguistics
       tweetVoice || null,
       tone
     );
@@ -658,6 +710,40 @@ export async function POST(request: NextRequest) {
     console.log('Gemini Archetype:', geminiBrandDNA?.archetype);
     console.log('Mapped To:', personality.name);
     console.log('Summary:', personalitySummary.substring(0, 100) + '...');
+
+    // CONTENT-PRIMARY: Compute analysis mode and confidence
+    const contentThemesCount = tweetVoice?.contentThemes?.length || 0;
+    const voiceConsistency = tweetVoice?.consistencyScore || 0;
+
+    let analysisMode: 'content-primary' | 'limited-tweets' | 'profile-only';
+    let analysisConfidence: 'high' | 'medium' | 'low';
+    const dataLimitations: string[] = [];
+
+    if (tweetVoice && contentThemesCount >= 3 && voiceConsistency > 50) {
+      // Strong content signal
+      analysisMode = 'content-primary';
+      analysisConfidence = voiceConsistency > 70 ? 'high' : 'medium';
+    } else if (tweetVoice) {
+      // Some tweets but limited content themes or low consistency
+      analysisMode = 'limited-tweets';
+      analysisConfidence = 'medium';
+      if (contentThemesCount < 3) {
+        dataLimitations.push('Limited content themes detected - consider posting more diverse content');
+      }
+      if (voiceConsistency < 50) {
+        dataLimitations.push('Voice inconsistency detected across tweets - consider establishing consistent topics');
+      }
+    } else {
+      // No tweet data
+      analysisMode = 'profile-only';
+      analysisConfidence = 'low';
+      dataLimitations.push('No tweet data available - analysis based on profile only');
+    }
+
+    console.log(`=== ANALYSIS MODE: ${analysisMode} (confidence: ${analysisConfidence}) ===`);
+    if (dataLimitations.length > 0) {
+      console.log('Data limitations:', dataLimitations.join('; '));
+    }
 
     const generatedBrandDNA: GeneratedBrandDNA = {
       id: `brand-${profile.username}-${Date.now()}`,
@@ -683,6 +769,10 @@ export async function POST(request: NextRequest) {
       performanceInsights,
       tweetDerivedVoice,
       dataSource: tweetVoice ? 'profile-and-tweets' : 'profile-only',
+      // CONTENT-PRIMARY: Analysis reliability indicators
+      analysisMode,
+      analysisConfidence,
+      dataLimitations: dataLimitations.length > 0 ? dataLimitations : undefined,
     };
 
     return NextResponse.json({

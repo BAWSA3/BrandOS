@@ -5,6 +5,8 @@ import { motion, AnimatePresence, useMotionValue, useSpring, animate } from 'mot
 import dynamic from 'next/dynamic';
 import BrandDNAPreview, { GeneratedBrandDNA } from './BrandDNAPreview';
 import ShareableScoreCard, { ShareCardData } from './ShareableScoreCard';
+import BrandAdvisorChat from './BrandAdvisorChat';
+import DNAWalkthrough from './DNAWalkthrough';
 import BrandOSDashboard, { BrandOSDashboardData } from './BrandOSDashboard';
 import BrandIssuesSection from './BrandIssuesSection';
 import { domToPng } from 'modern-screenshot';
@@ -45,7 +47,7 @@ interface BrandScoreResult {
   summary: string;
 }
 
-type FlowState = 'input' | 'journey' | 'reveal' | 'signup' | 'insufficient_data';
+type FlowState = 'input' | 'journey' | 'walkthrough' | 'reveal' | 'signup' | 'insufficient_data';
 
 interface XBrandScoreHeroProps {
   theme: string;
@@ -1163,6 +1165,7 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
   const [showConfetti, setShowConfetti] = useState(false);
   const [email, setEmail] = useState('');
   const [signupStatus, setSignupStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [showAdvisorChat, setShowAdvisorChat] = useState(false);
 
   const apiResultRef = useRef<{ profile: XProfileData; brandScore: BrandScoreResult } | null>(null);
   const apiCompleteRef = useRef(false);
@@ -1371,12 +1374,8 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
                 };
                 setProfile(flatProfile);
                 setBrandScore(apiResultRef.current!.brandScore);
-                setFlowState('reveal');
-
-                // Show confetti for high scores
-                if (apiResultRef.current!.brandScore.overallScore >= 70) {
-                  setTimeout(() => setShowConfetti(true), 500);
-                }
+                setFlowState('walkthrough');
+                // Confetti will show after walkthrough completes
               }, 600);
             } else if (apiErrorRef.current) {
               // API failed - show error and go back to input
@@ -1772,6 +1771,25 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
           </motion.div>
         )}
 
+        {/* WALKTHROUGH STATE - Guided DNA Overview */}
+        {flowState === 'walkthrough' && brandScore && profile && generatedBrandDNA && (
+          <DNAWalkthrough
+            profile={profile}
+            brandScore={brandScore}
+            generatedBrandDNA={generatedBrandDNA}
+            authenticity={accountAuthenticity}
+            activity={accountActivity}
+            onComplete={() => {
+              setFlowState('reveal');
+              // Show confetti for high scores after walkthrough
+              if (brandScore.overallScore >= 70) {
+                setTimeout(() => setShowConfetti(true), 500);
+              }
+            }}
+            theme={theme}
+          />
+        )}
+
         {/* REVEAL STATE - BrandOS Dashboard Experience */}
         {flowState === 'reveal' && brandScore && profile && generatedBrandDNA && (
           <motion.div
@@ -1984,12 +2002,12 @@ Get yours → mybrandos.app`;
                         margin: 0,
                       }}
                     >
-                      Your brand identity has been captured. Join the waitlist to access the full BrandOS toolkit.
+                      Your Brand Advisor is ready. Experience personalized strategy based on your DNA.
                     </p>
 
-                    {/* Primary CTA - Join Beta Waitlist */}
+                    {/* Primary CTA - Chat with Brand Advisor */}
                     <motion.button
-                      onClick={() => setFlowState('signup')}
+                      onClick={() => setShowAdvisorChat(true)}
                       whileHover={{ scale: 1.03, y: -2 }}
                       whileTap={{ scale: 0.98 }}
                       className="w-full px-8 py-4 rounded-xl cursor-pointer border-none"
@@ -2003,7 +2021,26 @@ Get yours → mybrandos.app`;
                         boxShadow: '0 4px 24px rgba(212, 165, 116, 0.4), inset 0 1px 0 rgba(255,255,255,0.2)',
                       }}
                     >
-                      JOIN WAITLIST →
+                      CHAT WITH BRAND ADVISOR →
+                    </motion.button>
+
+                    {/* Secondary CTA - Join Waitlist */}
+                    <motion.button
+                      onClick={() => setFlowState('signup')}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="w-full px-6 py-3 rounded-xl cursor-pointer"
+                      style={{
+                        fontFamily: "'VCR OSD Mono', monospace",
+                        fontSize: '11px',
+                        letterSpacing: '0.1em',
+                        color: 'rgba(255, 255, 255, 0.7)',
+                        fontWeight: 500,
+                        background: 'rgba(255, 255, 255, 0.05)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                      }}
+                    >
+                      JOIN WAITLIST
                     </motion.button>
 
                     {/* Social Proof - Using actual X profile pictures */}
@@ -2482,6 +2519,19 @@ Get yours → mybrandos.app`;
           animation: cursorBlink 0.8s ease-in-out infinite;
         }
       `}</style>
+
+      {/* Brand Advisor Chat Modal */}
+      {generatedBrandDNA && (
+        <BrandAdvisorChat
+          brandDNA={generatedBrandDNA}
+          isOpen={showAdvisorChat}
+          onClose={() => setShowAdvisorChat(false)}
+          onJoinWaitlist={() => {
+            setShowAdvisorChat(false);
+            setFlowState('signup');
+          }}
+        />
+      )}
     </div>
   );
 }

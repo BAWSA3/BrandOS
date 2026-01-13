@@ -2,9 +2,9 @@
   {
     "username": "banditxbt",
     "displayName": "banditxbt",
-    "score": 89,
+    "score": 87,
     "profileImage": "",
-    "timestamp": 1767785970449,
+    "timestamp": 1768270387022,
     "isCrypto": false
   },
   {
@@ -12,23 +12,23 @@
     "displayName": "BawsaXBT",
     "score": 79,
     "profileImage": "",
-    "timestamp": 1767862111465,
+    "timestamp": 1768274938781,
     "isCrypto": false
   },
   {
     "username": "naval",
     "displayName": "naval",
-    "score": 93,
+    "score": 97,
     "profileImage": "",
-    "timestamp": 1767863637488,
+    "timestamp": 1768265466555,
     "isCrypto": false
   },
   {
     "username": "elonmusk",
     "displayName": "elonmusk",
-    "score": 97,
+    "score": 95,
     "profileImage": "",
-    "timestamp": 1767668256564,
+    "timestamp": 1768278448676,
     "isCrypto": false
   },
   {
@@ -50,17 +50,17 @@
   {
     "username": "AndrewAsksHow",
     "displayName": "AndrewAsksHow",
-    "score": 85,
+    "score": 75,
     "profileImage": "",
-    "timestamp": 1767360315656,
+    "timestamp": 1768072774044,
     "isCrypto": false
   },
   {
     "username": "pmarca",
     "displayName": "pmarca",
-    "score": 95,
+    "score": 93,
     "profileImage": "",
-    "timestamp": 1767352802701,
+    "timestamp": 1768268550314,
     "isCrypto": false
   },
   {
@@ -106,9 +106,9 @@
   {
     "username": "Kurogod",
     "displayName": "Kurogod",
-    "score": 79,
+    "score": 78,
     "profileImage": "",
-    "timestamp": 1767729216418,
+    "timestamp": 1768276318880,
     "isCrypto": false
   },
   {
@@ -117,6 +117,38 @@
     "score": 78,
     "profileImage": "",
     "timestamp": 1767806479700,
+    "isCrypto": false
+  },
+  {
+    "username": "MINHxDYNASTY",
+    "displayName": "MINHxDYNASTY",
+    "score": 54,
+    "profileImage": "",
+    "timestamp": 1768264676010,
+    "isCrypto": false
+  },
+  {
+    "username": "dankoe",
+    "displayName": "dankoe",
+    "score": 32,
+    "profileImage": "",
+    "timestamp": 1768266542937,
+    "isCrypto": false
+  },
+  {
+    "username": "rarefinds",
+    "displayName": "rarefinds",
+    "score": 63,
+    "profileImage": "",
+    "timestamp": 1768278632566,
+    "isCrypto": false
+  },
+  {
+    "username": "thebulltard",
+    "displayName": "thebulltard",
+    "score": 67,
+    "profileImage": "",
+    "timestamp": 1768279334007,
     "isCrypto": false
   }
 ]
