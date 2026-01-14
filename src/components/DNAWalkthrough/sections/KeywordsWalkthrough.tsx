@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import WalkthroughSection from '../WalkthroughSection';
 import { TypewriterText, StaggerContainer, StaggerItem } from '../motion';
+import type { ParallaxLayerConfig } from '../motion';
 
 interface KeywordsWalkthroughProps {
   keywords: string[];
@@ -10,6 +11,7 @@ interface KeywordsWalkthroughProps {
   doPatterns: string[];
   dontPatterns: string[];
   theme: string;
+  parallaxLayers?: ParallaxLayerConfig[];
 }
 
 // Generate mock frequency data for keywords (in production, this would come from API)
@@ -28,6 +30,7 @@ export default function KeywordsWalkthrough({
   doPatterns,
   dontPatterns,
   theme,
+  parallaxLayers,
 }: KeywordsWalkthroughProps) {
   const keywordStats = generateKeywordStats(keywords);
   const voiceSample = voiceSamples?.[0] || '';
@@ -62,6 +65,7 @@ export default function KeywordsWalkthrough({
       whatYouCanDo={whatYouCanDo}
       theme={theme}
       accentColor="#0047FF"
+      parallaxLayers={parallaxLayers}
     >
       {/* Bento Grid Layout for Keywords */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">

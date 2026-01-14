@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { GeneratedBrandDNA } from '../BrandDNAPreview';
 import { AuthenticityAnalysis, ActivityAnalysis } from '@/lib/gemini';
 import WalkthroughProgress from './WalkthroughProgress';
@@ -11,7 +11,7 @@ import ToneWalkthrough from './sections/ToneWalkthrough';
 import ArchetypeWalkthrough from './sections/ArchetypeWalkthrough';
 import KeywordsWalkthrough from './sections/KeywordsWalkthrough';
 import PillarsWalkthrough from './sections/PillarsWalkthrough';
-import IssuesWalkthrough from './sections/IssuesWalkthrough';
+import JourneyEnd, { JourneyEndData } from '../JourneyEnd';
 
 // Types
 interface XProfileData {
@@ -57,7 +57,6 @@ const SECTION_NAMES = [
   'Archetype',
   'Keywords',
   'Content',
-  'Issues',
 ];
 
 export default function DNAWalkthrough({
@@ -70,9 +69,41 @@ export default function DNAWalkthrough({
   theme,
 }: DNAWalkthroughProps) {
   const [activeSection, setActiveSection] = useState(0);
-  const [hasReachedEnd, setHasReachedEnd] = useState(false);
+  const [email, setEmail] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [showJourneyEnd, setShowJourneyEnd] = useState(false);
   const sectionRefs = useRef<(HTMLDivElement | null)[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Helper to find best phase
+  function getBestPhase(phases: BrandScoreResult['phases']) {
+    const phaseEntries = Object.entries(phases) as [string, { score: number }][];
+    const avgScore = phaseEntries.reduce((sum, [, p]) => sum + p.score, 0) / 4;
+    let best = { name: 'Define', score: 0, diff: 0 };
+    for (const [name, phase] of phaseEntries) {
+      const diff = phase.score - avgScore;
+      if (diff > best.diff) {
+        best = { name: name.charAt(0).toUpperCase() + name.slice(1), score: phase.score, diff: Math.round(diff) };
+      }
+    }
+    return best;
+  }
+
+  // Prepare data for JourneyEnd
+  const journeyEndData: JourneyEndData = {
+    score: brandScore.overallScore,
+    archetype: generatedBrandDNA.archetype,
+    archetypeEmoji: generatedBrandDNA.archetypeEmoji || '🧬',
+    personalityType: generatedBrandDNA.personalityType,
+    username: profile.username,
+    displayName: profile.name,
+    profileImageUrl: profile.profile_image_url,
+    topStrength: brandScore.topStrengths[0] || 'Brand consistency',
+    bestPhase: getBestPhase(brandScore.phases),
+    voiceProfile: generatedBrandDNA.voiceProfile || '',
+    keywords: generatedBrandDNA.keywords,
+  };
 
   // Track which section is in view
   useEffect(() => {
@@ -83,14 +114,11 @@ export default function DNAWalkthrough({
 
       const observer = new IntersectionObserver(
         ([entry]) => {
-          if (entry.isIntersecting && entry.intersectionRatio > 0.5) {
+          if (entry.isIntersecting && entry.intersectionRatio > 0.3) {
             setActiveSection(index);
-            if (index === SECTION_NAMES.length - 1) {
-              setHasReachedEnd(true);
-            }
           }
         },
-        { threshold: [0.5] }
+        { threshold: [0.3, 0.5] }
       );
 
       observer.observe(ref);
@@ -106,10 +134,24 @@ export default function DNAWalkthrough({
     sectionRefs.current[index]?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  const handleWaitlistSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || isSubmitting) return;
+
+    setIsSubmitting(true);
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    setIsSubmitting(false);
+    setIsSubmitted(true);
+  };
+
   const handleViewDashboard = () => {
-    // Smooth scroll to top then transition
+    setShowJourneyEnd(true);
+  };
+
+  const handleJourneyEndComplete = () => {
+    setShowJourneyEnd(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    setTimeout(onComplete, 500);
+    setTimeout(onComplete, 300);
   };
 
   return (
@@ -121,8 +163,8 @@ export default function DNAWalkthrough({
         onSectionClick={scrollToSection}
       />
 
-      {/* Sections */}
-      <div className="relative">
+      {/* Sections - main scrollable content */}
+      <div className="relative z-10">
         {/* 1. Brand Score */}
         <div ref={(el) => { sectionRefs.current[0] = el; }}>
           <ScoreWalkthrough
@@ -183,52 +225,27 @@ export default function DNAWalkthrough({
           />
         </div>
 
-        {/* 7. Issues */}
-        <div ref={(el) => { sectionRefs.current[6] = el; }}>
-          <IssuesWalkthrough
-            brandScore={brandScore}
-            profile={profile}
-            authenticity={authenticity}
-            theme={theme}
-          />
-        </div>
-
         {/* Final CTA Section */}
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true, amount: 0.5 }}
           transition={{ duration: 0.6 }}
-          className="min-h-[60vh] flex flex-col items-center justify-center px-6 py-20"
+          className="min-h-[50vh] flex flex-col items-center justify-center px-6 py-20"
         >
           <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
+            initial={{ scale: 0.95, opacity: 0 }}
             whileInView={{ scale: 1, opacity: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="text-center max-w-lg"
+            className="w-full max-w-md"
           >
-            <div className="text-5xl mb-6">
-              {generatedBrandDNA.archetypeEmoji || '🧬'}
-            </div>
-            <h2
-              className="text-2xl md:text-3xl font-semibold mb-4"
-              style={{ color: theme === 'dark' ? '#FFFFFF' : '#000000' }}
-            >
-              Your Brand DNA is Complete
-            </h2>
-            <p
-              className="text-base mb-8"
-              style={{ color: theme === 'dark' ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)' }}
-            >
-              You've seen how we analyzed your brand. Now see everything in one view
-              and start taking action.
-            </p>
+            {/* View Dashboard Button */}
             <motion.button
               onClick={handleViewDashboard}
               whileHover={{ scale: 1.03, y: -2 }}
               whileTap={{ scale: 0.98 }}
-              className="px-8 py-4 rounded-xl cursor-pointer border-none font-semibold"
+              className="w-full px-8 py-4 mb-6 rounded-xl cursor-pointer border-none font-semibold"
               style={{
                 fontFamily: "'VCR OSD Mono', monospace",
                 fontSize: '12px',
@@ -240,9 +257,113 @@ export default function DNAWalkthrough({
             >
               VIEW YOUR DASHBOARD
             </motion.button>
+
+            {/* Waitlist Card */}
+            <div
+              className="rounded-2xl p-8 text-center"
+              style={{
+                background: theme === 'dark' ? 'rgba(26, 26, 26, 0.8)' : 'rgba(248, 248, 248, 0.9)',
+                border: theme === 'dark' ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.1)',
+                backdropFilter: 'blur(10px)',
+              }}
+            >
+              <h2
+                className="text-2xl md:text-3xl font-semibold mb-3"
+                style={{
+                  fontFamily: "'VCR OSD Mono', monospace",
+                  letterSpacing: '0.05em',
+                  color: theme === 'dark' ? '#FFFFFF' : '#000000',
+                }}
+              >
+                JOIN WAITLIST
+              </h2>
+              <p
+                className="text-sm mb-6"
+                style={{
+                  color: theme === 'dark' ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)',
+                }}
+              >
+                Get early full access to BrandOS
+              </p>
+
+              {!isSubmitted ? (
+                <form onSubmit={handleWaitlistSubmit} className="space-y-4">
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Enter your email"
+                    required
+                    className="w-full px-4 py-3 rounded-lg text-sm outline-none transition-all"
+                    style={{
+                      background: theme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+                      border: theme === 'dark' ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.1)',
+                      color: theme === 'dark' ? '#FFFFFF' : '#000000',
+                    }}
+                  />
+                  <motion.button
+                    type="submit"
+                    disabled={isSubmitting || !email}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="w-full px-6 py-3 rounded-lg cursor-pointer border-none font-semibold transition-opacity"
+                    style={{
+                      fontFamily: "'VCR OSD Mono', monospace",
+                      fontSize: '12px',
+                      letterSpacing: '0.1em',
+                      color: '#050505',
+                      background: 'linear-gradient(135deg, #E8C49A 0%, #D4A574 100%)',
+                      opacity: isSubmitting || !email ? 0.6 : 1,
+                    }}
+                  >
+                    {isSubmitting ? 'SUBMITTING...' : 'GET EARLY ACCESS'}
+                  </motion.button>
+                </form>
+              ) : (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="py-4"
+                >
+                  <div className="text-3xl mb-3">✓</div>
+                  <p
+                    className="text-sm"
+                    style={{
+                      color: theme === 'dark' ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.8)',
+                    }}
+                  >
+                    You are on the list! We will notify you when it is ready.
+                  </p>
+                </motion.div>
+              )}
+            </div>
+
+            {/* Analyze Another Profile Link */}
+            <motion.button
+              onClick={onComplete}
+              whileHover={{ opacity: 0.8 }}
+              className="mt-6 mx-auto block text-sm cursor-pointer bg-transparent border-none"
+              style={{
+                fontFamily: "'VCR OSD Mono', monospace",
+                fontSize: '11px',
+                letterSpacing: '0.1em',
+                color: theme === 'dark' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)',
+              }}
+            >
+              ANALYZE ANOTHER PROFILE
+            </motion.button>
           </motion.div>
         </motion.div>
       </div>
+
+      {/* Journey End Experience */}
+      {showJourneyEnd && (
+        <JourneyEnd
+          data={journeyEndData}
+          theme={theme}
+          onComplete={handleJourneyEndComplete}
+        />
+      )}
     </div>
   );
 }

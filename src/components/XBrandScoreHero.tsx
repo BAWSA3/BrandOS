@@ -1167,6 +1167,12 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
   const [signupStatus, setSignupStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [showAdvisorChat, setShowAdvisorChat] = useState(false);
 
+  // Dashboard CTA state
+  const [waitlistEmail, setWaitlistEmail] = useState('');
+  const [waitlistSubmitted, setWaitlistSubmitted] = useState(false);
+  const [isSubmittingWaitlist, setIsSubmittingWaitlist] = useState(false);
+  const [compareUsername, setCompareUsername] = useState('');
+
   const apiResultRef = useRef<{ profile: XProfileData; brandScore: BrandScoreResult } | null>(null);
   const apiCompleteRef = useRef(false);
   const apiErrorRef = useRef<string | null>(null);
@@ -1443,6 +1449,49 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
     }
   };
 
+  // Handle dashboard waitlist signup
+  const handleWaitlistSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!waitlistEmail || isSubmittingWaitlist) return;
+
+    setIsSubmittingWaitlist(true);
+    try {
+      const response = await fetch('/api/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: waitlistEmail,
+          source: 'dashboard',
+          xUsername: profile?.username,
+          brandData: {
+            displayName: profile?.name,
+            score: brandScore?.overallScore,
+            defineScore: brandScore?.phases.define.score,
+            checkScore: brandScore?.phases.check.score,
+            generateScore: brandScore?.phases.generate.score,
+            scaleScore: brandScore?.phases.scale.score,
+            archetype: generatedBrandDNA?.archetype,
+          },
+        }),
+      });
+
+      if (response.ok) {
+        setWaitlistSubmitted(true);
+      }
+    } catch (error) {
+      console.error('Waitlist signup error:', error);
+    } finally {
+      setIsSubmittingWaitlist(false);
+    }
+  };
+
+  // Handle compare profile (MVP: coming soon)
+  const handleCompareProfile = () => {
+    if (!compareUsername) return;
+    // MVP: Show coming soon message
+    alert('Profile comparison coming soon! We\'ll notify you when it\'s ready.');
+  };
+
   return (
     <div
       style={{
@@ -1453,7 +1502,7 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
         alignItems: 'center',
         padding: flowState === 'journey' ? '0' : '48px 24px',
         position: 'relative',
-        overflow: 'hidden',
+        overflow: (flowState === 'walkthrough' || flowState === 'journey') ? 'visible' : 'hidden',
       }}
     >
       {/* DNA Background - Visible during input & journey, hidden during reveal */}
@@ -1464,8 +1513,8 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
           zIndex: flowState === 'journey' ? 5 : 0,
           opacity: flowState === 'journey' ? 1 : flowState === 'reveal' ? 0 : 0.6,
           transition: 'opacity 0.5s ease',
-          // Enable pointer events during journey for DNA hover interactions
-          pointerEvents: flowState === 'journey' ? 'auto' : 'none',
+          // Disable pointer events so scroll passes through
+          pointerEvents: 'none',
         }}
       >
         <DNAJourneyScene
@@ -1915,189 +1964,148 @@ Get yours → mybrandos.app`;
               />
             </div>
 
-            {/* Brand Issues Section */}
+            {/* Dashboard CTAs */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4, duration: 0.5 }}
-              className="w-full mt-8"
+              className="w-full max-w-[800px] mt-10"
             >
-              <BrandIssuesSection
-                voiceConsistency={generatedBrandDNA?.performanceInsights?.voiceConsistency || brandScore.phases.check.score}
-                engagementScore={brandScore.phases.scale.score}
-                brandScore={brandScore.overallScore}
-                followersCount={profile.followers_count}
-                followingCount={profile.following_count}
-                hasBio={!!profile.description && profile.description.length > 0}
-                bioLength={profile.description?.length || 0}
-                hasContentPillars={!!generatedBrandDNA?.contentPillars && generatedBrandDNA.contentPillars.length > 0}
-                contentPillarsCount={generatedBrandDNA?.contentPillars?.length || 0}
-                authenticityScore={accountAuthenticity?.score}
-                isWarning={accountAuthenticity?.isWarning}
-              />
-            </motion.div>
-
-
-            {/* Hybrid CTA Panel - Brand DNA Preview + Waitlist */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6, duration: 0.5 }}
-              className="w-full max-w-[600px] mx-4 mt-10"
-            >
-              <div
-                className="relative overflow-hidden rounded-2xl"
-                style={{
-                  background: 'linear-gradient(135deg, rgba(212, 165, 116, 0.08) 0%, rgba(46, 106, 255, 0.05) 100%)',
-                  border: '1px solid rgba(212, 165, 116, 0.25)',
-                  boxShadow: '0 0 80px rgba(212, 165, 116, 0.1)',
-                }}
-              >
-                {/* Header */}
-                <div 
-                  className="px-6 py-4 border-b"
-                  style={{ 
-                    borderColor: 'rgba(255, 255, 255, 0.1)',
-                    background: 'rgba(212, 165, 116, 0.05)',
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Waitlist Email Input */}
+                <div
+                  className="rounded-xl p-6"
+                  style={{
+                    background: 'rgba(26,26,26,0.8)',
+                    border: '1px solid rgba(255,255,255,0.1)',
                   }}
                 >
-                  <div className="flex items-center gap-3">
-                    <div 
-                      className="w-10 h-10 rounded-lg flex items-center justify-center"
-                      style={{ 
-                        background: 'linear-gradient(135deg, rgba(212, 165, 116, 0.3) 0%, rgba(212, 165, 116, 0.1) 100%)',
-                        border: '1px solid rgba(212, 165, 116, 0.3)',
-                      }}
-                    >
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#D4A574" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                      </svg>
-                    </div>
-                    <div>
-                      <h3
+                  <h3
+                    style={{
+                      fontFamily: "'VCR OSD Mono', monospace",
+                      fontSize: '12px',
+                      letterSpacing: '0.1em',
+                      color: '#D4A574',
+                      marginBottom: '8px',
+                    }}
+                  >
+                    JOIN THE WAITLIST
+                  </h3>
+                  <p
+                    style={{
+                      fontSize: '13px',
+                      color: 'rgba(255,255,255,0.6)',
+                      marginBottom: '16px',
+                    }}
+                  >
+                    Get early access to full BrandOS features
+                  </p>
+                  {!waitlistSubmitted ? (
+                    <form onSubmit={handleWaitlistSubmit} className="flex gap-2">
+                      <input
+                        type="email"
+                        value={waitlistEmail}
+                        onChange={(e) => setWaitlistEmail(e.target.value)}
+                        placeholder="Enter your email"
+                        required
+                        className="flex-1 px-4 py-3 rounded-lg text-sm outline-none"
+                        style={{
+                          background: 'rgba(255,255,255,0.05)',
+                          border: '1px solid rgba(255,255,255,0.1)',
+                          color: '#FFFFFF',
+                        }}
+                      />
+                      <motion.button
+                        type="submit"
+                        disabled={isSubmittingWaitlist}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        className="px-6 py-3 rounded-lg cursor-pointer border-none"
                         style={{
                           fontFamily: "'VCR OSD Mono', monospace",
-                          fontSize: '13px',
-                          letterSpacing: '0.12em',
-                          color: '#D4A574',
-                          marginBottom: '2px',
+                          fontSize: '11px',
+                          letterSpacing: '0.08em',
+                          color: '#050505',
+                          background: 'linear-gradient(135deg, #E8C49A 0%, #D4A574 100%)',
+                          opacity: isSubmittingWaitlist ? 0.7 : 1,
                         }}
                       >
-                        YOUR BRAND DNA CAPTURED
-                      </h3>
+                        {isSubmittingWaitlist ? '...' : 'JOIN'}
+                      </motion.button>
+                    </form>
+                  ) : (
+                    <div className="text-center py-2">
+                      <span
+                        style={{
+                          color: '#10B981',
+                          fontFamily: "'VCR OSD Mono', monospace",
+                          fontSize: '12px',
+                        }}
+                      >
+                        ✓ YOU&apos;RE ON THE LIST!
+                      </span>
                     </div>
-                  </div>
+                  )}
                 </div>
 
-                {/* CTA Section */}
-                <div className="p-6">
-                  <div className="flex flex-col items-center text-center gap-4">
-                    <p
+                {/* Compare Profile CTA */}
+                <div
+                  className="rounded-xl p-6"
+                  style={{
+                    background: 'rgba(26,26,26,0.8)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                  }}
+                >
+                  <h3
+                    style={{
+                      fontFamily: "'VCR OSD Mono', monospace",
+                      fontSize: '12px',
+                      letterSpacing: '0.1em',
+                      color: '#2E6AFF',
+                      marginBottom: '8px',
+                    }}
+                  >
+                    COMPARE PROFILES
+                  </h3>
+                  <p
+                    style={{
+                      fontSize: '13px',
+                      color: 'rgba(255,255,255,0.6)',
+                      marginBottom: '16px',
+                    }}
+                  >
+                    See how you stack up against another creator
+                  </p>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={compareUsername}
+                      onChange={(e) => setCompareUsername(e.target.value.replace('@', ''))}
+                      placeholder="@username"
+                      className="flex-1 px-4 py-3 rounded-lg text-sm outline-none"
                       style={{
-                        fontFamily: "'Helvetica Neue', sans-serif",
-                        fontSize: '14px',
-                        color: 'rgba(255, 255, 255, 0.7)',
-                        lineHeight: 1.6,
-                        margin: 0,
+                        background: 'rgba(255,255,255,0.05)',
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        color: '#FFFFFF',
                       }}
-                    >
-                      Your Brand Advisor is ready. Experience personalized strategy based on your DNA.
-                    </p>
-
-                    {/* Primary CTA - Chat with Brand Advisor */}
+                    />
                     <motion.button
-                      onClick={() => setShowAdvisorChat(true)}
-                      whileHover={{ scale: 1.03, y: -2 }}
-                      whileTap={{ scale: 0.98 }}
-                      className="w-full px-8 py-4 rounded-xl cursor-pointer border-none"
-                      style={{
-                        fontFamily: "'VCR OSD Mono', monospace",
-                        fontSize: '12px',
-                        letterSpacing: '0.12em',
-                        color: '#050505',
-                        fontWeight: 600,
-                        background: 'linear-gradient(135deg, #E8C49A 0%, #D4A574 100%)',
-                        boxShadow: '0 4px 24px rgba(212, 165, 116, 0.4), inset 0 1px 0 rgba(255,255,255,0.2)',
-                      }}
-                    >
-                      CHAT WITH BRAND ADVISOR →
-                    </motion.button>
-
-                    {/* Secondary CTA - Join Waitlist */}
-                    <motion.button
-                      onClick={() => setFlowState('signup')}
+                      onClick={handleCompareProfile}
+                      disabled={!compareUsername}
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      className="w-full px-6 py-3 rounded-xl cursor-pointer"
+                      className="px-6 py-3 rounded-lg cursor-pointer border-none"
                       style={{
                         fontFamily: "'VCR OSD Mono', monospace",
                         fontSize: '11px',
-                        letterSpacing: '0.1em',
-                        color: 'rgba(255, 255, 255, 0.7)',
-                        fontWeight: 500,
-                        background: 'rgba(255, 255, 255, 0.05)',
-                        border: '1px solid rgba(255, 255, 255, 0.1)',
-                      }}
-                    >
-                      JOIN WAITLIST
-                    </motion.button>
-
-                    {/* Social Proof - Using actual X profile pictures */}
-                    <div
-                      className="flex items-center gap-2 px-4 py-2 rounded-full"
-                      style={{ background: 'rgba(255, 255, 255, 0.03)' }}
-                    >
-                      <div className="flex -space-x-2">
-                        {['banditxbt', 'AndrewAsksHow', 'balloondogs', 'BawsaXBT'].map((username, i) => (
-                          <img
-                            key={username}
-                            src={`https://unavatar.io/twitter/${username}`}
-                            alt={username}
-                            className="w-6 h-6 rounded-full border-2 border-[#050505] object-cover"
-                            style={{
-                              zIndex: 4 - i,
-                            }}
-                            onError={(e) => {
-                              // Fallback to gradient if image fails to load
-                              const target = e.target as HTMLImageElement;
-                              target.style.display = 'none';
-                            }}
-                          />
-                        ))}
-                      </div>
-                      <span
-                        className="text-[11px]"
-                        style={{
-                          color: 'rgba(255, 255, 255, 0.5)',
-                          fontFamily: "'VCR OSD Mono', monospace",
-                        }}
-                      >
-                        <span style={{ color: '#D4A574' }}>234</span> creators ahead of you
-                      </span>
-                    </div>
-
-                    {/* Secondary Action */}
-                    <button
-                      onClick={() => {
-                        setFlowState('input');
-                        setUsername('');
-                        setProfile(null);
-                        setBrandScore(null);
-                        setGeneratedBrandDNA(null);
-                        setShowConfetti(false);
-                      }}
-                      className="text-[11px] cursor-pointer bg-transparent border-none transition-colors"
-                      style={{
-                        fontFamily: "'VCR OSD Mono', monospace",
                         letterSpacing: '0.08em',
-                        color: 'rgba(255, 255, 255, 0.4)',
+                        color: '#FFFFFF',
+                        background: '#2E6AFF',
+                        opacity: !compareUsername ? 0.5 : 1,
                       }}
-                      onMouseEnter={(e) => e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)'}
-                      onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255, 255, 255, 0.4)'}
                     >
-                      ANALYZE ANOTHER PROFILE
-                    </button>
+                      COMPARE
+                    </motion.button>
                   </div>
                 </div>
               </div>

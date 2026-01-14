@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import WalkthroughSection from '../WalkthroughSection';
 import { ParallaxCard } from '../motion';
+import type { ParallaxLayerConfig } from '../motion';
 
 interface ScoreWalkthroughProps {
   score: number;
@@ -14,6 +15,7 @@ interface ScoreWalkthroughProps {
   };
   summary: string;
   theme: string;
+  parallaxLayers?: ParallaxLayerConfig[];
 }
 
 function getScoreLabel(score: number): string {
@@ -77,7 +79,7 @@ const AVERAGE_SCORES = {
   scale: 70,
 };
 
-export default function ScoreWalkthrough({ score, phases, summary, theme }: ScoreWalkthroughProps) {
+export default function ScoreWalkthrough({ score, phases, summary, theme, parallaxLayers }: ScoreWalkthroughProps) {
   const label = getScoreLabel(score);
   const percentile = getPercentile(score);
   const lowestPhase = getLowestPhase(phases);
@@ -108,6 +110,7 @@ export default function ScoreWalkthrough({ score, phases, summary, theme }: Scor
       whatYouCanDo={whatYouCanDo}
       theme={theme}
       accentColor={accentColor}
+      parallaxLayers={parallaxLayers}
     >
       <div className="space-y-4">
         {/* Top Row: Score + Percentile + Comparison */}

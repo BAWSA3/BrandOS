@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import Image from 'next/image';
 import WalkthroughSection from '../WalkthroughSection';
 import { TypewriterText, ParallaxCard, StaggerContainer, StaggerItem } from '../motion';
+import type { ParallaxLayerConfig } from '../motion';
 
 interface ArchetypeWalkthroughProps {
   archetype: string;
@@ -11,6 +12,7 @@ interface ArchetypeWalkthroughProps {
   personalityType?: string;
   personalitySummary?: string;
   theme: string;
+  parallaxLayers?: ParallaxLayerConfig[];
 }
 
 // Map archetype names to custom SVG emoji paths
@@ -186,6 +188,7 @@ export default function ArchetypeWalkthrough({
   personalityType,
   personalitySummary,
   theme,
+  parallaxLayers,
 }: ArchetypeWalkthroughProps) {
   const normalizedArchetype = normalizeArchetypeName(archetype);
   const archetypeInfo = ARCHETYPE_DESCRIPTIONS[normalizedArchetype] || DEFAULT_ARCHETYPE_DATA;
@@ -210,6 +213,7 @@ export default function ArchetypeWalkthrough({
       whatYouCanDo={whatYouCanDo}
       theme={theme}
       accentColor="#FFD700"
+      parallaxLayers={parallaxLayers}
     >
       {/* Bento Grid Layout for Archetype */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">

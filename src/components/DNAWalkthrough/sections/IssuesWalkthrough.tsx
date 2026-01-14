@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import WalkthroughSection from '../WalkthroughSection';
 import { AuthenticityAnalysis } from '@/lib/gemini';
 import { StaggerContainer, StaggerItem } from '../motion';
+import type { ParallaxLayerConfig } from '../motion';
 
 interface XProfileData {
   name: string;
@@ -36,6 +37,7 @@ interface IssuesWalkthroughProps {
   profile: XProfileData;
   authenticity?: AuthenticityAnalysis | null;
   theme: string;
+  parallaxLayers?: ParallaxLayerConfig[];
 }
 
 interface Issue {
@@ -161,6 +163,7 @@ export default function IssuesWalkthrough({
   profile,
   authenticity,
   theme,
+  parallaxLayers,
 }: IssuesWalkthroughProps) {
   const issues = detectIssues(brandScore, profile, authenticity);
   const criticalCount = issues.filter((i) => i.severity === 'critical').length;
@@ -200,6 +203,7 @@ export default function IssuesWalkthrough({
       whatYouCanDo={whatYouCanDo}
       theme={theme}
       accentColor="#EF4444"
+      parallaxLayers={parallaxLayers}
     >
       {/* Bento Grid Layout for Issues */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">

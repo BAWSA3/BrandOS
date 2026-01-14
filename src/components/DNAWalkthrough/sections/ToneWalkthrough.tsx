@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import WalkthroughSection from '../WalkthroughSection';
 import { StaggerContainer, StaggerItem } from '../motion';
+import type { ParallaxLayerConfig } from '../motion';
 
 interface ToneWalkthroughProps {
   tone: {
@@ -13,6 +14,7 @@ interface ToneWalkthroughProps {
   };
   voiceProfile: string;
   theme: string;
+  parallaxLayers?: ParallaxLayerConfig[];
 }
 
 function getToneDescription(tone: ToneWalkthroughProps['tone']): string {
@@ -51,7 +53,7 @@ const AVERAGE_TONE = {
   confidence: 48,
 };
 
-export default function ToneWalkthrough({ tone, voiceProfile, theme }: ToneWalkthroughProps) {
+export default function ToneWalkthrough({ tone, voiceProfile, theme, parallaxLayers }: ToneWalkthroughProps) {
   const isDark = theme === 'dark';
   const toneDesc = getToneDescription(tone);
 
@@ -119,6 +121,7 @@ export default function ToneWalkthrough({ tone, voiceProfile, theme }: ToneWalkt
       whatYouCanDo={whatYouCanDo}
       theme={theme}
       accentColor="#00FF41"
+      parallaxLayers={parallaxLayers}
     >
       <div className="space-y-4">
         {/* Top Row: Voice Style + Radar + Stats */}

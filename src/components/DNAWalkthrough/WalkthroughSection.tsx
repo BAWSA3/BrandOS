@@ -1,8 +1,9 @@
 'use client';
 
-import { ReactNode } from 'react';
+import { ReactNode, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { StaggerContainer, StaggerItem } from './motion';
+import { ParallaxLayer } from './motion';
+import type { ParallaxLayerConfig } from './motion';
 
 interface WalkthroughSectionProps {
   label: string;
@@ -12,7 +13,14 @@ interface WalkthroughSectionProps {
   whatYouCanDo: string[];
   theme: string;
   accentColor?: string;
+  parallaxLayers?: ParallaxLayerConfig[];
 }
+
+// Simple viewport-based reveal animation
+const revealVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0 },
+};
 
 export default function WalkthroughSection({
   label,
@@ -22,25 +30,34 @@ export default function WalkthroughSection({
   whatYouCanDo,
   theme,
   accentColor = '#D4A574',
+  parallaxLayers = [],
 }: WalkthroughSectionProps) {
   const isDark = theme === 'dark';
+  const sectionRef = useRef<HTMLElement>(null);
 
   return (
-    <motion.section
-      initial={{ opacity: 0 }}
-      whileInView={{ opacity: 1 }}
-      viewport={{ once: true, amount: 0.2 }}
-      transition={{ duration: 0.6 }}
-      className="flex flex-col items-center px-4 md:px-6 py-12 md:py-16"
+    <section
+      ref={sectionRef}
+      className="flex flex-col items-center px-4 md:px-6 py-12 md:py-16 relative overflow-hidden"
       style={{ boxSizing: 'border-box' }}
     >
-      <div className="w-full max-w-5xl">
+      {/* Parallax floating elements */}
+      {parallaxLayers.map((layer) => (
+        <ParallaxLayer
+          key={layer.id}
+          {...layer}
+          containerRef={sectionRef}
+        />
+      ))}
+
+      <div className="w-full max-w-5xl relative z-10">
         {/* Section Label */}
-        <motion.span
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5, delay: 0.1 }}
+        <motion.div
+          variants={revealVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.4 }}
           className="block text-center mb-6"
           style={{
             fontFamily: "'VCR OSD Mono', monospace",
@@ -51,16 +68,17 @@ export default function WalkthroughSection({
           }}
         >
           {label}
-        </motion.span>
+        </motion.div>
 
         {/* Bento Grid Layout */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
           {/* Main Visualization Card - spans full width on mobile, left side on desktop */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.2 }}
+            variants={revealVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.4, delay: 0.1 }}
             className="md:col-span-2 rounded-[4px] p-5 md:p-6"
             style={{
               background: isDark ? '#1A1A1A' : '#F8F8F8',
@@ -72,10 +90,11 @@ export default function WalkthroughSection({
 
           {/* How We Calculated Card */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.3 }}
+            variants={revealVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.4, delay: 0.2 }}
             className="rounded-[4px] p-4 md:p-5"
             style={{
               background: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
@@ -105,10 +124,11 @@ export default function WalkthroughSection({
 
           {/* Why It Matters Card */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.4 }}
+            variants={revealVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.4, delay: 0.3 }}
             className="rounded-[4px] p-4 md:p-5"
             style={{
               background: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
@@ -138,10 +158,11 @@ export default function WalkthroughSection({
 
           {/* What You Can Do Card - spans full width */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.5 }}
+            variants={revealVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.4, delay: 0.4 }}
             className="md:col-span-2 rounded-[4px] p-4 md:p-5"
             style={{
               background: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
@@ -159,11 +180,10 @@ export default function WalkthroughSection({
             >
               WHAT YOU CAN DO
             </h3>
-            <StaggerContainer className="space-y-2" staggerDelay={0.1} initialDelay={0.5}>
+            <div className="space-y-2">
               {whatYouCanDo.map((item, index) => (
-                <StaggerItem
+                <div
                   key={index}
-                  direction="left"
                   className="flex items-start gap-3 text-sm"
                   style={{
                     fontFamily: "'Helvetica Neue', Arial, sans-serif",
@@ -172,12 +192,12 @@ export default function WalkthroughSection({
                 >
                   <span style={{ color: accentColor, fontWeight: 600 }}>→</span>
                   <span>{item}</span>
-                </StaggerItem>
+                </div>
               ))}
-            </StaggerContainer>
+            </div>
           </motion.div>
         </div>
       </div>
-    </motion.section>
+    </section>
   );
 }

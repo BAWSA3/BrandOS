@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import WalkthroughSection from '../WalkthroughSection';
 import { AuthenticityAnalysis, ActivityAnalysis } from '@/lib/gemini';
+import type { ParallaxLayerConfig } from '../motion';
 
 interface XProfileData {
   name: string;
@@ -22,6 +23,7 @@ interface IdentityWalkthroughProps {
   authenticity?: AuthenticityAnalysis | null;
   activity?: ActivityAnalysis | null;
   theme: string;
+  parallaxLayers?: ParallaxLayerConfig[];
 }
 
 function formatFollowers(count: number): string {
@@ -76,6 +78,7 @@ export default function IdentityWalkthrough({
   authenticity,
   activity,
   theme,
+  parallaxLayers,
 }: IdentityWalkthroughProps) {
   const isDark = theme === 'dark';
   const bioLength = profile.description?.length || 0;
@@ -88,7 +91,14 @@ export default function IdentityWalkthrough({
   const profileCompleteness = getProfileCompleteness(profile);
   const influenceTier = getInfluenceTier(profile.followers_count);
 
-  const howWeCalculated = `Analyzed your profile signals: bio (${bioLength}/160 chars), ${hasLink ? 'website linked' : 'no website'}, ${hasLocation ? profile.location : 'no location'}, ${formatFollowers(profile.followers_count)} followers${authenticity ? `. Authenticity: ${authScore}%` : ''}.`;
+  // Build a cleaner calculation explanation
+  const signals: string[] = [];
+  signals.push(`bio length (${bioLength}/160 chars)`);
+  if (hasLink) signals.push('website linked');
+  if (hasLocation) signals.push('location set');
+  signals.push(`${formatFollowers(profile.followers_count)} followers`);
+
+  const howWeCalculated = `We analyzed ${signals.length} profile signals: ${signals.join(', ')}${authenticity ? `. Authenticity score: ${authScore}%` : ''}.`;
 
   const whyItMatters = `Your profile is your first impression. Complete profiles see up to 40% more follows. Your profile is ${profileCompleteness.score}% complete.`;
 
@@ -128,6 +138,7 @@ export default function IdentityWalkthrough({
       whatYouCanDo={whatYouCanDo}
       theme={theme}
       accentColor="#FFFFFF"
+      parallaxLayers={parallaxLayers}
     >
       <div className="space-y-4">
         {/* Top Row: Profile Card + Stats */}

@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import WalkthroughSection from '../WalkthroughSection';
 import { StaggerContainer, StaggerItem } from '../motion';
+import type { ParallaxLayerConfig } from '../motion';
 
 interface ContentPillar {
   name: string;
@@ -23,6 +24,7 @@ interface PillarsWalkthroughProps {
   contentPillars?: ContentPillar[];
   performanceInsights?: PerformanceInsights;
   theme: string;
+  parallaxLayers?: ParallaxLayerConfig[];
 }
 
 const PILLAR_COLORS = ['#FFFFFF', '#0047FF', '#FF6B00'];
@@ -62,6 +64,7 @@ export default function PillarsWalkthrough({
   contentPillars,
   performanceInsights,
   theme,
+  parallaxLayers,
 }: PillarsWalkthroughProps) {
   const pillars = contentPillars?.slice(0, 3) || [];
   const hasPillars = pillars.length > 0;
@@ -112,6 +115,7 @@ export default function PillarsWalkthrough({
       whatYouCanDo={whatYouCanDo}
       theme={theme}
       accentColor="#FF6B00"
+      parallaxLayers={parallaxLayers}
     >
       {/* Bento Grid Layout for Pillars */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
