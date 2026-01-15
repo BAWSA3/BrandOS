@@ -26,9 +26,9 @@
   {
     "username": "elonmusk",
     "displayName": "elonmusk",
-    "score": 95,
+    "score": 98,
     "profileImage": "",
-    "timestamp": 1768278448676,
+    "timestamp": 1768341531999,
     "isCrypto": false
   },
   {
@@ -50,9 +50,9 @@
   {
     "username": "AndrewAsksHow",
     "displayName": "AndrewAsksHow",
-    "score": 75,
+    "score": 83,
     "profileImage": "",
-    "timestamp": 1768072774044,
+    "timestamp": 1768343669609,
     "isCrypto": false
   },
   {
@@ -108,7 +108,7 @@
     "displayName": "Kurogod",
     "score": 78,
     "profileImage": "",
-    "timestamp": 1768276318880,
+    "timestamp": 1768441263737,
     "isCrypto": false
   },
   {
@@ -149,6 +149,22 @@
     "score": 67,
     "profileImage": "",
     "timestamp": 1768279334007,
+    "isCrypto": false
+  },
+  {
+    "username": "miragemunny",
+    "displayName": "miragemunny",
+    "score": 79,
+    "profileImage": "",
+    "timestamp": 1768340311031,
+    "isCrypto": false
+  },
+  {
+    "username": "frankdegods",
+    "displayName": "frankdegods",
+    "score": 87,
+    "profileImage": "",
+    "timestamp": 1768341379163,
     "isCrypto": false
   }
 ]

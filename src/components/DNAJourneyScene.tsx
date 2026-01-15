@@ -1,5 +1,6 @@
 'use client';
 
+import { useRef, useEffect } from 'react';
 import * as THREE from 'three';
 import { Canvas } from '@react-three/fiber';
 import { EffectComposer, Bloom, ChromaticAberration, Vignette } from '@react-three/postprocessing';
@@ -31,6 +32,13 @@ export default function DNAJourneyScene({
   // Rotation speed: slower during journey for focus
   const rotationMultiplier = flowState === 'journey' ? 0.2 : flowState === 'reveal' ? 0.5 : 1;
 
+  // Capture wheel events and prevent them from affecting the 3D scene
+  const handleWheel = (e: React.WheelEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    window.scrollBy(0, e.deltaY);
+  };
+
   return (
     <div
       style={{
@@ -42,9 +50,8 @@ export default function DNAJourneyScene({
         zIndex: flowState === 'journey' ? 5 : 0,
         // White bloom glow effect
         filter: 'drop-shadow(0 0 25px rgba(255, 255, 255, 0.5))',
-        // Enable pointer events during journey for hover interactions
-        pointerEvents: flowState === 'journey' ? 'auto' : 'none',
       }}
+      onWheel={handleWheel}
     >
       <Canvas
         camera={{ position: [0, 0, 40], fov: 45 }}

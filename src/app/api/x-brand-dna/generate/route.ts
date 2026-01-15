@@ -23,41 +23,49 @@ import { ExtractedColors, generateHarmoniousColors } from '@/lib/color-extractio
 const PERSONALITY_TYPES = {
   alpha: {
     name: 'The Alpha',
+    mbti: 'ENTJ', // Commander - bold, strategic leader
     emoji: '👑',
     traits: ['confident', 'bold predictions', 'market caller', 'trend setter'],
   },
   builder: {
     name: 'The Builder',
+    mbti: 'ISTP', // Virtuoso - practical, hands-on creator
     emoji: '🛠️',
     traits: ['ships products', 'technical', 'creation focused', 'pragmatic'],
   },
   educator: {
     name: 'The Educator',
+    mbti: 'ENFJ', // Protagonist - inspiring teacher
     emoji: '📚',
     traits: ['breaks down complex topics', 'thread master', 'helpful', 'patient'],
   },
   degen: {
     name: 'The Degen',
+    mbti: 'ESTP', // Entrepreneur - risk-taking, action-oriented
     emoji: '🎰',
     traits: ['high risk', 'ape mentality', 'meme-friendly', 'YOLO'],
   },
   analyst: {
     name: 'The Analyst',
+    mbti: 'INTJ', // Architect - strategic, analytical
     emoji: '📊',
     traits: ['data-driven', 'charts', 'technical analysis', 'methodical'],
   },
   philosopher: {
     name: 'The Philosopher',
+    mbti: 'INFJ', // Advocate - insightful, visionary
     emoji: '🧠',
     traits: ['big picture', 'macro views', 'thought leader', 'visionary'],
   },
   networker: {
     name: 'The Networker',
+    mbti: 'ESFJ', // Consul - social connector
     emoji: '🤝',
     traits: ['community builder', 'connects people', 'social glue', 'collaborative'],
   },
   contrarian: {
     name: 'The Contrarian',
+    mbti: 'ENTP', // Debater - innovative challenger
     emoji: '🔥',
     traits: ['against the crowd', 'unpopular opinions', 'provocative', 'independent'],
   },
@@ -757,8 +765,8 @@ export async function POST(request: NextRequest) {
       // Extra metadata
       archetype: geminiBrandDNA?.archetype || 'Creator',
       archetypeEmoji: geminiBrandDNA?.archetypeEmoji || '✨',
-      // Personality system (Brand Guardian)
-      personalityType: personality.name,
+      // Personality system (Brand Guardian) - use MBTI code for clarity
+      personalityType: personality.mbti,
       personalityEmoji: personality.emoji,
       personalitySummary,
       voiceProfile: geminiBrandDNA?.voiceProfile?.primary || 'Authentic Voice',
