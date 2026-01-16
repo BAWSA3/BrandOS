@@ -50,7 +50,7 @@ const routingPatterns: Record<AgentName, {
       'analyze', 'analysis', 'performance', 'metrics', 'data', 'report',
       'engagement', 'impressions', 'clicks', 'conversion', 'roi',
       'working', 'improve', 'optimize', 'benchmark', 'compare',
-      'trend', 'insight', 'why', 'dropping', 'increasing',
+      'insight', 'why', 'dropping', 'increasing',
     ],
     patterns: [
       /analy[sz]e\s+(my|our|the)/i,
@@ -61,6 +61,50 @@ const routingPatterns: Record<AgentName, {
       /what\s+should\s+(i|we)\s+(do|change|improve)/i,
     ],
   },
+  research: {
+    keywords: [
+      'research', 'trends', 'trending', 'news', 'latest', 'hot', 'buzz',
+      'tcg', 'pokemon', 'magic', 'mtg', 'yugioh', 'sports cards', 'collectibles',
+      'community', 'reddit', 'twitter', 'youtube', 'market', 'prices',
+      'drops', 'releases', 'set', 'grading', 'psa', 'bgs', 'what\'s new',
+      'find topics', 'content ideas', 'based on trends',
+    ],
+    patterns: [
+      /what('s|\s+is)\s+(trending|hot|new)/i,
+      /(find|get|show)\s+(me\s+)?.*(trends|news|topics)/i,
+      /research\s+(topics?|trends?|news)/i,
+      /latest\s+(news|trends|releases|drops)/i,
+      /create\s+content\s+.*(trends|news|latest)/i,
+      /(pokemon|mtg|yugioh|sports\s*cards?)\s+(news|trends|updates)/i,
+      /what\s+are\s+people\s+talking\s+about/i,
+      /content\s+(ideas?|topics?)\s+(from|based)/i,
+    ],
+  },
+  authority: {
+    keywords: [
+      'authority', 'positioning', 'thought leadership', 'expert', 'position',
+      'objection', 'competitor', 'vs', 'versus', 'compare', 'comparison',
+      'why relique', 'trust', 'security', 'vault', 'vaulting', 'tokenization',
+      'nft', 'how does relique', 'better than', 'educational', 'explain',
+      'ebay', 'tcgplayer', 'courtyard', 'alt', 'dibbs',
+      'collector', 'trader', 'seller', 'audience',
+      'proof', 'differentiate', 'advantage', 'benefit',
+    ],
+    patterns: [
+      /why\s+(should|would)\s+(i|we|they)\s+(use|choose|trust)\s+relique/i,
+      /(what|how)\s+(makes|is)\s+relique\s+(different|better|unique)/i,
+      /relique\s+vs\s+/i,
+      /vs\s+(ebay|tcgplayer|courtyard|alt|dibbs)/i,
+      /handle\s+(an?\s+)?objection/i,
+      /respond\s+to\s+.*(concern|objection|question)/i,
+      /(explain|how\s+does)\s+(vaulting|tokenization|nft)/i,
+      /position\s+(relique|us|ourselves)/i,
+      /thought\s+leadership/i,
+      /trust\s+(building|content)/i,
+      /educational\s+(content|post|article)/i,
+      /competitive\s+(content|positioning|comparison)/i,
+    ],
+  },
 };
 
 /**
@@ -68,11 +112,13 @@ const routingPatterns: Record<AgentName, {
  */
 export function quickRoute(message: string): RoutingDecision | null {
   const lowerMessage = message.toLowerCase();
-  
+
   const scores: Record<AgentName, number> = {
     campaign: 0,
     content: 0,
     analytics: 0,
+    research: 0,
+    authority: 0,
   };
 
   // Score based on keywords
@@ -137,15 +183,17 @@ export async function smartRoute(message: string): Promise<RoutingDecision> {
 
 AVAILABLE AGENTS:
 1. campaign - Marketing Strategist: Creates campaign plans, content calendars, marketing strategies, launch plans
-2. content - Creative Writer: Writes social posts, emails, headlines, adapts content across platforms  
+2. content - Creative Writer: Writes social posts, emails, headlines, adapts content across platforms
 3. analytics - Performance Analyst: Analyzes metrics, identifies patterns, provides optimization recommendations
+4. research - Trends Researcher: Aggregates TCG/collectibles news from social media, Reddit, YouTube. Finds trending topics for content creation.
+5. authority - Brand Authority Expert: Creates thought leadership, educational content, handles objections, competitive positioning for Relique. Positions the brand as a trusted expert in RWA collectibles.
 
 USER MESSAGE:
 "${message}"
 
 Which agent is best suited? Return ONLY valid JSON:
 {
-  "agent": "campaign" | "content" | "analytics",
+  "agent": "campaign" | "content" | "analytics" | "research" | "authority",
   "confidence": 0.0-1.0,
   "reasoning": "Brief explanation",
   "suggestedAction": "What the agent should do"
@@ -154,15 +202,15 @@ Which agent is best suited? Return ONLY valid JSON:
       ],
     });
 
-    const responseText = response.content[0].type === 'text' 
-      ? response.content[0].text 
+    const responseText = response.content[0].type === 'text'
+      ? response.content[0].text
       : '';
 
     const jsonMatch = responseText.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
       const decision = JSON.parse(jsonMatch[0]) as RoutingDecision;
       // Validate agent name
-      if (['campaign', 'content', 'analytics'].includes(decision.agent)) {
+      if (['campaign', 'content', 'analytics', 'research', 'authority'].includes(decision.agent)) {
         return decision;
       }
     }
@@ -217,6 +265,28 @@ function getSuggestedAction(agent: AgentName, message: string): string {
     if (lowerMessage.includes('compare')) return 'compare_periods';
     if (lowerMessage.includes('report')) return 'full_report';
     return 'analyze';
+  }
+
+  if (agent === 'research') {
+    if (lowerMessage.includes('pokemon')) return 'research_pokemon';
+    if (lowerMessage.includes('mtg') || lowerMessage.includes('magic')) return 'research_mtg';
+    if (lowerMessage.includes('yugioh')) return 'research_yugioh';
+    if (lowerMessage.includes('sports')) return 'research_sports_cards';
+    if (lowerMessage.includes('content') && lowerMessage.includes('trend')) return 'research_to_content';
+    if (lowerMessage.includes('summary')) return 'quick_summary';
+    return 'aggregate_trends';
+  }
+
+  if (agent === 'authority') {
+    if (lowerMessage.includes('objection')) return 'handle_objection';
+    if (lowerMessage.includes('vs') || lowerMessage.includes('versus') || lowerMessage.includes('compare')) return 'competitive_content';
+    if (lowerMessage.includes('educational') || lowerMessage.includes('explain')) return 'educational_content';
+    if (lowerMessage.includes('trust') || lowerMessage.includes('vault')) return 'trust_content';
+    if (lowerMessage.includes('thought leadership')) return 'thought_leadership';
+    if (lowerMessage.includes('ebay')) return 'compare_ebay';
+    if (lowerMessage.includes('tcgplayer')) return 'compare_tcgplayer';
+    if (lowerMessage.includes('courtyard')) return 'compare_courtyard';
+    return 'authority_content';
   }
 
   return 'chat';

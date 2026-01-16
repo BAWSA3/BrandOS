@@ -4,7 +4,7 @@ import { BrandDNA, ContentType, Platform } from '@/lib/types';
 
 // ===== AGENT SYSTEM TYPES =====
 
-export type AgentName = 'campaign' | 'content' | 'analytics';
+export type AgentName = 'campaign' | 'content' | 'analytics' | 'research' | 'authority';
 
 export interface AgentContext {
   brandDNA: BrandDNA;

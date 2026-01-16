@@ -2,14 +2,18 @@
 // POST /api/agents/orchestrate - Run multi-agent workflows
 
 import { NextRequest, NextResponse } from 'next/server';
-import { 
-  createAgents, 
+import {
+  createAgents,
   validateBrandDNA,
   ContentPerformanceData,
+  TCGVertical,
+  ResearchTopic,
+  TargetAudience,
+  AuthorityContentType,
 } from '@/lib/agents';
 import { BrandDNA, Platform } from '@/lib/types';
 
-type WorkflowType = 'idea-to-campaign-content' | 'analyze-and-improve';
+type WorkflowType = 'idea-to-campaign-content' | 'analyze-and-improve' | 'research-to-content' | 'research-to-authority-content';
 
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
@@ -39,9 +43,9 @@ export async function POST(request: NextRequest) {
 
     if (!workflow) {
       return NextResponse.json(
-        { 
+        {
           error: 'Workflow type is required',
-          availableWorkflows: ['idea-to-campaign-content', 'analyze-and-improve'],
+          availableWorkflows: ['idea-to-campaign-content', 'analyze-and-improve', 'research-to-content', 'research-to-authority-content'],
         },
         { status: 400 }
       );
@@ -120,10 +124,68 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    // Workflow 3: Research → Select → Content
+    if (workflow === 'research-to-content') {
+      const { verticals, selectedTopics, platforms, contentPerTopic } = params as {
+        verticals?: TCGVertical[];
+        selectedTopics?: ResearchTopic[];
+        platforms?: Platform[];
+        contentPerTopic?: number;
+      };
+
+      const result = await agents.researchToContent({
+        verticals,
+        selectedTopics,
+        platforms,
+        contentPerTopic,
+      });
+
+      return NextResponse.json({
+        workflow: 'research-to-content',
+        research: result.research.success ? result.research.data : null,
+        researchError: result.research.success ? null : result.research.error,
+        content: result.content?.success ? result.content.data : null,
+        contentError: result.content?.success === false ? result.content.error : null,
+        confidence: {
+          research: result.research.confidence,
+          content: result.content?.confidence,
+        },
+        processingTime: Date.now() - startTime,
+      });
+    }
+
+    // Workflow 4: Research → Authority → Content
+    if (workflow === 'research-to-authority-content') {
+      const { verticals, audiences, platforms, contentTypes, maxAnglesPerTopic } = params as {
+        verticals?: TCGVertical[];
+        audiences?: TargetAudience[];
+        platforms?: Platform[];
+        contentTypes?: AuthorityContentType[];
+        maxAnglesPerTopic?: number;
+      };
+
+      const result = await agents.researchToAuthorityContent({
+        verticals,
+        audiences,
+        platforms,
+        contentTypes,
+        maxAnglesPerTopic,
+      });
+
+      return NextResponse.json({
+        workflow: 'research-to-authority-content',
+        research: result.research.success ? result.research.data : null,
+        researchError: result.research.success ? null : result.research.error,
+        authorityContent: result.authorityContent,
+        workflowStages: result.workflow,
+        processingTime: Date.now() - startTime,
+      });
+    }
+
     return NextResponse.json(
-      { 
+      {
         error: `Unknown workflow: ${workflow}`,
-        availableWorkflows: ['idea-to-campaign-content', 'analyze-and-improve'],
+        availableWorkflows: ['idea-to-campaign-content', 'analyze-and-improve', 'research-to-content', 'research-to-authority-content'],
       },
       { status: 400 }
     );
@@ -173,6 +235,36 @@ export async function GET() {
         response: {
           analysis: 'AnalyticsReport - Performance analysis with recommendations',
           improvedContent: 'ContentBatch - New content applying learnings',
+        },
+      },
+      'research-to-content': {
+        description: 'Researches TCG/collectibles trends and generates content from top topics',
+        agents: ['research', 'content'],
+        params: {
+          verticals: 'TCGVertical[] (optional) - pokemon, mtg, yugioh, sports-cards, collectibles',
+          selectedTopics: 'ResearchTopic[] (optional) - Pre-selected topics to skip research step',
+          platforms: 'Platform[] (optional) - Platforms to generate content for',
+          contentPerTopic: 'number (optional, default 2) - Content pieces per topic',
+        },
+        response: {
+          research: 'ResearchBrief - Aggregated trends and topics',
+          content: 'ContentBatch - Generated content pieces',
+        },
+      },
+      'research-to-authority-content': {
+        description: 'Researches trends and creates authority positioning content that positions Relique as the expert',
+        agents: ['research', 'authority'],
+        params: {
+          verticals: 'TCGVertical[] (optional) - pokemon, mtg, yugioh, sports-cards, collectibles',
+          audiences: 'TargetAudience[] (optional) - collector, trader, seller',
+          platforms: 'Platform[] (optional) - Platforms to optimize content for',
+          contentTypes: 'AuthorityContentType[] (optional) - thought-leadership, educational, competitive, trust-building',
+          maxAnglesPerTopic: 'number (optional, default 2) - Authority angles per trending topic',
+        },
+        response: {
+          research: 'ResearchBrief - Aggregated trends and topics',
+          authorityContent: 'AuthorityContent[] - Generated authority content pieces',
+          workflowStages: 'Stage status for each workflow step',
         },
       },
     },

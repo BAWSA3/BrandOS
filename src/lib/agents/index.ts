@@ -20,40 +20,115 @@ import {
 } from './types';
 
 // Import agent functions
-import { 
-  createCampaignPlan, 
-  getCampaignSummary 
+import {
+  createCampaignPlan,
+  getCampaignSummary
 } from './campaign.agent';
 
-import { 
-  generateContent, 
-  generateContentBatch, 
+import {
+  generateContent,
+  generateContentBatch,
   adaptContentForPlatform,
   generateContentIdeas,
 } from './content.agent';
 
-import { 
-  analyzePerformance, 
+import {
+  analyzePerformance,
   quickPerformanceCheck,
   comparePerformancePeriods,
 } from './analytics.agent';
+
+import {
+  aggregateTrends,
+  getTopicsForVertical,
+  generateContentBrief as generateResearchContentBrief,
+  rankTopics,
+  getQuickSummary,
+} from './research.agent';
+
+import {
+  TCGVertical,
+  ResearchSource,
+  ResearchTopic,
+  ResearchBrief,
+  ResearchOptions,
+  ResearchContentBrief,
+} from './research.types';
+
+// Authority Agent imports
+import {
+  generateAuthorityContent,
+  createPositioningFromTrend,
+  handleObjection,
+  generateCompetitiveContent,
+  generateEducationalContent,
+  generateTrustContent,
+  getObjectionTypes,
+  getCompetitorPositions,
+  getEducationalTopicsList,
+  getMessagingFrameworkSummary,
+} from './authority.agent';
+
+import {
+  AuthorityContentType,
+  AuthorityPillar,
+  TargetAudience,
+  ObjectionType,
+  CompetitorType,
+  AuthorityContent,
+  AuthorityContentRequest,
+  ObjectionHandlingRequest,
+  ObjectionHandlingResult,
+  CompetitiveContentRequest,
+  CompetitiveContentResult,
+  EducationalContentRequest,
+  EducationalContent,
+  EducationalTopic,
+  TrustContentRequest,
+  TrustContent,
+  TrustContentFormat,
+  TrendToAuthorityRequest,
+  TrendToAuthorityResult,
+} from './authority.types';
 
 // Re-export all types for convenience
 export * from './types';
 export * from './chat.types';
 export * from './conductor';
+export * from './research.types';
+export * from './authority.types';
 
 // Re-export individual agent functions for direct use
 export {
+  // Campaign Agent
   createCampaignPlan,
   getCampaignSummary,
+  // Content Agent
   generateContent,
   generateContentBatch,
   adaptContentForPlatform,
   generateContentIdeas,
+  // Analytics Agent
   analyzePerformance,
   quickPerformanceCheck,
   comparePerformancePeriods,
+  // Research Agent
+  aggregateTrends,
+  getTopicsForVertical,
+  generateResearchContentBrief,
+  rankTopics,
+  getQuickSummary,
+  // Authority Agent
+  generateAuthorityContent,
+  createPositioningFromTrend,
+  handleObjection,
+  generateCompetitiveContent,
+  generateEducationalContent,
+  generateTrustContent,
+  getObjectionTypes,
+  getCompetitorPositions,
+  getEducationalTopicsList,
+  getMessagingFrameworkSummary,
 };
 
 // ===== AGENT REGISTRY =====
@@ -95,6 +170,31 @@ export const agentRegistry: Record<AgentName, AgentCapability> = {
       'trend-identification',
       'benchmark-comparison',
       'period-comparison',
+    ],
+  },
+  research: {
+    name: 'research',
+    description: 'Aggregates TCG/collectibles news and trends from social platforms, Reddit, YouTube, and news sources. Synthesizes findings into actionable content topics.',
+    capabilities: [
+      'trend-aggregation',
+      'news-monitoring',
+      'topic-synthesis',
+      'content-brief-generation',
+      'source-tracking',
+      'vertical-analysis',
+    ],
+  },
+  authority: {
+    name: 'authority',
+    description: 'Positions Relique as the trusted authority in RWA collectibles. Generates thought leadership, educational, competitive, and trust-building content.',
+    capabilities: [
+      'thought-leadership',
+      'educational-content',
+      'competitive-positioning',
+      'objection-handling',
+      'trust-building',
+      'trend-to-authority',
+      'audience-targeting',
     ],
   },
 };
@@ -254,6 +354,147 @@ export class BrandAgents {
     return comparePerformancePeriods(this.context, periodA, periodB);
   }
 
+  // ===== RESEARCH AGENT METHODS =====
+
+  /**
+   * Aggregate trends from multiple sources and synthesize into research brief
+   */
+  async researchTrends(options?: ResearchOptions): Promise<AgentResponse<ResearchBrief>> {
+    return aggregateTrends(this.context, options);
+  }
+
+  /**
+   * Get trending topics for a specific vertical
+   */
+  async getVerticalTopics(
+    vertical: TCGVertical,
+    limit?: number
+  ): Promise<AgentResponse<ResearchTopic[]>> {
+    return getTopicsForVertical(this.context, vertical, limit);
+  }
+
+  /**
+   * Generate a content brief from a research topic
+   */
+  async createBriefFromTopic(
+    topic: ResearchTopic,
+    contentType: string,
+    platform: string
+  ): Promise<AgentResponse<ResearchContentBrief>> {
+    return generateResearchContentBrief(this.context, topic, contentType, platform);
+  }
+
+  /**
+   * Get a quick summary of trending topics
+   */
+  async getResearchSummary(
+    verticals?: TCGVertical[]
+  ): Promise<AgentResponse<{
+    summary: string;
+    topTopics: { title: string; vertical: string }[];
+    trendingKeywords: string[];
+  }>> {
+    return getQuickSummary(this.context, verticals);
+  }
+
+  /**
+   * Rank topics by relevance and engagement
+   */
+  rankTopicsByRelevance(
+    topics: ResearchTopic[],
+    options?: {
+      preferredVerticals?: TCGVertical[];
+      minRelevance?: number;
+      sortBy?: 'relevance' | 'engagement' | 'recency';
+    }
+  ): ResearchTopic[] {
+    return rankTopics(topics, options);
+  }
+
+  // ===== AUTHORITY AGENT METHODS =====
+
+  /**
+   * Generate authority content (thought leadership, educational, etc.)
+   */
+  async createAuthorityContent(
+    request: AuthorityContentRequest
+  ): Promise<AgentResponse<AuthorityContent>> {
+    return generateAuthorityContent(this.context.brandDNA, request);
+  }
+
+  /**
+   * Create positioning angles from a trending topic
+   */
+  async trendToAuthority(
+    request: TrendToAuthorityRequest
+  ): Promise<AgentResponse<TrendToAuthorityResult>> {
+    return createPositioningFromTrend(this.context.brandDNA, request);
+  }
+
+  /**
+   * Handle customer/prospect objections
+   */
+  async handleCustomerObjection(
+    request: ObjectionHandlingRequest
+  ): Promise<AgentResponse<ObjectionHandlingResult>> {
+    return handleObjection(this.context.brandDNA, request);
+  }
+
+  /**
+   * Generate competitive positioning content
+   */
+  async createCompetitiveContent(
+    request: CompetitiveContentRequest
+  ): Promise<AgentResponse<CompetitiveContentResult>> {
+    return generateCompetitiveContent(this.context.brandDNA, request);
+  }
+
+  /**
+   * Generate educational content
+   */
+  async createEducationalContent(
+    request: EducationalContentRequest
+  ): Promise<AgentResponse<EducationalContent>> {
+    return generateEducationalContent(this.context.brandDNA, request);
+  }
+
+  /**
+   * Generate trust-building content
+   */
+  async createTrustContent(
+    request: TrustContentRequest
+  ): Promise<AgentResponse<TrustContent>> {
+    return generateTrustContent(this.context.brandDNA, request);
+  }
+
+  /**
+   * Get available objection types and quick responses
+   */
+  getObjectionTypes() {
+    return getObjectionTypes();
+  }
+
+  /**
+   * Get competitor positioning data
+   */
+  getCompetitorPositions() {
+    return getCompetitorPositions();
+  }
+
+  /**
+   * Get list of educational topics
+   */
+  getEducationalTopics() {
+    return getEducationalTopicsList();
+  }
+
+  /**
+   * Get messaging framework summary
+   */
+  getMessagingFramework() {
+    return getMessagingFrameworkSummary();
+  }
+
   // ===== ORCHESTRATED WORKFLOWS =====
 
   /**
@@ -350,6 +591,170 @@ export class BrandAgents {
     return {
       analysis: analysisResult,
       improvedContent: contentResult,
+    };
+  }
+
+  /**
+   * Workflow: Research → Select Topics → Generate Content
+   *
+   * Researches trends, lets user select topics, then generates content.
+   * This is the main workflow for "create content based on latest trends".
+   */
+  async researchToContent(options: {
+    verticals?: TCGVertical[];
+    selectedTopics?: ResearchTopic[];
+    platforms?: Platform[];
+    contentPerTopic?: number;
+  } = {}): Promise<{
+    research: AgentResponse<ResearchBrief>;
+    content?: AgentResponse<ContentBatch>;
+  }> {
+    const {
+      verticals = ['pokemon', 'mtg', 'sports-cards'],
+      selectedTopics,
+      platforms = ['twitter', 'instagram'],
+      contentPerTopic = 2,
+    } = options;
+
+    // Step 1: Research trends (skip if topics already selected)
+    let topics: ResearchTopic[] = selectedTopics || [];
+    let researchResult: AgentResponse<ResearchBrief>;
+
+    if (!selectedTopics || selectedTopics.length === 0) {
+      researchResult = await this.researchTrends({ verticals, timeRange: 'last-week' });
+
+      if (!researchResult.success || !researchResult.data) {
+        return { research: researchResult };
+      }
+
+      // Auto-select top 3 topics if none provided
+      topics = this.rankTopicsByRelevance(researchResult.data.topics, {
+        minRelevance: 50,
+        sortBy: 'relevance',
+      }).slice(0, 3);
+    } else {
+      // Create a minimal research result for pre-selected topics
+      researchResult = {
+        success: true,
+        data: {
+          topics: selectedTopics,
+          summary: 'Using pre-selected topics',
+          trendingKeywords: [],
+          verticalSummaries: {} as Record<TCGVertical, string>,
+          aggregatedAt: new Date().toISOString(),
+        },
+        confidence: 1,
+        processingTime: 0,
+      };
+    }
+
+    if (topics.length === 0) {
+      return { research: researchResult };
+    }
+
+    // Step 2: Generate content briefs for each topic
+    const contentBriefs: ContentBrief[] = [];
+
+    for (const topic of topics) {
+      for (const platform of platforms.slice(0, 2)) {
+        for (let i = 0; i < contentPerTopic; i++) {
+          const angle = topic.contentAngles?.[i] || topic.title;
+          contentBriefs.push({
+            type: this.mapContentType(platform),
+            platform: platform as Platform,
+            topic: `${topic.title}: ${angle}`,
+            keyMessage: topic.summary,
+            includeHashtags: true,
+          });
+        }
+      }
+    }
+
+    // Step 3: Generate content
+    const contentResult = await this.createContentBatch(contentBriefs.slice(0, 10));
+
+    return {
+      research: researchResult,
+      content: contentResult,
+    };
+  }
+
+  /**
+   * Workflow: Research → Authority → Content
+   *
+   * Researches trends, creates authority positioning angles, then generates
+   * authoritative content that positions Relique as the expert.
+   */
+  async researchToAuthorityContent(options: {
+    verticals?: TCGVertical[];
+    audiences?: TargetAudience[];
+    platforms?: Platform[];
+    contentTypes?: AuthorityContentType[];
+    maxAnglesPerTopic?: number;
+  } = {}): Promise<{
+    research: AgentResponse<ResearchBrief>;
+    authorityContent: AuthorityContent[];
+    workflow: { stage: string; status: 'completed' | 'pending' | 'failed'; message?: string }[];
+  }> {
+    const {
+      verticals = ['pokemon', 'mtg', 'sports-cards'],
+      audiences = ['collector', 'trader'],
+      platforms = ['twitter', 'instagram'],
+      contentTypes = ['thought-leadership', 'educational'],
+      maxAnglesPerTopic = 2,
+    } = options;
+
+    const workflow: { stage: string; status: 'completed' | 'pending' | 'failed'; message?: string }[] = [];
+    const authorityContent: AuthorityContent[] = [];
+
+    // Step 1: Research trends
+    workflow.push({ stage: 'Research trends', status: 'pending' });
+    const researchResult = await this.researchTrends({ verticals, timeRange: 'last-week' });
+
+    if (!researchResult.success || !researchResult.data) {
+      workflow[0].status = 'failed';
+      workflow[0].message = researchResult.error;
+      return { research: researchResult, authorityContent, workflow };
+    }
+    workflow[0].status = 'completed';
+
+    // Step 2: Select top topics
+    const topTopics = this.rankTopicsByRelevance(researchResult.data.topics, {
+      minRelevance: 50,
+      sortBy: 'relevance',
+    }).slice(0, 3);
+
+    if (topTopics.length === 0) {
+      workflow.push({ stage: 'Select topics', status: 'failed', message: 'No relevant topics found' });
+      return { research: researchResult, authorityContent, workflow };
+    }
+    workflow.push({ stage: 'Select topics', status: 'completed', message: `Selected ${topTopics.length} topics` });
+
+    // Step 3: Create authority positioning for each topic
+    workflow.push({ stage: 'Create authority angles', status: 'pending' });
+
+    for (const topic of topTopics) {
+      const authorityResult = await this.trendToAuthority({
+        trendTopic: topic.title,
+        trendSummary: topic.summary,
+        vertical: topic.vertical,
+        audiences,
+        platforms,
+      });
+
+      if (authorityResult.success && authorityResult.data) {
+        // Add suggested content from the authority angles
+        authorityContent.push(...authorityResult.data.suggestedContent.slice(0, maxAnglesPerTopic));
+      }
+    }
+
+    workflow[2].status = authorityContent.length > 0 ? 'completed' : 'failed';
+    workflow[2].message = `Generated ${authorityContent.length} authority content pieces`;
+
+    return {
+      research: researchResult,
+      authorityContent,
+      workflow,
     };
   }
 
