@@ -151,7 +151,14 @@ export default function DNAWalkthrough({
       />
 
       {/* Sections - main scrollable content */}
-      <div className="relative z-10">
+      <div
+        className="relative z-10 transition-all duration-300"
+        style={{
+          filter: showJourneyEnd ? 'blur(20px)' : 'none',
+          transform: showJourneyEnd ? 'scale(0.95)' : 'scale(1)',
+          opacity: showJourneyEnd ? 0.3 : 1,
+        }}
+      >
         {/* 1. Brand Score */}
         <div ref={(el) => { sectionRefs.current[0] = el; }}>
           <ScoreWalkthrough
