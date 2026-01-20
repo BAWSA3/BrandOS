@@ -309,7 +309,7 @@ function CursorGlow({
 }
 
 export default function ScorePage() {
-  const { theme, toggleTheme } = useBrandStore();
+  const { theme } = useBrandStore();
   const [mounted, setMounted] = useState(false);
 
   // Mouse position tracking (normalized 0-1)
@@ -444,47 +444,6 @@ export default function ScorePage() {
         }}
       />
 
-      {/* Theme Toggle with enhanced styling */}
-      <motion.button
-        onClick={toggleTheme}
-        whileHover={{ scale: 1.05, boxShadow: theme === 'dark' ? '0 0 20px rgba(0, 71, 255, 0.3)' : '0 0 20px rgba(60, 138, 255, 0.3)' }}
-        whileTap={{ scale: 0.95 }}
-        style={{
-          position: 'fixed',
-          top: '24px',
-          right: '24px',
-          zIndex: 100,
-          background: theme === 'dark' ? 'rgba(255, 255, 255, 0.06)' : 'rgba(255, 255, 255, 0.5)',
-          backdropFilter: 'blur(16px)',
-          border: `1px solid ${theme === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)'}`,
-          borderRadius: '14px',
-          padding: '12px',
-          cursor: 'pointer',
-          transition: 'background 0.3s ease, border-color 0.3s ease',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-        aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-      >
-        {theme === 'dark' ? (
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.8)" strokeWidth="1.5">
-            <circle cx="12" cy="12" r="5" />
-            <line x1="12" y1="1" x2="12" y2="3" />
-            <line x1="12" y1="21" x2="12" y2="23" />
-            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
-            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
-            <line x1="1" y1="12" x2="3" y2="12" />
-            <line x1="21" y1="12" x2="23" y2="12" />
-            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
-            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
-          </svg>
-        ) : (
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(0,0,0,0.7)" strokeWidth="1.5">
-            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-          </svg>
-        )}
-      </motion.button>
 
       {/* Main Content */}
       <div style={{ position: 'relative', zIndex: 10 }}>

@@ -26,6 +26,11 @@ import { BrandImportHub } from '@/components/import';
 import { ExtractedBrand } from '@/lib/importTypes';
 import PhasesBreakdown from '@/components/PhasesBreakdown';
 import AnimatedBackground from '@/components/AnimatedBackground';
+import DataPersistenceWarning from '@/components/DataPersistenceWarning';
+import { useToast } from '@/components/ToastProvider';
+import { BetaBadgeInline } from '@/components/BetaBadge';
+import ChangelogModal from '@/components/ChangelogModal';
+import analytics from '@/lib/analytics';
 
 function HomeContent() {
   const searchParams = useSearchParams();
@@ -40,7 +45,6 @@ function HomeContent() {
     addHistoryItem,
     clearHistory,
     theme,
-    toggleTheme,
     phaseProgress,
     completeOnboarding,
     markFirstCheck,
@@ -50,6 +54,7 @@ function HomeContent() {
 
   const brandDNA = useCurrentBrand();
   const brandCompleteness = useBrandCompleteness();
+  const toast = useToast();
 
   // Check for phases breakdown query param (from landing page)
   const showPhasesParam = searchParams.get('showPhases') === 'true';
@@ -116,6 +121,7 @@ function HomeContent() {
     setActivePhase(phase);
     setActiveTab(getDefaultTabForPhase(phase));
     setLastActivePhase(phase);
+    analytics.phaseVisited(phase);
   };
 
   const handleTabChange = (tab: SubTab) => {
@@ -138,10 +144,12 @@ function HomeContent() {
     completeOnboarding();
     setShowOnboarding(false);
     handlePhaseChange('check'); // Move to Check phase after onboarding
+    analytics.onboardingCompleted();
   };
 
   const handleOnboardingSkip = () => {
     completeOnboarding();
+    analytics.onboardingSkipped();
     setShowOnboarding(false);
   };
 
@@ -315,11 +323,15 @@ function HomeContent() {
       const result = await res.json();
       
       if (!res.ok) {
-        setCheckError(result.error || 'Analysis failed. Please try again.');
+        const errorMsg = result.error || 'Analysis failed. Please try again.';
+        setCheckError(errorMsg);
+        toast.error('Analysis failed', errorMsg);
         return;
       }
       
       setCheckResult(result);
+      toast.success('Analysis complete!', `Your content scored ${result.score}/100`);
+      analytics.contentChecked(result.score);
       
       // Mark first check complete
       if (!phaseProgress.hasCompletedFirstCheck) {
@@ -336,6 +348,7 @@ function HomeContent() {
     } catch (error) {
       console.error(error);
       setCheckError('Network error. Please check your connection.');
+      toast.error('Network error', 'Please check your connection and try again.');
     } finally {
       setIsChecking(false);
     }
@@ -358,11 +371,15 @@ function HomeContent() {
       const result = await res.json();
       
       if (!res.ok) {
-        setGenerateError(result.error || 'Generation failed. Please try again.');
+        const errorMsg = result.error || 'Generation failed. Please try again.';
+        setGenerateError(errorMsg);
+        toast.error('Generation failed', errorMsg);
         return;
       }
       
       setGeneratedContent(result.content);
+      toast.success('Content generated!', 'Your on-brand content is ready.');
+      analytics.contentGenerated(contentType);
       
       // Mark first generation complete
       if (!phaseProgress.hasCompletedFirstGeneration) {
@@ -380,6 +397,7 @@ function HomeContent() {
     } catch (error) {
       console.error(error);
       setGenerateError('Network error. Please check your connection.');
+      toast.error('Network error', 'Please check your connection and try again.');
     } finally {
       setIsGenerating(false);
     }
@@ -506,6 +524,8 @@ function HomeContent() {
     a.download = `${brandDNA.name.toLowerCase().replace(/\s+/g, '-')}-brand-guidelines.json`;
     a.click();
     URL.revokeObjectURL(url);
+    toast.success('Brand exported!', 'Your brand guidelines have been downloaded.');
+    analytics.brandExported();
   };
 
   const handleShare = async () => {
@@ -525,9 +545,14 @@ function HomeContent() {
       
       if (res.ok) {
         setShareUrl(data.shareUrl);
+        toast.success('Share link created!', 'Copy and share with your team.');
+        analytics.brandShared();
+      } else {
+        toast.error('Failed to create share link', 'Please try again.');
       }
     } catch (error) {
       console.error('Share error:', error);
+      toast.error('Share failed', 'Please check your connection.');
     } finally {
       setIsSharing(false);
     }
@@ -679,6 +704,7 @@ function HomeContent() {
           >
             <span className="text-white/50 text-xs font-mono uppercase tracking-wider">Brand</span>
             <span className="font-medium text-white">{brandDNA?.name || 'Select'}</span>
+            <BetaBadgeInline />
             <svg className="w-4 h-4 text-white/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 9l-7 7-7-7" />
             </svg>
@@ -739,22 +765,6 @@ function HomeContent() {
           )}
         </div>
         
-        {/* Theme Toggle */}
-        <button
-          onClick={toggleTheme}
-          className={`p-2.5 transition-colors backdrop-blur-xl rounded-full ${theme === 'dark' ? 'text-white/70 hover:text-white bg-[rgba(255,255,255,0.08)] border border-[rgba(255,255,255,0.12)] hover:bg-[rgba(255,255,255,0.12)]' : 'text-black/60 hover:text-black bg-[rgba(0,0,0,0.04)] border border-[rgba(0,0,0,0.08)] hover:bg-[rgba(0,0,0,0.08)]'}`}
-          aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-        >
-          {theme === 'dark' ? (
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-            </svg>
-          ) : (
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-            </svg>
-          )}
-        </button>
       </div>
 
       {/* Click outside to close menus */}
@@ -774,6 +784,12 @@ function HomeContent() {
         canCheck={brandCompleteness >= 30}
         canGenerate={phaseProgress.hasCompletedFirstCheck}
       />
+
+      {/* Data Persistence Warning */}
+      <DataPersistenceWarning onExport={exportAsJSON} />
+
+      {/* Changelog Modal - shows automatically for new versions */}
+      {phaseProgress.hasCompletedOnboarding && <ChangelogModal />}
 
       {/* Join Waitlist Panel */}
       {!waitlistSubmitted && (
@@ -1333,7 +1349,10 @@ function HomeContent() {
                           <p className="text-sm leading-relaxed">{checkResult.revisedVersion}</p>
                         </div>
                         <button
-                          onClick={() => navigator.clipboard.writeText(checkResult.revisedVersion)}
+                          onClick={() => {
+                            navigator.clipboard.writeText(checkResult.revisedVersion);
+                            toast.success('Copied!', 'Revised content copied to clipboard.');
+                          }}
                           className="mt-3 text-xs text-muted hover:text-foreground transition-colors"
                         >
                           Copy to clipboard
@@ -1507,7 +1526,10 @@ function HomeContent() {
                     <div className="text-sm leading-relaxed whitespace-pre-wrap">{generatedContent}</div>
                   </div>
                   <button
-                    onClick={() => navigator.clipboard.writeText(generatedContent)}
+                    onClick={() => {
+                      navigator.clipboard.writeText(generatedContent);
+                      toast.success('Copied!', 'Generated content copied to clipboard.');
+                    }}
                     className="mt-3 text-xs text-muted hover:text-foreground transition-colors"
                   >
                     Copy to clipboard
@@ -1888,6 +1910,7 @@ function HomeContent() {
                     <button
                       onClick={() => {
                         navigator.clipboard.writeText(shareUrl);
+                        toast.success('Link copied!', 'Share URL copied to clipboard.');
                       }}
                       className="px-4 py-2 text-sm bg-foreground text-background rounded hover:opacity-80 transition-opacity"
                     >
