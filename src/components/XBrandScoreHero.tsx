@@ -1572,14 +1572,14 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
                 color: theme === 'dark' ? '#ffffff' : '#1a1a1a',
                 textAlign: 'center',
                 margin: 0,
-                marginBottom: '0.25rem',
+                marginBottom: '1rem',
                 textTransform: 'uppercase',
                 textShadow: theme === 'dark'
                   ? '0 2px 8px rgba(0,0,0,0.8), 0 0 20px rgba(0,0,0,0.5)'
                   : 'none',
               }}
             >
-              Free X Profile Analysis
+              AI-powered OS that builds your brand's DNA.
             </motion.p>
 
             {/* Logo - Animated Text Reveal */}
@@ -1633,8 +1633,8 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
                 color: theme === 'dark' ? '#ffffff' : '#1a1a1a',
                 textAlign: 'center',
                 margin: 0,
-                marginTop: '-56px',
-                marginBottom: '1.5rem',
+                marginTop: '-40px',
+                marginBottom: '2rem',
                 textTransform: 'uppercase',
                 textShadow: theme === 'dark'
                   ? '0 2px 8px rgba(0,0,0,0.8), 0 0 20px rgba(0,0,0,0.5)'
@@ -1642,28 +1642,7 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
                 willChange: 'transform',
               }}
             >
-              SEE HOW YOUR PERSONAL BRAND ACTUALLY PERFORMS
-            </motion.p>
-
-            {/* Value Proposition */}
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.2 }}
-              style={{
-                fontFamily: "'Inter', sans-serif",
-                fontSize: '1.1rem',
-                fontWeight: 400,
-                lineHeight: 1.6,
-                color: theme === 'dark' ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.6)',
-                textAlign: 'center',
-                margin: 0,
-                marginTop: '-0.5rem',
-                marginBottom: '0.5rem',
-                maxWidth: '480px',
-              }}
-            >
-              One scan reveals your score, archetype, and what to fix.
+              DECODE YOUR BRAND SIGNAL
             </motion.p>
 
             {/* Input Form */}
@@ -1788,7 +1767,7 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
                 letterSpacing: '0.08em',
                 color: theme === 'dark' ? '#ffffff' : '#2a2a2a',
                 textAlign: 'center',
-                marginTop: '7px',
+                marginTop: '1.5rem',
                 textShadow: theme === 'dark'
                   ? '0 2px 8px rgba(0,0,0,0.8), 0 0 15px rgba(0,0,0,0.5)'
                   : 'none',
