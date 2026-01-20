@@ -1964,7 +1964,7 @@ Get yours → mybrandos.app`;
               />
             </div>
 
-            {/* View Dashboard CTA */}
+            {/* Join Waitlist CTA */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -1995,55 +1995,113 @@ Get yours → mybrandos.app`;
                   }}
                 />
 
-                {/* Encouraging tagline */}
-                <h3
-                  style={{
-                    fontFamily: "'VCR OSD Mono', monospace",
-                    fontSize: '14px',
-                    letterSpacing: '0.25em',
-                    color: '#D4A574',
-                    marginBottom: '16px',
-                    textTransform: 'uppercase',
-                  }}
-                >
-                  Your Brand DNA is Ready
-                </h3>
-                <p
-                  style={{
-                    fontSize: '17px',
-                    color: 'rgba(255, 255, 255, 0.6)',
-                    marginBottom: '32px',
-                    textAlign: 'center',
-                    maxWidth: '420px',
-                    lineHeight: '1.6',
-                  }}
-                >
-                  Take control of your personal brand with AI-powered tools to check, generate, and scale your content.
-                </p>
+                {!waitlistSubmitted ? (
+                  <>
+                    <h3
+                      style={{
+                        fontFamily: "'VCR OSD Mono', monospace",
+                        fontSize: '14px',
+                        letterSpacing: '0.25em',
+                        color: '#D4A574',
+                        marginBottom: '16px',
+                        textTransform: 'uppercase',
+                      }}
+                    >
+                      Join the Waitlist
+                    </h3>
+                    <p
+                      style={{
+                        fontSize: '17px',
+                        color: 'rgba(255, 255, 255, 0.6)',
+                        marginBottom: '32px',
+                        textAlign: 'center',
+                        maxWidth: '420px',
+                        lineHeight: '1.6',
+                      }}
+                    >
+                      Be the first to access AI-powered tools to check, generate, and scale your brand content.
+                    </p>
 
-                <motion.a
-                  href="/app"
-                  whileHover={{ scale: 1.03, boxShadow: '0 0 40px rgba(212, 165, 116, 0.4)' }}
-                  whileTap={{ scale: 0.98 }}
-                  className="px-10 py-5 rounded-xl cursor-pointer no-underline"
-                  style={{
-                    fontFamily: "'VCR OSD Mono', monospace",
-                    fontSize: '15px',
-                    letterSpacing: '0.12em',
-                    color: '#050505',
-                    background: 'linear-gradient(135deg, #E8C49A 0%, #D4A574 100%)',
-                    border: 'none',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '12px',
-                    boxShadow: '0 4px 24px rgba(212, 165, 116, 0.3)',
-                  }}
-                >
-                  VIEW YOUR DASHBOARD
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M5 12h14M12 5l7 7-7 7"/>
-                  </svg>
-                </motion.a>
+                    <form onSubmit={handleWaitlistSubmit} className="flex gap-3 w-full max-w-[400px]">
+                      <input
+                        type="email"
+                        value={waitlistEmail}
+                        onChange={(e) => setWaitlistEmail(e.target.value)}
+                        placeholder="Enter your email"
+                        required
+                        className="flex-1 px-5 py-4 rounded-xl outline-none"
+                        style={{
+                          fontFamily: "'VCR OSD Mono', monospace",
+                          fontSize: '13px',
+                          background: 'rgba(255, 255, 255, 0.05)',
+                          border: '1px solid rgba(212, 165, 116, 0.2)',
+                          color: '#fff',
+                        }}
+                      />
+                      <motion.button
+                        type="submit"
+                        disabled={isSubmittingWaitlist}
+                        whileHover={{ scale: 1.03, boxShadow: '0 0 40px rgba(212, 165, 116, 0.4)' }}
+                        whileTap={{ scale: 0.98 }}
+                        className="px-8 py-4 rounded-xl cursor-pointer"
+                        style={{
+                          fontFamily: "'VCR OSD Mono', monospace",
+                          fontSize: '13px',
+                          letterSpacing: '0.1em',
+                          color: '#050505',
+                          background: 'linear-gradient(135deg, #E8C49A 0%, #D4A574 100%)',
+                          border: 'none',
+                          boxShadow: '0 4px 24px rgba(212, 165, 116, 0.3)',
+                          opacity: isSubmittingWaitlist ? 0.7 : 1,
+                        }}
+                      >
+                        {isSubmittingWaitlist ? '...' : 'JOIN'}
+                      </motion.button>
+                    </form>
+                  </>
+                ) : (
+                  <>
+                    <div
+                      style={{
+                        width: '60px',
+                        height: '60px',
+                        borderRadius: '50%',
+                        background: 'rgba(16, 185, 129, 0.1)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        marginBottom: '24px',
+                      }}
+                    >
+                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#10B981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M20 6L9 17l-5-5"/>
+                      </svg>
+                    </div>
+                    <h3
+                      style={{
+                        fontFamily: "'VCR OSD Mono', monospace",
+                        fontSize: '14px',
+                        letterSpacing: '0.25em',
+                        color: '#10B981',
+                        marginBottom: '16px',
+                        textTransform: 'uppercase',
+                      }}
+                    >
+                      You&apos;re on the List!
+                    </h3>
+                    <p
+                      style={{
+                        fontSize: '17px',
+                        color: 'rgba(255, 255, 255, 0.6)',
+                        textAlign: 'center',
+                        maxWidth: '420px',
+                        lineHeight: '1.6',
+                      }}
+                    >
+                      We&apos;ll notify you when BrandOS is ready. Get ready to take control of your personal brand.
+                    </p>
+                  </>
+                )}
               </div>
 
               {/* Bottom decorative element */}
