@@ -69,9 +69,6 @@ export default function DNAWalkthrough({
   theme,
 }: DNAWalkthroughProps) {
   const [activeSection, setActiveSection] = useState(0);
-  const [email, setEmail] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
   const [showJourneyEnd, setShowJourneyEnd] = useState(false);
   const sectionRefs = useRef<(HTMLDivElement | null)[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -132,16 +129,6 @@ export default function DNAWalkthrough({
 
   const scrollToSection = (index: number) => {
     sectionRefs.current[index]?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  const handleWaitlistSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email || isSubmitting) return;
-
-    setIsSubmitting(true);
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setIsSubmitting(false);
-    setIsSubmitted(true);
   };
 
   const handleViewDashboard = () => {
@@ -238,120 +225,94 @@ export default function DNAWalkthrough({
             whileInView={{ scale: 1, opacity: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="w-full max-w-md"
+            className="w-full max-w-[500px] flex flex-col items-center"
           >
-            {/* View Dashboard Button */}
-            <motion.button
-              onClick={handleViewDashboard}
-              whileHover={{ scale: 1.03, y: -2 }}
-              whileTap={{ scale: 0.98 }}
-              className="w-full px-8 py-4 mb-6 rounded-xl cursor-pointer border-none font-semibold"
-              style={{
-                fontFamily: "'VCR OSD Mono', monospace",
-                fontSize: '12px',
-                letterSpacing: '0.12em',
-                color: '#050505',
-                background: 'linear-gradient(135deg, #E8C49A 0%, #D4A574 100%)',
-                boxShadow: '0 4px 24px rgba(212, 165, 116, 0.4)',
-              }}
-            >
-              VIEW YOUR DASHBOARD
-            </motion.button>
-
-            {/* Waitlist Card */}
+            {/* CTA Card */}
             <div
-              className="rounded-2xl p-8 text-center"
               style={{
-                background: theme === 'dark' ? 'rgba(26, 26, 26, 0.8)' : 'rgba(248, 248, 248, 0.9)',
-                border: theme === 'dark' ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.1)',
+                width: '100%',
+                padding: '48px 40px',
+                borderRadius: '24px',
+                background: theme === 'dark' ? 'rgba(26, 26, 26, 0.6)' : 'rgba(255, 255, 255, 0.8)',
+                border: `1px solid ${theme === 'dark' ? 'rgba(212, 165, 116, 0.15)' : 'rgba(212, 165, 116, 0.3)'}`,
                 backdropFilter: 'blur(10px)',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
               }}
             >
-              <h2
-                className="text-2xl md:text-3xl font-semibold mb-3"
+              {/* Decorative line */}
+              <div
+                style={{
+                  width: '80px',
+                  height: '2px',
+                  background: `linear-gradient(90deg, transparent, ${theme === 'dark' ? 'rgba(212, 165, 116, 0.6)' : 'rgba(212, 165, 116, 0.8)'}, transparent)`,
+                  marginBottom: '32px',
+                }}
+              />
+
+              {/* Encouraging tagline */}
+              <h3
                 style={{
                   fontFamily: "'VCR OSD Mono', monospace",
-                  letterSpacing: '0.05em',
-                  color: theme === 'dark' ? '#FFFFFF' : '#000000',
+                  fontSize: '14px',
+                  letterSpacing: '0.25em',
+                  color: '#D4A574',
+                  marginBottom: '16px',
+                  textTransform: 'uppercase',
                 }}
               >
-                JOIN WAITLIST
-              </h2>
+                Your Brand DNA is Ready
+              </h3>
               <p
-                className="text-sm mb-6"
                 style={{
-                  color: theme === 'dark' ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)',
+                  fontSize: '17px',
+                  color: theme === 'dark' ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)',
+                  marginBottom: '32px',
+                  textAlign: 'center',
+                  maxWidth: '420px',
+                  lineHeight: '1.6',
                 }}
               >
-                Get early full access to BrandOS
+                Take control of your personal brand with AI-powered tools to check, generate, and scale your content.
               </p>
 
-              {!isSubmitted ? (
-                <form onSubmit={handleWaitlistSubmit} className="space-y-4">
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Enter your email"
-                    required
-                    className="w-full px-4 py-3 rounded-lg text-sm outline-none transition-all"
-                    style={{
-                      background: theme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
-                      border: theme === 'dark' ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.1)',
-                      color: theme === 'dark' ? '#FFFFFF' : '#000000',
-                    }}
-                  />
-                  <motion.button
-                    type="submit"
-                    disabled={isSubmitting || !email}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    className="w-full px-6 py-3 rounded-lg cursor-pointer border-none font-semibold transition-opacity"
-                    style={{
-                      fontFamily: "'VCR OSD Mono', monospace",
-                      fontSize: '12px',
-                      letterSpacing: '0.1em',
-                      color: '#050505',
-                      background: 'linear-gradient(135deg, #E8C49A 0%, #D4A574 100%)',
-                      opacity: isSubmitting || !email ? 0.6 : 1,
-                    }}
-                  >
-                    {isSubmitting ? 'SUBMITTING...' : 'GET EARLY ACCESS'}
-                  </motion.button>
-                </form>
-              ) : (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="py-4"
-                >
-                  <div className="text-3xl mb-3">✓</div>
-                  <p
-                    className="text-sm"
-                    style={{
-                      color: theme === 'dark' ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.8)',
-                    }}
-                  >
-                    You are on the list! We will notify you when it is ready.
-                  </p>
-                </motion.div>
-              )}
+              {/* View Dashboard Button */}
+              <motion.button
+                onClick={handleViewDashboard}
+                whileHover={{ scale: 1.03, boxShadow: '0 0 40px rgba(212, 165, 116, 0.4)' }}
+                whileTap={{ scale: 0.98 }}
+                className="px-10 py-5 rounded-xl cursor-pointer border-none font-semibold"
+                style={{
+                  fontFamily: "'VCR OSD Mono', monospace",
+                  fontSize: '15px',
+                  letterSpacing: '0.12em',
+                  color: '#050505',
+                  background: 'linear-gradient(135deg, #E8C49A 0%, #D4A574 100%)',
+                  boxShadow: '0 4px 24px rgba(212, 165, 116, 0.3)',
+                }}
+              >
+                VIEW YOUR DASHBOARD
+              </motion.button>
             </div>
 
-            {/* Analyze Another Profile Link */}
-            <motion.button
-              onClick={onComplete}
-              whileHover={{ opacity: 0.8 }}
-              className="mt-6 mx-auto block text-sm cursor-pointer bg-transparent border-none"
+            {/* Bottom decorative element */}
+            <div
               style={{
-                fontFamily: "'VCR OSD Mono', monospace",
+                marginTop: '40px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                color: theme === 'dark' ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0, 0, 0, 0.3)',
                 fontSize: '11px',
-                letterSpacing: '0.1em',
-                color: theme === 'dark' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)',
+                fontFamily: "'VCR OSD Mono', monospace",
+                letterSpacing: '0.15em',
               }}
             >
-              ANALYZE ANOTHER PROFILE
-            </motion.button>
+              <div style={{ width: '30px', height: '1px', background: theme === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)' }} />
+              POWERED BY BRANDOS
+              <div style={{ width: '30px', height: '1px', background: theme === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)' }} />
+            </div>
           </motion.div>
         </motion.div>
       </div>

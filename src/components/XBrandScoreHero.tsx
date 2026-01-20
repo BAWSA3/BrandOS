@@ -1969,30 +1969,100 @@ Get yours → mybrandos.app`;
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4, duration: 0.5 }}
-              className="w-full max-w-[800px] mt-10 flex justify-center"
+              className="w-full max-w-[600px] mt-16 flex flex-col items-center"
             >
-              <motion.a
-                href="/app"
-                whileHover={{ scale: 1.02, boxShadow: '0 0 30px rgba(212, 165, 116, 0.3)' }}
-                whileTap={{ scale: 0.98 }}
-                className="px-8 py-4 rounded-xl cursor-pointer no-underline"
+              {/* CTA Card */}
+              <div
                 style={{
-                  fontFamily: "'VCR OSD Mono', monospace",
-                  fontSize: '14px',
-                  letterSpacing: '0.1em',
-                  color: '#050505',
-                  background: 'linear-gradient(135deg, #E8C49A 0%, #D4A574 100%)',
-                  border: 'none',
-                  display: 'inline-flex',
+                  width: '100%',
+                  padding: '48px 40px',
+                  borderRadius: '24px',
+                  background: 'rgba(26, 26, 26, 0.6)',
+                  border: '1px solid rgba(212, 165, 116, 0.15)',
+                  backdropFilter: 'blur(10px)',
+                  display: 'flex',
+                  flexDirection: 'column',
                   alignItems: 'center',
-                  gap: '10px',
                 }}
               >
-                VIEW YOUR DASHBOARD
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M5 12h14M12 5l7 7-7 7"/>
-                </svg>
-              </motion.a>
+                {/* Decorative line */}
+                <div
+                  style={{
+                    width: '80px',
+                    height: '2px',
+                    background: 'linear-gradient(90deg, transparent, rgba(212, 165, 116, 0.6), transparent)',
+                    marginBottom: '32px',
+                  }}
+                />
+
+                {/* Encouraging tagline */}
+                <h3
+                  style={{
+                    fontFamily: "'VCR OSD Mono', monospace",
+                    fontSize: '14px',
+                    letterSpacing: '0.25em',
+                    color: '#D4A574',
+                    marginBottom: '16px',
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  Your Brand DNA is Ready
+                </h3>
+                <p
+                  style={{
+                    fontSize: '17px',
+                    color: 'rgba(255, 255, 255, 0.6)',
+                    marginBottom: '32px',
+                    textAlign: 'center',
+                    maxWidth: '420px',
+                    lineHeight: '1.6',
+                  }}
+                >
+                  Take control of your personal brand with AI-powered tools to check, generate, and scale your content.
+                </p>
+
+                <motion.a
+                  href="/app"
+                  whileHover={{ scale: 1.03, boxShadow: '0 0 40px rgba(212, 165, 116, 0.4)' }}
+                  whileTap={{ scale: 0.98 }}
+                  className="px-10 py-5 rounded-xl cursor-pointer no-underline"
+                  style={{
+                    fontFamily: "'VCR OSD Mono', monospace",
+                    fontSize: '15px',
+                    letterSpacing: '0.12em',
+                    color: '#050505',
+                    background: 'linear-gradient(135deg, #E8C49A 0%, #D4A574 100%)',
+                    border: 'none',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    boxShadow: '0 4px 24px rgba(212, 165, 116, 0.3)',
+                  }}
+                >
+                  VIEW YOUR DASHBOARD
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                  </svg>
+                </motion.a>
+              </div>
+
+              {/* Bottom decorative element */}
+              <div
+                style={{
+                  marginTop: '40px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  color: 'rgba(255, 255, 255, 0.3)',
+                  fontSize: '11px',
+                  fontFamily: "'VCR OSD Mono', monospace",
+                  letterSpacing: '0.15em',
+                }}
+              >
+                <div style={{ width: '30px', height: '1px', background: 'rgba(255,255,255,0.2)' }} />
+                POWERED BY BRANDOS
+                <div style={{ width: '30px', height: '1px', background: 'rgba(255,255,255,0.2)' }} />
+              </div>
             </motion.div>
 
           </motion.div>

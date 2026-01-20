@@ -96,6 +96,11 @@ function HomeContent() {
   const [isAnalyzingCompetitor, setIsAnalyzingCompetitor] = useState(false);
   const [competitorError, setCompetitorError] = useState('');
 
+  // Waitlist state
+  const [waitlistEmail, setWaitlistEmail] = useState('');
+  const [waitlistSubmitted, setWaitlistSubmitted] = useState(false);
+  const [isSubmittingWaitlist, setIsSubmittingWaitlist] = useState(false);
+
   // Input states
   const [keywordInput, setKeywordInput] = useState('');
   const [doPatternInput, setDoPatternInput] = useState('');
@@ -149,6 +154,32 @@ function HomeContent() {
   const handlePhasesSkip = () => {
     setShowPhasesBreakdown(false);
     setShowImportHub(true);
+  };
+
+  // Handle waitlist signup
+  const handleWaitlistSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!waitlistEmail || isSubmittingWaitlist) return;
+
+    setIsSubmittingWaitlist(true);
+    try {
+      await fetch('/api/waitlist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: waitlistEmail,
+          source: 'dashboard',
+          brandData: {
+            displayName: brandDNA?.name,
+          },
+        }),
+      });
+      setWaitlistSubmitted(true);
+    } catch (error) {
+      console.error('Waitlist submission error:', error);
+    } finally {
+      setIsSubmittingWaitlist(false);
+    }
   };
 
   // Handle imported brand DNA welcome
@@ -743,6 +774,108 @@ function HomeContent() {
         canCheck={brandCompleteness >= 30}
         canGenerate={phaseProgress.hasCompletedFirstCheck}
       />
+
+      {/* Join Waitlist Panel */}
+      {!waitlistSubmitted && (
+        <div
+          className="fixed bottom-6 left-6 z-40 animate-fade-in"
+          style={{
+            maxWidth: '320px',
+          }}
+        >
+          <div
+            className="rounded-xl p-5"
+            style={{
+              background: theme === 'dark' ? 'rgba(26,26,26,0.95)' : 'rgba(255,255,255,0.95)',
+              border: `1px solid ${theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
+              backdropFilter: 'blur(20px)',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+            }}
+          >
+            <h3
+              style={{
+                fontFamily: "'VCR OSD Mono', monospace",
+                fontSize: '11px',
+                letterSpacing: '0.1em',
+                color: '#D4A574',
+                marginBottom: '6px',
+              }}
+            >
+              JOIN THE WAITLIST
+            </h3>
+            <p
+              style={{
+                fontSize: '12px',
+                color: theme === 'dark' ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)',
+                marginBottom: '12px',
+                lineHeight: '1.4',
+              }}
+            >
+              Get early access to premium BrandOS features
+            </p>
+            <form onSubmit={handleWaitlistSubmit} className="flex gap-2">
+              <input
+                type="email"
+                value={waitlistEmail}
+                onChange={(e) => setWaitlistEmail(e.target.value)}
+                placeholder="Enter your email"
+                required
+                className="flex-1 px-3 py-2.5 rounded-lg text-sm outline-none"
+                style={{
+                  background: theme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+                  border: `1px solid ${theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
+                  color: theme === 'dark' ? '#FFFFFF' : '#1a1a1a',
+                }}
+              />
+              <button
+                type="submit"
+                disabled={isSubmittingWaitlist}
+                className="px-4 py-2.5 rounded-lg cursor-pointer border-none transition-transform hover:scale-[1.02] active:scale-[0.98]"
+                style={{
+                  fontFamily: "'VCR OSD Mono', monospace",
+                  fontSize: '10px',
+                  letterSpacing: '0.08em',
+                  color: '#050505',
+                  background: 'linear-gradient(135deg, #E8C49A 0%, #D4A574 100%)',
+                  opacity: isSubmittingWaitlist ? 0.7 : 1,
+                }}
+              >
+                {isSubmittingWaitlist ? '...' : 'JOIN'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Waitlist Success Message */}
+      {waitlistSubmitted && (
+        <div
+          className="fixed bottom-6 left-6 z-40 animate-fade-in"
+          style={{
+            maxWidth: '320px',
+          }}
+        >
+          <div
+            className="rounded-xl p-5 text-center"
+            style={{
+              background: theme === 'dark' ? 'rgba(26,26,26,0.95)' : 'rgba(255,255,255,0.95)',
+              border: `1px solid ${theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
+              backdropFilter: 'blur(20px)',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+            }}
+          >
+            <span
+              style={{
+                color: '#10B981',
+                fontFamily: "'VCR OSD Mono', monospace",
+                fontSize: '12px',
+              }}
+            >
+              ✓ YOU&apos;RE ON THE LIST!
+            </span>
+          </div>
+        </div>
+      )}
 
       {/* Main Content */}
       <main className="pt-4">
