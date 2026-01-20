@@ -50,7 +50,8 @@ export default function JourneyEnd({
   // Handle "Claim Your Brand DNA" click → go to dashboard
   const handleClaimDNA = () => {
     setStage('complete');
-    onComplete();
+    // Delay onComplete so the 'complete' stage overlay renders first
+    setTimeout(onComplete, 100);
   };
 
   return (
@@ -106,6 +107,23 @@ export default function JourneyEnd({
             theme={theme}
           />
         </motion.div>
+      )}
+
+      {/* COMPLETE STAGE - maintains overlay while parent transitions */}
+      {stage === 'complete' && (
+        <motion.div
+          key="complete"
+          initial={{ opacity: 1 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 100,
+            background: '#050505',
+          }}
+        />
       )}
     </AnimatePresence>
   );
