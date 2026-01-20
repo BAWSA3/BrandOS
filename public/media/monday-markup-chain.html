@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pokemon TCG Markup Chain | Relique</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(135deg, #00142e 0%, #001a3d 50%, #00142e 100%);
+      color: #dcdbd6;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Halftone dot pattern overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -50%;
+      right: -20%;
+      width: 600px;
+      height: 600px;
+      background-image: radial-gradient(#822a80 2px, transparent 2px);
+      background-size: 20px 20px;
+      opacity: 0.15;
+      transform: rotate(15deg);
+      pointer-events: none;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      bottom: -30%;
+      left: -10%;
+      width: 400px;
+      height: 400px;
+      background-image: radial-gradient(#822a80 1.5px, transparent 1.5px);
+      background-size: 15px 15px;
+      opacity: 0.1;
+      transform: rotate(-20deg);
+      pointer-events: none;
+    }
+
+    .card {
+      width: 620px;
+      background: linear-gradient(145deg, #001833 0%, #00142e 100%);
+      border-radius: 24px;
+      padding: 48px;
+      border: 2px solid transparent;
+      background-clip: padding-box;
+      position: relative;
+      box-shadow:
+        0 25px 50px -12px rgba(0, 0, 0, 0.5),
+        0 0 0 1px rgba(178, 126, 43, 0.3),
+        inset 0 1px 0 rgba(220, 219, 214, 0.05);
+    }
+
+    /* Gold accent border effect */
+    .card::before {
+      content: '';
+      position: absolute;
+      inset: -2px;
+      border-radius: 26px;
+      padding: 2px;
+      background: linear-gradient(135deg, rgba(178, 126, 43, 0.5), rgba(130, 42, 128, 0.3), rgba(178, 126, 43, 0.2));
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .header h1 {
+      font-size: 28px;
+      font-weight: 800;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, #dcdbd6 0%, #c9a265 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .header p {
+      color: #9a8479;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+    }
+
+    .chain {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .step {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      padding: 16px 0;
+      position: relative;
+    }
+
+    .step:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      left: 24px;
+      bottom: -8px;
+      width: 2px;
+      height: 16px;
+      background: linear-gradient(to bottom, #822a80, transparent);
+    }
+
+    .step-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+      border: 1px solid rgba(220, 219, 214, 0.1);
+    }
+
+    .step-content {
+      flex: 1;
+    }
+
+    .step-label {
+      font-size: 13px;
+      color: #9a8479;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .step-value {
+      font-size: 20px;
+      font-weight: 700;
+      color: #dcdbd6;
+    }
+
+    .step-markup {
+      margin-left: auto;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    /* Base cost - Warm cream (Japan) */
+    .step.base .step-icon {
+      background: rgba(220, 219, 214, 0.1);
+      border-color: rgba(220, 219, 214, 0.25);
+    }
+    .step.base .step-value {
+      color: #dcdbd6;
+    }
+
+    /* Distributor - Warm Gray */
+    .step.distributor .step-icon {
+      background: rgba(154, 132, 121, 0.15);
+      border-color: rgba(154, 132, 121, 0.3);
+    }
+    .step.distributor .step-markup {
+      background: rgba(154, 132, 121, 0.15);
+      color: #b9a89d;
+      border: 1px solid rgba(154, 132, 121, 0.3);
+    }
+
+    /* Retailer - Muted purple */
+    .step.retailer .step-icon {
+      background: rgba(130, 42, 128, 0.12);
+      border-color: rgba(130, 42, 128, 0.25);
+    }
+    .step.retailer .step-markup {
+      background: rgba(130, 42, 128, 0.12);
+      color: #9a6b99;
+      border: 1px solid rgba(130, 42, 128, 0.25);
+    }
+
+    /* Margin - Dusty purple */
+    .step.margin .step-icon {
+      background: rgba(130, 42, 128, 0.18);
+      border-color: rgba(130, 42, 128, 0.35);
+    }
+    .step.margin .step-markup {
+      background: rgba(130, 42, 128, 0.18);
+      color: #a87ba6;
+      border: 1px solid rgba(130, 42, 128, 0.35);
+    }
+
+    /* Scalper - Muted gold/bronze */
+    .step.scalper .step-icon {
+      background: rgba(178, 126, 43, 0.15);
+      border-color: rgba(178, 126, 43, 0.3);
+    }
+    .step.scalper .step-markup {
+      background: rgba(178, 126, 43, 0.15);
+      color: #c9a265;
+      border: 1px solid rgba(178, 126, 43, 0.3);
+    }
+
+    /* Final - Warm cream/gold */
+    .step.final .step-icon {
+      background: rgba(220, 219, 214, 0.08);
+      border-color: rgba(201, 162, 101, 0.3);
+    }
+    .step.final .step-value {
+      color: #c9a265;
+      font-size: 24px;
+    }
+
+    .divider {
+      height: 1px;
+      background: linear-gradient(to right, transparent, #822a80, transparent);
+      margin: 24px 0;
+    }
+
+    .arrow {
+      display: flex;
+      justify-content: center;
+      padding: 8px 0;
+      color: #822a80;
+      font-size: 20px;
+    }
+
+    .footer {
+      margin-top: 32px;
+      padding-top: 24px;
+      border-top: 1px solid rgba(130, 42, 128, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 28px;
+      font-weight: 800;
+      color: #c9a265;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      color: #9a8479;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 4px;
+    }
+
+    .brand {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+    }
+
+    .brand-name {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #9a8479;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 1px;
+    }
+
+    .brand-dot {
+      width: 6px;
+      height: 6px;
+      background: #822a80;
+      border-radius: 50%;
+    }
+
+    /* Barcode element */
+    .barcode {
+      display: flex;
+      align-items: flex-end;
+      gap: 1px;
+      height: 20px;
+      opacity: 0.5;
+    }
+
+    .barcode span {
+      display: block;
+      background: #9a8479;
+    }
+
+    .barcode span:nth-child(1) { width: 2px; height: 100%; }
+    .barcode span:nth-child(2) { width: 1px; height: 100%; }
+    .barcode span:nth-child(3) { width: 3px; height: 100%; }
+    .barcode span:nth-child(4) { width: 1px; height: 100%; }
+    .barcode span:nth-child(5) { width: 2px; height: 80%; }
+    .barcode span:nth-child(6) { width: 1px; height: 100%; }
+    .barcode span:nth-child(7) { width: 2px; height: 90%; }
+    .barcode span:nth-child(8) { width: 1px; height: 100%; }
+    .barcode span:nth-child(9) { width: 3px; height: 100%; }
+    .barcode span:nth-child(10) { width: 1px; height: 70%; }
+    .barcode span:nth-child(11) { width: 2px; height: 100%; }
+    .barcode span:nth-child(12) { width: 1px; height: 85%; }
+    .barcode span:nth-child(13) { width: 2px; height: 100%; }
+
+    .total-markup {
+      text-align: center;
+      margin-top: 24px;
+      padding: 20px;
+      background: linear-gradient(135deg, rgba(130, 42, 128, 0.1) 0%, rgba(178, 126, 43, 0.1) 100%);
+      border-radius: 16px;
+      border: 1px solid rgba(178, 126, 43, 0.25);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Subtle halftone in total markup box */
+    .total-markup::before {
+      content: '';
+      position: absolute;
+      top: -20px;
+      right: -20px;
+      width: 100px;
+      height: 100px;
+      background-image: radial-gradient(#822a80 1px, transparent 1px);
+      background-size: 8px 8px;
+      opacity: 0.2;
+      transform: rotate(15deg);
+      pointer-events: none;
+    }
+
+    .total-markup-value {
+      font-size: 48px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #a8824a 0%, #c9a265 50%, #a8824a 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+      position: relative;
+    }
+
+    .total-markup-label {
+      font-size: 14px;
+      color: #9a8479;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="header">
+      <h1>Where Your Money Goes</h1>
+      <p>Pokemon TCG Markup Chain</p>
+    </div>
+
+    <div class="chain">
+      <div class="step base">
+        <div class="step-icon">&#127471;&#127477;</div>
+        <div class="step-content">
+          <div class="step-label">Base Cost (Japan)</div>
+          <div class="step-value">$0.75</div>
+        </div>
+      </div>
+
+      <div class="arrow">&#8595;</div>
+
+      <div class="step distributor">
+        <div class="step-icon">&#128230;</div>
+        <div class="step-content">
+          <div class="step-label">Distributor</div>
+          <div class="step-value">$1.05</div>
+        </div>
+        <div class="step-markup">+40%</div>
+      </div>
+
+      <div class="arrow">&#8595;</div>
+
+      <div class="step retailer">
+        <div class="step-icon">&#127978;</div>
+        <div class="step-content">
+          <div class="step-label">Retailer</div>
+          <div class="step-value">$1.42</div>
+        </div>
+        <div class="step-markup">+35%</div>
+      </div>
+
+      <div class="arrow">&#8595;</div>
+
+      <div class="step margin">
+        <div class="step-icon">&#128176;</div>
+        <div class="step-content">
+          <div class="step-label">Retail Margin</div>
+          <div class="step-value">$2.06</div>
+        </div>
+        <div class="step-markup">+45%</div>
+      </div>
+
+      <div class="arrow">&#8595;</div>
+
+      <div class="step scalper">
+        <div class="step-icon">&#128293;</div>
+        <div class="step-content">
+          <div class="step-label">Scalper Premium</div>
+          <div class="step-value">$6.18 - $18.50</div>
+        </div>
+        <div class="step-markup">+200-800%</div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="step final">
+        <div class="step-icon">&#127482;&#127480;</div>
+        <div class="step-content">
+          <div class="step-label">You Pay (US)</div>
+          <div class="step-value">$5 - $12+</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="total-markup">
+      <div class="total-markup-value">500%+</div>
+      <div class="total-markup-label">Total Markup on Same Product</div>
+    </div>
+
+    <div class="footer">
+      <div class="stat">
+        <div class="stat-value">140%</div>
+        <div class="stat-label">Price &#8593; Since 2020</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">73%</div>
+        <div class="stat-label">New Collectors Priced Out</div>
+      </div>
+      <div class="brand">
+        <div class="barcode">
+          <span></span><span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span>
+        </div>
+        <div class="brand-name">
+          <div class="brand-dot"></div>
+          <span>RELIQUE</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
