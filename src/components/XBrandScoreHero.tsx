@@ -1579,7 +1579,7 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
                   : 'none',
               }}
             >
-              Define. Check. Generate. Scale.
+              Free X Profile Analysis
             </motion.p>
 
             {/* Logo - Animated Text Reveal */}
@@ -1642,7 +1642,28 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
                 willChange: 'transform',
               }}
             >
-              AN AI-POWERED OS THAT BUILDS YOUR BRAND'S DNA.
+              SEE HOW YOUR PERSONAL BRAND ACTUALLY PERFORMS
+            </motion.p>
+
+            {/* Value Proposition */}
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.2 }}
+              style={{
+                fontFamily: "'Inter', sans-serif",
+                fontSize: '1.1rem',
+                fontWeight: 400,
+                lineHeight: 1.6,
+                color: theme === 'dark' ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.6)',
+                textAlign: 'center',
+                margin: 0,
+                marginTop: '-0.5rem',
+                marginBottom: '0.5rem',
+                maxWidth: '480px',
+              }}
+            >
+              One scan reveals your score, archetype, and what to fix.
             </motion.p>
 
             {/* Input Form */}
@@ -1737,7 +1758,7 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
                   transition: 'background 0.3s ease',
                 }}
               >
-                {isValidating ? 'CHECKING...' : "ENTER"}
+                {isValidating ? 'ANALYZING...' : "ANALYZE MY PROFILE →"}
               </motion.button>
 
               {error && (
@@ -1773,7 +1794,7 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
                   : 'none',
               }}
             >
-              SEARCH ANY PUBLIC X PROFILE TO GET STARTED
+              WORKS WITH ANY PUBLIC X ACCOUNT
             </motion.p>
           </motion.div>
         )}
@@ -1964,151 +1985,35 @@ Get yours → mybrandos.app`;
               />
             </div>
 
-            {/* Dashboard CTAs */}
+            {/* View Dashboard CTA */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4, duration: 0.5 }}
-              className="w-full max-w-[800px] mt-10"
+              className="w-full max-w-[800px] mt-10 flex justify-center"
             >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Waitlist Email Input */}
-                <div
-                  className="rounded-xl p-6"
-                  style={{
-                    background: 'rgba(26,26,26,0.8)',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                  }}
-                >
-                  <h3
-                    style={{
-                      fontFamily: "'VCR OSD Mono', monospace",
-                      fontSize: '12px',
-                      letterSpacing: '0.1em',
-                      color: '#D4A574',
-                      marginBottom: '8px',
-                    }}
-                  >
-                    JOIN THE WAITLIST
-                  </h3>
-                  <p
-                    style={{
-                      fontSize: '13px',
-                      color: 'rgba(255,255,255,0.6)',
-                      marginBottom: '16px',
-                    }}
-                  >
-                    Get early access to full BrandOS features
-                  </p>
-                  {!waitlistSubmitted ? (
-                    <form onSubmit={handleWaitlistSubmit} className="flex gap-2">
-                      <input
-                        type="email"
-                        value={waitlistEmail}
-                        onChange={(e) => setWaitlistEmail(e.target.value)}
-                        placeholder="Enter your email"
-                        required
-                        className="flex-1 px-4 py-3 rounded-lg text-sm outline-none"
-                        style={{
-                          background: 'rgba(255,255,255,0.05)',
-                          border: '1px solid rgba(255,255,255,0.1)',
-                          color: '#FFFFFF',
-                        }}
-                      />
-                      <motion.button
-                        type="submit"
-                        disabled={isSubmittingWaitlist}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        className="px-6 py-3 rounded-lg cursor-pointer border-none"
-                        style={{
-                          fontFamily: "'VCR OSD Mono', monospace",
-                          fontSize: '11px',
-                          letterSpacing: '0.08em',
-                          color: '#050505',
-                          background: 'linear-gradient(135deg, #E8C49A 0%, #D4A574 100%)',
-                          opacity: isSubmittingWaitlist ? 0.7 : 1,
-                        }}
-                      >
-                        {isSubmittingWaitlist ? '...' : 'JOIN'}
-                      </motion.button>
-                    </form>
-                  ) : (
-                    <div className="text-center py-2">
-                      <span
-                        style={{
-                          color: '#10B981',
-                          fontFamily: "'VCR OSD Mono', monospace",
-                          fontSize: '12px',
-                        }}
-                      >
-                        ✓ YOU&apos;RE ON THE LIST!
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Compare Profile CTA */}
-                <div
-                  className="rounded-xl p-6"
-                  style={{
-                    background: 'rgba(26,26,26,0.8)',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                  }}
-                >
-                  <h3
-                    style={{
-                      fontFamily: "'VCR OSD Mono', monospace",
-                      fontSize: '12px',
-                      letterSpacing: '0.1em',
-                      color: '#2E6AFF',
-                      marginBottom: '8px',
-                    }}
-                  >
-                    COMPARE PROFILES
-                  </h3>
-                  <p
-                    style={{
-                      fontSize: '13px',
-                      color: 'rgba(255,255,255,0.6)',
-                      marginBottom: '16px',
-                    }}
-                  >
-                    See how you stack up against another creator
-                  </p>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={compareUsername}
-                      onChange={(e) => setCompareUsername(e.target.value.replace('@', ''))}
-                      placeholder="@username"
-                      className="flex-1 px-4 py-3 rounded-lg text-sm outline-none"
-                      style={{
-                        background: 'rgba(255,255,255,0.05)',
-                        border: '1px solid rgba(255,255,255,0.1)',
-                        color: '#FFFFFF',
-                      }}
-                    />
-                    <motion.button
-                      onClick={handleCompareProfile}
-                      disabled={!compareUsername}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      className="px-6 py-3 rounded-lg cursor-pointer border-none"
-                      style={{
-                        fontFamily: "'VCR OSD Mono', monospace",
-                        fontSize: '11px',
-                        letterSpacing: '0.08em',
-                        color: '#FFFFFF',
-                        background: '#2E6AFF',
-                        opacity: !compareUsername ? 0.5 : 1,
-                      }}
-                    >
-                      COMPARE
-                    </motion.button>
-                  </div>
-                </div>
-              </div>
+              <motion.a
+                href="/app"
+                whileHover={{ scale: 1.02, boxShadow: '0 0 30px rgba(212, 165, 116, 0.3)' }}
+                whileTap={{ scale: 0.98 }}
+                className="px-8 py-4 rounded-xl cursor-pointer no-underline"
+                style={{
+                  fontFamily: "'VCR OSD Mono', monospace",
+                  fontSize: '14px',
+                  letterSpacing: '0.1em',
+                  color: '#050505',
+                  background: 'linear-gradient(135deg, #E8C49A 0%, #D4A574 100%)',
+                  border: 'none',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                }}
+              >
+                VIEW YOUR DASHBOARD
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+              </motion.a>
             </motion.div>
 
           </motion.div>
