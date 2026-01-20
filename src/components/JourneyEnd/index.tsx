@@ -63,17 +63,15 @@ export default function JourneyEnd({
 
   return (
     <>
-      {/* Solid background overlay - always present during complete stage */}
-      {stage === 'complete' && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: 99,
-            background: '#050505',
-          }}
-        />
-      )}
+      {/* Persistent solid background - always present to prevent flash during stage transitions */}
+      <div
+        style={{
+          position: 'fixed',
+          inset: 0,
+          zIndex: 99,
+          background: '#050505',
+        }}
+      />
 
       <AnimatePresence mode="wait">
         {/* ACHIEVEMENT UNLOCK TRANSITION */}
