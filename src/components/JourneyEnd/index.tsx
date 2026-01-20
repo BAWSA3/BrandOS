@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import AchievementUnlock from './transitions/AchievementUnlock';
+import InnerCircleUnlock from './transitions/InnerCircleUnlock';
 import HighlightReel from './intermediates/HighlightReel';
 
 // =============================================================================
@@ -33,7 +34,7 @@ interface JourneyEndProps {
 // MAIN COMPONENT
 // =============================================================================
 
-type Stage = 'transition' | 'highlight' | 'complete';
+type Stage = 'transition' | 'innerCircle' | 'highlight' | 'complete';
 
 export default function JourneyEnd({
   data,
@@ -42,8 +43,25 @@ export default function JourneyEnd({
 }: JourneyEndProps) {
   const [stage, setStage] = useState<Stage>('transition');
 
-  // Handle transition complete → show highlight reel
+  // Handle transition complete → show Inner Circle or highlight reel
   const handleTransitionComplete = () => {
+    // Check Inner Circle status directly to avoid closure issues
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlValue = urlParams.get('innerCircle');
+    const localValue = localStorage.getItem('innerCircle');
+    // More robust check - handle string 'true' or truthy values
+    const isInnerCircle = String(urlValue).toLowerCase() === 'true' ||
+                          String(localValue).toLowerCase() === 'true';
+
+    if (isInnerCircle) {
+      setStage('innerCircle');
+    } else {
+      setStage('highlight');
+    }
+  };
+
+  // Handle Inner Circle unlock complete → show highlight reel
+  const handleInnerCircleComplete = () => {
     setStage('highlight');
   };
 
@@ -97,6 +115,30 @@ export default function JourneyEnd({
               score={data.score}
               personalityType={data.personalityType}
               onComplete={handleTransitionComplete}
+              theme={theme}
+            />
+          </motion.div>
+        )}
+
+        {/* INNER CIRCLE EXCLUSIVE ACCESS UNLOCK */}
+        {stage === 'innerCircle' && (
+          <motion.div
+            key="innerCircle"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              zIndex: 100,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: '#050505',
+            }}
+          >
+            <InnerCircleUnlock
+              onComplete={handleInnerCircleComplete}
               theme={theme}
             />
           </motion.div>
