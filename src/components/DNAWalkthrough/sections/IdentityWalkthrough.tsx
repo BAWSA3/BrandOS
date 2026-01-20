@@ -430,12 +430,12 @@ export default function IdentityWalkthrough({
                 : 'Multiple red flags for bot-like behavior'}
             </p>
 
-            {authenticity?.signals && authenticity.signals.length > 0 && (
+            {authenticity?.signals && (
               <div className="text-[10px] space-y-1">
-                {authenticity.signals.slice(0, 2).map((signal, i) => (
-                  <div key={i} className="flex items-start gap-1.5" style={{ color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)' }}>
+                {Object.entries(authenticity.signals).slice(0, 2).map(([key, signal]) => (
+                  <div key={key} className="flex items-start gap-1.5" style={{ color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)' }}>
                     <span>•</span>
-                    <span>{signal}</span>
+                    <span>{signal.detail}</span>
                   </div>
                 ))}
               </div>

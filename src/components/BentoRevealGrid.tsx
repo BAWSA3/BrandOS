@@ -2,7 +2,36 @@
 
 import { motion, Variants, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
-import { AnimateNumber } from 'motion-plus/react';
+
+// Custom AnimateNumber replacement
+function AnimateNumber({ children, format }: { children: number; format?: Intl.NumberFormatOptions }) {
+  const [displayValue, setDisplayValue] = useState(0);
+  const targetValue = typeof children === 'number' ? children : 0;
+
+  useEffect(() => {
+    const duration = 1500;
+    const startTime = Date.now();
+
+    const animate = () => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const current = Math.round(targetValue * eased);
+      setDisplayValue(current);
+
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      }
+    };
+
+    requestAnimationFrame(animate);
+  }, [targetValue]);
+
+  if (format) {
+    return <>{new Intl.NumberFormat('en-US', format).format(displayValue)}</>;
+  }
+  return <>{displayValue}</>;
+}
 import { BentoShareCardData, generateBentoShareImage } from './ShareableBentoCard';
 import CardPreviewSelector from './CardPreviewSelector';
 import { ShareCardData, CardStyle } from './ShareCardPrototypes';

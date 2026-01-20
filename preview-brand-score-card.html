@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Brand Score Card Preview</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    // Sample user data - this simulates what would come from the API
+    const sampleData = {
+      score: 87,
+      displayName: "Alex Chen",
+      username: "alexbuilds",
+      profileImageUrl: "https://pbs.twimg.com/profile_images/1234567890/avatar_200x200.jpg",
+      voiceConsistency: 92,
+      engagementScore: 78,
+      influenceTier: "Mid",
+      brandColors: {
+        primary: "#6366f1",  // Indigo
+        secondary: "#a855f7" // Purple
+      }
+    };
+
+    // Score label helper
+    function getScoreLabel(score) {
+      if (score >= 90) return 'EXCEPTIONAL';
+      if (score >= 80) return 'EXCELLENT';
+      if (score >= 70) return 'STRONG';
+      if (score >= 60) return 'GOOD';
+      if (score >= 50) return 'DECENT';
+      if (score >= 40) return 'NEEDS WORK';
+      return 'CRITICAL';
+    }
+
+    // Reusable Metric Component
+    const MetricItem = ({ label, value, color, width }) => (
+      <div className="group">
+        <div className="mb-2">
+          <p className="text-gray-400 text-sm font-medium mb-1">{label}</p>
+          <p className="text-white text-xl font-bold tracking-tight">{value}</p>
+        </div>
+
+        {/* Progress Bar Container */}
+        <div className="h-2.5 w-full bg-white/10 rounded-full overflow-hidden">
+          {/* Animated Fill */}
+          <div
+            className={`h-full rounded-full transition-all duration-1000 ease-out`}
+            style={{ width: width, backgroundColor: color }}
+          ></div>
+        </div>
+      </div>
+    );
+
+    function BrandScoreCard({ data }) {
+      const label = getScoreLabel(data.score);
+      const primary = data.brandColors?.primary || '#6366f1';
+      const secondary = data.brandColors?.secondary || '#a855f7';
+
+      return (
+        <div className="flex items-center justify-center min-h-screen bg-gray-200 p-4">
+
+          {/* Main Card Container - 1200x630 aspect ratio for Twitter */}
+          <div
+            className="flex w-full bg-[#0F1115] rounded-[32px] overflow-hidden shadow-2xl font-sans ring-1 ring-white/10"
+            style={{ maxWidth: '900px', aspectRatio: '1200/630' }}
+          >
+
+            {/* LEFT PANEL: The Data (Dark Mode) - 55% width */}
+            <div className="w-[55%] p-10 flex flex-col justify-between relative">
+
+              {/* Header */}
+              <div>
+                <h1 className="text-3xl font-bold text-white tracking-tight">
+                  Brand<span className="text-white/40">OS</span>
+                </h1>
+                <p className="text-[11px] font-semibold text-white/50 mt-1 tracking-[0.15em] uppercase font-mono">
+                  AI-Powered Brand DNA
+                </p>
+              </div>
+
+              {/* Profile Section */}
+              <div className="flex items-center gap-4 -mt-2">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold text-lg ring-2 ring-white/15">
+                  {data.displayName?.[0] || data.username[0].toUpperCase()}
+                </div>
+                <div>
+                  <p className="text-white font-semibold text-lg">{data.displayName || data.username}</p>
+                  <p className="text-white/50 text-sm">@{data.username}</p>
+                </div>
+              </div>
+
+              {/* Metrics Section */}
+              <div className="space-y-5">
+                <MetricItem
+                  label="Voice Consistency"
+                  value={`${data.voiceConsistency}%`}
+                  color="#10B981"
+                  width={`${data.voiceConsistency}%`}
+                />
+
+                <MetricItem
+                  label="Engagement"
+                  value={`${data.engagementScore}%`}
+                  color="#0047FF"
+                  width={`${data.engagementScore}%`}
+                />
+
+                <MetricItem
+                  label="Influence"
+                  value={data.influenceTier}
+                  color="#9d4edd"
+                  width={data.influenceTier === 'Mega' ? '100%' : data.influenceTier === 'Macro' ? '85%' : data.influenceTier === 'Mid' ? '65%' : data.influenceTier === 'Micro' ? '45%' : '25%'}
+                />
+              </div>
+
+              {/* Footer Decoration */}
+              <div className="flex items-center gap-2">
+                 <div className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                 <span className="text-[10px] uppercase tracking-[0.2em] text-white/40 font-mono font-semibold">Analysis Complete</span>
+              </div>
+            </div>
+
+            {/* RIGHT PANEL: The Score (User's Brand Colors) - 45% width */}
+            <div
+              className="w-[45%] relative flex flex-col items-center justify-center p-12 overflow-hidden"
+              style={{
+                background: `linear-gradient(135deg, ${primary} 0%, ${secondary} 50%, ${secondary}dd 100%)`
+              }}
+            >
+
+              {/* Top-Right Light Leak Effect */}
+              <div
+                className="absolute -top-20 -right-20 w-64 h-64 rounded-full blur-[80px] opacity-40 mix-blend-screen"
+                style={{ backgroundColor: primary }}
+              ></div>
+
+              {/* Bottom-Left Depth Effect */}
+              <div
+                className="absolute -bottom-20 -left-20 w-64 h-64 rounded-full blur-[60px] opacity-40 mix-blend-multiply"
+                style={{ backgroundColor: secondary }}
+              ></div>
+
+              {/* The Content */}
+              <div className="relative z-10 text-center">
+                <h2 className="text-[100px] leading-none font-bold text-white tracking-tighter drop-shadow-xl">
+                  {data.score}
+                </h2>
+                <div className="mt-4 inline-block border border-white/20 bg-white/15 backdrop-blur-md px-5 py-2 rounded-full">
+                  <span className="text-sm font-bold text-white tracking-[0.2em] uppercase font-mono">
+                    {label}
+                  </span>
+                </div>
+              </div>
+
+              {/* CTA */}
+              <div className="absolute bottom-8 text-white/70 text-sm font-medium">
+                brandos.xyz
+              </div>
+            </div>
+
+          </div>
+        </div>
+      );
+    }
+
+    // Controls to modify data
+    function App() {
+      const [data, setData] = useState(sampleData);
+
+      const updateField = (field, value) => {
+        setData(prev => ({ ...prev, [field]: value }));
+      };
+
+      const updateColor = (type, value) => {
+        setData(prev => ({
+          ...prev,
+          brandColors: { ...prev.brandColors, [type]: value }
+        }));
+      };
+
+      return (
+        <div>
+          <BrandScoreCard data={data} />
+
+          {/* Controls Panel */}
+          <div className="fixed bottom-4 left-4 bg-white rounded-xl shadow-xl p-4 max-w-sm">
+            <h3 className="font-bold text-gray-800 mb-3">Preview Controls</h3>
+
+            <div className="space-y-3 text-sm">
+              <div>
+                <label className="text-gray-600 block mb-1">Score</label>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={data.score}
+                  onChange={(e) => updateField('score', parseInt(e.target.value))}
+                  className="w-full"
+                />
+                <span className="text-gray-800 font-mono">{data.score}</span>
+              </div>
+
+              <div>
+                <label className="text-gray-600 block mb-1">Voice Consistency</label>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={data.voiceConsistency}
+                  onChange={(e) => updateField('voiceConsistency', parseInt(e.target.value))}
+                  className="w-full"
+                />
+              </div>
+
+              <div>
+                <label className="text-gray-600 block mb-1">Engagement</label>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={data.engagementScore}
+                  onChange={(e) => updateField('engagementScore', parseInt(e.target.value))}
+                  className="w-full"
+                />
+              </div>
+
+              <div>
+                <label className="text-gray-600 block mb-1">Influence Tier</label>
+                <select
+                  value={data.influenceTier}
+                  onChange={(e) => updateField('influenceTier', e.target.value)}
+                  className="w-full border rounded px-2 py-1"
+                >
+                  <option value="Nano">Nano</option>
+                  <option value="Micro">Micro</option>
+                  <option value="Mid">Mid</option>
+                  <option value="Macro">Macro</option>
+                  <option value="Mega">Mega</option>
+                </select>
+              </div>
+
+              <div className="flex gap-2">
+                <div className="flex-1">
+                  <label className="text-gray-600 block mb-1">Primary</label>
+                  <input
+                    type="color"
+                    value={data.brandColors.primary}
+                    onChange={(e) => updateColor('primary', e.target.value)}
+                    className="w-full h-8 rounded cursor-pointer"
+                  />
+                </div>
+                <div className="flex-1">
+                  <label className="text-gray-600 block mb-1">Secondary</label>
+                  <input
+                    type="color"
+                    value={data.brandColors.secondary}
+                    onChange={(e) => updateColor('secondary', e.target.value)}
+                    className="w-full h-8 rounded cursor-pointer"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>

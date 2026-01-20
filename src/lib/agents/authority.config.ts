@@ -123,7 +123,7 @@ export const RELIQUE_MESSAGING_FRAMEWORK: MessagingFramework = {
         'Build your collection with confidence',
         'Access your cards anytime, virtually or physically',
       ],
-      preferredPlatforms: ['twitter', 'instagram', 'youtube'],
+      preferredPlatforms: ['twitter', 'instagram', 'tiktok'],
       cta: 'Protect your collection today',
     },
     trader: {
@@ -144,7 +144,7 @@ export const RELIQUE_MESSAGING_FRAMEWORK: MessagingFramework = {
         'Lower fees than traditional platforms',
         'Never miss a market move',
       ],
-      preferredPlatforms: ['twitter', 'discord'],
+      preferredPlatforms: ['twitter', 'linkedin'],
       cta: 'Start trading globally',
     },
     seller: {

@@ -89,9 +89,9 @@ Your role is to generate content that positions Relique as THE trusted authority
 
 Brand DNA:
 - Name: ${brandDNA.name}
-- Tagline: ${brandDNA.tagline || 'The future of collectible ownership'}
-- Tone: ${brandDNA.toneProfile?.primary || 'Expert'}, ${brandDNA.toneProfile?.secondary || 'Trustworthy'}
-- Voice: ${brandDNA.voiceTraits?.join(', ') || 'Confident, knowledgeable, collector-first'}
+- Tagline: ${(brandDNA as any).tagline || 'The future of collectible ownership'}
+- Tone: ${(brandDNA as any).toneProfile?.primary || 'Expert'}, ${(brandDNA as any).toneProfile?.secondary || 'Trustworthy'}
+- Voice: ${(brandDNA as any).voiceTraits?.join(', ') || 'Confident, knowledgeable, collector-first'}
 
 Key Pillar - ${pillar.toUpperCase()}:
 - Headline: ${pillarContent.headline}

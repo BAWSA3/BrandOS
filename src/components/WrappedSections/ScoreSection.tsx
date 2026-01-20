@@ -1,7 +1,7 @@
 'use client';
 
-import { motion } from 'motion/react';
-import { AnimateNumber } from 'motion-plus/react';
+import { motion, useSpring, useTransform } from 'motion/react';
+import { useEffect, useState } from 'react';
 
 interface ScoreSectionProps {
   score: number;
@@ -25,6 +25,32 @@ function getScorePercentile(score: number): string {
   if (score >= 60) return "You're ahead of most creators";
   if (score >= 50) return 'You have solid foundations';
   return 'Room to grow your brand';
+}
+
+function AnimatedNumber({ value }: { value: number }) {
+  const [displayValue, setDisplayValue] = useState(0);
+
+  useEffect(() => {
+    const duration = 1500;
+    const startTime = Date.now();
+    const startValue = 0;
+
+    const animate = () => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+      const current = Math.round(startValue + (value - startValue) * eased);
+      setDisplayValue(current);
+
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      }
+    };
+
+    requestAnimationFrame(animate);
+  }, [value]);
+
+  return <>{displayValue}</>;
 }
 
 export default function ScoreSection({ score, primaryColor = '#0047FF' }: ScoreSectionProps) {
@@ -96,7 +122,7 @@ export default function ScoreSection({ score, primaryColor = '#0047FF' }: ScoreS
           zIndex: 1,
         }}
       >
-        <AnimateNumber>{score}</AnimateNumber>
+        <AnimatedNumber value={score} />
       </motion.div>
 
       {/* Score Label Badge */}

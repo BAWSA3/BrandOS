@@ -46,13 +46,17 @@
         {
           "value": 93,
           "scannedAt": 1768893000804
+        },
+        {
+          "value": 93,
+          "scannedAt": 1768896797547
         }
       ],
       "highestScore": 93,
       "currentScore": 93,
       "firstScannedAt": 1768892981245,
-      "lastScannedAt": 1768893000804,
-      "totalScans": 3
+      "lastScannedAt": 1768896797547,
+      "totalScans": 4
     },
     "pmarca": {
       "username": "pmarca",
@@ -125,7 +129,401 @@
       "firstScannedAt": 1768893028638,
       "lastScannedAt": 1768893047164,
       "totalScans": 3
+    },
+    "elonmusk": {
+      "username": "elonmusk",
+      "displayName": "Elon Musk",
+      "archetype": {
+        "primary": "The Prophet",
+        "emoji": "🔮",
+        "tagline": "Visionary, Disruptor, Influencer",
+        "description": "Elon Musk embodies 'The Prophet' due to his visionary thinking, often predicting and shaping future technological advancements. His influence extends far beyond Twitter, impacting global industries and public discourse.",
+        "strengths": [
+          "Visionary Leadership",
+          "Disruptive Innovation"
+        ],
+        "growthTip": "Continue sharing bold visions and engaging in thought-provoking discussions to maintain his thought leader status. Consider experimenting with threads to expound ideas.",
+        "assignedAt": 1768895525086
+      },
+      "archetypeHistory": [
+        {
+          "archetype": {
+            "primary": "The Prophet",
+            "emoji": "🔮",
+            "tagline": "Visionary, Disruptor, Influencer",
+            "description": "Elon Musk embodies 'The Prophet' due to his visionary thinking, often predicting and shaping future technological advancements. His influence extends far beyond Twitter, impacting global industries and public discourse.",
+            "strengths": [
+              "Visionary Leadership",
+              "Disruptive Innovation"
+            ],
+            "growthTip": "Continue sharing bold visions and engaging in thought-provoking discussions to maintain his thought leader status. Consider experimenting with threads to expound ideas.",
+            "assignedAt": 1768895525086
+          },
+          "reason": "initial",
+          "score": 93,
+          "timestamp": 1768895525086
+        }
+      ],
+      "scores": [
+        {
+          "value": 93,
+          "scannedAt": 1768895525086
+        },
+        {
+          "value": 95,
+          "scannedAt": 1768895839301
+        },
+        {
+          "value": 95,
+          "scannedAt": 1768895873510
+        },
+        {
+          "value": 92,
+          "scannedAt": 1768896303151
+        },
+        {
+          "value": 98,
+          "scannedAt": 1768896489913
+        },
+        {
+          "value": 95,
+          "scannedAt": 1768897265560
+        }
+      ],
+      "highestScore": 98,
+      "currentScore": 95,
+      "firstScannedAt": 1768895525086,
+      "lastScannedAt": 1768897265560,
+      "totalScans": 6
+    },
+    "leap_xyz": {
+      "username": "leap_xyz",
+      "displayName": "Leap",
+      "archetype": {
+        "primary": "Ship or Die",
+        "emoji": "🚢",
+        "tagline": "Building in Public",
+        "description": "The focus on building and the reference to '@donatedotgg' suggests a maker mentality, aligning with the 'Ship or Die' archetype. Their profile should show consistent product development updates and community building.",
+        "strengths": [
+          "Execution",
+          "Focus"
+        ],
+        "growthTip": "Document your building journey publicly. Engage followers by showcasing your building progress and asking for feedback.",
+        "assignedAt": 1768896589325
+      },
+      "archetypeHistory": [
+        {
+          "archetype": {
+            "primary": "Ship or Die",
+            "emoji": "🚢",
+            "tagline": "Building in Public",
+            "description": "The focus on building and the reference to '@donatedotgg' suggests a maker mentality, aligning with the 'Ship or Die' archetype. Their profile should show consistent product development updates and community building.",
+            "strengths": [
+              "Execution",
+              "Focus"
+            ],
+            "growthTip": "Document your building journey publicly. Engage followers by showcasing your building progress and asking for feedback.",
+            "assignedAt": 1768896589325
+          },
+          "reason": "initial",
+          "score": 79,
+          "timestamp": 1768896589325
+        }
+      ],
+      "scores": [
+        {
+          "value": 79,
+          "scannedAt": 1768896589325
+        }
+      ],
+      "highestScore": 79,
+      "currentScore": 79,
+      "firstScannedAt": 1768896589325,
+      "lastScannedAt": 1768896589325,
+      "totalScans": 1
+    },
+    "paulg": {
+      "username": "paulg",
+      "displayName": "Paul Graham",
+      "archetype": {
+        "primary": "The Prophet",
+        "emoji": "🔮",
+        "tagline": "Startup Visionary",
+        "description": "Paul Graham is known for his insightful takes on startups, technology, and the future. His experience with Y Combinator gives him a platform to share thought-provoking ideas and shape the next generation of entrepreneurs.",
+        "strengths": [
+          "Thought leadership",
+          "Industry expertise"
+        ],
+        "growthTip": "Continue to share valuable insights and engage in thoughtful discussions to maintain and expand influence within the startup community.",
+        "assignedAt": 1768897358369
+      },
+      "archetypeHistory": [
+        {
+          "archetype": {
+            "primary": "The Prophet",
+            "emoji": "🔮",
+            "tagline": "Startup Visionary",
+            "description": "Paul Graham is known for his insightful takes on startups, technology, and the future. His experience with Y Combinator gives him a platform to share thought-provoking ideas and shape the next generation of entrepreneurs.",
+            "strengths": [
+              "Thought leadership",
+              "Industry expertise"
+            ],
+            "growthTip": "Continue to share valuable insights and engage in thoughtful discussions to maintain and expand influence within the startup community.",
+            "assignedAt": 1768897358369
+          },
+          "reason": "initial",
+          "score": 94,
+          "timestamp": 1768897358369
+        }
+      ],
+      "scores": [
+        {
+          "value": 94,
+          "scannedAt": 1768897358369
+        }
+      ],
+      "highestScore": 94,
+      "currentScore": 94,
+      "firstScannedAt": 1768897358369,
+      "lastScannedAt": 1768897358369,
+      "totalScans": 1
+    },
+    "bawsaxbt": {
+      "username": "bawsaxbt",
+      "displayName": "BAWSA",
+      "archetype": {
+        "primary": "Ship or Die",
+        "emoji": "🚢",
+        "tagline": "Building BrandOS, brick by brick",
+        "description": "The bio's emphasis on 'building BrandOS' and 'brick by brick' construction suggests a builder mentality focused on creating and shipping products/services.",
+        "strengths": [
+          "Driven and results-oriented",
+          "Focused on building and shipping"
+        ],
+        "growthTip": "Showcase behind-the-scenes glimpses of the building process to humanize the brand and connect with followers on a personal level.",
+        "assignedAt": 1768904843172
+      },
+      "archetypeHistory": [
+        {
+          "archetype": {
+            "primary": "Ship or Die",
+            "emoji": "🚢",
+            "tagline": "Building BrandOS, brick by brick",
+            "description": "The bio's emphasis on 'building BrandOS' and 'brick by brick' construction suggests a builder mentality focused on creating and shipping products/services.",
+            "strengths": [
+              "Driven and results-oriented",
+              "Focused on building and shipping"
+            ],
+            "growthTip": "Showcase behind-the-scenes glimpses of the building process to humanize the brand and connect with followers on a personal level.",
+            "assignedAt": 1768904843172
+          },
+          "reason": "initial",
+          "score": 76,
+          "timestamp": 1768904843172
+        }
+      ],
+      "scores": [
+        {
+          "value": 76,
+          "scannedAt": 1768904843172
+        },
+        {
+          "value": 77,
+          "scannedAt": 1768905109945
+        },
+        {
+          "value": 76,
+          "scannedAt": 1768905715999
+        }
+      ],
+      "highestScore": 77,
+      "currentScore": 76,
+      "firstScannedAt": 1768904843172,
+      "lastScannedAt": 1768905715999,
+      "totalScans": 3
+    },
+    "web3pingu": {
+      "username": "web3pingu",
+      "displayName": "🫡Pingu",
+      "archetype": {
+        "primary": "The Anon",
+        "emoji": "👻",
+        "tagline": "Mysterious Web3 Authority",
+        "description": "Given the pseudonymous nature and presence within web3, The Anon archetype fits well. Their influence is built on perceived expertise and a distinct online persona, rather than direct identification.",
+        "strengths": [
+          "High engagement",
+          "Strong brand recognition"
+        ],
+        "growthTip": "Cultivate a consistent narrative or thematic element throughout all content to solidify brand identity and attract new followers.",
+        "assignedAt": 1768905125670
+      },
+      "archetypeHistory": [
+        {
+          "archetype": {
+            "primary": "The Anon",
+            "emoji": "👻",
+            "tagline": "Mysterious Web3 Authority",
+            "description": "Given the pseudonymous nature and presence within web3, The Anon archetype fits well. Their influence is built on perceived expertise and a distinct online persona, rather than direct identification.",
+            "strengths": [
+              "High engagement",
+              "Strong brand recognition"
+            ],
+            "growthTip": "Cultivate a consistent narrative or thematic element throughout all content to solidify brand identity and attract new followers.",
+            "assignedAt": 1768905125670
+          },
+          "reason": "initial",
+          "score": 79,
+          "timestamp": 1768905125670
+        }
+      ],
+      "scores": [
+        {
+          "value": 79,
+          "scannedAt": 1768905125670
+        }
+      ],
+      "highestScore": 79,
+      "currentScore": 79,
+      "firstScannedAt": 1768905125670,
+      "lastScannedAt": 1768905125670,
+      "totalScans": 1
+    },
+    "banditxbt": {
+      "username": "banditxbt",
+      "displayName": "banditxbt",
+      "archetype": {
+        "primary": "The Prophet",
+        "emoji": "🔮",
+        "tagline": "Visionary Vibe Curator",
+        "description": "This account blends philosophical insights with curated content, hinting at a visionary outlook and strong opinions, fitting the Prophet archetype. Their established follower base suggests a growing influence on shaping perspectives.",
+        "strengths": [
+          "Thought leadership",
+          "Niche expertise"
+        ],
+        "growthTip": "Focus on creating long-form content (threads, articles) to showcase expertise and establish deeper connections with the audience, solidifying the 'Prophet' image.",
+        "assignedAt": 1768905521780
+      },
+      "archetypeHistory": [
+        {
+          "archetype": {
+            "primary": "The Prophet",
+            "emoji": "🔮",
+            "tagline": "Visionary Vibe Curator",
+            "description": "This account blends philosophical insights with curated content, hinting at a visionary outlook and strong opinions, fitting the Prophet archetype. Their established follower base suggests a growing influence on shaping perspectives.",
+            "strengths": [
+              "Thought leadership",
+              "Niche expertise"
+            ],
+            "growthTip": "Focus on creating long-form content (threads, articles) to showcase expertise and establish deeper connections with the audience, solidifying the 'Prophet' image.",
+            "assignedAt": 1768905521780
+          },
+          "reason": "initial",
+          "score": 88,
+          "timestamp": 1768905521780
+        }
+      ],
+      "scores": [
+        {
+          "value": 88,
+          "scannedAt": 1768905521780
+        }
+      ],
+      "highestScore": 88,
+      "currentScore": 88,
+      "firstScannedAt": 1768905521780,
+      "lastScannedAt": 1768905521780,
+      "totalScans": 1
+    },
+    "levelsio": {
+      "username": "levelsio",
+      "displayName": "@levelsio",
+      "archetype": {
+        "primary": "Ship or Die",
+        "emoji": "🚢",
+        "tagline": "Build, Ship, Scale Income",
+        "description": "This archetype best fits Levelsio because he is focused on building and launching products to generate income. He embodies a pragmatic and execution-oriented approach.",
+        "strengths": [
+          "Product Focused",
+          "Execution Excellence"
+        ],
+        "growthTip": "Leverage micro-content to document your building process and showcase behind-the-scenes insights, further solidifying your reputation as a prolific 'Ship or Die' creator.",
+        "assignedAt": 1768905837583
+      },
+      "archetypeHistory": [
+        {
+          "archetype": {
+            "primary": "Ship or Die",
+            "emoji": "🚢",
+            "tagline": "Build, Ship, Scale Income",
+            "description": "This archetype best fits Levelsio because he is focused on building and launching products to generate income. He embodies a pragmatic and execution-oriented approach.",
+            "strengths": [
+              "Product Focused",
+              "Execution Excellence"
+            ],
+            "growthTip": "Leverage micro-content to document your building process and showcase behind-the-scenes insights, further solidifying your reputation as a prolific 'Ship or Die' creator.",
+            "assignedAt": 1768905837583
+          },
+          "reason": "initial",
+          "score": 92,
+          "timestamp": 1768905837583
+        }
+      ],
+      "scores": [
+        {
+          "value": 92,
+          "scannedAt": 1768905837583
+        },
+        {
+          "value": 92,
+          "scannedAt": 1768905924117
+        },
+        {
+          "value": 93,
+          "scannedAt": 1768906035609
+        },
+        {
+          "value": 92,
+          "scannedAt": 1768906420197
+        },
+        {
+          "value": 94,
+          "scannedAt": 1768908185523
+        },
+        {
+          "value": 93,
+          "scannedAt": 1768908404807
+        },
+        {
+          "value": 93,
+          "scannedAt": 1768908470815
+        },
+        {
+          "value": 93,
+          "scannedAt": 1768908625886
+        },
+        {
+          "value": 92,
+          "scannedAt": 1768908657145
+        },
+        {
+          "value": 92,
+          "scannedAt": 1768908998517
+        },
+        {
+          "value": 92,
+          "scannedAt": 1768909000359
+        },
+        {
+          "value": 91,
+          "scannedAt": 1768909701385
+        }
+      ],
+      "highestScore": 94,
+      "currentScore": 91,
+      "firstScannedAt": 1768905837583,
+      "lastScannedAt": 1768909701385,
+      "totalScans": 12
     }
   },
-  "lastUpdated": 1768893047164
+  "lastUpdated": 1768909701385
 }

@@ -3,6 +3,9 @@ import "./globals.css";
 import ThemeProvider from "@/components/ThemeProvider";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { ToastProvider } from "@/components/ToastProvider";
+import FeedbackButton from "@/components/FeedbackButton";
+import BetaBadge from "@/components/BetaBadge";
 
 export const metadata: Metadata = {
   title: "BrandOS — Discover Your Brand DNA",
@@ -63,7 +66,13 @@ export default function RootLayout({
         {/* Custom fonts loaded via @font-face in globals.css */}
       </head>
       <body>
-        <ThemeProvider>{children}</ThemeProvider>
+        <ToastProvider>
+          <ThemeProvider>
+            <BetaBadge variant="banner" />
+            {children}
+            <FeedbackButton email="bawsa@mybrandos.app" />
+          </ThemeProvider>
+        </ToastProvider>
         <Analytics />
         <SpeedInsights />
       </body>

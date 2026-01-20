@@ -22,7 +22,8 @@ export function useScrollProgress(
 ): ScrollProgressReturn {
   const { target, offset } = options;
 
-  const scrollConfig: { target?: RefObject<HTMLElement>; offset?: [string, string][] } = {};
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const scrollConfig: any = {};
   if (target) scrollConfig.target = target;
   if (offset) scrollConfig.offset = offset;
 

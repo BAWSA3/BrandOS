@@ -151,7 +151,6 @@ export default function BrandScoreJourney({ theme, onComplete }: BrandScoreJourn
       phaseSectionsRef.current.forEach((section, index) => {
         if (!section) return;
 
-        // @ts-expect-error - GSAP ScrollTrigger plugin types
         ScrollTrigger.create({
           trigger: section,
           start: 'top top',
@@ -171,7 +170,6 @@ export default function BrandScoreJourney({ theme, onComplete }: BrandScoreJourn
 
       // Score reveal section
       if (revealSectionRef.current) {
-        // @ts-expect-error - GSAP ScrollTrigger plugin types
         ScrollTrigger.create({
           trigger: revealSectionRef.current,
           start: 'top center',
@@ -181,7 +179,6 @@ export default function BrandScoreJourney({ theme, onComplete }: BrandScoreJourn
 
       // CTA section
       if (ctaSectionRef.current) {
-        // @ts-expect-error - GSAP ScrollTrigger plugin types
         ScrollTrigger.create({
           trigger: ctaSectionRef.current,
           start: 'top center',

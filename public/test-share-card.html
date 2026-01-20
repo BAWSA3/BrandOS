@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Share Card Generator</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      background: #1a1a1a;
+      color: white;
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+    button {
+      padding: 16px 32px;
+      background: #0047FF;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0038CC;
+    }
+    #preview {
+      margin-top: 20px;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    }
+    .info {
+      color: #888;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Share Card Canvas Test</h1>
+  <p class="info">Click the button to generate an image using the canvas API</p>
+
+  <button onclick="generateImage()">Generate Share Card Image</button>
+
+  <div id="output"></div>
+
+  <script>
+    // Sample data matching ShareCardData interface
+    const testData = {
+      score: 87,
+      username: "alexbuilds",
+      displayName: "Alex Chen",
+      profileImageUrl: null, // Can't load external images in this test
+      topStrength: "Consistent brand voice",
+      voiceConsistency: 92,
+      engagementScore: 78,
+      influenceTier: "Mid",
+      brandColors: {
+        primary: "#f97316",  // Orange
+        secondary: "#a855f7" // Purple
+      }
+    };
+
+    // Color utilities
+    function hexToRgb(hex) {
+      const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+      return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+      } : null;
+    }
+
+    function darkenColor(hex, percent) {
+      const rgb = hexToRgb(hex);
+      if (!rgb) return hex;
+      const factor = 1 - percent / 100;
+      const r = Math.round(rgb.r * factor);
+      const g = Math.round(rgb.g * factor);
+      const b = Math.round(rgb.b * factor);
+      return `rgb(${r}, ${g}, ${b})`;
+    }
+
+    function getScoreLabel(score) {
+      if (score >= 90) return 'EXCEPTIONAL';
+      if (score >= 80) return 'EXCELLENT';
+      if (score >= 70) return 'STRONG';
+      if (score >= 60) return 'GOOD';
+      if (score >= 50) return 'DECENT';
+      if (score >= 40) return 'NEEDS WORK';
+      return 'CRITICAL';
+    }
+
+    function getInfluenceTierWidth(tier) {
+      switch (tier) {
+        case 'Mega': return 100;
+        case 'Macro': return 85;
+        case 'Mid': return 65;
+        case 'Micro': return 45;
+        case 'Nano':
+        default: return 25;
+      }
+    }
+
+    async function generateImage() {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+
+      // Twitter card dimensions
+      canvas.width = 1200;
+      canvas.height = 630;
+
+      const data = testData;
+      const primaryColor = data.brandColors?.primary || '#6366f1';
+      const secondaryColor = data.brandColors?.secondary || '#a855f7';
+
+      // Panel dimensions
+      const leftPanelWidth = Math.floor(canvas.width * 0.55);
+      const rightPanelWidth = canvas.width - leftPanelWidth;
+      const cornerRadius = 32;
+
+      // ==========================================================================
+      // LEFT PANEL - Dark background
+      // ==========================================================================
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(cornerRadius, 0);
+      ctx.lineTo(leftPanelWidth, 0);
+      ctx.lineTo(leftPanelWidth, canvas.height);
+      ctx.lineTo(cornerRadius, canvas.height);
+      ctx.arcTo(0, canvas.height, 0, canvas.height - cornerRadius, cornerRadius);
+      ctx.lineTo(0, cornerRadius);
+      ctx.arcTo(0, 0, cornerRadius, 0, cornerRadius);
+      ctx.closePath();
+      ctx.fillStyle = '#0F1115';
+      ctx.fill();
+      ctx.restore();
+
+      // Subtle border
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(leftPanelWidth, 0);
+      ctx.lineTo(leftPanelWidth, canvas.height);
+      ctx.stroke();
+
+      // ==========================================================================
+      // RIGHT PANEL - Brand color gradient
+      // ==========================================================================
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(leftPanelWidth, 0);
+      ctx.lineTo(canvas.width - cornerRadius, 0);
+      ctx.arcTo(canvas.width, 0, canvas.width, cornerRadius, cornerRadius);
+      ctx.lineTo(canvas.width, canvas.height - cornerRadius);
+      ctx.arcTo(canvas.width, canvas.height, canvas.width - cornerRadius, canvas.height, cornerRadius);
+      ctx.lineTo(leftPanelWidth, canvas.height);
+      ctx.closePath();
+      ctx.clip();
+
+      // Main gradient
+      const gradient = ctx.createLinearGradient(leftPanelWidth, 0, canvas.width, canvas.height);
+      gradient.addColorStop(0, primaryColor);
+      gradient.addColorStop(0.5, secondaryColor);
+      gradient.addColorStop(1, darkenColor(secondaryColor, 20));
+      ctx.fillStyle = gradient;
+      ctx.fillRect(leftPanelWidth, 0, rightPanelWidth, canvas.height);
+
+      // Light leak effect
+      const primaryRgb = hexToRgb(primaryColor);
+      if (primaryRgb) {
+        const lightLeak = ctx.createRadialGradient(
+          canvas.width + 50, -50, 0,
+          canvas.width + 50, -50, 300
+        );
+        lightLeak.addColorStop(0, `rgba(${Math.min(255, primaryRgb.r + 100)}, ${Math.min(255, primaryRgb.g + 100)}, ${Math.min(255, primaryRgb.b + 100)}, 0.4)`);
+        lightLeak.addColorStop(1, 'transparent');
+        ctx.fillStyle = lightLeak;
+        ctx.fillRect(leftPanelWidth, 0, rightPanelWidth, canvas.height);
+      }
+
+      ctx.restore();
+
+      // ==========================================================================
+      // LEFT PANEL CONTENT
+      // ==========================================================================
+
+      const leftPadding = 60;
+      let currentY = 70;
+
+      // BrandOS Logo
+      ctx.textBaseline = 'alphabetic';
+      ctx.textAlign = 'left';
+      ctx.font = 'bold 36px "Helvetica Neue", Arial, sans-serif';
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillText('Brand', leftPadding, currentY);
+
+      const brandWidth = ctx.measureText('Brand').width;
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+      ctx.fillText('OS', leftPadding + brandWidth, currentY);
+
+      // Subtitle
+      currentY += 28;
+      ctx.font = '600 11px "Courier New", monospace';
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+      ctx.fillText('AI-POWERED BRAND DNA', leftPadding, currentY);
+
+      // ==========================================================================
+      // PROFILE SECTION (without image for this test)
+      // ==========================================================================
+      currentY += 55;
+
+      // Avatar circle with initial
+      const imgSize = 52;
+      const imgX = leftPadding;
+      const imgY = currentY;
+
+      ctx.beginPath();
+      ctx.arc(imgX + imgSize / 2, imgY + imgSize / 2, imgSize / 2, 0, Math.PI * 2);
+      ctx.fillStyle = `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})`;
+      // Fallback solid color since gradients don't work on arcs directly
+      ctx.fillStyle = primaryColor;
+      ctx.fill();
+
+      // Initial letter
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = 'bold 24px "Helvetica Neue", Arial, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(data.displayName?.[0] || data.username[0].toUpperCase(), imgX + imgSize / 2, imgY + imgSize / 2);
+
+      // Reset alignment
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'alphabetic';
+
+      // Name and handle
+      const textX = imgX + imgSize + 16;
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = '600 22px "Helvetica Neue", Arial, sans-serif';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(data.displayName, textX, imgY + 16);
+
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+      ctx.font = '400 16px "Helvetica Neue", Arial, sans-serif';
+      ctx.fillText(`@${data.username}`, textX, imgY + 40);
+
+      currentY += imgSize + 45;
+
+      // ==========================================================================
+      // METRICS SECTION
+      // ==========================================================================
+
+      const metricBarWidth = leftPanelWidth - leftPadding * 2 - 20;
+      const metricBarHeight = 10;
+      const metricSpacing = 70;
+
+      const drawMetric = (label, value, widthPercent, color, y) => {
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+        ctx.font = '500 14px "Helvetica Neue", Arial, sans-serif';
+        ctx.textBaseline = 'alphabetic';
+        ctx.textAlign = 'left';
+        ctx.fillText(label, leftPadding, y);
+
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = 'bold 22px "Helvetica Neue", Arial, sans-serif';
+        ctx.fillText(value, leftPadding, y + 28);
+
+        const barY = y + 42;
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+        ctx.beginPath();
+        ctx.roundRect(leftPadding, barY, metricBarWidth, metricBarHeight, metricBarHeight / 2);
+        ctx.fill();
+
+        const fillWidth = (widthPercent / 100) * metricBarWidth;
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.roundRect(leftPadding, barY, fillWidth, metricBarHeight, metricBarHeight / 2);
+        ctx.fill();
+      };
+
+      drawMetric('Voice Consistency', `${data.voiceConsistency}%`, data.voiceConsistency, '#10B981', currentY);
+      currentY += metricSpacing;
+
+      drawMetric('Engagement', `${data.engagementScore}%`, data.engagementScore, '#0047FF', currentY);
+      currentY += metricSpacing;
+
+      const tierWidth = getInfluenceTierWidth(data.influenceTier);
+      drawMetric('Influence', data.influenceTier, tierWidth, '#9d4edd', currentY);
+
+      // ==========================================================================
+      // ANALYSIS COMPLETE INDICATOR
+      // ==========================================================================
+
+      const bottomY = canvas.height - 50;
+
+      ctx.fillStyle = '#10B981';
+      ctx.beginPath();
+      ctx.arc(leftPadding + 5, bottomY, 5, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+      ctx.font = '600 10px "Courier New", monospace';
+      ctx.textBaseline = 'middle';
+      ctx.textAlign = 'left';
+      ctx.fillText('ANALYSIS COMPLETE', leftPadding + 20, bottomY);
+
+      // ==========================================================================
+      // RIGHT PANEL - SCORE DISPLAY
+      // ==========================================================================
+
+      const rightCenterX = leftPanelWidth + rightPanelWidth / 2;
+      const rightCenterY = canvas.height / 2;
+
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = 'bold 120px "Helvetica Neue", Arial, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+      ctx.shadowBlur = 20;
+      ctx.shadowOffsetY = 4;
+      ctx.fillText(String(data.score), rightCenterX, rightCenterY - 20);
+
+      ctx.shadowColor = 'transparent';
+      ctx.shadowBlur = 0;
+      ctx.shadowOffsetY = 0;
+
+      // Score label badge
+      const label = getScoreLabel(data.score);
+      ctx.font = 'bold 14px "Courier New", monospace';
+      const badgeWidth = ctx.measureText(label).width + 40;
+      const badgeHeight = 36;
+      const badgeX = rightCenterX - badgeWidth / 2;
+      const badgeY = rightCenterY + 50;
+
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.roundRect(badgeX, badgeY, badgeWidth, badgeHeight, badgeHeight / 2);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#FFFFFF';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(label, rightCenterX, badgeY + badgeHeight / 2);
+
+      // CTA
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+      ctx.font = '500 14px "Helvetica Neue", Arial, sans-serif';
+      ctx.textBaseline = 'alphabetic';
+      ctx.fillText('brandos.xyz', rightCenterX, canvas.height - 40);
+
+      // Display the image
+      const dataUrl = canvas.toDataURL('image/png');
+      const output = document.getElementById('output');
+      output.innerHTML = `
+        <img id="preview" src="${dataUrl}" style="max-width: 100%; height: auto;" />
+        <p class="info" style="margin-top: 20px;">1200 x 630 px • Twitter Card</p>
+        <a href="${dataUrl}" download="brandos-score-card.png" style="display: inline-block; margin-top: 10px; color: #0047FF;">Download Image</a>
+      `;
+    }
+  </script>
+</body>
+</html>

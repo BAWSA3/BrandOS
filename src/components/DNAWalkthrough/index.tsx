@@ -92,7 +92,7 @@ export default function DNAWalkthrough({
     score: brandScore.overallScore,
     archetype: generatedBrandDNA.archetype,
     archetypeEmoji: generatedBrandDNA.archetypeEmoji || '🧬',
-    personalityType: generatedBrandDNA.personalityType,
+    personalityType: generatedBrandDNA.personalityType || 'INTJ',
     username: profile.username,
     displayName: profile.name,
     profileImageUrl: profile.profile_image_url,

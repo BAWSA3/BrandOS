@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BrandOS Card Prototypes</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: #0a0a0a;
+      color: #fff;
+      padding: 40px;
+      min-height: 100vh;
+    }
+    
+    h1 {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      letter-spacing: -0.02em;
+    }
+    
+    .subtitle {
+      color: rgba(255,255,255,0.5);
+      margin-bottom: 40px;
+      font-size: 14px;
+    }
+    
+    .controls {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 40px;
+      flex-wrap: wrap;
+      align-items: flex-end;
+    }
+    
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    
+    .control-group label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: rgba(255,255,255,0.5);
+    }
+    
+    input[type="text"], input[type="number"], input[type="color"], select {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: #fff;
+      font-size: 14px;
+      min-width: 120px;
+    }
+    
+    input[type="color"] {
+      width: 50px;
+      height: 40px;
+      padding: 4px;
+      cursor: pointer;
+    }
+    
+    button {
+      padding: 12px 24px;
+      background: #0047FF;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    
+    button:hover {
+      background: #0038CC;
+      transform: translateY(-1px);
+    }
+    
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+      gap: 40px;
+      margin-bottom: 40px;
+    }
+    
+    .card-container {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      padding: 24px;
+    }
+    
+    .card-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .card-title span {
+      background: rgba(0, 71, 255, 0.2);
+      color: #0047FF;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 500;
+    }
+    
+    .card-desc {
+      color: rgba(255,255,255,0.5);
+      font-size: 13px;
+      margin-bottom: 20px;
+    }
+    
+    .canvas-wrapper {
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    }
+    
+    canvas {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+    
+    .download-btn {
+      margin-top: 16px;
+      width: 100%;
+      background: rgba(255,255,255,0.1);
+    }
+    
+    .download-btn:hover {
+      background: rgba(255,255,255,0.15);
+    }
+  </style>
+</head>
+<body>
+  <h1>BrandOS Card Prototypes</h1>
+  <p class="subtitle">Test different shareable card designs with live preview</p>
+  
+  <div class="controls">
+    <div class="control-group">
+      <label>Username</label>
+      <input type="text" id="username" value="alexbuilds" />
+    </div>
+    <div class="control-group">
+      <label>Display Name</label>
+      <input type="text" id="displayName" value="Alex Chen" />
+    </div>
+    <div class="control-group">
+      <label>Score</label>
+      <input type="number" id="score" value="87" min="0" max="100" />
+    </div>
+    <div class="control-group">
+      <label>Voice %</label>
+      <input type="number" id="voice" value="92" min="0" max="100" />
+    </div>
+    <div class="control-group">
+      <label>Influence Tier</label>
+      <select id="tier">
+        <option value="Nano">Nano</option>
+        <option value="Micro">Micro</option>
+        <option value="Mid" selected>Mid</option>
+        <option value="Macro">Macro</option>
+        <option value="Mega">Mega</option>
+      </select>
+    </div>
+    <div class="control-group">
+      <label>Archetype</label>
+      <input type="text" id="archetype" value="The Builder" />
+    </div>
+    <div class="control-group">
+      <label>Primary Color</label>
+      <input type="color" id="primaryColor" value="#0047FF" />
+    </div>
+    <div class="control-group">
+      <label>Secondary Color</label>
+      <input type="color" id="secondaryColor" value="#9d4edd" />
+    </div>
+    <button onclick="generateAllCards()">Generate All Cards</button>
+  </div>
+  
+  <div class="cards-grid">
+    <!-- Billboard Card -->
+    <div class="card-container">
+      <h3 class="card-title">The Billboard <span>Design A</span></h3>
+      <p class="card-desc">Giant score, minimal data, maximum impact</p>
+      <div class="canvas-wrapper">
+        <canvas id="billboardCanvas" width="1200" height="630"></canvas>
+      </div>
+      <button class="download-btn" onclick="downloadCard('billboard')">Download PNG</button>
+    </div>
+    
+    <!-- Split Card -->
+    <div class="card-container">
+      <h3 class="card-title">The Split <span>Design B</span></h3>
+      <p class="card-desc">Identity on left, score on right with gradient</p>
+      <div class="canvas-wrapper">
+        <canvas id="splitCanvas" width="1200" height="630"></canvas>
+      </div>
+      <button class="download-btn" onclick="downloadCard('split')">Download PNG</button>
+    </div>
+    
+    <!-- Wrapped Card -->
+    <div class="card-container">
+      <h3 class="card-title">The Wrapped <span>Design C</span></h3>
+      <p class="card-desc">Spotify Wrapped-inspired vertical flow</p>
+      <div class="canvas-wrapper">
+        <canvas id="wrappedCanvas" width="1200" height="630"></canvas>
+      </div>
+      <button class="download-btn" onclick="downloadCard('wrapped')">Download PNG</button>
+    </div>
+  </div>
+
+  <script>
+    // =============================================================================
+    // UTILITIES
+    // =============================================================================
+    
+    function hexToRgb(hex) {
+      const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+      return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+      } : { r: 0, g: 71, b: 255 };
+    }
+    
+    function getScoreLabel(score) {
+      if (score >= 90) return 'EXCEPTIONAL';
+      if (score >= 80) return 'EXCELLENT';
+      if (score >= 70) return 'STRONG';
+      if (score >= 60) return 'GOOD';
+      if (score >= 50) return 'DECENT';
+      if (score >= 40) return 'NEEDS WORK';
+      return 'CRITICAL';
+    }
+    
+    function getData() {
+      return {
+        username: document.getElementById('username').value,
+        displayName: document.getElementById('displayName').value,
+        score: parseInt(document.getElementById('score').value),
+        voice: parseInt(document.getElementById('voice').value),
+        tier: document.getElementById('tier').value,
+        archetype: document.getElementById('archetype').value,
+        primaryColor: document.getElementById('primaryColor').value,
+        secondaryColor: document.getElementById('secondaryColor').value,
+      };
+    }
+    
+    // =============================================================================
+    // DESIGN A: THE BILLBOARD
+    // =============================================================================
+    
+    function generateBillboardCard() {
+      const canvas = document.getElementById('billboardCanvas');
+      const ctx = canvas.getContext('2d');
+      const data = getData();
+      const { r, g, b } = hexToRgb(data.primaryColor);
+      const { r: r2, g: g2, b: b2 } = hexToRgb(data.secondaryColor);
+      
+      // Background gradient (user's brand colors)
+      const bgGradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+      bgGradient.addColorStop(0, data.primaryColor);
+      bgGradient.addColorStop(0.5, data.secondaryColor);
+      bgGradient.addColorStop(1, `rgb(${Math.max(0, r2-40)}, ${Math.max(0, g2-40)}, ${Math.max(0, b2-40)})`);
+      ctx.fillStyle = bgGradient;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      // Noise texture overlay
+      ctx.fillStyle = 'rgba(0,0,0,0.15)';
+      for (let i = 0; i < 3000; i++) {
+        ctx.fillRect(Math.random() * canvas.width, Math.random() * canvas.height, 1, 1);
+      }
+      
+      // Light leak effect top-right
+      const lightLeak = ctx.createRadialGradient(canvas.width - 100, 100, 0, canvas.width - 100, 100, 400);
+      lightLeak.addColorStop(0, 'rgba(255,255,255,0.25)');
+      lightLeak.addColorStop(1, 'transparent');
+      ctx.fillStyle = lightLeak;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      // Username at top
+      ctx.fillStyle = 'rgba(255,255,255,0.9)';
+      ctx.font = '600 24px Inter, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(`@${data.username}`, canvas.width / 2, 80);
+      
+      // GIANT Score
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = '800 220px Inter, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.shadowColor = 'rgba(0,0,0,0.3)';
+      ctx.shadowBlur = 40;
+      ctx.shadowOffsetY = 8;
+      ctx.fillText(String(data.score), canvas.width / 2, canvas.height / 2 - 20);
+      ctx.shadowBlur = 0;
+      ctx.shadowOffsetY = 0;
+      
+      // Score label badge
+      const label = getScoreLabel(data.score);
+      ctx.font = '700 16px Inter, sans-serif';
+      const labelWidth = ctx.measureText(label).width + 48;
+      const badgeX = canvas.width / 2 - labelWidth / 2;
+      const badgeY = canvas.height / 2 + 100;
+      
+      ctx.fillStyle = 'rgba(255,255,255,0.2)';
+      ctx.beginPath();
+      ctx.roundRect(badgeX, badgeY, labelWidth, 44, 22);
+      ctx.fill();
+      
+      ctx.fillStyle = '#FFFFFF';
+      ctx.textAlign = 'center';
+      ctx.fillText(label, canvas.width / 2, badgeY + 24);
+      
+      // Bottom pills (Voice + Influence)
+      const pillY = canvas.height - 80;
+      const pillGap = 20;
+      
+      // Voice pill
+      ctx.fillStyle = 'rgba(0,0,0,0.3)';
+      ctx.beginPath();
+      ctx.roundRect(canvas.width / 2 - 180, pillY, 170, 40, 20);
+      ctx.fill();
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = '600 14px Inter, sans-serif';
+      ctx.fillText(`Voice ${data.voice}%`, canvas.width / 2 - 95, pillY + 22);
+      
+      // Influence pill
+      ctx.fillStyle = 'rgba(0,0,0,0.3)';
+      ctx.beginPath();
+      ctx.roundRect(canvas.width / 2 + 10, pillY, 170, 40, 20);
+      ctx.fill();
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillText(`${data.tier} Tier`, canvas.width / 2 + 95, pillY + 22);
+      
+      // BrandOS logo bottom center
+      ctx.fillStyle = 'rgba(255,255,255,0.7)';
+      ctx.font = '500 14px Inter, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('brandos.xyz', canvas.width / 2, canvas.height - 24);
+    }
+    
+    // =============================================================================
+    // DESIGN B: THE SPLIT
+    // =============================================================================
+    
+    function generateSplitCard() {
+      const canvas = document.getElementById('splitCanvas');
+      const ctx = canvas.getContext('2d');
+      const data = getData();
+      const { r, g, b } = hexToRgb(data.primaryColor);
+      const { r: r2, g: g2, b: b2 } = hexToRgb(data.secondaryColor);
+      
+      const splitX = Math.floor(canvas.width * 0.45);
+      
+      // LEFT PANEL - Dark
+      ctx.fillStyle = '#0a0a0a';
+      ctx.beginPath();
+      ctx.roundRect(0, 0, splitX, canvas.height, [24, 0, 0, 24]);
+      ctx.fill();
+      
+      // Subtle left panel texture
+      ctx.fillStyle = 'rgba(255,255,255,0.02)';
+      for (let i = 0; i < 500; i++) {
+        ctx.fillRect(Math.random() * splitX, Math.random() * canvas.height, 1, 1);
+      }
+      
+      // RIGHT PANEL - Gradient
+      const rightGradient = ctx.createLinearGradient(splitX, 0, canvas.width, canvas.height);
+      rightGradient.addColorStop(0, data.primaryColor);
+      rightGradient.addColorStop(0.6, data.secondaryColor);
+      rightGradient.addColorStop(1, `rgb(${Math.max(0, r2-50)}, ${Math.max(0, g2-50)}, ${Math.max(0, b2-50)})`);
+      ctx.fillStyle = rightGradient;
+      ctx.beginPath();
+      ctx.roundRect(splitX, 0, canvas.width - splitX, canvas.height, [0, 24, 24, 0]);
+      ctx.fill();
+      
+      // Light leak on right panel
+      const lightLeak = ctx.createRadialGradient(canvas.width, 0, 0, canvas.width, 0, 350);
+      lightLeak.addColorStop(0, 'rgba(255,255,255,0.3)');
+      lightLeak.addColorStop(1, 'transparent');
+      ctx.fillStyle = lightLeak;
+      ctx.fillRect(splitX, 0, canvas.width - splitX, canvas.height);
+      
+      // LEFT PANEL CONTENT
+      const leftPadding = 50;
+      
+      // BrandOS Logo
+      ctx.font = '700 italic 28px Inter, sans-serif';
+      ctx.fillStyle = '#FFFFFF';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'alphabetic';
+      ctx.fillText('Brand', leftPadding, 60);
+      const brandWidth = ctx.measureText('Brand').width;
+      ctx.fillStyle = data.primaryColor;
+      ctx.font = '700 28px monospace';
+      ctx.fillText('OS', leftPadding + brandWidth, 60);
+      
+      // Username
+      ctx.fillStyle = 'rgba(255,255,255,0.6)';
+      ctx.font = '500 16px Inter, sans-serif';
+      ctx.fillText(`@${data.username}`, leftPadding, 110);
+      
+      // Archetype with emoji
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = '700 32px Inter, sans-serif';
+      ctx.fillText(`🎯 ${data.archetype}`, leftPadding, 180);
+      
+      // Personality summary
+      ctx.fillStyle = 'rgba(255,255,255,0.6)';
+      ctx.font = '400 15px Inter, sans-serif';
+      const summary = "You bring ideas to life with precision and purpose. Your community trusts you to deliver.";
+      const words = summary.split(' ');
+      let line = '';
+      let lineY = 230;
+      const maxWidth = splitX - leftPadding * 2;
+      
+      for (const word of words) {
+        const testLine = line + word + ' ';
+        if (ctx.measureText(testLine).width > maxWidth) {
+          ctx.fillText(line.trim(), leftPadding, lineY);
+          line = word + ' ';
+          lineY += 24;
+        } else {
+          line = testLine;
+        }
+      }
+      ctx.fillText(line.trim(), leftPadding, lineY);
+      
+      // Divider line
+      ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(leftPadding, 340);
+      ctx.lineTo(splitX - leftPadding, 340);
+      ctx.stroke();
+      
+      // Metrics on left
+      const metrics = [
+        { label: 'Voice Consistency', value: `${data.voice}%` },
+        { label: 'Influence Tier', value: data.tier },
+        { label: 'Engagement', value: '78%' },
+      ];
+      
+      let metricY = 380;
+      metrics.forEach(m => {
+        ctx.fillStyle = 'rgba(255,255,255,0.5)';
+        ctx.font = '400 12px Inter, sans-serif';
+        ctx.fillText(m.label, leftPadding, metricY);
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = '600 16px Inter, sans-serif';
+        ctx.fillText(m.value, leftPadding, metricY + 22);
+        metricY += 60;
+      });
+      
+      // brandos.xyz at bottom left
+      ctx.fillStyle = 'rgba(255,255,255,0.4)';
+      ctx.font = '500 12px Inter, sans-serif';
+      ctx.fillText('brandos.xyz', leftPadding, canvas.height - 30);
+      
+      // RIGHT PANEL CONTENT
+      const rightCenterX = splitX + (canvas.width - splitX) / 2;
+      
+      // SCORE
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = '800 160px Inter, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.shadowColor = 'rgba(0,0,0,0.25)';
+      ctx.shadowBlur = 30;
+      ctx.fillText(String(data.score), rightCenterX, canvas.height / 2 - 40);
+      ctx.shadowBlur = 0;
+      
+      // Score label
+      const label = getScoreLabel(data.score);
+      ctx.fillStyle = 'rgba(255,255,255,0.2)';
+      const labelWidth = 140;
+      ctx.beginPath();
+      ctx.roundRect(rightCenterX - labelWidth / 2, canvas.height / 2 + 40, labelWidth, 40, 20);
+      ctx.fill();
+      
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = '700 14px Inter, sans-serif';
+      ctx.fillText(label, rightCenterX, canvas.height / 2 + 62);
+      
+      // "Brand Score" label at bottom of right panel
+      ctx.fillStyle = 'rgba(255,255,255,0.6)';
+      ctx.font = '500 14px Inter, sans-serif';
+      ctx.fillText('BRAND SCORE', rightCenterX, canvas.height - 50);
+    }
+    
+    // =============================================================================
+    // DESIGN C: THE WRAPPED
+    // =============================================================================
+    
+    function generateWrappedCard() {
+      const canvas = document.getElementById('wrappedCanvas');
+      const ctx = canvas.getContext('2d');
+      const data = getData();
+      const { r, g, b } = hexToRgb(data.primaryColor);
+      const { r: r2, g: g2, b: b2 } = hexToRgb(data.secondaryColor);
+      
+      // Background - dark base
+      ctx.fillStyle = '#0a0a0a';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      // Gradient blob behind score area
+      const blobGradient = ctx.createRadialGradient(
+        canvas.width / 2, canvas.height / 2 - 50, 0,
+        canvas.width / 2, canvas.height / 2 - 50, 400
+      );
+      blobGradient.addColorStop(0, `rgba(${r}, ${g}, ${b}, 0.5)`);
+      blobGradient.addColorStop(0.5, `rgba(${r2}, ${g2}, ${b2}, 0.3)`);
+      blobGradient.addColorStop(1, 'transparent');
+      ctx.fillStyle = blobGradient;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      // Noise
+      ctx.fillStyle = 'rgba(255,255,255,0.015)';
+      for (let i = 0; i < 2000; i++) {
+        ctx.fillRect(Math.random() * canvas.width, Math.random() * canvas.height, 1, 1);
+      }
+      
+      // TOP HEADER BAR
+      ctx.fillStyle = 'rgba(255,255,255,0.05)';
+      ctx.fillRect(0, 0, canvas.width, 70);
+      ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(0, 70);
+      ctx.lineTo(canvas.width, 70);
+      ctx.stroke();
+      
+      // BrandOS logo left
+      ctx.font = '700 italic 22px Inter, sans-serif';
+      ctx.fillStyle = '#FFFFFF';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('Brand', 40, 35);
+      const brandWidth = ctx.measureText('Brand').width;
+      ctx.fillStyle = data.primaryColor;
+      ctx.font = '700 22px monospace';
+      ctx.fillText('OS', 40 + brandWidth, 35);
+      
+      // Username + tier right
+      ctx.fillStyle = 'rgba(255,255,255,0.7)';
+      ctx.font = '500 16px Inter, sans-serif';
+      ctx.textAlign = 'right';
+      ctx.fillText(`@${data.username} • ${data.tier} Tier`, canvas.width - 40, 35);
+      
+      // SCORE CENTER
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = '800 180px Inter, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.shadowColor = `rgba(${r}, ${g}, ${b}, 0.5)`;
+      ctx.shadowBlur = 60;
+      ctx.fillText(String(data.score), canvas.width / 2, 220);
+      ctx.shadowBlur = 0;
+      
+      // Score label
+      const label = getScoreLabel(data.score);
+      ctx.font = '700 14px Inter, sans-serif';
+      ctx.fillStyle = data.primaryColor;
+      ctx.fillText(label, canvas.width / 2, 320);
+      
+      // ARCHETYPE
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = '700 36px Inter, sans-serif';
+      ctx.fillText(`🎯 ${data.archetype.toUpperCase()}`, canvas.width / 2, 390);
+      
+      // Summary text
+      ctx.fillStyle = 'rgba(255,255,255,0.6)';
+      ctx.font = '400 16px Inter, sans-serif';
+      ctx.fillText('"You bring ideas to life with precision and purpose."', canvas.width / 2, 440);
+      
+      // BOTTOM TONE STRIP
+      const stripY = canvas.height - 100;
+      ctx.fillStyle = 'rgba(255,255,255,0.03)';
+      ctx.fillRect(0, stripY, canvas.width, 100);
+      ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+      ctx.beginPath();
+      ctx.moveTo(0, stripY);
+      ctx.lineTo(canvas.width, stripY);
+      ctx.stroke();
+      
+      // Tone bars
+      const tones = [
+        { label: 'Voice', value: data.voice, color: '#10B981' },
+        { label: 'Energy', value: 78, color: data.primaryColor },
+        { label: 'Confidence', value: 85, color: '#F59E0B' },
+        { label: 'Style', value: 71, color: data.secondaryColor },
+      ];
+      
+      const barWidth = 200;
+      const barGap = 60;
+      const totalWidth = (barWidth * 4) + (barGap * 3);
+      let barX = (canvas.width - totalWidth) / 2;
+      
+      tones.forEach(tone => {
+        // Label
+        ctx.fillStyle = 'rgba(255,255,255,0.5)';
+        ctx.font = '500 11px Inter, sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText(tone.label, barX, stripY + 30);
+        
+        // Value
+        ctx.textAlign = 'right';
+        ctx.fillText(`${tone.value}%`, barX + barWidth, stripY + 30);
+        
+        // Bar background
+        ctx.fillStyle = 'rgba(255,255,255,0.1)';
+        ctx.beginPath();
+        ctx.roundRect(barX, stripY + 45, barWidth, 8, 4);
+        ctx.fill();
+        
+        // Bar fill
+        ctx.fillStyle = tone.color;
+        ctx.beginPath();
+        ctx.roundRect(barX, stripY + 45, barWidth * (tone.value / 100), 8, 4);
+        ctx.fill();
+        
+        barX += barWidth + barGap;
+      });
+      
+      // brandos.xyz footer
+      ctx.fillStyle = 'rgba(255,255,255,0.4)';
+      ctx.font = '500 12px Inter, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('brandos.xyz', canvas.width / 2, stripY + 85);
+    }
+    
+    // =============================================================================
+    // GENERATE & DOWNLOAD
+    // =============================================================================
+    
+    function generateAllCards() {
+      generateBillboardCard();
+      generateSplitCard();
+      generateWrappedCard();
+    }
+    
+    function downloadCard(type) {
+      const canvasId = type + 'Canvas';
+      const canvas = document.getElementById(canvasId);
+      const link = document.createElement('a');
+      link.download = `brandos-${type}-card.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }
+    
+    // Generate on load
+    generateAllCards();
+    
+    // Regenerate on input change
+    document.querySelectorAll('input, select').forEach(el => {
+      el.addEventListener('change', generateAllCards);
+      el.addEventListener('input', generateAllCards);
+    });
+  </script>
+</body>
+</html>
