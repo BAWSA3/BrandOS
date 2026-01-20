@@ -1,0 +1,131 @@
+{
+  "profiles": {
+    "naval": {
+      "username": "naval",
+      "displayName": "Naval",
+      "archetype": {
+        "primary": "The Prophet",
+        "emoji": "🔮",
+        "tagline": "Incompressible wisdom, concise delivery.",
+        "description": "Naval consistently shares insightful and visionary thoughts, often exploring philosophical and entrepreneurial concepts before they become mainstream. His short, impactful tweets exemplify a prophetic voice.",
+        "strengths": [
+          "Visionary thinking",
+          "Concise communication"
+        ],
+        "growthTip": "Consider hosting occasional live Q&A sessions on Twitter Spaces to further engage with his audience and reinforce his thought leadership position.",
+        "assignedAt": 1768892981245
+      },
+      "archetypeHistory": [
+        {
+          "archetype": {
+            "primary": "The Prophet",
+            "emoji": "🔮",
+            "tagline": "Incompressible wisdom, concise delivery.",
+            "description": "Naval consistently shares insightful and visionary thoughts, often exploring philosophical and entrepreneurial concepts before they become mainstream. His short, impactful tweets exemplify a prophetic voice.",
+            "strengths": [
+              "Visionary thinking",
+              "Concise communication"
+            ],
+            "growthTip": "Consider hosting occasional live Q&A sessions on Twitter Spaces to further engage with his audience and reinforce his thought leadership position.",
+            "assignedAt": 1768892981245
+          },
+          "reason": "initial",
+          "score": 92,
+          "timestamp": 1768892981245
+        }
+      ],
+      "scores": [
+        {
+          "value": 92,
+          "scannedAt": 1768892981245
+        },
+        {
+          "value": 92,
+          "scannedAt": 1768892992249
+        },
+        {
+          "value": 93,
+          "scannedAt": 1768893000804
+        }
+      ],
+      "highestScore": 93,
+      "currentScore": 93,
+      "firstScannedAt": 1768892981245,
+      "lastScannedAt": 1768893000804,
+      "totalScans": 3
+    },
+    "pmarca": {
+      "username": "pmarca",
+      "displayName": "Marc Andreessen 🇺🇸",
+      "archetype": {
+        "primary": "The Prophet",
+        "emoji": "🔮",
+        "tagline": "Future-focused visionary",
+        "description": "Andreessen's profile aligns with The Prophet archetype due to his strong opinions, forward-thinking perspectives, and history of predicting technological trends.",
+        "strengths": [
+          "Visionary thinking",
+          "Predictive analysis"
+        ],
+        "growthTip": "Continue to share bold predictions and engage in thoughtful discussions about the future to reinforce the Prophet archetype.",
+        "assignedAt": 1768893047164
+      },
+      "archetypeHistory": [
+        {
+          "archetype": {
+            "primary": "The Prophet",
+            "emoji": "🔮",
+            "tagline": "Visionary tech prognosticator",
+            "description": "Andreessen's track record of predicting and shaping technological trends positions him as a 'Prophet.' His strong opinions and future-oriented perspective are well-known.",
+            "strengths": [
+              "Clear, confident vision",
+              "Significant industry influence"
+            ],
+            "growthTip": "Continue to engage in thoughtful discourse and selectively share insights that reinforce his position as a leading voice in technology.",
+            "assignedAt": 1768893028638
+          },
+          "reason": "initial",
+          "score": 92,
+          "timestamp": 1768893028638
+        },
+        {
+          "archetype": {
+            "primary": "The Prophet",
+            "emoji": "🔮",
+            "tagline": "Future-focused visionary",
+            "description": "Andreessen's profile aligns with The Prophet archetype due to his strong opinions, forward-thinking perspectives, and history of predicting technological trends.",
+            "strengths": [
+              "Visionary thinking",
+              "Predictive analysis"
+            ],
+            "growthTip": "Continue to share bold predictions and engage in thoughtful discussions about the future to reinforce the Prophet archetype.",
+            "assignedAt": 1768893047164
+          },
+          "previousArchetype": "The Prophet",
+          "reason": "manual_reevaluate",
+          "score": 94,
+          "timestamp": 1768893047164
+        }
+      ],
+      "scores": [
+        {
+          "value": 92,
+          "scannedAt": 1768893028638
+        },
+        {
+          "value": 92,
+          "scannedAt": 1768893038427
+        },
+        {
+          "value": 94,
+          "scannedAt": 1768893047164
+        }
+      ],
+      "highestScore": 94,
+      "currentScore": 94,
+      "firstScannedAt": 1768893028638,
+      "lastScannedAt": 1768893047164,
+      "totalScans": 3
+    }
+  },
+  "lastUpdated": 1768893047164
+}

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { geminiFlash, xBrandScorePrompt, XProfileData } from '@/lib/gemini';
+import { resolveArchetype, getEvolutionInfo } from '@/lib/archetype-engine';
 
 /**
  * Brand Score API - Profile-only analysis
@@ -101,7 +102,10 @@ async function fetchProfile(username: string, origin: string): Promise<XProfileD
 
 export async function POST(request: NextRequest) {
   try {
-    const { username } = await request.json() as { username: string };
+    const { username, forceReevaluate = false } = await request.json() as {
+      username: string;
+      forceReevaluate?: boolean;
+    };
 
     if (!username) {
       return NextResponse.json(
@@ -154,6 +158,30 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // === ARCHETYPE CONSISTENCY ENGINE ===
+    // Resolve archetype: new users get Gemini result, returning users get cached
+    let archetypeDecision;
+    try {
+      archetypeDecision = await resolveArchetype(
+        cleanUsername,
+        profile.name || profile.username,
+        brandScore.archetype,
+        brandScore.overallScore,
+        forceReevaluate
+      );
+
+      // Replace Gemini's archetype with the resolved (consistent) one
+      brandScore.archetype = archetypeDecision.archetype;
+
+      console.log(`[BrandScore] Archetype for @${cleanUsername}: ${archetypeDecision.archetype.primary} (${archetypeDecision.reason})`);
+    } catch (archetypeError) {
+      console.error('Archetype resolution error:', archetypeError);
+      // Continue with Gemini's result if archetype engine fails
+    }
+
+    // Get evolution info for UI
+    const evolutionInfo = getEvolutionInfo(cleanUsername);
+
     // Save to leaderboard
     try {
       await fetch(`${origin}/api/leaderboard`, {
@@ -177,6 +205,10 @@ export async function POST(request: NextRequest) {
       meta: {
         enhanced: false,
         analyzedAt: new Date().toISOString(),
+        archetypeSource: archetypeDecision?.reason || 'gemini',
+        evolved: archetypeDecision?.evolved || false,
+        previousArchetype: archetypeDecision?.previousArchetype,
+        evolutionInfo: evolutionInfo || undefined,
       },
     });
 
