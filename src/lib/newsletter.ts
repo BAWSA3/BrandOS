@@ -1,8 +1,4 @@
-import { promises as fs } from 'fs';
-import path from 'path';
-
-const DATA_DIR = path.join(process.cwd(), 'data');
-const SIGNUPS_FILE = path.join(DATA_DIR, 'signups.json');
+import supabase from './supabase';
 
 export interface EmailSignup {
   id: string;
@@ -11,57 +7,102 @@ export interface EmailSignup {
   createdAt: string;
 }
 
-async function ensureDataDir() {
+export async function addEmailSignup(
+  email: string,
+  source: string = 'landing'
+): Promise<{ success: boolean; error?: string }> {
   try {
-    await fs.access(DATA_DIR);
-  } catch {
-    await fs.mkdir(DATA_DIR, { recursive: true });
+    const normalizedEmail = email.toLowerCase().trim();
+
+    // Check if email already exists
+    const { data: existing } = await supabase
+      .from('EmailSignup')
+      .select('id')
+      .eq('email', normalizedEmail)
+      .single();
+
+    if (existing) {
+      return { success: false, error: 'Email already registered' };
+    }
+
+    // Generate a cuid-like ID
+    const id = `signup_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+
+    // Add new signup with explicit id and createdAt
+    const { error } = await supabase
+      .from('EmailSignup')
+      .insert({
+        id,
+        email: normalizedEmail,
+        source,
+        createdAt: new Date().toISOString(),
+      });
+
+    if (error) {
+      console.error('[Newsletter] Supabase error:', error);
+      return { success: false, error: `Failed to save signup: ${error.message}` };
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error('[Newsletter] Error adding signup:', error);
+    return { success: false, error: 'Failed to save signup' };
   }
 }
 
-async function readSignups(): Promise<EmailSignup[]> {
-  await ensureDataDir();
+export async function getSignupCount(): Promise<number> {
   try {
-    const data = await fs.readFile(SIGNUPS_FILE, 'utf-8');
-    return JSON.parse(data);
-  } catch {
+    const { count, error } = await supabase
+      .from('EmailSignup')
+      .select('*', { count: 'exact', head: true });
+
+    if (error) {
+      console.error('[Newsletter] Error getting signup count:', error);
+      return 0;
+    }
+
+    return count || 0;
+  } catch (error) {
+    console.error('[Newsletter] Error getting signup count:', error);
+    return 0;
+  }
+}
+
+export async function getAllSignups(): Promise<EmailSignup[]> {
+  try {
+    const { data, error } = await supabase
+      .from('EmailSignup')
+      .select('*')
+      .order('createdAt', { ascending: false });
+
+    if (error) {
+      console.error('[Newsletter] Error getting all signups:', error);
+      return [];
+    }
+
+    return data || [];
+  } catch (error) {
+    console.error('[Newsletter] Error getting all signups:', error);
     return [];
   }
 }
 
-async function writeSignups(signups: EmailSignup[]) {
-  await ensureDataDir();
-  await fs.writeFile(SIGNUPS_FILE, JSON.stringify(signups, null, 2));
-}
+export async function getSignupsBySource(source: string): Promise<EmailSignup[]> {
+  try {
+    const { data, error } = await supabase
+      .from('EmailSignup')
+      .select('*')
+      .eq('source', source)
+      .order('createdAt', { ascending: false });
 
-export async function addEmailSignup(email: string, source: string = 'landing'): Promise<{ success: boolean; error?: string }> {
-  const signups = await readSignups();
+    if (error) {
+      console.error('[Newsletter] Error getting signups by source:', error);
+      return [];
+    }
 
-  // Check if email already exists
-  const exists = signups.some(s => s.email.toLowerCase() === email.toLowerCase());
-  if (exists) {
-    return { success: false, error: 'Email already registered' };
+    return data || [];
+  } catch (error) {
+    console.error('[Newsletter] Error getting signups by source:', error);
+    return [];
   }
-
-  // Add new signup
-  const newSignup: EmailSignup = {
-    id: `signup_${crypto.randomUUID()}`,
-    email: email.toLowerCase().trim(),
-    source,
-    createdAt: new Date().toISOString(),
-  };
-
-  signups.push(newSignup);
-  await writeSignups(signups);
-
-  return { success: true };
-}
-
-export async function getSignupCount(): Promise<number> {
-  const signups = await readSignups();
-  return signups.length;
-}
-
-export async function getAllSignups(): Promise<EmailSignup[]> {
-  return readSignups();
 }
