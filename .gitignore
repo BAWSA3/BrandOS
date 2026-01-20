@@ -46,7 +46,7 @@ yarn-error.log*
 .playwright-mcp/
 
 # Separate projects
-relique/
+/relique/
 
 # typescript
 *.tsbuildinfo
