@@ -4,6 +4,7 @@ import { useBrandStore } from '@/lib/store';
 import XBrandScoreHero from '@/components/XBrandScoreHero';
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { scroll, animate } from 'motion';
+import { useInnerCircle } from '@/components/InnerCircleBadge';
 
 
 // =============================================================================
@@ -100,6 +101,9 @@ function ScrollParallax() {
 
 export default function LandingPage() {
   const { theme } = useBrandStore();
+
+  // Handle invite code validation on landing page
+  useInnerCircle();
 
   return (
     <div

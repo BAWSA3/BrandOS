@@ -121,3 +121,107 @@ model EmailSignup {
   @@index([createdAt])
 }
 
+// Invite codes for Inner Circle referrals
+model InviteCode {
+  id          String    @id @default(cuid())
+  code        String    @unique
+  createdBy   String    // X username of creator
+  maxUses     Int       @default(3)
+  usedCount   Int       @default(0)
+  usedBy      String    @default("[]") // JSON array of usernames
+  expiresAt   DateTime?
+  createdAt   DateTime  @default(now())
+  isActive    Boolean   @default(true)
+
+  @@index([code])
+  @@index([createdBy])
+}
+
+// ===== RESEARCH AGENT MODELS =====
+
+model ResearchRun {
+  id          String    @id @default(cuid())
+  status      String    @default("pending") // pending, running, completed, failed
+  verticals   String    // JSON array of verticals covered
+  sources     String    // JSON array of sources used
+  startedAt   DateTime  @default(now())
+  completedAt DateTime?
+  topicsFound Int       @default(0)
+  error       String?
+
+  // Owner
+  userId  String
+  brandId String?
+
+  // Relationships
+  topics ResearchTopic[]
+
+  @@index([userId])
+  @@index([brandId])
+  @@index([startedAt])
+}
+
+model ResearchTopic {
+  id              String   @id @default(cuid())
+  title           String
+  summary         String
+  vertical        String   // pokemon, mtg, yugioh, sports-cards, collectibles
+  category        String   // news, trend, controversy, product-launch, price-alert
+  relevanceScore  Int      @default(50) // 0-100
+  sentimentScore  Int?     // -100 to 100
+  engagementLevel String?  // low, medium, high, viral
+
+  // Source data
+  sources  String // JSON array of source references
+  keywords String  // JSON array of extracted keywords
+  hashtags String? // JSON array of related hashtags
+  mentions String? // JSON array of mentioned accounts/products
+
+  // Timing
+  trendingPeriod String?  // last-24h, last-week, last-month
+  firstSeen      DateTime @default(now())
+  lastUpdated    DateTime @default(now())
+  expiresAt      DateTime?
+
+  // Relationships
+  researchRunId String
+  researchRun   ResearchRun      @relation(fields: [researchRunId], references: [id], onDelete: Cascade)
+  selections    TopicSelection[]
+
+  @@index([vertical])
+  @@index([category])
+  @@index([relevanceScore])
+  @@index([firstSeen])
+}
+
+model TopicSelection {
+  id         String   @id @default(cuid())
+  status     String   @default("selected") // selected, in-progress, content-generated, dismissed
+  selectedAt DateTime @default(now())
+
+  // Content generation tracking
+  contentTypes   String? // JSON array of content types to generate
+  generatedCount Int     @default(0)
+
+  // Relationships
+  topicId String
+  topic   ResearchTopic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  userId  String
+  brandId String?
+
+  @@unique([topicId, userId])
+  @@index([userId])
+  @@index([status])
+}
+
+model ResearchSourceConfig {
+  id          String    @id @default(cuid())
+  name        String    @unique // twitter, reddit, youtube, serper
+  enabled     Boolean   @default(true)
+  apiStatus   String    @default("unknown") // healthy, degraded, down, unknown
+  lastChecked DateTime?
+  config      String?   // JSON config (rate limits, etc.)
+
+  @@index([enabled])
+}
+

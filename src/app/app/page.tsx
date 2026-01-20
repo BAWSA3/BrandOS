@@ -29,6 +29,7 @@ import AnimatedBackground from '@/components/AnimatedBackground';
 import DataPersistenceWarning from '@/components/DataPersistenceWarning';
 import { useToast } from '@/components/ToastProvider';
 import { BetaBadgeInline } from '@/components/BetaBadge';
+import { InnerCircleBadge, useInnerCircle, InnerCircleStyles } from '@/components/InnerCircleBadge';
 import ChangelogModal from '@/components/ChangelogModal';
 import analytics from '@/lib/analytics';
 
@@ -55,6 +56,7 @@ function HomeContent() {
   const brandDNA = useCurrentBrand();
   const brandCompleteness = useBrandCompleteness();
   const toast = useToast();
+  const { isInnerCircle } = useInnerCircle();
 
   // Check for phases breakdown query param (from landing page)
   const showPhasesParam = searchParams.get('showPhases') === 'true';
@@ -618,6 +620,9 @@ function HomeContent() {
 
   return (
     <div className={`min-h-screen relative overflow-hidden transition-colors duration-300 ${theme === 'dark' ? 'bg-[#0a0a0a] text-white' : 'bg-[#faf8f5] text-[#1a1a1a]'}`}>
+      {/* Inner Circle styles for shimmer animation */}
+      {isInnerCircle && <InnerCircleStyles />}
+
       {/* Animated Background with Blue Orbs */}
       <AnimatedBackground variant="default" orbCount={3} />
       
@@ -705,6 +710,7 @@ function HomeContent() {
             <span className="text-white/50 text-xs font-mono uppercase tracking-wider">Brand</span>
             <span className="font-medium text-white">{brandDNA?.name || 'Select'}</span>
             <BetaBadgeInline />
+            {isInnerCircle && <InnerCircleBadge variant="inline" />}
             <svg className="w-4 h-4 text-white/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 9l-7 7-7-7" />
             </svg>

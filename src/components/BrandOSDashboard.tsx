@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Terminal, Shield, BarChart3, Activity, Info, AlertTriangle } from 'lucide-react';
 import { AuthenticityAnalysis, ActivityAnalysis } from '@/lib/gemini';
+import { InnerCircleBadge, useInnerCircle } from '@/components/InnerCircleBadge';
 
 
 /* TYPEWRITER TEXT COMPONENT */
@@ -97,6 +98,7 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({
   onShareToX
 }) => {
   const [copyStatus, setCopyStatus] = useState<'idle' | 'copying' | 'copied'>('idle');
+  const { isInnerCircle } = useInnerCircle();
 
   const handleCopy = async () => {
     if (!onCopyToClipboard) return;
@@ -196,7 +198,7 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({
               <h2 className="text-3xl md:text-4xl font-brand font-black italic text-black tracking-tight leading-none">
                 {data.profile.displayName}
               </h2>
-              <div className="flex items-center gap-2 mt-1">
+              <div className="flex items-center gap-2 mt-1 flex-wrap">
                 <p className="font-os text-sm text-gray-500 font-bold">@{data.profile.username}</p>
                 {activity && (
                   <span className={`font-os text-[9px] px-1.5 py-0.5 rounded-[2px] font-bold tracking-wider ${
@@ -209,6 +211,7 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({
                     {activity.levelLabel.toUpperCase()}
                   </span>
                 )}
+                {isInnerCircle && <InnerCircleBadge variant="inline" />}
               </div>
             </div>
           </div>
