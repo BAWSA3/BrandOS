@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "prisma generate && next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "send-email": "npx tsx scripts/send-email.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.71.2",

@@ -99,6 +99,47 @@ But even strong brands have room to grow.`,
 }
 
 // =============================================================================
+// Launch Announcement Email (Manual Send)
+// =============================================================================
+
+export const launchAnnouncementEmail: EmailTemplate = {
+  id: 'launch-announcement',
+  name: 'BrandOS Public Launch Announcement',
+  sendDelay: 'manual', // Not part of auto sequence
+  subjectLines: [
+    'BrandOS is live. Discover your Brand DNA.',
+    "It's here, {{name}}. BrandOS just launched.",
+    'You got early access. Now everyone can see what you discovered.',
+  ],
+  body: (data) => `Hey ${data.name}!
+
+Big news: BrandOS is officially live.
+
+You were one of the first to discover your Brand DNA. Now the world can too.
+
+Your stats:
+→ Brand DNA Score: ${data.score}/100
+→ Archetype: ${data.archetype} ${data.archetypeEmoji}
+
+Here's what's new since you last visited:
+→ Shareable score cards (flex your archetype)
+→ 5 AI agents trained on YOUR Brand DNA
+→ Archetype evolution tracking
+
+As an Inner Circle member, you have Founding Member status forever. That means free access to features we'll charge for later.
+
+Share your score card and let's make some noise: mybrandos.app
+
+Thanks for being early.
+
+- Bawsa
+
+"brick by brick"
+
+P.S. Know someone who needs to discover their Brand DNA? Send them to mybrandos.app`
+};
+
+// =============================================================================
 // Email 1: Your Score + What It Means
 // =============================================================================
 
@@ -811,6 +852,11 @@ export function getEmailSequenceForSegment(segment: Segment): EmailTemplate[] {
   return emailSequencesBySegment[segment] || emailSequence;
 }
 
+// Manual/one-off email templates (not in auto sequences)
+export const manualEmailTemplates: EmailTemplate[] = [
+  launchAnnouncementEmail,
+];
+
 // All templates combined (for lookup by ID)
 export const allEmailTemplates: EmailTemplate[] = [
   ...emailSequence,
@@ -818,6 +864,7 @@ export const allEmailTemplates: EmailTemplate[] = [
   ...dtcSequence,
   ...b2bSaasSequence,
   ...agencySequence,
+  ...manualEmailTemplates,
 ];
 
 // =============================================================================
