@@ -12,9 +12,25 @@
  */
 
 import * as readline from 'readline';
-import { promises as fs } from 'fs';
+import { promises as fs, readFileSync } from 'fs';
 import path from 'path';
 import { Resend } from 'resend';
+
+// Load .env.local
+try {
+  const envLocalPath = path.join(process.cwd(), '.env.local');
+  const envLocal = readFileSync(envLocalPath, 'utf-8');
+  envLocal.split('\n').forEach(line => {
+    if (line && !line.startsWith('#')) {
+      const [key, ...valueParts] = line.split('=');
+      if (key && valueParts.length) {
+        process.env[key.trim()] = valueParts.join('=').trim();
+      }
+    }
+  });
+} catch {
+  // .env.local not found, continue with existing env
+}
 
 // Types
 interface Signup {
