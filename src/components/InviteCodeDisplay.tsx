@@ -30,7 +30,7 @@ export function InviteCodeDisplay({ username, onGenerate }: InviteCodeDisplayPro
         const response = await fetch('/api/invite', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username, count: 3 }),
+          body: JSON.stringify({ username, count: 1 }),
         });
 
         const data = await response.json();
@@ -97,7 +97,7 @@ export function InviteCodeDisplay({ username, onGenerate }: InviteCodeDisplayPro
             color: 'rgba(255, 255, 255, 0.6)',
           }}
         >
-          GENERATING YOUR INVITE CODES...
+          GENERATING YOUR INVITE CODE...
         </div>
       </motion.div>
     );
@@ -301,7 +301,7 @@ export function InviteCodeDisplay({ username, onGenerate }: InviteCodeDisplayPro
           textAlign: 'center',
         }}
       >
-        Share these links with friends to give them Inner Circle access
+        Share this link with a friend to give them Inner Circle access
       </div>
 
       {/* Toast notification */}
