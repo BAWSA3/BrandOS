@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, Fragment } from "react";
+import { useState, useEffect, useCallback, Fragment, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Copy, Power, Eye, EyeOff, Plus, RefreshCw, Check, X } from "lucide-react";
 
@@ -23,7 +23,28 @@ interface Stats {
   codesCreatedToday: number;
 }
 
+// Loading fallback for Suspense
+function AdminLoading() {
+  return (
+    <div className="min-h-screen bg-[#0A0A0F] flex items-center justify-center">
+      <div className="flex items-center gap-3 text-white/50">
+        <RefreshCw className="w-5 h-5 animate-spin" />
+        <span>Loading...</span>
+      </div>
+    </div>
+  );
+}
+
+// Main export wrapped in Suspense
 export default function AdminPage() {
+  return (
+    <Suspense fallback={<AdminLoading />}>
+      <AdminPageContent />
+    </Suspense>
+  );
+}
+
+function AdminPageContent() {
   const searchParams = useSearchParams();
   const adminKey = searchParams.get("key");
 
