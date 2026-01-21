@@ -72,7 +72,7 @@ export async function GET(request: NextRequest) {
 }
 
 // POST /api/invite - Generate invite codes for a username
-const MAX_CODES_PER_USER = 3;
+const MAX_CODES_PER_USER = 1;
 
 export async function POST(request: NextRequest) {
   try {
@@ -134,7 +134,7 @@ export async function POST(request: NextRequest) {
         data: {
           code,
           createdBy: username,
-          maxUses: 3,
+          maxUses: 1,
           usedCount: 0,
           usedBy: '[]',
           isActive: true,
