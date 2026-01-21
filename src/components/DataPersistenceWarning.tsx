@@ -1,26 +1,35 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useAuth } from '@/hooks/useAuth';
 
 interface DataPersistenceWarningProps {
   storageKey?: string;
   onExport?: () => void;
 }
 
-export default function DataPersistenceWarning({ 
+export default function DataPersistenceWarning({
   storageKey = 'brandos-data-warning-dismissed',
   onExport
 }: DataPersistenceWarningProps) {
+  const { user, isLoading } = useAuth();
   const [isDismissed, setIsDismissed] = useState(true); // Start true to prevent flash
   const [showReminder, setShowReminder] = useState(false);
-  
+
   useEffect(() => {
+    // Don't show warning if user is authenticated (data syncs to database)
+    if (user) {
+      setIsDismissed(true);
+      setShowReminder(false);
+      return;
+    }
+
     // Check if dismissed on client
     const dismissed = localStorage.getItem(storageKey);
     const lastReminder = localStorage.getItem(`${storageKey}-reminder`);
-    
+
     setIsDismissed(dismissed === 'true');
-    
+
     // Show reminder every 7 days even if dismissed
     if (dismissed === 'true' && lastReminder) {
       const daysSinceReminder = (Date.now() - parseInt(lastReminder)) / (1000 * 60 * 60 * 24);
@@ -29,7 +38,7 @@ export default function DataPersistenceWarning({
         localStorage.setItem(`${storageKey}-reminder`, Date.now().toString());
       }
     }
-  }, [storageKey]);
+  }, [storageKey, user]);
 
   const handleDismiss = () => {
     setIsDismissed(true);

@@ -32,6 +32,10 @@ import { BetaBadgeInline } from '@/components/BetaBadge';
 import { InnerCircleBadge, useInnerCircle, InnerCircleStyles } from '@/components/InnerCircleBadge';
 import ChangelogModal from '@/components/ChangelogModal';
 import analytics from '@/lib/analytics';
+import { useAuth } from '@/hooks/useAuth';
+import { useBrandSync } from '@/hooks/useBrandSync';
+import AuthButton from '@/components/AuthButton';
+import { SaveResultsPrompt } from '@/components/SaveResultsPrompt';
 
 function HomeContent() {
   const searchParams = useSearchParams();
@@ -56,7 +60,12 @@ function HomeContent() {
   const brandDNA = useCurrentBrand();
   const brandCompleteness = useBrandCompleteness();
   const toast = useToast();
-  const { isInnerCircle } = useInnerCircle();
+  const { isInnerCircle, pendingInviteCode } = useInnerCircle();
+  const { user, isLoading: authLoading } = useAuth();
+  const { isSyncing, syncError } = useBrandSync();
+
+  // State for showing save results prompt (for unauthenticated users)
+  const [showSavePrompt, setShowSavePrompt] = useState(false);
 
   // Check for phases breakdown query param (from landing page)
   const showPhasesParam = searchParams.get('showPhases') === 'true';
@@ -147,6 +156,10 @@ function HomeContent() {
     setShowOnboarding(false);
     handlePhaseChange('check'); // Move to Check phase after onboarding
     analytics.onboardingCompleted();
+    // Show save prompt for unauthenticated users
+    if (!user) {
+      setShowSavePrompt(true);
+    }
   };
 
   const handleOnboardingSkip = () => {
@@ -700,8 +713,22 @@ function HomeContent() {
         hasGenerated={phaseProgress.hasCompletedFirstGeneration}
       />
 
-      {/* Brand Switcher (floating) */}
-      <div className="fixed top-20 right-6 z-40 flex items-center gap-2">
+      {/* Brand Switcher and Auth Button (floating) */}
+      <div className="fixed top-20 right-6 z-40 flex items-center gap-3">
+        {/* Sync indicator */}
+        {user && isSyncing && (
+          <div className="flex items-center gap-1.5 text-white/50 text-xs">
+            <svg className="animate-spin w-3 h-3" viewBox="0 0 24 24" fill="none">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+            </svg>
+            <span>Syncing...</span>
+          </div>
+        )}
+
+        {/* Auth Button */}
+        <AuthButton showInnerCircle={!isInnerCircle} />
+
         <div className="relative">
           <button
             onClick={() => setShowBrandMenu(!showBrandMenu)}
@@ -793,6 +820,14 @@ function HomeContent() {
 
       {/* Data Persistence Warning */}
       <DataPersistenceWarning onExport={exportAsJSON} />
+
+      {/* Save Results Prompt - for unauthenticated users who have completed the journey */}
+      {!user && !authLoading && phaseProgress.hasCompletedOnboarding && showSavePrompt && (
+        <SaveResultsPrompt
+          inviteCode={pendingInviteCode || undefined}
+          onDismiss={() => setShowSavePrompt(false)}
+        />
+      )}
 
       {/* Changelog Modal - shows automatically for new versions */}
       {phaseProgress.hasCompletedOnboarding && <ChangelogModal />}

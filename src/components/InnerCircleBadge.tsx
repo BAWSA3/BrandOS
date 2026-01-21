@@ -147,10 +147,12 @@ export function InnerCircleBadge({ variant = 'inline', showEntrance = false }: I
 }
 
 // Hook to check if Inner Circle mode is active
+// Now uses database via useAuth, with localStorage fallback for unauthenticated users
 export function useInnerCircle() {
   const [isInnerCircle, setIsInnerCircle] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
   const [referredBy, setReferredBy] = useState<string | null>(null);
+  const [pendingInviteCode, setPendingInviteCode] = useState<string | null>(null);
 
   useEffect(() => {
     const validateAndRedeem = async () => {
@@ -169,35 +171,27 @@ export function useInnerCircle() {
       if (inviteCode) {
         setIsValidating(true);
         try {
-          // First validate the code
+          // Validate the code
           const validateRes = await fetch(`/api/invite?code=${encodeURIComponent(inviteCode)}`);
           const validateData = await validateRes.json();
 
           if (validateData.valid) {
-            // Get username from localStorage or generate temp one
-            const storedUsername = localStorage.getItem('brandos_username') ||
-                                   localStorage.getItem('xUsername') ||
-                                   `user_${Date.now()}`;
+            // Store the invite code for use during auth flow
+            localStorage.setItem('pendingInviteCode', inviteCode);
+            document.cookie = `pendingInviteCode=${inviteCode}; path=/; max-age=3600; samesite=lax`;
+            setPendingInviteCode(inviteCode);
 
-            // Redeem the code
-            const redeemRes = await fetch('/api/invite', {
-              method: 'PATCH',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ code: inviteCode, username: storedUsername }),
-            });
-            const redeemData = await redeemRes.json();
+            // For unauthenticated users going through the score journey,
+            // mark as Inner Circle locally (will be persisted on auth)
+            localStorage.setItem('innerCircle', 'true');
+            localStorage.setItem('innerCircle_referredBy', validateData.createdBy || '');
+            setReferredBy(validateData.createdBy);
+            setIsInnerCircle(true);
 
-            if (redeemData.success) {
-              localStorage.setItem('innerCircle', 'true');
-              localStorage.setItem('innerCircle_referredBy', redeemData.referredBy || '');
-              setReferredBy(redeemData.referredBy);
-              setIsInnerCircle(true);
-
-              // Clean up URL (remove invite param)
-              const newUrl = new URL(window.location.href);
-              newUrl.searchParams.delete('invite');
-              window.history.replaceState({}, '', newUrl.toString());
-            }
+            // Clean up URL (remove invite param)
+            const newUrl = new URL(window.location.href);
+            newUrl.searchParams.delete('invite');
+            window.history.replaceState({}, '', newUrl.toString());
           }
         } catch (err) {
           console.error('[useInnerCircle] Failed to validate invite:', err);
@@ -207,7 +201,22 @@ export function useInnerCircle() {
         return;
       }
 
-      // Otherwise check localStorage
+      // Check if user is authenticated and has Inner Circle status in database
+      try {
+        const res = await fetch('/api/auth/user');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.user?.isInnerCircle) {
+            setIsInnerCircle(true);
+            setReferredBy(data.user.invitedBy);
+            return;
+          }
+        }
+      } catch (err) {
+        // Not authenticated or error, fall through to localStorage check
+      }
+
+      // Fallback: check localStorage for unauthenticated users
       const stored = localStorage.getItem('innerCircle');
       if (stored === 'true') {
         setIsInnerCircle(true);
@@ -218,7 +227,7 @@ export function useInnerCircle() {
     validateAndRedeem();
   }, []);
 
-  return { isInnerCircle, isValidating, referredBy };
+  return { isInnerCircle, isValidating, referredBy, pendingInviteCode };
 }
 
 // Add keyframes to global styles

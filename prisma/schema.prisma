@@ -9,16 +9,24 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            String    @id @default(cuid())
+  supabaseId    String    @unique    // Links to Supabase Auth
+  email         String?   @unique    // Optional - for account recovery
+  xUsername     String               // Required - from X OAuth
+  xId           String    @unique    // X user ID
+  name          String?
+  avatar        String?
+  isInnerCircle Boolean   @default(false)
+  invitedBy     String?              // Username who invited them
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
   // Relationships
   brands       Brand[]
   teamMembers  TeamMember[]
   sharedBrands SharedBrand[]
+
+  @@index([xUsername])
 }
 
 model Brand {
