@@ -3,9 +3,15 @@ import { promises as fs } from 'fs';
 import path from 'path';
 import {
   EmailTemplateData,
-  emailSequence,
+  Segment,
+  SegmentIndicators,
+  detectSegment,
+  getEmailSequenceForSegment,
   generateEmailContent,
 } from './email-templates';
+
+// Re-export segment types for convenience
+export type { Segment, SegmentIndicators };
 
 // Lazy initialize Resend client (only when needed)
 let resendClient: Resend | null = null;
@@ -160,13 +166,27 @@ export async function schedulePendingEmail(
 
 /**
  * Send the welcome email sequence to a new signup
+ * @param email - User's email address
+ * @param data - Template data for personalization
+ * @param segmentOrIndicators - Either a Segment string or SegmentIndicators to detect segment
  */
 export async function sendWelcomeSequence(
   email: string,
-  data: Partial<EmailTemplateData>
-): Promise<{ success: boolean; emailsSent: number; emailsScheduled: number }> {
+  data: Partial<EmailTemplateData>,
+  segmentOrIndicators?: Segment | SegmentIndicators
+): Promise<{ success: boolean; emailsSent: number; emailsScheduled: number; segment: Segment }> {
   let emailsSent = 0;
   let emailsScheduled = 0;
+
+  // Determine segment
+  let segment: Segment = 'general';
+  if (segmentOrIndicators) {
+    if (typeof segmentOrIndicators === 'string') {
+      segment = segmentOrIndicators;
+    } else {
+      segment = detectSegment(segmentOrIndicators);
+    }
+  }
 
   // Ensure we have at least a username for templates
   const templateData: Partial<EmailTemplateData> = {
@@ -187,8 +207,12 @@ export async function sendWelcomeSequence(
     ...data,
   };
 
+  // Get the appropriate sequence for this segment
+  const sequence = getEmailSequenceForSegment(segment);
+  console.log(`[Email] Using ${segment} sequence (${sequence.length} emails)`);
+
   // Process each email in the sequence
-  for (const template of emailSequence) {
+  for (const template of sequence) {
     const content = generateEmailContent(template.id, templateData as EmailTemplateData);
     if (!content) continue;
 
@@ -206,7 +230,7 @@ export async function sendWelcomeSequence(
     }
   }
 
-  return { success: true, emailsSent, emailsScheduled };
+  return { success: true, emailsSent, emailsScheduled, segment };
 }
 
 /**

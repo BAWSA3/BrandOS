@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { addEmailSignup } from '@/lib/newsletter';
-import { sendWelcomeSequence } from '@/lib/email';
+import { sendWelcomeSequence, SegmentIndicators } from '@/lib/email';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { email, source = 'landing', xUsername, brandData } = body;
+    const { email, source = 'landing', xUsername, brandData, segmentData } = body;
 
     // Validate email
     if (!email || typeof email !== 'string') {
@@ -34,24 +34,35 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Build segment indicators from signup data
+    const segmentIndicators: SegmentIndicators | undefined = segmentData ? {
+      role: segmentData.role || 'other',
+      companySize: segmentData.companySize || '1-10',
+      industry: segmentData.industry || 'other',
+    } : undefined;
+
     // Trigger welcome email sequence
     try {
-      const emailResult = await sendWelcomeSequence(email, {
-        username: xUsername || 'user',
-        name: brandData?.displayName || xUsername || 'there',
-        score: brandData?.score || 0,
-        defineScore: brandData?.defineScore || 0,
-        checkScore: brandData?.checkScore || 0,
-        generateScore: brandData?.generateScore || 0,
-        scaleScore: brandData?.scaleScore || 0,
-        archetype: brandData?.archetype || 'Creator',
-        archetypeEmoji: brandData?.archetypeEmoji || '✨',
-        archetypeTagline: brandData?.archetypeTagline || '',
-        archetypeDescription: brandData?.archetypeDescription || '',
-        archetypeStrengths: brandData?.archetypeStrengths || [],
-        topImprovement: brandData?.topImprovement || '',
-        topStrength: brandData?.topStrength || '',
-      });
+      const emailResult = await sendWelcomeSequence(
+        email,
+        {
+          username: xUsername || 'user',
+          name: brandData?.displayName || xUsername || 'there',
+          score: brandData?.score || 0,
+          defineScore: brandData?.defineScore || 0,
+          checkScore: brandData?.checkScore || 0,
+          generateScore: brandData?.generateScore || 0,
+          scaleScore: brandData?.scaleScore || 0,
+          archetype: brandData?.archetype || 'Creator',
+          archetypeEmoji: brandData?.archetypeEmoji || '✨',
+          archetypeTagline: brandData?.archetypeTagline || '',
+          archetypeDescription: brandData?.archetypeDescription || '',
+          archetypeStrengths: brandData?.archetypeStrengths || [],
+          topImprovement: brandData?.topImprovement || '',
+          topStrength: brandData?.topStrength || '',
+        },
+        segmentIndicators
+      );
       console.log('[Signup] Email sequence triggered:', emailResult);
     } catch (emailError) {
       // Log but don't fail the signup if email fails
