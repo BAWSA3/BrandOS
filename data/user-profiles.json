@@ -50,13 +50,17 @@
         {
           "value": 93,
           "scannedAt": 1768896797547
+        },
+        {
+          "value": 95,
+          "scannedAt": 1768988844163
         }
       ],
-      "highestScore": 93,
-      "currentScore": 93,
+      "highestScore": 95,
+      "currentScore": 95,
       "firstScannedAt": 1768892981245,
-      "lastScannedAt": 1768896797547,
-      "totalScans": 4
+      "lastScannedAt": 1768988844163,
+      "totalScans": 5
     },
     "pmarca": {
       "username": "pmarca",
@@ -188,13 +192,21 @@
         {
           "value": 95,
           "scannedAt": 1768897265560
+        },
+        {
+          "value": 97,
+          "scannedAt": 1768988666456
+        },
+        {
+          "value": 98,
+          "scannedAt": 1768988752073
         }
       ],
       "highestScore": 98,
-      "currentScore": 95,
+      "currentScore": 98,
       "firstScannedAt": 1768895525086,
-      "lastScannedAt": 1768897265560,
-      "totalScans": 6
+      "lastScannedAt": 1768988752073,
+      "totalScans": 8
     },
     "leap_xyz": {
       "username": "leap_xyz",
@@ -334,13 +346,17 @@
         {
           "value": 76,
           "scannedAt": 1768905715999
+        },
+        {
+          "value": 77,
+          "scannedAt": 1768988403249
         }
       ],
       "highestScore": 77,
-      "currentScore": 76,
+      "currentScore": 77,
       "firstScannedAt": 1768904843172,
-      "lastScannedAt": 1768905715999,
-      "totalScans": 3
+      "lastScannedAt": 1768988403249,
+      "totalScans": 4
     },
     "web3pingu": {
       "username": "web3pingu",
@@ -525,5 +541,5 @@
       "totalScans": 12
     }
   },
-  "lastUpdated": 1768909701385
+  "lastUpdated": 1768988844163
 }
