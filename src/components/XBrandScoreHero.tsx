@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback, MouseEvent as ReactMouseEvent } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence, useMotionValue, useSpring, animate } from 'motion/react';
 import dynamic from 'next/dynamic';
 import BrandDNAPreview, { GeneratedBrandDNA } from './BrandDNAPreview';
@@ -9,6 +10,8 @@ import BrandAdvisorChat from './BrandAdvisorChat';
 import DNAWalkthrough from './DNAWalkthrough';
 import BrandOSDashboard, { BrandOSDashboardData } from './BrandOSDashboard';
 import BrandIssuesSection from './BrandIssuesSection';
+import { SaveResultsPrompt } from './SaveResultsPrompt';
+import { useAuth } from '@/hooks/useAuth';
 import { domToPng } from 'modern-screenshot';
 import { AuthenticityAnalysis, ActivityAnalysis } from '@/lib/gemini';
 
@@ -1152,6 +1155,12 @@ function JourneyProgressIndicator({
 // Main Component
 // ============================================================================
 export default function XBrandScoreHero({ theme, initialUsername, autoStart }: XBrandScoreHeroProps) {
+  // Auth state
+  const { user, isLoading: isAuthLoading } = useAuth();
+  const searchParams = useSearchParams();
+  const pendingInviteCode = searchParams.get('invite') || undefined;
+  const [showSavePrompt, setShowSavePrompt] = useState(true);
+
   const [flowState, setFlowState] = useState<FlowState>('input');
   const [username, setUsername] = useState(initialUsername || '');
   const [error, setError] = useState('');
@@ -1964,7 +1973,16 @@ Get yours → mybrandos.app`;
               />
             </div>
 
-            {/* Join Waitlist CTA */}
+            {/* Save Results Prompt - Show for unauthenticated users */}
+            {!user && !isAuthLoading && showSavePrompt && (
+              <SaveResultsPrompt
+                inviteCode={pendingInviteCode}
+                onDismiss={() => setShowSavePrompt(false)}
+              />
+            )}
+
+            {/* Join Waitlist CTA - Only show for authenticated users or if save prompt is dismissed */}
+            {(user || !showSavePrompt) && (
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -2122,6 +2140,7 @@ Get yours → mybrandos.app`;
                 <div style={{ width: '30px', height: '1px', background: 'rgba(255,255,255,0.2)' }} />
               </div>
             </motion.div>
+            )}
 
           </motion.div>
         )}
