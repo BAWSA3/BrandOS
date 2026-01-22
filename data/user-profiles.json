@@ -236,13 +236,17 @@
         {
           "value": 98,
           "scannedAt": 1769051380208
+        },
+        {
+          "value": 96,
+          "scannedAt": 1769070297382
         }
       ],
       "highestScore": 98,
-      "currentScore": 98,
+      "currentScore": 96,
       "firstScannedAt": 1768895525086,
-      "lastScannedAt": 1769051380208,
-      "totalScans": 17
+      "lastScannedAt": 1769070297382,
+      "totalScans": 18
     },
     "leap_xyz": {
       "username": "leap_xyz",
@@ -386,13 +390,25 @@
         {
           "value": 77,
           "scannedAt": 1768988403249
+        },
+        {
+          "value": 76,
+          "scannedAt": 1769071075178
+        },
+        {
+          "value": 79,
+          "scannedAt": 1769073849933
+        },
+        {
+          "value": 79,
+          "scannedAt": 1769074146627
         }
       ],
-      "highestScore": 77,
-      "currentScore": 77,
+      "highestScore": 79,
+      "currentScore": 79,
       "firstScannedAt": 1768904843172,
-      "lastScannedAt": 1768988403249,
-      "totalScans": 4
+      "lastScannedAt": 1769074146627,
+      "totalScans": 7
     },
     "web3pingu": {
       "username": "web3pingu",
@@ -627,5 +643,5 @@
       "totalScans": 2
     }
   },
-  "lastUpdated": 1769051380208
+  "lastUpdated": 1769074146627
 }
