@@ -1,23 +1,12 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
-import { createClient, Session, User as SupabaseUser, SupabaseClient } from '@supabase/supabase-js';
+import { useState, useEffect, useCallback } from 'react';
+import { Session, User as SupabaseUser } from '@supabase/supabase-js';
+import { getSupabaseBrowser } from '@/lib/supabase-browser';
 
-// Lazy singleton for browser client
-let supabaseInstance: SupabaseClient | null = null;
-
-function getSupabase(): SupabaseClient {
-  if (supabaseInstance) return supabaseInstance;
-
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-  if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error('Missing Supabase environment variables');
-  }
-
-  supabaseInstance = createClient(supabaseUrl, supabaseAnonKey);
-  return supabaseInstance;
+// Use the SSR-compatible browser client
+function getSupabase() {
+  return getSupabaseBrowser();
 }
 
 export interface AuthUser {
@@ -67,11 +56,37 @@ export function useAuth(): UseAuthReturn {
     }
   }, []);
 
-  // Initialize auth state
+  // Initialize auth state and handle OAuth callback tokens
   useEffect(() => {
     const initAuth = async () => {
       try {
         const supabase = getSupabase();
+
+        // Check if we have tokens in the URL hash (implicit flow fallback)
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        const accessToken = hashParams.get('access_token');
+        const refreshToken = hashParams.get('refresh_token');
+
+        if (accessToken && refreshToken) {
+          // Set the session from hash tokens
+          const { data: { session: hashSession }, error: setSessionError } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+          });
+
+          if (setSessionError) {
+            console.error('[useAuth] Set session error:', setSessionError);
+          } else if (hashSession) {
+            setSession(hashSession);
+            await fetchUser(hashSession.user);
+            // Clean up URL hash and redirect to app
+            window.history.replaceState(null, '', '/app');
+            setIsLoading(false);
+            return;
+          }
+        }
+
+        // Standard session check
         const { data: { session: currentSession } } = await supabase.auth.getSession();
         setSession(currentSession);
         await fetchUser(currentSession?.user ?? null);
@@ -105,9 +120,9 @@ export function useAuth(): UseAuthReturn {
 
   // Sign in with X (Twitter) OAuth
   const signInWithX = useCallback(async (options?: { inviteCode?: string; redirectTo?: string }) => {
-    // Store invite code and any pending brand data in localStorage for use after callback
+    // Store invite code in cookie for use after callback (server-side readable)
     if (options?.inviteCode) {
-      localStorage.setItem('pendingInviteCode', options.inviteCode);
+      document.cookie = `pendingInviteCode=${options.inviteCode}; path=/; max-age=3600; samesite=lax`;
     }
 
     // Determine redirect URL
@@ -157,4 +172,4 @@ export function useAuth(): UseAuthReturn {
 }
 
 // Export the supabase getter for use elsewhere
-export { getSupabase };
+export { getSupabaseBrowser as getSupabase } from '@/lib/supabase-browser';

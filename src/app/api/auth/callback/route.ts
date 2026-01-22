@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import prisma from '@/lib/db';
 
@@ -22,9 +22,18 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-      auth: {
-        flowType: 'pkce',
+    const cookieStore = await cookies();
+
+    const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
+      cookies: {
+        getAll() {
+          return cookieStore.getAll();
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) => {
+            cookieStore.set(name, value, options);
+          });
+        },
       },
     });
 
@@ -55,7 +64,6 @@ export async function GET(request: NextRequest) {
     }
 
     // Get invite code from cookie (set before OAuth redirect)
-    const cookieStore = await cookies();
     const pendingInviteCode = cookieStore.get('pendingInviteCode')?.value;
 
     // Check and redeem invite code

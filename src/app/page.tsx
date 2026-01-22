@@ -5,6 +5,7 @@ import XBrandScoreHero from '@/components/XBrandScoreHero';
 import { useEffect, useRef, useState, useCallback, Suspense } from 'react';
 import { scroll, animate } from 'motion';
 import { useInnerCircle } from '@/components/InnerCircleBadge';
+import { useAuth } from '@/hooks/useAuth';
 
 
 // =============================================================================
@@ -104,6 +105,9 @@ export default function LandingPage() {
 
   // Handle invite code validation on landing page
   useInnerCircle();
+
+  // Handle OAuth callback tokens (if redirected here with tokens in URL hash)
+  useAuth();
 
   return (
     <div

@@ -1,10 +1,11 @@
+'use client';
+
 import { createBrowserClient } from '@supabase/ssr';
 import { SupabaseClient } from '@supabase/supabase-js';
 
-// Lazy singleton for Supabase client (browser-side, uses cookies for PKCE)
 let supabaseInstance: SupabaseClient | null = null;
 
-export function getSupabase(): SupabaseClient {
+export function getSupabaseBrowser(): SupabaseClient {
   if (supabaseInstance) return supabaseInstance;
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -17,12 +18,3 @@ export function getSupabase(): SupabaseClient {
   supabaseInstance = createBrowserClient(supabaseUrl, supabaseAnonKey);
   return supabaseInstance;
 }
-
-// For backwards compatibility - lazy getter
-export const supabase = new Proxy({} as SupabaseClient, {
-  get(_, prop) {
-    return getSupabase()[prop as keyof SupabaseClient];
-  },
-});
-
-export default supabase;
