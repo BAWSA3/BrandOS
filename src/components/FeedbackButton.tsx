@@ -3,41 +3,68 @@
 import { useState } from 'react';
 
 interface FeedbackButtonProps {
-  email?: string;
   className?: string;
 }
 
-export default function FeedbackButton({ 
-  email = 'feedback@mybrandos.app',
+type FeedbackType = 'bug' | 'idea' | 'other';
+
+export default function FeedbackButton({
   className = ''
 }: FeedbackButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [feedbackType, setFeedbackType] = useState<'bug' | 'idea' | 'other'>('bug');
+  const [feedbackType, setFeedbackType] = useState<FeedbackType>('bug');
   const [message, setMessage] = useState('');
+  const [rating, setRating] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async () => {
     if (!message.trim()) return;
-    
+
     setIsSubmitting(true);
-    
-    // Create mailto link with pre-filled subject and body
-    const subject = encodeURIComponent(`[BrandOS Beta ${feedbackType.toUpperCase()}] Feedback`);
-    const body = encodeURIComponent(`Type: ${feedbackType}\n\n${message}\n\n---\nSent from BrandOS Beta\nURL: ${window.location.href}\nUser Agent: ${navigator.userAgent}`);
-    
-    window.open(`mailto:${email}?subject=${subject}&body=${body}`, '_blank');
-    
-    setSubmitted(true);
-    setIsSubmitting(false);
-    
-    // Reset after delay
-    setTimeout(() => {
-      setIsOpen(false);
-      setSubmitted(false);
-      setMessage('');
-      setFeedbackType('bug');
-    }, 2000);
+    setError(null);
+
+    try {
+      const response = await fetch('/api/feedback', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          type: feedbackType,
+          message: message.trim(),
+          rating,
+          url: window.location.href,
+          category: 'general',
+        }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to submit feedback');
+      }
+
+      setSubmitted(true);
+
+      // Reset after delay
+      setTimeout(() => {
+        setIsOpen(false);
+        setSubmitted(false);
+        setMessage('');
+        setRating(null);
+        setFeedbackType('bug');
+      }, 2000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Something went wrong');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleClose = () => {
+    setIsOpen(false);
+    setError(null);
   };
 
   return (
@@ -53,14 +80,14 @@ export default function FeedbackButton({
         }}
         aria-label="Send feedback"
       >
-        <svg 
-          width="20" 
-          height="20" 
-          viewBox="0 0 24 24" 
-          fill="none" 
-          stroke="white" 
-          strokeWidth="2" 
-          strokeLinecap="round" 
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="white"
+          strokeWidth="2"
+          strokeLinecap="round"
           strokeLinejoin="round"
         >
           <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
@@ -70,15 +97,15 @@ export default function FeedbackButton({
 
       {/* Modal Backdrop */}
       {isOpen && (
-        <div 
+        <div
           className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm animate-fade-in"
-          onClick={() => setIsOpen(false)}
+          onClick={handleClose}
         />
       )}
 
       {/* Feedback Modal */}
       {isOpen && (
-        <div 
+        <div
           className="fixed bottom-24 right-6 z-[101] w-[360px] rounded-2xl shadow-2xl animate-slide-up"
           style={{
             background: 'rgba(15, 15, 15, 0.95)',
@@ -89,7 +116,7 @@ export default function FeedbackButton({
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-white/10">
             <div className="flex items-center gap-2">
-              <div 
+              <div
                 className="w-8 h-8 rounded-lg flex items-center justify-center"
                 style={{ background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)' }}
               >
@@ -102,8 +129,8 @@ export default function FeedbackButton({
                 <p className="text-white/50 text-xs">Help us improve BrandOS</p>
               </div>
             </div>
-            <button 
-              onClick={() => setIsOpen(false)}
+            <button
+              onClick={handleClose}
               className="p-1 rounded-lg hover:bg-white/10 transition-colors"
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
@@ -122,11 +149,18 @@ export default function FeedbackButton({
                 </svg>
               </div>
               <h4 className="text-white font-semibold mb-2">Thanks for your feedback!</h4>
-              <p className="text-white/60 text-sm">Your email client should open. Send the email to submit your feedback.</p>
+              <p className="text-white/60 text-sm">We&apos;ll review it and use it to improve BrandOS.</p>
             </div>
           ) : (
             /* Form */
             <div className="p-4">
+              {/* Error Message */}
+              {error && (
+                <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+                  {error}
+                </div>
+              )}
+
               {/* Feedback Type */}
               <div className="mb-4">
                 <label className="block text-xs uppercase tracking-wider text-white/50 mb-2">
@@ -134,13 +168,13 @@ export default function FeedbackButton({
                 </label>
                 <div className="flex gap-2">
                   {[
-                    { id: 'bug', label: '🐛 Bug', color: 'red' },
-                    { id: 'idea', label: '💡 Idea', color: 'yellow' },
-                    { id: 'other', label: '💬 Other', color: 'blue' },
+                    { id: 'bug', label: '🐛 Bug' },
+                    { id: 'idea', label: '💡 Idea' },
+                    { id: 'other', label: '💬 Other' },
                   ].map((type) => (
                     <button
                       key={type.id}
-                      onClick={() => setFeedbackType(type.id as typeof feedbackType)}
+                      onClick={() => setFeedbackType(type.id as FeedbackType)}
                       className={`flex-1 px-3 py-2 text-sm rounded-lg transition-all ${
                         feedbackType === type.id
                           ? 'bg-white/20 text-white border border-white/30'
@@ -162,8 +196,8 @@ export default function FeedbackButton({
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   placeholder={
-                    feedbackType === 'bug' 
-                      ? "Describe what happened and what you expected..." 
+                    feedbackType === 'bug'
+                      ? "Describe what happened and what you expected..."
                       : feedbackType === 'idea'
                       ? "What feature would make BrandOS better for you?"
                       : "What's on your mind?"
@@ -171,6 +205,30 @@ export default function FeedbackButton({
                   rows={4}
                   className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-white text-sm placeholder:text-white/30 outline-none focus:border-white/30 resize-none transition-colors"
                 />
+              </div>
+
+              {/* Rating (optional) */}
+              <div className="mb-4">
+                <label className="block text-xs uppercase tracking-wider text-white/50 mb-2">
+                  How&apos;s your experience? (optional)
+                </label>
+                <div className="flex gap-1">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      onClick={() => setRating(rating === star ? null : star)}
+                      className={`p-2 rounded-lg transition-all ${
+                        rating && rating >= star
+                          ? 'text-yellow-400'
+                          : 'text-white/20 hover:text-white/40'
+                      }`}
+                    >
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                      </svg>
+                    </button>
+                  ))}
+                </div>
               </div>
 
               {/* Submit */}
@@ -183,11 +241,11 @@ export default function FeedbackButton({
                   color: 'white',
                 }}
               >
-                {isSubmitting ? 'Opening email...' : 'Send Feedback'}
+                {isSubmitting ? 'Submitting...' : 'Send Feedback'}
               </button>
 
               <p className="text-center text-white/40 text-xs mt-3">
-                Opens your email client to send feedback
+                Your feedback is saved and reviewed by our team
               </p>
             </div>
           )}

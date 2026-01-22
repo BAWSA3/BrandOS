@@ -200,13 +200,49 @@
         {
           "value": 98,
           "scannedAt": 1768988752073
+        },
+        {
+          "value": 92,
+          "scannedAt": 1769042852926
+        },
+        {
+          "value": 94,
+          "scannedAt": 1769043265998
+        },
+        {
+          "value": 98,
+          "scannedAt": 1769043626181
+        },
+        {
+          "value": 92,
+          "scannedAt": 1769044753051
+        },
+        {
+          "value": 93,
+          "scannedAt": 1769045056290
+        },
+        {
+          "value": 92,
+          "scannedAt": 1769047841246
+        },
+        {
+          "value": 93,
+          "scannedAt": 1769048198581
+        },
+        {
+          "value": 93,
+          "scannedAt": 1769048919193
+        },
+        {
+          "value": 98,
+          "scannedAt": 1769051380208
         }
       ],
       "highestScore": 98,
       "currentScore": 98,
       "firstScannedAt": 1768895525086,
-      "lastScannedAt": 1768988752073,
-      "totalScans": 8
+      "lastScannedAt": 1769051380208,
+      "totalScans": 17
     },
     "leap_xyz": {
       "username": "leap_xyz",
@@ -539,7 +575,57 @@
       "firstScannedAt": 1768905837583,
       "lastScannedAt": 1768909701385,
       "totalScans": 12
+    },
+    "testuser": {
+      "username": "testuser",
+      "displayName": "test User",
+      "archetype": {
+        "primary": "Underdog Arc",
+        "emoji": "🐕",
+        "tagline": "Brand loading... please wait",
+        "description": "Given the emerging status and need for fundamental improvements, this profile embodies the 'Underdog Arc' archetype, starting with a blank slate and a clear trajectory for growth.",
+        "strengths": [
+          "Potential for growth",
+          "Opportunity to define brand"
+        ],
+        "growthTip": "Focus on defining a niche and creating valuable content to attract a targeted audience.",
+        "assignedAt": 1769049448000
+      },
+      "archetypeHistory": [
+        {
+          "archetype": {
+            "primary": "Underdog Arc",
+            "emoji": "🐕",
+            "tagline": "Brand loading... please wait",
+            "description": "Given the emerging status and need for fundamental improvements, this profile embodies the 'Underdog Arc' archetype, starting with a blank slate and a clear trajectory for growth.",
+            "strengths": [
+              "Potential for growth",
+              "Opportunity to define brand"
+            ],
+            "growthTip": "Focus on defining a niche and creating valuable content to attract a targeted audience.",
+            "assignedAt": 1769049448000
+          },
+          "reason": "initial",
+          "score": 32,
+          "timestamp": 1769049448000
+        }
+      ],
+      "scores": [
+        {
+          "value": 32,
+          "scannedAt": 1769049448000
+        },
+        {
+          "value": 33,
+          "scannedAt": 1769051373678
+        }
+      ],
+      "highestScore": 33,
+      "currentScore": 33,
+      "firstScannedAt": 1769049448000,
+      "lastScannedAt": 1769051373678,
+      "totalScans": 2
     }
   },
-  "lastUpdated": 1768988844163
+  "lastUpdated": 1769051380208
 }

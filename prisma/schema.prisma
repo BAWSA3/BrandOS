@@ -25,6 +25,7 @@ model User {
   brands       Brand[]
   teamMembers  TeamMember[]
   sharedBrands SharedBrand[]
+  feedback     Feedback[]
 
   @@index([xUsername])
 }
@@ -231,5 +232,29 @@ model ResearchSourceConfig {
   config      String?   // JSON config (rate limits, etc.)
 
   @@index([enabled])
+}
+
+// ===== FEEDBACK SYSTEM =====
+
+model Feedback {
+  id          String   @id @default(cuid())
+  userId      String?  // Optional - allow anonymous feedback
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  type        String   // 'bug', 'idea', 'other', 'nps', 'feature_request'
+  category    String?  // 'score_journey', 'brand_dna', 'agents', 'ui', 'performance'
+  message     String
+  rating      Int?     // 1-5 stars or 0-10 NPS
+  url         String?  // Page where feedback was given
+  metadata    String?  // JSON - browser, screen size, etc.
+  status      String   @default("new") // 'new', 'reviewed', 'in_progress', 'resolved', 'wont_fix'
+  priority    String?  // 'low', 'medium', 'high', 'critical'
+  adminNotes  String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([type])
+  @@index([status])
+  @@index([createdAt])
+  @@index([userId])
 }
 

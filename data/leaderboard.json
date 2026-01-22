@@ -198,5 +198,13 @@
     "profileImage": "",
     "timestamp": 1768908185545,
     "isCrypto": false
+  },
+  {
+    "username": "TestUser",
+    "displayName": "TestUser",
+    "score": 33,
+    "profileImage": "",
+    "timestamp": 1769051373689,
+    "isCrypto": false
   }
 ]
