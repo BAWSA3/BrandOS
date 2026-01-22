@@ -70,7 +70,7 @@ export default function RootLayout({
           <ThemeProvider>
             <BetaBadge variant="banner" />
             {children}
-            <FeedbackButton email="bawsa@mybrandos.app" />
+            <FeedbackButton />
           </ThemeProvider>
         </ToastProvider>
         <Analytics />

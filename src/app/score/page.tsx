@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { motion, useMotionValue, useSpring, useTransform, MotionValue } from 'motion/react';
 import { useBrandStore } from '@/lib/store';
 import XBrandScoreHero from '@/components/XBrandScoreHero';
@@ -447,7 +447,9 @@ export default function ScorePage() {
 
       {/* Main Content */}
       <div style={{ position: 'relative', zIndex: 10 }}>
-        <XBrandScoreHero theme={theme} />
+        <Suspense fallback={null}>
+          <XBrandScoreHero theme={theme} />
+        </Suspense>
       </div>
     </div>
   );

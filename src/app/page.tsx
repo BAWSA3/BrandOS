@@ -2,7 +2,7 @@
 
 import { useBrandStore } from '@/lib/store';
 import XBrandScoreHero from '@/components/XBrandScoreHero';
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback, Suspense } from 'react';
 import { scroll, animate } from 'motion';
 import { useInnerCircle } from '@/components/InnerCircleBadge';
 
@@ -245,7 +245,9 @@ export default function LandingPage() {
 
 
       {/* Main Content - X Brand Score Lead Magnet */}
-      <XBrandScoreHero theme={theme} />
+      <Suspense fallback={null}>
+        <XBrandScoreHero theme={theme} />
+      </Suspense>
     </div>
   );
 }
