@@ -48,6 +48,9 @@ yarn-error.log*
 # Separate projects
 /relique/
 
+# Data files with PII
+data/*.json
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

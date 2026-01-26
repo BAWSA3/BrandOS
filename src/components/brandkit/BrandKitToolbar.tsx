@@ -25,20 +25,17 @@ export default function BrandKitToolbar({
   const [showExportMenu, setShowExportMenu] = useState(false);
 
   const handleExportPDF = async () => {
-    // Will be implemented in export features
-    console.log('Export PDF');
+    // TODO: Implement PDF export
     setShowExportMenu(false);
   };
 
   const handleExportZIP = async () => {
-    // Will be implemented in export features
-    console.log('Export ZIP');
+    // TODO: Implement ZIP export
     setShowExportMenu(false);
   };
 
   const handleShare = async () => {
-    // Will be implemented
-    console.log('Share');
+    // TODO: Implement share functionality
     setShowExportMenu(false);
   };
 

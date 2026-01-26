@@ -12,6 +12,7 @@ import ArchetypeWalkthrough from './sections/ArchetypeWalkthrough';
 import KeywordsWalkthrough from './sections/KeywordsWalkthrough';
 import PillarsWalkthrough from './sections/PillarsWalkthrough';
 import JourneyEnd, { JourneyEndData } from '../JourneyEnd';
+import { useDNAWalkthroughDemoCapture } from '@/hooks/useDemoCaptureIntegration';
 
 // Types
 interface XProfileData {
@@ -72,6 +73,9 @@ export default function DNAWalkthrough({
   const [showJourneyEnd, setShowJourneyEnd] = useState(false);
   const sectionRefs = useRef<(HTMLDivElement | null)[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Demo mode capture integration - captures each section as user scrolls
+  useDNAWalkthroughDemoCapture({ activeSection });
 
   // Helper to find best phase
   function getBestPhase(phases: BrandScoreResult['phases']) {

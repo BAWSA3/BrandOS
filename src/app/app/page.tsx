@@ -34,6 +34,7 @@ import ChangelogModal from '@/components/ChangelogModal';
 import analytics from '@/lib/analytics';
 import { useAuth } from '@/hooks/useAuth';
 import { useBrandSync } from '@/hooks/useBrandSync';
+import { useHistorySync } from '@/hooks/useHistorySync';
 import AuthButton from '@/components/AuthButton';
 import { SaveResultsPrompt } from '@/components/SaveResultsPrompt';
 
@@ -47,7 +48,6 @@ function HomeContent() {
     deleteBrand,
     switchBrand,
     history,
-    addHistoryItem,
     clearHistory,
     theme,
     phaseProgress,
@@ -63,6 +63,7 @@ function HomeContent() {
   const { isInnerCircle, pendingInviteCode } = useInnerCircle();
   const { user, isLoading: authLoading } = useAuth();
   const { isSyncing, syncError } = useBrandSync();
+  const { saveHistoryItem } = useHistorySync();
 
   // State for showing save results prompt (for unauthenticated users)
   const [showSavePrompt, setShowSavePrompt] = useState(false);
@@ -353,7 +354,7 @@ function HomeContent() {
         markFirstCheck();
       }
       
-      addHistoryItem({
+      saveHistoryItem({
         type: 'check',
         brandId: brandDNA.id,
         brandName: brandDNA.name,
@@ -401,7 +402,7 @@ function HomeContent() {
         markFirstGeneration();
       }
       
-      addHistoryItem({
+      saveHistoryItem({
         type: 'generate',
         brandId: brandDNA.id,
         brandName: brandDNA.name,

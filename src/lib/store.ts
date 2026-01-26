@@ -5,6 +5,22 @@ import { v4 as uuidv4 } from 'uuid';
 
 type Theme = 'light' | 'dark';
 
+// Demo Mode types for screenshot capture
+export interface CapturedMoment {
+  id: string;
+  momentId: string;
+  label: string;
+  timestamp: number;
+}
+
+export interface DemoModeState {
+  isActive: boolean;
+  sessionId: string | null;
+  captures: CapturedMoment[];
+  currentMoment: string | null;
+  captureCount: number;
+}
+
 // Phase tracking for guided experience
 interface PhaseProgress {
   hasCompletedOnboarding: boolean;
@@ -78,6 +94,14 @@ interface BrandStore {
   markFirstGeneration: () => void;
   setLastActivePhase: (phase: PhaseProgress['lastActivePhase']) => void;
   resetOnboarding: () => void;
+
+  // Demo Mode (for screenshot capture)
+  demoMode: DemoModeState;
+  startDemoSession: () => string;
+  endDemoSession: () => void;
+  setDemoMoment: (momentId: string | null) => void;
+  recordDemoCapture: (momentId: string, label: string) => void;
+  clearDemoCaptures: () => void;
 }
 
 const createDefaultBrandDNA = (name: string = ''): BrandDNA => ({
@@ -124,6 +148,15 @@ export const useBrandStore = create<BrandStore>()(
         hasCompletedFirstCheck: false,
         hasCompletedFirstGeneration: false,
         lastActivePhase: 'define',
+      },
+
+      // Demo mode initial state (not persisted - only active during session)
+      demoMode: {
+        isActive: false,
+        sessionId: null,
+        captures: [],
+        currentMoment: null,
+        captureCount: 0,
       },
       
       setBrandDNA: (dna) =>
@@ -341,9 +374,72 @@ export const useBrandStore = create<BrandStore>()(
             lastActivePhase: 'define',
           },
         })),
+
+      // Demo Mode Methods
+      startDemoSession: () => {
+        const sessionId = `demo-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+        set({
+          demoMode: {
+            isActive: true,
+            sessionId,
+            captures: [],
+            currentMoment: null,
+            captureCount: 0,
+          },
+        });
+        return sessionId;
+      },
+
+      endDemoSession: () =>
+        set({
+          demoMode: {
+            isActive: false,
+            sessionId: null,
+            captures: [],
+            currentMoment: null,
+            captureCount: 0,
+          },
+        }),
+
+      setDemoMoment: (momentId) =>
+        set((state) => ({
+          demoMode: { ...state.demoMode, currentMoment: momentId },
+        })),
+
+      recordDemoCapture: (momentId, label) =>
+        set((state) => ({
+          demoMode: {
+            ...state.demoMode,
+            captures: [
+              ...state.demoMode.captures,
+              { id: uuidv4(), momentId, label, timestamp: Date.now() },
+            ],
+            captureCount: state.demoMode.captureCount + 1,
+          },
+        })),
+
+      clearDemoCaptures: () =>
+        set((state) => ({
+          demoMode: {
+            ...state.demoMode,
+            captures: [],
+            captureCount: 0,
+          },
+        })),
     }),
     {
       name: 'brandos-storage',
+      partialize: (state) => ({
+        // Exclude demoMode from persistence - it's session-only
+        theme: state.theme,
+        brands: state.brands,
+        currentBrandId: state.currentBrandId,
+        history: state.history,
+        safeZones: state.safeZones,
+        brandMemory: state.brandMemory,
+        designIntents: state.designIntents,
+        phaseProgress: state.phaseProgress,
+      }),
     }
   )
 );

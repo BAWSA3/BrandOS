@@ -29,7 +29,7 @@ PATTERNS=(
 
   # AWS
   'AKIA[0-9A-Z]{16}'                       # AWS Access Key ID
-  '[a-zA-Z0-9/+=]{40}'                     # AWS Secret (too broad, commented out)
+  # Note: AWS secret pattern removed - too many false positives with comment dividers
 
   # Generic patterns
   'Bearer [a-zA-Z0-9_-]{20,}'              # Bearer tokens

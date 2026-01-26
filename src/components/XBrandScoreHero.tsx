@@ -14,6 +14,8 @@ import { SaveResultsPrompt } from './SaveResultsPrompt';
 import { useAuth } from '@/hooks/useAuth';
 import { domToPng } from 'modern-screenshot';
 import { AuthenticityAnalysis, ActivityAnalysis } from '@/lib/gemini';
+import { useXBrandScoreDemoCapture } from '@/hooks/useDemoCaptureIntegration';
+import DemoModeControls from './DemoModeControls';
 
 // Dynamically import DNA scene to avoid SSR issues with Three.js
 const DNAJourneyScene = dynamic(() => import('./DNAJourneyScene'), {
@@ -1188,6 +1190,14 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
   const autoStartTriggered = useRef(false);
 
   const [isValidating, setIsValidating] = useState(false);
+
+  // Demo mode capture integration - automatically captures at key journey moments
+  useXBrandScoreDemoCapture({
+    flowState,
+    currentPhase,
+    username,
+    isValidating,
+  });
 
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
@@ -2571,6 +2581,9 @@ Get yours → mybrandos.app`;
           }}
         />
       )}
+
+      {/* Demo Mode Controls - only visible when demo=true param is present */}
+      <DemoModeControls theme={theme} />
     </div>
   );
 }
