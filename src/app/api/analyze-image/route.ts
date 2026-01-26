@@ -1,6 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { NextRequest, NextResponse } from 'next/server';
 import { BrandDNA } from '@/lib/types';
+import { checkRateLimit, getClientIdentifier, rateLimiters } from '@/lib/rate-limit';
 
 // Security: Validate URL to prevent SSRF attacks
 function isUrlSafe(urlString: string): boolean {
@@ -43,8 +44,22 @@ function isUrlSafe(urlString: string): boolean {
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting: 10 requests per 10 seconds (burst protection for expensive AI calls)
+    const clientId = getClientIdentifier(request);
+    const { limited, resetIn } = checkRateLimit(clientId + ':analyze-image', rateLimiters.burst);
+
+    if (limited) {
+      return NextResponse.json(
+        { error: 'Too many requests. Please try again later.' },
+        {
+          status: 429,
+          headers: { 'Retry-After': Math.ceil(resetIn / 1000).toString() },
+        }
+      );
+    }
+
     const apiKey = process.env.ANTHROPIC_API_KEY;
-    
+
     if (!apiKey) {
       return NextResponse.json(
         { error: 'API key not configured' },

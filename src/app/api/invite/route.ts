@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { randomBytes } from 'crypto';
 import prisma from '@/lib/db';
+import { checkRateLimit, getClientIdentifier, rateLimiters } from '@/lib/rate-limit';
 
 // Generate a 6-character invite code using cryptographically secure random
 function generateCode(): string {
@@ -14,6 +15,20 @@ function generateCode(): string {
 // GET /api/invite?code=XXX - Validate an invite code
 export async function GET(request: NextRequest) {
   try {
+    // Strict rate limiting: 5 requests per minute to prevent brute force
+    const clientId = getClientIdentifier(request);
+    const { limited, resetIn } = checkRateLimit(clientId + ':invite', rateLimiters.strict);
+
+    if (limited) {
+      return NextResponse.json(
+        { error: 'Too many attempts. Please try again later.' },
+        {
+          status: 429,
+          headers: { 'Retry-After': Math.ceil(resetIn / 1000).toString() },
+        }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const code = searchParams.get('code');
 

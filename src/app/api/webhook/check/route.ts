@@ -2,6 +2,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import { NextRequest, NextResponse } from 'next/server';
 import { buildCheckPrompt } from '@/prompts/brand-guardian';
 import { BrandDNA } from '@/lib/types';
+import { checkRateLimit, getClientIdentifier, rateLimiters } from '@/lib/rate-limit';
 
 // Security: Validate callback URL to prevent SSRF attacks
 function isCallbackUrlSafe(urlString: string): boolean {
@@ -35,6 +36,23 @@ function validateApiKey(request: NextRequest): boolean {
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting: 30 requests per minute per IP
+    const clientId = getClientIdentifier(request);
+    const { limited, remaining, resetIn } = checkRateLimit(clientId, rateLimiters.standard);
+
+    if (limited) {
+      return NextResponse.json(
+        { error: 'Too many requests. Please try again later.' },
+        {
+          status: 429,
+          headers: {
+            'Retry-After': Math.ceil(resetIn / 1000).toString(),
+            'X-RateLimit-Remaining': '0',
+          },
+        }
+      );
+    }
+
     // Validate API key
     if (!validateApiKey(request)) {
       return NextResponse.json(

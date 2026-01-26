@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { profileCache } from '@/lib/cache';
+import { checkRateLimit, getClientIdentifier, rateLimiters } from '@/lib/rate-limit';
 
 // X API v2 User fields we want to fetch
 const USER_FIELDS = [
@@ -37,6 +38,20 @@ export interface XProfile {
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting: 30 requests per minute per IP
+    const clientId = getClientIdentifier(request);
+    const { limited, resetIn } = checkRateLimit(clientId + ':x-profile', rateLimiters.standard);
+
+    if (limited) {
+      return NextResponse.json(
+        { error: 'Too many requests. Please try again later.' },
+        {
+          status: 429,
+          headers: { 'Retry-After': Math.ceil(resetIn / 1000).toString() },
+        }
+      );
+    }
+
     const { username } = await request.json() as { username: string };
 
     if (!username) {
