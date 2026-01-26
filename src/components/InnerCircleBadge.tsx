@@ -156,6 +156,20 @@ export function useInnerCircle() {
 
   useEffect(() => {
     const validateAndRedeem = async () => {
+      // Check early access mode first
+      const earlyAccessMode = process.env.NEXT_PUBLIC_EARLY_ACCESS_MODE === 'true';
+
+      if (earlyAccessMode) {
+        // Grant Inner Circle to everyone during early access
+        const stored = localStorage.getItem('innerCircle');
+        if (stored !== 'true') {
+          localStorage.setItem('innerCircle', 'true');
+          localStorage.setItem('innerCircle_earlyAccess', 'true');
+        }
+        setIsInnerCircle(true);
+        // Continue to process invite codes for referral tracking (don't return)
+      }
+
       const urlParams = new URLSearchParams(window.location.search);
 
       // Check direct innerCircle param first (for admin/testing)
@@ -200,6 +214,9 @@ export function useInnerCircle() {
         }
         return;
       }
+
+      // If early access mode already set status, skip remaining checks
+      if (earlyAccessMode) return;
 
       // Check if user is authenticated and has Inner Circle status in database
       try {

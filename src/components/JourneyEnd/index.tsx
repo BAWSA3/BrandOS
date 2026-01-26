@@ -49,8 +49,11 @@ export default function JourneyEnd({
     const urlParams = new URLSearchParams(window.location.search);
     const urlValue = urlParams.get('innerCircle');
     const localValue = localStorage.getItem('innerCircle');
+    const earlyAccessMode = process.env.NEXT_PUBLIC_EARLY_ACCESS_MODE === 'true';
+
     // More robust check - handle string 'true' or truthy values
-    const isInnerCircle = String(urlValue).toLowerCase() === 'true' ||
+    const isInnerCircle = earlyAccessMode ||
+                          String(urlValue).toLowerCase() === 'true' ||
                           String(localValue).toLowerCase() === 'true';
 
     if (isInnerCircle) {

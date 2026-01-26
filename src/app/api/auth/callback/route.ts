@@ -3,6 +3,9 @@ import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import prisma from '@/lib/db';
 
+// Early Access Mode - when true, all users get Inner Circle status
+const EARLY_ACCESS_MODE = process.env.NEXT_PUBLIC_EARLY_ACCESS_MODE === 'true';
+
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get('code');
@@ -100,6 +103,12 @@ export async function GET(request: NextRequest) {
       } catch (error) {
         console.error('[Auth Callback] Invite code error:', error);
       }
+    }
+
+    // Early Access Mode: Grant Inner Circle to all users if not already granted via invite
+    if (EARLY_ACCESS_MODE && !isInnerCircle) {
+      isInnerCircle = true;
+      invitedBy = 'EARLY_ACCESS';
     }
 
     // Create or update user in database

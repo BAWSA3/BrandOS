@@ -40,7 +40,10 @@ export default function HighlightReel({
     const urlParams = new URLSearchParams(window.location.search);
     const urlValue = urlParams.get('innerCircle');
     const localValue = localStorage.getItem('innerCircle');
-    const hasAccess = String(urlValue).toLowerCase() === 'true' ||
+    const earlyAccessMode = process.env.NEXT_PUBLIC_EARLY_ACCESS_MODE === 'true';
+
+    const hasAccess = earlyAccessMode ||
+                      String(urlValue).toLowerCase() === 'true' ||
                       String(localValue).toLowerCase() === 'true';
     setIsInnerCircle(hasAccess);
   }, []);
