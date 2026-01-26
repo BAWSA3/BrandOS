@@ -1,0 +1,2 @@
+# Run secrets scanning before commit
+bash scripts/check-secrets.sh
