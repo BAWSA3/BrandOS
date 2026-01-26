@@ -1,5 +1,8 @@
 # Ignore separate projects
 relique/
+remotion-bbb/
+remotion-brandos/
+my-video/
 
 # IDE and tool configs
 .claude/
