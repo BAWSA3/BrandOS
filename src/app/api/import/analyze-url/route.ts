@@ -1,6 +1,24 @@
 import { NextResponse } from 'next/server';
 import * as cheerio from 'cheerio';
 
+// Security: Validate URL to prevent SSRF attacks
+function isUrlSafe(urlString: string): boolean {
+  try {
+    const url = new URL(urlString);
+    if (url.protocol !== 'https:' && url.protocol !== 'http:') return false;
+
+    const hostname = url.hostname.toLowerCase();
+    const blockedPatterns = [
+      /^127\./, /^10\./, /^172\.(1[6-9]|2[0-9]|3[0-1])\./, /^192\.168\./,
+      /^169\.254\./, /^0\./, /^localhost$/i, /^.*\.local$/i, /^.*\.internal$/i,
+      /^\[::1\]$/, /^\[fc00:/i, /^\[fe80:/i,
+    ];
+    return !blockedPatterns.some(p => p.test(hostname));
+  } catch {
+    return false;
+  }
+}
+
 export async function POST(request: Request) {
   try {
     const { url } = await request.json();
@@ -9,12 +27,17 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'URL is required' }, { status: 400 });
     }
 
-    // Validate URL
+    // Validate URL format
     let validUrl: URL;
     try {
       validUrl = new URL(url);
     } catch {
       return NextResponse.json({ error: 'Invalid URL' }, { status: 400 });
+    }
+
+    // Validate URL is not internal/private (SSRF protection)
+    if (!isUrlSafe(validUrl.toString())) {
+      return NextResponse.json({ error: 'URL not allowed' }, { status: 400 });
     }
 
     // Fetch the webpage

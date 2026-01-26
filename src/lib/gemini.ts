@@ -3,6 +3,24 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 // Initialize Gemini client
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GEMINI_API_KEY || '');
 
+// Security: Validate URL to prevent SSRF attacks
+function isUrlSafe(urlString: string): boolean {
+  try {
+    const url = new URL(urlString);
+    if (url.protocol !== 'https:' && url.protocol !== 'http:') return false;
+
+    const hostname = url.hostname.toLowerCase();
+    const blockedPatterns = [
+      /^127\./, /^10\./, /^172\.(1[6-9]|2[0-9]|3[0-1])\./, /^192\.168\./,
+      /^169\.254\./, /^0\./, /^localhost$/i, /^.*\.local$/i, /^.*\.internal$/i,
+      /^\[::1\]$/, /^\[fc00:/i, /^\[fe80:/i,
+    ];
+    return !blockedPatterns.some(p => p.test(hostname));
+  } catch {
+    return false;
+  }
+}
+
 // Models
 export const geminiFlash = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
 export const geminiPro = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' });
@@ -138,7 +156,7 @@ Each should be 2-3 sentences and exemplify the brand voice.
 
 // Utility to check if API key is configured
 export function isGeminiConfigured(): boolean {
-  return !!process.env.GEMINI_API_KEY;
+  return !!process.env.GOOGLE_GEMINI_API_KEY;
 }
 
 // Visual Engine Prompts
@@ -1861,8 +1879,16 @@ export async function analyzeProfileImageWithVision(
   profileContext: { name: string; username: string; bio: string; followers: number }
 ): Promise<ProfileImageAnalysis | null> {
   try {
+    const finalUrl = imageUrl.replace('_normal', '_400x400');
+
+    // Validate URL to prevent SSRF attacks
+    if (!isUrlSafe(finalUrl)) {
+      console.error('[Gemini] Invalid image URL blocked');
+      return null;
+    }
+
     // Fetch the image and convert to base64
-    const imageResponse = await fetch(imageUrl.replace('_normal', '_400x400'));
+    const imageResponse = await fetch(finalUrl);
     if (!imageResponse.ok) return null;
     
     const arrayBuffer = await imageResponse.arrayBuffer();

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { randomBytes } from 'crypto';
 import prisma from '@/lib/db';
 
 // Simple admin key check - same pattern as signups
@@ -14,11 +15,12 @@ function isAuthorized(request: NextRequest): boolean {
   return apiKey === ADMIN_KEY && !!ADMIN_KEY;
 }
 
-// Generate a 6-character invite code
+// Generate a 6-character invite code using cryptographically secure random
 function generateCode(): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  return Array.from({ length: 6 }, () =>
-    chars[Math.floor(Math.random() * chars.length)]
+  const bytes = randomBytes(6);
+  return Array.from(bytes, (byte) =>
+    chars[byte % chars.length]
   ).join('');
 }
 

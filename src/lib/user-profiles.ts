@@ -92,11 +92,21 @@ function writeProfiles(storage: ProfileStorage): void {
   fs.writeFileSync(PROFILES_FILE, JSON.stringify(storage, null, 2));
 }
 
+// Security: Keys that could cause prototype pollution
+const DANGEROUS_KEYS = ['__proto__', 'constructor', 'prototype'];
+
 /**
  * Normalize username for consistent lookups (lowercase)
  */
 export function normalizeUsername(username: string): string {
-  return username.toLowerCase().replace(/^@/, '').trim();
+  const normalized = username.toLowerCase().replace(/^@/, '').trim();
+
+  // Prevent prototype pollution attacks
+  if (DANGEROUS_KEYS.includes(normalized)) {
+    throw new Error('Invalid username');
+  }
+
+  return normalized;
 }
 
 /**

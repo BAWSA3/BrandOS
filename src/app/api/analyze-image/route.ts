@@ -2,6 +2,45 @@ import Anthropic from '@anthropic-ai/sdk';
 import { NextRequest, NextResponse } from 'next/server';
 import { BrandDNA } from '@/lib/types';
 
+// Security: Validate URL to prevent SSRF attacks
+function isUrlSafe(urlString: string): boolean {
+  try {
+    const url = new URL(urlString);
+
+    // Must be HTTPS (or HTTP for localhost in dev)
+    if (url.protocol !== 'https:' && url.protocol !== 'http:') {
+      return false;
+    }
+
+    // Block private/internal IPs and metadata endpoints
+    const hostname = url.hostname.toLowerCase();
+    const blockedPatterns = [
+      /^127\./,                          // Localhost IPv4
+      /^10\./,                           // Private Class A
+      /^172\.(1[6-9]|2[0-9]|3[0-1])\./,  // Private Class B
+      /^192\.168\./,                     // Private Class C
+      /^169\.254\./,                     // Link-local / AWS metadata
+      /^0\./,                            // Current network
+      /^localhost$/i,
+      /^.*\.local$/i,
+      /^.*\.internal$/i,
+      /^\[::1\]$/,                       // IPv6 localhost
+      /^\[fc00:/i,                       // IPv6 private
+      /^\[fe80:/i,                       // IPv6 link-local
+    ];
+
+    for (const pattern of blockedPatterns) {
+      if (pattern.test(hostname)) {
+        return false;
+      }
+    }
+
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const apiKey = process.env.ANTHROPIC_API_KEY;
@@ -40,6 +79,11 @@ export async function POST(request: NextRequest) {
         mediaType = 'image/jpeg';
       }
     } else {
+      // Validate URL to prevent SSRF attacks
+      if (!isUrlSafe(imageUrl!)) {
+        return NextResponse.json({ error: 'Invalid image URL' }, { status: 400 });
+      }
+
       // Fetch image and convert to base64
       const imageResponse = await fetch(imageUrl!);
       if (!imageResponse.ok) {

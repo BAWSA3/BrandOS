@@ -1,3 +1,4 @@
+import { randomUUID } from 'crypto';
 import supabase from './supabase';
 
 export interface EmailSignup {
@@ -25,8 +26,8 @@ export async function addEmailSignup(
       return { success: false, error: 'Email already registered' };
     }
 
-    // Generate a cuid-like ID
-    const id = `signup_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    // Generate a unique ID using crypto
+    const id = `signup_${randomUUID()}`;
 
     // Add new signup with explicit id and createdAt
     const { error } = await supabase

@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import DOMPurify from 'dompurify';
 import { GeneratedBrandDNA } from './BrandDNAPreview';
 import {
   getWelcomeMessage,
@@ -202,7 +203,7 @@ export default function BrandAdvisorChat({
                     <div
                       className="text-neutral-100 whitespace-pre-wrap prose prose-invert prose-sm max-w-none"
                       dangerouslySetInnerHTML={{
-                        __html: formatMarkdown(message.content)
+                        __html: DOMPurify.sanitize(formatMarkdown(message.content))
                       }}
                     />
                   </div>

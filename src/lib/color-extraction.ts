@@ -8,6 +8,23 @@ import fs from 'fs';
 import path from 'path';
 import os from 'os';
 
+// Security: Validate URL to prevent SSRF attacks
+function isUrlSafe(urlString: string): boolean {
+  try {
+    const url = new URL(urlString);
+    if (url.protocol !== 'https:' && url.protocol !== 'http:') return false;
+
+    const hostname = url.hostname.toLowerCase();
+    const blockedPatterns = [
+      /^127\./, /^10\./, /^172\.(1[6-9]|2[0-9]|3[0-1])\./, /^192\.168\./,
+      /^169\.254\./, /^0\./, /^localhost$/i, /^.*\.local$/i, /^.*\.internal$/i,
+    ];
+    return !blockedPatterns.some(p => p.test(hostname));
+  } catch {
+    return false;
+  }
+}
+
 export interface ExtractedColors {
   primary: string;
   secondary: string;
@@ -296,6 +313,12 @@ export async function extractColorsFromImage(
   try {
     // Upgrade to higher resolution image (Twitter uses _normal for small)
     const highResUrl = imageUrl.replace('_normal', '_400x400');
+
+    // Validate URL to prevent SSRF attacks
+    if (!isUrlSafe(highResUrl)) {
+      console.warn('Blocked unsafe image URL');
+      return DEFAULT_COLORS;
+    }
 
     // Fetch the image
     console.log('=== FETCHING IMAGE FOR COLOR EXTRACTION (node-vibrant) ===');

@@ -25,6 +25,13 @@ let settings = {
   currentBrand: null
 };
 
+// Security: Escape HTML to prevent XSS
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
 // Initialize
 document.addEventListener('DOMContentLoaded', async () => {
   await loadSettings();
@@ -125,7 +132,7 @@ checkBtn.addEventListener('click', async () => {
     console.error('Check error:', error);
     scoreValue.textContent = '!';
     scoreLabel.textContent = 'Error';
-    feedbackDiv.innerHTML = `<p style="color: #ff3b30;">${error.message}</p>`;
+    feedbackDiv.innerHTML = `<p style="color: #ff3b30;">${escapeHtml(error.message)}</p>`;
   } finally {
     checkBtn.disabled = false;
     checkBtn.textContent = 'Check Content';
@@ -208,21 +215,21 @@ function displayResult(result) {
   
   // Display feedback
   let feedbackHtml = '';
-  
+
   if (result.strengths && result.strengths.length > 0) {
     feedbackHtml += '<p><strong>Strengths:</strong></p>';
     result.strengths.forEach(s => {
-      feedbackHtml += `<p>✓ ${s}</p>`;
+      feedbackHtml += `<p>✓ ${escapeHtml(s)}</p>`;
     });
   }
-  
+
   if (result.issues && result.issues.length > 0) {
     feedbackHtml += '<p><strong>Issues:</strong></p>';
     result.issues.forEach(s => {
-      feedbackHtml += `<p>✗ ${s}</p>`;
+      feedbackHtml += `<p>✗ ${escapeHtml(s)}</p>`;
     });
   }
-  
+
   feedbackDiv.innerHTML = feedbackHtml;
   
   // Show revised version

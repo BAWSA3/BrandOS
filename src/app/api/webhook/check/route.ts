@@ -3,6 +3,23 @@ import { NextRequest, NextResponse } from 'next/server';
 import { buildCheckPrompt } from '@/prompts/brand-guardian';
 import { BrandDNA } from '@/lib/types';
 
+// Security: Validate callback URL to prevent SSRF attacks
+function isCallbackUrlSafe(urlString: string): boolean {
+  try {
+    const url = new URL(urlString);
+    if (url.protocol !== 'https:') return false; // Only allow HTTPS for webhooks
+
+    const hostname = url.hostname.toLowerCase();
+    const blockedPatterns = [
+      /^127\./, /^10\./, /^172\.(1[6-9]|2[0-9]|3[0-1])\./, /^192\.168\./,
+      /^169\.254\./, /^0\./, /^localhost$/i, /^.*\.local$/i, /^.*\.internal$/i,
+    ];
+    return !blockedPatterns.some(p => p.test(hostname));
+  } catch {
+    return false;
+  }
+}
+
 // API key authentication for webhooks
 function validateApiKey(request: NextRequest): boolean {
   const apiKey = request.headers.get('x-api-key');
@@ -73,8 +90,8 @@ export async function POST(request: NextRequest) {
     
     const result = JSON.parse(jsonMatch[0]);
 
-    // If callback URL provided, send result there
-    if (callbackUrl) {
+    // If callback URL provided, validate and send result there
+    if (callbackUrl && isCallbackUrlSafe(callbackUrl)) {
       try {
         await fetch(callbackUrl, {
           method: 'POST',
@@ -90,6 +107,8 @@ export async function POST(request: NextRequest) {
       } catch (callbackError) {
         console.error('Callback failed:', callbackError);
       }
+    } else if (callbackUrl) {
+      console.warn('[Webhook] Blocked unsafe callback URL');
     }
 
     return NextResponse.json({

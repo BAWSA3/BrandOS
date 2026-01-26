@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { randomBytes } from 'crypto';
 import prisma from '@/lib/db';
 
-// Generate a 6-character invite code
+// Generate a 6-character invite code using cryptographically secure random
 function generateCode(): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // exclude confusing chars (O, 0, I, 1, L)
-  return Array.from({ length: 6 }, () =>
-    chars[Math.floor(Math.random() * chars.length)]
+  const bytes = randomBytes(6);
+  return Array.from(bytes, (byte) =>
+    chars[byte % chars.length]
   ).join('');
 }
 
