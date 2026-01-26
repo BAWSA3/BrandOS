@@ -30,7 +30,7 @@ export function InviteCodeDisplay({ username, onGenerate }: InviteCodeDisplayPro
         const response = await fetch('/api/invite', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username, count: 1 }),
+          body: JSON.stringify({ username, count: 3 }),
         });
 
         const data = await response.json();
@@ -97,7 +97,7 @@ export function InviteCodeDisplay({ username, onGenerate }: InviteCodeDisplayPro
             color: 'rgba(255, 255, 255, 0.6)',
           }}
         >
-          GENERATING YOUR INVITE CODE...
+          GENERATING YOUR INVITE CODES...
         </div>
       </motion.div>
     );

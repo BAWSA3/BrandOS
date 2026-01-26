@@ -30,6 +30,7 @@ import DataPersistenceWarning from '@/components/DataPersistenceWarning';
 import { useToast } from '@/components/ToastProvider';
 import { BetaBadgeInline } from '@/components/BetaBadge';
 import { InnerCircleBadge, useInnerCircle, InnerCircleStyles } from '@/components/InnerCircleBadge';
+import { InviteCodeDisplay } from '@/components/InviteCodeDisplay';
 import ChangelogModal from '@/components/ChangelogModal';
 import analytics from '@/lib/analytics';
 import { useAuth } from '@/hooks/useAuth';
@@ -1823,6 +1824,14 @@ function HomeContent() {
                   <div className="text-xs uppercase tracking-widest text-muted">Average Score</div>
                 </div>
               </div>
+
+              {/* Inner Circle Invite Codes */}
+              {isInnerCircle && (
+                <div className="mb-16">
+                  <h3 className="text-xs uppercase tracking-widest text-muted mb-6">Your Invite Codes</h3>
+                  <InviteCodeDisplay username={user?.xUsername || brandDNA?.name || 'user'} />
+                </div>
+              )}
 
               {/* Score History Chart */}
               {dashboardStats.recentScores.length > 0 && (
