@@ -157,7 +157,8 @@ export function useInnerCircle() {
   useEffect(() => {
     const validateAndRedeem = async () => {
       // Check early access mode first
-      const earlyAccessMode = process.env.NEXT_PUBLIC_EARLY_ACCESS_MODE === 'true';
+      // TODO: When ready to end early access, change this to false
+      const earlyAccessMode = true; // process.env.NEXT_PUBLIC_EARLY_ACCESS_MODE === 'true';
 
       if (earlyAccessMode) {
         // Grant Inner Circle to everyone during early access
