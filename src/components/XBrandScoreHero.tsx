@@ -1619,9 +1619,9 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
                   fontFamily: "'Inter', sans-serif",
                   fontWeight: 800,
                   fontStyle: 'italic',
-                  fontSize: '9rem',
-                  letterSpacing: '-4px',
-                  marginRight: '12px',
+                  fontSize: 'clamp(3rem, 18vw, 9rem)',
+                  letterSpacing: 'clamp(-2px, -0.5vw, -4px)',
+                  marginRight: 'clamp(4px, 1.5vw, 12px)',
                   color: theme === 'dark' ? '#ffffff' : '#1a1a1a',
                 }}
               />
@@ -1631,7 +1631,7 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
                 staggerDelay={0.08}
                 style={{
                   fontFamily: "'Press Start 2P', cursive",
-                  fontSize: '7rem',
+                  fontSize: 'clamp(2.2rem, 14vw, 7rem)',
                   color: '#0047FF',
                   textShadow: '0 0 35px rgba(0, 71, 255, 0.4)',
                 }}
@@ -1661,7 +1661,7 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
                 willChange: 'transform',
               }}
             >
-              DECODE YOUR BRAND SIGNAL
+              HOW GOOD IS YOUR BRAND?
             </motion.p>
 
             {/* Input Form */}
