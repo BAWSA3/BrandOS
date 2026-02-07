@@ -1,0 +1,24 @@
+{
+  "name": "remotion-bbb",
+  "version": "1.0.0",
+  "description": "Brick by Brick - Promotional Video",
+  "scripts": {
+    "dev": "remotion studio",
+    "build": "remotion render BrickByBrick out/video.mp4",
+    "render": "remotion render BrickByBrick out/video.mp4",
+    "upgrade": "remotion upgrade"
+  },
+  "dependencies": {
+    "@remotion/cli": "^4.0.0",
+    "@remotion/player": "^4.0.0",
+    "@remotion/transitions": "^4.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "remotion": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "typescript": "^5.0.0"
+  }
+}

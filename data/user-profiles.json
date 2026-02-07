@@ -240,13 +240,17 @@
         {
           "value": 96,
           "scannedAt": 1769070297382
+        },
+        {
+          "value": 94,
+          "scannedAt": 1769429628884
         }
       ],
       "highestScore": 98,
-      "currentScore": 96,
+      "currentScore": 94,
       "firstScannedAt": 1768895525086,
-      "lastScannedAt": 1769070297382,
-      "totalScans": 18
+      "lastScannedAt": 1769429628884,
+      "totalScans": 19
     },
     "leap_xyz": {
       "username": "leap_xyz",
@@ -647,5 +651,5 @@
       "totalScans": 2
     }
   },
-  "lastUpdated": 1769118544955
+  "lastUpdated": 1769429628884
 }

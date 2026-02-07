@@ -1,0 +1,25 @@
+{
+  "name": "remotion-brandos",
+  "version": "1.0.0",
+  "description": "BrandOS - 8 Archetypes Cinematic Promo",
+  "scripts": {
+    "dev": "remotion studio",
+    "build": "remotion render Archetypes out/archetypes.mp4",
+    "render": "remotion render Archetypes out/archetypes.mp4 --codec h264",
+    "render:gif": "remotion render Archetypes out/archetypes.gif --codec gif",
+    "upgrade": "remotion upgrade"
+  },
+  "dependencies": {
+    "@remotion/cli": "^4.0.0",
+    "@remotion/player": "^4.0.0",
+    "@remotion/transitions": "^4.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "remotion": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "typescript": "^5.0.0"
+  }
+}
