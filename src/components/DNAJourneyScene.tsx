@@ -32,15 +32,28 @@ export default function DNAJourneyScene({
   // Rotation speed: slower during journey for focus
   const rotationMultiplier = flowState === 'journey' ? 0.2 : flowState === 'reveal' ? 0.5 : 1;
 
-  // Capture wheel events and prevent them from affecting the 3D scene
-  const handleWheel = (e: React.WheelEvent) => {
-    e.stopPropagation();
-    e.preventDefault();
-    window.scrollBy(0, e.deltaY);
-  };
+  // Capture wheel events and prevent them from affecting the 3D scene.
+  // Must use a native listener with { passive: false } since browsers
+  // register wheel events as passive by default, blocking preventDefault().
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const handleWheel = (e: WheelEvent) => {
+      e.stopPropagation();
+      e.preventDefault();
+      window.scrollBy(0, e.deltaY);
+    };
+
+    el.addEventListener('wheel', handleWheel, { passive: false });
+    return () => el.removeEventListener('wheel', handleWheel);
+  }, []);
 
   return (
     <div
+      ref={containerRef}
       style={{
         width: '100%',
         height: '100%',
@@ -51,7 +64,6 @@ export default function DNAJourneyScene({
         // White bloom glow effect
         filter: 'drop-shadow(0 0 25px rgba(255, 255, 255, 0.5))',
       }}
-      onWheel={handleWheel}
     >
       <Canvas
         camera={{ position: [0, 0, 40], fov: 45 }}
