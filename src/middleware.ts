@@ -12,6 +12,7 @@ const publicRoutes = [
   '/leaderboard',
   '/admin',
   '/api/auth',
+  '/article',
 ];
 
 export function middleware(request: NextRequest) {
