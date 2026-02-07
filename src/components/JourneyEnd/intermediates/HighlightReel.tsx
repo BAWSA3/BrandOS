@@ -40,8 +40,7 @@ export default function HighlightReel({
     const urlParams = new URLSearchParams(window.location.search);
     const urlValue = urlParams.get('innerCircle');
     const localValue = localStorage.getItem('innerCircle');
-    // TODO: When ready to end early access, change this to false
-    const earlyAccessMode = true; // process.env.NEXT_PUBLIC_EARLY_ACCESS_MODE === 'true';
+    const earlyAccessMode = process.env.NEXT_PUBLIC_EARLY_ACCESS_MODE === 'true';
 
     const hasAccess = earlyAccessMode ||
                       String(urlValue).toLowerCase() === 'true' ||
