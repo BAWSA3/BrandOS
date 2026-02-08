@@ -414,13 +414,17 @@
         {
           "value": 75,
           "scannedAt": 1770552920642
+        },
+        {
+          "value": 79,
+          "scannedAt": 1770555156385
         }
       ],
       "highestScore": 79,
-      "currentScore": 75,
+      "currentScore": 79,
       "firstScannedAt": 1768904843172,
-      "lastScannedAt": 1770552920642,
-      "totalScans": 9
+      "lastScannedAt": 1770555156385,
+      "totalScans": 10
     },
     "web3pingu": {
       "username": "web3pingu",
@@ -506,13 +510,17 @@
         {
           "value": 88,
           "scannedAt": 1768905521780
+        },
+        {
+          "value": 87,
+          "scannedAt": 1770554764336
         }
       ],
       "highestScore": 88,
-      "currentScore": 88,
+      "currentScore": 87,
       "firstScannedAt": 1768905521780,
-      "lastScannedAt": 1768905521780,
-      "totalScans": 1
+      "lastScannedAt": 1770554764336,
+      "totalScans": 2
     },
     "levelsio": {
       "username": "levelsio",
@@ -655,5 +663,5 @@
       "totalScans": 2
     }
   },
-  "lastUpdated": 1770552920642
+  "lastUpdated": 1770555156386
 }
