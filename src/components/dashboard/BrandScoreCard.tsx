@@ -9,11 +9,10 @@ export default function BrandScoreCard() {
   const completeness = useBrandCompleteness();
   const [animatedScore, setAnimatedScore] = useState(0);
 
-  // Animate score on mount
   useEffect(() => {
     const target = completeness;
     let current = 0;
-    const step = target / 40;
+    const step = target / 30;
     const interval = setInterval(() => {
       current += step;
       if (current >= target) {
@@ -25,97 +24,74 @@ export default function BrandScoreCard() {
     return () => clearInterval(interval);
   }, [completeness]);
 
-  const circumference = 2 * Math.PI * 52;
-  const strokeDashoffset = circumference - (animatedScore / 100) * circumference;
+  const circumference = 2 * Math.PI * 44;
+  const offset = circumference - (animatedScore / 100) * circumference;
+
+  const tone = brandDNA?.tone;
+  const keywords = brandDNA?.keywords || [];
 
   return (
-    <div
-      className="relative col-span-2 row-span-1 rounded-2xl border overflow-hidden p-6 flex items-center gap-8"
-      style={{
-        background: 'linear-gradient(135deg, rgba(0,47,167,0.15) 0%, rgba(0,71,255,0.08) 50%, rgba(15,15,15,0.9) 100%)',
-        borderColor: 'rgba(0,71,255,0.2)',
-      }}
-    >
-      {/* Grid pattern overlay */}
-      <div
-        className="absolute inset-0 opacity-[0.03]"
-        style={{
-          backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)',
-          backgroundSize: '20px 20px',
-        }}
-      />
-
-      {/* Score Ring */}
-      <div className="relative w-32 h-32 shrink-0">
-        <svg className="w-32 h-32 -rotate-90" viewBox="0 0 120 120">
-          <circle
-            cx="60" cy="60" r="52"
-            fill="none"
-            stroke="rgba(255,255,255,0.06)"
-            strokeWidth="6"
-          />
-          <circle
-            cx="60" cy="60" r="52"
-            fill="none"
-            stroke="#0047FF"
-            strokeWidth="6"
-            strokeLinecap="round"
-            strokeDasharray={circumference}
-            strokeDashoffset={strokeDashoffset}
-            className="transition-all duration-1000 ease-out"
-            style={{ filter: 'drop-shadow(0 0 8px rgba(0,71,255,0.5))' }}
-          />
-        </svg>
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-3xl font-bold text-white tracking-tight">{animatedScore}</span>
-          <span className="text-[9px] uppercase tracking-[0.15em] text-white/40 mt-0.5">Brand Score</span>
+    <div style={{ background: '#1C1C1E', borderRadius: 16, padding: 24 }} className="h-full">
+      <div className="flex items-start gap-6">
+        {/* Score ring */}
+        <div className="relative shrink-0">
+          <svg width="100" height="100" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="44" fill="none" stroke="#2C2C2E" strokeWidth="6" />
+            <circle
+              cx="50" cy="50" r="44" fill="none"
+              stroke="#0A84FF" strokeWidth="6" strokeLinecap="round"
+              strokeDasharray={circumference}
+              strokeDashoffset={offset}
+              style={{ transform: 'rotate(-90deg)', transformOrigin: '50% 50%', transition: 'stroke-dashoffset 1s ease-out' }}
+            />
+          </svg>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span style={{ fontSize: 28, fontWeight: 700, color: '#F5F5F7', letterSpacing: '-0.02em' }}>
+              {animatedScore}
+            </span>
+          </div>
         </div>
-      </div>
 
-      {/* Brand Info */}
-      <div className="relative flex-1 space-y-3">
-        <div>
-          <h2 className="text-xl font-semibold text-white tracking-tight">
+        {/* Brand info */}
+        <div className="flex-1 min-w-0">
+          <h2 style={{ fontSize: 22, fontWeight: 600, color: '#F5F5F7', letterSpacing: '-0.02em', marginBottom: 4 }}>
             {brandDNA?.name || 'Your Brand'}
           </h2>
-          <p className="text-xs text-white/40 mt-0.5">Brand DNA Health</p>
-        </div>
+          <p style={{ fontSize: 14, color: '#86868B', marginBottom: 16 }}>
+            Brand completeness score
+          </p>
 
-        {/* Tone bars */}
-        <div className="space-y-2">
-          {[
-            { label: 'Formality', value: brandDNA?.tone.minimal || 0, color: '#71767B' },
-            { label: 'Energy', value: brandDNA?.tone.playful || 0, color: '#00FF41' },
-            { label: 'Confidence', value: brandDNA?.tone.bold || 0, color: '#0047FF' },
-          ].map(({ label, value, color }) => (
-            <div key={label} className="flex items-center gap-3">
-              <span className="text-[9px] uppercase tracking-wider text-white/30 w-16 shrink-0 font-mono">
-                {label.slice(0, 3).toUpperCase()}
-              </span>
-              <div className="flex-1 h-1.5 bg-white/[0.04] rounded-full overflow-hidden">
-                <div
-                  className="h-full rounded-full transition-all duration-700"
-                  style={{ width: `${value}%`, backgroundColor: color, boxShadow: `0 0 8px ${color}40` }}
-                />
-              </div>
-              <span className="text-[10px] text-white/25 w-6 text-right font-mono">{value}</span>
+          {/* Tone */}
+          {tone && (
+            <div style={{ marginBottom: 12 }}>
+              <span style={{ fontSize: 12, color: '#6E6E73', display: 'block', marginBottom: 6 }}>Tone</span>
+              <span style={{ fontSize: 14, color: '#F5F5F7' }}>{tone}</span>
             </div>
-          ))}
-        </div>
+          )}
 
-        {/* Keywords preview */}
-        {brandDNA && brandDNA.keywords.length > 0 && (
-          <div className="flex flex-wrap gap-1 pt-1">
-            {brandDNA.keywords.slice(0, 4).map((kw, i) => (
-              <span
-                key={i}
-                className="px-2 py-0.5 text-[9px] rounded-full bg-[#0047FF]/10 text-[#0047FF]/70 border border-[#0047FF]/20"
-              >
-                {kw}
-              </span>
-            ))}
-          </div>
-        )}
+          {/* Keywords */}
+          {keywords.length > 0 && (
+            <div>
+              <span style={{ fontSize: 12, color: '#6E6E73', display: 'block', marginBottom: 6 }}>Keywords</span>
+              <div className="flex flex-wrap gap-1.5">
+                {keywords.slice(0, 6).map((kw, i) => (
+                  <span
+                    key={i}
+                    style={{
+                      fontSize: 12,
+                      color: '#86868B',
+                      background: '#2C2C2E',
+                      padding: '3px 10px',
+                      borderRadius: 6,
+                    }}
+                  >
+                    {kw}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

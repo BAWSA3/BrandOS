@@ -20,24 +20,17 @@ import ContextTone from '@/components/ContextTone';
 import PhaseNavigation, { Phase, SubTab, getPhaseFromTab, getDefaultTabForPhase } from '@/components/PhaseNavigation';
 import OnboardingWizard from '@/components/OnboardingWizard';
 import BrandCompleteness, { useBrandCompleteness } from '@/components/BrandCompleteness';
-import QuickActions from '@/components/QuickActions';
 import { BrandKitCanvas, LogoSection, ColorSection, TypographySection, ImagerySection, IconSection, TemplateSection, AIStudio } from '@/components/brandkit';
 import { BrandImportHub } from '@/components/import';
 import { ExtractedBrand } from '@/lib/importTypes';
 import PhasesBreakdown from '@/components/PhasesBreakdown';
-import AnimatedBackground from '@/components/AnimatedBackground';
-import DataPersistenceWarning from '@/components/DataPersistenceWarning';
 import { useToast } from '@/components/ToastProvider';
-import { BetaBadgeInline } from '@/components/BetaBadge';
-import { InnerCircleBadge, useInnerCircle, InnerCircleStyles } from '@/components/InnerCircleBadge';
-import { InviteCodeDisplay } from '@/components/InviteCodeDisplay';
+import { useInnerCircle, InnerCircleStyles } from '@/components/InnerCircleBadge';
 import ChangelogModal from '@/components/ChangelogModal';
 import analytics from '@/lib/analytics';
 import { useAuth } from '@/hooks/useAuth';
 import { useBrandSync } from '@/hooks/useBrandSync';
 import { useHistorySync } from '@/hooks/useHistorySync';
-import AuthButton from '@/components/AuthButton';
-import { SaveResultsPrompt } from '@/components/SaveResultsPrompt';
 import ContentWorkflow from '@/components/workflow/ContentWorkflow';
 import DashboardHome from '@/components/dashboard/DashboardHome';
 
@@ -636,76 +629,26 @@ function HomeContent() {
   }
 
   return (
-    <div className={`min-h-screen relative overflow-hidden transition-colors duration-300 ${theme === 'dark' ? 'bg-[#0a0a0a] text-white' : 'bg-[#faf8f5] text-[#1a1a1a]'}`}>
-      {/* Inner Circle styles for shimmer animation */}
+    <div className="min-h-screen bg-black text-[#F5F5F7]">
+      {/* Inner Circle styles */}
       {isInnerCircle && <InnerCircleStyles />}
-
-      {/* Animated Background with Blue Orbs */}
-      <AnimatedBackground variant="default" orbCount={3} />
       
       {/* Imported Brand DNA Welcome Toast */}
       {showImportedWelcome && (
-        <div 
-          className="fixed top-4 left-1/2 -translate-x-1/2 z-50 animate-fade-in"
-          style={{ animation: 'slideDown 0.5s ease-out' }}
-        >
-          <div 
-            className="flex items-center gap-4 px-6 py-4 rounded-2xl shadow-lg"
-            style={{
-              background: 'linear-gradient(135deg, rgba(212, 165, 116, 0.15) 0%, rgba(212, 165, 116, 0.05) 100%)',
-              border: '1px solid rgba(212, 165, 116, 0.3)',
-              backdropFilter: 'blur(20px)',
-            }}
-          >
-            <div 
-              className="w-10 h-10 rounded-full flex items-center justify-center"
-              style={{ background: 'rgba(212, 165, 116, 0.2)' }}
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#D4A574" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="20 6 9 17 4 12"/>
-              </svg>
-            </div>
-            <div>
-              <h4 
-                className="font-semibold mb-0.5"
-                style={{ 
-                  fontFamily: "'VCR OSD Mono', monospace",
-                  fontSize: '13px',
-                  letterSpacing: '0.1em',
-                  color: '#D4A574',
-                }}
-              >
-                BRAND DNA IMPORTED
-              </h4>
-              <p 
-                className="text-sm"
-                style={{ 
-                  color: 'rgba(255, 255, 255, 0.7)',
-                  fontFamily: "'Helvetica Neue', sans-serif",
-                }}
-              >
-                Welcome to BrandOS! Your brand identity is ready to use.
-              </p>
-            </div>
+        <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50 animate-fade-in">
+          <div className="flex items-center gap-3 px-5 py-3 rounded-xl" style={{ background: '#1C1C1E', boxShadow: '0 4px 12px rgba(0,0,0,0.4)' }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#30D158" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            <span style={{ fontSize: 14, color: '#F5F5F7' }}>Brand DNA imported successfully</span>
             <button
-              onClick={() => {
-                setShowImportedWelcome(false);
-                window.history.replaceState({}, '', '/app');
-              }}
-              className="ml-4 p-1 rounded-lg hover:bg-white/10 transition-colors"
+              onClick={() => { setShowImportedWelcome(false); window.history.replaceState({}, '', '/app'); }}
+              className="ml-2 p-1 rounded-md hover:bg-white/5 transition-colors"
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="18" y1="6" x2="6" y2="18"/>
-                <line x1="6" y1="6" x2="18" y2="18"/>
-              </svg>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6E6E73" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
           </div>
         </div>
       )}
-      
-      {/* Subtle noise overlay */}
-      <div className="noise-overlay" />
-      
+
       {/* Phase Navigation */}
       <PhaseNavigation
         activePhase={activePhase}
@@ -715,231 +658,61 @@ function HomeContent() {
         brandCompleteness={brandCompleteness}
         hasChecked={phaseProgress.hasCompletedFirstCheck}
         hasGenerated={phaseProgress.hasCompletedFirstGeneration}
+        userName={user?.name || undefined}
+        userAvatar={user?.avatar}
+        brandName={brandDNA?.name || undefined}
+        onAvatarClick={() => setShowBrandMenu(!showBrandMenu)}
       />
 
-      {/* Brand Switcher and Auth Button (floating) */}
-      <div className="fixed top-20 right-6 z-40 flex items-center gap-3">
-        {/* Sync indicator */}
-        {user && isSyncing && (
-          <div className="flex items-center gap-1.5 text-white/50 text-xs">
-            <svg className="animate-spin w-3 h-3" viewBox="0 0 24 24" fill="none">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-            </svg>
-            <span>Syncing...</span>
-          </div>
-        )}
-
-        {/* Auth Button */}
-        <AuthButton showInnerCircle={!isInnerCircle} />
-
-        <div className="relative">
-          <button
-            onClick={() => setShowBrandMenu(!showBrandMenu)}
-            className={`flex items-center gap-2 px-4 py-2.5 text-sm backdrop-blur-xl rounded-full transition-all ${theme === 'dark' ? 'bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.1)] hover:bg-[rgba(255,255,255,0.1)] hover:border-[rgba(255,255,255,0.2)]' : 'bg-[rgba(0,0,0,0.03)] border border-[rgba(0,0,0,0.08)] hover:bg-[rgba(0,0,0,0.06)] hover:border-[rgba(0,0,0,0.12)]'}`}
+      {/* Brand Switcher Popover (triggered from nav avatar) */}
+      {showBrandMenu && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setShowBrandMenu(false)} />
+          <div
+            className="fixed top-[60px] right-6 z-50 w-56 animate-fade-in"
+            style={{ background: '#1C1C1E', borderRadius: 12, boxShadow: '0 16px 48px rgba(0,0,0,0.6)', border: '1px solid rgba(255,255,255,0.06)' }}
           >
-            <span className="text-white/50 text-xs font-mono uppercase tracking-wider">Brand</span>
-            <span className="font-medium text-white">{brandDNA?.name || 'Select'}</span>
-            <BetaBadgeInline />
-            {isInnerCircle && <InnerCircleBadge variant="inline" />}
-            <svg className="w-4 h-4 text-white/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 9l-7 7-7-7" />
-            </svg>
-          </button>
-          
-          {showBrandMenu && (
-            <div className="absolute top-full right-0 mt-2 w-64 bg-[rgba(20,20,20,0.95)] backdrop-blur-xl border border-[rgba(255,255,255,0.1)] rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.4)] overflow-hidden animate-fade-in">
-              <div className="p-2 max-h-64 overflow-y-auto">
-                {brands.map((brand) => (
-                  <div
-                    key={brand.id}
-                    className={`flex items-center justify-between px-3 py-2.5 rounded-xl cursor-pointer transition-all ${
-                      brand.id === currentBrandId 
-                        ? 'bg-[rgba(0,71,255,0.15)] border border-[rgba(0,71,255,0.3)]' 
-                        : 'hover:bg-[rgba(255,255,255,0.05)]'
-                    }`}
-                  >
-                    <span
-                      className="flex-1 text-sm text-white"
-                      onClick={() => {
-                        switchBrand(brand.id);
-                        setShowBrandMenu(false);
-                      }}
-                    >
-                      {brand.name || 'Unnamed Brand'}
-                    </span>
-                    {brands.length > 1 && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          deleteBrand(brand.id);
-                        }}
-                        className="text-white/40 hover:text-white p-1 transition-colors"
-                      >
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
-                    )}
-                  </div>
-                ))}
+            {user && (
+              <div className="px-4 py-3" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                <p style={{ fontSize: 13, fontWeight: 600, color: '#F5F5F7' }}>{user.name || user.xUsername}</p>
+                <p style={{ fontSize: 12, color: '#6E6E73' }}>@{user.xUsername}</p>
               </div>
-              <div className="border-t border-[rgba(255,255,255,0.1)] p-2">
-                <button
-                  onClick={() => {
-                    createBrand();
-                    setShowBrandMenu(false);
-                  }}
-                  className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-white/60 hover:text-white hover:bg-[rgba(255,255,255,0.05)] rounded-xl transition-all"
+            )}
+            <div className="p-1.5 max-h-48 overflow-y-auto">
+              {brands.map((brand) => (
+                <div
+                  key={brand.id}
+                  className="flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer transition-colors"
+                  style={{ background: brand.id === currentBrandId ? 'rgba(10,132,255,0.1)' : 'transparent' }}
+                  onClick={() => { switchBrand(brand.id); setShowBrandMenu(false); }}
                 >
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" />
-                  </svg>
-                  New Brand
-                </button>
-              </div>
+                  <span style={{ fontSize: 13, color: brand.id === currentBrandId ? '#0A84FF' : '#F5F5F7' }}>
+                    {brand.name || 'Unnamed Brand'}
+                  </span>
+                </div>
+              ))}
             </div>
-          )}
-        </div>
-        
-      </div>
-
-      {/* Click outside to close menus */}
-      {(showBrandMenu || showTemplates) && (
-        <div 
-          className="fixed inset-0 z-30" 
-          onClick={() => {
-            setShowBrandMenu(false);
-            setShowTemplates(false);
-          }}
-        />
+            <div className="p-1.5" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+              <button
+                onClick={() => { createBrand(); setShowBrandMenu(false); }}
+                className="w-full flex items-center gap-2 px-3 py-2 rounded-lg transition-colors"
+                style={{ fontSize: 13, color: '#86868B', background: 'transparent', border: 'none', cursor: 'pointer' }}
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                </svg>
+                New Brand
+              </button>
+            </div>
+          </div>
+        </>
       )}
 
-      {/* Quick Actions FAB */}
-      <QuickActions
-        onNavigate={handleQuickNavigate}
-        canCheck={brandCompleteness >= 30}
-        canGenerate={phaseProgress.hasCompletedFirstCheck}
-      />
-
-      {/* Data Persistence Warning */}
-      <DataPersistenceWarning onExport={exportAsJSON} />
-
-      {/* Save Results Prompt - for unauthenticated users who have completed the journey */}
-      {!user && !authLoading && phaseProgress.hasCompletedOnboarding && showSavePrompt && (
-        <SaveResultsPrompt
-          inviteCode={pendingInviteCode || undefined}
-          onDismiss={() => setShowSavePrompt(false)}
-        />
-      )}
-
-      {/* Changelog Modal - shows automatically for new versions */}
+      {/* Changelog Modal */}
       {phaseProgress.hasCompletedOnboarding && <ChangelogModal />}
 
-      {/* Join Waitlist Panel */}
-      {!waitlistSubmitted && (
-        <div
-          className="fixed bottom-6 left-6 z-40 animate-fade-in"
-          style={{
-            maxWidth: '320px',
-          }}
-        >
-          <div
-            className="rounded-xl p-5"
-            style={{
-              background: theme === 'dark' ? 'rgba(26,26,26,0.95)' : 'rgba(255,255,255,0.95)',
-              border: `1px solid ${theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
-              backdropFilter: 'blur(20px)',
-              boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
-            }}
-          >
-            <h3
-              style={{
-                fontFamily: "'VCR OSD Mono', monospace",
-                fontSize: '11px',
-                letterSpacing: '0.1em',
-                color: '#D4A574',
-                marginBottom: '6px',
-              }}
-            >
-              JOIN THE WAITLIST
-            </h3>
-            <p
-              style={{
-                fontSize: '12px',
-                color: theme === 'dark' ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)',
-                marginBottom: '12px',
-                lineHeight: '1.4',
-              }}
-            >
-              Get early access to premium BrandOS features
-            </p>
-            <form onSubmit={handleWaitlistSubmit} className="flex gap-2">
-              <input
-                type="email"
-                value={waitlistEmail}
-                onChange={(e) => setWaitlistEmail(e.target.value)}
-                placeholder="Enter your email"
-                required
-                className="flex-1 px-3 py-2.5 rounded-lg text-sm outline-none"
-                style={{
-                  background: theme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
-                  border: `1px solid ${theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
-                  color: theme === 'dark' ? '#FFFFFF' : '#1a1a1a',
-                }}
-              />
-              <button
-                type="submit"
-                disabled={isSubmittingWaitlist}
-                className="px-4 py-2.5 rounded-lg cursor-pointer border-none transition-transform hover:scale-[1.02] active:scale-[0.98]"
-                style={{
-                  fontFamily: "'VCR OSD Mono', monospace",
-                  fontSize: '10px',
-                  letterSpacing: '0.08em',
-                  color: '#050505',
-                  background: 'linear-gradient(135deg, #E8C49A 0%, #D4A574 100%)',
-                  opacity: isSubmittingWaitlist ? 0.7 : 1,
-                }}
-              >
-                {isSubmittingWaitlist ? '...' : 'JOIN'}
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Waitlist Success Message */}
-      {waitlistSubmitted && (
-        <div
-          className="fixed bottom-6 left-6 z-40 animate-fade-in"
-          style={{
-            maxWidth: '320px',
-          }}
-        >
-          <div
-            className="rounded-xl p-5 text-center"
-            style={{
-              background: theme === 'dark' ? 'rgba(26,26,26,0.95)' : 'rgba(255,255,255,0.95)',
-              border: `1px solid ${theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
-              backdropFilter: 'blur(20px)',
-              boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
-            }}
-          >
-            <span
-              style={{
-                color: '#10B981',
-                fontFamily: "'VCR OSD Mono', monospace",
-                fontSize: '12px',
-              }}
-            >
-              ✓ YOU&apos;RE ON THE LIST!
-            </span>
-          </div>
-        </div>
-      )}
-
       {/* Main Content */}
-      <main className="pt-4">
+      <main className="max-w-[1200px] mx-auto px-6 py-8">
         {/* ======================= HOME DASHBOARD ======================= */}
 
         {activeTab === 'home' && (
@@ -953,15 +726,11 @@ function HomeContent() {
         {/* Brand DNA Tab */}
         {activeTab === 'brand' && (
           <div className="animate-fade-in">
-            <section className="py-16 px-6 text-center border-b border-border">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-surface rounded-full text-xs text-muted mb-6">
-                <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
-                Phase 1: Define
-              </div>
-              <h2 className="text-5xl font-light tracking-tight mb-4">
-                Define your brand.
+            <section className="pb-8">
+              <h2 style={{ fontSize: 28, fontWeight: 600, color: '#F5F5F7', letterSpacing: '-0.02em', marginBottom: 4 }}>
+                Define
               </h2>
-              <p className="text-muted text-lg max-w-md mx-auto mb-8">
+              <p style={{ fontSize: 15, color: '#86868B', marginBottom: 24 }}>
                 Capture the essence of your brand identity.
               </p>
               
@@ -1258,17 +1027,7 @@ function HomeContent() {
         {/* Safe Zones Tab */}
         {activeTab === 'safezones' && (
           <div className="animate-fade-in">
-            <section className="py-16 px-6 text-center border-b border-border">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-surface rounded-full text-xs text-muted mb-6">
-                <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-                Phase 1: Define
-              </div>
-              <h2 className="text-5xl font-light tracking-tight mb-4">Safe Zones.</h2>
-              <p className="text-muted text-lg max-w-md mx-auto">
-                Define what&apos;s locked, flexible, and experimental in your brand.
-              </p>
-            </section>
-            <section className="max-w-3xl mx-auto px-6 py-16">
+            <section className="max-w-3xl mx-auto">
               <SafeZones />
             </section>
           </div>
@@ -1277,17 +1036,7 @@ function HomeContent() {
         {/* Design Intents Tab */}
         {activeTab === 'intents' && (
           <div className="animate-fade-in">
-            <section className="py-16 px-6 text-center border-b border-border">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-surface rounded-full text-xs text-muted mb-6">
-                <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-                Phase 1: Define
-              </div>
-              <h2 className="text-5xl font-light tracking-tight mb-4">Design Intents.</h2>
-              <p className="text-muted text-lg max-w-md mx-auto">
-                Convert natural language directives into structured, enforceable brand rules.
-              </p>
-            </section>
-            <section className="max-w-3xl mx-auto px-6 py-16">
+            <section className="max-w-3xl mx-auto">
               <DesignIntentBlocks />
             </section>
           </div>
@@ -1298,18 +1047,16 @@ function HomeContent() {
         {/* Check Tab */}
         {activeTab === 'check' && (
           <div className="animate-fade-in">
-            <section className="py-16 px-6 text-center border-b border-border">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-surface rounded-full text-xs text-muted mb-6">
-                <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                Phase 2: Check
-              </div>
-              <h2 className="text-5xl font-light tracking-tight mb-4">Check your content.</h2>
-              <p className="text-muted text-lg max-w-md mx-auto">
+            <section className="pb-8">
+              <h2 style={{ fontSize: 28, fontWeight: 600, color: '#F5F5F7', letterSpacing: '-0.02em', marginBottom: 4 }}>
+                Check
+              </h2>
+              <p style={{ fontSize: 15, color: '#86868B', marginBottom: 24 }}>
                 Real-time brand alignment analysis.
               </p>
             </section>
 
-            <section className="max-w-2xl mx-auto px-6 py-16">
+            <section className="max-w-2xl mx-auto">
               <div className="mb-8">
                 <div className="flex items-center justify-between mb-4">
                   <label className="text-xs uppercase tracking-widest text-muted">Content to Analyze</label>
@@ -1435,17 +1182,7 @@ function HomeContent() {
         {/* Cohesion Tab */}
         {activeTab === 'cohesion' && (
           <div className="animate-fade-in">
-            <section className="py-16 px-6 text-center border-b border-border">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-surface rounded-full text-xs text-muted mb-6">
-                <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                Phase 2: Check
-              </div>
-              <h2 className="text-5xl font-light tracking-tight mb-4">Brand Cohesion.</h2>
-              <p className="text-muted text-lg max-w-md mx-auto">
-                Analyze your brand as a system. Detect drift, repetition, and missing anchors.
-              </p>
-            </section>
-            <section className="max-w-3xl mx-auto px-6 py-16">
+            <section className="max-w-3xl mx-auto">
               <BrandCohesion />
             </section>
           </div>
@@ -1454,17 +1191,7 @@ function HomeContent() {
         {/* Guardrails Tab */}
         {activeTab === 'guardrails' && (
           <div className="animate-fade-in">
-            <section className="py-16 px-6 text-center border-b border-border">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-surface rounded-full text-xs text-muted mb-6">
-                <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                Phase 2: Check
-              </div>
-              <h2 className="text-5xl font-light tracking-tight mb-4">Creator Guardrails.</h2>
-              <p className="text-muted text-lg max-w-md mx-auto">
-                Review drafts from creators and agencies against your brand guidelines.
-              </p>
-            </section>
-            <section className="max-w-3xl mx-auto px-6 py-16">
+            <section className="max-w-3xl mx-auto">
               <CreatorGuardrails />
             </section>
           </div>
@@ -1473,17 +1200,7 @@ function HomeContent() {
         {/* Protect Tab */}
         {activeTab === 'protect' && (
           <div className="animate-fade-in">
-            <section className="py-16 px-6 text-center border-b border-border">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-surface rounded-full text-xs text-muted mb-6">
-                <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                Phase 2: Check
-              </div>
-              <h2 className="text-5xl font-light tracking-tight mb-4">Taste Protection.</h2>
-              <p className="text-muted text-lg max-w-md mx-auto">
-                AI optimized for restraint. Suggests removal over addition.
-              </p>
-            </section>
-            <section className="max-w-3xl mx-auto px-6 py-16">
+            <section className="max-w-3xl mx-auto">
               <TasteProtection />
             </section>
           </div>
@@ -1492,17 +1209,7 @@ function HomeContent() {
         {/* Taste Tab */}
         {activeTab === 'taste' && (
           <div className="animate-fade-in">
-            <section className="py-16 px-6 text-center border-b border-border">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-surface rounded-full text-xs text-muted mb-6">
-                <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                Phase 2: Check
-              </div>
-              <h2 className="text-5xl font-light tracking-tight mb-4">Taste Translation.</h2>
-              <p className="text-muted text-lg max-w-md mx-auto">
-                Turn subjective feedback into concrete, actionable design rules.
-              </p>
-            </section>
-            <section className="max-w-3xl mx-auto px-6 py-16">
+            <section className="max-w-3xl mx-auto">
               <TasteTranslator />
             </section>
           </div>
@@ -1520,17 +1227,11 @@ function HomeContent() {
         {/* Platforms Tab */}
         {activeTab === 'platforms' && (
           <div className="animate-fade-in">
-            <section className="py-16 px-6 text-center border-b border-border">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-surface rounded-full text-xs text-muted mb-6">
-                <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
-                Phase 3: Generate
-              </div>
-              <h2 className="text-5xl font-light tracking-tight mb-4">Platform Adaptation.</h2>
-              <p className="text-muted text-lg max-w-md mx-auto">
-                Adapt your content for each platform while preserving brand identity.
-              </p>
+            <section className="pb-8">
+              <h2 style={{ fontSize: 28, fontWeight: 600, color: '#F5F5F7', letterSpacing: '-0.02em', marginBottom: 4 }}>Platforms</h2>
+              <p style={{ fontSize: 15, color: '#86868B', marginBottom: 24 }}>Adapt content for each platform while preserving brand identity.</p>
             </section>
-            <section className="max-w-3xl mx-auto px-6 py-16">
+            <section className="max-w-3xl mx-auto">
               <PlatformAdapter />
             </section>
           </div>
@@ -1539,17 +1240,11 @@ function HomeContent() {
         {/* Context Tab */}
         {activeTab === 'context' && (
           <div className="animate-fade-in">
-            <section className="py-16 px-6 text-center border-b border-border">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-surface rounded-full text-xs text-muted mb-6">
-                <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
-                Phase 3: Generate
-              </div>
-              <h2 className="text-5xl font-light tracking-tight mb-4">Context Tone.</h2>
-              <p className="text-muted text-lg max-w-md mx-auto">
-                Adapt your brand voice for launches, apologies, crises, and more.
-              </p>
+            <section className="pb-8">
+              <h2 style={{ fontSize: 28, fontWeight: 600, color: '#F5F5F7', letterSpacing: '-0.02em', marginBottom: 4 }}>Context Tone</h2>
+              <p style={{ fontSize: 15, color: '#86868B', marginBottom: 24 }}>Adapt your brand voice for launches, apologies, crises, and more.</p>
             </section>
-            <section className="max-w-3xl mx-auto px-6 py-16">
+            <section className="max-w-3xl mx-auto">
               <ContextTone />
             </section>
           </div>
@@ -1558,12 +1253,6 @@ function HomeContent() {
         {/* Visual Tab */}
         {activeTab === 'visual' && (
           <div className="animate-fade-in">
-            <section className="py-16 px-6 text-center border-b border-border">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-surface rounded-full text-xs text-muted mb-6">
-                <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
-                Phase 3: Generate
-              </div>
-            </section>
             <VisualConcepts />
           </div>
         )}
@@ -1573,19 +1262,11 @@ function HomeContent() {
         {/* AI Studio Tab */}
         {activeTab === 'kit-ai-studio' && (
           <div className="animate-fade-in">
-            <section className="py-16 px-6 text-center border-b border-border">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-gradient-to-r from-purple-500/10 to-blue-500/10 rounded-full text-xs text-muted mb-6">
-                <span className="w-2 h-2 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full animate-pulse"></span>
-                Phase 4: Brand Kit
-              </div>
-              <h2 className="text-5xl font-light tracking-tight mb-4">AI Studio.</h2>
-              <p className="text-muted text-lg max-w-md mx-auto">
-                Generate brand assets with Gemini AI.
-              </p>
+            <section className="pb-8">
+              <h2 style={{ fontSize: 28, fontWeight: 600, color: '#F5F5F7', letterSpacing: '-0.02em', marginBottom: 4 }}>AI Studio</h2>
+              <p style={{ fontSize: 15, color: '#86868B', marginBottom: 24 }}>Generate brand assets with AI.</p>
             </section>
-            <section className="px-6 py-16">
-              <AIStudio />
-            </section>
+            <AIStudio />
           </div>
         )}
 
@@ -1599,17 +1280,7 @@ function HomeContent() {
         {/* Brand Kit Logos Tab */}
         {activeTab === 'kit-logos' && (
           <div className="animate-fade-in">
-            <section className="py-16 px-6 text-center border-b border-border">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-surface rounded-full text-xs text-muted mb-6">
-                <span className="w-2 h-2 bg-pink-500 rounded-full animate-pulse"></span>
-                Phase 4: Brand Kit
-              </div>
-              <h2 className="text-5xl font-light tracking-tight mb-4">Logos & Marks.</h2>
-              <p className="text-muted text-lg max-w-md mx-auto">
-                Upload and manage your logo variants with usage guidelines.
-              </p>
-            </section>
-            <section className="max-w-3xl mx-auto px-6 py-16">
+            <section className="max-w-3xl mx-auto">
               {currentBrandId && <LogoSection brandId={currentBrandId} />}
             </section>
           </div>
@@ -1618,17 +1289,7 @@ function HomeContent() {
         {/* Brand Kit Colors Tab */}
         {activeTab === 'kit-colors' && (
           <div className="animate-fade-in">
-            <section className="py-16 px-6 text-center border-b border-border">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-surface rounded-full text-xs text-muted mb-6">
-                <span className="w-2 h-2 bg-pink-500 rounded-full"></span>
-                Phase 4: Brand Kit
-              </div>
-              <h2 className="text-5xl font-light tracking-tight mb-4">Extended Colors.</h2>
-              <p className="text-muted text-lg max-w-md mx-auto">
-                Build your complete color palette with semantic naming and accessibility checks.
-              </p>
-            </section>
-            <section className="max-w-3xl mx-auto px-6 py-16">
+            <section className="max-w-3xl mx-auto">
               {currentBrandId && <ColorSection brandId={currentBrandId} />}
             </section>
           </div>
@@ -1637,17 +1298,7 @@ function HomeContent() {
         {/* Brand Kit Typography Tab */}
         {activeTab === 'kit-typography' && (
           <div className="animate-fade-in">
-            <section className="py-16 px-6 text-center border-b border-border">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-surface rounded-full text-xs text-muted mb-6">
-                <span className="w-2 h-2 bg-pink-500 rounded-full"></span>
-                Phase 4: Brand Kit
-              </div>
-              <h2 className="text-5xl font-light tracking-tight mb-4">Typography.</h2>
-              <p className="text-muted text-lg max-w-md mx-auto">
-                Define your type system with fonts, scales, and pairings.
-              </p>
-            </section>
-            <section className="max-w-4xl mx-auto px-6 py-16">
+            <section className="max-w-4xl mx-auto">
               {currentBrandId && <TypographySection brandId={currentBrandId} />}
             </section>
           </div>
@@ -1656,17 +1307,7 @@ function HomeContent() {
         {/* Brand Kit Imagery Tab */}
         {activeTab === 'kit-imagery' && (
           <div className="animate-fade-in">
-            <section className="py-16 px-6 text-center border-b border-border">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-surface rounded-full text-xs text-muted mb-6">
-                <span className="w-2 h-2 bg-pink-500 rounded-full"></span>
-                Phase 4: Brand Kit
-              </div>
-              <h2 className="text-5xl font-light tracking-tight mb-4">Imagery & Mood.</h2>
-              <p className="text-muted text-lg max-w-md mx-auto">
-                Create mood boards and define your visual style with do/don&apos;t examples.
-              </p>
-            </section>
-            <section className="max-w-4xl mx-auto px-6 py-16">
+            <section className="max-w-4xl mx-auto">
               {currentBrandId && <ImagerySection brandId={currentBrandId} />}
             </section>
           </div>
@@ -1675,17 +1316,7 @@ function HomeContent() {
         {/* Brand Kit Icons Tab */}
         {activeTab === 'kit-icons' && (
           <div className="animate-fade-in">
-            <section className="py-16 px-6 text-center border-b border-border">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-surface rounded-full text-xs text-muted mb-6">
-                <span className="w-2 h-2 bg-pink-500 rounded-full"></span>
-                Phase 4: Brand Kit
-              </div>
-              <h2 className="text-5xl font-light tracking-tight mb-4">Icon Library.</h2>
-              <p className="text-muted text-lg max-w-md mx-auto">
-                Organize and categorize your brand icons with usage guidelines.
-              </p>
-            </section>
-            <section className="max-w-4xl mx-auto px-6 py-16">
+            <section className="max-w-4xl mx-auto">
               {currentBrandId && <IconSection brandId={currentBrandId} />}
             </section>
           </div>
@@ -1694,17 +1325,7 @@ function HomeContent() {
         {/* Brand Kit Templates Tab */}
         {activeTab === 'kit-templates' && (
           <div className="animate-fade-in">
-            <section className="py-16 px-6 text-center border-b border-border">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-surface rounded-full text-xs text-muted mb-6">
-                <span className="w-2 h-2 bg-pink-500 rounded-full"></span>
-                Phase 4: Brand Kit
-              </div>
-              <h2 className="text-5xl font-light tracking-tight mb-4">Templates.</h2>
-              <p className="text-muted text-lg max-w-md mx-auto">
-                Create templates for social media, email, ads, and more.
-              </p>
-            </section>
-            <section className="max-w-4xl mx-auto px-6 py-16">
+            <section className="max-w-4xl mx-auto">
               {currentBrandId && <TemplateSection brandId={currentBrandId} />}
             </section>
           </div>
@@ -1715,18 +1336,12 @@ function HomeContent() {
         {/* Dashboard Tab */}
         {activeTab === 'dashboard' && (
           <div className="animate-fade-in">
-            <section className="py-16 px-6 text-center border-b border-border">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-surface rounded-full text-xs text-muted mb-6">
-                <span className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></span>
-                Phase 5: Scale
-              </div>
-              <h2 className="text-5xl font-light tracking-tight mb-4">Dashboard.</h2>
-              <p className="text-muted text-lg max-w-md mx-auto">
-                Track your brand consistency over time.
-              </p>
+            <section className="pb-8">
+              <h2 style={{ fontSize: 28, fontWeight: 600, color: '#F5F5F7', letterSpacing: '-0.02em', marginBottom: 4 }}>Analytics</h2>
+              <p style={{ fontSize: 15, color: '#86868B', marginBottom: 24 }}>Track your brand consistency over time.</p>
             </section>
 
-            <section className="max-w-4xl mx-auto px-6 py-16">
+            <section className="max-w-4xl mx-auto">
               {/* Brand Health Summary */}
               <div className="mb-12 p-6 bg-surface rounded-xl">
                 <BrandCompleteness size="md" showDetails={true} />
@@ -1793,16 +1408,12 @@ function HomeContent() {
         {/* History Tab */}
         {activeTab === 'history' && (
           <div className="animate-fade-in">
-            <section className="py-16 px-6 text-center border-b border-border">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-surface rounded-full text-xs text-muted mb-6">
-                <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
-                Phase 5: Scale
-              </div>
-              <h2 className="text-5xl font-light tracking-tight mb-4">History.</h2>
-              <p className="text-muted text-lg max-w-md mx-auto">Review your previous checks and generations.</p>
+            <section className="pb-8">
+              <h2 style={{ fontSize: 28, fontWeight: 600, color: '#F5F5F7', letterSpacing: '-0.02em', marginBottom: 4 }}>History</h2>
+              <p style={{ fontSize: 15, color: '#86868B', marginBottom: 24 }}>Review your previous checks and generations.</p>
             </section>
 
-            <section className="max-w-2xl mx-auto px-6 py-16">
+            <section className="max-w-2xl mx-auto">
               {history.length === 0 ? (
                 <div className="text-center py-16">
                   <p className="text-muted">No history yet.</p>
@@ -1845,16 +1456,12 @@ function HomeContent() {
         {/* Export Tab */}
         {activeTab === 'export' && (
           <div className="animate-fade-in">
-            <section className="py-16 px-6 text-center border-b border-border">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-surface rounded-full text-xs text-muted mb-6">
-                <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
-                Phase 5: Scale
-              </div>
-              <h2 className="text-5xl font-light tracking-tight mb-4">Export.</h2>
-              <p className="text-muted text-lg max-w-md mx-auto">Download your brand guidelines.</p>
+            <section className="pb-8">
+              <h2 style={{ fontSize: 28, fontWeight: 600, color: '#F5F5F7', letterSpacing: '-0.02em', marginBottom: 4 }}>Export</h2>
+              <p style={{ fontSize: 15, color: '#86868B', marginBottom: 24 }}>Download your brand guidelines.</p>
             </section>
 
-            <section className="max-w-2xl mx-auto px-6 py-16">
+            <section className="max-w-2xl mx-auto">
               <div className="grid grid-cols-3 gap-4 mb-8">
                 <button onClick={exportAsJSON} className="py-4 border border-border rounded-lg hover:border-foreground transition-colors">
                   <span className="block text-sm font-medium mb-1">Export JSON</span>
@@ -1987,18 +1594,12 @@ function HomeContent() {
         {/* Competitors Tab */}
         {activeTab === 'competitors' && (
           <div className="animate-fade-in">
-            <section className="py-16 px-6 text-center border-b border-border">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-surface rounded-full text-xs text-muted mb-6">
-                <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
-                Phase 5: Scale
-              </div>
-              <h2 className="text-5xl font-light tracking-tight mb-4">Compare.</h2>
-              <p className="text-muted text-lg max-w-md mx-auto">
-                Analyze how your brand voice differs from competitors.
-              </p>
+            <section className="pb-8">
+              <h2 style={{ fontSize: 28, fontWeight: 600, color: '#F5F5F7', letterSpacing: '-0.02em', marginBottom: 4 }}>Compare</h2>
+              <p style={{ fontSize: 15, color: '#86868B', marginBottom: 24 }}>Analyze how your brand voice differs from competitors.</p>
             </section>
 
-            <section className="max-w-2xl mx-auto px-6 py-16">
+            <section className="max-w-2xl mx-auto">
               <div className="mb-8">
                 <label className="block text-xs uppercase tracking-widest text-muted mb-4">Competitor Name</label>
                 <input
@@ -2112,31 +1713,21 @@ function HomeContent() {
         {/* Memory Tab */}
         {activeTab === 'memory' && (
           <div className="animate-fade-in">
-            <section className="py-16 px-6 text-center border-b border-border">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-surface rounded-full text-xs text-muted mb-6">
-                <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
-                Phase 5: Scale
-              </div>
-              <h2 className="text-5xl font-light tracking-tight mb-4">Brand Memory.</h2>
-              <p className="text-muted text-lg max-w-md mx-auto">
-                Track what worked and what failed. Build institutional memory.
-              </p>
+            <section className="pb-8">
+              <h2 style={{ fontSize: 28, fontWeight: 600, color: '#F5F5F7', letterSpacing: '-0.02em', marginBottom: 4 }}>Brand Memory</h2>
+              <p style={{ fontSize: 15, color: '#86868B', marginBottom: 24 }}>Track what worked and what failed. Build institutional memory.</p>
             </section>
-            <section className="max-w-3xl mx-auto px-6 py-16">
+            <section className="max-w-3xl mx-auto">
               <BrandMemory />
             </section>
           </div>
         )}
 
-        <footer className="border-t border-[rgba(255,255,255,0.1)] py-12 mt-16 print:hidden relative z-10">
-          <div className="max-w-6xl mx-auto px-6 text-center">
-            <div className="flex items-center justify-center gap-2 mb-3">
-              <span className="font-helvetica text-white/80">brand</span>
-              <span className="font-pixel text-[#0047FF]">OS</span>
-            </div>
-            <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/30">
-              AI-powered brand consistency
-            </p>
+        <footer className="py-10 mt-12 print:hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+          <div className="text-center">
+            <span style={{ fontSize: 13, fontWeight: 600, color: '#48484A' }}>
+              Brand<span style={{ color: '#0A84FF' }}>OS</span>
+            </span>
           </div>
         </footer>
       </main>
