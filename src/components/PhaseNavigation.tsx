@@ -3,8 +3,10 @@
 import { useMemo } from 'react';
 import BrandOSLogo from './BrandOSLogo';
 
-export type Phase = 'define' | 'check' | 'generate' | 'scale';
+export type Phase = 'home' | 'define' | 'check' | 'generate' | 'scale';
 export type SubTab =
+  // Home phase
+  | 'home'
   // Define phase
   | 'brand' | 'safezones' | 'intents'
   // Check phase
@@ -25,6 +27,16 @@ interface PhaseConfig {
 }
 
 const phases: PhaseConfig[] = [
+  {
+    id: 'home',
+    label: 'Home',
+    number: '⌂',
+    description: 'Your command center',
+    tabs: [
+      { id: 'home', label: 'Dashboard', description: 'Overview & insights' },
+    ],
+    unlockCondition: () => true,
+  },
   {
     id: 'define',
     label: 'Define',
@@ -149,13 +161,19 @@ export default function PhaseNavigation({
                     }
                   `}
                 >
-                  {/* Number */}
-                  <span className={`
-                    font-mono text-[10px] tracking-[0.1em]
-                    ${phase.isActive ? 'text-white/80' : 'text-white/40'}
-                  `}>
-                    {phase.number}
-                  </span>
+                  {/* Number / Home Icon */}
+                  {phase.id === 'home' ? (
+                    <svg className={`w-3.5 h-3.5 ${phase.isActive ? 'text-white/80' : 'text-white/40'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                    </svg>
+                  ) : (
+                    <span className={`
+                      font-mono text-[10px] tracking-[0.1em]
+                      ${phase.isActive ? 'text-white/80' : 'text-white/40'}
+                    `}>
+                      {phase.number}
+                    </span>
+                  )}
 
                   {/* Label */}
                   <span className="text-sm font-medium hidden sm:inline">
@@ -269,6 +287,7 @@ export default function PhaseNavigation({
 
 // Helper to get phase from tab
 export function getPhaseFromTab(tab: SubTab): Phase {
+  if (tab === 'home') return 'home';
   const definesTabs: SubTab[] = ['brand', 'safezones', 'intents'];
   const checkTabs: SubTab[] = ['check', 'cohesion', 'guardrails', 'protect', 'taste'];
   const generateTabs: SubTab[] = ['generate', 'platforms', 'context', 'visual', 'kit-ai-studio', 'kit-canvas', 'kit-logos', 'kit-colors', 'kit-typography', 'kit-imagery', 'kit-icons', 'kit-templates'];
@@ -282,6 +301,7 @@ export function getPhaseFromTab(tab: SubTab): Phase {
 // Helper to get default tab for phase
 export function getDefaultTabForPhase(phase: Phase): SubTab {
   switch (phase) {
+    case 'home': return 'home';
     case 'define': return 'brand';
     case 'check': return 'check';
     case 'generate': return 'generate';

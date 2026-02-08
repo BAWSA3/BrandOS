@@ -39,6 +39,7 @@ import { useHistorySync } from '@/hooks/useHistorySync';
 import AuthButton from '@/components/AuthButton';
 import { SaveResultsPrompt } from '@/components/SaveResultsPrompt';
 import ContentWorkflow from '@/components/workflow/ContentWorkflow';
+import DashboardHome from '@/components/dashboard/DashboardHome';
 
 function HomeContent() {
   const searchParams = useSearchParams();
@@ -76,8 +77,8 @@ function HomeContent() {
   const importedParam = searchParams.get('imported') === 'true';
 
   // Phase-based navigation
-  const [activePhase, setActivePhase] = useState<Phase>(phaseProgress.lastActivePhase || 'define');
-  const [activeTab, setActiveTab] = useState<SubTab>(getDefaultTabForPhase(phaseProgress.lastActivePhase || 'define'));
+  const [activePhase, setActivePhase] = useState<Phase>(phaseProgress.lastActivePhase || 'home');
+  const [activeTab, setActiveTab] = useState<SubTab>(getDefaultTabForPhase(phaseProgress.lastActivePhase || 'home'));
   const [showBrandMenu, setShowBrandMenu] = useState(false);
   const [showTemplates, setShowTemplates] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(!phaseProgress.hasCompletedOnboarding);
@@ -157,7 +158,7 @@ function HomeContent() {
   const handleOnboardingComplete = () => {
     completeOnboarding();
     setShowOnboarding(false);
-    handlePhaseChange('check'); // Move to Check phase after onboarding
+    handlePhaseChange('home'); // Land on Dashboard Home after onboarding
     analytics.onboardingCompleted();
     // Show save prompt for unauthenticated users
     if (!user) {
@@ -939,6 +940,14 @@ function HomeContent() {
 
       {/* Main Content */}
       <main className="pt-4">
+        {/* ======================= HOME DASHBOARD ======================= */}
+
+        {activeTab === 'home' && (
+          <div className="animate-fade-in">
+            <DashboardHome onNavigatePhase={handlePhaseChange} />
+          </div>
+        )}
+
         {/* ======================= DEFINE PHASE ======================= */}
         
         {/* Brand DNA Tab */}

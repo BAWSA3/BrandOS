@@ -16,7 +16,7 @@ const steps: { id: Step; title: string; subtitle: string }[] = [
   { id: 'tone', title: 'Brand Tone', subtitle: 'How should your brand sound?' },
   { id: 'keywords', title: 'Brand Keywords', subtitle: 'Words that define your brand' },
   { id: 'samples', title: 'Voice Samples', subtitle: 'Show us your best writing' },
-  { id: 'complete', title: 'You\'re All Set!', subtitle: 'Your brand is ready to use' },
+  { id: 'complete', title: 'Your Brand is Ready', subtitle: 'Your dashboard awaits' },
 ];
 
 interface OnboardingWizardProps {
@@ -517,12 +517,13 @@ export default function OnboardingWizard({ onComplete, onSkip }: OnboardingWizar
             <div className="space-y-3">
               <button
                 onClick={onComplete}
-                className="w-full px-8 py-3 bg-foreground text-background rounded-full text-sm font-medium hover:opacity-90 transition-opacity"
+                className="w-full px-8 py-3 bg-foreground text-background rounded-full text-sm font-medium hover:opacity-90 transition-opacity group relative overflow-hidden"
               >
-                Start Checking Content
+                <span className="relative z-10">Open Your Dashboard</span>
+                <span className="absolute inset-0 bg-gradient-to-r from-[#0047FF] to-[#00FF41] opacity-0 group-hover:opacity-20 transition-opacity" />
               </button>
               <p className="text-xs text-muted">
-                You can always refine your brand settings later
+                Your personalized command center is ready
               </p>
             </div>
           </div>

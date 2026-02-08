@@ -26,7 +26,7 @@ interface PhaseProgress {
   hasCompletedOnboarding: boolean;
   hasCompletedFirstCheck: boolean;
   hasCompletedFirstGeneration: boolean;
-  lastActivePhase: 'define' | 'check' | 'generate' | 'scale';
+  lastActivePhase: 'home' | 'define' | 'check' | 'generate' | 'scale';
 }
 
 // Type for importing generated Brand DNA from X Brand Score analysis
@@ -147,7 +147,7 @@ export const useBrandStore = create<BrandStore>()(
         hasCompletedOnboarding: false,
         hasCompletedFirstCheck: false,
         hasCompletedFirstGeneration: false,
-        lastActivePhase: 'define',
+        lastActivePhase: 'home',
       },
 
       // Demo mode initial state (not persisted - only active during session)
@@ -371,7 +371,7 @@ export const useBrandStore = create<BrandStore>()(
             hasCompletedOnboarding: false,
             hasCompletedFirstCheck: false,
             hasCompletedFirstGeneration: false,
-            lastActivePhase: 'define',
+            lastActivePhase: 'home',
           },
         })),
 
