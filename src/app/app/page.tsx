@@ -38,6 +38,7 @@ import { useBrandSync } from '@/hooks/useBrandSync';
 import { useHistorySync } from '@/hooks/useHistorySync';
 import AuthButton from '@/components/AuthButton';
 import { SaveResultsPrompt } from '@/components/SaveResultsPrompt';
+import ContentWorkflow from '@/components/workflow/ContentWorkflow';
 
 function HomeContent() {
   const searchParams = useSearchParams();
@@ -1500,97 +1501,10 @@ function HomeContent() {
 
         {/* ======================= GENERATE PHASE ======================= */}
 
-        {/* Generate Tab */}
+        {/* Generate Tab — Content Workflow */}
         {activeTab === 'generate' && (
           <div className="animate-fade-in">
-            <section className="py-16 px-6 text-center border-b border-border">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-surface rounded-full text-xs text-muted mb-6">
-                <span className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></span>
-                Phase 3: Generate
-              </div>
-              <h2 className="text-5xl font-light tracking-tight mb-4">Generate content.</h2>
-              <p className="text-muted text-lg max-w-md mx-auto">
-                Create on-brand content for any channel.
-              </p>
-            </section>
-
-            <section className="max-w-3xl mx-auto px-6 py-16">
-              {/* Content Type Selector */}
-              <div className="mb-8">
-                <label className="block text-xs uppercase tracking-widest text-muted mb-4">Content Type</label>
-                <div className="grid grid-cols-4 gap-2">
-                  {contentTypes.map(([type, info]) => (
-                    <button
-                      key={type}
-                      onClick={() => setContentType(type)}
-                      className={`p-3 text-left rounded-lg border transition-all ${
-                        contentType === type
-                          ? 'border-foreground bg-surface'
-                          : 'border-border hover:border-muted'
-                      }`}
-                    >
-                      <div className="text-sm font-medium">{info.label}</div>
-                      <div className="text-xs text-muted">{info.description}</div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Prompt Input */}
-              <div className="mb-8">
-                <label className="block text-xs uppercase tracking-widest text-muted mb-4">Your Request</label>
-                <textarea
-                  value={generatePrompt}
-                  onChange={(e) => setGeneratePrompt(e.target.value)}
-                  placeholder={contentTypeLabels[contentType]?.placeholder || 'Describe what you need...'}
-                  rows={4}
-                  className="w-full bg-transparent text-base border border-border rounded-lg p-4 outline-none resize-none placeholder:text-muted focus:border-foreground transition-colors"
-                />
-              </div>
-
-              <button
-                onClick={handleGenerate}
-                disabled={isGenerating || !generatePrompt.trim() || !brandDNA?.name}
-                className="w-full py-3 bg-foreground text-background rounded-full text-sm font-medium disabled:opacity-30 disabled:cursor-not-allowed hover:opacity-80 transition-opacity"
-              >
-                {isGenerating ? 'Generating...' : 'Generate Content'}
-              </button>
-
-              {generateError && (
-                <div className="mt-6 p-4 border border-red-500/20 bg-red-500/5 rounded-lg">
-                  <p className="text-sm text-red-500">{generateError}</p>
-                </div>
-              )}
-
-              {generatedContent && (
-                <div className="mt-16 animate-fade-in">
-                  <h4 className="text-xs uppercase tracking-widest text-muted mb-4">Generated Options</h4>
-                  <div className="p-6 bg-surface rounded-lg">
-                    <div className="text-sm leading-relaxed whitespace-pre-wrap">{generatedContent}</div>
-                  </div>
-                  <button
-                    onClick={() => {
-                      navigator.clipboard.writeText(generatedContent);
-                      toast.success('Copied!', 'Generated content copied to clipboard.');
-                    }}
-                    className="mt-3 text-xs text-muted hover:text-foreground transition-colors"
-                  >
-                    Copy to clipboard
-                  </button>
-
-                  {/* Next Step CTA */}
-                  <div className="mt-12 p-6 bg-surface rounded-xl text-center">
-                    <p className="text-sm text-muted mb-4">Track your brand performance and export guidelines.</p>
-                    <button
-                      onClick={() => handlePhaseChange('scale')}
-                      className="px-6 py-3 bg-foreground text-background rounded-full text-sm font-medium hover:opacity-90 transition-opacity"
-                    >
-                      Go to Scale →
-                    </button>
-                  </div>
-                </div>
-              )}
-            </section>
+            <ContentWorkflow />
           </div>
         )}
 

@@ -1233,3 +1233,82 @@ code {
 .capturing img.grayscale {
   filter: none !important;
 }
+
+/* ===== Content Workflow — React Flow Overrides ===== */
+
+.workflow-canvas .react-flow__node {
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+.workflow-canvas .react-flow__edge-path {
+  stroke-linecap: round;
+}
+
+.workflow-canvas .react-flow__handle {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.workflow-canvas .react-flow__handle:hover {
+  transform: scale(1.4);
+  box-shadow: 0 0 8px currentColor;
+}
+
+.workflow-canvas .react-flow__selection {
+  background: rgba(46, 106, 255, 0.05);
+  border: 1px solid rgba(46, 106, 255, 0.3);
+}
+
+/* Controls dark theme */
+.workflow-controls {
+  background: rgba(15, 15, 15, 0.85) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 12px !important;
+}
+
+.workflow-controls button {
+  background: transparent !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+  color: rgba(255, 255, 255, 0.4) !important;
+  fill: rgba(255, 255, 255, 0.4) !important;
+  width: 28px !important;
+  height: 28px !important;
+}
+
+.workflow-controls button:hover {
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: rgba(255, 255, 255, 0.8) !important;
+  fill: rgba(255, 255, 255, 0.8) !important;
+}
+
+.workflow-controls button:last-child {
+  border-bottom: none !important;
+}
+
+.workflow-controls button svg {
+  fill: currentColor !important;
+}
+
+/* MiniMap dark theme */
+.react-flow__minimap {
+  background: rgba(15, 15, 15, 0.8) !important;
+}
+
+/* Node custom scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
