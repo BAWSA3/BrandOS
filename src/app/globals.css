@@ -193,6 +193,25 @@
   --color-brand-green: var(--brand-green);
   --color-brand-yellow: var(--brand-yellow);
   --color-brand-gray: var(--brand-gray);
+
+  /* Swiss Design Palette */
+  --color-brand-cream: #F5F5F0;
+  --color-brand-black-swiss: #0F0F0F;
+  --color-brand-gray-swiss: #E5E5E5;
+  --color-brand-blue-swiss: #2F54EB;
+  --color-brand-orange: #FA8C16;
+
+  /* Typography */
+  --font-sans: var(--font-inter), "Helvetica Neue", sans-serif;
+  --font-mono: var(--font-jetbrains), "Courier New", monospace;
+
+  /* Background Images */
+  --background-image-noise-pattern: url('/assets/noise.png');
+  --background-image-grid-pattern: linear-gradient(to right, #E5E5E5 1px, transparent 1px), linear-gradient(to bottom, #E5E5E5 1px, transparent 1px);
+
+  /* Glow Shadows */
+  --shadow-glow-blue: 0 0 20px rgba(47, 84, 235, 0.4);
+  --shadow-glow-orange: 0 0 20px rgba(250, 140, 22, 0.4);
 }
 
 /* ============================================
