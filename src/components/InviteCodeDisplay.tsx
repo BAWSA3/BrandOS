@@ -27,11 +27,17 @@ export function InviteCodeDisplay({ username, onGenerate }: InviteCodeDisplayPro
       setError(null);
 
       try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 5000);
+
         const response = await fetch('/api/invite', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username, count: 3 }),
+          signal: controller.signal,
         });
+
+        clearTimeout(timeout);
 
         const data = await response.json();
 
@@ -65,68 +71,11 @@ export function InviteCodeDisplay({ username, onGenerate }: InviteCodeDisplayPro
   }, []);
 
   if (isLoading) {
-    return (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        style={{
-          padding: '20px',
-          borderRadius: '16px',
-          background: 'rgba(245, 158, 11, 0.1)',
-          border: '1px solid rgba(245, 158, 11, 0.2)',
-          textAlign: 'center',
-        }}
-      >
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-          style={{
-            width: '24px',
-            height: '24px',
-            border: '2px solid rgba(245, 158, 11, 0.3)',
-            borderTopColor: '#F59E0B',
-            borderRadius: '50%',
-            margin: '0 auto 12px',
-          }}
-        />
-        <div
-          style={{
-            fontFamily: "'VCR OSD Mono', monospace",
-            fontSize: '11px',
-            letterSpacing: '0.1em',
-            color: 'rgba(255, 255, 255, 0.6)',
-          }}
-        >
-          GENERATING YOUR INVITE CODES...
-        </div>
-      </motion.div>
-    );
+    return null;
   }
 
   if (error) {
-    return (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        style={{
-          padding: '16px',
-          borderRadius: '12px',
-          background: 'rgba(239, 68, 68, 0.1)',
-          border: '1px solid rgba(239, 68, 68, 0.2)',
-          textAlign: 'center',
-        }}
-      >
-        <div
-          style={{
-            fontFamily: "'Inter', sans-serif",
-            fontSize: '14px',
-            color: '#EF4444',
-          }}
-        >
-          {error}
-        </div>
-      </motion.div>
-    );
+    return null;
   }
 
   return (
