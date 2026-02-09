@@ -58,3 +58,6 @@ data/*.json
 *.tsbuildinfo
 next-env.d.ts
 prisma/dev.db
+
+# AI Studio exports
+brandkit-for-ai-studio.txt
