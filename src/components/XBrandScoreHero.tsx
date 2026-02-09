@@ -1178,10 +1178,7 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
   const [signupStatus, setSignupStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [showAdvisorChat, setShowAdvisorChat] = useState(false);
 
-  // Dashboard CTA state
-  const [waitlistEmail, setWaitlistEmail] = useState('');
-  const [waitlistSubmitted, setWaitlistSubmitted] = useState(false);
-  const [isSubmittingWaitlist, setIsSubmittingWaitlist] = useState(false);
+  // Compare state (coming soon)
   const [compareUsername, setCompareUsername] = useState('');
 
   const apiResultRef = useRef<{ profile: XProfileData; brandScore: BrandScoreResult } | null>(null);
@@ -1468,42 +1465,6 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
     }
   };
 
-  // Handle dashboard waitlist signup
-  const handleWaitlistSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!waitlistEmail || isSubmittingWaitlist) return;
-
-    setIsSubmittingWaitlist(true);
-    try {
-      const response = await fetch('/api/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: waitlistEmail,
-          source: 'dashboard',
-          xUsername: profile?.username,
-          brandData: {
-            displayName: profile?.name,
-            score: brandScore?.overallScore,
-            defineScore: brandScore?.phases.define.score,
-            checkScore: brandScore?.phases.check.score,
-            generateScore: brandScore?.phases.generate.score,
-            scaleScore: brandScore?.phases.scale.score,
-            archetype: generatedBrandDNA?.archetype,
-          },
-        }),
-      });
-
-      if (response.ok) {
-        setWaitlistSubmitted(true);
-      }
-    } catch (error) {
-      console.error('Waitlist signup error:', error);
-    } finally {
-      setIsSubmittingWaitlist(false);
-    }
-  };
-
   // Handle compare profile (MVP: coming soon)
   const handleCompareProfile = () => {
     if (!compareUsername) return;
@@ -1616,7 +1577,7 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
                 delay={0.2}
                 staggerDelay={0.05}
                 style={{
-                  fontFamily: "'Inter', sans-serif",
+                  fontFamily: "'Blauer Nue', 'Inter', sans-serif",
                   fontWeight: 800,
                   fontStyle: 'italic',
                   fontSize: 'clamp(3rem, 18vw, 9rem)',
@@ -1630,10 +1591,12 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
                 delay={0.5}
                 staggerDelay={0.08}
                 style={{
-                  fontFamily: "'Press Start 2P', cursive",
+                  fontFamily: "'Mac Minecraft', 'Press Start 2P', cursive",
+                  fontWeight: 700,
+                  fontStyle: 'italic',
                   fontSize: 'clamp(2.2rem, 14vw, 7rem)',
                   color: '#0047FF',
-                  textShadow: '0 0 35px rgba(0, 71, 255, 0.4)',
+                  letterSpacing: '-0.05em',
                 }}
               />
             </motion.div>
@@ -1991,8 +1954,7 @@ Get yours → mybrandos.app`;
               />
             )}
 
-            {/* Join Waitlist CTA - Only show for authenticated users or if save prompt is dismissed */}
-            {(user || !showSavePrompt) && (
+            {/* Dashboard CTA - Navigate to the real dashboard */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -2006,7 +1968,7 @@ Get yours → mybrandos.app`;
                   padding: '48px 40px',
                   borderRadius: '24px',
                   background: 'rgba(26, 26, 26, 0.6)',
-                  border: '1px solid rgba(212, 165, 116, 0.15)',
+                  border: '1px solid rgba(10, 132, 255, 0.15)',
                   backdropFilter: 'blur(10px)',
                   display: 'flex',
                   flexDirection: 'column',
@@ -2018,118 +1980,129 @@ Get yours → mybrandos.app`;
                   style={{
                     width: '80px',
                     height: '2px',
-                    background: 'linear-gradient(90deg, transparent, rgba(212, 165, 116, 0.6), transparent)',
+                    background: 'linear-gradient(90deg, transparent, rgba(10, 132, 255, 0.6), transparent)',
                     marginBottom: '32px',
                   }}
                 />
 
-                {!waitlistSubmitted ? (
-                  <>
-                    <h3
-                      style={{
-                        fontFamily: "'VCR OSD Mono', monospace",
-                        fontSize: '14px',
-                        letterSpacing: '0.25em',
-                        color: '#D4A574',
-                        marginBottom: '16px',
-                        textTransform: 'uppercase',
-                      }}
-                    >
-                      Join the Waitlist
-                    </h3>
-                    <p
-                      style={{
-                        fontSize: '17px',
-                        color: 'rgba(255, 255, 255, 0.6)',
-                        marginBottom: '32px',
-                        textAlign: 'center',
-                        maxWidth: '420px',
-                        lineHeight: '1.6',
-                      }}
-                    >
-                      Be the first to access AI-powered tools to check, generate, and scale your brand content.
-                    </p>
+                <h3
+                  style={{
+                    fontFamily: "'VCR OSD Mono', monospace",
+                    fontSize: '14px',
+                    letterSpacing: '0.25em',
+                    color: '#0A84FF',
+                    marginBottom: '16px',
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  Your Dashboard Awaits
+                </h3>
+                <p
+                  style={{
+                    fontSize: '17px',
+                    color: 'rgba(255, 255, 255, 0.6)',
+                    marginBottom: '32px',
+                    textAlign: 'center',
+                    maxWidth: '420px',
+                    lineHeight: '1.6',
+                  }}
+                >
+                  Your Brand DNA has been analyzed. Open your personalized command center to check, generate, and scale your brand content.
+                </p>
 
-                    <form onSubmit={handleWaitlistSubmit} className="flex gap-3 w-full max-w-[400px]">
-                      <input
-                        type="email"
-                        value={waitlistEmail}
-                        onChange={(e) => setWaitlistEmail(e.target.value)}
-                        placeholder="Enter your email"
-                        required
-                        className="flex-1 px-5 py-4 rounded-xl outline-none"
-                        style={{
-                          fontFamily: "'VCR OSD Mono', monospace",
-                          fontSize: '13px',
-                          background: 'rgba(255, 255, 255, 0.05)',
-                          border: '1px solid rgba(212, 165, 116, 0.2)',
-                          color: '#fff',
-                        }}
-                      />
-                      <motion.button
-                        type="submit"
-                        disabled={isSubmittingWaitlist}
-                        whileHover={{ scale: 1.03, boxShadow: '0 0 40px rgba(212, 165, 116, 0.4)' }}
-                        whileTap={{ scale: 0.98 }}
-                        className="px-8 py-4 rounded-xl cursor-pointer"
-                        style={{
-                          fontFamily: "'VCR OSD Mono', monospace",
-                          fontSize: '13px',
-                          letterSpacing: '0.1em',
-                          color: '#050505',
-                          background: 'linear-gradient(135deg, #E8C49A 0%, #D4A574 100%)',
-                          border: 'none',
-                          boxShadow: '0 4px 24px rgba(212, 165, 116, 0.3)',
-                          opacity: isSubmittingWaitlist ? 0.7 : 1,
-                        }}
-                      >
-                        {isSubmittingWaitlist ? '...' : 'JOIN'}
-                      </motion.button>
-                    </form>
-                  </>
-                ) : (
-                  <>
-                    <div
-                      style={{
-                        width: '60px',
-                        height: '60px',
-                        borderRadius: '50%',
-                        background: 'rgba(16, 185, 129, 0.1)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        marginBottom: '24px',
-                      }}
-                    >
-                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#10B981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M20 6L9 17l-5-5"/>
-                      </svg>
-                    </div>
-                    <h3
-                      style={{
-                        fontFamily: "'VCR OSD Mono', monospace",
-                        fontSize: '14px',
-                        letterSpacing: '0.25em',
-                        color: '#10B981',
-                        marginBottom: '16px',
-                        textTransform: 'uppercase',
-                      }}
-                    >
-                      You&apos;re on the List!
-                    </h3>
-                    <p
-                      style={{
-                        fontSize: '17px',
-                        color: 'rgba(255, 255, 255, 0.6)',
-                        textAlign: 'center',
-                        maxWidth: '420px',
-                        lineHeight: '1.6',
-                      }}
-                    >
-                      We&apos;ll notify you when BrandOS is ready. Get ready to take control of your personal brand.
-                    </p>
-                  </>
-                )}
+                <MagneticButton
+                  onClick={() => {
+                    // Navigate to the real dashboard — import brand DNA if available
+                    if (generatedBrandDNA && profile) {
+                      // Store the generated DNA so it can be imported on the dashboard
+                      const importData = {
+                        name: generatedBrandDNA.name || profile.name,
+                        colors: {
+                          primary: generatedBrandDNA.colors?.primary || '#000000',
+                          secondary: generatedBrandDNA.colors?.secondary || '#ffffff',
+                          accent: generatedBrandDNA.colors?.accent || '#6366f1',
+                        },
+                        tone: generatedBrandDNA.tone || { minimal: 50, playful: 50, bold: 50, experimental: 30 },
+                        keywords: generatedBrandDNA.keywords || [],
+                        doPatterns: generatedBrandDNA.doPatterns || [],
+                        dontPatterns: generatedBrandDNA.dontPatterns || [],
+                        voiceSamples: generatedBrandDNA.voiceSamples || [],
+                      };
+                      try { sessionStorage.setItem('brandos-import', JSON.stringify(importData)); } catch {}
+                    }
+                    window.location.href = '/app?imported=true';
+                  }}
+                  style={{
+                    fontFamily: "'VCR OSD Mono', monospace",
+                    fontSize: '14px',
+                    letterSpacing: '0.12em',
+                    color: '#FFFFFF',
+                    background: 'linear-gradient(135deg, #0A84FF 0%, #0060DF 100%)',
+                    border: 'none',
+                    padding: '18px 40px',
+                    borderRadius: '14px',
+                    cursor: 'pointer',
+                    boxShadow: '0 10px 40px -10px rgba(10, 132, 255, 0.4)',
+                  }}
+                >
+                  OPEN YOUR DASHBOARD →
+                </MagneticButton>
+
+                {/* Secondary: share/compare options */}
+                <div className="flex gap-3 mt-6">
+                  <motion.button
+                    onClick={async () => {
+                      const shareUrl = `${window.location.origin}/score/${profile.username}`;
+                      try {
+                        await navigator.clipboard.writeText(shareUrl);
+                        const btn = document.activeElement as HTMLButtonElement;
+                        const originalText = btn.innerText;
+                        btn.innerText = '✓ COPIED!';
+                        setTimeout(() => { btn.innerText = originalText; }, 2000);
+                      } catch { window.open(shareUrl, '_blank'); }
+                    }}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    style={{
+                      fontFamily: "'VCR OSD Mono', monospace",
+                      fontSize: '11px',
+                      letterSpacing: '0.08em',
+                      color: 'rgba(255,255,255,0.4)',
+                      background: 'transparent',
+                      border: '1px solid rgba(255,255,255,0.12)',
+                      cursor: 'pointer',
+                      padding: '10px 16px',
+                      borderRadius: '8px',
+                    }}
+                  >
+                    SHARE SCORE
+                  </motion.button>
+                  <motion.button
+                    onClick={() => {
+                      setFlowState('input');
+                      setUsername('');
+                      setProfile(null);
+                      setBrandScore(null);
+                      setGeneratedBrandDNA(null);
+                      setShowConfetti(false);
+                    }}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    style={{
+                      fontFamily: "'VCR OSD Mono', monospace",
+                      fontSize: '11px',
+                      letterSpacing: '0.08em',
+                      color: 'rgba(255,255,255,0.4)',
+                      background: 'transparent',
+                      border: '1px solid rgba(255,255,255,0.12)',
+                      cursor: 'pointer',
+                      padding: '10px 16px',
+                      borderRadius: '8px',
+                    }}
+                  >
+                    ANALYZE ANOTHER
+                  </motion.button>
+                </div>
               </div>
 
               {/* Bottom decorative element */}
@@ -2150,7 +2123,6 @@ Get yours → mybrandos.app`;
                 <div style={{ width: '30px', height: '1px', background: 'rgba(255,255,255,0.2)' }} />
               </div>
             </motion.div>
-            )}
 
           </motion.div>
         )}

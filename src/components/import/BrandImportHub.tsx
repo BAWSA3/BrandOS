@@ -66,7 +66,7 @@ export default function BrandImportHub({ onStartFresh, onImportComplete }: Brand
         <div className="max-w-3xl w-full">
           <div className="text-center mb-12">
             <div className="flex items-center justify-center mb-6">
-              <BrandOSLogo size="md" />
+              <BrandOSLogo size="md" variant="landing" />
             </div>
             <h1 className="text-4xl font-light tracking-tight mb-4">
               How would you like to start?

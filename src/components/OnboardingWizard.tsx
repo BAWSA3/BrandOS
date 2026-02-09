@@ -136,8 +136,8 @@ export default function OnboardingWizard({ onComplete, onSkip }: OnboardingWizar
         {/* Welcome */}
         {currentStep === 'welcome' && (
           <div className="text-center">
-            <div className="mb-8">
-              <BrandOSLogo size="xl" />
+            <div className="mb-8 flex justify-center">
+              <BrandOSLogo size="xl" variant="landing" />
             </div>
             <h2 className="text-3xl font-light tracking-tight mb-4">
               Let&apos;s set up your brand

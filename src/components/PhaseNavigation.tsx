@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
+import BrandOSLogo from './BrandOSLogo';
 
 export type Phase = 'home' | 'define' | 'check' | 'generate' | 'scale';
 export type SubTab =
@@ -123,19 +124,14 @@ export default function PhaseNavigation({
       <nav
         style={{
           height: 56,
-          background: '#000000',
-          borderBottom: '1px solid rgba(255,255,255,0.06)',
+          background: 'var(--surface)',
+          borderBottom: '1px solid var(--border)',
         }}
       >
         <div className="max-w-[1200px] mx-auto h-full px-6 flex items-center justify-between">
           {/* Left: Logo */}
-          <div className="flex items-center gap-1 shrink-0">
-            <span style={{ fontSize: 17, fontWeight: 700, color: '#F5F5F7', letterSpacing: '-0.03em' }}>
-              Brand
-            </span>
-            <span style={{ fontSize: 17, fontWeight: 700, color: '#0A84FF', letterSpacing: '-0.03em' }}>
-              OS
-            </span>
+          <div className="shrink-0">
+            <BrandOSLogo size="sm" variant="landing" />
           </div>
 
           {/* Center: Phase tabs */}
@@ -150,10 +146,10 @@ export default function PhaseNavigation({
                   fontSize: 14,
                   fontWeight: phase.isActive ? 600 : 400,
                   color: phase.isActive
-                    ? '#F5F5F7'
+                    ? 'var(--text-primary)'
                     : phase.isUnlocked
-                      ? '#86868B'
-                      : '#48484A',
+                      ? 'var(--text-secondary)'
+                      : 'var(--text-quaternary)',
                   background: 'transparent',
                   border: 'none',
                   borderRadius: 8,
@@ -163,12 +159,12 @@ export default function PhaseNavigation({
                 }}
                 onMouseEnter={(e) => {
                   if (phase.isUnlocked && !phase.isActive) {
-                    e.currentTarget.style.color = '#F5F5F7';
+                    e.currentTarget.style.color = 'var(--text-primary)';
                   }
                 }}
                 onMouseLeave={(e) => {
                   if (phase.isUnlocked && !phase.isActive) {
-                    e.currentTarget.style.color = '#86868B';
+                    e.currentTarget.style.color = 'var(--text-secondary)';
                   }
                 }}
               >
@@ -201,7 +197,7 @@ export default function PhaseNavigation({
           {/* Right: Avatar / Brand */}
           <div className="flex items-center gap-3 shrink-0">
             {brandName && (
-              <span style={{ fontSize: 13, color: '#6E6E73' }}>
+              <span style={{ fontSize: 13, color: 'var(--text-tertiary)' }}>
                 {brandName}
               </span>
             )}
@@ -211,7 +207,7 @@ export default function PhaseNavigation({
                 width: 32,
                 height: 32,
                 borderRadius: '50%',
-                background: userAvatar ? 'transparent' : '#2C2C2E',
+                background: userAvatar ? 'transparent' : 'var(--surface-tertiary)',
                 border: 'none',
                 cursor: 'pointer',
                 overflow: 'hidden',
@@ -226,7 +222,7 @@ export default function PhaseNavigation({
               {userAvatar ? (
                 <img src={userAvatar} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               ) : (
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#86868B" strokeWidth={1.5}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
                 </svg>
               )}
@@ -240,8 +236,8 @@ export default function PhaseNavigation({
         <div
           style={{
             height: 40,
-            background: '#000000',
-            borderBottom: '1px solid rgba(255,255,255,0.06)',
+            background: 'var(--surface)',
+            borderBottom: '1px solid var(--border)',
           }}
         >
           <div className="max-w-[1200px] mx-auto h-full px-6 flex items-center gap-1">
@@ -253,8 +249,8 @@ export default function PhaseNavigation({
                   padding: '4px 12px',
                   fontSize: 13,
                   fontWeight: activeTab === tab.id ? 500 : 400,
-                  color: activeTab === tab.id ? '#F5F5F7' : '#6E6E73',
-                  background: activeTab === tab.id ? '#1C1C1E' : 'transparent',
+                  color: activeTab === tab.id ? 'var(--text-primary)' : 'var(--text-tertiary)',
+                  background: activeTab === tab.id ? 'var(--surface-hover)' : 'transparent',
                   border: 'none',
                   borderRadius: 6,
                   cursor: 'pointer',
@@ -262,13 +258,13 @@ export default function PhaseNavigation({
                 }}
                 onMouseEnter={(e) => {
                   if (activeTab !== tab.id) {
-                    e.currentTarget.style.color = '#86868B';
-                    e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
+                    e.currentTarget.style.color = 'var(--text-secondary)';
+                    e.currentTarget.style.background = 'var(--surface-hover)';
                   }
                 }}
                 onMouseLeave={(e) => {
                   if (activeTab !== tab.id) {
-                    e.currentTarget.style.color = '#6E6E73';
+                    e.currentTarget.style.color = 'var(--text-tertiary)';
                     e.currentTarget.style.background = 'transparent';
                   }
                 }}

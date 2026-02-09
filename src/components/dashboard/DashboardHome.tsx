@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback } from 'react';
+import { useCallback, CSSProperties } from 'react';
 import BrandScoreCard from './BrandScoreCard';
 import QuickStatsCard from './QuickStatsCard';
 import RecentPostsCard from './RecentPostsCard';
@@ -16,6 +16,14 @@ import type { TonePill } from '@/components/workflow/workflow.types';
 
 interface DashboardHomeProps {
   onNavigatePhase: (phase: Phase) => void;
+}
+
+// Staggered reveal animation helper
+function staggerStyle(index: number): CSSProperties {
+  return {
+    animationDelay: `${index * 80}ms`,
+    animationFillMode: 'both',
+  };
 }
 
 export default function DashboardHome({ onNavigatePhase }: DashboardHomeProps) {
@@ -45,13 +53,13 @@ export default function DashboardHome({ onNavigatePhase }: DashboardHomeProps) {
   );
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      {/* Top row: Brand score + quick stats */}
+    <div className="space-y-4">
+      {/* ─── Row 1: Brand Score Hero (2/3) + Quick Stats (1/3) ─── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 animate-fade-in" style={staggerStyle(0)}>
           <BrandScoreCard />
         </div>
-        <div>
+        <div className="animate-fade-in" style={staggerStyle(1)}>
           <QuickStatsCard
             postsThisWeek={stats.postsThisWeek}
             avgEngagementRate={stats.avgEngagementRate}
@@ -60,15 +68,19 @@ export default function DashboardHome({ onNavigatePhase }: DashboardHomeProps) {
         </div>
       </div>
 
-      {/* Recent posts */}
-      <RecentPostsCard posts={posts} isLoading={isLoadingPosts} />
+      {/* ─── Row 2: Recent X Posts (full-width scrollable) ─── */}
+      <div className="animate-fade-in" style={staggerStyle(2)}>
+        <RecentPostsCard posts={posts} isLoading={isLoadingPosts} />
+      </div>
 
-      {/* AI Insights */}
-      <AIInsightsPanel insights={insights} isLoading={isLoadingInsights} />
+      {/* ─── Row 2b: AI Performance Insights ─── */}
+      <div className="animate-fade-in" style={staggerStyle(3)}>
+        <AIInsightsPanel insights={insights} isLoading={isLoadingInsights} />
+      </div>
 
-      {/* Bottom row: Ideas + Phase access */}
+      {/* ─── Row 3: AI Idea Feed (2/3) + Phase Quick Access (1/3) ─── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 animate-fade-in" style={staggerStyle(4)}>
           <AIIdeaFeed
             ideas={ideas}
             isLoading={isLoadingIdeas}
@@ -76,7 +88,7 @@ export default function DashboardHome({ onNavigatePhase }: DashboardHomeProps) {
             onCreatePost={handleCreatePost}
           />
         </div>
-        <div>
+        <div className="animate-fade-in" style={staggerStyle(5)}>
           <PhaseQuickAccess
             brandCompleteness={completeness}
             hasChecked={phaseProgress.hasCompletedFirstCheck}

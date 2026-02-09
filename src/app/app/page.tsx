@@ -33,6 +33,7 @@ import { useBrandSync } from '@/hooks/useBrandSync';
 import { useHistorySync } from '@/hooks/useHistorySync';
 import ContentWorkflow from '@/components/workflow/ContentWorkflow';
 import DashboardHome from '@/components/dashboard/DashboardHome';
+import { InviteCodeDisplay } from '@/components/InviteCodeDisplay';
 
 function HomeContent() {
   const searchParams = useSearchParams();
@@ -629,21 +630,21 @@ function HomeContent() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-[#F5F5F7]">
+    <div className="min-h-screen" style={{ background: 'var(--background)', color: 'var(--text-primary)' }}>
       {/* Inner Circle styles */}
       {isInnerCircle && <InnerCircleStyles />}
       
       {/* Imported Brand DNA Welcome Toast */}
       {showImportedWelcome && (
         <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50 animate-fade-in">
-          <div className="flex items-center gap-3 px-5 py-3 rounded-xl" style={{ background: '#1C1C1E', boxShadow: '0 4px 12px rgba(0,0,0,0.4)' }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#30D158" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-            <span style={{ fontSize: 14, color: '#F5F5F7' }}>Brand DNA imported successfully</span>
+          <div className="flex items-center gap-3 px-5 py-3 rounded-xl" style={{ background: 'var(--surface)', boxShadow: 'var(--shadow-elevated)', border: '1px solid var(--border)' }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--success)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            <span style={{ fontSize: 14, color: 'var(--text-primary)' }}>Brand DNA imported successfully</span>
             <button
               onClick={() => { setShowImportedWelcome(false); window.history.replaceState({}, '', '/app'); }}
-              className="ml-2 p-1 rounded-md hover:bg-white/5 transition-colors"
+              className="ml-2 p-1 rounded-md hover:bg-black/5 transition-colors"
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6E6E73" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
           </div>
         </div>
@@ -670,12 +671,12 @@ function HomeContent() {
           <div className="fixed inset-0 z-40" onClick={() => setShowBrandMenu(false)} />
           <div
             className="fixed top-[60px] right-6 z-50 w-56 animate-fade-in"
-            style={{ background: '#1C1C1E', borderRadius: 12, boxShadow: '0 16px 48px rgba(0,0,0,0.6)', border: '1px solid rgba(255,255,255,0.06)' }}
+            style={{ background: 'var(--surface)', borderRadius: 12, boxShadow: 'var(--shadow-modal)', border: '1px solid var(--border)' }}
           >
             {user && (
-              <div className="px-4 py-3" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-                <p style={{ fontSize: 13, fontWeight: 600, color: '#F5F5F7' }}>{user.name || user.xUsername}</p>
-                <p style={{ fontSize: 12, color: '#6E6E73' }}>@{user.xUsername}</p>
+              <div className="px-4 py-3" style={{ borderBottom: '1px solid var(--border)' }}>
+                <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{user.name || user.xUsername}</p>
+                <p style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>@{user.xUsername}</p>
               </div>
             )}
             <div className="p-1.5 max-h-48 overflow-y-auto">
@@ -686,17 +687,17 @@ function HomeContent() {
                   style={{ background: brand.id === currentBrandId ? 'rgba(10,132,255,0.1)' : 'transparent' }}
                   onClick={() => { switchBrand(brand.id); setShowBrandMenu(false); }}
                 >
-                  <span style={{ fontSize: 13, color: brand.id === currentBrandId ? '#0A84FF' : '#F5F5F7' }}>
+                  <span style={{ fontSize: 13, color: brand.id === currentBrandId ? 'var(--accent)' : 'var(--text-primary)' }}>
                     {brand.name || 'Unnamed Brand'}
                   </span>
                 </div>
               ))}
             </div>
-            <div className="p-1.5" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+            <div className="p-1.5" style={{ borderTop: '1px solid var(--border)' }}>
               <button
                 onClick={() => { createBrand(); setShowBrandMenu(false); }}
                 className="w-full flex items-center gap-2 px-3 py-2 rounded-lg transition-colors"
-                style={{ fontSize: 13, color: '#86868B', background: 'transparent', border: 'none', cursor: 'pointer' }}
+                style={{ fontSize: 13, color: 'var(--text-secondary)', background: 'transparent', border: 'none', cursor: 'pointer' }}
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
@@ -727,10 +728,10 @@ function HomeContent() {
         {activeTab === 'brand' && (
           <div className="animate-fade-in">
             <section className="pb-8">
-              <h2 style={{ fontSize: 28, fontWeight: 600, color: '#F5F5F7', letterSpacing: '-0.02em', marginBottom: 4 }}>
+              <h2 style={{ fontSize: 28, fontWeight: 600, color: 'var(--text-primary)', letterSpacing: '-0.02em', marginBottom: 4 }}>
                 Define
               </h2>
-              <p style={{ fontSize: 15, color: '#86868B', marginBottom: 24 }}>
+              <p style={{ fontSize: 15, color: 'var(--text-secondary)', marginBottom: 24 }}>
                 Capture the essence of your brand identity.
               </p>
               
@@ -1048,10 +1049,10 @@ function HomeContent() {
         {activeTab === 'check' && (
           <div className="animate-fade-in">
             <section className="pb-8">
-              <h2 style={{ fontSize: 28, fontWeight: 600, color: '#F5F5F7', letterSpacing: '-0.02em', marginBottom: 4 }}>
+              <h2 style={{ fontSize: 28, fontWeight: 600, color: 'var(--text-primary)', letterSpacing: '-0.02em', marginBottom: 4 }}>
                 Check
               </h2>
-              <p style={{ fontSize: 15, color: '#86868B', marginBottom: 24 }}>
+              <p style={{ fontSize: 15, color: 'var(--text-secondary)', marginBottom: 24 }}>
                 Real-time brand alignment analysis.
               </p>
             </section>
@@ -1228,8 +1229,8 @@ function HomeContent() {
         {activeTab === 'platforms' && (
           <div className="animate-fade-in">
             <section className="pb-8">
-              <h2 style={{ fontSize: 28, fontWeight: 600, color: '#F5F5F7', letterSpacing: '-0.02em', marginBottom: 4 }}>Platforms</h2>
-              <p style={{ fontSize: 15, color: '#86868B', marginBottom: 24 }}>Adapt content for each platform while preserving brand identity.</p>
+              <h2 style={{ fontSize: 28, fontWeight: 600, color: 'var(--text-primary)', letterSpacing: '-0.02em', marginBottom: 4 }}>Platforms</h2>
+              <p style={{ fontSize: 15, color: 'var(--text-secondary)', marginBottom: 24 }}>Adapt content for each platform while preserving brand identity.</p>
             </section>
             <section className="max-w-3xl mx-auto">
               <PlatformAdapter />
@@ -1241,8 +1242,8 @@ function HomeContent() {
         {activeTab === 'context' && (
           <div className="animate-fade-in">
             <section className="pb-8">
-              <h2 style={{ fontSize: 28, fontWeight: 600, color: '#F5F5F7', letterSpacing: '-0.02em', marginBottom: 4 }}>Context Tone</h2>
-              <p style={{ fontSize: 15, color: '#86868B', marginBottom: 24 }}>Adapt your brand voice for launches, apologies, crises, and more.</p>
+              <h2 style={{ fontSize: 28, fontWeight: 600, color: 'var(--text-primary)', letterSpacing: '-0.02em', marginBottom: 4 }}>Context Tone</h2>
+              <p style={{ fontSize: 15, color: 'var(--text-secondary)', marginBottom: 24 }}>Adapt your brand voice for launches, apologies, crises, and more.</p>
             </section>
             <section className="max-w-3xl mx-auto">
               <ContextTone />
@@ -1263,8 +1264,8 @@ function HomeContent() {
         {activeTab === 'kit-ai-studio' && (
           <div className="animate-fade-in">
             <section className="pb-8">
-              <h2 style={{ fontSize: 28, fontWeight: 600, color: '#F5F5F7', letterSpacing: '-0.02em', marginBottom: 4 }}>AI Studio</h2>
-              <p style={{ fontSize: 15, color: '#86868B', marginBottom: 24 }}>Generate brand assets with AI.</p>
+              <h2 style={{ fontSize: 28, fontWeight: 600, color: 'var(--text-primary)', letterSpacing: '-0.02em', marginBottom: 4 }}>AI Studio</h2>
+              <p style={{ fontSize: 15, color: 'var(--text-secondary)', marginBottom: 24 }}>Generate brand assets with AI.</p>
             </section>
             <AIStudio />
           </div>
@@ -1337,8 +1338,8 @@ function HomeContent() {
         {activeTab === 'dashboard' && (
           <div className="animate-fade-in">
             <section className="pb-8">
-              <h2 style={{ fontSize: 28, fontWeight: 600, color: '#F5F5F7', letterSpacing: '-0.02em', marginBottom: 4 }}>Analytics</h2>
-              <p style={{ fontSize: 15, color: '#86868B', marginBottom: 24 }}>Track your brand consistency over time.</p>
+              <h2 style={{ fontSize: 28, fontWeight: 600, color: 'var(--text-primary)', letterSpacing: '-0.02em', marginBottom: 4 }}>Analytics</h2>
+              <p style={{ fontSize: 15, color: 'var(--text-secondary)', marginBottom: 24 }}>Track your brand consistency over time.</p>
             </section>
 
             <section className="max-w-4xl mx-auto">
@@ -1409,8 +1410,8 @@ function HomeContent() {
         {activeTab === 'history' && (
           <div className="animate-fade-in">
             <section className="pb-8">
-              <h2 style={{ fontSize: 28, fontWeight: 600, color: '#F5F5F7', letterSpacing: '-0.02em', marginBottom: 4 }}>History</h2>
-              <p style={{ fontSize: 15, color: '#86868B', marginBottom: 24 }}>Review your previous checks and generations.</p>
+              <h2 style={{ fontSize: 28, fontWeight: 600, color: 'var(--text-primary)', letterSpacing: '-0.02em', marginBottom: 4 }}>History</h2>
+              <p style={{ fontSize: 15, color: 'var(--text-secondary)', marginBottom: 24 }}>Review your previous checks and generations.</p>
             </section>
 
             <section className="max-w-2xl mx-auto">
@@ -1457,8 +1458,8 @@ function HomeContent() {
         {activeTab === 'export' && (
           <div className="animate-fade-in">
             <section className="pb-8">
-              <h2 style={{ fontSize: 28, fontWeight: 600, color: '#F5F5F7', letterSpacing: '-0.02em', marginBottom: 4 }}>Export</h2>
-              <p style={{ fontSize: 15, color: '#86868B', marginBottom: 24 }}>Download your brand guidelines.</p>
+              <h2 style={{ fontSize: 28, fontWeight: 600, color: 'var(--text-primary)', letterSpacing: '-0.02em', marginBottom: 4 }}>Export</h2>
+              <p style={{ fontSize: 15, color: 'var(--text-secondary)', marginBottom: 24 }}>Download your brand guidelines.</p>
             </section>
 
             <section className="max-w-2xl mx-auto">
@@ -1595,8 +1596,8 @@ function HomeContent() {
         {activeTab === 'competitors' && (
           <div className="animate-fade-in">
             <section className="pb-8">
-              <h2 style={{ fontSize: 28, fontWeight: 600, color: '#F5F5F7', letterSpacing: '-0.02em', marginBottom: 4 }}>Compare</h2>
-              <p style={{ fontSize: 15, color: '#86868B', marginBottom: 24 }}>Analyze how your brand voice differs from competitors.</p>
+              <h2 style={{ fontSize: 28, fontWeight: 600, color: 'var(--text-primary)', letterSpacing: '-0.02em', marginBottom: 4 }}>Compare</h2>
+              <p style={{ fontSize: 15, color: 'var(--text-secondary)', marginBottom: 24 }}>Analyze how your brand voice differs from competitors.</p>
             </section>
 
             <section className="max-w-2xl mx-auto">
@@ -1714,8 +1715,8 @@ function HomeContent() {
         {activeTab === 'memory' && (
           <div className="animate-fade-in">
             <section className="pb-8">
-              <h2 style={{ fontSize: 28, fontWeight: 600, color: '#F5F5F7', letterSpacing: '-0.02em', marginBottom: 4 }}>Brand Memory</h2>
-              <p style={{ fontSize: 15, color: '#86868B', marginBottom: 24 }}>Track what worked and what failed. Build institutional memory.</p>
+              <h2 style={{ fontSize: 28, fontWeight: 600, color: 'var(--text-primary)', letterSpacing: '-0.02em', marginBottom: 4 }}>Brand Memory</h2>
+              <p style={{ fontSize: 15, color: 'var(--text-secondary)', marginBottom: 24 }}>Track what worked and what failed. Build institutional memory.</p>
             </section>
             <section className="max-w-3xl mx-auto">
               <BrandMemory />
@@ -1723,10 +1724,10 @@ function HomeContent() {
           </div>
         )}
 
-        <footer className="py-10 mt-12 print:hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+        <footer className="py-10 mt-12 print:hidden" style={{ borderTop: '1px solid var(--border)' }}>
           <div className="text-center">
-            <span style={{ fontSize: 13, fontWeight: 600, color: '#48484A' }}>
-              Brand<span style={{ color: '#0A84FF' }}>OS</span>
+            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-quaternary)' }}>
+              Brand<span style={{ color: 'var(--accent)' }}>OS</span>
             </span>
           </div>
         </footer>
