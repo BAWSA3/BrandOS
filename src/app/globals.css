@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /* ============================================
-   CUSTOM FONT FACES
+   CUSTOM FONT FACES (kept for landing page)
    ============================================ */
 @font-face {
   font-family: 'Helvetica Custom';
@@ -52,82 +52,92 @@
 }
 
 /* ============================================
-   NEW DESIGN SYSTEM - GLASSMORPHIC BLUE
+   DESIGN SYSTEM — APPLE-INSPIRED DARK
    ============================================ */
 
 :root {
-  /* Primary Blue Palette - International Klein Blue inspired */
+  /* Core Surfaces */
+  --background: #000000;
+  --foreground: #F5F5F7;
+  --surface: #1C1C1E;
+  --surface-hover: #2C2C2E;
+  --surface-tertiary: #38383A;
+  --muted: #86868B;
+
+  /* Borders */
+  --border: rgba(255, 255, 255, 0.06);
+  --border-hover: rgba(255, 255, 255, 0.1);
+  --separator: rgba(255, 255, 255, 0.08);
+
+  /* Text Hierarchy */
+  --text-primary: #F5F5F7;
+  --text-secondary: #86868B;
+  --text-tertiary: #6E6E73;
+  --text-quaternary: #48484A;
+
+  /* Accent Colors — Apple System Palette */
+  --accent: #0A84FF;
+  --accent-hover: #0070E0;
+  --success: #30D158;
+  --warning: #FFD60A;
+  --danger: #FF453A;
+
+  /* Legacy aliases (keep landing page working) */
   --blue-klein: #002FA7;
-  --blue-electric: #0047FF;
+  --blue-electric: #0A84FF;
   --blue-deep: #001847;
-  --blue-glow: rgba(0, 71, 255, 0.4);
-  --blue-subtle: rgba(0, 71, 255, 0.1);
-  --blue-hover: #0038CC;
+  --blue-glow: rgba(10, 132, 255, 0.3);
+  --blue-subtle: rgba(10, 132, 255, 0.1);
+  --blue-hover: #0070E0;
 
-  /* Dashboard "Digital Brutalism" Palette */
+  /* Legacy dashboard palette (landing page) */
   --brand-black: #050505;
-  --brand-blue: #2E6AFF;
-  --brand-green: #00FF41;
-  --brand-yellow: #FFD700;
-  --brand-gray: #1A1A1A;
+  --brand-blue: #0A84FF;
+  --brand-green: #30D158;
+  --brand-yellow: #FFD60A;
+  --brand-gray: #1C1C1E;
 
-  /* Dark Theme (Primary) */
-  --background: #0a0a0a;
-  --foreground: #ffffff;
-  --muted: rgba(255, 255, 255, 0.5);
-  --border: rgba(255, 255, 255, 0.1);
-  --surface: rgba(255, 255, 255, 0.05);
-  --accent: var(--blue-electric);
-
-  /* Glass Effects */
+  /* Legacy glass (landing page backward compat) */
   --glass-bg: rgba(255, 255, 255, 0.05);
-  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-border: rgba(255, 255, 255, 0.08);
   --glass-hover: rgba(255, 255, 255, 0.08);
 
-  /* Gradients */
-  --gradient-hero: linear-gradient(135deg, #0a0a0a 0%, rgba(0, 71, 255, 0.3) 50%, #0a0a0a 100%);
-  --gradient-card: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
-  --gradient-orb: radial-gradient(circle, var(--blue-electric) 0%, transparent 70%);
-  --gradient-text: linear-gradient(135deg, #ffffff 0%, #0047FF 50%, #ffffff 100%);
+  /* Legacy gradients (landing page) */
+  --gradient-hero: linear-gradient(135deg, #000 0%, rgba(10, 132, 255, 0.2) 50%, #000 100%);
+  --gradient-card: linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%);
+  --gradient-orb: radial-gradient(circle, var(--accent) 0%, transparent 70%);
+  --gradient-text: linear-gradient(135deg, #ffffff 0%, #0A84FF 50%, #ffffff 100%);
 
-  /* Design Tokens */
+  /* Radii */
   --radius-sm: 8px;
-  --radius-md: 16px;
-  --radius-lg: 24px;
-  --radius-xl: 32px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
   --radius-pill: 9999px;
-  
-  --transition-fast: 150ms ease-out;
-  --transition-medium: 300ms ease-out;
-  --transition-slow: 500ms cubic-bezier(0.4, 0, 0.2, 1);
 
-  /* Shadows & Glows */
-  --glow-sm: 0 0 20px rgba(0, 71, 255, 0.2);
-  --glow-md: 0 0 40px rgba(0, 71, 255, 0.3);
-  --glow-lg: 0 0 80px rgba(0, 71, 255, 0.4);
-  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.3);
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-medium: 250ms ease;
+  --transition-slow: 400ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
 
-  /* ============================================
-     MOTION STUDIO SPRING ANIMATIONS
-     Physics-based easing via linear() function
-     ============================================ */
+  /* Shadows (no glows) */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-elevated: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-modal: 0 16px 48px rgba(0, 0, 0, 0.6);
 
-  /* Snappy spring - Quick micro-interactions (200ms feel, 300ms actual) */
+  /* Legacy glow aliases (landing page) */
+  --glow-sm: 0 0 20px rgba(10, 132, 255, 0.15);
+  --glow-md: 0 0 40px rgba(10, 132, 255, 0.2);
+  --glow-lg: 0 0 80px rgba(10, 132, 255, 0.25);
+
+  /* Spring Animations (kept — purposeful motion) */
   --spring-snappy: 300ms linear(0, 0.3601, 0.7689, 0.9599, 1.0117, 1.0133, 1.0062, 1.0017, 1.0001, 1);
-
-  /* Default spring - Buttons, cards, standard interactions (300ms feel, 550ms actual) */
   --spring-default: 550ms linear(0, 0.1654, 0.4677, 0.7368, 0.9162, 1.0096, 1.043, 1.0437, 1.0315, 1.0177, 1.0074, 1.0012, 0.9985, 1, 0.9982, 0.9989, 0.9995, 1);
-
-  /* Bouncy spring - Modals, reveals, dramatic entrances (500ms feel, 1100ms actual) */
-  --spring-bouncy: 1100ms linear(0, 0.0694, 0.237, 0.4486, 0.6622, 0.8494, 0.9944, 1.0924, 1.146, 1.163, 1.1531, 1.1266, 1.0924, 1.0574, 1.0265, 1.0023, 0.9858, 0.9766, 0.9735, 0.9748, 0.979, 0.9845, 0.9903, 0.9954, 0.9994, 1.0022, 1.0037, 1, 1.0041, 1.0035, 1.0026, 1.0017, 1.0008, 1.0001, 0.9997, 1, 1);
-
-  /* Gentle spring - Subtle, smooth transitions (400ms feel, 650ms actual) */
   --spring-gentle: 650ms linear(0, 0.1162, 0.3622, 0.6245, 0.8404, 0.9868, 1.0661, 1.0937, 1.0885, 1.0672, 1.042, 1.02, 1.0043, 0.9952, 0.9914, 0.9913, 0.993, 0.9954, 0.9976, 0.9993, 1.0003, 1);
-
-  /* Bounce easing - Ball drop effect for playful animations */
+  --spring-bouncy: 1100ms linear(0, 0.0694, 0.237, 0.4486, 0.6622, 0.8494, 0.9944, 1.0924, 1.146, 1.163, 1.1531, 1.1266, 1.0924, 1.0574, 1.0265, 1.0023, 0.9858, 0.9766, 0.9735, 0.9748, 0.979, 0.9845, 0.9903, 0.9954, 0.9994, 1.0022, 1.0037, 1, 1.0041, 1.0035, 1.0026, 1.0017, 1.0008, 1.0001, 0.9997, 1, 1);
   --ease-bounce: linear(0, 0.0012, 0.0048, 0.0109, 0.0194, 0.0303, 0.0436, 0.0594, 0.0776, 0.0982, 0.1212, 0.1466, 0.1745, 0.2048, 0.2375, 0.2726, 0.3102, 0.3502, 0.3926, 0.4374, 0.4847, 0.5344, 0.5865, 0.641, 0.698, 0.7573, 0.8191, 0.8834, 0.95, 0.9906, 0.9577, 0.9271, 0.8991, 0.8734, 0.8501, 0.8293, 0.8109, 0.795, 0.7814, 0.7703, 0.7616, 0.7553, 0.7514, 0.75, 0.751, 0.7544, 0.7603, 0.7685, 0.7792, 0.7923, 0.8078, 0.8258, 0.8462, 0.869, 0.8942, 0.9219, 0.9519, 0.9844, 0.9909, 0.976, 0.9635, 0.9535, 0.9459, 0.9407, 0.938, 0.9377, 0.9398, 0.9443, 0.9512, 0.9606, 0.9724, 0.9866, 0.9985, 0.9914, 0.9868, 0.9846, 0.9848, 0.9874, 0.9925, 1);
 }
-
 
 @theme inline {
   --color-background: var(--background);
@@ -137,7 +147,7 @@
   --color-surface: var(--surface);
   --color-accent: var(--accent);
 
-  /* Dashboard Colors */
+  /* Legacy dashboard colors */
   --color-brand-black: var(--brand-black);
   --color-brand-blue: var(--brand-blue);
   --color-brand-green: var(--brand-green);
@@ -169,7 +179,6 @@ body,
   padding: 0;
 }
 
-/* Respect user's reduced motion preference */
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -177,8 +186,8 @@ body,
 }
 
 body {
-  color: var(--foreground);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color: var(--text-primary);
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   font-weight: 400;
   line-height: 1.5;
   letter-spacing: -0.01em;
@@ -187,208 +196,76 @@ body {
 }
 
 /* ============================================
-   GLASSMORPHIC COMPONENTS
+   SURFACE COMPONENTS (replaces glassmorphic)
    ============================================ */
 
-/* Glass Card - Primary component */
-.glass-card {
-  background: var(--glass-bg);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid var(--glass-border);
+.glass-card,
+.surface-card {
+  background: var(--surface);
   border-radius: var(--radius-lg);
-  transition: all var(--transition-medium);
+  transition: background var(--transition-medium);
 }
 
-.glass-card:hover {
-  background: var(--glass-hover);
-  border-color: rgba(255, 255, 255, 0.15);
-  box-shadow: var(--glow-sm);
+.glass-card:hover,
+.surface-card:hover {
+  background: var(--surface-hover);
 }
 
-/* Glass Card with Blue Glow */
 .glass-card-glow {
-  background: var(--glass-bg);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid var(--glass-border);
+  background: var(--surface);
   border-radius: var(--radius-lg);
-  box-shadow: 0 0 0 1px rgba(0, 71, 255, 0.1);
-  transition: all var(--transition-medium);
+  transition: background var(--transition-medium);
 }
 
 .glass-card-glow:hover {
-  border-color: rgba(0, 71, 255, 0.3);
-  box-shadow: var(--glow-md);
+  background: var(--surface-hover);
 }
 
-/* Glass Surface */
 .glass-surface {
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: var(--surface);
 }
 
 /* ============================================
-   BLUE ORB ANIMATIONS
+   LANDING PAGE — ORB ANIMATIONS (kept)
    ============================================ */
 
 @keyframes orbPulse {
-  0%, 100% {
-    transform: scale(1);
-    opacity: 0.6;
-  }
-  50% {
-    transform: scale(1.05);
-    opacity: 0.8;
-  }
+  0%, 100% { transform: scale(1); opacity: 0.6; }
+  50% { transform: scale(1.05); opacity: 0.8; }
 }
 
 @keyframes orbDrift {
-  0% {
-    transform: translate(0, 0) rotate(0deg);
-  }
-  25% {
-    transform: translate(10px, -10px) rotate(2deg);
-  }
-  50% {
-    transform: translate(0, -20px) rotate(0deg);
-  }
-  75% {
-    transform: translate(-10px, -10px) rotate(-2deg);
-  }
-  100% {
-    transform: translate(0, 0) rotate(0deg);
-  }
+  0% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(10px, -10px) rotate(2deg); }
+  50% { transform: translate(0, -20px) rotate(0deg); }
+  75% { transform: translate(-10px, -10px) rotate(-2deg); }
+  100% { transform: translate(0, 0) rotate(0deg); }
 }
 
-@keyframes orbGlow {
-  0%, 100% {
-    filter: blur(80px);
-    opacity: 0.5;
-  }
-  50% {
-    filter: blur(100px);
-    opacity: 0.7;
-  }
-}
-
-/* Blue Orb - Hero Element */
 .blue-orb {
   position: absolute;
   width: 500px;
   height: 500px;
-  background: radial-gradient(circle, var(--blue-electric) 0%, rgba(0, 71, 255, 0.5) 30%, transparent 70%);
+  background: radial-gradient(circle, var(--accent) 0%, rgba(10, 132, 255, 0.5) 30%, transparent 70%);
   border-radius: 50%;
   filter: blur(80px);
   animation: orbPulse 4s ease-in-out infinite, orbDrift 20s ease-in-out infinite;
   pointer-events: none;
 }
 
-.blue-orb-sm {
-  width: 200px;
-  height: 200px;
-}
-
-.blue-orb-lg {
-  width: 800px;
-  height: 800px;
-}
-
-/* Secondary Orb */
+.blue-orb-sm { width: 200px; height: 200px; }
+.blue-orb-lg { width: 800px; height: 800px; }
 .blue-orb-secondary {
-  background: radial-gradient(circle, rgba(0, 71, 255, 0.3) 0%, transparent 60%);
+  background: radial-gradient(circle, rgba(10, 132, 255, 0.3) 0%, transparent 60%);
   animation-delay: -2s;
   animation-duration: 5s, 25s;
-}
-
-/* ============================================
-   NUMBERED PILLS NAVIGATION
-   ============================================ */
-
-.pill-nav {
-  display: flex;
-  gap: 8px;
-}
-
-.pill-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  padding: 12px 20px;
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-pill);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.pill-item:hover {
-  background: var(--glass-hover);
-  border-color: rgba(255, 255, 255, 0.2);
-}
-
-.pill-item.active {
-  background: var(--blue-electric);
-  border-color: var(--blue-electric);
-  box-shadow: var(--glow-sm);
-}
-
-.pill-number {
-  font-family: 'VCR OSD Mono', monospace;
-  font-size: 10px;
-  letter-spacing: 0.1em;
-  opacity: 0.6;
-}
-
-.pill-item.active .pill-number {
-  opacity: 1;
-}
-
-.pill-label {
-  font-size: 12px;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-/* ============================================
-   SECTION HEADERS WITH ARROWS
-   ============================================ */
-
-.section-header-line {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 32px;
-}
-
-.section-title {
-  font-family: 'PP Mondwest', sans-serif;
-  font-size: 14px;
-  text-transform: uppercase;
-  letter-spacing: 0.2em;
-  color: var(--muted);
-}
-
-.section-arrow {
-  flex: 1;
-  height: 1px;
-  background: linear-gradient(90deg, var(--border) 0%, transparent 100%);
-}
-
-.section-arrow::after {
-  content: '→';
-  position: relative;
-  left: calc(100% - 20px);
-  color: var(--muted);
 }
 
 /* ============================================
    TYPOGRAPHY
    ============================================ */
 
+/* Landing page fonts */
 .font-helvetica {
   font-family: 'Helvetica Custom', "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
@@ -398,14 +275,14 @@ body {
 }
 
 .font-mono {
-  font-family: 'VCR OSD Mono', monospace;
+  font-family: 'SF Mono', 'Menlo', 'Consolas', monospace;
 }
 
 .font-russo {
   font-family: 'Russo One', sans-serif;
 }
 
-/* Headline - Bold condensed */
+/* Headlines */
 .headline-xl {
   font-size: clamp(3rem, 8vw, 6rem);
   font-weight: 700;
@@ -427,13 +304,12 @@ body {
   line-height: 1.1;
 }
 
-/* Body text */
 .text-light {
   font-weight: 300;
-  color: var(--muted);
+  color: var(--text-secondary);
 }
 
-/* Labels */
+/* Legacy label classes (landing page) */
 .label-mono {
   font-family: 'VCR OSD Mono', monospace;
   font-size: 10px;
@@ -441,7 +317,7 @@ body {
   text-transform: uppercase;
 }
 
-/* Gradient text effect */
+/* Landing page gradient text */
 .gradient-text {
   background: var(--gradient-text);
   background-size: 200% auto;
@@ -458,45 +334,59 @@ body {
 }
 
 /* ============================================
-   ENTROPY TO ORDER ANIMATION
+   LANDING PAGE ANIMATIONS (kept)
    ============================================ */
 
-/* Individual character styling for chaos animation */
 .brand-char-entropy {
   display: inline-block;
   will-change: transform;
 }
 
-/* Snap glow pulse animation */
 @keyframes snapGlow {
-  0% {
-    opacity: 0;
-  }
-  50% {
-    opacity: 0.4;
-    filter: blur(0);
-  }
-  100% {
-    opacity: 0;
-  }
+  0% { opacity: 0; }
+  50% { opacity: 0.4; filter: blur(0); }
+  100% { opacity: 0; }
 }
 
 .snap-glow-active {
   animation: snapGlow 0.3s ease-out forwards;
 }
 
-/* OS chaos initial state helper */
 .os-chaos {
   will-change: transform, opacity;
 }
 
-/* Pinned hero section styling during scroll */
 .hero-pinned {
   will-change: transform;
 }
 
+@keyframes breathe {
+  0%, 100% { opacity: 0.6; transform: translateX(-50%) scale(1); }
+  50% { opacity: 0.8; transform: translateX(-50%) scale(1.1); }
+}
+
+@keyframes dnaFloat {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-15px); }
+}
+
+@keyframes gridPulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes slideInFromRight {
+  from { opacity: 0; transform: translateX(100%); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.animate-breathe { animation: breathe 6s infinite ease-in-out; }
+.animate-dna-float { animation: dnaFloat 8s infinite ease-in-out; }
+.animate-grid-pulse { animation: gridPulse 8s infinite ease-in-out; }
+.animate-slide-in-right { animation: slideInFromRight 0.6s ease-out forwards; }
+
 /* ============================================
-   BUTTONS
+   BUTTONS — APPLE STYLE
    ============================================ */
 
 .btn-primary {
@@ -504,25 +394,23 @@ body {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 14px 28px;
-  background: var(--blue-electric);
+  padding: 10px 20px;
+  background: var(--accent);
   color: white;
   font-weight: 500;
   font-size: 14px;
   border: none;
   border-radius: var(--radius-md);
   cursor: pointer;
-  transition: transform var(--spring-default), box-shadow var(--spring-default), background 150ms ease;
+  transition: opacity var(--transition-fast);
 }
 
 .btn-primary:hover {
-  background: var(--blue-hover);
-  box-shadow: var(--glow-sm);
-  transform: translateY(-2px) scale(1.02);
+  opacity: 0.85;
 }
 
 .btn-primary:active {
-  transform: translateY(0) scale(0.98);
+  opacity: 0.7;
 }
 
 .btn-glass {
@@ -530,26 +418,24 @@ body {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 14px 28px;
-  background: var(--glass-bg);
-  color: var(--foreground);
+  padding: 10px 20px;
+  background: var(--surface);
+  color: var(--text-primary);
   font-weight: 500;
   font-size: 14px;
-  border: 1px solid var(--glass-border);
+  border: 1px solid var(--border);
   border-radius: var(--radius-md);
   cursor: pointer;
-  backdrop-filter: blur(12px);
-  transition: transform var(--spring-default), box-shadow var(--spring-default), background 150ms ease, border-color 150ms ease;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
 }
 
 .btn-glass:hover {
-  background: var(--glass-hover);
-  border-color: rgba(255, 255, 255, 0.2);
-  transform: translateY(-2px) scale(1.02);
+  background: var(--surface-hover);
+  border-color: var(--border-hover);
 }
 
 .btn-glass:active {
-  transform: translateY(0) scale(0.98);
+  background: var(--surface-tertiary);
 }
 
 .btn-pill {
@@ -557,69 +443,40 @@ body {
   border-radius: var(--radius-pill);
 }
 
-/* ============================================
-   BENTO GRID LAYOUT
-   ============================================ */
-
-.bento-grid {
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  gap: 16px;
-  padding: 16px;
+/* Legacy button styles (landing page) */
+.btn-brand {
+  font-family: 'VCR OSD Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #FFFFFF;
+  background: var(--accent);
+  border: none;
+  padding: 16px 48px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: opacity var(--transition-fast);
 }
 
-.bento-item {
-  background: var(--glass-bg);
-  backdrop-filter: blur(20px);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  transition: transform var(--spring-default), box-shadow var(--spring-default), border-color 150ms ease;
+.btn-brand:hover {
+  opacity: 0.85;
 }
 
-.bento-item:hover {
-  border-color: rgba(255, 255, 255, 0.15);
-  transform: translateY(-4px) scale(1.01);
-  box-shadow: var(--shadow-card), var(--glow-sm);
+.btn-spring {
+  transition: transform var(--spring-snappy);
 }
 
-/* Bento sizing classes */
-.bento-sm { grid-column: span 3; }
-.bento-md { grid-column: span 4; }
-.bento-lg { grid-column: span 6; }
-.bento-xl { grid-column: span 8; }
-.bento-full { grid-column: span 12; }
-.bento-tall { grid-row: span 2; }
-
-@media (max-width: 1024px) {
-  .bento-sm { grid-column: span 6; }
-  .bento-md { grid-column: span 6; }
-  .bento-lg { grid-column: span 12; }
-  .bento-xl { grid-column: span 12; }
-}
-
-@media (max-width: 640px) {
-  .bento-grid {
-    grid-template-columns: 1fr;
-  }
-  .bento-sm, .bento-md, .bento-lg, .bento-xl, .bento-full {
-    grid-column: span 1;
-  }
+.btn-spring:active {
+  transform: scale(0.97);
 }
 
 /* ============================================
-   PAGE ANIMATIONS
+   PAGE ANIMATIONS (purposeful, not perpetual)
    ============================================ */
 
 @keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes fadeIn {
@@ -628,156 +485,38 @@ body {
 }
 
 @keyframes slideInRight {
-  from {
-    opacity: 0;
-    transform: translateX(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+  from { opacity: 0; transform: translateX(-12px); }
+  to { opacity: 1; transform: translateX(0); }
 }
 
 @keyframes scaleIn {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+  from { opacity: 0; transform: scale(0.97); }
+  to { opacity: 1; transform: scale(1); }
 }
 
-.animate-fade-in-up {
-  animation: fadeInUp 0.5s ease-out forwards;
-}
+.animate-fade-in-up { animation: fadeInUp 0.4s ease-out forwards; }
+.animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+.animate-slide-in { animation: slideInRight 0.3s ease-out forwards; }
+.animate-scale-in { animation: scaleIn 0.25s ease-out forwards; }
 
-.animate-fade-in {
-  animation: fadeIn 0.4s ease-out forwards;
-}
-
-.animate-slide-in {
-  animation: slideInRight 0.4s ease-out forwards;
-}
-
-.animate-scale-in {
-  animation: scaleIn 0.3s ease-out forwards;
-}
-
-/* Staggered animation delays */
 .delay-100 { animation-delay: 100ms; }
 .delay-200 { animation-delay: 200ms; }
 .delay-300 { animation-delay: 300ms; }
 .delay-400 { animation-delay: 400ms; }
 .delay-500 { animation-delay: 500ms; }
 
-/* ============================================
-   MOTION STUDIO SPRING UTILITY CLASSES
-   ============================================ */
-
-/* Spring transition utilities */
-.spring-snappy {
-  transition: transform var(--spring-snappy), opacity var(--spring-snappy);
-}
-
-.spring-default {
-  transition: transform var(--spring-default), opacity var(--spring-default);
-}
-
-.spring-bouncy {
-  transition: transform var(--spring-bouncy), opacity var(--spring-bouncy);
-}
-
-.spring-gentle {
-  transition: transform var(--spring-gentle), opacity var(--spring-gentle);
-}
-
-/* Spring hover effects for buttons */
-.btn-spring {
-  transition: transform var(--spring-default), box-shadow var(--spring-default);
-}
-
-.btn-spring:hover {
-  transform: translateY(-2px) scale(1.02);
-}
-
-.btn-spring:active {
-  transform: translateY(0) scale(0.98);
-}
-
-/* Spring card hover */
-.card-spring {
-  transition: transform var(--spring-default), box-shadow var(--spring-default), border-color var(--spring-default);
-}
-
-.card-spring:hover {
-  transform: translateY(-4px) scale(1.01);
-  box-shadow: var(--shadow-card), var(--glow-sm);
-}
-
-/* Spring scale animations */
-@keyframes springScaleIn {
-  0% {
-    opacity: 0;
-    transform: scale(0.8);
-  }
-  60% {
-    opacity: 1;
-    transform: scale(1.05);
-  }
-  80% {
-    transform: scale(0.98);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
-@keyframes springFadeInUp {
-  0% {
-    opacity: 0;
-    transform: translateY(30px) scale(0.95);
-  }
-  60% {
-    opacity: 1;
-    transform: translateY(-5px) scale(1.02);
-  }
-  100% {
-    transform: translateY(0) scale(1);
-  }
-}
-
-@keyframes springBounceIn {
-  0% {
-    opacity: 0;
-    transform: scale(0);
-  }
-  50% {
-    transform: scale(1.15);
-  }
-  70% {
-    transform: scale(0.95);
-  }
-  85% {
-    transform: scale(1.05);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
+/* Spring utilities (kept for micro-interactions) */
+.spring-snappy { transition: transform var(--spring-snappy), opacity var(--spring-snappy); }
+.spring-default { transition: transform var(--spring-default), opacity var(--spring-default); }
+.spring-bouncy { transition: transform var(--spring-bouncy), opacity var(--spring-bouncy); }
+.spring-gentle { transition: transform var(--spring-gentle), opacity var(--spring-gentle); }
 
 .animate-spring-scale-in {
-  animation: springScaleIn 550ms linear(0, 0.1654, 0.4677, 0.7368, 0.9162, 1.0096, 1.043, 1.0437, 1.0315, 1.0177, 1.0074, 1.0012, 0.9985, 1) forwards;
+  animation: scaleIn 400ms var(--spring-default) forwards;
 }
 
 .animate-spring-fade-in-up {
-  animation: springFadeInUp 650ms linear(0, 0.1162, 0.3622, 0.6245, 0.8404, 0.9868, 1.0661, 1.0937, 1.0885, 1.0672, 1.042, 1.02, 1.0043, 0.9952, 0.9914, 0.9913, 0.993, 0.9954, 0.9976, 0.9993, 1.0003, 1) forwards;
-}
-
-.animate-spring-bounce-in {
-  animation: springBounceIn 800ms linear(0, 0.0012, 0.0048, 0.0109, 0.0194, 0.0303, 0.0436, 0.0594, 0.0776, 0.0982, 0.1212, 0.1466, 0.1745, 0.2048, 0.2375, 0.2726, 0.3102, 0.3502, 0.3926, 0.4374, 0.4847, 0.5344, 0.5865, 0.641, 0.698, 0.7573, 0.8191, 0.8834, 0.95, 0.9906, 0.9577, 0.9271, 0.8991, 0.8734, 0.8501, 0.8293, 0.8109, 0.795, 0.7814, 0.7703, 0.7616, 0.7553, 0.7514, 0.75, 0.751, 0.7544, 0.7603, 0.7685, 0.7792, 0.7923, 0.8078, 0.8258, 0.8462, 0.869, 0.8942, 0.9219, 0.9519, 0.9844, 0.9909, 0.976, 0.9635, 0.9535, 0.9459, 0.9407, 0.938, 0.9377, 0.9398, 0.9443, 0.9512, 0.9606, 0.9724, 0.9866, 0.9985) forwards;
+  animation: fadeInUp 400ms var(--spring-gentle) forwards;
 }
 
 /* ============================================
@@ -794,15 +533,14 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--border);
+  background: var(--text-quaternary);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--muted);
+  background: var(--text-tertiary);
 }
 
-/* Hide scrollbar for nav */
 .nav-scroll {
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -812,31 +550,35 @@ body {
   display: none;
 }
 
+.custom-scrollbar::-webkit-scrollbar { width: 4px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.08); border-radius: 4px; }
+.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.15); }
+
 /* ============================================
    FORM ELEMENTS
    ============================================ */
 
 input, textarea, select {
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-md);
-  padding: 12px 16px;
-  color: var(--foreground);
+  background: var(--surface-tertiary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  color: var(--text-primary);
   font-size: 14px;
-  transition: all var(--transition-fast);
+  transition: border-color var(--transition-fast);
 }
 
 input:focus, textarea:focus, select:focus {
   outline: none;
-  border-color: var(--blue-electric);
-  box-shadow: 0 0 0 3px var(--blue-subtle);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.15);
 }
 
 input::placeholder, textarea::placeholder {
-  color: var(--muted);
+  color: var(--text-tertiary);
 }
 
-/* Range slider */
 input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
@@ -846,7 +588,7 @@ input[type="range"] {
 }
 
 input[type="range"]::-webkit-slider-runnable-track {
-  background: var(--border);
+  background: var(--surface-tertiary);
   height: 4px;
   border-radius: 2px;
 }
@@ -855,11 +597,10 @@ input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
   margin-top: -6px;
-  background: var(--blue-electric);
+  background: var(--accent);
   height: 16px;
   width: 16px;
   border-radius: 50%;
-  box-shadow: 0 0 10px var(--blue-glow);
   transition: transform 0.15s ease;
 }
 
@@ -868,27 +609,23 @@ input[type="range"]::-webkit-slider-thumb:hover {
 }
 
 /* ============================================
-   UTILITY CLASSES
+   UTILITIES
    ============================================ */
 
-/* Selection */
 ::selection {
-  background: var(--blue-electric);
+  background: var(--accent);
   color: white;
 }
 
-/* Focus visible */
 :focus-visible {
-  outline: 2px solid var(--blue-electric);
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
 
-/* Noise texture overlay - disabled to prevent white box issues */
 .noise-overlay {
   display: none;
 }
 
-/* Screen reader only */
 .sr-only {
   position: absolute;
   width: 1px;
@@ -902,102 +639,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
 }
 
 /* ============================================
-   BRANDOS SPECIFIC COMPONENTS
-   ============================================ */
-
-/* BrandOS Logo */
-.brandos-logo {
-  display: flex;
-  align-items: baseline;
-  gap: 2px;
-}
-
-.brandos-logo .brand {
-  font-family: 'Helvetica Custom', sans-serif;
-  font-weight: 400;
-  letter-spacing: -0.02em;
-}
-
-.brandos-logo .os {
-  font-family: 'PP Mondwest', monospace;
-  color: var(--blue-electric);
-}
-
-/* Progress ring */
-.progress-ring {
-  transform: rotate(-90deg);
-}
-
-.progress-ring-bg {
-  stroke: var(--border);
-}
-
-.progress-ring-fill {
-  stroke: var(--blue-electric);
-  stroke-linecap: round;
-  transition: stroke-dashoffset 0.5s ease-out;
-}
-
-/* Status indicators */
-.status-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--blue-electric);
-  box-shadow: 0 0 8px var(--blue-glow);
-  animation: pulse 2s ease-in-out infinite;
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
-}
-
-/* Tag/Badge */
-.tag {
-  display: inline-flex;
-  align-items: center;
-  padding: 4px 10px;
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-pill);
-  font-size: 11px;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.tag-blue {
-  background: var(--blue-subtle);
-  border-color: rgba(0, 71, 255, 0.2);
-  color: var(--blue-electric);
-}
-
-/* Divider */
-.divider {
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--border), transparent);
-}
-
-/* Code blocks */
-pre, code {
-  font-family: 'VCR OSD Mono', 'SF Mono', Consolas, monospace;
-  font-size: 12px;
-  background: rgba(0, 0, 0, 0.3);
-  border-radius: var(--radius-sm);
-}
-
-pre {
-  padding: 16px;
-  overflow-x: auto;
-}
-
-code {
-  padding: 2px 6px;
-}
-
-/* ============================================
-   LEGACY SUPPORT (keeping old classes working)
+   LEGACY — LANDING PAGE SUPPORT
    ============================================ */
 
 .bg-background { background-color: var(--background); }
@@ -1009,7 +651,6 @@ code {
 .border-border { border-color: var(--border); }
 .border-foreground { border-color: var(--foreground); }
 
-/* Legacy glass class */
 .glass {
   background: var(--glass-bg);
   backdrop-filter: blur(12px);
@@ -1017,70 +658,20 @@ code {
   border: 1px solid var(--glass-border);
 }
 
-/* VCR label */
-.vcr-label {
-  font-family: 'VCR OSD Mono', monospace;
-  font-size: 10px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
-/* Phase badge */
-.phase-badge {
-  font-family: 'VCR OSD Mono', monospace;
-  font-size: 10px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--blue-electric);
-  background: var(--blue-subtle);
-  padding: 4px 8px;
-  border-radius: 4px;
-}
-
-/* Brand blue CTA button */
-.btn-brand {
-  font-family: 'VCR OSD Mono', monospace;
-  font-size: 12px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: #FFFFFF;
-  background: var(--blue-electric);
-  border: none;
-  padding: 16px 48px;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
-}
-
-.btn-brand:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--glow-md);
-}
-
-/* Section header */
-.section-header {
-  text-align: center;
-  padding: 64px 24px;
-  border-bottom: 1px solid var(--border);
-}
-
-.section-header h2 {
-  font-size: clamp(2rem, 5vw, 3rem);
-  font-weight: 300;
+/* BrandOS Logo (landing page) */
+.brandos-logo { display: flex; align-items: baseline; gap: 2px; }
+.brandos-logo .brand {
+  font-family: 'Helvetica Custom', sans-serif;
+  font-weight: 400;
   letter-spacing: -0.02em;
-  margin-bottom: 16px;
+}
+.brandos-logo .os {
+  font-family: 'PP Mondwest', monospace;
+  color: var(--accent);
 }
 
-.section-header p {
-  color: var(--muted);
-  font-size: 1.125rem;
-  max-width: 28rem;
-  margin: 0 auto;
-}
-
-/* BrandOS Logo shimmer effect - Blue theme */
 .os-shimmer {
-  background: linear-gradient(90deg, #0047FF 0%, #4477FF 25%, #0047FF 50%, #4477FF 75%, #0047FF 100%);
+  background: linear-gradient(90deg, #0A84FF 0%, #4499FF 25%, #0A84FF 50%, #4499FF 75%, #0A84FF 100%);
   background-size: 200% 100%;
   -webkit-background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
@@ -1093,222 +684,142 @@ code {
   100% { background-position: -200% 0; }
 }
 
-/* Tab content animation */
-.tab-content {
-  animation: fadeInUp 0.3s ease-out;
+/* Landing page pill nav */
+.pill-nav { display: flex; gap: 8px; }
+.pill-item {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 12px 20px; background: var(--glass-bg);
+  border: 1px solid var(--glass-border); border-radius: var(--radius-pill);
+  cursor: pointer; transition: all var(--transition-fast);
+}
+.pill-item:hover { background: var(--glass-hover); border-color: rgba(255, 255, 255, 0.2); }
+.pill-item.active { background: var(--accent); border-color: var(--accent); }
+.pill-number { font-family: 'VCR OSD Mono', monospace; font-size: 10px; letter-spacing: 0.1em; opacity: 0.6; }
+.pill-item.active .pill-number { opacity: 1; }
+.pill-label { font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; }
+
+/* Landing page section headers */
+.section-header-line { display: flex; align-items: center; gap: 16px; margin-bottom: 32px; }
+.section-title {
+  font-family: 'PP Mondwest', sans-serif;
+  font-size: 14px; text-transform: uppercase; letter-spacing: 0.2em; color: var(--text-secondary);
+}
+.section-arrow { flex: 1; height: 1px; background: linear-gradient(90deg, var(--border) 0%, transparent 100%); }
+.section-arrow::after { content: '→'; position: relative; left: calc(100% - 20px); color: var(--text-secondary); }
+
+.section-header { text-align: center; padding: 64px 24px; border-bottom: 1px solid var(--border); }
+.section-header h2 { font-size: clamp(2rem, 5vw, 3rem); font-weight: 300; letter-spacing: -0.02em; margin-bottom: 16px; }
+.section-header p { color: var(--text-secondary); font-size: 1.125rem; max-width: 28rem; margin: 0 auto; }
+
+.vcr-label {
+  font-family: 'VCR OSD Mono', monospace;
+  font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
 }
 
-/* Asset card */
-.asset-card {
-  transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
+.phase-badge {
+  font-family: 'VCR OSD Mono', monospace;
+  font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--accent); background: var(--blue-subtle); padding: 4px 8px; border-radius: 4px;
 }
 
-.asset-card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-card);
+/* Legacy tags */
+.tag {
+  display: inline-flex; align-items: center; padding: 4px 10px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-pill); font-size: 11px; font-weight: 500;
+}
+.tag-blue { background: var(--blue-subtle); border-color: rgba(10, 132, 255, 0.2); color: var(--accent); }
+
+.divider { height: 1px; background: var(--separator); }
+
+/* Progress ring */
+.progress-ring { transform: rotate(-90deg); }
+.progress-ring-bg { stroke: var(--surface-tertiary); }
+.progress-ring-fill { stroke: var(--accent); stroke-linecap: round; transition: stroke-dashoffset 0.5s ease-out; }
+
+.status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+
+pre, code {
+  font-family: 'SF Mono', 'Menlo', Consolas, monospace;
+  font-size: 12px;
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+}
+pre { padding: 16px; overflow-x: auto; }
+code { padding: 2px 6px; }
+
+.tab-content { animation: fadeIn 0.25s ease-out; }
+.asset-card { transition: background var(--transition-fast); }
+.asset-card:hover { background: var(--surface-hover); }
+.dropzone { border: 2px dashed var(--border); transition: border-color 0.2s ease; }
+.dropzone:hover, .dropzone.dragover { border-color: var(--accent); background-color: rgba(10, 132, 255, 0.05); }
+
+/* Card spring — simplified for app shell */
+.card-spring { transition: background var(--transition-fast); }
+.card-spring:hover { background: var(--surface-hover); }
+
+/* Bento grid (kept for legacy, simplified) */
+.bento-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 16px; padding: 16px; }
+.bento-item { background: var(--surface); border-radius: var(--radius-lg); overflow: hidden; transition: background var(--transition-medium); }
+.bento-item:hover { background: var(--surface-hover); }
+.bento-sm { grid-column: span 3; }
+.bento-md { grid-column: span 4; }
+.bento-lg { grid-column: span 6; }
+.bento-xl { grid-column: span 8; }
+.bento-full { grid-column: span 12; }
+.bento-tall { grid-row: span 2; }
+@media (max-width: 1024px) {
+  .bento-sm { grid-column: span 6; }
+  .bento-md { grid-column: span 6; }
+  .bento-lg, .bento-xl { grid-column: span 12; }
+}
+@media (max-width: 640px) {
+  .bento-grid { grid-template-columns: 1fr; }
+  .bento-sm, .bento-md, .bento-lg, .bento-xl, .bento-full { grid-column: span 1; }
 }
 
-/* Dropzone */
-.dropzone {
-  border: 2px dashed var(--border);
-  transition: border-color 0.2s ease-out, background-color 0.2s ease-out;
-}
+/* Landing page typography */
+.font-inter { font-family: 'Inter', sans-serif; }
+.logo-brand-text { font-family: 'Inter', sans-serif; font-weight: 800; font-style: italic; letter-spacing: -2px; }
+.logo-os-text { font-family: 'Press Start 2P', cursive; color: #0A84FF; text-shadow: 0 0 20px rgba(10, 132, 255, 0.5); }
+.landing-input::placeholder { color: #f5f0e8 !important; opacity: 0.7; }
+.landing-input-light::placeholder { color: #666666 !important; opacity: 0.8; }
+.capturing .grayscale, .capturing img.grayscale { filter: none !important; }
 
-.dropzone:hover,
-.dropzone.dragover {
-  border-color: var(--blue-electric);
-  background-color: var(--blue-subtle);
-}
-
-/* Print styles */
 @media print {
-  body {
-    background: white !important;
-    color: black !important;
-  }
+  body { background: white !important; color: black !important; }
 }
 
 /* ============================================
-   DESIGN #2 - DNA INTERFACE ANIMATIONS
+   CONTENT WORKFLOW — REACT FLOW OVERRIDES
    ============================================ */
-
-/* Atmosphere bloom breathing animation */
-@keyframes breathe {
-  0%, 100% {
-    opacity: 0.6;
-    transform: translateX(-50%) scale(1);
-  }
-  50% {
-    opacity: 0.8;
-    transform: translateX(-50%) scale(1.1);
-  }
-}
-
-/* DNA float animation */
-@keyframes dnaFloat {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-15px);
-  }
-}
-
-/* Grid pulse animation (subtle) */
-@keyframes gridPulse {
-  0%, 100% {
-    opacity: 0.4;
-  }
-  50% {
-    opacity: 0.5;
-  }
-}
-
-/* Panel slide in from right */
-@keyframes slideInFromRight {
-  from {
-    opacity: 0;
-    transform: translateX(100%);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-.animate-breathe {
-  animation: breathe 6s infinite ease-in-out;
-}
-
-.animate-dna-float {
-  animation: dnaFloat 8s infinite ease-in-out;
-}
-
-.animate-grid-pulse {
-  animation: gridPulse 8s infinite ease-in-out;
-}
-
-.animate-slide-in-right {
-  animation: slideInFromRight 0.6s ease-out forwards;
-}
-
-/* Design #2 Typography */
-.font-inter {
-  font-family: 'Inter', sans-serif;
-}
-
-.font-pixel {
-  font-family: 'Press Start 2P', cursive;
-}
-
-/* Logo Brand text - Inter 800 italic */
-.logo-brand-text {
-  font-family: 'Inter', sans-serif;
-  font-weight: 800;
-  font-style: italic;
-  letter-spacing: -2px;
-}
-
-/* Logo OS text - Press Start 2P with glow */
-.logo-os-text {
-  font-family: 'Press Start 2P', cursive;
-  color: #2b7fff;
-  text-shadow: 0 0 20px #006eff;
-}
-
-/* Landing page username input - off-white placeholder (dark mode) */
-.landing-input::placeholder {
-  color: #f5f0e8 !important;
-  opacity: 0.7;
-}
-
-/* Landing page username input - dark placeholder (light mode) */
-.landing-input-light::placeholder {
-  color: #666666 !important;
-  opacity: 0.8;
-}
-
-/* Remove grayscale filter when capturing for clipboard */
-.capturing .grayscale,
-.capturing img.grayscale {
-  filter: none !important;
-}
-
-/* ===== Content Workflow — React Flow Overrides ===== */
 
 .workflow-canvas .react-flow__node {
   border: none !important;
   box-shadow: none !important;
   background: transparent !important;
 }
-
-.workflow-canvas .react-flow__edge-path {
-  stroke-linecap: round;
-}
-
-.workflow-canvas .react-flow__handle {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.workflow-canvas .react-flow__handle:hover {
-  transform: scale(1.4);
-  box-shadow: 0 0 8px currentColor;
-}
-
-.workflow-canvas .react-flow__selection {
-  background: rgba(46, 106, 255, 0.05);
-  border: 1px solid rgba(46, 106, 255, 0.3);
-}
-
-/* Controls dark theme */
+.workflow-canvas .react-flow__edge-path { stroke-linecap: round; }
+.workflow-canvas .react-flow__handle { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+.workflow-canvas .react-flow__handle:hover { transform: scale(1.4); box-shadow: 0 0 8px currentColor; }
+.workflow-canvas .react-flow__selection { background: rgba(10, 132, 255, 0.05); border: 1px solid rgba(10, 132, 255, 0.3); }
 .workflow-controls {
-  background: rgba(15, 15, 15, 0.85) !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  background: var(--surface) !important;
+  border: 1px solid var(--border) !important;
   border-radius: 12px !important;
 }
-
 .workflow-controls button {
   background: transparent !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
-  color: rgba(255, 255, 255, 0.4) !important;
-  fill: rgba(255, 255, 255, 0.4) !important;
-  width: 28px !important;
-  height: 28px !important;
+  border-bottom: 1px solid var(--border) !important;
+  color: var(--text-tertiary) !important;
+  fill: var(--text-tertiary) !important;
+  width: 28px !important; height: 28px !important;
 }
-
 .workflow-controls button:hover {
-  background: rgba(255, 255, 255, 0.05) !important;
-  color: rgba(255, 255, 255, 0.8) !important;
-  fill: rgba(255, 255, 255, 0.8) !important;
+  background: var(--surface-hover) !important;
+  color: var(--text-primary) !important;
+  fill: var(--text-primary) !important;
 }
-
-.workflow-controls button:last-child {
-  border-bottom: none !important;
-}
-
-.workflow-controls button svg {
-  fill: currentColor !important;
-}
-
-/* MiniMap dark theme */
-.react-flow__minimap {
-  background: rgba(15, 15, 15, 0.8) !important;
-}
-
-/* Node custom scrollbar */
-.custom-scrollbar::-webkit-scrollbar {
-  width: 4px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
-}
+.workflow-controls button:last-child { border-bottom: none !important; }
+.workflow-controls button svg { fill: currentColor !important; }
+.react-flow__minimap { background: var(--surface) !important; }

@@ -1,7 +1,6 @@
 'use client';
 
 import { useMemo } from 'react';
-import BrandOSLogo from './BrandOSLogo';
 
 export type Phase = 'home' | 'define' | 'check' | 'generate' | 'scale';
 export type SubTab =
@@ -11,7 +10,7 @@ export type SubTab =
   | 'brand' | 'safezones' | 'intents'
   // Check phase
   | 'check' | 'cohesion' | 'guardrails' | 'protect' | 'taste'
-  // Generate phase (includes Brand Kit for beta)
+  // Generate phase (consolidated)
   | 'generate' | 'platforms' | 'context' | 'visual'
   | 'kit-canvas' | 'kit-logos' | 'kit-colors' | 'kit-typography' | 'kit-imagery' | 'kit-icons' | 'kit-templates' | 'kit-ai-studio'
   // Scale phase
@@ -20,9 +19,8 @@ export type SubTab =
 interface PhaseConfig {
   id: Phase;
   label: string;
-  number: string;
   description: string;
-  tabs: { id: SubTab; label: string; description?: string }[];
+  tabs: { id: SubTab; label: string }[];
   unlockCondition: (brandCompleteness: number, hasChecked: boolean, hasGenerated: boolean) => boolean;
 }
 
@@ -30,71 +28,52 @@ const phases: PhaseConfig[] = [
   {
     id: 'home',
     label: 'Home',
-    number: '⌂',
     description: 'Your command center',
-    tabs: [
-      { id: 'home', label: 'Dashboard', description: 'Overview & insights' },
-    ],
+    tabs: [{ id: 'home', label: 'Dashboard' }],
     unlockCondition: () => true,
   },
   {
     id: 'define',
     label: 'Define',
-    number: '01',
     description: 'Build your system',
     tabs: [
-      { id: 'brand', label: 'Brand DNA', description: 'Name, colors, tone, keywords' },
-      { id: 'safezones', label: 'Safe Zones', description: 'Lock/unlock elements' },
-      { id: 'intents', label: 'Design Intents', description: 'Natural language rules' },
+      { id: 'brand', label: 'Brand DNA' },
+      { id: 'safezones', label: 'Safe Zones' },
+      { id: 'intents', label: 'Design Intents' },
     ],
     unlockCondition: () => true,
   },
   {
     id: 'check',
     label: 'Check',
-    number: '02',
     description: 'Score against your DNA',
     tabs: [
-      { id: 'check', label: 'Content Check', description: 'Score your content' },
-      { id: 'cohesion', label: 'Cohesion', description: 'Analyze consistency' },
-      { id: 'guardrails', label: 'Guardrails', description: 'Creator review' },
-      { id: 'protect', label: 'Protect', description: 'Prevent over-design' },
-      { id: 'taste', label: 'Taste', description: 'Translate feedback' },
+      { id: 'check', label: 'Content Check' },
+      { id: 'cohesion', label: 'Cohesion' },
+      { id: 'guardrails', label: 'Guardrails' },
     ],
     unlockCondition: (completeness) => completeness >= 30,
   },
   {
     id: 'generate',
     label: 'Generate',
-    number: '03',
     description: 'Create from your DNA',
     tabs: [
-      { id: 'generate', label: 'Generate', description: 'AI content creation' },
-      { id: 'platforms', label: 'Platforms', description: 'Adapt for channels' },
-      { id: 'context', label: 'Context', description: 'Situational tone' },
-      { id: 'visual', label: 'Visual', description: 'Design inspiration' },
-      { id: 'kit-ai-studio', label: 'AI Studio', description: 'Generate with Gemini' },
-      { id: 'kit-canvas', label: 'Canvas', description: 'Visual brand layout' },
-      { id: 'kit-logos', label: 'Logos', description: 'Logo variants & rules' },
-      { id: 'kit-colors', label: 'Colors', description: 'Extended palette' },
-      { id: 'kit-typography', label: 'Typography', description: 'Fonts & scales' },
-      { id: 'kit-imagery', label: 'Imagery', description: 'Photo & mood' },
-      { id: 'kit-icons', label: 'Icons', description: 'Icon library' },
-      { id: 'kit-templates', label: 'Templates', description: 'Content templates' },
+      { id: 'generate', label: 'Create' },
+      { id: 'kit-canvas', label: 'Brand Kit' },
+      { id: 'kit-ai-studio', label: 'AI Studio' },
+      { id: 'platforms', label: 'Platforms' },
     ],
     unlockCondition: (completeness, hasChecked) => completeness >= 30 && hasChecked,
   },
   {
     id: 'scale',
     label: 'Scale',
-    number: '04',
     description: 'Let your system run',
     tabs: [
-      { id: 'dashboard', label: 'Dashboard', description: 'Brand analytics' },
-      { id: 'history', label: 'History', description: 'Past activity' },
-      { id: 'export', label: 'Export', description: 'Download & share' },
-      { id: 'competitors', label: 'Compare', description: 'Competitor analysis' },
-      { id: 'memory', label: 'Memory', description: 'Brand learnings' },
+      { id: 'dashboard', label: 'Analytics' },
+      { id: 'history', label: 'History' },
+      { id: 'export', label: 'Export' },
     ],
     unlockCondition: () => true,
   },
@@ -108,6 +87,10 @@ interface PhaseNavigationProps {
   brandCompleteness: number;
   hasChecked: boolean;
   hasGenerated: boolean;
+  userName?: string;
+  userAvatar?: string | null;
+  brandName?: string;
+  onAvatarClick?: () => void;
 }
 
 export default function PhaseNavigation({
@@ -118,169 +101,184 @@ export default function PhaseNavigation({
   brandCompleteness,
   hasChecked,
   hasGenerated,
+  userName,
+  userAvatar,
+  brandName,
+  onAvatarClick,
 }: PhaseNavigationProps) {
-  const currentPhaseIndex = phases.findIndex(p => p.id === activePhase);
-
   const phaseStates = useMemo(() => {
-    return phases.map((phase, index) => {
+    return phases.map((phase) => {
       const isUnlocked = phase.unlockCondition(brandCompleteness, hasChecked, hasGenerated);
       const isActive = phase.id === activePhase;
-      const isComplete = index < currentPhaseIndex || 
-        (phase.id === 'define' && brandCompleteness >= 70) ||
-        (phase.id === 'check' && hasChecked) ||
-        (phase.id === 'generate' && hasGenerated);
-      
-      return { ...phase, isUnlocked, isActive, isComplete };
+      return { ...phase, isUnlocked, isActive };
     });
-  }, [activePhase, brandCompleteness, hasChecked, hasGenerated, currentPhaseIndex]);
+  }, [activePhase, brandCompleteness, hasChecked, hasGenerated]);
+
+  const activePhaseConfig = phaseStates.find(p => p.id === activePhase);
+  const showSubTabs = activePhaseConfig && activePhaseConfig.tabs.length > 1;
 
   return (
-    <div className="border-b border-[rgba(255,255,255,0.1)] bg-[rgba(10,10,10,0.8)] backdrop-blur-xl sticky top-0 z-50">
-      {/* Main Navigation */}
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="flex items-center justify-between py-4">
-          {/* Logo */}
-          <BrandOSLogo size="sm" />
+    <div className="sticky top-0 z-50">
+      {/* Main navigation bar */}
+      <nav
+        style={{
+          height: 56,
+          background: '#000000',
+          borderBottom: '1px solid rgba(255,255,255,0.06)',
+        }}
+      >
+        <div className="max-w-[1200px] mx-auto h-full px-6 flex items-center justify-between">
+          {/* Left: Logo */}
+          <div className="flex items-center gap-1 shrink-0">
+            <span style={{ fontSize: 17, fontWeight: 700, color: '#F5F5F7', letterSpacing: '-0.03em' }}>
+              Brand
+            </span>
+            <span style={{ fontSize: 17, fontWeight: 700, color: '#0A84FF', letterSpacing: '-0.03em' }}>
+              OS
+            </span>
+          </div>
 
-          {/* Phase Pills - Numbered Navigation */}
-          <nav className="flex items-center gap-2">
-            {phaseStates.map((phase, index) => (
-              <div key={phase.id} className="flex items-center">
-                {/* Phase Pill */}
-                <button
-                  onClick={() => phase.isUnlocked && onPhaseChange(phase.id)}
-                  disabled={!phase.isUnlocked}
-                  className={`
-                    relative flex items-center gap-3 px-4 py-2.5 rounded-full
-                    transition-all duration-200 ease-out
-                    ${phase.isActive 
-                      ? 'bg-[#0047FF] text-white shadow-[0_0_20px_rgba(0,71,255,0.4)]' 
-                      : phase.isUnlocked
-                        ? 'bg-[rgba(255,255,255,0.05)] text-white/70 border border-[rgba(255,255,255,0.1)] hover:bg-[rgba(255,255,255,0.1)] hover:text-white'
-                        : 'bg-transparent text-white/30 cursor-not-allowed'
-                    }
-                  `}
-                >
-                  {/* Number / Home Icon */}
-                  {phase.id === 'home' ? (
-                    <svg className={`w-3.5 h-3.5 ${phase.isActive ? 'text-white/80' : 'text-white/40'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                    </svg>
-                  ) : (
-                    <span className={`
-                      font-mono text-[10px] tracking-[0.1em]
-                      ${phase.isActive ? 'text-white/80' : 'text-white/40'}
-                    `}>
-                      {phase.number}
-                    </span>
-                  )}
-
-                  {/* Label */}
-                  <span className="text-sm font-medium hidden sm:inline">
-                    {phase.label}
-                  </span>
-
-                  {/* Completion indicator */}
-                  {phase.isComplete && !phase.isActive && (
-                    <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500 rounded-full ring-2 ring-[#0a0a0a]" />
-                  )}
-                  
-                  {/* Lock icon */}
+          {/* Center: Phase tabs */}
+          <div className="flex items-center gap-1">
+            {phaseStates.map((phase) => (
+              <button
+                key={phase.id}
+                onClick={() => phase.isUnlocked && onPhaseChange(phase.id)}
+                disabled={!phase.isUnlocked}
+                style={{
+                  padding: '6px 16px',
+                  fontSize: 14,
+                  fontWeight: phase.isActive ? 600 : 400,
+                  color: phase.isActive
+                    ? '#F5F5F7'
+                    : phase.isUnlocked
+                      ? '#86868B'
+                      : '#48484A',
+                  background: 'transparent',
+                  border: 'none',
+                  borderRadius: 8,
+                  cursor: phase.isUnlocked ? 'pointer' : 'default',
+                  position: 'relative',
+                  transition: 'color 200ms ease',
+                }}
+                onMouseEnter={(e) => {
+                  if (phase.isUnlocked && !phase.isActive) {
+                    e.currentTarget.style.color = '#F5F5F7';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (phase.isUnlocked && !phase.isActive) {
+                    e.currentTarget.style.color = '#86868B';
+                  }
+                }}
+              >
+                <span className="flex items-center gap-1.5">
+                  {phase.label}
                   {!phase.isUnlocked && (
-                    <svg className="w-3 h-3 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    <svg className="w-3 h-3 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                     </svg>
                   )}
-                </button>
-                
-                {/* Connector Arrow */}
-                {index < phases.length - 1 && (
-                  <div className="mx-2 hidden sm:flex items-center">
-                    <svg 
-                      className={`w-4 h-4 ${index < currentPhaseIndex ? 'text-white/40' : 'text-white/20'}`} 
-                      fill="none" 
-                      viewBox="0 0 24 24" 
-                      stroke="currentColor"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </div>
+                </span>
+                {/* Active indicator line */}
+                {phase.isActive && (
+                  <span
+                    style={{
+                      position: 'absolute',
+                      bottom: -1,
+                      left: 16,
+                      right: 16,
+                      height: 2,
+                      background: '#0A84FF',
+                      borderRadius: 1,
+                    }}
+                  />
                 )}
-              </div>
+              </button>
             ))}
-          </nav>
+          </div>
 
-          {/* Brand Completeness Mini Ring */}
-          <div className="hidden md:flex items-center gap-3">
-            <div className="relative w-10 h-10">
-              <svg className="w-10 h-10 -rotate-90" viewBox="0 0 36 36">
-                {/* Background circle */}
-                <circle
-                  cx="18"
-                  cy="18"
-                  r="16"
-                  fill="none"
-                  stroke="rgba(255,255,255,0.1)"
-                  strokeWidth="2"
-                />
-                {/* Progress circle */}
-                <circle
-                  cx="18"
-                  cy="18"
-                  r="16"
-                  fill="none"
-                  stroke="#0047FF"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeDasharray={`${brandCompleteness} 100`}
-                  className="transition-all duration-500"
-                />
-              </svg>
-              <span className="absolute inset-0 flex items-center justify-center text-[10px] font-mono text-white/70">
-                {brandCompleteness}
+          {/* Right: Avatar / Brand */}
+          <div className="flex items-center gap-3 shrink-0">
+            {brandName && (
+              <span style={{ fontSize: 13, color: '#6E6E73' }}>
+                {brandName}
               </span>
-            </div>
+            )}
+            <button
+              onClick={onAvatarClick}
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: '50%',
+                background: userAvatar ? 'transparent' : '#2C2C2E',
+                border: 'none',
+                cursor: 'pointer',
+                overflow: 'hidden',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'opacity 200ms ease',
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.opacity = '0.8'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.opacity = '1'; }}
+            >
+              {userAvatar ? (
+                <img src={userAvatar} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              ) : (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#86868B" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                </svg>
+              )}
+            </button>
           </div>
         </div>
+      </nav>
 
-        {/* Sub-tabs for active phase */}
-        <div className="flex items-center gap-1 pb-3 overflow-x-auto nav-scroll">
-          {phaseStates.find(p => p.id === activePhase)?.tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => onTabChange(tab.id)}
-              className={`
-                px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-all duration-200
-                ${activeTab === tab.id
-                  ? 'bg-[rgba(255,255,255,0.1)] text-white font-medium'
-                  : 'text-white/50 hover:text-white/80 hover:bg-[rgba(255,255,255,0.05)]'
-                }
-              `}
-            >
-              {tab.label}
-            </button>
-          ))}
-          
-          {/* Hints for locked phases */}
-          {activePhase === 'define' && brandCompleteness < 30 && (
-            <span className="ml-auto text-[10px] text-white/40 flex items-center gap-1.5 font-mono tracking-wide">
-              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              COMPLETE 30% TO UNLOCK CHECK
-            </span>
-          )}
-          
-          {activePhase === 'check' && !hasChecked && (
-            <span className="ml-auto text-[10px] text-white/40 flex items-center gap-1.5 font-mono tracking-wide">
-              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              RUN FIRST CHECK TO UNLOCK GENERATE
-            </span>
-          )}
+      {/* Sub-tabs (only when phase has multiple tabs) */}
+      {showSubTabs && (
+        <div
+          style={{
+            height: 40,
+            background: '#000000',
+            borderBottom: '1px solid rgba(255,255,255,0.06)',
+          }}
+        >
+          <div className="max-w-[1200px] mx-auto h-full px-6 flex items-center gap-1">
+            {activePhaseConfig?.tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => onTabChange(tab.id)}
+                style={{
+                  padding: '4px 12px',
+                  fontSize: 13,
+                  fontWeight: activeTab === tab.id ? 500 : 400,
+                  color: activeTab === tab.id ? '#F5F5F7' : '#6E6E73',
+                  background: activeTab === tab.id ? '#1C1C1E' : 'transparent',
+                  border: 'none',
+                  borderRadius: 6,
+                  cursor: 'pointer',
+                  transition: 'all 150ms ease',
+                }}
+                onMouseEnter={(e) => {
+                  if (activeTab !== tab.id) {
+                    e.currentTarget.style.color = '#86868B';
+                    e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (activeTab !== tab.id) {
+                    e.currentTarget.style.color = '#6E6E73';
+                    e.currentTarget.style.background = 'transparent';
+                  }
+                }}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

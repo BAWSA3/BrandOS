@@ -170,8 +170,15 @@ export async function POST(request: NextRequest) {
       success: true,
       codes,
     }, { status: 201 });
-  } catch (error) {
-    console.error('[Invite] Generation error:', error);
+  } catch (error: unknown) {
+    const prismaCode = error && typeof error === 'object' && 'code' in error ? (error as { code: string }).code : undefined;
+    if (prismaCode === 'P2021') {
+      console.error('[Invite] Generation error: InviteCode table does not exist. Run `npx prisma db push` to create it.');
+    } else if (prismaCode === 'P1001') {
+      console.error('[Invite] Generation error: Cannot reach database server. Check DATABASE_URL and ensure the database is running.');
+    } else {
+      console.error('[Invite] Generation error:', error);
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
