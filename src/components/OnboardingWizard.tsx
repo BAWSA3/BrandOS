@@ -357,22 +357,19 @@ export default function OnboardingWizard({ onComplete, onSkip }: OnboardingWizar
                 <BrandOSLogo size="hero" variant="landing" />
               </div>
 
-              {/* Glass card */}
-              <div className="glass-panel rounded-sm p-12 border border-white/30">
-                <h2 className="font-sans text-4xl font-semibold tracking-tight text-brand-black-swiss mb-4">
-                  Let&apos;s set up your brand
-                </h2>
-                <p className="font-sans text-lg text-brand-black-swiss/50 mb-12 max-w-md mx-auto leading-relaxed">
-                  Answer a few quick questions to capture your brand identity. This takes about 2 minutes.
-                </p>
+              <h2 className="font-sans text-5xl font-bold tracking-tight text-brand-black-swiss mb-4">
+                Let&apos;s set up your brand
+              </h2>
+              <p className="font-sans text-lg text-brand-black-swiss/50 mb-14 max-w-md mx-auto leading-relaxed">
+                Answer a few quick questions to capture your brand identity. This takes about 2 minutes.
+              </p>
 
-                <button
-                  onClick={nextStep}
-                  className="px-12 py-4 bg-brand-black-swiss text-brand-cream rounded-sm text-base font-medium hover:shadow-glow-blue transition-shadow"
-                >
-                  Begin Setup
-                </button>
-              </div>
+              <button
+                onClick={nextStep}
+                className="px-14 py-4 bg-brand-black-swiss text-brand-cream rounded-full text-base font-medium shadow-[0_0_0_2px_rgba(47,84,235,0.5)] hover:shadow-[0_0_12px_rgba(47,84,235,0.6)] transition-shadow"
+              >
+                Begin Setup
+              </button>
             </div>
           )}
 
@@ -416,50 +413,47 @@ export default function OnboardingWizard({ onComplete, onSkip }: OnboardingWizar
           {/* ════════ TEMPLATE ════════ */}
           {currentStep === 'template' && (
             <div>
-              <div className="text-center mb-8">
-                <span className="font-mono text-xs tracking-[0.2em] text-brand-black-swiss/40 uppercase block mb-3">
-                  Step 02
-                </span>
-                <h2 className="font-sans text-3xl font-semibold tracking-tight text-brand-black-swiss mb-2">
+              <div className="text-center mb-12">
+                <h2 className="font-sans text-5xl font-bold tracking-tight text-brand-black-swiss mb-4">
                   {steps[2].title}
                 </h2>
-                <p className="font-sans text-base text-brand-black-swiss/50">
+                <p className="font-sans text-lg text-brand-black-swiss/50">
                   {steps[2].subtitle}
                 </p>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 mb-10">
+              <div className="grid grid-cols-2 gap-4 mb-12">
                 {brandTemplates.map((template) => (
                   <button
                     key={template.id}
                     onClick={() => applyTemplate(template.id)}
-                    className="glass-panel rounded-sm p-5 text-left hover:shadow-glow-blue transition-all hover:scale-[1.02] active:scale-[0.98] border border-white/30"
+                    className="bg-white/50 border border-brand-black-swiss/10 rounded-sm p-6 text-left hover:shadow-[0_0_0_2px_rgba(47,84,235,0.4)] transition-all hover:scale-[1.02] active:scale-[0.98]"
                   >
-                    <div className="flex gap-1.5 mb-3">
+                    <div className="flex gap-2 mb-3">
                       {Object.values(template.preview.colors || {}).map((color, i) => (
                         <div
                           key={i}
-                          className="w-5 h-5 rounded-sm border border-brand-black-swiss/5"
+                          className="w-6 h-6 rounded-sm border border-brand-black-swiss/5"
                           style={{ backgroundColor: color }}
                         />
                       ))}
                     </div>
-                    <p className="font-sans text-sm font-medium text-brand-black-swiss">{template.name}</p>
-                    <p className="font-mono text-[10px] text-brand-black-swiss/40 mt-0.5">{template.description}</p>
+                    <p className="font-sans text-base font-medium text-brand-black-swiss">{template.name}</p>
+                    <p className="font-mono text-xs text-brand-black-swiss/40 mt-1">{template.description}</p>
                   </button>
                 ))}
               </div>
 
-              <div className="flex justify-center gap-6">
+              <div className="flex items-center justify-center gap-8">
                 <button
                   onClick={prevStep}
-                  className="font-mono text-sm text-brand-black-swiss/40 hover:text-brand-black-swiss transition-colors"
+                  className="font-sans text-base text-brand-black-swiss/70 underline underline-offset-4 decoration-brand-black-swiss/30 hover:text-brand-black-swiss hover:decoration-brand-black-swiss transition-colors"
                 >
                   Back
                 </button>
                 <button
                   onClick={nextStep}
-                  className="font-mono text-sm text-brand-black-swiss/40 hover:text-brand-black-swiss transition-colors"
+                  className="font-sans text-base text-brand-black-swiss/70 underline underline-offset-4 decoration-brand-black-swiss/30 hover:text-brand-black-swiss hover:decoration-brand-black-swiss transition-colors"
                 >
                   Skip, start fresh
                 </button>
@@ -470,59 +464,54 @@ export default function OnboardingWizard({ onComplete, onSkip }: OnboardingWizar
           {/* ════════ COLORS ════════ */}
           {currentStep === 'colors' && (
             <div>
-              <div className="text-center mb-8">
-                <span className="font-mono text-xs tracking-[0.2em] text-brand-black-swiss/40 uppercase block mb-3">
-                  Step 03
-                </span>
-                <h2 className="font-sans text-3xl font-semibold tracking-tight text-brand-black-swiss mb-2">
+              <div className="text-center mb-12">
+                <h2 className="font-sans text-5xl font-bold tracking-tight text-brand-black-swiss mb-4">
                   {steps[3].title}
                 </h2>
-                <p className="font-sans text-base text-brand-black-swiss/50">
+                <p className="font-sans text-lg text-brand-black-swiss/50">
                   {steps[3].subtitle}
                 </p>
               </div>
 
-              <div className="glass-panel rounded-sm p-10">
-                <div className="grid grid-cols-3 gap-6">
-                  {[
-                    { key: 'primary', label: 'PRIMARY' },
-                    { key: 'secondary', label: 'SECONDARY' },
-                    { key: 'accent', label: 'ACCENT' },
-                  ].map(({ key, label }) => (
-                    <div key={key} className="text-center group">
-                      <label className="block cursor-pointer">
-                        <div
-                          className="w-full aspect-square rounded-sm border border-brand-black-swiss/10 transition-all group-hover:scale-105 group-hover:shadow-glow-blue mb-3"
-                          style={{ backgroundColor: brandDNA?.colors?.[key as keyof typeof brandDNA.colors] || '#000000' }}
-                        />
-                        <input
-                          type="color"
-                          value={brandDNA?.colors?.[key as keyof typeof brandDNA.colors] || '#000000'}
-                          onChange={(e) => setBrandDNA({
-                            colors: { ...brandDNA?.colors!, [key]: e.target.value },
-                          })}
-                          className="sr-only"
-                        />
-                      </label>
-                      <p className="font-mono text-[10px] tracking-widest text-brand-black-swiss/40">{label}</p>
-                      <p className="font-mono text-[10px] text-brand-black-swiss/25 mt-0.5">
-                        {brandDNA?.colors?.[key as keyof typeof brandDNA.colors] || '#000000'}
-                      </p>
-                    </div>
-                  ))}
-                </div>
+              <div className="grid grid-cols-3 gap-8">
+                {[
+                  { key: 'primary', label: 'PRIMARY' },
+                  { key: 'secondary', label: 'SECONDARY' },
+                  { key: 'accent', label: 'ACCENT' },
+                ].map(({ key, label }) => (
+                  <div key={key} className="text-center group">
+                    <label className="block cursor-pointer">
+                      <div
+                        className="w-full aspect-square rounded-sm border border-brand-black-swiss/10 transition-all group-hover:scale-105 group-hover:shadow-[0_0_0_2px_rgba(47,84,235,0.4)] mb-4"
+                        style={{ backgroundColor: brandDNA?.colors?.[key as keyof typeof brandDNA.colors] || '#000000' }}
+                      />
+                      <input
+                        type="color"
+                        value={brandDNA?.colors?.[key as keyof typeof brandDNA.colors] || '#000000'}
+                        onChange={(e) => setBrandDNA({
+                          colors: { ...brandDNA?.colors!, [key]: e.target.value },
+                        })}
+                        className="sr-only"
+                      />
+                    </label>
+                    <p className="font-mono text-xs tracking-widest text-brand-black-swiss/40">{label}</p>
+                    <p className="font-mono text-xs text-brand-black-swiss/25 mt-1">
+                      {brandDNA?.colors?.[key as keyof typeof brandDNA.colors] || '#000000'}
+                    </p>
+                  </div>
+                ))}
               </div>
 
-              <div className="flex justify-center gap-6 mt-12">
+              <div className="flex items-center justify-center gap-8 mt-14">
                 <button
                   onClick={prevStep}
-                  className="font-mono text-sm text-brand-black-swiss/40 hover:text-brand-black-swiss transition-colors"
+                  className="font-sans text-base text-brand-black-swiss/70 underline underline-offset-4 decoration-brand-black-swiss/30 hover:text-brand-black-swiss hover:decoration-brand-black-swiss transition-colors"
                 >
                   Back
                 </button>
                 <button
                   onClick={nextStep}
-                  className="px-12 py-4 bg-brand-black-swiss text-brand-cream rounded-sm text-base font-medium hover:shadow-glow-blue transition-shadow"
+                  className="px-14 py-4 bg-brand-black-swiss text-brand-cream rounded-full text-base font-medium shadow-[0_0_0_2px_rgba(47,84,235,0.5)] hover:shadow-[0_0_12px_rgba(47,84,235,0.6)] transition-shadow"
                 >
                   Continue
                 </button>
@@ -533,19 +522,16 @@ export default function OnboardingWizard({ onComplete, onSkip }: OnboardingWizar
           {/* ════════ TONE ════════ */}
           {currentStep === 'tone' && (
             <div>
-              <div className="text-center mb-8">
-                <span className="font-mono text-xs tracking-[0.2em] text-brand-black-swiss/40 uppercase block mb-3">
-                  Step 04
-                </span>
-                <h2 className="font-sans text-3xl font-semibold tracking-tight text-brand-black-swiss mb-2">
+              <div className="text-center mb-12">
+                <h2 className="font-sans text-5xl font-bold tracking-tight text-brand-black-swiss mb-4">
                   {steps[4].title}
                 </h2>
-                <p className="font-sans text-base text-brand-black-swiss/50">
+                <p className="font-sans text-lg text-brand-black-swiss/50">
                   {steps[4].subtitle}
                 </p>
               </div>
 
-              <div className="glass-panel rounded-sm p-10 space-y-7">
+              <div className="space-y-8">
                 {toneSliders.map((slider) => (
                   <GradientSlider
                     key={slider.key}
@@ -558,16 +544,16 @@ export default function OnboardingWizard({ onComplete, onSkip }: OnboardingWizar
                 ))}
               </div>
 
-              <div className="flex justify-center gap-6 mt-12">
+              <div className="flex items-center justify-center gap-8 mt-14">
                 <button
                   onClick={prevStep}
-                  className="font-mono text-sm text-brand-black-swiss/40 hover:text-brand-black-swiss transition-colors"
+                  className="font-sans text-base text-brand-black-swiss/70 underline underline-offset-4 decoration-brand-black-swiss/30 hover:text-brand-black-swiss hover:decoration-brand-black-swiss transition-colors"
                 >
                   Back
                 </button>
                 <button
                   onClick={nextStep}
-                  className="px-12 py-4 bg-brand-black-swiss text-brand-cream rounded-sm text-base font-medium hover:shadow-glow-blue transition-shadow"
+                  className="px-14 py-4 bg-brand-black-swiss text-brand-cream rounded-full text-base font-medium shadow-[0_0_0_2px_rgba(47,84,235,0.5)] hover:shadow-[0_0_12px_rgba(47,84,235,0.6)] transition-shadow"
                 >
                   Continue
                 </button>
@@ -578,71 +564,66 @@ export default function OnboardingWizard({ onComplete, onSkip }: OnboardingWizar
           {/* ════════ KEYWORDS ════════ */}
           {currentStep === 'keywords' && (
             <div>
-              <div className="text-center mb-8">
-                <span className="font-mono text-xs tracking-[0.2em] text-brand-black-swiss/40 uppercase block mb-3">
-                  Step 05
-                </span>
-                <h2 className="font-sans text-3xl font-semibold tracking-tight text-brand-black-swiss mb-2">
+              <div className="text-center mb-12">
+                <h2 className="font-sans text-5xl font-bold tracking-tight text-brand-black-swiss mb-4">
                   {steps[5].title}
                 </h2>
-                <p className="font-sans text-base text-brand-black-swiss/50">
+                <p className="font-sans text-lg text-brand-black-swiss/50">
                   {steps[5].subtitle}
                 </p>
               </div>
 
-              <div className="glass-panel rounded-sm p-10">
-                <div className="flex gap-2 mb-4">
-                  <input
-                    type="text"
-                    value={keywordInput}
-                    onChange={(e) => setKeywordInput(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && addKeyword()}
-                    placeholder="Type a keyword and press Enter"
-                    className="flex-1 px-4 py-3 bg-white/50 rounded-sm outline-none placeholder:text-brand-black-swiss/20 text-sm text-brand-black-swiss border border-brand-black-swiss/5 focus:border-brand-blue-swiss transition-colors"
-                  />
-                  <button
-                    onClick={addKeyword}
-                    disabled={!keywordInput.trim()}
-                    className="px-4 py-3 bg-brand-black-swiss text-brand-cream rounded-sm text-sm disabled:opacity-30 transition-opacity"
-                  >
-                    Add
-                  </button>
-                </div>
-
-                <div className="flex flex-wrap gap-2 min-h-[48px]">
-                  {brandDNA?.keywords?.map((keyword, i) => (
-                    <motion.span
-                      key={`${keyword}-${i}`}
-                      initial={{ scale: 0.8, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      exit={{ scale: 0.8, opacity: 0 }}
-                      onClick={() => removeKeyword(i)}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/60 rounded-sm text-sm text-brand-black-swiss cursor-pointer hover:bg-white transition-colors border border-brand-black-swiss/5"
-                    >
-                      {keyword}
-                      <span className="text-brand-black-swiss/30 text-xs">&times;</span>
-                    </motion.span>
-                  ))}
-                  {(!brandDNA?.keywords || brandDNA.keywords.length === 0) && (
-                    <p className="font-mono text-[10px] text-brand-black-swiss/30">No keywords yet</p>
-                  )}
-                </div>
-
-                <p className="font-mono text-[9px] text-brand-black-swiss/30 text-center mt-4">
-                  Suggestions: innovative, premium, friendly, bold, minimal, playful, trustworthy
-                </p>
+              <div className="flex gap-3 mb-6">
+                <input
+                  type="text"
+                  value={keywordInput}
+                  onChange={(e) => setKeywordInput(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && addKeyword()}
+                  placeholder="Type a keyword and press Enter"
+                  className="flex-1 px-6 py-4 bg-white/50 rounded-sm outline-none placeholder:text-brand-black-swiss/30 text-base text-brand-black-swiss border border-brand-black-swiss/10 focus:border-brand-blue-swiss transition-colors"
+                />
+                <button
+                  onClick={addKeyword}
+                  disabled={!keywordInput.trim()}
+                  className="px-6 py-4 bg-brand-black-swiss text-brand-cream rounded-sm text-base disabled:opacity-30 transition-opacity"
+                >
+                  Add
+                </button>
               </div>
 
-              <div className="flex justify-center gap-6 mt-12">
+              <div className="flex flex-wrap gap-2.5 min-h-[56px] mb-4">
+                {brandDNA?.keywords?.map((keyword, i) => (
+                  <motion.span
+                    key={`${keyword}-${i}`}
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0.8, opacity: 0 }}
+                    onClick={() => removeKeyword(i)}
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-white/60 rounded-sm text-base text-brand-black-swiss cursor-pointer hover:bg-white transition-colors border border-brand-black-swiss/10"
+                  >
+                    {keyword}
+                    <span className="text-brand-black-swiss/30">&times;</span>
+                  </motion.span>
+                ))}
+                {(!brandDNA?.keywords || brandDNA.keywords.length === 0) && (
+                  <p className="font-mono text-xs text-brand-black-swiss/30">No keywords yet</p>
+                )}
+              </div>
+
+              <p className="font-mono text-xs text-brand-black-swiss/30 text-center mb-2">
+                Suggestions: innovative, premium, friendly, bold, minimal, playful, trustworthy
+              </p>
+
+              <div className="flex items-center justify-center gap-8 mt-14">
                 <button
                   onClick={prevStep}
-                  className="font-mono text-sm text-brand-black-swiss/40 hover:text-brand-black-swiss transition-colors"
+                  className="font-sans text-base text-brand-black-swiss/70 underline underline-offset-4 decoration-brand-black-swiss/30 hover:text-brand-black-swiss hover:decoration-brand-black-swiss transition-colors"
                 >
                   Back
                 </button>
                 <button
                   onClick={nextStep}
-                  className="px-12 py-4 bg-brand-black-swiss text-brand-cream rounded-sm text-base font-medium hover:shadow-glow-blue transition-shadow"
+                  className="px-14 py-4 bg-brand-black-swiss text-brand-cream rounded-full text-base font-medium shadow-[0_0_0_2px_rgba(47,84,235,0.5)] hover:shadow-[0_0_12px_rgba(47,84,235,0.6)] transition-shadow"
                 >
                   {brandDNA?.keywords?.length ? 'Continue' : 'Skip'}
                 </button>
@@ -653,61 +634,56 @@ export default function OnboardingWizard({ onComplete, onSkip }: OnboardingWizar
           {/* ════════ VOICE SAMPLES ════════ */}
           {currentStep === 'samples' && (
             <div>
-              <div className="text-center mb-8">
-                <span className="font-mono text-xs tracking-[0.2em] text-brand-black-swiss/40 uppercase block mb-3">
-                  Step 06
-                </span>
-                <h2 className="font-sans text-3xl font-semibold tracking-tight text-brand-black-swiss mb-2">
+              <div className="text-center mb-12">
+                <h2 className="font-sans text-5xl font-bold tracking-tight text-brand-black-swiss mb-4">
                   {steps[6].title}
                 </h2>
-                <p className="font-sans text-base text-brand-black-swiss/50">
+                <p className="font-sans text-lg text-brand-black-swiss/50">
                   {steps[6].subtitle}
                 </p>
               </div>
 
-              <div className="glass-panel rounded-sm p-10">
-                <textarea
-                  value={sampleInput}
-                  onChange={(e) => setSampleInput(e.target.value)}
-                  placeholder="Paste an example of your brand's writing... A tagline, marketing copy, or any text that represents your voice."
-                  rows={3}
-                  className="w-full px-4 py-3 bg-white/50 rounded-sm outline-none placeholder:text-brand-black-swiss/20 text-sm text-brand-black-swiss resize-none mb-3 border border-brand-black-swiss/5 focus:border-brand-blue-swiss transition-colors"
-                />
+              <textarea
+                value={sampleInput}
+                onChange={(e) => setSampleInput(e.target.value)}
+                placeholder="Paste an example of your brand's writing... A tagline, marketing copy, or any text that represents your voice."
+                rows={3}
+                className="w-full px-6 py-4 bg-white/50 rounded-sm outline-none placeholder:text-brand-black-swiss/30 text-base text-brand-black-swiss resize-none mb-4 border border-brand-black-swiss/10 focus:border-brand-blue-swiss transition-colors"
+              />
 
-                <button
-                  onClick={addSample}
-                  disabled={!sampleInput.trim()}
-                  className="w-full py-2.5 border border-brand-black-swiss/10 rounded-sm text-sm text-brand-black-swiss/60 hover:border-brand-black-swiss/30 transition-colors disabled:opacity-30"
-                >
-                  Add Sample
-                </button>
+              <button
+                onClick={addSample}
+                disabled={!sampleInput.trim()}
+                className="w-full py-3.5 border border-brand-black-swiss/10 rounded-sm text-base text-brand-black-swiss/60 hover:border-brand-black-swiss/30 transition-colors disabled:opacity-30"
+              >
+                Add Sample
+              </button>
 
-                <div className="space-y-2 mt-4 max-h-32 overflow-y-auto">
-                  {brandDNA?.voiceSamples?.map((sample, i) => (
-                    <motion.div
-                      key={i}
-                      initial={{ y: 8, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      onClick={() => removeSample(i)}
-                      className="p-3 bg-white/50 rounded-sm text-sm cursor-pointer hover:bg-white transition-colors group border border-brand-black-swiss/5"
-                    >
-                      <p className="italic text-brand-black-swiss/60 line-clamp-2">&ldquo;{sample}&rdquo;</p>
-                      <p className="font-mono text-[9px] text-brand-black-swiss/20 group-hover:text-brand-black-swiss/50 mt-1">Click to remove</p>
-                    </motion.div>
-                  ))}
-                </div>
+              <div className="space-y-2.5 mt-5 max-h-40 overflow-y-auto">
+                {brandDNA?.voiceSamples?.map((sample, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ y: 8, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    onClick={() => removeSample(i)}
+                    className="p-4 bg-white/50 rounded-sm text-base cursor-pointer hover:bg-white transition-colors group border border-brand-black-swiss/10"
+                  >
+                    <p className="italic text-brand-black-swiss/60 line-clamp-2">&ldquo;{sample}&rdquo;</p>
+                    <p className="font-mono text-xs text-brand-black-swiss/20 group-hover:text-brand-black-swiss/50 mt-1">Click to remove</p>
+                  </motion.div>
+                ))}
               </div>
 
-              <div className="flex justify-center gap-6 mt-12">
+              <div className="flex items-center justify-center gap-8 mt-14">
                 <button
                   onClick={prevStep}
-                  className="font-mono text-sm text-brand-black-swiss/40 hover:text-brand-black-swiss transition-colors"
+                  className="font-sans text-base text-brand-black-swiss/70 underline underline-offset-4 decoration-brand-black-swiss/30 hover:text-brand-black-swiss hover:decoration-brand-black-swiss transition-colors"
                 >
                   Back
                 </button>
                 <button
                   onClick={nextStep}
-                  className="px-12 py-4 bg-brand-black-swiss text-brand-cream rounded-sm text-base font-medium hover:shadow-glow-blue transition-shadow"
+                  className="px-14 py-4 bg-brand-black-swiss text-brand-cream rounded-full text-base font-medium shadow-[0_0_0_2px_rgba(47,84,235,0.5)] hover:shadow-[0_0_12px_rgba(47,84,235,0.6)] transition-shadow"
                 >
                   {brandDNA?.voiceSamples?.length ? 'Finish Setup' : 'Skip & Finish'}
                 </button>
@@ -723,45 +699,45 @@ export default function OnboardingWizard({ onComplete, onSkip }: OnboardingWizar
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ type: 'spring', stiffness: 200, damping: 15, delay: 0.1 }}
-                className="w-20 h-20 mx-auto mb-8 rounded-sm bg-brand-blue-swiss/10 flex items-center justify-center"
+                className="w-20 h-20 mx-auto mb-8 rounded-full bg-brand-blue-swiss/10 flex items-center justify-center"
               >
                 <svg className="w-10 h-10 text-brand-blue-swiss" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
               </motion.div>
 
-              <h2 className="font-sans text-3xl font-semibold tracking-tight text-brand-black-swiss mb-2">
+              <h2 className="font-sans text-5xl font-bold tracking-tight text-brand-black-swiss mb-4">
                 {steps[7].title}
               </h2>
-              <p className="font-sans text-base text-brand-black-swiss/50 mb-10">
+              <p className="font-sans text-lg text-brand-black-swiss/50 mb-12">
                 {steps[7].subtitle}
               </p>
 
               {/* Brand preview card */}
-              <div className="glass-panel rounded-sm p-8 mb-10 text-left border border-white/30">
-                <div className="flex items-center gap-4 mb-4">
+              <div className="bg-white/50 border border-brand-black-swiss/10 rounded-sm p-8 mb-12 text-left">
+                <div className="flex items-center gap-4 mb-5">
                   <div className="flex -space-x-1">
                     {Object.values(brandDNA?.colors || {}).map((color, i) => (
                       <div
                         key={i}
-                        className="w-7 h-7 rounded-sm border-2 border-brand-cream"
+                        className="w-8 h-8 rounded-sm border-2 border-brand-cream"
                         style={{ backgroundColor: color }}
                       />
                     ))}
                   </div>
                   <div>
-                    <p className="font-sans font-medium text-brand-black-swiss">{brandDNA?.name}</p>
-                    <p className="font-mono text-[10px] text-brand-black-swiss/30">
+                    <p className="font-sans text-lg font-medium text-brand-black-swiss">{brandDNA?.name}</p>
+                    <p className="font-mono text-xs text-brand-black-swiss/30">
                       {brandDNA?.keywords?.slice(0, 3).join(' / ') || 'No keywords'}
                     </p>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-4 gap-3 text-center">
+                <div className="grid grid-cols-4 gap-4 text-center">
                   {toneSliders.map((slider) => (
                     <div key={slider.key}>
-                      <p className="font-mono text-[9px] text-brand-black-swiss/30">{slider.label}</p>
-                      <p className="font-sans text-sm font-medium text-brand-black-swiss">{brandDNA?.tone?.[slider.key] ?? 50}%</p>
+                      <p className="font-mono text-xs text-brand-black-swiss/30">{slider.label}</p>
+                      <p className="font-sans text-base font-medium text-brand-black-swiss">{brandDNA?.tone?.[slider.key] ?? 50}%</p>
                     </div>
                   ))}
                 </div>
@@ -769,11 +745,11 @@ export default function OnboardingWizard({ onComplete, onSkip }: OnboardingWizar
 
               <button
                 onClick={onComplete}
-                className="w-full px-10 py-4.5 bg-brand-black-swiss text-brand-cream rounded-sm text-base font-medium hover:shadow-glow-blue transition-shadow"
+                className="w-full px-14 py-4 bg-brand-black-swiss text-brand-cream rounded-full text-base font-medium shadow-[0_0_0_2px_rgba(47,84,235,0.5)] hover:shadow-[0_0_12px_rgba(47,84,235,0.6)] transition-shadow"
               >
                 Open Your Dashboard
               </button>
-              <p className="font-mono text-xs text-brand-black-swiss/30 mt-4">
+              <p className="font-mono text-sm text-brand-black-swiss/30 mt-5">
                 Your personalized command center is ready
               </p>
             </div>
