@@ -11,6 +11,7 @@ import BrandReviewWizard from './BrandReviewWizard';
 import BrandReviewGrid from './BrandReviewGrid';
 import BrandReviewComparison from './BrandReviewComparison';
 import BrandOSLogo from '../BrandOSLogo';
+import SwissBackground from '../SwissBackground';
 
 interface BrandImportHubProps {
   onStartFresh: () => void;
@@ -62,99 +63,100 @@ export default function BrandImportHub({ onStartFresh, onImportComplete }: Brand
   // Initial choice: Start Fresh vs Import
   if (stage === 'choice') {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-6">
-        <div className="max-w-3xl w-full">
-          <div className="text-center mb-12">
-            <div className="flex items-center justify-center mb-6">
-              <BrandOSLogo size="md" variant="landing" />
+      <SwissBackground mode="full" className="items-center justify-center">
+        <div className="flex items-center justify-center flex-1 p-6">
+          <div className="max-w-3xl w-full">
+            <div className="text-center mb-12">
+              <div className="flex items-center justify-center mb-6">
+                <BrandOSLogo size="md" variant="landing" />
+              </div>
+              <h1 className="font-sans text-5xl font-bold tracking-tight text-brand-black-swiss mb-4">
+                How would you like to start?
+              </h1>
+              <p className="font-sans text-lg text-brand-black-swiss/50">
+                Build a new brand from scratch or import your existing brand assets
+              </p>
             </div>
-            <h1 className="text-4xl font-light tracking-tight mb-4">
-              How would you like to start?
-            </h1>
-            <p className="text-muted text-lg">
-              Build a new brand from scratch or import your existing brand assets
-            </p>
-          </div>
 
-          <div className="grid grid-cols-2 gap-6">
-            {/* Start Fresh */}
-            <button
-              onClick={onStartFresh}
-              className="group p-8 bg-surface rounded-2xl border border-border hover:border-foreground transition-all text-left"
-            >
-              <div className="w-16 h-16 mb-6 rounded-xl bg-background flex items-center justify-center group-hover:scale-110 transition-transform">
-                <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" />
-                </svg>
-              </div>
-              <h2 className="text-xl font-medium mb-2">Start Fresh</h2>
-              <p className="text-muted text-sm">
-                Build your brand identity from the ground up with our guided setup wizard
-              </p>
-            </button>
+            <div className="grid grid-cols-2 gap-6">
+              {/* Start Fresh */}
+              <button
+                onClick={onStartFresh}
+                className="group p-8 bg-white/50 rounded-sm border border-brand-black-swiss/10 hover:shadow-[0_0_0_2px_rgba(47,84,235,0.4)] transition-all text-left"
+              >
+                <div className="w-16 h-16 mb-6 rounded-sm bg-white/60 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <svg className="w-8 h-8 text-brand-black-swiss" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" />
+                  </svg>
+                </div>
+                <h2 className="font-sans text-xl font-medium text-brand-black-swiss mb-2">Start Fresh</h2>
+                <p className="font-mono text-xs text-brand-black-swiss/40">
+                  Build your brand identity from the ground up with our guided setup wizard
+                </p>
+              </button>
 
-            {/* Import Brand */}
-            <button
-              onClick={() => setStage('select-source')}
-              className="group p-8 bg-surface rounded-2xl border border-border hover:border-foreground transition-all text-left"
-            >
-              <div className="w-16 h-16 mb-6 rounded-xl bg-background flex items-center justify-center group-hover:scale-110 transition-transform">
-                <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                </svg>
-              </div>
-              <h2 className="text-xl font-medium mb-2">Import Existing Brand</h2>
-              <p className="text-muted text-sm">
-                Upload your brand guidelines, assets, or website to auto-populate your brand DNA
-              </p>
-            </button>
+              {/* Import Brand */}
+              <button
+                onClick={() => setStage('select-source')}
+                className="group p-8 bg-white/50 rounded-sm border border-brand-black-swiss/10 hover:shadow-[0_0_0_2px_rgba(47,84,235,0.4)] transition-all text-left"
+              >
+                <div className="w-16 h-16 mb-6 rounded-sm bg-white/60 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <svg className="w-8 h-8 text-brand-black-swiss" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                  </svg>
+                </div>
+                <h2 className="font-sans text-xl font-medium text-brand-black-swiss mb-2">Import Existing Brand</h2>
+                <p className="font-mono text-xs text-brand-black-swiss/40">
+                  Upload your brand guidelines, assets, or website to auto-populate your brand DNA
+                </p>
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      </SwissBackground>
     );
   }
 
   // Select import source
   if (stage === 'select-source') {
     return (
-      <div className="min-h-screen bg-background p-6">
-        <div className="max-w-4xl mx-auto">
-          <button
-            onClick={handleBack}
-            className="flex items-center gap-2 text-muted hover:text-foreground transition-colors mb-8"
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            Back
-          </button>
+      <SwissBackground mode="full">
+        <div className="flex-1 overflow-y-auto p-6">
+          <div className="max-w-4xl mx-auto pt-8">
+            <button
+              onClick={handleBack}
+              className="font-sans text-base text-brand-black-swiss/70 underline underline-offset-4 decoration-brand-black-swiss/30 hover:text-brand-black-swiss hover:decoration-brand-black-swiss transition-colors mb-8 block"
+            >
+              Back
+            </button>
 
-          <div className="text-center mb-12">
-            <h1 className="text-4xl font-light tracking-tight mb-4">
-              Choose your import source
-            </h1>
-            <p className="text-muted text-lg">
-              We&apos;ll analyze your existing brand and extract the key elements
-            </p>
-          </div>
+            <div className="text-center mb-12">
+              <h1 className="font-sans text-5xl font-bold tracking-tight text-brand-black-swiss mb-4">
+                Choose your import source
+              </h1>
+              <p className="font-sans text-lg text-brand-black-swiss/50">
+                We&apos;ll analyze your existing brand and extract the key elements
+              </p>
+            </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {importSources.map((source) => (
-              <button
-                key={source.id}
-                onClick={() => handleSourceSelect(source.id)}
-                className="group p-6 bg-surface rounded-xl border border-border hover:border-foreground transition-all text-left"
-              >
-                <div className="w-12 h-12 mb-4 rounded-lg bg-background flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <ImportSourceIcon icon={source.icon} />
-                </div>
-                <h3 className="font-medium mb-1">{source.label}</h3>
-                <p className="text-sm text-muted">{source.description}</p>
-              </button>
-            ))}
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              {importSources.map((source) => (
+                <button
+                  key={source.id}
+                  onClick={() => handleSourceSelect(source.id)}
+                  className="group p-6 bg-white/50 rounded-sm border border-brand-black-swiss/10 hover:shadow-[0_0_0_2px_rgba(47,84,235,0.4)] transition-all text-left"
+                >
+                  <div className="w-12 h-12 mb-4 rounded-sm bg-white/60 flex items-center justify-center group-hover:scale-110 transition-transform text-brand-black-swiss">
+                    <ImportSourceIcon icon={source.icon} />
+                  </div>
+                  <h3 className="font-sans text-xl font-medium text-brand-black-swiss mb-1">{source.label}</h3>
+                  <p className="font-mono text-xs text-brand-black-swiss/40">{source.description}</p>
+                </button>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
+      </SwissBackground>
     );
   }
 
@@ -169,80 +171,78 @@ export default function BrandImportHub({ onStartFresh, onImportComplete }: Brand
     }[selectedSource];
 
     return (
-      <div className="min-h-screen bg-background p-6">
-        <div className="max-w-4xl mx-auto">
-          <button
-            onClick={handleBack}
-            className="flex items-center gap-2 text-muted hover:text-foreground transition-colors mb-8"
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            Back
-          </button>
+      <SwissBackground mode="full">
+        <div className="flex-1 overflow-y-auto p-6">
+          <div className="max-w-4xl mx-auto pt-8">
+            <button
+              onClick={handleBack}
+              className="font-sans text-base text-brand-black-swiss/70 underline underline-offset-4 decoration-brand-black-swiss/30 hover:text-brand-black-swiss hover:decoration-brand-black-swiss transition-colors mb-8 block"
+            >
+              Back
+            </button>
 
-          <ImportComponent onExtract={handleExtraction} />
+            <ImportComponent onExtract={handleExtraction} />
+          </div>
         </div>
-      </div>
+      </SwissBackground>
     );
   }
 
   // Select review mode
   if (stage === 'select-review' && extractedBrand) {
     return (
-      <div className="min-h-screen bg-background p-6">
-        <div className="max-w-3xl mx-auto">
-          <button
-            onClick={handleBack}
-            className="flex items-center gap-2 text-muted hover:text-foreground transition-colors mb-8"
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            Back
-          </button>
+      <SwissBackground mode="full">
+        <div className="flex-1 overflow-y-auto p-6">
+          <div className="max-w-3xl mx-auto pt-8">
+            <button
+              onClick={handleBack}
+              className="font-sans text-base text-brand-black-swiss/70 underline underline-offset-4 decoration-brand-black-swiss/30 hover:text-brand-black-swiss hover:decoration-brand-black-swiss transition-colors mb-8 block"
+            >
+              Back
+            </button>
 
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-500/10 text-green-500 rounded-full text-sm mb-6">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-              Analysis Complete
+            <div className="text-center mb-12">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-brand-blue-swiss/10 text-brand-blue-swiss rounded-full font-mono text-[10px] tracking-wider mb-6">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                ANALYSIS COMPLETE
+              </div>
+              <h1 className="font-sans text-5xl font-bold tracking-tight text-brand-black-swiss mb-4">
+                Review extracted brand elements
+              </h1>
+              <p className="font-sans text-lg text-brand-black-swiss/50">
+                We found {countExtractedElements(extractedBrand)} brand elements with {extractedBrand.overallConfidence}% confidence
+              </p>
             </div>
-            <h1 className="text-4xl font-light tracking-tight mb-4">
-              Review extracted brand elements
-            </h1>
-            <p className="text-muted text-lg">
-              We found {countExtractedElements(extractedBrand)} brand elements with {extractedBrand.overallConfidence}% confidence
-            </p>
-          </div>
 
-          <div className="grid grid-cols-3 gap-4 mb-8">
-            {reviewModes.map((mode) => (
-              <button
-                key={mode.id}
-                onClick={() => setSelectedReviewMode(mode.id)}
-                className={`p-6 rounded-xl border transition-all text-left ${
-                  selectedReviewMode === mode.id
-                    ? 'border-foreground bg-surface'
-                    : 'border-border hover:border-muted'
-                }`}
-              >
-                <ReviewModeIcon icon={mode.icon} active={selectedReviewMode === mode.id} />
-                <h3 className="font-medium mt-4 mb-1">{mode.label}</h3>
-                <p className="text-sm text-muted">{mode.description}</p>
-              </button>
-            ))}
-          </div>
+            <div className="grid grid-cols-3 gap-4 mb-8">
+              {reviewModes.map((mode) => (
+                <button
+                  key={mode.id}
+                  onClick={() => setSelectedReviewMode(mode.id)}
+                  className={`p-6 rounded-sm border transition-all text-left ${
+                    selectedReviewMode === mode.id
+                      ? 'bg-white/50 border-brand-black-swiss/10 shadow-[0_0_0_2px_rgba(47,84,235,0.5)]'
+                      : 'bg-white/50 border-brand-black-swiss/10 hover:shadow-[0_0_0_2px_rgba(47,84,235,0.4)]'
+                  }`}
+                >
+                  <ReviewModeIcon icon={mode.icon} active={selectedReviewMode === mode.id} />
+                  <h3 className="font-sans text-xl font-medium text-brand-black-swiss mt-4 mb-1">{mode.label}</h3>
+                  <p className="font-mono text-xs text-brand-black-swiss/40">{mode.description}</p>
+                </button>
+              ))}
+            </div>
 
-          <button
-            onClick={() => setStage('review')}
-            className="w-full py-4 bg-foreground text-background rounded-xl text-sm font-medium hover:opacity-90 transition-opacity"
-          >
-            Continue to Review
-          </button>
+            <button
+              onClick={() => setStage('review')}
+              className="w-full py-4 bg-brand-black-swiss text-brand-cream rounded-full text-base font-medium shadow-[0_0_0_2px_rgba(47,84,235,0.5)] hover:shadow-[0_0_12px_rgba(47,84,235,0.6)] transition-shadow"
+            >
+              Continue to Review
+            </button>
+          </div>
         </div>
-      </div>
+      </SwissBackground>
     );
   }
 
@@ -255,14 +255,16 @@ export default function BrandImportHub({ onStartFresh, onImportComplete }: Brand
     }[selectedReviewMode];
 
     return (
-      <div className="min-h-screen bg-background">
-        <ReviewComponent
-          extractedBrand={extractedBrand}
-          sourcePreview={sourcePreview}
-          onBack={handleBack}
-          onComplete={handleReviewComplete}
-        />
-      </div>
+      <SwissBackground mode="full">
+        <div className="flex-1 overflow-y-auto">
+          <ReviewComponent
+            extractedBrand={extractedBrand}
+            sourcePreview={sourcePreview}
+            onBack={handleBack}
+            onComplete={handleReviewComplete}
+          />
+        </div>
+      </SwissBackground>
     );
   }
 
@@ -271,7 +273,7 @@ export default function BrandImportHub({ onStartFresh, onImportComplete }: Brand
 
 function ImportSourceIcon({ icon }: { icon: string }) {
   const className = "w-6 h-6";
-  
+
   switch (icon) {
     case 'document':
       return (
@@ -309,8 +311,8 @@ function ImportSourceIcon({ icon }: { icon: string }) {
 }
 
 function ReviewModeIcon({ icon, active }: { icon: string; active: boolean }) {
-  const className = `w-8 h-8 ${active ? 'text-foreground' : 'text-muted'}`;
-  
+  const className = `w-8 h-8 ${active ? 'text-brand-blue-swiss' : 'text-brand-black-swiss/40'}`;
+
   switch (icon) {
     case 'list':
       return (
@@ -351,19 +353,3 @@ function countExtractedElements(brand: ExtractedBrand): number {
   count += brand.voiceSamples?.length || 0;
   return count;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

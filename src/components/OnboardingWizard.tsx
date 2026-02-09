@@ -5,6 +5,7 @@ import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from
 import { useBrandStore, useCurrentBrand } from '@/lib/store';
 import { brandTemplates } from '@/lib/templates';
 import BrandOSLogo from './BrandOSLogo';
+import SwissBackground from './SwissBackground';
 
 type Step = 'welcome' | 'name' | 'template' | 'colors' | 'tone' | 'keywords' | 'samples' | 'complete';
 
@@ -224,77 +225,7 @@ export default function OnboardingWizard({ onComplete, onSkip }: OnboardingWizar
   };
 
   return (
-    <div className="fixed inset-0 z-[100] bg-brand-cream flex flex-col items-center justify-center overflow-hidden">
-      {/* ── Grid background ── */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          backgroundImage: 'linear-gradient(to right, rgba(15,15,15,0.04) 1px, transparent 1px), linear-gradient(to bottom, rgba(15,15,15,0.04) 1px, transparent 1px)',
-          backgroundSize: '48px 48px',
-        }}
-      />
-
-      {/* ── Color orbs (behind the clouds — color bleeds through halftone dots) ── */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {/* Blue orb — top-left, overlaps left cloud */}
-        <div
-          className="absolute"
-          style={{
-            width: '50vw',
-            height: '50vh',
-            top: '-5%',
-            left: '-8%',
-            background: 'radial-gradient(ellipse 80% 80% at 55% 60%, rgba(47,84,235,1) 0%, rgba(47,84,235,0.7) 25%, rgba(47,84,235,0.25) 50%, transparent 70%)',
-            filter: 'blur(15px)',
-          }}
-        />
-        {/* Blue accent — upper-right corner */}
-        <div
-          className="absolute"
-          style={{
-            width: '18vw',
-            height: '18vw',
-            top: '-4%',
-            right: '8%',
-            background: 'radial-gradient(circle, rgba(47,84,235,1) 0%, rgba(47,84,235,0.6) 35%, transparent 65%)',
-            filter: 'blur(10px)',
-          }}
-        />
-        {/* Orange orb — top-right, covers right cloud area */}
-        <div
-          className="absolute"
-          style={{
-            width: '45vw',
-            height: '55vh',
-            top: '5%',
-            right: '-8%',
-            background: 'radial-gradient(ellipse 75% 80% at 45% 50%, rgba(250,140,22,1) 0%, rgba(250,140,22,0.65) 25%, rgba(250,140,22,0.2) 50%, transparent 70%)',
-            filter: 'blur(15px)',
-          }}
-        />
-        {/* Blue orb — bottom-left, overlaps bottom cloud */}
-        <div
-          className="absolute"
-          style={{
-            width: '40vw',
-            height: '40vh',
-            bottom: '-8%',
-            left: '0%',
-            background: 'radial-gradient(ellipse 80% 80% at 50% 40%, rgba(47,84,235,1) 0%, rgba(47,84,235,0.6) 25%, rgba(47,84,235,0.15) 50%, transparent 70%)',
-            filter: 'blur(12px)',
-          }}
-        />
-      </div>
-
-      {/* ── Dithered cloud artwork (full-screen, content sits between the 3 clouds) ── */}
-      <div className="absolute inset-0 pointer-events-none">
-        <img
-          src="/assets/cloud-bg.png"
-          alt=""
-          className="w-full h-full object-contain blend-dither opacity-40"
-        />
-      </div>
-
+    <SwissBackground mode="full" className="items-center justify-center">
       {/* ── Top bar: progress dots + skip ── */}
       <div className="fixed top-0 left-0 right-0 z-10 flex items-center justify-between px-8 py-6">
         {/* Step dots */}
@@ -756,6 +687,6 @@ export default function OnboardingWizard({ onComplete, onSkip }: OnboardingWizar
           )}
         </motion.div>
       </AnimatePresence>
-    </div>
+    </SwissBackground>
   );
 }

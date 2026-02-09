@@ -1,6 +1,9 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
+import { motion } from 'motion/react';
+import BrandOSLogo from './BrandOSLogo';
+import SwissBackground from './SwissBackground';
 
 interface PhaseDetail {
   title: string;
@@ -15,7 +18,6 @@ interface Phase {
   features: string[];
   details: PhaseDetail[];
   icon: React.ReactNode;
-  gridArea: string;
 }
 
 const phases: Phase[] = [
@@ -36,7 +38,6 @@ const phases: Phase[] = [
         <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
       </svg>
     ),
-    gridArea: 'define',
   },
   {
     number: 2,
@@ -56,7 +57,6 @@ const phases: Phase[] = [
         <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />
       </svg>
     ),
-    gridArea: 'check',
   },
   {
     number: 3,
@@ -76,7 +76,6 @@ const phases: Phase[] = [
         <circle cx="12" cy="12" r="10" />
       </svg>
     ),
-    gridArea: 'generate',
   },
   {
     number: 4,
@@ -96,7 +95,6 @@ const phases: Phase[] = [
         <path d="M17 6h6v6" />
       </svg>
     ),
-    gridArea: 'scale',
   },
 ];
 
@@ -107,568 +105,187 @@ interface PhasesBreakdownProps {
 
 export default function PhasesBreakdown({ onGetStarted, onSkip }: PhasesBreakdownProps) {
   const [expandedPhase, setExpandedPhase] = useState<number | null>(null);
-  const [isVisible, setIsVisible] = useState(false);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setIsVisible(true), 50);
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Grid background animation (matching landing page)
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    const resize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight * 3; // Taller for scroll
-    };
-    resize();
-    window.addEventListener('resize', resize);
-
-    const gridSize = 60;
-
-    const draw = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
-      ctx.lineWidth = 1;
-
-      for (let x = 0; x < canvas.width; x += gridSize) {
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, canvas.height);
-        ctx.stroke();
-      }
-
-      for (let y = 0; y < canvas.height; y += gridSize) {
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(canvas.width, y);
-        ctx.stroke();
-      }
-    };
-
-    draw();
-
-    return () => {
-      window.removeEventListener('resize', resize);
-    };
-  }, []);
 
   const handlePhaseClick = (phaseNumber: number) => {
     setExpandedPhase(expandedPhase === phaseNumber ? null : phaseNumber);
   };
 
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        background: '#000000',
-        position: 'relative',
-        overflowX: 'hidden',
-      }}
-    >
-      {/* Grid Canvas Background */}
-      <canvas
-        ref={canvasRef}
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          pointerEvents: 'none',
-          zIndex: 0,
-        }}
-      />
+    <SwissBackground mode="full" className="overflow-y-auto">
+      {/* Hero Section */}
+      <motion.section
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: 'easeOut' }}
+        className="min-h-screen flex flex-col items-center justify-center px-12"
+      >
+        {/* Large BrandOS Logo */}
+        <div className="mb-6">
+          <BrandOSLogo size="hero" variant="landing" />
+        </div>
 
-      {/* Noise texture overlay */}
-      <div
-        style={{
-          position: 'fixed',
-          inset: 0,
-          opacity: 0.03,
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
-          pointerEvents: 'none',
-          zIndex: 1,
-        }}
-      />
+        {/* Tagline */}
+        <p className="font-mono text-xs tracking-widest uppercase text-brand-black-swiss/50 text-center mb-12">
+          Your Brand Journey in Four Phases
+        </p>
 
-      {/* Bento Frame Corners */}
-      <div style={{ position: 'fixed', inset: '24px', pointerEvents: 'none', zIndex: 10 }}>
-        {/* Top Left */}
-        <div style={{ position: 'absolute', top: 0, left: 0 }}>
-          <div style={{ width: '8px', height: '8px', background: '#0000FF' }} />
-          <div style={{ position: 'absolute', top: 0, left: 0, width: '48px', height: '1px', background: 'rgba(255,255,255,0.2)' }} />
-          <div style={{ position: 'absolute', top: 0, left: 0, width: '1px', height: '48px', background: 'rgba(255,255,255,0.2)' }} />
+        {/* Scroll indicator */}
+        <div className="flex flex-col items-center gap-2 mt-12 animate-bounce">
+          <span className="font-mono text-[10px] tracking-widest uppercase text-brand-black-swiss/30">
+            Scroll to explore
+          </span>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="text-brand-black-swiss/30" stroke="currentColor" strokeWidth="1.5">
+            <path d="M12 5v14M5 12l7 7 7-7" />
+          </svg>
         </div>
-        {/* Top Right */}
-        <div style={{ position: 'absolute', top: 0, right: 0 }}>
-          <div style={{ width: '8px', height: '8px', background: '#0000FF', marginLeft: 'auto' }} />
-          <div style={{ position: 'absolute', top: 0, right: 0, width: '48px', height: '1px', background: 'rgba(255,255,255,0.2)' }} />
-          <div style={{ position: 'absolute', top: 0, right: 0, width: '1px', height: '48px', background: 'rgba(255,255,255,0.2)' }} />
-        </div>
-        {/* Bottom Left */}
-        <div style={{ position: 'absolute', bottom: 0, left: 0 }}>
-          <div style={{ width: '8px', height: '8px', background: '#0000FF' }} />
-          <div style={{ position: 'absolute', bottom: 0, left: 0, width: '48px', height: '1px', background: 'rgba(255,255,255,0.2)' }} />
-          <div style={{ position: 'absolute', bottom: 0, left: 0, width: '1px', height: '48px', background: 'rgba(255,255,255,0.2)' }} />
-        </div>
-        {/* Bottom Right */}
-        <div style={{ position: 'absolute', bottom: 0, right: 0 }}>
-          <div style={{ width: '8px', height: '8px', background: '#0000FF', marginLeft: 'auto' }} />
-          <div style={{ position: 'absolute', bottom: 0, right: 0, width: '48px', height: '1px', background: 'rgba(255,255,255,0.2)' }} />
-          <div style={{ position: 'absolute', bottom: 0, right: 0, width: '1px', height: '48px', background: 'rgba(255,255,255,0.2)' }} />
-        </div>
-      </div>
+      </motion.section>
 
-      {/* Content */}
-      <div style={{ position: 'relative', zIndex: 5 }}>
-        {/* Hero Section */}
-        <section
-          style={{
-            minHeight: '100vh',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '48px',
-            opacity: isVisible ? 1 : 0,
-            transform: isVisible ? 'translateY(0)' : 'translateY(30px)',
-            transition: 'opacity 0.8s ease-out, transform 0.8s ease-out',
-          }}
-        >
-          {/* Large BrandOS Logo */}
-          <h1
-            style={{
-              fontSize: 'clamp(80px, 15vw, 200px)',
-              lineHeight: 1,
-              margin: 0,
-              display: 'flex',
-              alignItems: 'baseline',
-              letterSpacing: '-0.05em',
-              marginBottom: '24px',
-            }}
-          >
-            <span
-              style={{
-                fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
-                fontWeight: 700,
-                fontStyle: 'italic',
-                color: '#FFFFFF',
-              }}
+      {/* Phases Grid */}
+      <section className="px-12 pb-12 max-w-[1400px] mx-auto">
+        <div className="grid grid-cols-2 gap-6">
+          {phases.map((phase, index) => (
+            <motion.div
+              key={phase.number}
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: index * 0.15 + 0.3, ease: [0.25, 0.1, 0.25, 1] }}
+              onClick={() => handlePhaseClick(phase.number)}
+              className={`
+                bg-white/50 border rounded-sm p-8 cursor-pointer
+                hover:shadow-[0_0_0_2px_rgba(47,84,235,0.4)] hover:scale-[1.01] transition-all duration-300
+                ${expandedPhase === phase.number
+                  ? 'col-span-2 border-brand-blue-swiss/30 shadow-[0_0_0_2px_rgba(47,84,235,0.4)]'
+                  : 'border-brand-black-swiss/10'
+                }
+              `}
             >
-              Brand
-            </span>
-            <span
-              style={{
-                fontFamily: "'VCR OSD Mono', monospace",
-                fontWeight: 400,
-                color: '#0000FF',
-                position: 'relative',
-                top: '0.05em',
-              }}
-            >
-              OS
-            </span>
-          </h1>
-
-          {/* Large Tagline */}
-          <p
-            style={{
-              fontFamily: "'VCR OSD Mono', monospace",
-              fontSize: 'clamp(16px, 3vw, 28px)',
-              letterSpacing: '0.15em',
-              color: 'rgba(255, 255, 255, 0.5)',
-              textTransform: 'uppercase',
-              textAlign: 'center',
-              marginBottom: '48px',
-            }}
-          >
-            Your Brand Journey in Four Phases
-          </p>
-
-          {/* Scroll indicator */}
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '8px',
-              marginTop: '48px',
-              animation: 'bounce 2s infinite',
-            }}
-          >
-            <span
-              style={{
-                fontFamily: "'VCR OSD Mono', monospace",
-                fontSize: '10px',
-                letterSpacing: '0.2em',
-                color: 'rgba(255, 255, 255, 0.3)',
-                textTransform: 'uppercase',
-              }}
-            >
-              Scroll to explore
-            </span>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5">
-              <path d="M12 5v14M5 12l7 7 7-7" />
-            </svg>
-          </div>
-        </section>
-
-        {/* Phases Bento Grid */}
-        <section
-          style={{
-            padding: '48px',
-            maxWidth: '1400px',
-            margin: '0 auto',
-          }}
-        >
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(2, 1fr)',
-              gridTemplateRows: 'auto',
-              gap: '24px',
-            }}
-          >
-            {phases.map((phase, index) => (
-              <div
-                key={phase.number}
-                onClick={() => handlePhaseClick(phase.number)}
-                style={{
-                  background: expandedPhase === phase.number
-                    ? 'rgba(0, 0, 255, 0.05)'
-                    : 'rgba(255, 255, 255, 0.02)',
-                  border: `1px solid ${expandedPhase === phase.number ? '#0000FF' : 'rgba(255, 255, 255, 0.1)'}`,
-                  borderRadius: '16px',
-                  padding: '32px',
-                  cursor: 'pointer',
-                  transition: 'all 0.7s cubic-bezier(0.25, 0.1, 0.25, 1), background 0.5s ease, border-color 0.5s ease',
-                  opacity: isVisible ? 1 : 0,
-                  transform: isVisible ? 'translateY(0)' : 'translateY(40px)',
-                  transitionDelay: `${index * 150 + 300}ms`,
-                  gridColumn: expandedPhase === phase.number ? '1 / -1' : 'auto',
-                }}
-                onMouseEnter={(e) => {
-                  if (expandedPhase !== phase.number) {
-                    e.currentTarget.style.borderColor = 'rgba(0, 0, 255, 0.5)';
-                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.04)';
-                    e.currentTarget.style.transform = 'translateY(-4px)';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (expandedPhase !== phase.number) {
-                    e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
-                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.02)';
-                    e.currentTarget.style.transform = 'translateY(0)';
-                  }
-                }}
-              >
-                {/* Phase Header */}
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    justifyContent: 'space-between',
-                    marginBottom: '24px',
-                  }}
-                >
-                  <div>
-                    {/* Phase badge */}
-                    <span
-                      style={{
-                        fontFamily: "'VCR OSD Mono', monospace",
-                        fontSize: '11px',
-                        letterSpacing: '0.15em',
-                        color: '#0000FF',
-                        background: 'rgba(0, 0, 255, 0.15)',
-                        padding: '6px 12px',
-                        borderRadius: '4px',
-                        display: 'inline-block',
-                        marginBottom: '16px',
-                      }}
-                    >
-                      PHASE {phase.number}
-                    </span>
-
-                    {/* Title */}
-                    <h2
-                      style={{
-                        fontFamily: "'VCR OSD Mono', monospace",
-                        fontSize: expandedPhase === phase.number ? '48px' : '32px',
-                        fontWeight: 400,
-                        letterSpacing: '0.05em',
-                        color: '#FFFFFF',
-                        margin: 0,
-                        marginBottom: '8px',
-                        transition: 'font-size 0.6s cubic-bezier(0.25, 0.1, 0.25, 1)',
-                      }}
-                    >
-                      {phase.title}
-                    </h2>
-
-                    {/* Subtitle */}
-                    <p
-                      style={{
-                        fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
-                        fontSize: '16px',
-                        color: 'rgba(255, 255, 255, 0.5)',
-                        margin: 0,
-                      }}
-                    >
-                      {phase.subtitle}
-                    </p>
-                  </div>
-
-                  {/* Icon */}
-                  <div
-                    style={{
-                      color: expandedPhase === phase.number ? '#0000FF' : 'rgba(255, 255, 255, 0.3)',
-                      transition: 'color 0.5s cubic-bezier(0.25, 0.1, 0.25, 1), transform 0.5s cubic-bezier(0.25, 0.1, 0.25, 1)',
-                      transform: expandedPhase === phase.number ? 'scale(1.1)' : 'scale(1)',
-                    }}
-                  >
-                    {phase.icon}
-                  </div>
-                </div>
-
-                {/* Description (shown when expanded) */}
-                <div
-                  style={{
-                    maxHeight: expandedPhase === phase.number ? '800px' : '0',
-                    overflow: 'hidden',
-                    transition: expandedPhase === phase.number
-                      ? 'max-height 0.8s cubic-bezier(0.25, 0.1, 0.25, 1), opacity 0.6s cubic-bezier(0.25, 0.1, 0.25, 1) 0.1s, padding 0.8s cubic-bezier(0.25, 0.1, 0.25, 1)'
-                      : 'max-height 0.6s cubic-bezier(0.25, 0.1, 0.25, 1), opacity 0.4s cubic-bezier(0.25, 0.1, 0.25, 1), padding 0.6s cubic-bezier(0.25, 0.1, 0.25, 1)',
-                    opacity: expandedPhase === phase.number ? 1 : 0,
-                    paddingTop: expandedPhase === phase.number ? '16px' : '0',
-                  }}
-                >
-                  <p
-                    style={{
-                      fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
-                      fontSize: '18px',
-                      lineHeight: 1.6,
-                      color: 'rgba(255, 255, 255, 0.7)',
-                      marginBottom: '32px',
-                      maxWidth: '600px',
-                    }}
-                  >
-                    {phase.description}
-                  </p>
-
-                  {/* Detailed breakdown grid */}
-                  <div
-                    style={{
-                      display: 'grid',
-                      gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-                      gap: '16px',
-                      paddingTop: '24px',
-                      borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-                    }}
-                  >
-                    {phase.details.map((detail, i) => (
-                      <div
-                        key={detail.title}
-                        style={{
-                          background: 'rgba(255, 255, 255, 0.03)',
-                          borderRadius: '12px',
-                          padding: '20px',
-                          border: '1px solid rgba(255, 255, 255, 0.05)',
-                        }}
-                      >
-                        <h4
-                          style={{
-                            fontFamily: "'VCR OSD Mono', monospace",
-                            fontSize: '12px',
-                            letterSpacing: '0.1em',
-                            color: '#0000FF',
-                            margin: 0,
-                            marginBottom: '8px',
-                          }}
-                        >
-                          {detail.title}
-                        </h4>
-                        <p
-                          style={{
-                            fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
-                            fontSize: '14px',
-                            lineHeight: 1.5,
-                            color: 'rgba(255, 255, 255, 0.6)',
-                            margin: 0,
-                          }}
-                        >
-                          {detail.description}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Feature tags (shown when collapsed) */}
-                {expandedPhase !== phase.number && (
-                  <div
-                    style={{
-                      display: 'flex',
-                      flexWrap: 'wrap',
-                      gap: '8px',
-                      marginTop: '16px',
-                    }}
-                  >
-                    {phase.features.map((feature) => (
-                      <span
-                        key={feature}
-                        style={{
-                          fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
-                          fontSize: '12px',
-                          color: 'rgba(255, 255, 255, 0.5)',
-                          background: 'rgba(255, 255, 255, 0.05)',
-                          padding: '6px 12px',
-                          borderRadius: '20px',
-                          border: '1px solid rgba(255, 255, 255, 0.1)',
-                        }}
-                      >
-                        {feature}
-                      </span>
-                    ))}
-                  </div>
-                )}
-
-                {/* Expand/Collapse indicator */}
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    marginTop: '24px',
-                    color: 'rgba(255, 255, 255, 0.3)',
-                  }}
-                >
-                  <span
-                    style={{
-                      fontFamily: "'VCR OSD Mono', monospace",
-                      fontSize: '10px',
-                      letterSpacing: '0.1em',
-                      marginRight: '8px',
-                    }}
-                  >
-                    {expandedPhase === phase.number ? 'COLLAPSE' : 'EXPAND'}
+              {/* Phase Header */}
+              <div className="flex items-start justify-between mb-6">
+                <div>
+                  {/* Phase badge */}
+                  <span className="inline-block mb-4 bg-brand-blue-swiss/10 text-brand-blue-swiss font-mono text-[10px] tracking-wider px-3 py-1.5 rounded-sm">
+                    PHASE {phase.number}
                   </span>
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    style={{
-                      transform: expandedPhase === phase.number ? 'rotate(180deg)' : 'rotate(0)',
-                      transition: 'transform 0.5s cubic-bezier(0.25, 0.1, 0.25, 1)',
-                    }}
-                  >
-                    <path d="M6 9l6 6 6-6" />
-                  </svg>
+
+                  {/* Title */}
+                  <h2 className={`font-sans font-bold text-brand-black-swiss mb-2 transition-all duration-500 ${
+                    expandedPhase === phase.number ? 'text-5xl' : 'text-3xl'
+                  }`}>
+                    {phase.title}
+                  </h2>
+
+                  {/* Subtitle */}
+                  <p className="font-sans text-base text-brand-black-swiss/50">
+                    {phase.subtitle}
+                  </p>
+                </div>
+
+                {/* Icon */}
+                <div className={`transition-all duration-500 ${
+                  expandedPhase === phase.number
+                    ? 'text-brand-blue-swiss scale-110'
+                    : 'text-brand-black-swiss/30'
+                }`}>
+                  {phase.icon}
                 </div>
               </div>
-            ))}
-          </div>
-        </section>
 
-        {/* CTA Section */}
-        <section
-          style={{
-            padding: '96px 48px',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '24px',
-            opacity: isVisible ? 1 : 0,
-            transform: isVisible ? 'translateY(0)' : 'translateY(30px)',
-            transition: 'opacity 0.8s ease-out, transform 0.8s ease-out',
-            transitionDelay: '800ms',
-          }}
+              {/* Expanded description */}
+              <div
+                className={`overflow-hidden transition-all duration-700 ${
+                  expandedPhase === phase.number
+                    ? 'max-h-[800px] opacity-100 pt-4'
+                    : 'max-h-0 opacity-0'
+                }`}
+                style={{
+                  transitionTimingFunction: 'cubic-bezier(0.25, 0.1, 0.25, 1)',
+                }}
+              >
+                <p className="font-sans text-lg leading-relaxed text-brand-black-swiss/70 mb-8 max-w-[600px]">
+                  {phase.description}
+                </p>
+
+                {/* Detail cards grid */}
+                <div className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-4 pt-6 border-t border-brand-black-swiss/10">
+                  {phase.details.map((detail) => (
+                    <div
+                      key={detail.title}
+                      className="bg-white/30 rounded-sm p-5 border border-brand-black-swiss/5"
+                    >
+                      <h4 className="font-mono text-xs tracking-wider text-brand-blue-swiss mb-2">
+                        {detail.title}
+                      </h4>
+                      <p className="font-sans text-sm leading-relaxed text-brand-black-swiss/60">
+                        {detail.description}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Feature tags (shown when collapsed) */}
+              {expandedPhase !== phase.number && (
+                <div className="flex flex-wrap gap-2 mt-4">
+                  {phase.features.map((feature) => (
+                    <span
+                      key={feature}
+                      className="bg-white/60 border border-brand-black-swiss/10 rounded-sm font-sans text-xs px-3 py-1.5 text-brand-black-swiss/50"
+                    >
+                      {feature}
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {/* Expand/Collapse indicator */}
+              <div className="flex items-center justify-center mt-6 text-brand-black-swiss/30">
+                <span className="font-mono text-[10px] tracking-wider mr-2">
+                  {expandedPhase === phase.number ? 'COLLAPSE' : 'EXPAND'}
+                </span>
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  className={`transition-transform duration-500 ${
+                    expandedPhase === phase.number ? 'rotate-180' : ''
+                  }`}
+                >
+                  <path d="M6 9l6 6 6-6" />
+                </svg>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <motion.section
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, delay: 0.8, ease: 'easeOut' }}
+        className="py-24 px-12 flex flex-col items-center gap-6"
+      >
+        <p className="font-mono text-xs tracking-widest uppercase text-brand-black-swiss/50 text-center">
+          Ready to build your brand system?
+        </p>
+
+        <button
+          onClick={onGetStarted}
+          className="px-16 py-5 rounded-full bg-brand-black-swiss text-brand-cream text-base font-medium shadow-[0_0_0_2px_rgba(47,84,235,0.5)] hover:shadow-[0_0_12px_rgba(47,84,235,0.6)] transition-shadow"
         >
-          <p
-            style={{
-              fontFamily: "'VCR OSD Mono', monospace",
-              fontSize: '14px',
-              letterSpacing: '0.2em',
-              color: 'rgba(255, 255, 255, 0.4)',
-              textTransform: 'uppercase',
-              textAlign: 'center',
-            }}
-          >
-            Ready to build your brand system?
-          </p>
+          GET STARTED
+        </button>
 
-          <button
-            onClick={onGetStarted}
-            style={{
-              fontFamily: "'VCR OSD Mono', monospace",
-              fontSize: '14px',
-              letterSpacing: '0.15em',
-              color: '#FFFFFF',
-              background: '#0000FF',
-              border: 'none',
-              padding: '20px 64px',
-              cursor: 'pointer',
-              transition: 'all 0.3s ease',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-3px)';
-              e.currentTarget.style.boxShadow = '0 12px 40px rgba(0, 0, 255, 0.4)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = 'none';
-            }}
-          >
-            GET STARTED
-          </button>
-
-          <button
-            onClick={onSkip}
-            style={{
-              fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
-              fontSize: '14px',
-              color: 'rgba(255, 255, 255, 0.4)',
-              background: 'transparent',
-              border: 'none',
-              cursor: 'pointer',
-              padding: '12px 24px',
-              transition: 'color 0.2s ease',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.color = 'rgba(255, 255, 255, 0.8)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.color = 'rgba(255, 255, 255, 0.4)';
-            }}
-          >
-            Skip for now
-          </button>
-        </section>
-      </div>
-
-      {/* CSS Animations */}
-      <style jsx global>{`
-        @keyframes bounce {
-          0%, 20%, 50%, 80%, 100% {
-            transform: translateY(0);
-          }
-          40% {
-            transform: translateY(-10px);
-          }
-          60% {
-            transform: translateY(-5px);
-          }
-        }
-      `}</style>
-    </div>
+        <button
+          onClick={onSkip}
+          className="font-sans text-sm text-brand-black-swiss/70 underline underline-offset-4 decoration-brand-black-swiss/30 hover:text-brand-black-swiss hover:decoration-brand-black-swiss transition-colors py-3 px-6"
+        >
+          Skip for now
+        </button>
+      </motion.section>
+    </SwissBackground>
   );
 }
