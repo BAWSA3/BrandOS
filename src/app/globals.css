@@ -208,10 +208,14 @@
   /* Background Images */
   --background-image-noise-pattern: url('/assets/noise.png');
   --background-image-grid-pattern: linear-gradient(to right, #E5E5E5 1px, transparent 1px), linear-gradient(to bottom, #E5E5E5 1px, transparent 1px);
+  --background-image-gradient-brand: linear-gradient(135deg, #2F54EB 0%, #FA8C16 100%);
 
   /* Glow Shadows */
-  --shadow-glow-blue: 0 0 20px rgba(47, 84, 235, 0.4);
-  --shadow-glow-orange: 0 0 20px rgba(250, 140, 22, 0.4);
+  --shadow-glow-blue: 0 0 20px rgba(47, 84, 235, 0.5);
+  --shadow-glow-orange: 0 0 20px rgba(250, 140, 22, 0.5);
+
+  /* Animations */
+  --animate-pulse-slow: pulse-slow 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
 /* ============================================
@@ -443,6 +447,11 @@ body {
 @keyframes slideInFromRight {
   from { opacity: 0; transform: translateX(100%); }
   to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes pulse-slow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
 }
 
 .animate-breathe { animation: breathe 6s infinite ease-in-out; }
