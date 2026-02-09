@@ -285,6 +285,12 @@ body {
   filter: url(#dither-filter);
 }
 
+/* Dither blend mode — makes white pixels transparent, pops black */
+.blend-dither {
+  mix-blend-mode: multiply;
+  filter: contrast(120%);
+}
+
 .glass-card,
 .surface-card {
   background: var(--surface);
