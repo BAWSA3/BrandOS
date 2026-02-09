@@ -379,38 +379,33 @@ export default function OnboardingWizard({ onComplete, onSkip }: OnboardingWizar
           {/* ════════ NAME ════════ */}
           {currentStep === 'name' && (
             <div className="text-center">
-              <span className="font-mono text-xs tracking-[0.2em] text-brand-black-swiss/40 uppercase block mb-3">
-                Step 01
-              </span>
-              <h2 className="font-sans text-3xl font-semibold tracking-tight text-brand-black-swiss mb-2">
+              <h2 className="font-sans text-5xl font-bold tracking-tight text-brand-black-swiss mb-4">
                 {steps[1].title}
               </h2>
-              <p className="font-sans text-base text-brand-black-swiss/50 mb-10">
+              <p className="font-sans text-lg text-brand-black-swiss/50 mb-12">
                 {steps[1].subtitle}
               </p>
 
-              <div className="glass-panel rounded-sm p-10">
-                <input
-                  type="text"
-                  value={brandDNA?.name || ''}
-                  onChange={(e) => setBrandDNA({ name: e.target.value })}
-                  placeholder="Enter your brand name"
-                  className="w-full text-center text-4xl font-sans font-light bg-transparent border-b-2 border-brand-black-swiss/10 pb-5 outline-none focus:border-brand-blue-swiss transition-colors placeholder:text-brand-black-swiss/20 text-brand-black-swiss"
-                  autoFocus
-                />
-              </div>
+              <input
+                type="text"
+                value={brandDNA?.name || ''}
+                onChange={(e) => setBrandDNA({ name: e.target.value })}
+                placeholder="Enter your brand name"
+                className="w-full text-center text-lg font-sans bg-white/50 border border-brand-black-swiss/10 rounded-sm px-6 py-5 outline-none focus:border-brand-blue-swiss transition-colors placeholder:text-brand-black-swiss/30 text-brand-black-swiss"
+                autoFocus
+              />
 
-              <div className="flex justify-center gap-6 mt-12">
+              <div className="flex items-center justify-center gap-8 mt-12">
                 <button
                   onClick={prevStep}
-                  className="font-mono text-sm text-brand-black-swiss/40 hover:text-brand-black-swiss transition-colors"
+                  className="font-sans text-base text-brand-black-swiss/70 underline underline-offset-4 decoration-brand-black-swiss/30 hover:text-brand-black-swiss hover:decoration-brand-black-swiss transition-colors"
                 >
                   Back
                 </button>
                 <button
                   onClick={nextStep}
                   disabled={!brandDNA?.name?.trim()}
-                  className="px-12 py-4 bg-brand-black-swiss text-brand-cream rounded-sm text-base font-medium hover:shadow-glow-blue transition-shadow disabled:opacity-30"
+                  className="px-14 py-4 bg-brand-black-swiss text-brand-cream rounded-full text-base font-medium shadow-[0_0_0_2px_rgba(47,84,235,0.5)] hover:shadow-[0_0_12px_rgba(47,84,235,0.6)] transition-shadow disabled:opacity-30"
                 >
                   Continue
                 </button>
