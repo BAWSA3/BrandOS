@@ -268,6 +268,23 @@ body {
    SURFACE COMPONENTS (replaces glassmorphic)
    ============================================ */
 
+/* Frosted grain glass panel */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+/* 1-Bit dither text effect (requires SVG #dither-filter in layout) */
+.dither-text {
+  background: black;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: url(#dither-filter);
+}
+
 .glass-card,
 .surface-card {
   background: var(--surface);
