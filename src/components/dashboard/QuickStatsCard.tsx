@@ -4,6 +4,7 @@ interface QuickStatsCardProps {
   postsThisWeek: number;
   avgEngagementRate: number;
   brandConsistency: number;
+  brandTrend?: { direction: 'up' | 'down' | 'stable'; delta: number };
 }
 
 // Mini sparkline SVG from a set of values
@@ -69,6 +70,7 @@ export default function QuickStatsCard({
   postsThisWeek,
   avgEngagementRate,
   brandConsistency,
+  brandTrend,
 }: QuickStatsCardProps) {
   // Generate simple sparkline data (simulate weekly trend)
   const postsSparkline = [
@@ -103,9 +105,9 @@ export default function QuickStatsCard({
       color: '#30D158',
     },
     {
-      label: 'Brand score',
+      label: 'Brand health',
       value: `${brandConsistency}%`,
-      trend: brandConsistency > 50 ? ('up' as const) : brandConsistency > 0 ? ('stable' as const) : ('down' as const),
+      trend: brandTrend?.direction ?? (brandConsistency > 50 ? ('up' as const) : brandConsistency > 0 ? ('stable' as const) : ('down' as const)),
       sparkline: consistencySparkline,
       color: '#BF5AF2',
     },

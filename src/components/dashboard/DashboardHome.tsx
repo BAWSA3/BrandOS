@@ -32,6 +32,7 @@ export default function DashboardHome({ onNavigatePhase }: DashboardHomeProps) {
     posts,
     insights,
     ideas,
+    health,
     stats,
     isLoadingPosts,
     isLoadingInsights,
@@ -66,6 +67,7 @@ export default function DashboardHome({ onNavigatePhase }: DashboardHomeProps) {
               postsThisWeek={stats.postsThisWeek}
               avgEngagementRate={stats.avgEngagementRate}
               brandConsistency={stats.brandConsistency}
+              brandTrend={health.hasSnapshot ? health.trend : undefined}
             />
           </div>
         </div>

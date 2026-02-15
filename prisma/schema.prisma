@@ -58,6 +58,9 @@ model Brand {
   // History
   history   HistoryEntry[]
 
+  // Health Snapshots
+  healthSnapshots BrandHealthSnapshot[]
+
   @@index([userId])
   @@index([teamId])
   @@index([shareToken])
@@ -102,6 +105,29 @@ model SharedBrand {
 
   @@unique([userId, brandId])
   @@index([brandId])
+}
+
+model BrandHealthSnapshot {
+  id              String   @id @default(cuid())
+  overallScore    Int      // Composite 0-100
+  completeness    Int      // Sub-dimension 0-100
+  consistency     Int      // Sub-dimension 0-100
+  voiceMatch      Int      // Sub-dimension 0-100
+  engagement      Int      // Sub-dimension 0-100
+  activity        Int      // Sub-dimension 0-100
+  trendDirection  String   // "up", "down", "stable"
+  trendDelta      Int      // Absolute delta from previous
+  computationData String   // JSON audit trail of raw inputs
+  periodStart     DateTime
+  periodEnd       DateTime
+  createdAt       DateTime @default(now())
+
+  brandId String
+  brand   Brand  @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  @@index([brandId])
+  @@index([createdAt])
+  @@index([brandId, createdAt])
 }
 
 model HistoryEntry {

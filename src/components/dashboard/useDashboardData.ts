@@ -6,11 +6,13 @@ import { useAuth } from '@/hooks/useAuth';
 import type { DashboardPost } from '@/app/api/dashboard/posts/route';
 import type { DashboardInsight } from '@/app/api/dashboard/insights/route';
 import type { ContentIdea } from '@/app/api/dashboard/ideas/route';
+import { useBrandHealthScore, type BrandHealthScore } from '@/hooks/useBrandHealthScore';
 
 interface DashboardData {
   posts: DashboardPost[];
   insights: DashboardInsight[];
   ideas: ContentIdea[];
+  health: BrandHealthScore;
   stats: {
     postsThisWeek: number;
     avgEngagementRate: number;
@@ -33,6 +35,7 @@ export function useDashboardData(): DashboardData {
   const [posts, setPosts] = useState<DashboardPost[]>([]);
   const [insights, setInsights] = useState<DashboardInsight[]>([]);
   const [ideas, setIdeas] = useState<ContentIdea[]>([]);
+  const health = useBrandHealthScore();
   const [isLoadingPosts, setIsLoadingPosts] = useState(true);
   const [isLoadingInsights, setIsLoadingInsights] = useState(false);
   const [isLoadingIdeas, setIsLoadingIdeas] = useState(false);
@@ -164,10 +167,11 @@ export function useDashboardData(): DashboardData {
     posts,
     insights,
     ideas,
+    health,
     stats: {
       postsThisWeek,
       avgEngagementRate,
-      brandConsistency,
+      brandConsistency: health.hasSnapshot ? health.overallScore : brandConsistency,
       totalChecks,
       totalGenerations,
     },
