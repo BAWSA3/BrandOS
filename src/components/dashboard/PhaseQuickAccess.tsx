@@ -1,5 +1,6 @@
 'use client';
 
+import type { ReactNode } from 'react';
 import type { Phase } from '@/components/PhaseNavigation';
 
 interface PhaseQuickAccessProps {
@@ -14,7 +15,7 @@ const phaseItems: {
   num: string;
   label: string;
   description: string;
-  icon: JSX.Element;
+  icon: ReactNode;
 }[] = [
   {
     id: 'define',
