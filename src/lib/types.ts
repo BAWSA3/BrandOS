@@ -16,6 +16,7 @@ export interface BrandDNA {
   doPatterns: string[];
   dontPatterns: string[];
   voiceSamples: string[];
+  voiceFingerprint?: string; // JSON string of VoiceFingerprint
   createdAt: Date;
   updatedAt: Date;
 }

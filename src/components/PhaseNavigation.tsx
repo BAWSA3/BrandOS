@@ -8,7 +8,7 @@ export type SubTab =
   // Home phase
   | 'home'
   // Define phase
-  | 'brand' | 'safezones' | 'intents'
+  | 'brand' | 'safezones' | 'intents' | 'voiceprint'
   // Check phase
   | 'check' | 'cohesion' | 'guardrails' | 'protect' | 'taste'
   // Generate phase (consolidated)
@@ -39,6 +39,7 @@ const phases: PhaseConfig[] = [
     description: 'Build your system',
     tabs: [
       { id: 'brand', label: 'Brand DNA' },
+      { id: 'voiceprint', label: 'Voice Print' },
       { id: 'safezones', label: 'Safe Zones' },
       { id: 'intents', label: 'Design Intents' },
     ],
@@ -282,7 +283,7 @@ export default function PhaseNavigation({
 // Helper to get phase from tab
 export function getPhaseFromTab(tab: SubTab): Phase {
   if (tab === 'home') return 'home';
-  const definesTabs: SubTab[] = ['brand', 'safezones', 'intents'];
+  const definesTabs: SubTab[] = ['brand', 'voiceprint', 'safezones', 'intents'];
   const checkTabs: SubTab[] = ['check', 'cohesion', 'guardrails', 'protect', 'taste'];
   const generateTabs: SubTab[] = ['generate', 'platforms', 'context', 'visual', 'kit-ai-studio', 'kit-canvas', 'kit-logos', 'kit-colors', 'kit-typography', 'kit-imagery', 'kit-icons', 'kit-templates'];
 

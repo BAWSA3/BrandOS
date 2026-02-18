@@ -1,5 +1,6 @@
 import { BrandDNA } from './types';
 import { buildBrandContext } from '@/prompts/brand-guardian';
+import { VoiceFingerprint, summarizeFingerprint, formatSummaryForPrompt } from './voice-fingerprint';
 
 // ── Types ──────────────────────────────────────────────────────
 
@@ -57,10 +58,14 @@ export function computeConsistency(checkEntries: { score: number | null }[]): nu
 // ── Voice Match (25%) ──────────────────────────────────────────
 // Claude call: send last 10 posts + brand DNA → get 0-100 score
 
-export function buildVoiceMatchPrompt(brand: BrandDNA, posts: string[]): string {
+export function buildVoiceMatchPrompt(brand: BrandDNA, posts: string[], fingerprint?: VoiceFingerprint): string {
+  const fingerprintSection = fingerprint
+    ? `\n\nVOICE FINGERPRINT (use this for more precise matching):\n${formatSummaryForPrompt(summarizeFingerprint(fingerprint))}`
+    : '';
+
   return `You are a brand voice analyst. Analyze how well these recent posts match the brand's defined voice and identity.
 
-${buildBrandContext(brand)}
+${buildBrandContext(brand)}${fingerprintSection}
 
 RECENT POSTS:
 ${posts.map((p, i) => `${i + 1}. "${p}"`).join('\n')}
@@ -71,6 +76,7 @@ Score how consistently these posts match the brand voice on a scale of 0-100.
 - 50-69: Posts are somewhat aligned but inconsistent
 - 30-49: Posts frequently deviate from the brand voice
 - 0-29: Posts don't match the brand voice at all
+${fingerprint ? '\nWith the voice fingerprint available, also evaluate against sentence patterns, vocabulary, rhetoric style, and signature elements.' : ''}
 
 Return ONLY valid JSON:
 {"score": <number 0-100>, "reasoning": "<one sentence explanation>"}`;
@@ -79,11 +85,12 @@ Return ONLY valid JSON:
 export async function computeVoiceMatch(
   posts: string[],
   brand: BrandDNA,
-  callClaude: (prompt: string) => Promise<string>
+  callClaude: (prompt: string) => Promise<string>,
+  fingerprint?: VoiceFingerprint
 ): Promise<number> {
   if (posts.length === 0) return 0;
 
-  const prompt = buildVoiceMatchPrompt(brand, posts.slice(0, 10));
+  const prompt = buildVoiceMatchPrompt(brand, posts.slice(0, 10), fingerprint);
   try {
     const response = await callClaude(prompt);
     const parsed = JSON.parse(response);

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { BrandDNA, HistoryItem, SafeZone, MemoryEvent, DesignIntentBlock } from './types';
+import { VoiceFingerprint } from './voice-fingerprint';
 import { v4 as uuidv4 } from 'uuid';
 
 type Theme = 'light' | 'dark';
@@ -86,6 +87,11 @@ interface BrandStore {
   designIntents: Record<string, DesignIntentBlock[]>;
   addDesignIntent: (intent: DesignIntentBlock) => void;
   deleteDesignIntent: (id: string) => void;
+
+  // Voice Fingerprints (per brand)
+  voiceFingerprints: Record<string, VoiceFingerprint>;
+  setVoiceFingerprint: (brandId: string, fp: VoiceFingerprint) => void;
+  clearVoiceFingerprint: (brandId: string) => void;
   
   // Phase Progress (for guided experience)
   phaseProgress: PhaseProgress;
@@ -141,6 +147,7 @@ export const useBrandStore = create<BrandStore>()(
       safeZones: {},
       brandMemory: {},
       designIntents: {},
+      voiceFingerprints: {},
       
       // Phase progress initial state
       phaseProgress: {
@@ -185,14 +192,16 @@ export const useBrandStore = create<BrandStore>()(
           const { [id]: _sz, ...restSafeZones } = state.safeZones;
           const { [id]: _mem, ...restMemory } = state.brandMemory;
           const { [id]: _di, ...restIntents } = state.designIntents;
+          const { [id]: _vf, ...restFingerprints } = state.voiceFingerprints;
           return {
             brands: newBrands,
-            currentBrandId: state.currentBrandId === id 
-              ? newBrands[0]?.id || null 
+            currentBrandId: state.currentBrandId === id
+              ? newBrands[0]?.id || null
               : state.currentBrandId,
             safeZones: restSafeZones,
             brandMemory: restMemory,
             designIntents: restIntents,
+            voiceFingerprints: restFingerprints,
           };
         }),
       
@@ -343,7 +352,22 @@ export const useBrandStore = create<BrandStore>()(
             },
           };
         }),
-      
+
+      // Voice Fingerprints
+      setVoiceFingerprint: (brandId, fp) =>
+        set((state) => ({
+          voiceFingerprints: {
+            ...state.voiceFingerprints,
+            [brandId]: fp,
+          },
+        })),
+
+      clearVoiceFingerprint: (brandId) =>
+        set((state) => {
+          const { [brandId]: _, ...rest } = state.voiceFingerprints;
+          return { voiceFingerprints: rest };
+        }),
+
       // Phase Progress Methods
       completeOnboarding: () =>
         set((state) => ({
@@ -438,6 +462,7 @@ export const useBrandStore = create<BrandStore>()(
         safeZones: state.safeZones,
         brandMemory: state.brandMemory,
         designIntents: state.designIntents,
+        voiceFingerprints: state.voiceFingerprints,
         phaseProgress: state.phaseProgress,
       }),
     }

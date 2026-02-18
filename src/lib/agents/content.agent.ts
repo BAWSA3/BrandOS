@@ -3,12 +3,13 @@
 
 import Anthropic from '@anthropic-ai/sdk';
 import { BrandDNA, Platform } from '@/lib/types';
-import { 
-  AgentContext, 
-  AgentResponse, 
-  ContentBrief, 
+import { summarizeFingerprint, formatSummaryForPrompt } from '@/lib/voice-fingerprint';
+import {
+  AgentContext,
+  AgentResponse,
+  ContentBrief,
   GeneratedContent,
-  ContentBatch 
+  ContentBatch
 } from './types';
 
 // Platform-specific guidelines
@@ -65,7 +66,7 @@ const platformGuidelines: Record<Platform | 'default', PlatformGuidelines> = {
 };
 
 // Build the content generation prompt
-function buildContentPrompt(brand: BrandDNA, brief: ContentBrief): string {
+function buildContentPrompt(brand: BrandDNA, brief: ContentBrief, context?: AgentContext): string {
   const guidelines = platformGuidelines[brief.platform] || platformGuidelines.default;
   
   // Calculate tone descriptors based on brand values
@@ -129,6 +130,10 @@ AVOID:
 - Content that sounds AI-generated
 - Weak or missing CTAs
 - Burying the value below the fold
+${context?.voiceFingerprint ? `
+${formatSummaryForPrompt(summarizeFingerprint(context.voiceFingerprint))}
+
+CRITICAL: Match the creator's actual voice. If any phrase sounds like "ChatGPT wrote this", rewrite it.` : ''}
 
 Return ONLY valid JSON:
 {
@@ -213,7 +218,7 @@ export async function generateContent(
       messages: [
         {
           role: 'user',
-          content: buildContentPrompt(context.brandDNA, brief),
+          content: buildContentPrompt(context.brandDNA, brief, context),
         },
       ],
     });

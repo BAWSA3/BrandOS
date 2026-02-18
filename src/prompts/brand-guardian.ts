@@ -1,7 +1,9 @@
 import { BrandDNA, ContentType } from '@/lib/types';
+import { VoiceFingerprintSummary } from '@/lib/voice-fingerprint';
+import { buildVoiceFingerprintInstructions } from '@/prompts/voice-fingerprint';
 
-export function buildBrandContext(brand: BrandDNA): string {
-  return `
+export function buildBrandContext(brand: BrandDNA, fingerprintSummary?: VoiceFingerprintSummary): string {
+  let context = `
 BRAND DNA:
 - Brand Name: ${brand.name}
 - Tone Profile: Formality (${brand.tone.minimal}/100), Energy (${brand.tone.playful}/100), Confidence (${brand.tone.bold}/100), Style (${brand.tone.experimental}/100)
@@ -10,6 +12,12 @@ BRAND DNA:
 - DON'T patterns: ${brand.dontPatterns.join('; ') || 'None specified'}
 - Voice samples: ${brand.voiceSamples.join(' | ') || 'None provided'}
 `.trim();
+
+  if (fingerprintSummary) {
+    context += '\n\n' + buildVoiceFingerprintInstructions(fingerprintSummary);
+  }
+
+  return context;
 }
 
 export function buildCheckPrompt(brand: BrandDNA, content: string): string {
@@ -44,10 +52,18 @@ const contentTypeInstructions: Record<ContentType, string> = {
   'blog-intro': 'Generate blog introduction paragraphs. Hook the reader immediately. Preview the value they\'ll get. Create momentum to keep reading.',
 };
 
-export function buildGeneratePrompt(brand: BrandDNA, userRequest: string, contentType: ContentType = 'general'): string {
+export function buildGeneratePrompt(brand: BrandDNA, userRequest: string, contentType: ContentType = 'general', fingerprintSummary?: VoiceFingerprintSummary): string {
+  const voiceWarning = fingerprintSummary
+    ? `\n\nCRITICAL — VOICE AUTHENTICITY:
+The content MUST sound like this specific creator wrote it. Apply every rule from the Voice Fingerprint below.
+If any phrase sounds like "an AI wrote this" — rewrite it before including.
+Common AI tells to AVOID: "In today's...", "Excited to announce", "It's worth noting", "At the end of the day", perfect parallel structure, excessive hedging.`
+    : '';
+
   return `You are a brand guardian AI. Generate content that perfectly matches this brand's identity.
 
-${buildBrandContext(brand)}
+${buildBrandContext(brand, fingerprintSummary)}
+${voiceWarning}
 
 CONTENT TYPE: ${contentType.toUpperCase().replace('-', ' ')}
 ${contentTypeInstructions[contentType]}

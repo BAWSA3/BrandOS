@@ -1,4 +1,5 @@
 import { GeneratedBrandDNA } from '@/components/BrandDNAPreview';
+import { VoiceFingerprintSummary, formatSummaryForPrompt } from '@/lib/voice-fingerprint';
 
 // Archetype descriptions for the welcome message
 const ARCHETYPE_DESCRIPTIONS: Record<string, string> = {
@@ -16,7 +17,7 @@ const ARCHETYPE_DESCRIPTIONS: Record<string, string> = {
  * Build the system prompt for the Brand Advisor
  * This injects the user's Brand DNA as persistent context
  */
-export function buildAdvisorSystemPrompt(brandDNA: GeneratedBrandDNA): string {
+export function buildAdvisorSystemPrompt(brandDNA: GeneratedBrandDNA, fingerprintSummary?: VoiceFingerprintSummary): string {
   const contentPillarsSection = brandDNA.contentPillars?.length
     ? `\n- Content Pillars: ${brandDNA.contentPillars.map(p => p.name).join(', ')}`
     : '';
@@ -80,7 +81,15 @@ You are their trusted brand advisor who deeply understands their unique identity
 - Analyzing what's working and what's not
 - Building sustainable content systems
 
-Remember: They came to you because generic AI advice doesn't cut it. Make every response feel personalized to THEIR brand.`;
+Remember: They came to you because generic AI advice doesn't cut it. Make every response feel personalized to THEIR brand.
+${fingerprintSummary ? `
+## Voice Fingerprint
+
+You have a detailed understanding of how this creator writes. When generating content examples or suggestions, match their actual voice:
+
+${formatSummaryForPrompt(fingerprintSummary)}
+
+Always write examples in THEIR voice, never generic AI voice.` : ''}`;
 }
 
 /**

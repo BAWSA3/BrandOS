@@ -2,11 +2,12 @@ import Anthropic from '@anthropic-ai/sdk';
 import { NextRequest, NextResponse } from 'next/server';
 import { buildGeneratePrompt } from '@/prompts/brand-guardian';
 import { BrandDNA, ContentType } from '@/lib/types';
+import { VoiceFingerprintSummary } from '@/lib/voice-fingerprint';
 
 export async function POST(request: NextRequest) {
   try {
     const apiKey = process.env.ANTHROPIC_API_KEY;
-    
+
     if (!apiKey) {
       console.error('ANTHROPIC_API_KEY is not set. Value:', apiKey);
       return NextResponse.json(
@@ -17,10 +18,11 @@ export async function POST(request: NextRequest) {
 
     const anthropic = new Anthropic({ apiKey });
 
-    const { brandDNA, prompt, contentType = 'general' } = await request.json() as {
+    const { brandDNA, prompt, contentType = 'general', voiceFingerprint } = await request.json() as {
       brandDNA: BrandDNA;
       prompt: string;
       contentType?: ContentType;
+      voiceFingerprint?: VoiceFingerprintSummary;
     };
 
     if (!brandDNA?.name || !prompt) {
@@ -36,13 +38,13 @@ export async function POST(request: NextRequest) {
       messages: [
         {
           role: 'user',
-          content: buildGeneratePrompt(brandDNA, prompt, contentType),
+          content: buildGeneratePrompt(brandDNA, prompt, contentType, voiceFingerprint),
         },
       ],
     });
 
-    const responseText = message.content[0].type === 'text' 
-      ? message.content[0].text 
+    const responseText = message.content[0].type === 'text'
+      ? message.content[0].text
       : '';
 
     return NextResponse.json({ content: responseText });

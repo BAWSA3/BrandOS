@@ -18,6 +18,9 @@ import BrandMemory from '@/components/BrandMemory';
 import TasteProtection from '@/components/TasteProtection';
 import ContextTone from '@/components/ContextTone';
 import PhaseNavigation, { Phase, SubTab, getPhaseFromTab, getDefaultTabForPhase } from '@/components/PhaseNavigation';
+import VoiceFingerprint from '@/components/VoiceFingerprint';
+import VoiceFingerprintMini from '@/components/VoiceFingerprintMini';
+import { AuthenticityScore, AuthenticityFlag, summarizeFingerprint } from '@/lib/voice-fingerprint';
 import OnboardingWizard from '@/components/OnboardingWizard';
 import BrandCompleteness, { useBrandCompleteness } from '@/components/BrandCompleteness';
 import { BrandKitCanvas, LogoSection, ColorSection, TypographySection, ImagerySection, IconSection, TemplateSection, AIStudio } from '@/components/brandkit';
@@ -52,10 +55,12 @@ function HomeContent() {
     markFirstCheck,
     markFirstGeneration,
     setLastActivePhase,
+    voiceFingerprints,
   } = useBrandStore();
 
   const brandDNA = useCurrentBrand();
   const brandCompleteness = useBrandCompleteness();
+  const currentFingerprint = currentBrandId ? voiceFingerprints[currentBrandId] : null;
   const toast = useToast();
   const { isInnerCircle, pendingInviteCode } = useInnerCircle();
   const { user, isLoading: authLoading } = useAuth();
@@ -88,12 +93,18 @@ function HomeContent() {
   const [toneAnalysis, setToneAnalysis] = useState<ToneAnalysis | null>(null);
   const [isAnalyzingTone, setIsAnalyzingTone] = useState(false);
   
+  // Authenticity state (for Check phase)
+  const [authenticityScore, setAuthenticityScore] = useState<AuthenticityScore | null>(null);
+  const [isRewritingFlags, setIsRewritingFlags] = useState(false);
+
   // Generate state
   const [generatePrompt, setGeneratePrompt] = useState('');
   const [generatedContent, setGeneratedContent] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [generateError, setGenerateError] = useState('');
   const [contentType, setContentType] = useState<ContentType>('general');
+  const [generateAuthScore, setGenerateAuthScore] = useState<AuthenticityScore | null>(null);
+  const [isCheckingGenAuth, setIsCheckingGenAuth] = useState(false);
 
   // Competitor state
   const [competitorName, setCompetitorName] = useState('');
@@ -321,16 +332,21 @@ function HomeContent() {
 
   const handleCheck = async () => {
     if (!contentToCheck.trim() || !brandDNA?.name) return;
-    
+
     setIsChecking(true);
     setCheckResult(null);
     setCheckError('');
-    
+    setAuthenticityScore(null);
+
     try {
       const res = await fetch('/api/check', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ brandDNA, content: contentToCheck }),
+        body: JSON.stringify({
+          brandDNA,
+          content: contentToCheck,
+          voiceFingerprint: currentFingerprint || undefined,
+        }),
       });
       
       const result = await res.json();
@@ -343,6 +359,9 @@ function HomeContent() {
       }
       
       setCheckResult(result);
+      if (result.authenticityScore) {
+        setAuthenticityScore(result.authenticityScore);
+      }
       toast.success('Analysis complete!', `Your content scored ${result.score}/100`);
       analytics.contentChecked(result.score);
       
@@ -369,16 +388,23 @@ function HomeContent() {
 
   const handleGenerate = async () => {
     if (!generatePrompt.trim() || !brandDNA?.name) return;
-    
+
     setIsGenerating(true);
     setGeneratedContent('');
     setGenerateError('');
-    
+    setGenerateAuthScore(null);
+
     try {
+      const fpSummary = currentFingerprint ? summarizeFingerprint(currentFingerprint) : undefined;
       const res = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ brandDNA, prompt: generatePrompt, contentType }),
+        body: JSON.stringify({
+          brandDNA,
+          prompt: generatePrompt,
+          contentType,
+          voiceFingerprint: fpSummary,
+        }),
       });
       
       const result = await res.json();
@@ -393,6 +419,24 @@ function HomeContent() {
       setGeneratedContent(result.content);
       toast.success('Content generated!', 'Your on-brand content is ready.');
       analytics.contentGenerated(contentType);
+
+      // Auto-check authenticity if fingerprint exists
+      if (currentFingerprint && result.content) {
+        setIsCheckingGenAuth(true);
+        try {
+          const authRes = await fetch('/api/voice-fingerprint/check-authenticity', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ content: result.content, fingerprint: currentFingerprint }),
+          });
+          if (authRes.ok) {
+            const { score } = await authRes.json();
+            setGenerateAuthScore(score);
+          }
+        } catch {} finally {
+          setIsCheckingGenAuth(false);
+        }
+      }
       
       // Mark first generation complete
       if (!phaseProgress.hasCompletedFirstGeneration) {
@@ -1034,6 +1078,15 @@ function HomeContent() {
           </div>
         )}
 
+        {/* Voice Print Tab */}
+        {activeTab === 'voiceprint' && (
+          <div className="animate-fade-in">
+            <section className="max-w-3xl mx-auto">
+              <VoiceFingerprint />
+            </section>
+          </div>
+        )}
+
         {/* Design Intents Tab */}
         {activeTab === 'intents' && (
           <div className="animate-fade-in">
@@ -1099,6 +1152,19 @@ function HomeContent() {
                 </div>
               )}
 
+              {/* Voice Print indicator */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                <VoiceFingerprintMini
+                  fingerprint={currentFingerprint}
+                  onClick={() => { handlePhaseChange('define'); setActiveTab('voiceprint'); }}
+                />
+                {currentFingerprint && (
+                  <span style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>
+                    Authenticity scoring enabled
+                  </span>
+                )}
+              </div>
+
               <button
                 onClick={handleCheck}
                 disabled={isChecking || !contentToCheck.trim() || !brandDNA?.name}
@@ -1115,9 +1181,152 @@ function HomeContent() {
 
               {checkResult && (
                 <div className="mt-16 animate-fade-in">
-                  <div className="flex justify-center mb-12">
-                    <ScoreRing score={checkResult.score} />
+                  <div className="flex justify-center gap-12 mb-12">
+                    <div className="text-center">
+                      <ScoreRing score={checkResult.score} />
+                      <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 8 }}>Brand Alignment</div>
+                    </div>
+                    {authenticityScore && (
+                      <div className="text-center">
+                        <ScoreRing score={authenticityScore.overall} />
+                        <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 8 }}>
+                          Authenticity
+                          <span
+                            style={{
+                              display: 'inline-block',
+                              marginLeft: 6,
+                              padding: '1px 6px',
+                              fontSize: 10,
+                              borderRadius: 8,
+                              background:
+                                authenticityScore.verdict === 'authentic' || authenticityScore.verdict === 'mostly_authentic'
+                                  ? 'rgba(52, 199, 89, 0.15)'
+                                  : authenticityScore.verdict === 'needs_work'
+                                    ? 'rgba(255, 159, 10, 0.15)'
+                                    : 'rgba(255, 69, 58, 0.15)',
+                              color:
+                                authenticityScore.verdict === 'authentic' || authenticityScore.verdict === 'mostly_authentic'
+                                  ? '#34C759'
+                                  : authenticityScore.verdict === 'needs_work'
+                                    ? '#FF9F0A'
+                                    : '#FF453A',
+                            }}
+                          >
+                            {authenticityScore.verdict.replace('_', ' ')}
+                          </span>
+                        </div>
+                      </div>
+                    )}
                   </div>
+
+                  {/* Authenticity Flags */}
+                  {authenticityScore && authenticityScore.flags.length > 0 && (
+                    <div className="mb-8">
+                      <div className="flex items-center justify-between mb-4">
+                        <h4 className="text-xs uppercase tracking-widest text-muted">Authenticity Flags</h4>
+                        <button
+                          onClick={async () => {
+                            if (!currentFingerprint || !authenticityScore) return;
+                            setIsRewritingFlags(true);
+                            try {
+                              const res = await fetch('/api/voice-fingerprint/rewrite', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                  content: contentToCheck,
+                                  fingerprint: currentFingerprint,
+                                  flags: authenticityScore.flags,
+                                }),
+                              });
+                              if (res.ok) {
+                                const { rewrittenContent, newScore } = await res.json();
+                                setContentToCheck(rewrittenContent);
+                                if (newScore) setAuthenticityScore(newScore);
+                                toast.success('Flags fixed!', 'Content rewritten in your voice.');
+                              }
+                            } catch {
+                              toast.error('Rewrite failed', 'Please try again.');
+                            } finally {
+                              setIsRewritingFlags(false);
+                            }
+                          }}
+                          disabled={isRewritingFlags}
+                          style={{
+                            fontSize: 12,
+                            padding: '4px 12px',
+                            borderRadius: 16,
+                            border: '1px solid var(--accent, #0A84FF)',
+                            background: 'transparent',
+                            color: 'var(--accent, #0A84FF)',
+                            cursor: isRewritingFlags ? 'default' : 'pointer',
+                            opacity: isRewritingFlags ? 0.5 : 1,
+                          }}
+                        >
+                          {isRewritingFlags ? 'Rewriting...' : 'Rewrite All Flagged'}
+                        </button>
+                      </div>
+                      <div className="space-y-3">
+                        {authenticityScore.flags.map((flag) => (
+                          <div
+                            key={flag.id}
+                            style={{
+                              padding: 12,
+                              borderRadius: 10,
+                              border: `1px solid ${
+                                flag.severity === 'high'
+                                  ? 'rgba(255, 69, 58, 0.3)'
+                                  : flag.severity === 'medium'
+                                    ? 'rgba(255, 159, 10, 0.3)'
+                                    : 'var(--border)'
+                              }`,
+                              background:
+                                flag.severity === 'high'
+                                  ? 'rgba(255, 69, 58, 0.05)'
+                                  : flag.severity === 'medium'
+                                    ? 'rgba(255, 159, 10, 0.05)'
+                                    : 'var(--surface)',
+                            }}
+                          >
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                              <span
+                                style={{
+                                  fontSize: 11,
+                                  padding: '2px 8px',
+                                  borderRadius: 8,
+                                  background:
+                                    flag.severity === 'high'
+                                      ? 'rgba(255, 69, 58, 0.15)'
+                                      : flag.severity === 'medium'
+                                        ? 'rgba(255, 159, 10, 0.15)'
+                                        : 'var(--surface)',
+                                  color:
+                                    flag.severity === 'high'
+                                      ? '#FF453A'
+                                      : flag.severity === 'medium'
+                                        ? '#FF9F0A'
+                                        : 'var(--text-tertiary)',
+                                }}
+                              >
+                                {flag.severity}
+                              </span>
+                              <span style={{ fontSize: 11, color: 'var(--text-quaternary)' }}>
+                                {flag.dimension}
+                              </span>
+                            </div>
+                            <p style={{ fontSize: 13, color: 'var(--text-primary)', marginBottom: 4, fontStyle: 'italic' }}>
+                              &ldquo;{flag.text}&rdquo;
+                            </p>
+                            <p style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 6 }}>{flag.reason}</p>
+                            <div style={{ padding: '8px 10px', background: 'rgba(10, 132, 255, 0.06)', borderRadius: 8, fontSize: 12 }}>
+                              <span style={{ color: 'var(--text-tertiary)' }}>Suggestion: </span>
+                              <span style={{ color: 'var(--text-secondary)' }}>{flag.suggestion}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   <div className="grid gap-8">
                     {checkResult.strengths?.length > 0 && (
                       <div>

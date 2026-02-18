@@ -39,6 +39,7 @@ model Brand {
   doPatterns String  // JSON array string
   dontPatterns String // JSON array string
   voiceSamples String // JSON array string
+  voiceFingerprint String? // JSON string of VoiceFingerprint
   isPublic  Boolean  @default(false)
   shareToken String? @unique
   createdAt DateTime @default(now())

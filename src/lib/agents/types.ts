@@ -1,6 +1,7 @@
 // ===== BRANDOS PRODUCT AGENTS - TYPE DEFINITIONS =====
 
 import { BrandDNA, ContentType, Platform } from '@/lib/types';
+import { VoiceFingerprint } from '@/lib/voice-fingerprint';
 
 // ===== AGENT SYSTEM TYPES =====
 
@@ -10,6 +11,7 @@ export interface AgentContext {
   brandDNA: BrandDNA;
   userId?: string;
   sessionId?: string;
+  voiceFingerprint?: VoiceFingerprint;
 }
 
 export interface AgentResponse<T> {
