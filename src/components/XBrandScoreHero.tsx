@@ -1532,7 +1532,7 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              gap: '12px',
+              gap: '0px',
               maxWidth: '1200px',
               width: '100%',
               position: 'relative',
@@ -1577,6 +1577,7 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
                 gap: '16px',
                 width: '100%',
                 maxWidth: '420px',
+                marginTop: '-40px',
                 willChange: 'transform',
               }}
             >
