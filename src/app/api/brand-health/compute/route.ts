@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
     const fourteenDaysAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
 
     // Fetch data in parallel
-    const [checkEntries, allHistoryEntries, posts, previousSnapshot] = await Promise.all([
+    const [checkEntries, allHistoryEntries, storedTweets, tweetSyncCount, previousSnapshot] = await Promise.all([
       // Last 20 check entries for consistency
       prisma.historyEntry.findMany({
         where: { brandId, type: 'check', score: { not: null } },
@@ -96,8 +96,17 @@ export async function POST(request: NextRequest) {
         where: { brandId, createdAt: { gte: fourteenDaysAgo } },
         select: { id: true },
       }),
-      // Fetch X posts via internal API (reuse dashboard posts endpoint logic)
-      fetchXPosts(request),
+      // Fetch stored tweets from BrandTweet table (no live X API call needed)
+      prisma.brandTweet.findMany({
+        where: { brandId },
+        orderBy: { postedAt: 'desc' },
+        take: 20,
+        select: { text: true, metrics: true },
+      }),
+      // Count tweet syncs in last 14 days (contributes to activity)
+      prisma.brandTweet.count({
+        where: { brandId, syncedAt: { gte: fourteenDaysAgo } },
+      }),
       // Previous snapshot for trend (7 days ago or most recent before that)
       prisma.brandHealthSnapshot.findFirst({
         where: {
@@ -109,10 +118,24 @@ export async function POST(request: NextRequest) {
       }),
     ]);
 
+    // Transform stored tweets into the shape computeEngagement expects
+    const posts = storedTweets.map(t => {
+      const m = JSON.parse(t.metrics);
+      return {
+        text: t.text,
+        public_metrics: {
+          like_count: m.likes || 0,
+          retweet_count: m.retweets || 0,
+          reply_count: m.replies || 0,
+          impression_count: m.impressions || 0,
+        },
+      };
+    });
+
     // Compute each dimension
     const completeness = computeCompleteness(brandDNA);
     const consistency = computeConsistency(checkEntries);
-    const activity = computeActivity(allHistoryEntries.length);
+    const activity = computeActivity(allHistoryEntries.length + tweetSyncCount);
 
     // Voice match requires Claude call
     let voiceMatch = 0;
@@ -154,7 +177,8 @@ export async function POST(request: NextRequest) {
         computationData: JSON.stringify({
           checkEntriesCount: checkEntries.length,
           postsCount: posts.length,
-          activityCount: allHistoryEntries.length,
+          tweetSyncCount,
+          activityCount: allHistoryEntries.length + tweetSyncCount,
           flags,
           weights: flags,
         }),
@@ -171,19 +195,3 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Helper: fetch X posts (reuse logic from dashboard/posts)
-async function fetchXPosts(request: NextRequest) {
-  try {
-    const origin = new URL(request.url).origin;
-    const res = await fetch(`${origin}/api/dashboard/posts`, {
-      headers: {
-        cookie: request.headers.get('cookie') || '',
-      },
-    });
-    if (!res.ok) return [];
-    const data = await res.json();
-    return data.posts || [];
-  } catch {
-    return [];
-  }
-}

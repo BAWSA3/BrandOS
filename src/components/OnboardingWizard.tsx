@@ -6,6 +6,7 @@ import { useBrandStore, useCurrentBrand } from '@/lib/store';
 import { brandTemplates } from '@/lib/templates';
 import BrandOSLogo from './BrandOSLogo';
 import SwissBackground from './SwissBackground';
+import { AsciiSky } from './ascii-sky';
 
 type Step = 'welcome' | 'name' | 'template' | 'colors' | 'tone' | 'keywords' | 'samples' | 'complete';
 
@@ -282,22 +283,38 @@ export default function OnboardingWizard({ onComplete, onSkip }: OnboardingWizar
         >
           {/* ════════ WELCOME ════════ */}
           {currentStep === 'welcome' && (
-            <div className="text-center">
+            <div className="text-center relative">
+              {/* ASCII Sky — full background behind welcome content */}
+              <div className="fixed inset-0 z-0 pointer-events-none">
+                <AsciiSky
+                  cloudCount={7}
+                  showHills={true}
+                  fontSize="14px"
+                  skyColorTop="#1a3a8a"
+                  skyColorBottom="#6ba3d6"
+                  cloudColor="#ffffff"
+                  hillColor="#3d8c34"
+                  hillColorFar="#265a20"
+                />
+                {/* Subtle overlay to ensure text readability */}
+                <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at center 40%, rgba(245,245,240,0.7) 0%, rgba(245,245,240,0.3) 50%, transparent 80%)' }} />
+              </div>
+
               {/* Logo */}
-              <div className="mb-12 flex justify-center">
+              <div className="relative z-10 mb-12 flex justify-center">
                 <BrandOSLogo size="hero" variant="landing" />
               </div>
 
-              <h2 className="font-sans text-5xl font-bold tracking-tight text-brand-black-swiss mb-4">
+              <h2 className="relative z-10 font-sans text-5xl font-bold tracking-tight text-brand-black-swiss mb-4" style={{ textShadow: '0 1px 8px rgba(245,245,240,0.8)' }}>
                 Let&apos;s set up your brand
               </h2>
-              <p className="font-sans text-lg text-brand-black-swiss/50 mb-14 max-w-md mx-auto leading-relaxed">
+              <p className="relative z-10 font-sans text-lg text-brand-black-swiss/60 mb-14 max-w-md mx-auto leading-relaxed" style={{ textShadow: '0 1px 6px rgba(245,245,240,0.9)' }}>
                 Answer a few quick questions to capture your brand identity. This takes about 2 minutes.
               </p>
 
               <button
                 onClick={nextStep}
-                className="px-14 py-4 bg-brand-black-swiss text-brand-cream rounded-full text-base font-medium shadow-[0_0_0_2px_rgba(47,84,235,0.5)] hover:shadow-[0_0_12px_rgba(47,84,235,0.6)] transition-shadow"
+                className="relative z-10 px-14 py-4 bg-brand-black-swiss text-brand-cream rounded-full text-base font-medium shadow-[0_0_0_2px_rgba(47,84,235,0.5)] hover:shadow-[0_0_12px_rgba(47,84,235,0.6)] transition-shadow"
               >
                 Begin Setup
               </button>
