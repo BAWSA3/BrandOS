@@ -1539,7 +1539,7 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
               zIndex: 10,
             }}
           >
-            {/* Logo - New Brand Image */}
+            {/* Logo - New Brand Image (includes subheading) */}
             <motion.div
               className="hero-parallax-title"
               initial={{ opacity: 0, scale: 0.95 }}
@@ -1554,34 +1554,9 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
             >
               <img
                 src="/brandos-logo-new.png"
-                alt="BrandOS"
+                alt="BrandOS — The AI-powered OS that builds your brand."
                 style={{
-                  width: 'clamp(280px, 50vw, 600px)',
-                  height: 'auto',
-                  filter: theme === 'dark' ? 'invert(1) brightness(2)' : 'none',
-                }}
-              />
-            </motion.div>
-
-            {/* Subheading - New Brand Image */}
-            <motion.div
-              className="hero-parallax-subtitle"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.3 }}
-              style={{
-                display: 'flex',
-                justifyContent: 'center',
-                marginTop: '-20px',
-                marginBottom: '2rem',
-                willChange: 'transform',
-              }}
-            >
-              <img
-                src="/brandos-subheading.png"
-                alt="The AI-powered OS that builds your brand."
-                style={{
-                  width: 'clamp(240px, 40vw, 480px)',
+                  width: 'clamp(360px, 70vw, 900px)',
                   height: 'auto',
                   filter: theme === 'dark' ? 'invert(1) brightness(2)' : 'none',
                 }}
