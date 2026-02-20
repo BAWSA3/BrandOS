@@ -1539,93 +1539,54 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
               zIndex: 10,
             }}
           >
-            {/* Phase tagline - micro copy style */}
-            <motion.p
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              style={{
-                fontFamily: "'Courier New', Courier, monospace",
-                fontSize: '1.1rem',
-                fontWeight: 500,
-                letterSpacing: '0.2em',
-                color: theme === 'dark' ? '#ffffff' : '#1a1a1a',
-                textAlign: 'center',
-                margin: 0,
-                marginBottom: '1rem',
-                textTransform: 'uppercase',
-                textShadow: theme === 'dark'
-                  ? '0 2px 8px rgba(0,0,0,0.8), 0 0 20px rgba(0,0,0,0.5)'
-                  : 'none',
-              }}
-            >
-              AI-powered OS that builds your brand's DNA.
-            </motion.p>
-
-            {/* Logo - Animated Text Reveal */}
+            {/* Logo - New Brand Image */}
             <motion.div
               className="hero-parallax-title"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6, delay: 0.1 }}
               style={{
                 display: 'flex',
-                alignItems: 'center',
+                justifyContent: 'center',
                 marginBottom: '0',
                 willChange: 'transform',
               }}
             >
-              <AnimatedText
-                text="Brand"
-                delay={0.2}
-                staggerDelay={0.05}
+              <img
+                src="/brandos-logo-new.png"
+                alt="BrandOS"
                 style={{
-                  fontFamily: "'Blauer Nue', 'Inter', sans-serif",
-                  fontWeight: 800,
-                  fontStyle: 'italic',
-                  fontSize: 'clamp(3rem, 18vw, 9rem)',
-                  letterSpacing: 'clamp(-2px, -0.5vw, -4px)',
-                  marginRight: 'clamp(4px, 1.5vw, 12px)',
-                  color: theme === 'dark' ? '#ffffff' : '#1a1a1a',
-                }}
-              />
-              <AnimatedText
-                text="OS"
-                delay={0.5}
-                staggerDelay={0.08}
-                style={{
-                  fontFamily: "'Mac Minecraft', 'Press Start 2P', cursive",
-                  fontWeight: 700,
-                  fontStyle: 'italic',
-                  fontSize: 'clamp(2.2rem, 14vw, 7rem)',
-                  color: '#0047FF',
-                  letterSpacing: '-0.05em',
+                  width: 'clamp(280px, 50vw, 600px)',
+                  height: 'auto',
+                  filter: theme === 'dark' ? 'invert(1) brightness(2)' : 'none',
                 }}
               />
             </motion.div>
 
-            {/* Sub-head - Design #2 Style */}
-            <motion.p
+            {/* Subheading - New Brand Image */}
+            <motion.div
               className="hero-parallax-subtitle"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.15 }}
+              transition={{ delay: 0.3 }}
               style={{
-                fontFamily: "'Press Start 2P', cursive",
-                fontSize: '0.85rem',
-                fontWeight: 400,
-                letterSpacing: '0.12em',
-                color: theme === 'dark' ? '#ffffff' : '#1a1a1a',
-                textAlign: 'center',
-                margin: 0,
-                marginTop: '-40px',
+                display: 'flex',
+                justifyContent: 'center',
+                marginTop: '-20px',
                 marginBottom: '2rem',
-                textTransform: 'uppercase',
-                textShadow: theme === 'dark'
-                  ? '0 2px 8px rgba(0,0,0,0.8), 0 0 20px rgba(0,0,0,0.5)'
-                  : 'none',
                 willChange: 'transform',
               }}
             >
-              HOW GOOD IS YOUR BRAND?
-            </motion.p>
+              <img
+                src="/brandos-subheading.png"
+                alt="The AI-powered OS that builds your brand."
+                style={{
+                  width: 'clamp(240px, 40vw, 480px)',
+                  height: 'auto',
+                  filter: theme === 'dark' ? 'invert(1) brightness(2)' : 'none',
+                }}
+              />
+            </motion.div>
 
             {/* Input Form */}
             <motion.form
