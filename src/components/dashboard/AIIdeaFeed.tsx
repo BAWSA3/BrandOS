@@ -7,6 +7,7 @@ interface AIIdeaFeedProps {
   isLoading: boolean;
   onRefresh: () => void;
   onCreatePost: (topic: string, tone: string) => void;
+  onSaveToCalendar?: (topic: string, tone: string) => void;
 }
 
 const tonePillColors: Record<string, { bg: string; text: string }> = {
@@ -27,7 +28,7 @@ const categoryLabels: Record<string, string> = {
   timely: 'Timely opportunity',
 };
 
-export default function AIIdeaFeed({ ideas, isLoading, onRefresh, onCreatePost }: AIIdeaFeedProps) {
+export default function AIIdeaFeed({ ideas, isLoading, onRefresh, onCreatePost, onSaveToCalendar }: AIIdeaFeedProps) {
   return (
     <div style={{ background: 'var(--surface)', borderRadius: 16, padding: 24, border: '1px solid var(--border)', boxShadow: 'var(--shadow-card)' }} className="h-full">
       <div className="flex items-center justify-between mb-4">
@@ -143,35 +144,75 @@ export default function AIIdeaFeed({ ideas, isLoading, onRefresh, onCreatePost }
                     )}
                   </div>
 
-                  <button
-                    onClick={() =>
-                      onCreatePost(
-                        idea.prefillTopic || idea.hook,
-                        idea.prefillTone || idea.tone || 'casual'
-                      )
-                    }
-                    style={{
-                      fontSize: 12,
-                      fontWeight: 500,
-                      color: '#0A84FF',
-                      background: 'rgba(10,132,255,0.1)',
-                      border: 'none',
-                      borderRadius: 8,
-                      padding: '6px 14px',
-                      cursor: 'pointer',
-                      whiteSpace: 'nowrap',
-                      transition: 'all 150ms ease',
-                      marginTop: 2,
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = 'rgba(10,132,255,0.18)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = 'rgba(10,132,255,0.1)';
-                    }}
-                  >
-                    Create Post
-                  </button>
+                  <div className="flex flex-col gap-1.5" style={{ marginTop: 2 }}>
+                    <button
+                      onClick={() =>
+                        onCreatePost(
+                          idea.prefillTopic || idea.hook,
+                          idea.prefillTone || idea.tone || 'casual'
+                        )
+                      }
+                      style={{
+                        fontSize: 12,
+                        fontWeight: 500,
+                        color: '#0A84FF',
+                        background: 'rgba(10,132,255,0.1)',
+                        border: 'none',
+                        borderRadius: 8,
+                        padding: '6px 14px',
+                        cursor: 'pointer',
+                        whiteSpace: 'nowrap',
+                        transition: 'all 150ms ease',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = 'rgba(10,132,255,0.18)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = 'rgba(10,132,255,0.1)';
+                      }}
+                    >
+                      Create Post
+                    </button>
+                    {onSaveToCalendar && (
+                      <button
+                        onClick={() =>
+                          onSaveToCalendar(
+                            idea.prefillTopic || idea.hook,
+                            idea.prefillTone || idea.tone || 'casual'
+                          )
+                        }
+                        style={{
+                          fontSize: 11,
+                          fontWeight: 500,
+                          color: 'var(--text-secondary)',
+                          background: 'var(--surface-hover)',
+                          border: 'none',
+                          borderRadius: 6,
+                          padding: '4px 10px',
+                          cursor: 'pointer',
+                          whiteSpace: 'nowrap',
+                          transition: 'all 150ms ease',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 4,
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.color = 'var(--text-primary)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.color = 'var(--text-secondary)';
+                        }}
+                      >
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                          <line x1="16" y1="2" x2="16" y2="6" />
+                          <line x1="8" y1="2" x2="8" y2="6" />
+                          <line x1="3" y1="10" x2="21" y2="10" />
+                        </svg>
+                        Save to Calendar
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             );

@@ -12,7 +12,7 @@ export type SubTab =
   // Check phase
   | 'check' | 'cohesion' | 'guardrails' | 'protect' | 'taste'
   // Generate phase (consolidated)
-  | 'generate' | 'platforms' | 'context' | 'visual'
+  | 'generate' | 'calendar' | 'platforms' | 'context' | 'visual'
   | 'kit-canvas' | 'kit-logos' | 'kit-colors' | 'kit-typography' | 'kit-imagery' | 'kit-icons' | 'kit-templates' | 'kit-ai-studio'
   // Scale phase
   | 'dashboard' | 'history' | 'export' | 'competitors' | 'memory';
@@ -62,6 +62,7 @@ const phases: PhaseConfig[] = [
     description: 'Create from your DNA',
     tabs: [
       { id: 'generate', label: 'Create' },
+      { id: 'calendar', label: 'Calendar' },
       { id: 'kit-canvas', label: 'Brand Kit' },
       { id: 'kit-ai-studio', label: 'AI Studio' },
       { id: 'platforms', label: 'Platforms' },
@@ -285,7 +286,7 @@ export function getPhaseFromTab(tab: SubTab): Phase {
   if (tab === 'home') return 'home';
   const definesTabs: SubTab[] = ['brand', 'voiceprint', 'safezones', 'intents'];
   const checkTabs: SubTab[] = ['check', 'cohesion', 'guardrails', 'protect', 'taste'];
-  const generateTabs: SubTab[] = ['generate', 'platforms', 'context', 'visual', 'kit-ai-studio', 'kit-canvas', 'kit-logos', 'kit-colors', 'kit-typography', 'kit-imagery', 'kit-icons', 'kit-templates'];
+  const generateTabs: SubTab[] = ['generate', 'calendar', 'platforms', 'context', 'visual', 'kit-ai-studio', 'kit-canvas', 'kit-logos', 'kit-colors', 'kit-typography', 'kit-imagery', 'kit-icons', 'kit-templates'];
 
   if (definesTabs.includes(tab)) return 'define';
   if (checkTabs.includes(tab)) return 'check';

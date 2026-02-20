@@ -62,6 +62,12 @@ model Brand {
   // Health Snapshots
   healthSnapshots BrandHealthSnapshot[]
 
+  // Synced X tweets
+  tweets BrandTweet[]
+
+  // Content calendar drafts
+  contentDrafts ContentDraft[]
+
   @@index([userId])
   @@index([teamId])
   @@index([shareToken])
@@ -129,6 +135,23 @@ model BrandHealthSnapshot {
   @@index([brandId])
   @@index([createdAt])
   @@index([brandId, createdAt])
+}
+
+model BrandTweet {
+  id              String   @id @default(cuid())
+  tweetId         String   @unique        // X tweet ID (dedup key)
+  text            String
+  postedAt        DateTime               // When tweet was posted on X
+  metrics         String                 // JSON: {likes, retweets, replies, impressions, quotes}
+  entities        String?                // JSON: {hashtags, mentions, urls}
+  alignmentScore  Int?                   // 0-100, null = not yet scored
+  engagementRate  Float?                 // Computed: (likes+RTs+replies)/impressions
+  brandId         String
+  brand           Brand    @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  syncedAt        DateTime @default(now())
+  createdAt       DateTime @default(now())
+
+  @@index([brandId, postedAt(sort: Desc)])
 }
 
 model HistoryEntry {
@@ -259,6 +282,35 @@ model ResearchSourceConfig {
   config      String?   // JSON config (rate limits, etc.)
 
   @@index([enabled])
+}
+
+// ===== CONTENT CALENDAR =====
+
+model ContentDraft {
+  id           String    @id @default(cuid())
+  content      String
+  contentType  String    @default("tweet") // tweet, thread, poll, hot-take, educational, counter-argument, story
+  tone         String    @default("casual")
+  status       String    @default("idea") // idea, draft, scheduled, published
+  scheduledFor DateTime?
+  sourceType   String?   // idea-feed, manual, repurpose
+  sourceId     String?   // ID of the parent draft (for repurpose chain)
+  authenticity Int?      // 0-100 from fingerprint pipeline
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  brandId String
+  brand   Brand  @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  // Self-referential repurpose chain
+  parentId String?
+  parent   ContentDraft?  @relation("RepurposeChain", fields: [parentId], references: [id], onDelete: SetNull)
+  children ContentDraft[] @relation("RepurposeChain")
+
+  @@index([brandId])
+  @@index([brandId, status])
+  @@index([brandId, scheduledFor])
+  @@index([parentId])
 }
 
 // ===== FEEDBACK SYSTEM =====

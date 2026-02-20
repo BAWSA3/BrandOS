@@ -35,8 +35,10 @@ import { useAuth } from '@/hooks/useAuth';
 import { useBrandSync } from '@/hooks/useBrandSync';
 import { useHistorySync } from '@/hooks/useHistorySync';
 import ContentWorkflow from '@/components/workflow/ContentWorkflow';
+import ContentCalendar from '@/components/calendar/ContentCalendar';
 import DashboardHome from '@/components/dashboard/DashboardHome';
 import { InviteCodeDisplay } from '@/components/InviteCodeDisplay';
+import { AsciiSkyLoadingScreen } from '@/components/ascii-sky';
 
 function HomeContent() {
   const searchParams = useSearchParams();
@@ -81,6 +83,7 @@ function HomeContent() {
   const [showBrandMenu, setShowBrandMenu] = useState(false);
   const [showTemplates, setShowTemplates] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(!phaseProgress.hasCompletedOnboarding);
+  const [showLoadingScreen, setShowLoadingScreen] = useState(true);
   const [showImportHub, setShowImportHub] = useState(false);
   const [showPhasesBreakdown, setShowPhasesBreakdown] = useState(showPhasesParam && !phaseProgress.hasCompletedOnboarding);
   const [showImportedWelcome, setShowImportedWelcome] = useState(importedParam);
@@ -163,6 +166,7 @@ function HomeContent() {
   const handleOnboardingComplete = () => {
     completeOnboarding();
     setShowOnboarding(false);
+    setShowLoadingScreen(true); // Show loading screen transition before dashboard
     handlePhaseChange('home'); // Land on Dashboard Home after onboarding
     analytics.onboardingCompleted();
     // Show save prompt for unauthenticated users
@@ -671,6 +675,16 @@ function HomeContent() {
   // Show onboarding wizard after choosing "Start Fresh"
   if (showOnboarding) {
     return <OnboardingWizard onComplete={handleOnboardingComplete} onSkip={handleOnboardingSkip} />;
+  }
+
+  // Show ASCII sky loading screen (on initial load + after onboarding)
+  if (showLoadingScreen) {
+    return (
+      <AsciiSkyLoadingScreen
+        onComplete={() => setShowLoadingScreen(false)}
+        brandName={brandDNA?.name}
+      />
+    );
   }
 
   return (
@@ -1431,6 +1445,13 @@ function HomeContent() {
         {activeTab === 'generate' && (
           <div className="animate-fade-in">
             <ContentWorkflow />
+          </div>
+        )}
+
+        {/* Calendar Tab */}
+        {activeTab === 'calendar' && (
+          <div className="animate-fade-in">
+            <ContentCalendar />
           </div>
         )}
 

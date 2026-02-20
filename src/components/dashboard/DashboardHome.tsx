@@ -3,14 +3,15 @@
 import { useCallback, CSSProperties } from 'react';
 import BrandScoreCard from './BrandScoreCard';
 import QuickStatsCard from './QuickStatsCard';
-import RecentPostsCard from './RecentPostsCard';
+import BrandFeedCard from './BrandFeedCard';
 import AIInsightsPanel from './AIInsightsPanel';
 import AIIdeaFeed from './AIIdeaFeed';
 import PhaseQuickAccess from './PhaseQuickAccess';
 import { useDashboardData } from './useDashboardData';
 import { useBrandCompleteness } from '@/components/BrandCompleteness';
-import { useBrandStore } from '@/lib/store';
+import { useBrandStore, useCurrentBrand } from '@/lib/store';
 import { useWorkflowStore } from '@/components/workflow/useWorkflowStore';
+import CalendarSummaryCard from './CalendarSummaryCard';
 import type { Phase } from '@/components/PhaseNavigation';
 import type { TonePill } from '@/components/workflow/workflow.types';
 import SwissBackground from '../SwissBackground';
@@ -29,12 +30,10 @@ function staggerStyle(index: number): CSSProperties {
 
 export default function DashboardHome({ onNavigatePhase }: DashboardHomeProps) {
   const {
-    posts,
     insights,
     ideas,
     health,
     stats,
-    isLoadingPosts,
     isLoadingInsights,
     isLoadingIdeas,
     refreshIdeas,
@@ -42,6 +41,29 @@ export default function DashboardHome({ onNavigatePhase }: DashboardHomeProps) {
 
   const completeness = useBrandCompleteness();
   const { phaseProgress } = useBrandStore();
+  const brand = useCurrentBrand();
+
+  const handleSaveToCalendar = useCallback(
+    async (topic: string, tone: string) => {
+      if (!brand?.id) return;
+      try {
+        await fetch('/api/calendar/drafts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            brandId: brand.id,
+            content: topic,
+            tone: tone || 'casual',
+            status: 'idea',
+            sourceType: 'idea-feed',
+          }),
+        });
+      } catch (err) {
+        console.error('Failed to save to calendar:', err);
+      }
+    },
+    [brand?.id]
+  );
 
   const handleCreatePost = useCallback(
     (topic: string, tone: string) => {
@@ -72,9 +94,9 @@ export default function DashboardHome({ onNavigatePhase }: DashboardHomeProps) {
           </div>
         </div>
 
-        {/* ─── Row 2: Recent X Posts (full-width scrollable) ─── */}
+        {/* ─── Row 2: Brand Feed — synced X tweets with alignment scores ─── */}
         <div className="animate-fade-in" style={staggerStyle(2)}>
-          <RecentPostsCard posts={posts} isLoading={isLoadingPosts} />
+          <BrandFeedCard />
         </div>
 
         {/* ─── Row 2b: AI Performance Insights ─── */}
@@ -82,7 +104,7 @@ export default function DashboardHome({ onNavigatePhase }: DashboardHomeProps) {
           <AIInsightsPanel insights={insights} isLoading={isLoadingInsights} />
         </div>
 
-        {/* ─── Row 3: AI Idea Feed (2/3) + Phase Quick Access (1/3) ─── */}
+        {/* ─── Row 3: AI Idea Feed (2/3) + Calendar Summary + Phase Access (1/3) ─── */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <div className="lg:col-span-2 animate-fade-in" style={staggerStyle(4)}>
             <AIIdeaFeed
@@ -90,9 +112,13 @@ export default function DashboardHome({ onNavigatePhase }: DashboardHomeProps) {
               isLoading={isLoadingIdeas}
               onRefresh={refreshIdeas}
               onCreatePost={handleCreatePost}
+              onSaveToCalendar={handleSaveToCalendar}
             />
           </div>
-          <div className="animate-fade-in" style={staggerStyle(5)}>
+          <div className="space-y-4 animate-fade-in" style={staggerStyle(5)}>
+            <CalendarSummaryCard
+              onOpenCalendar={() => onNavigatePhase('generate')}
+            />
             <PhaseQuickAccess
               brandCompleteness={completeness}
               hasChecked={phaseProgress.hasCompletedFirstCheck}
