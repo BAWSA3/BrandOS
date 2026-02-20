@@ -1,6 +1,6 @@
 # BrandOS Brand Kit
 
-> Last updated: 2026-02-19
+> Last updated: 2026-02-20
 
 ---
 
@@ -105,6 +105,9 @@ Home → Define → Check → Generate → Scale
 | **VCR OSD Mono** | `VCR_OSD_MONO_1.001.ttf` | Monospace labels, phase badges, CTAs |
 | **Russo One** | `RussoOne-Regular.ttf` | Gaming/bold display text |
 | **Mac Minecraft** | `MacMinecraft-BoldItalic.ttf` | Logo "OS" text, playful accents |
+| **Coolvetica** | `Coolvetica-RgIt.otf` | Hero logo "Brand" wordmark (italic) |
+| **LEDLIGHT** | `LEDLIGHT.otf` | Hero logo "OS" text (LED/digital style, gradient fill) |
+| **Moderniz** | `Moderniz.otf` | Hero subheading, tagline text |
 
 ### System Font Stack (Body Text)
 
@@ -116,7 +119,9 @@ font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
 ### Font Usage Rules
 
 - **Headlines / Hero:** Blauer Nue Extrabold or system stack at large sizes
-- **Logo wordmark:** "Brand" in Blauer Nue + "OS" in PP Mondwest (colored `--accent`)
+- **Logo wordmark (hero):** "Brand" in Coolvetica Italic + "OS" in LEDLIGHT (white→blue gradient)
+- **Logo wordmark (alt):** "Brand" in Blauer Nue + "OS" in PP Mondwest (colored `--accent`)
+- **Tagline / Subheading:** Moderniz
 - **Section labels / Badges:** VCR OSD Mono or PP Mondwest
 - **Body text:** System font stack (SF Pro / Inter / Segoe UI)
 - **Code / Data:** VCR OSD Mono
@@ -138,6 +143,9 @@ PPMondwest-Regular.otf
 PPNeueBit-Bold.otf
 RussoOne-Regular.ttf
 VCR_OSD_MONO_1.001.ttf
+Coolvetica-RgIt.otf
+LEDLIGHT.otf
+Moderniz.otf
 ```
 
 ---
