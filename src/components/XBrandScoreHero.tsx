@@ -16,6 +16,7 @@ import { domToPng } from 'modern-screenshot';
 import { AuthenticityAnalysis, ActivityAnalysis } from '@/lib/gemini';
 import { useXBrandScoreDemoCapture } from '@/hooks/useDemoCaptureIntegration';
 import DemoModeControls from './DemoModeControls';
+import HeroBackground from '@/components/HeroBackground';
 
 // Dynamically import DNA scene to avoid SSR issues with Three.js
 const DNAJourneyScene = dynamic(() => import('./DNAJourneyScene'), {
@@ -1474,6 +1475,7 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
 
   return (
     <div
+      className={flowState === 'input' ? 'crt-scanlines' : ''}
       style={{
         minHeight: '100vh',
         display: 'flex',
@@ -1485,15 +1487,29 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
         overflow: (flowState === 'walkthrough' || flowState === 'journey') ? 'visible' : 'hidden',
       }}
     >
-      {/* DNA Background - Visible during input & journey, hidden during reveal */}
+      {/* Video Sky Background — visible during input state */}
+      <motion.div
+        initial={{ opacity: 1 }}
+        animate={{ opacity: flowState === 'input' ? 1 : 0 }}
+        transition={{ duration: 0.8 }}
+        style={{
+          position: 'absolute',
+          inset: 0,
+          zIndex: 0,
+          pointerEvents: 'none',
+        }}
+      >
+        <HeroBackground />
+      </motion.div>
+
+      {/* DNA Background - Hidden during input, visible during journey, hidden during reveal */}
       <div
         style={{
           position: 'absolute',
           inset: 0,
           zIndex: flowState === 'journey' ? 5 : 0,
-          opacity: flowState === 'journey' ? 1 : flowState === 'reveal' ? 0 : 0.6,
-          transition: 'opacity 0.5s ease',
-          // Disable pointer events so scroll passes through
+          opacity: flowState === 'input' ? 0 : flowState === 'journey' ? 1 : flowState === 'reveal' ? 0 : 0.6,
+          transition: 'opacity 0.8s ease',
           pointerEvents: 'none',
         }}
       >
@@ -1519,180 +1535,381 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
       {/* Confetti */}
       <Confetti isActive={showConfetti} />
 
+      {/* System UI Decorations — corner brackets, status labels */}
+      <AnimatePresence>
+        {flowState === 'input' && (
+          <>
+            {/* Corner brackets — all 4 viewport corners */}
+            {/* Top-left */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.15 }}
+              exit={{ opacity: 0 }}
+              transition={{ delay: 1.2, duration: 0.5 }}
+              style={{
+                position: 'fixed', top: 16, left: 16, width: 30, height: 30,
+                borderTop: '1px solid rgba(0,0,0,0.2)',
+                borderLeft: '1px solid rgba(0,0,0,0.2)',
+                pointerEvents: 'none', zIndex: 20,
+              }}
+            />
+            {/* Top-right */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.15 }}
+              exit={{ opacity: 0 }}
+              transition={{ delay: 1.2, duration: 0.5 }}
+              style={{
+                position: 'fixed', top: 16, right: 16, width: 30, height: 30,
+                borderTop: '1px solid rgba(0,0,0,0.2)',
+                borderRight: '1px solid rgba(0,0,0,0.2)',
+                pointerEvents: 'none', zIndex: 20,
+              }}
+            />
+            {/* Bottom-left */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.15 }}
+              exit={{ opacity: 0 }}
+              transition={{ delay: 1.2, duration: 0.5 }}
+              style={{
+                position: 'fixed', bottom: 16, left: 16, width: 30, height: 30,
+                borderBottom: '1px solid rgba(0,0,0,0.2)',
+                borderLeft: '1px solid rgba(0,0,0,0.2)',
+                pointerEvents: 'none', zIndex: 20,
+              }}
+            />
+            {/* Bottom-right */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.15 }}
+              exit={{ opacity: 0 }}
+              transition={{ delay: 1.2, duration: 0.5 }}
+              style={{
+                position: 'fixed', bottom: 16, right: 16, width: 30, height: 30,
+                borderBottom: '1px solid rgba(0,0,0,0.2)',
+                borderRight: '1px solid rgba(0,0,0,0.2)',
+                pointerEvents: 'none', zIndex: 20,
+              }}
+            />
+
+            {/* Version label — top-right */}
+            <motion.span
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.3 }}
+              exit={{ opacity: 0 }}
+              transition={{ delay: 1.2, duration: 0.5 }}
+              style={{
+                position: 'fixed', top: 22, right: 54,
+                fontFamily: "'PP NeueBit', monospace", fontSize: '11px',
+                letterSpacing: '0.15em', color: 'rgba(0,0,0,0.25)',
+                pointerEvents: 'none', zIndex: 20,
+              }}
+            >
+              v2.0
+            </motion.span>
+
+            {/* Bottom-center — POWERED BY AI */}
+            <motion.span
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.25 }}
+              exit={{ opacity: 0 }}
+              transition={{ delay: 1.4, duration: 0.5 }}
+              style={{
+                position: 'fixed', bottom: 22, left: '50%', transform: 'translateX(-50%)',
+                fontFamily: "'PP NeueBit', monospace", fontSize: '11px',
+                letterSpacing: '0.2em', color: 'rgba(0,0,0,0.2)',
+                whiteSpace: 'nowrap', pointerEvents: 'none', zIndex: 20,
+              }}
+            >
+              ── POWERED BY AI ──
+            </motion.span>
+          </>
+        )}
+      </AnimatePresence>
+
       <AnimatePresence mode="wait">
         {/* INPUT STATE */}
         {flowState === 'input' && (
           <motion.div
             key="input"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
             exit={{ opacity: 0, y: -30 }}
             transition={{ duration: 0.5 }}
             style={{
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              gap: '0px',
-              maxWidth: '1200px',
+              maxWidth: '640px',
               width: '100%',
               position: 'relative',
               zIndex: 10,
             }}
           >
-            {/* Logo - New Brand Image (includes subheading) */}
+            {/* OS Window Chrome Frame */}
             <motion.div
-              className="hero-parallax-title"
-              initial={{ opacity: 0, scale: 0.95 }}
+              initial={{ opacity: 0, scale: 0.97 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
+              transition={{ duration: 0.4, delay: 0.2 }}
               style={{
-                display: 'flex',
-                justifyContent: 'center',
-                marginBottom: '0',
-                willChange: 'transform',
-              }}
-            >
-              <img
-                src="/brandos-logo-new.png"
-                alt="BrandOS — The AI-powered OS that builds your brand."
-                style={{
-                  width: 'clamp(500px, 90vw, 1100px)',
-                  height: 'auto',
-                  filter: theme === 'dark' ? 'invert(1) brightness(2)' : 'none',
-                }}
-              />
-            </motion.div>
-
-            {/* Input Form */}
-            <motion.form
-              className="hero-parallax-form"
-              onSubmit={handleSubmit}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.25 }}
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: '16px',
                 width: '100%',
-                maxWidth: '420px',
-                marginTop: '-40px',
-                willChange: 'transform',
+                border: '1px solid rgba(0,0,0,0.15)',
+                borderRadius: '3px',
+                background: 'rgba(0,0,0,0.35)',
+                backdropFilter: 'blur(12px)',
+                WebkitBackdropFilter: 'blur(12px)',
+                overflow: 'hidden',
               }}
             >
-              {/* Glassmorphic Input - More visible */}
-              <div style={{ position: 'relative', width: '100%' }}>
-                <input
-                  type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value.replace(/^@/, ''))}
-                  placeholder="@username"
-                  maxLength={15}
-                  className={theme === 'dark' ? 'landing-input' : 'landing-input-light'}
-                  style={{
-                    width: '100%',
-                    fontFamily: "'Courier New', monospace",
-                    fontSize: '1.125rem',
-                    padding: '1.125rem',
-                    textAlign: 'center',
-                    borderRadius: '12px',
-                    border: `2px solid ${error ? '#EF4444' : theme === 'dark' ? 'rgba(255, 255, 255, 0.35)' : 'rgba(0, 0, 0, 0.15)'}`,
-                    background: theme === 'dark' ? 'rgba(0, 0, 0, 0.6)' : 'rgba(255, 255, 255, 0.9)',
-                    backdropFilter: 'blur(16px)',
-                    WebkitBackdropFilter: 'blur(16px)',
-                    color: theme === 'dark' ? '#ffffff' : '#1a1a1a',
-                    outline: 'none',
-                    transition: 'all 0.3s ease',
-                    boxShadow: theme === 'dark'
-                      ? '0 4px 20px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
-                      : '0 4px 20px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.5)',
-                  }}
-                  onFocus={(e) => {
-                    if (theme === 'dark') {
-                      e.currentTarget.style.background = 'rgba(0, 0, 0, 0.75)';
-                      e.currentTarget.style.borderColor = 'rgba(0, 71, 255, 0.7)';
-                      e.currentTarget.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.4), 0 0 30px rgba(0, 71, 255, 0.3)';
-                    } else {
-                      e.currentTarget.style.background = 'rgba(255, 255, 255, 1)';
-                      e.currentTarget.style.borderColor = 'rgba(0, 71, 255, 0.6)';
-                      e.currentTarget.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.08), 0 0 20px rgba(0, 71, 255, 0.15)';
-                    }
-                  }}
-                  onBlur={(e) => {
-                    if (theme === 'dark') {
-                      e.currentTarget.style.background = 'rgba(0, 0, 0, 0.6)';
-                      e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.35)';
-                      e.currentTarget.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)';
-                    } else {
-                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.9)';
-                      e.currentTarget.style.borderColor = 'rgba(0, 0, 0, 0.15)';
-                      e.currentTarget.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.5)';
-                    }
-                  }}
-                />
-              </div>
-
-              {/* CTA Button */}
-              <motion.button
-                type="submit"
-                disabled={isValidating}
-                whileHover={!isValidating ? { scale: 1.02, boxShadow: '0 15px 50px -10px rgba(0, 71, 255, 0.5)' } : {}}
-                whileTap={!isValidating ? { scale: 0.98 } : {}}
+              {/* Title bar */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3, duration: 0.3 }}
                 style={{
-                  width: '100%',
-                  fontFamily: "'Courier New', monospace",
-                  fontSize: '1rem',
-                  fontWeight: 'bold',
-                  letterSpacing: '0.12em',
-                  color: '#ffffff',
-                  background: '#0047FF',
-                  border: 'none',
-                  padding: '1.125rem',
-                  borderRadius: '10px',
-                  cursor: isValidating ? 'wait' : 'pointer',
-                  boxShadow: '0 10px 40px -10px rgba(0, 71, 255, 0.4)',
-                  opacity: isValidating ? 0.7 : 1,
-                  transition: 'background 0.3s ease',
+                  height: '28px',
+                  background: 'rgba(255,255,255,0.04)',
+                  borderBottom: '1px solid rgba(255,255,255,0.08)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  padding: '0 12px',
+                  gap: '6px',
+                  position: 'relative',
                 }}
               >
-                {isValidating ? 'ANALYZING...' : "ANALYZE MY PROFILE →"}
-              </motion.button>
+                {/* Mac window dots */}
+                <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#FF5F57' }} />
+                <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#FEBC2E' }} />
+                <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#28C840' }} />
 
-              {error && (
-                <motion.p
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
+                {/* SYS.ONLINE indicator */}
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 1.0, duration: 0.4 }}
                   style={{
-                    fontFamily: "'VCR OSD Mono', monospace",
-                    fontSize: '12px',
-                    color: '#EF4444',
-                    margin: 0,
+                    display: 'flex', alignItems: 'center', gap: '5px',
+                    marginLeft: '10px',
                   }}
                 >
-                  {error}
-                </motion.p>
-              )}
-            </motion.form>
+                  <motion.div
+                    animate={{ opacity: [0.4, 1, 0.4] }}
+                    transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                    style={{ width: 5, height: 5, borderRadius: '50%', background: '#FEBC2E' }}
+                  />
+                  <span style={{
+                    fontFamily: "'PP NeueBit', monospace", fontSize: '10px',
+                    letterSpacing: '0.15em', color: 'rgba(255,255,255,0.3)',
+                  }}>
+                    SYS.ONLINE
+                  </span>
+                </motion.div>
 
-            {/* Footer hint - Design #2 Style */}
+                {/* Title */}
+                <span style={{
+                  position: 'absolute', left: '50%', transform: 'translateX(-50%)',
+                  fontFamily: "'PP NeueBit', monospace", fontSize: '11px',
+                  letterSpacing: '0.15em', color: 'rgba(255,255,255,0.3)',
+                }}>
+                  BRANDOS.EXE
+                </span>
+              </motion.div>
+
+              {/* Window content */}
+              <div style={{
+                display: 'flex', flexDirection: 'column', alignItems: 'center',
+                padding: '32px 32px 28px',
+                gap: '0px',
+              }}>
+                {/* Logo */}
+                <motion.div
+                  className="hero-parallax-title"
+                  initial={{ opacity: 0, scale: 0.9, filter: 'blur(8px)' }}
+                  animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+                  transition={{ duration: 0.5, delay: 0.5 }}
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    marginBottom: '0',
+                    willChange: 'transform',
+                  }}
+                >
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'baseline',
+                    fontSize: 'clamp(3rem, 8vw, 5rem)',
+                    lineHeight: 1,
+                    gap: '0.05em',
+                  }}>
+                    <span style={{
+                      fontFamily: "'Coolvetica', sans-serif",
+                      fontStyle: 'italic',
+                      fontWeight: 700,
+                      color: '#ffffff',
+                    }}>Brand</span>
+                    <span style={{
+                      fontFamily: "'LEDLIGHT', monospace",
+                      fontWeight: 400,
+                      background: 'linear-gradient(to right, #ffffff 0%, #0047FF 100%)',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      backgroundClip: 'text',
+                    }}>OS</span>
+                  </div>
+                  <span style={{
+                    fontFamily: "'Moderniz', sans-serif",
+                    fontSize: 'clamp(0.55rem, 1.3vw, 0.8rem)',
+                    color: 'rgba(255,255,255,0.6)',
+                    letterSpacing: '0.08em',
+                    marginTop: '6px',
+                    textAlign: 'center',
+                    whiteSpace: 'nowrap',
+                  }}>
+                    The AI-powered OS that builds your brand
+                  </span>
+                </motion.div>
+
+                {/* Input Form */}
+                <motion.form
+                  className="hero-parallax-form"
+                  onSubmit={handleSubmit}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.7 }}
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: '12px',
+                    width: '100%',
+                    maxWidth: '420px',
+                    marginTop: '-24px',
+                    willChange: 'transform',
+                  }}
+                >
+                  {/* ENTER HANDLE label */}
+                  <motion.span
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 0.3 }}
+                    transition={{ delay: 0.7, duration: 0.3 }}
+                    style={{
+                      fontFamily: "'PP NeueBit', monospace",
+                      fontSize: '12px',
+                      letterSpacing: '0.25em',
+                      color: 'rgba(255,255,255,0.3)',
+                      marginBottom: '4px',
+                    }}
+                  >
+                    ENTER HANDLE
+                  </motion.span>
+
+                  {/* Terminal Input with > prefix */}
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.8, duration: 0.3 }}
+                    style={{ position: 'relative', width: '100%' }}
+                  >
+                    {/* > prompt character */}
+                    <span style={{
+                      position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)',
+                      fontFamily: "'VCR OSD Mono', monospace", fontSize: '1.125rem',
+                      color: 'rgba(255,255,255,0.3)', pointerEvents: 'none', zIndex: 1,
+                    }}>
+                      &gt;
+                    </span>
+                    <input
+                      type="text"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value.replace(/^@/, ''))}
+                      placeholder="enter @username"
+                      maxLength={15}
+                      className="terminal-input"
+                      style={{
+                        width: '100%',
+                        fontSize: '1.125rem',
+                        padding: '1rem 1rem 1rem 28px',
+                        textAlign: 'left',
+                        borderRadius: '2px',
+                        border: `1px solid ${error ? '#EF4444' : 'rgba(255,255,255,0.1)'}`,
+                        background: 'rgba(0,0,0,0.5)',
+                        color: '#ffffff',
+                        outline: 'none',
+                        transition: 'all 0.3s ease',
+                      }}
+                      onFocus={(e) => {
+                        e.currentTarget.style.borderColor = 'rgba(0, 71, 255, 0.5)';
+                        e.currentTarget.style.boxShadow = '0 0 20px rgba(0, 71, 255, 0.15)';
+                      }}
+                      onBlur={(e) => {
+                        e.currentTarget.style.borderColor = error ? '#EF4444' : 'rgba(255,255,255,0.1)';
+                        e.currentTarget.style.boxShadow = 'none';
+                      }}
+                    />
+                  </motion.div>
+
+                  {/* CTA Button — Flat OS Style */}
+                  <motion.button
+                    type="submit"
+                    disabled={isValidating}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.9, duration: 0.3 }}
+                    whileHover={!isValidating ? { scale: 1.02 } : {}}
+                    whileTap={!isValidating ? { scale: 0.98 } : {}}
+                    style={{
+                      width: '100%',
+                      fontFamily: "'VCR OSD Mono', monospace",
+                      fontSize: '13px',
+                      letterSpacing: '0.15em',
+                      color: '#ffffff',
+                      background: '#0047FF',
+                      border: 'none',
+                      padding: '1rem',
+                      borderRadius: '2px',
+                      cursor: isValidating ? 'wait' : 'pointer',
+                      opacity: isValidating ? 0.7 : 1,
+                      transition: 'opacity 0.3s ease',
+                    }}
+                  >
+                    {isValidating ? 'PROCESSING...' : 'RUN ANALYSIS →'}
+                  </motion.button>
+
+                  {error && (
+                    <motion.p
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      style={{
+                        fontFamily: "'VCR OSD Mono', monospace",
+                        fontSize: '12px',
+                        color: '#EF4444',
+                        margin: 0,
+                      }}
+                    >
+                      {error}
+                    </motion.p>
+                  )}
+                </motion.form>
+              </div>
+            </motion.div>
+
+            {/* Footer hint — retro terminal style */}
             <motion.p
               initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.4 }}
+              animate={{ opacity: 0.3 }}
+              transition={{ delay: 1.4, duration: 0.4 }}
               style={{
-                fontFamily: "'Courier New', monospace",
-                fontSize: '0.7rem',
-                letterSpacing: '0.08em',
-                color: theme === 'dark' ? '#ffffff' : '#2a2a2a',
+                fontFamily: "'PP NeueBit', monospace",
+                fontSize: '11px',
+                letterSpacing: '0.15em',
+                color: 'rgba(0,0,0,0.25)',
                 textAlign: 'center',
                 marginTop: '1.5rem',
-                textShadow: theme === 'dark'
-                  ? '0 2px 8px rgba(0,0,0,0.8), 0 0 15px rgba(0,0,0,0.5)'
-                  : 'none',
               }}
             >
-              WORKS WITH ANY PUBLIC X ACCOUNT
+              ── WORKS WITH ANY PUBLIC X ACCOUNT ──
             </motion.p>
           </motion.div>
         )}
