@@ -91,6 +91,71 @@
   font-display: swap;
 }
 
+@font-face {
+  font-family: 'Coolvetica';
+  src: url('/fonts/Coolvetica-RgIt.otf') format('opentype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'LEDLIGHT';
+  src: url('/fonts/LEDLIGHT.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Moderniz';
+  src: url('/fonts/Moderniz.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Upheaval';
+  src: url('/fonts/upheavtt.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Ari W9500';
+  src: url('/fonts/ari-w9500.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Ari W9500';
+  src: url('/fonts/ari-w9500-bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Ari W9500';
+  src: url('/fonts/ari-w9500-condensed-bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-stretch: condensed;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'M42 Flight 721';
+  src: url('/fonts/m42.TTF') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* ============================================
    DESIGN SYSTEM — SILVER MATTE LIGHT
    ============================================ */
@@ -882,6 +947,35 @@ code { padding: 2px 6px; }
 .landing-input::placeholder { color: #f5f0e8 !important; opacity: 0.7; }
 .landing-input-light::placeholder { color: #666666 !important; opacity: 0.8; }
 .capturing .grayscale, .capturing img.grayscale { filter: none !important; }
+
+/* ============================================
+   RETRO OS — CRT SCANLINES & TERMINAL INPUT
+   ============================================ */
+
+.crt-scanlines::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.03) 2px,
+    rgba(0, 0, 0, 0.03) 4px
+  );
+  pointer-events: none;
+  z-index: 9999;
+}
+
+.terminal-input {
+  font-family: 'VCR OSD Mono', monospace;
+  caret-color: #0047FF;
+}
+
+.terminal-input::placeholder {
+  color: rgba(255, 255, 255, 0.2);
+  font-family: 'VCR OSD Mono', monospace;
+}
 
 @media print {
   body { background: white !important; color: black !important; }

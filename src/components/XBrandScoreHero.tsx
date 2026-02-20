@@ -1647,252 +1647,171 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
               zIndex: 10,
             }}
           >
-            {/* OS Window Chrome Frame */}
+            {/* Floating content with radial shadow for readability */}
             <motion.div
               initial={{ opacity: 0, scale: 0.97 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.4, delay: 0.2 }}
               style={{
-                width: '100%',
-                border: '1px solid rgba(0,0,0,0.15)',
-                borderRadius: '3px',
-                background: 'rgba(0,0,0,0.35)',
-                backdropFilter: 'blur(12px)',
-                WebkitBackdropFilter: 'blur(12px)',
-                overflow: 'hidden',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '24px',
+                padding: '48px 32px',
               }}
             >
-              {/* Title bar */}
+              {/* Logo */}
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.3, duration: 0.3 }}
+                initial={{ opacity: 0, scale: 0.9, filter: 'blur(8px)' }}
+                animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+                transition={{ duration: 0.5, delay: 0.5 }}
                 style={{
-                  height: '28px',
-                  background: 'rgba(255,255,255,0.04)',
-                  borderBottom: '1px solid rgba(255,255,255,0.08)',
                   display: 'flex',
+                  flexDirection: 'column',
                   alignItems: 'center',
-                  padding: '0 12px',
-                  gap: '6px',
-                  position: 'relative',
+                  filter: 'drop-shadow(0 2px 12px rgba(0,0,0,0.5))',
                 }}
               >
-                {/* Mac window dots */}
-                <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#FF5F57' }} />
-                <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#FEBC2E' }} />
-                <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#28C840' }} />
-
-                {/* SYS.ONLINE indicator */}
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 1.0, duration: 0.4 }}
-                  style={{
-                    display: 'flex', alignItems: 'center', gap: '5px',
-                    marginLeft: '10px',
-                  }}
-                >
-                  <motion.div
-                    animate={{ opacity: [0.4, 1, 0.4] }}
-                    transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-                    style={{ width: 5, height: 5, borderRadius: '50%', background: '#FEBC2E' }}
-                  />
-                  <span style={{
-                    fontFamily: "'PP NeueBit', monospace", fontSize: '10px',
-                    letterSpacing: '0.15em', color: 'rgba(255,255,255,0.3)',
-                  }}>
-                    SYS.ONLINE
-                  </span>
-                </motion.div>
-
-                {/* Title */}
-                <span style={{
-                  position: 'absolute', left: '50%', transform: 'translateX(-50%)',
-                  fontFamily: "'PP NeueBit', monospace", fontSize: '11px',
-                  letterSpacing: '0.15em', color: 'rgba(255,255,255,0.3)',
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'baseline',
+                  fontSize: 'clamp(4.5rem, 14vw, 8rem)',
+                  lineHeight: 1,
+                  gap: '0.05em',
                 }}>
-                  BRANDOS.EXE
+                  <span style={{
+                    fontFamily: "'Coolvetica', sans-serif",
+                    fontStyle: 'italic',
+                    fontWeight: 700,
+                    color: '#ffffff',
+                  }}>Brand</span>
+                  <span style={{
+                    fontFamily: "'LEDLIGHT', monospace",
+                    fontWeight: 400,
+                    background: 'linear-gradient(to right, #ffffff 0%, #0047FF 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text',
+                  }}>OS</span>
+                </div>
+                <span style={{
+                  fontFamily: "'M42 Flight 721', sans-serif",
+                  fontSize: 'clamp(0.75rem, 1.8vw, 1.1rem)',
+                  color: 'rgba(255,255,255,0.75)',
+                  letterSpacing: '0.15em',
+                  marginTop: '8px',
+                  textAlign: 'center',
+                  whiteSpace: 'nowrap',
+                  filter: 'drop-shadow(0 1px 6px rgba(0,0,0,0.5))',
+                }}>
+                  The AI-powered OS that builds your brand
                 </span>
               </motion.div>
 
-              {/* Window content */}
-              <div style={{
-                display: 'flex', flexDirection: 'column', alignItems: 'center',
-                padding: '32px 32px 28px',
-                gap: '0px',
-              }}>
-                {/* Logo */}
+              {/* Input Form */}
+              <motion.form
+                onSubmit={handleSubmit}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.7 }}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: '12px',
+                  width: '100%',
+                  maxWidth: '420px',
+                }}
+              >
+                {/* Terminal Input with > prefix */}
                 <motion.div
-                  className="hero-parallax-title"
-                  initial={{ opacity: 0, scale: 0.9, filter: 'blur(8px)' }}
-                  animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
-                  transition={{ duration: 0.5, delay: 0.5 }}
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    marginBottom: '0',
-                    willChange: 'transform',
-                  }}
-                >
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'baseline',
-                    fontSize: 'clamp(3rem, 8vw, 5rem)',
-                    lineHeight: 1,
-                    gap: '0.05em',
-                  }}>
-                    <span style={{
-                      fontFamily: "'Coolvetica', sans-serif",
-                      fontStyle: 'italic',
-                      fontWeight: 700,
-                      color: '#ffffff',
-                    }}>Brand</span>
-                    <span style={{
-                      fontFamily: "'LEDLIGHT', monospace",
-                      fontWeight: 400,
-                      background: 'linear-gradient(to right, #ffffff 0%, #0047FF 100%)',
-                      WebkitBackgroundClip: 'text',
-                      WebkitTextFillColor: 'transparent',
-                      backgroundClip: 'text',
-                    }}>OS</span>
-                  </div>
-                  <span style={{
-                    fontFamily: "'Moderniz', sans-serif",
-                    fontSize: 'clamp(0.55rem, 1.3vw, 0.8rem)',
-                    color: 'rgba(255,255,255,0.6)',
-                    letterSpacing: '0.08em',
-                    marginTop: '6px',
-                    textAlign: 'center',
-                    whiteSpace: 'nowrap',
-                  }}>
-                    The AI-powered OS that builds your brand
-                  </span>
-                </motion.div>
-
-                {/* Input Form */}
-                <motion.form
-                  className="hero-parallax-form"
-                  onSubmit={handleSubmit}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  transition={{ delay: 0.7 }}
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    gap: '12px',
-                    width: '100%',
-                    maxWidth: '420px',
-                    marginTop: '-24px',
-                    willChange: 'transform',
-                  }}
+                  transition={{ delay: 0.8, duration: 0.3 }}
+                  style={{ position: 'relative', width: '100%' }}
                 >
-                  {/* ENTER HANDLE label */}
-                  <motion.span
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 0.3 }}
-                    transition={{ delay: 0.7, duration: 0.3 }}
-                    style={{
-                      fontFamily: "'PP NeueBit', monospace",
-                      fontSize: '12px',
-                      letterSpacing: '0.25em',
-                      color: 'rgba(255,255,255,0.3)',
-                      marginBottom: '4px',
-                    }}
-                  >
-                    ENTER HANDLE
-                  </motion.span>
-
-                  {/* Terminal Input with > prefix */}
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.8, duration: 0.3 }}
-                    style={{ position: 'relative', width: '100%' }}
-                  >
-                    {/* > prompt character */}
-                    <span style={{
-                      position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)',
-                      fontFamily: "'VCR OSD Mono', monospace", fontSize: '1.125rem',
-                      color: 'rgba(255,255,255,0.3)', pointerEvents: 'none', zIndex: 1,
-                    }}>
-                      &gt;
-                    </span>
-                    <input
-                      type="text"
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value.replace(/^@/, ''))}
-                      placeholder="enter @username"
-                      maxLength={15}
-                      className="terminal-input"
-                      style={{
-                        width: '100%',
-                        fontSize: '1.125rem',
-                        padding: '1rem 1rem 1rem 28px',
-                        textAlign: 'left',
-                        borderRadius: '2px',
-                        border: `1px solid ${error ? '#EF4444' : 'rgba(255,255,255,0.1)'}`,
-                        background: 'rgba(0,0,0,0.5)',
-                        color: '#ffffff',
-                        outline: 'none',
-                        transition: 'all 0.3s ease',
-                      }}
-                      onFocus={(e) => {
-                        e.currentTarget.style.borderColor = 'rgba(0, 71, 255, 0.5)';
-                        e.currentTarget.style.boxShadow = '0 0 20px rgba(0, 71, 255, 0.15)';
-                      }}
-                      onBlur={(e) => {
-                        e.currentTarget.style.borderColor = error ? '#EF4444' : 'rgba(255,255,255,0.1)';
-                        e.currentTarget.style.boxShadow = 'none';
-                      }}
-                    />
-                  </motion.div>
-
-                  {/* CTA Button — Flat OS Style */}
-                  <motion.button
-                    type="submit"
-                    disabled={isValidating}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.9, duration: 0.3 }}
-                    whileHover={!isValidating ? { scale: 1.02 } : {}}
-                    whileTap={!isValidating ? { scale: 0.98 } : {}}
+                  {/* > prompt character */}
+                  <span style={{
+                    position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)',
+                    fontFamily: "'VCR OSD Mono', monospace", fontSize: '1.125rem',
+                    color: 'rgba(255,255,255,0.3)', pointerEvents: 'none', zIndex: 1,
+                  }}>
+                    &gt;
+                  </span>
+                  <input
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value.replace(/^@/, ''))}
+                    placeholder="enter @username"
+                    maxLength={15}
+                    className="terminal-input"
                     style={{
                       width: '100%',
-                      fontFamily: "'VCR OSD Mono', monospace",
-                      fontSize: '13px',
-                      letterSpacing: '0.15em',
+                      fontSize: '1.125rem',
+                      padding: '1rem 1rem 1rem 32px',
+                      textAlign: 'left',
+                      borderRadius: '10px',
+                      border: `1px solid ${error ? '#EF4444' : 'rgba(255,255,255,0.15)'}`,
+                      background: 'rgba(0,0,0,0.45)',
+                      backdropFilter: 'blur(8px)',
                       color: '#ffffff',
-                      background: '#0047FF',
-                      border: 'none',
-                      padding: '1rem',
-                      borderRadius: '2px',
-                      cursor: isValidating ? 'wait' : 'pointer',
-                      opacity: isValidating ? 0.7 : 1,
-                      transition: 'opacity 0.3s ease',
+                      outline: 'none',
+                      transition: 'all 0.3s ease',
+                    }}
+                    onFocus={(e) => {
+                      e.currentTarget.style.borderColor = 'rgba(0, 71, 255, 0.5)';
+                      e.currentTarget.style.boxShadow = '0 0 20px rgba(0, 71, 255, 0.15)';
+                    }}
+                    onBlur={(e) => {
+                      e.currentTarget.style.borderColor = error ? '#EF4444' : 'rgba(255,255,255,0.15)';
+                      e.currentTarget.style.boxShadow = 'none';
+                    }}
+                  />
+                </motion.div>
+
+                {/* CTA Button with glow */}
+                <motion.button
+                  type="submit"
+                  disabled={isValidating}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.9, duration: 0.3 }}
+                  whileHover={!isValidating ? { scale: 1.02 } : {}}
+                  whileTap={!isValidating ? { scale: 0.98 } : {}}
+                  style={{
+                    width: '100%',
+                    fontFamily: "'VCR OSD Mono', monospace",
+                    fontSize: '13px',
+                    letterSpacing: '0.15em',
+                    color: '#ffffff',
+                    background: '#0047FF',
+                    border: 'none',
+                    padding: '1rem',
+                    borderRadius: '10px',
+                    cursor: isValidating ? 'wait' : 'pointer',
+                    opacity: isValidating ? 0.7 : 1,
+                    boxShadow: '0 4px 24px rgba(0, 71, 255, 0.4), 0 0 48px rgba(0, 71, 255, 0.2)',
+                    transition: 'opacity 0.3s ease, box-shadow 0.3s ease',
+                  }}
+                >
+                  {isValidating ? 'PROCESSING...' : 'RUN ANALYSIS →'}
+                </motion.button>
+
+                {error && (
+                  <motion.p
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    style={{
+                      fontFamily: "'VCR OSD Mono', monospace",
+                      fontSize: '12px',
+                      color: '#EF4444',
+                      margin: 0,
                     }}
                   >
-                    {isValidating ? 'PROCESSING...' : 'RUN ANALYSIS →'}
-                  </motion.button>
-
-                  {error && (
-                    <motion.p
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      style={{
-                        fontFamily: "'VCR OSD Mono', monospace",
-                        fontSize: '12px',
-                        color: '#EF4444',
-                        margin: 0,
-                      }}
-                    >
-                      {error}
-                    </motion.p>
-                  )}
-                </motion.form>
-              </div>
+                    {error}
+                  </motion.p>
+                )}
+              </motion.form>
             </motion.div>
 
             {/* Footer hint — retro terminal style */}
