@@ -1532,7 +1532,7 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              gap: '36px',
+              gap: '12px',
               maxWidth: '1200px',
               width: '100%',
               position: 'relative',
