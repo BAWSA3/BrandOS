@@ -13,11 +13,21 @@ export interface BrandHealthDimensions {
   activity: number;
 }
 
+export interface HealthHistoryPoint {
+  score: number;
+  date: string;
+  completeness: number;
+  consistency: number;
+  voiceMatch: number;
+  engagement: number;
+  activity: number;
+}
+
 export interface BrandHealthScore {
   overallScore: number;
   dimensions: BrandHealthDimensions;
   trend: { direction: 'up' | 'down' | 'stable'; delta: number };
-  history: { score: number; date: string }[];
+  history: HealthHistoryPoint[];
   isLoading: boolean;
   isComputing: boolean;
   lastUpdated: string | null;
@@ -39,7 +49,7 @@ export function useBrandHealthScore(): BrandHealthScore {
   const [trend, setTrend] = useState<{ direction: 'up' | 'down' | 'stable'; delta: number }>({
     direction: 'stable', delta: 0,
   });
-  const [history, setHistory] = useState<{ score: number; date: string }[]>([]);
+  const [history, setHistory] = useState<HealthHistoryPoint[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isComputing, setIsComputing] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
@@ -91,9 +101,14 @@ export function useBrandHealthScore(): BrandHealthScore {
         setHistory(
           historyData.snapshots
             .reverse()
-            .map((s: { overallScore: number; createdAt: string }) => ({
+            .map((s: { overallScore: number; completeness: number; consistency: number; voiceMatch: number; engagement: number; activity: number; createdAt: string }) => ({
               score: s.overallScore,
               date: s.createdAt,
+              completeness: s.completeness,
+              consistency: s.consistency,
+              voiceMatch: s.voiceMatch,
+              engagement: s.engagement,
+              activity: s.activity,
             }))
         );
       }
@@ -143,9 +158,14 @@ export function useBrandHealthScore(): BrandHealthScore {
           setHistory(
             historyData.snapshots
               .reverse()
-              .map((snap: { overallScore: number; createdAt: string }) => ({
+              .map((snap: { overallScore: number; completeness: number; consistency: number; voiceMatch: number; engagement: number; activity: number; createdAt: string }) => ({
                 score: snap.overallScore,
                 date: snap.createdAt,
+                completeness: snap.completeness,
+                consistency: snap.consistency,
+                voiceMatch: snap.voiceMatch,
+                engagement: snap.engagement,
+                activity: snap.activity,
               }))
           );
         }

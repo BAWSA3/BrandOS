@@ -4,6 +4,7 @@ import { useCallback, CSSProperties } from 'react';
 import BrandScoreCard from './BrandScoreCard';
 import QuickStatsCard from './QuickStatsCard';
 import BrandFeedCard from './BrandFeedCard';
+import BrandConsistencyChart from './BrandConsistencyChart';
 import AIInsightsPanel from './AIInsightsPanel';
 import AIIdeaFeed from './AIIdeaFeed';
 import PhaseQuickAccess from './PhaseQuickAccess';
@@ -99,14 +100,19 @@ export default function DashboardHome({ onNavigatePhase }: DashboardHomeProps) {
           <BrandFeedCard />
         </div>
 
-        {/* ─── Row 2b: AI Performance Insights ─── */}
+        {/* ─── Row 2b: Brand Consistency Over Time ─── */}
         <div className="animate-fade-in" style={staggerStyle(3)}>
+          <BrandConsistencyChart />
+        </div>
+
+        {/* ─── Row 2c: AI Performance Insights ─── */}
+        <div className="animate-fade-in" style={staggerStyle(4)}>
           <AIInsightsPanel insights={insights} isLoading={isLoadingInsights} />
         </div>
 
         {/* ─── Row 3: AI Idea Feed (2/3) + Calendar Summary + Phase Access (1/3) ─── */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <div className="lg:col-span-2 animate-fade-in" style={staggerStyle(4)}>
+          <div className="lg:col-span-2 animate-fade-in" style={staggerStyle(5)}>
             <AIIdeaFeed
               ideas={ideas}
               isLoading={isLoadingIdeas}
@@ -115,7 +121,7 @@ export default function DashboardHome({ onNavigatePhase }: DashboardHomeProps) {
               onSaveToCalendar={handleSaveToCalendar}
             />
           </div>
-          <div className="space-y-4 animate-fade-in" style={staggerStyle(5)}>
+          <div className="space-y-4 animate-fade-in" style={staggerStyle(6)}>
             <CalendarSummaryCard
               onOpenCalendar={() => onNavigatePhase('generate')}
             />
