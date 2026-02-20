@@ -96,6 +96,12 @@ export function useXFeedSync(): XFeedState {
       });
       // Silently refresh feed to show new scores
       await fetchFeed();
+      // Trigger drift detection in background after scoring
+      fetch('/api/drift-alerts/detect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ brandId }),
+      }).catch(() => {});
     } catch {
       // Scoring is best-effort — don't block the UI
     }

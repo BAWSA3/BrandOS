@@ -1669,31 +1669,16 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
-                  filter: 'drop-shadow(0 2px 12px rgba(0,0,0,0.5))',
                 }}
               >
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'baseline',
-                  fontSize: 'clamp(4.5rem, 14vw, 8rem)',
-                  lineHeight: 1,
-                  gap: '0.05em',
-                }}>
-                  <span style={{
-                    fontFamily: "'Coolvetica', sans-serif",
-                    fontStyle: 'italic',
-                    fontWeight: 700,
-                    color: '#ffffff',
-                  }}>Brand</span>
-                  <span style={{
-                    fontFamily: "'LEDLIGHT', monospace",
-                    fontWeight: 400,
-                    background: 'linear-gradient(to right, #ffffff 0%, #0047FF 100%)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    backgroundClip: 'text',
-                  }}>OS</span>
-                </div>
+                <img
+                  src="/brandos-hero-logo.png"
+                  alt="BrandOS"
+                  style={{
+                    width: 'clamp(500px, 70vw, 880px)',
+                    height: 'auto',
+                  }}
+                />
                 <span style={{
                   fontFamily: "'M42 Flight 721', sans-serif",
                   fontSize: 'clamp(0.75rem, 1.8vw, 1.1rem)',

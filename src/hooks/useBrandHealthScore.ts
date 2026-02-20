@@ -151,6 +151,13 @@ export function useBrandHealthScore(): BrandHealthScore {
         setLastUpdated(s.createdAt);
         setHasSnapshot(true);
 
+        // Trigger drift detection in background
+        fetch('/api/drift-alerts/detect', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ brandId }),
+        }).catch(() => {});
+
         // Refresh history after compute
         const historyRes = await fetch(`/api/brand-health/history?brandId=${brandId}&limit=30`);
         const historyData = await historyRes.json();

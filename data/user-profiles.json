@@ -430,13 +430,17 @@
         {
           "value": 87,
           "scannedAt": 1771427530900
+        },
+        {
+          "value": 79,
+          "scannedAt": 1771620879186
         }
       ],
       "highestScore": 87,
-      "currentScore": 87,
+      "currentScore": 79,
       "firstScannedAt": 1768904843172,
-      "lastScannedAt": 1771427530900,
-      "totalScans": 13
+      "lastScannedAt": 1771620879186,
+      "totalScans": 14
     },
     "web3pingu": {
       "username": "web3pingu",
@@ -675,5 +679,5 @@
       "totalScans": 2
     }
   },
-  "lastUpdated": 1771427530900
+  "lastUpdated": 1771620879186
 }

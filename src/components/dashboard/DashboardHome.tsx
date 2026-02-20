@@ -13,6 +13,7 @@ import { useBrandCompleteness } from '@/components/BrandCompleteness';
 import { useBrandStore, useCurrentBrand } from '@/lib/store';
 import { useWorkflowStore } from '@/components/workflow/useWorkflowStore';
 import CalendarSummaryCard from './CalendarSummaryCard';
+import DriftAlertsBar from './DriftAlertsBar';
 import type { Phase } from '@/components/PhaseNavigation';
 import type { TonePill } from '@/components/workflow/workflow.types';
 import SwissBackground from '../SwissBackground';
@@ -95,24 +96,29 @@ export default function DashboardHome({ onNavigatePhase }: DashboardHomeProps) {
           </div>
         </div>
 
-        {/* ─── Row 2: Brand Feed — synced X tweets with alignment scores ─── */}
+        {/* ─── Drift Alerts ─── */}
         <div className="animate-fade-in" style={staggerStyle(2)}>
+          <DriftAlertsBar />
+        </div>
+
+        {/* ─── Row 2: Brand Feed — synced X tweets with alignment scores ─── */}
+        <div className="animate-fade-in" style={staggerStyle(3)}>
           <BrandFeedCard />
         </div>
 
         {/* ─── Row 2b: Brand Consistency Over Time ─── */}
-        <div className="animate-fade-in" style={staggerStyle(3)}>
+        <div className="animate-fade-in" style={staggerStyle(4)}>
           <BrandConsistencyChart />
         </div>
 
         {/* ─── Row 2c: AI Performance Insights ─── */}
-        <div className="animate-fade-in" style={staggerStyle(4)}>
+        <div className="animate-fade-in" style={staggerStyle(5)}>
           <AIInsightsPanel insights={insights} isLoading={isLoadingInsights} />
         </div>
 
         {/* ─── Row 3: AI Idea Feed (2/3) + Calendar Summary + Phase Access (1/3) ─── */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <div className="lg:col-span-2 animate-fade-in" style={staggerStyle(5)}>
+          <div className="lg:col-span-2 animate-fade-in" style={staggerStyle(6)}>
             <AIIdeaFeed
               ideas={ideas}
               isLoading={isLoadingIdeas}
@@ -121,7 +127,7 @@ export default function DashboardHome({ onNavigatePhase }: DashboardHomeProps) {
               onSaveToCalendar={handleSaveToCalendar}
             />
           </div>
-          <div className="space-y-4 animate-fade-in" style={staggerStyle(6)}>
+          <div className="space-y-4 animate-fade-in" style={staggerStyle(7)}>
             <CalendarSummaryCard
               onOpenCalendar={() => onNavigatePhase('generate')}
             />

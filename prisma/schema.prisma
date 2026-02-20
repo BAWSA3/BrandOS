@@ -68,6 +68,9 @@ model Brand {
   // Content calendar drafts
   contentDrafts ContentDraft[]
 
+  // Drift alerts
+  driftAlerts DriftAlert[]
+
   @@index([userId])
   @@index([teamId])
   @@index([shareToken])
@@ -335,5 +338,27 @@ model Feedback {
   @@index([status])
   @@index([createdAt])
   @@index([userId])
+}
+
+// ===== BRAND DRIFT ALERTS =====
+
+model DriftAlert {
+  id            String   @id @default(cuid())
+  type          String   // "dimension_drop", "low_alignment", "overall_drop"
+  severity      String   // "critical", "warning"
+  metric        String   // which dimension dropped, or "overall"
+  previousScore Int
+  currentScore  Int
+  delta         Int      // absolute drop amount
+  message       String   // human-readable description
+  status        String   @default("new") // "new", "dismissed"
+  createdAt     DateTime @default(now())
+
+  brandId String
+  brand   Brand  @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  @@index([brandId])
+  @@index([brandId, status])
+  @@index([createdAt])
 }
 
