@@ -1533,7 +1533,7 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
               flexDirection: 'column',
               alignItems: 'center',
               gap: '36px',
-              maxWidth: '900px',
+              maxWidth: '1200px',
               width: '100%',
               position: 'relative',
               zIndex: 10,
@@ -1556,7 +1556,7 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
                 src="/brandos-logo-new.png"
                 alt="BrandOS — The AI-powered OS that builds your brand."
                 style={{
-                  width: 'clamp(360px, 70vw, 900px)',
+                  width: 'clamp(500px, 90vw, 1100px)',
                   height: 'auto',
                   filter: theme === 'dark' ? 'invert(1) brightness(2)' : 'none',
                 }}
