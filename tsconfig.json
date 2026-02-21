@@ -19,7 +19,8 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "motion-plus-dom": ["./plus/packages/motion-plus-dom/src/index.ts"]
     }
   },
   "include": [
@@ -30,5 +31,5 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules", "my-video", "remotion-bbb"]
+  "exclude": ["node_modules", "my-video", "remotion-bbb", "plus"]
 }

@@ -1,50 +1,10 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Terminal, Shield, BarChart3, Activity, Info, AlertTriangle } from 'lucide-react';
 import { AuthenticityAnalysis, ActivityAnalysis } from '@/lib/gemini';
 import { InnerCircleBadge, useInnerCircle } from '@/components/InnerCircleBadge';
-
-
-/* TYPEWRITER TEXT COMPONENT */
-interface TypewriterTextProps {
-  text: string;
-  speed?: number;
-}
-
-const TypewriterText: React.FC<TypewriterTextProps> = ({ text, speed = 20 }) => {
-  const [displayedText, setDisplayedText] = useState('');
-  const [isComplete, setIsComplete] = useState(false);
-
-  // Split text into sentences and format with > prefix
-  const sentences = text.split(/(?<=[.!?])\s+/).filter(s => s.trim());
-  const formattedText = sentences.map(s => `> ${s}`).join('\n');
-
-  useEffect(() => {
-    setDisplayedText('');
-    setIsComplete(false);
-    let currentIndex = 0;
-
-    const interval = setInterval(() => {
-      if (currentIndex < formattedText.length) {
-        setDisplayedText(formattedText.slice(0, currentIndex + 1));
-        currentIndex++;
-      } else {
-        setIsComplete(true);
-        clearInterval(interval);
-      }
-    }, speed);
-
-    return () => clearInterval(interval);
-  }, [formattedText, speed]);
-
-  return (
-    <pre className="font-os text-xs md:text-sm text-[#E0E0E0] leading-relaxed whitespace-pre-wrap">
-      {displayedText}
-      <span className={`inline-block w-1.5 md:w-2 h-3 md:h-4 bg-[#E0E0E0] ml-0.5 align-middle ${isComplete ? 'animate-pulse' : ''}`} />
-    </pre>
-  );
-};
+import { AnimateNumber, Typewriter, ScrambleText } from '@/lib/motion-plus';
 
 /* DATA STRUCTURE TYPES */
 export interface BrandOSDashboardData {
@@ -100,6 +60,12 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({
   const [copyStatus, setCopyStatus] = useState<'idle' | 'copying' | 'copied'>('idle');
   const { isInnerCircle } = useInnerCircle();
 
+  // Format DNA voice text with > prefix per sentence for terminal look
+  const formattedVoice = useMemo(() => {
+    const sentences = data.dna.voice.split(/(?<=[.!?])\s+/).filter(s => s.trim());
+    return sentences.map(s => `> ${s}`).join('\n');
+  }, [data.dna.voice]);
+
   const handleCopy = async () => {
     if (!onCopyToClipboard) return;
     setCopyStatus('copying');
@@ -148,22 +114,39 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({
           </div>
           <div className="relative z-10 my-auto">
             <h1 className="font-brand font-black italic text-[120px] md:text-[180px] leading-none tracking-tighter text-white drop-shadow-xl">
-              {data.scores.brandScore}
+              <AnimateNumber
+                transition={{
+                  y: { type: "spring", duration: 0.8, bounce: 0 },
+                  width: { type: "spring", duration: 0.5, bounce: 0 },
+                  opacity: { duration: 0.4 },
+                }}
+                trend={1}
+              >
+                {data.scores.brandScore}
+              </AnimateNumber>
             </h1>
           </div>
           <div className="z-10 grid grid-cols-2 gap-8 border-t border-white/20 pt-6">
              <div>
                 <span className="font-os text-[10px] md:text-xs text-white/70 block mb-1 uppercase tracking-wider">Voice Consistency</span>
                 <div className="flex items-center gap-2">
-                  <span className="text-2xl font-brand font-bold italic">{data.scores.voiceConsistency}%</span>
+                  <span className="text-2xl font-brand font-bold italic">
+                    <AnimateNumber suffix="%" trend={1}>
+                      {data.scores.voiceConsistency}
+                    </AnimateNumber>
+                  </span>
                   <div className="h-1.5 w-12 bg-white/30 rounded-full overflow-hidden">
-                    <div style={{width: `${data.scores.voiceConsistency}%`}} className="h-full bg-white" />
+                    <div style={{width: `${data.scores.voiceConsistency}%`}} className="h-full bg-white transition-all duration-700" />
                   </div>
                 </div>
              </div>
              <div className="text-right">
                 <span className="font-os text-[10px] md:text-xs text-white/70 block mb-1 uppercase tracking-wider">Engagement</span>
-                <span className="text-2xl font-brand font-bold italic">{data.scores.engagementScore}/100</span>
+                <span className="text-2xl font-brand font-bold italic">
+                  <AnimateNumber suffix="/100" trend={1}>
+                    {data.scores.engagementScore}
+                  </AnimateNumber>
+                </span>
              </div>
           </div>
         </div>
@@ -218,7 +201,9 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({
           <div className={`mt-4 sm:mt-0 text-center sm:text-right border-t sm:border-t-0 sm:border-l border-gray-200 pt-4 sm:pt-0 sm:pl-6 w-full sm:w-auto ${authenticity?.isWarning ? 'mt-6 sm:mt-0' : ''}`}>
             <span className="font-os text-[10px] text-gray-400 block uppercase tracking-widest mb-1">Audience</span>
             <span className="text-4xl md:text-5xl font-brand font-black italic text-black tracking-tighter">
-              {data.profile.followersCount}
+              <AnimateNumber trend={1}>
+                {data.profile.followersCount}
+              </AnimateNumber>
             </span>
           </div>
         </div>
@@ -313,12 +298,32 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({
            <div className="flex flex-wrap gap-1.5 md:gap-2 mb-3 md:mb-4">
              {data.dna.keywords.map((word, i) => (
                <span key={i} className="bg-black text-white px-1.5 md:px-2 py-0.5 md:py-1 text-[9px] md:text-xs font-os rounded-[2px] hover:bg-[#2E6AFF] hover:translate-y-[-2px] transition-all cursor-crosshair">
-                 [{word.toLowerCase()}]
+                 [<ScrambleText
+                   duration={0.8}
+                   delay={i * 0.1}
+                   interval={0.04}
+                   chars="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_-./\\"
+                 >
+                   {word.toLowerCase()}
+                 </ScrambleText>]
                </span>
              ))}
            </div>
            <div className="bg-black/90 p-3 md:p-4 rounded-[2px] min-h-[100px] md:min-h-[120px]">
-             <TypewriterText text={data.dna.voice} speed={15} />
+             <Typewriter
+               as="pre"
+               className="font-os text-xs md:text-sm text-[#E0E0E0] leading-relaxed whitespace-pre-wrap"
+               speed="fast"
+               variance="natural"
+               cursorStyle={{
+                 width: '6px',
+                 height: '14px',
+                 backgroundColor: '#E0E0E0',
+                 top: '0.05em',
+               }}
+             >
+               {formattedVoice}
+             </Typewriter>
            </div>
         </div>
 
@@ -342,7 +347,9 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({
                  <div key={i} className="flex flex-col h-full group">
                    {/* Fixed height for percentage */}
                    <div className="h-5 flex items-center justify-center text-[10px] md:text-xs text-gray-400 font-os opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-                     {pillar.value}%
+                     <AnimateNumber suffix="%" trend={1}>
+                       {pillar.value}
+                     </AnimateNumber>
                    </div>
                    {/* Bar container with fixed height */}
                    <div className="h-[60px] md:h-[80px] relative">
