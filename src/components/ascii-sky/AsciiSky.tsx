@@ -7,6 +7,9 @@ import {
   computeScene,
   gridToHtml,
   type Cloud,
+  type Season,
+  type PathConfig,
+  type GroundElement,
 } from './ascii-sky-engine';
 
 export interface AsciiSkyProps {
@@ -23,6 +26,12 @@ export interface AsciiSkyProps {
   hillColor?: string;
   hillColorFar?: string;
   className?: string;
+  season?: Season;
+  path?: PathConfig;
+  groundElements?: GroundElement[];
+  timeOfDay?: number;
+  onElementClick?: (elementId: string) => void;
+  onElementHover?: (elementId: string | null) => void;
 }
 
 const TARGET_FPS = 20;
@@ -42,6 +51,12 @@ export default function AsciiSky({
   hillColor = '#4a9e3f',
   hillColorFar = '#2d6b28',
   className = '',
+  season,
+  path,
+  groundElements,
+  timeOfDay,
+  onElementClick,
+  onElementHover,
 }: AsciiSkyProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const preRef = useRef<HTMLPreElement>(null);
@@ -55,7 +70,6 @@ export default function AsciiSky({
     rows: propRows ?? 35,
   });
 
-  // ── Responsive sizing via ResizeObserver ──
   useEffect(() => {
     if (propCols && propRows) {
       setDimensions({ cols: propCols, rows: propRows });
@@ -67,7 +81,6 @@ export default function AsciiSky({
 
     const measure = () => {
       const { width, height } = container.getBoundingClientRect();
-      // Approximate char dimensions for the chosen font size
       const charW = parseFloat(fontSize) * 0.6;
       const charH = parseFloat(fontSize) * 1.2;
       const cols = Math.max(30, Math.floor(width / charW));
@@ -82,13 +95,11 @@ export default function AsciiSky({
     return () => ro.disconnect();
   }, [propCols, propRows, fontSize]);
 
-  // ── Initialize clouds when dimensions change ──
   useEffect(() => {
     cloudsRef.current = generateInitialClouds(dimensions.cols, dimensions.rows, cloudCount);
     timeRef.current = 0;
   }, [dimensions.cols, dimensions.rows, cloudCount]);
 
-  // ── Render one frame ──
   const renderFrame = useCallback(() => {
     const pre = preRef.current;
     if (!pre) return;
@@ -104,17 +115,17 @@ export default function AsciiSky({
       hillColor,
       hillColorFar,
       time: timeRef.current,
+      season,
+      path,
+      groundElements,
+      timeOfDay,
     });
 
     pre.innerHTML = gridToHtml(grid);
-  }, [dimensions, showHills, skyColorTop, skyColorBottom, cloudColor, hillColor, hillColorFar]);
+  }, [dimensions, showHills, skyColorTop, skyColorBottom, cloudColor, hillColor, hillColorFar, season, path, groundElements, timeOfDay]);
 
-  // ── Animation loop ──
   useEffect(() => {
-    // Check prefers-reduced-motion
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-    // Render initial static frame immediately
     renderFrame();
 
     if (paused || prefersReduced) return;
@@ -127,7 +138,6 @@ export default function AsciiSky({
 
     const loop = (now: number) => {
       rafRef.current = requestAnimationFrame(loop);
-
       if (!visible) return;
 
       const elapsed = now - lastFrameRef.current;
@@ -138,9 +148,7 @@ export default function AsciiSky({
       const dt = FRAME_INTERVAL / 1000;
       timeRef.current += dt;
 
-      // Advance clouds
       cloudsRef.current = advanceClouds(cloudsRef.current, dt, dimensions.cols);
-
       renderFrame();
     };
 
@@ -151,6 +159,34 @@ export default function AsciiSky({
       document.removeEventListener('visibilitychange', handleVisibility);
     };
   }, [paused, renderFrame, dimensions.cols]);
+
+  // Interactive element event delegation
+  useEffect(() => {
+    const pre = preRef.current;
+    if (!pre) return;
+
+    const handleClick = (e: MouseEvent) => {
+      const target = (e.target as HTMLElement).closest('[data-element]');
+      if (target && onElementClick) {
+        onElementClick((target as HTMLElement).dataset.element!);
+      }
+    };
+
+    const handleMouseOver = (e: MouseEvent) => {
+      const target = (e.target as HTMLElement).closest('[data-element]');
+      if (onElementHover) {
+        onElementHover(target ? (target as HTMLElement).dataset.element! : null);
+      }
+    };
+
+    pre.addEventListener('click', handleClick);
+    pre.addEventListener('mouseover', handleMouseOver);
+
+    return () => {
+      pre.removeEventListener('click', handleClick);
+      pre.removeEventListener('mouseover', handleMouseOver);
+    };
+  }, [onElementClick, onElementHover]);
 
   return (
     <div

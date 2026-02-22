@@ -1,7 +1,9 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import BrandOSLogo from './BrandOSLogo';
+import { WorldPath } from './world';
 
 export type Phase = 'home' | 'define' | 'check' | 'generate' | 'scale';
 export type SubTab =
@@ -82,6 +84,14 @@ const phases: PhaseConfig[] = [
   },
 ];
 
+const PHASE_SEASON_COLORS: Record<string, string> = {
+  home: '#E8A838',
+  define: '#E8A838',
+  check: '#00FF88',
+  generate: '#FF6B35',
+  scale: '#00D4FF',
+};
+
 interface PhaseNavigationProps {
   activePhase: Phase;
   activeTab: SubTab;
@@ -109,6 +119,8 @@ export default function PhaseNavigation({
   brandName,
   onAvatarClick,
 }: PhaseNavigationProps) {
+  const [worldExpanded, setWorldExpanded] = useState(false);
+
   const phaseStates = useMemo(() => {
     return phases.map((phase) => {
       const isUnlocked = phase.unlockCondition(brandCompleteness, hasChecked, hasGenerated);
@@ -119,98 +131,117 @@ export default function PhaseNavigation({
 
   const activePhaseConfig = phaseStates.find(p => p.id === activePhase);
   const showSubTabs = activePhaseConfig && activePhaseConfig.tabs.length > 1;
+  const accentColor = PHASE_SEASON_COLORS[activePhase] || '#E8A838';
 
   return (
     <div className="sticky top-0 z-50">
-      {/* Main navigation bar */}
+      {/* Top bar with logo, mini phase indicators, and avatar */}
       <nav
         style={{
-          height: 56,
-          background: 'var(--surface)',
-          borderBottom: '1px solid var(--border)',
+          height: 48,
+          background: '#0A0A12',
+          borderBottom: '1px solid rgba(255,255,255,0.06)',
         }}
       >
         <div className="max-w-[1200px] mx-auto h-full px-6 flex items-center justify-between">
           {/* Left: Logo */}
-          <div className="shrink-0">
+          <div className="shrink-0 flex items-center gap-3">
             <BrandOSLogo size="sm" variant="landing" />
           </div>
 
-          {/* Center: Phase tabs */}
+          {/* Center: Compact phase pills */}
           <div className="flex items-center gap-1">
-            {phaseStates.map((phase) => (
+            {/* Home button */}
+            <button
+              onClick={() => onPhaseChange('home')}
+              style={{
+                padding: '4px 10px',
+                fontSize: 11,
+                fontFamily: "'VCR OSD Mono', monospace",
+                letterSpacing: '0.08em',
+                fontWeight: activePhase === 'home' ? 600 : 400,
+                color: activePhase === 'home' ? '#E8A838' : 'rgba(255,255,255,0.35)',
+                background: activePhase === 'home' ? 'rgba(232,168,56,0.1)' : 'transparent',
+                border: activePhase === 'home' ? '1px solid rgba(232,168,56,0.2)' : '1px solid transparent',
+                borderRadius: 4,
+                cursor: 'pointer',
+                transition: 'all 200ms ease',
+              }}
+            >
+              ◆ HOME
+            </button>
+
+            <span style={{ width: 1, height: 16, background: 'rgba(255,255,255,0.06)', margin: '0 4px' }} />
+
+            {/* Phase buttons */}
+            {phaseStates.filter(p => p.id !== 'home').map((phase) => (
               <button
                 key={phase.id}
                 onClick={() => phase.isUnlocked && onPhaseChange(phase.id)}
                 disabled={!phase.isUnlocked}
                 style={{
-                  padding: '6px 16px',
-                  fontSize: 14,
+                  padding: '4px 10px',
+                  fontSize: 11,
+                  fontFamily: "'VCR OSD Mono', monospace",
+                  letterSpacing: '0.08em',
                   fontWeight: phase.isActive ? 600 : 400,
                   color: phase.isActive
-                    ? 'var(--text-primary)'
+                    ? PHASE_SEASON_COLORS[phase.id]
                     : phase.isUnlocked
-                      ? 'var(--text-secondary)'
-                      : 'var(--text-quaternary)',
-                  background: 'transparent',
-                  border: 'none',
-                  borderRadius: 8,
+                      ? 'rgba(255,255,255,0.35)'
+                      : 'rgba(255,255,255,0.12)',
+                  background: phase.isActive ? `${PHASE_SEASON_COLORS[phase.id]}10` : 'transparent',
+                  border: phase.isActive ? `1px solid ${PHASE_SEASON_COLORS[phase.id]}25` : '1px solid transparent',
+                  borderRadius: 4,
                   cursor: phase.isUnlocked ? 'pointer' : 'default',
+                  transition: 'all 200ms ease',
                   position: 'relative',
-                  transition: 'color 200ms ease',
-                }}
-                onMouseEnter={(e) => {
-                  if (phase.isUnlocked && !phase.isActive) {
-                    e.currentTarget.style.color = 'var(--text-primary)';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (phase.isUnlocked && !phase.isActive) {
-                    e.currentTarget.style.color = 'var(--text-secondary)';
-                  }
                 }}
               >
-                <span className="flex items-center gap-1.5">
-                  {phase.label}
-                  {!phase.isUnlocked && (
-                    <svg className="w-3 h-3 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                    </svg>
-                  )}
-                </span>
-                {/* Active indicator line */}
-                {phase.isActive && (
-                  <span
-                    style={{
-                      position: 'absolute',
-                      bottom: -1,
-                      left: 16,
-                      right: 16,
-                      height: 2,
-                      background: '#0A84FF',
-                      borderRadius: 1,
-                    }}
-                  />
+                {!phase.isUnlocked && (
+                  <span style={{ marginRight: 3, opacity: 0.5 }}>⬡</span>
                 )}
+                {phase.label.toUpperCase()}
               </button>
             ))}
+
+            <span style={{ width: 1, height: 16, background: 'rgba(255,255,255,0.06)', margin: '0 4px' }} />
+
+            {/* World toggle */}
+            <button
+              onClick={() => setWorldExpanded(prev => !prev)}
+              style={{
+                padding: '4px 8px',
+                fontSize: 11,
+                fontFamily: "'VCR OSD Mono', monospace",
+                color: worldExpanded ? accentColor : 'rgba(255,255,255,0.25)',
+                background: worldExpanded ? `${accentColor}10` : 'transparent',
+                border: worldExpanded ? `1px solid ${accentColor}25` : '1px solid transparent',
+                borderRadius: 4,
+                cursor: 'pointer',
+                transition: 'all 200ms ease',
+              }}
+              title="Toggle world view"
+            >
+              {worldExpanded ? '▼' : '▲'} MAP
+            </button>
           </div>
 
           {/* Right: Avatar / Brand */}
           <div className="flex items-center gap-3 shrink-0">
             {brandName && (
-              <span style={{ fontSize: 13, color: 'var(--text-tertiary)' }}>
+              <span style={{ fontSize: 11, fontFamily: "'VCR OSD Mono', monospace", color: 'rgba(255,255,255,0.25)', letterSpacing: '0.05em' }}>
                 {brandName}
               </span>
             )}
             <button
               onClick={onAvatarClick}
               style={{
-                width: 32,
-                height: 32,
-                borderRadius: '50%',
-                background: userAvatar ? 'transparent' : 'var(--surface-tertiary)',
-                border: 'none',
+                width: 28,
+                height: 28,
+                borderRadius: 4,
+                background: userAvatar ? 'transparent' : 'rgba(255,255,255,0.06)',
+                border: '1px solid rgba(255,255,255,0.08)',
                 cursor: 'pointer',
                 overflow: 'hidden',
                 display: 'flex',
@@ -224,7 +255,7 @@ export default function PhaseNavigation({
               {userAvatar ? (
                 <img src={userAvatar} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               ) : (
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" strokeWidth={1.5}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
                 </svg>
               )}
@@ -233,47 +264,64 @@ export default function PhaseNavigation({
         </div>
       </nav>
 
-      {/* Sub-tabs (only when phase has multiple tabs) */}
+      {/* Expandable World Path mini-map */}
+      <AnimatePresence>
+        {worldExpanded && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 160, opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ type: 'spring', stiffness: 200, damping: 25 }}
+            style={{ overflow: 'hidden' }}
+          >
+            <WorldPath
+              activePhase={activePhase}
+              brandCompleteness={brandCompleteness}
+              hasChecked={hasChecked}
+              hasGenerated={hasGenerated}
+              onPhaseChange={(phase) => {
+                onPhaseChange(phase);
+              }}
+              height={160}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Sub-tabs */}
       {showSubTabs && (
         <div
           style={{
-            height: 40,
-            background: 'var(--surface)',
-            borderBottom: '1px solid var(--border)',
+            height: 36,
+            background: '#0A0A12',
+            borderBottom: '1px solid rgba(255,255,255,0.06)',
           }}
         >
           <div className="max-w-[1200px] mx-auto h-full px-6 flex items-center gap-1">
-            {activePhaseConfig?.tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => onTabChange(tab.id)}
-                style={{
-                  padding: '4px 12px',
-                  fontSize: 13,
-                  fontWeight: activeTab === tab.id ? 500 : 400,
-                  color: activeTab === tab.id ? 'var(--text-primary)' : 'var(--text-tertiary)',
-                  background: activeTab === tab.id ? 'var(--surface-hover)' : 'transparent',
-                  border: 'none',
-                  borderRadius: 6,
-                  cursor: 'pointer',
-                  transition: 'all 150ms ease',
-                }}
-                onMouseEnter={(e) => {
-                  if (activeTab !== tab.id) {
-                    e.currentTarget.style.color = 'var(--text-secondary)';
-                    e.currentTarget.style.background = 'var(--surface-hover)';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (activeTab !== tab.id) {
-                    e.currentTarget.style.color = 'var(--text-tertiary)';
-                    e.currentTarget.style.background = 'transparent';
-                  }
-                }}
-              >
-                {tab.label}
-              </button>
-            ))}
+            {activePhaseConfig?.tabs.map((tab) => {
+              const isActiveTab = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => onTabChange(tab.id)}
+                  style={{
+                    padding: '4px 12px',
+                    fontSize: 12,
+                    fontFamily: "'VCR OSD Mono', monospace",
+                    letterSpacing: '0.05em',
+                    fontWeight: isActiveTab ? 500 : 400,
+                    color: isActiveTab ? accentColor : 'rgba(255,255,255,0.3)',
+                    background: isActiveTab ? `${accentColor}08` : 'transparent',
+                    border: 'none',
+                    borderRadius: 4,
+                    cursor: 'pointer',
+                    transition: 'all 150ms ease',
+                  }}
+                >
+                  {tab.label}
+                </button>
+              );
+            })}
           </div>
         </div>
       )}
