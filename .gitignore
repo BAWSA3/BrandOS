@@ -61,3 +61,6 @@ prisma/dev.db
 
 # AI Studio exports
 brandkit-for-ai-studio.txt
+
+# Local motion-plus source (not needed - inlined)
+plus/
