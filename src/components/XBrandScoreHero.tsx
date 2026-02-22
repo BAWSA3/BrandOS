@@ -1155,6 +1155,56 @@ function JourneyProgressIndicator({
 }
 
 // ============================================================================
+// Typewriter Placeholder
+// ============================================================================
+function TypewriterPlaceholder({ text }: { text: string }) {
+  const [displayed, setDisplayed] = useState('');
+  const [showCursor, setShowCursor] = useState(true);
+
+  useEffect(() => {
+    let i = 0;
+    const interval = setInterval(() => {
+      if (i < text.length) {
+        setDisplayed(text.slice(0, i + 1));
+        i++;
+      } else {
+        clearInterval(interval);
+        // Blink cursor a few times then hide
+        setTimeout(() => setShowCursor(false), 2000);
+      }
+    }, 80);
+    return () => clearInterval(interval);
+  }, [text]);
+
+  return (
+    <span
+      style={{
+        position: 'absolute',
+        left: '32px',
+        top: '50%',
+        transform: 'translateY(-50%)',
+        fontFamily: "'VCR OSD Mono', monospace",
+        fontSize: '1.125rem',
+        color: 'rgba(255,255,255,0.35)',
+        pointerEvents: 'none',
+        zIndex: 2,
+      }}
+    >
+      {displayed}
+      {showCursor && (
+        <motion.span
+          animate={{ opacity: [1, 0] }}
+          transition={{ duration: 0.6, repeat: Infinity, repeatType: 'reverse' }}
+          style={{ marginLeft: '2px' }}
+        >
+          |
+        </motion.span>
+      )}
+    </span>
+  );
+}
+
+// ============================================================================
 // Main Component
 // ============================================================================
 export default function XBrandScoreHero({ theme, initialUsername, autoStart }: XBrandScoreHeroProps) {
@@ -1641,8 +1691,10 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
+              justifyContent: 'center',
               maxWidth: '640px',
               width: '100%',
+              height: '100vh',
               position: 'relative',
               zIndex: 10,
             }}
@@ -1656,8 +1708,8 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                gap: '24px',
-                padding: '48px 32px',
+                gap: '0px',
+                padding: '0px 32px',
               }}
             >
               {/* Logo */}
@@ -1675,23 +1727,26 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
                   src="/brandos-hero-logo.png"
                   alt="BrandOS"
                   style={{
-                    width: 'clamp(500px, 70vw, 880px)',
+                    width: 'clamp(600px, 85vw, 1050px)',
                     height: 'auto',
                   }}
                 />
-                <span style={{
-                  fontFamily: "'M42 Flight 721', sans-serif",
-                  fontSize: 'clamp(0.75rem, 1.8vw, 1.1rem)',
-                  color: 'rgba(255,255,255,0.75)',
-                  letterSpacing: '0.15em',
-                  marginTop: '8px',
-                  textAlign: 'center',
-                  whiteSpace: 'nowrap',
-                  filter: 'drop-shadow(0 1px 6px rgba(0,0,0,0.5))',
-                }}>
-                  The AI-powered OS that builds your brand
-                </span>
               </motion.div>
+
+              {/* Tagline — positioned between logo and CTA */}
+              <span style={{
+                fontFamily: "'M42 Flight 721', sans-serif",
+                fontSize: 'clamp(0.75rem, 1.8vw, 1.1rem)',
+                color: 'rgba(0,0,0,0.85)',
+                letterSpacing: '0.15em',
+                marginTop: '-160px',
+                marginBottom: '48px',
+                textAlign: 'center',
+                whiteSpace: 'nowrap',
+                filter: 'drop-shadow(0 1px 6px rgba(0,0,0,0.5))',
+              }}>
+                The AI-powered OS that builds your brand
+              </span>
 
               {/* Input Form */}
               <motion.form
@@ -1723,11 +1778,15 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
                   }}>
                     &gt;
                   </span>
+                  {/* Typewriter placeholder overlay */}
+                  {!username && (
+                    <TypewriterPlaceholder text="enter @username" />
+                  )}
                   <input
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value.replace(/^@/, ''))}
-                    placeholder="enter @username"
+                    placeholder=""
                     maxLength={15}
                     className="terminal-input"
                     style={{
@@ -1802,13 +1861,13 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
             {/* Footer hint — retro terminal style */}
             <motion.p
               initial={{ opacity: 0 }}
-              animate={{ opacity: 0.3 }}
+              animate={{ opacity: 1 }}
               transition={{ delay: 1.4, duration: 0.4 }}
               style={{
                 fontFamily: "'PP NeueBit', monospace",
                 fontSize: '11px',
                 letterSpacing: '0.15em',
-                color: 'rgba(0,0,0,0.25)',
+                color: 'rgba(0,0,0,0.85)',
                 textAlign: 'center',
                 marginTop: '1.5rem',
               }}
