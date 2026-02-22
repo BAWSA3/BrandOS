@@ -3,7 +3,7 @@ import { withSentryConfig } from "@sentry/nextjs";
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
-  transpilePackages: ["motion-plus", "motion-plus-dom"],
+  transpilePackages: [],
 };
 
 export default withSentryConfig(nextConfig, {
