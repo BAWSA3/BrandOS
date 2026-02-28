@@ -39,6 +39,7 @@ import ContentCalendar from '@/components/calendar/ContentCalendar';
 import DashboardHome from '@/components/dashboard/DashboardHome';
 import { InviteCodeDisplay } from '@/components/InviteCodeDisplay';
 import { AsciiSkyLoadingScreen } from '@/components/ascii-sky';
+import { AttestBrandButton, AttestContentButton } from '@/components/onchain';
 
 function HomeContent() {
   const searchParams = useSearchParams();
@@ -1067,6 +1068,13 @@ function HomeContent() {
                 </div>
               </div>
 
+              {/* Attest Brand DNA Onchain */}
+              {brandCompleteness >= 50 && currentBrandId && (
+                <div className="mb-8">
+                  <AttestBrandButton brandId={currentBrandId} variant="compact" />
+                </div>
+              )}
+
               {/* Next Step CTA */}
               {brandCompleteness >= 30 && (
                 <div className="p-6 bg-surface rounded-xl text-center">
@@ -1384,6 +1392,18 @@ function HomeContent() {
                       </div>
                     )}
                   </div>
+
+                  {/* Attest Content Onchain */}
+                  {currentBrandId && checkResult.score >= 70 && (
+                    <div className="mt-8">
+                      <AttestContentButton
+                        content={contentToCheck}
+                        brandId={currentBrandId}
+                        brandAlignmentScore={checkResult.score}
+                        authenticityScore={authenticityScore?.overall}
+                      />
+                    </div>
+                  )}
 
                   {/* Next Step CTA */}
                   {phaseProgress.hasCompletedFirstCheck && !phaseProgress.hasCompletedFirstGeneration && (

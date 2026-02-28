@@ -1,11 +1,13 @@
 /**
  * BrandOS Beta Analytics
  * 
- * Wraps Vercel Analytics with beta-specific event tracking.
- * This helps understand how beta users interact with the product.
+ * Dual-tracks to Vercel Analytics (performance) and PostHog (product behavior).
+ * Vercel Analytics: page views, web vitals, speed metrics.
+ * PostHog: funnels, feature usage, session replays, user identification.
  */
 
 import { track as vercelTrack } from '@vercel/analytics';
+import posthog from 'posthog-js';
 
 // =============================================================================
 // Types
@@ -64,19 +66,22 @@ export interface EventProperties {
  */
 export function trackBetaEvent(event: BetaEvent, properties?: EventProperties) {
   try {
-    // Track with Vercel Analytics
-    vercelTrack(event, {
+    const enriched = {
       ...properties,
       beta_version: '0.2.0',
       timestamp: new Date().toISOString(),
-    });
+    };
 
-    // Log in development
+    vercelTrack(event, enriched);
+
+    if (typeof window !== 'undefined' && posthog.__loaded) {
+      posthog.capture(event, enriched);
+    }
+
     if (process.env.NODE_ENV === 'development') {
       console.log(`[Analytics] ${event}`, properties);
     }
   } catch (error) {
-    // Silent fail - analytics should never break the app
     console.warn('[Analytics] Failed to track event:', error);
   }
 }

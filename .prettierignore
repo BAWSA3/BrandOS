@@ -1,0 +1,14 @@
+node_modules
+.next
+out
+build
+.vercel
+*.min.js
+*.min.css
+package-lock.json
+my-video
+remotion-bbb
+remotion-brandos
+plus
+relique
+chrome-extension

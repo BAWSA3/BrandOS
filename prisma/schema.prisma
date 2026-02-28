@@ -18,6 +18,7 @@ model User {
   avatar        String?
   isInnerCircle Boolean   @default(false)
   invitedBy     String?              // Username who invited them
+  walletAddress String?   @unique    // Embedded wallet address for onchain attestations
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -360,5 +361,32 @@ model DriftAlert {
   @@index([brandId])
   @@index([brandId, status])
   @@index([createdAt])
+}
+
+// ===== ONCHAIN ATTESTATIONS =====
+
+model OnchainAttestation {
+  id                String   @id @default(cuid())
+  uid               String   @unique // EAS attestation UID (bytes32 hex)
+  txHash            String   // Transaction hash
+  chain             String   // "avalanche" | "avalanche-fuji" | "base" | "base-sepolia"
+  attestationType   String   // "brand-dna", "content-check", "brand-score", "voice-fingerprint", "brand-health"
+  schemaUid         String   // EAS schema UID used
+  attester          String   // Address that created the attestation (platform wallet)
+  recipient         String   // Recipient address (user wallet or zero address)
+  dataHash          String   // SHA-256 hash of the attested data
+  metadata          String?  // JSON: extra context (brandId, score, username, etc.)
+  explorerUrl       String   // Direct link to view on EAS explorer
+  createdAt         DateTime @default(now())
+
+  // Optional links to BrandOS entities
+  brandId           String?
+  userId            String?
+
+  @@index([attestationType])
+  @@index([brandId])
+  @@index([userId])
+  @@index([uid])
+  @@index([chain, attestationType])
 }
 

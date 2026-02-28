@@ -6,6 +6,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import { ToastProvider } from "@/components/ToastProvider";
 import FeedbackButton from "@/components/FeedbackButton";
 import BetaBadge from "@/components/BetaBadge";
+import PostHogProvider from "@/components/PostHogProvider";
 
 export const metadata: Metadata = {
   title: "BrandOS — Discover Your Brand DNA",
@@ -66,13 +67,15 @@ export default function RootLayout({
         {/* Custom fonts loaded via @font-face in globals.css */}
       </head>
       <body>
-        <ToastProvider>
-          <ThemeProvider>
-            <BetaBadge variant="banner" />
-            {children}
-            <FeedbackButton />
-          </ThemeProvider>
-        </ToastProvider>
+        <PostHogProvider>
+          <ToastProvider>
+            <ThemeProvider>
+              <BetaBadge variant="banner" />
+              {children}
+              <FeedbackButton />
+            </ThemeProvider>
+          </ToastProvider>
+        </PostHogProvider>
         <Analytics />
         <SpeedInsights />
       </body>

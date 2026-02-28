@@ -1,21 +1,12 @@
 'use client';
 
+import { motion } from 'motion/react';
+
 interface ParallaxBackgroundProps {
   theme?: string;
 }
 
-// Static background - no scroll-linked parallax
-// Ensures scrolling works normally on the entire page
 export default function ParallaxBackground({ theme = 'dark' }: ParallaxBackgroundProps) {
-  const isDark = theme === 'dark';
-
-  const orbStyles = {
-    position: 'absolute' as const,
-    borderRadius: '50%',
-    filter: 'blur(80px)',
-    pointerEvents: 'none' as const,
-  };
-
   return (
     <div
       style={{
@@ -24,65 +15,106 @@ export default function ParallaxBackground({ theme = 'dark' }: ParallaxBackgroun
         zIndex: 0,
         pointerEvents: 'none',
         overflow: 'hidden',
+        imageRendering: 'pixelated',
       }}
     >
-      {/* Large blue orb - top right */}
+      {/* Deep pixel sky */}
       <div
+        className="absolute inset-0"
         style={{
-          ...orbStyles,
-          top: '5%',
-          right: '10%',
-          width: '500px',
-          height: '500px',
-          background: `radial-gradient(circle, ${isDark ? 'rgba(46, 106, 255, 0.12)' : 'rgba(46, 106, 255, 0.08)'} 0%, transparent 70%)`,
+          background: theme === 'dark'
+            ? 'linear-gradient(180deg, #050510 0%, #0A0A1A 30%, #0D1020 60%, #101428 100%)'
+            : 'linear-gradient(180deg, #0A0A1A 0%, #101428 100%)',
         }}
       />
 
-      {/* Amber orb - bottom left */}
-      <div
-        style={{
-          ...orbStyles,
-          bottom: '20%',
-          left: '5%',
-          width: '400px',
-          height: '400px',
-          background: `radial-gradient(circle, ${isDark ? 'rgba(212, 165, 116, 0.1)' : 'rgba(212, 165, 116, 0.06)'} 0%, transparent 70%)`,
-        }}
-      />
+      {/* Subtle pixel star field */}
+      {Array.from({ length: 20 }, (_, i) => (
+        <motion.div
+          key={i}
+          animate={{ opacity: [0.1, 0.4, 0.1] }}
+          transition={{ duration: 3 + (i % 4), delay: i * 0.3, repeat: Infinity }}
+          style={{
+            position: 'absolute',
+            left: `${(i * 37 + 13) % 100}%`,
+            top: `${(i * 23 + 7) % 100}%`,
+            width: i % 5 === 0 ? 3 : 2,
+            height: i % 5 === 0 ? 3 : 2,
+            background: 'rgba(176, 216, 240, 0.3)',
+          }}
+        />
+      ))}
 
-      {/* Purple accent orb - center right */}
-      <div
-        style={{
-          ...orbStyles,
-          top: '40%',
-          right: '20%',
-          width: '300px',
-          height: '300px',
-          background: `radial-gradient(circle, ${isDark ? 'rgba(139, 92, 246, 0.08)' : 'rgba(139, 92, 246, 0.05)'} 0%, transparent 70%)`,
-        }}
-      />
+      {/* Ground terrain -- parallax layer at bottom */}
+      <svg
+        viewBox="0 0 320 60"
+        preserveAspectRatio="none"
+        className="absolute bottom-0 w-full"
+        style={{ height: '10%', opacity: 0.1 }}
+      >
+        <polygon
+          points="0,60 0,40 20,30 50,35 80,25 110,32 140,20 170,30 200,22 230,35 260,28 290,32 320,25 320,60"
+          fill="#2D7A1A"
+        />
+      </svg>
 
-      {/* Green accent orb - bottom center */}
-      <div
-        style={{
-          ...orbStyles,
-          bottom: '10%',
-          left: '40%',
-          width: '250px',
-          height: '250px',
-          background: `radial-gradient(circle, ${isDark ? 'rgba(16, 185, 129, 0.06)' : 'rgba(16, 185, 129, 0.04)'} 0%, transparent 70%)`,
-        }}
-      />
+      {/* Pixel tree silhouettes on edges */}
+      <svg
+        viewBox="0 0 320 80"
+        preserveAspectRatio="none"
+        className="absolute bottom-0 w-full"
+        style={{ height: '15%', opacity: 0.06 }}
+      >
+        {[20, 50, 90, 140, 180, 230, 270, 300].map((x, i) => (
+          <g key={i} transform={`translate(${x}, 0)`}>
+            <rect x="-6" y="30" width="4" height="10" fill="#1A4A3A" />
+            <rect x="-10" y="20" width="12" height="12" fill="#1A4A3A" />
+            <rect x="-8" y="12" width="8" height="10" fill="#1E5A44" />
+            <rect x="-6" y="6" width="4" height="8" fill="#1A4A3A" />
+          </g>
+        ))}
+      </svg>
 
-      {/* Film grain texture */}
+      {/* Ambient color orbs (softened pixel-style) */}
       <div
         style={{
           position: 'absolute',
-          inset: 0,
-          opacity: isDark ? 0.03 : 0.02,
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
-          backgroundSize: '150px 150px',
-          pointerEvents: 'none',
+          top: '10%',
+          right: '15%',
+          width: 200,
+          height: 200,
+          background: 'radial-gradient(circle, rgba(90,191,62,0.04) 0%, transparent 70%)',
+          filter: 'blur(40px)',
+        }}
+      />
+      <div
+        style={{
+          position: 'absolute',
+          bottom: '25%',
+          left: '10%',
+          width: 180,
+          height: 180,
+          background: 'radial-gradient(circle, rgba(232,138,74,0.04) 0%, transparent 70%)',
+          filter: 'blur(40px)',
+        }}
+      />
+      <div
+        style={{
+          position: 'absolute',
+          top: '50%',
+          right: '25%',
+          width: 150,
+          height: 150,
+          background: 'radial-gradient(circle, rgba(176,216,240,0.03) 0%, transparent 70%)',
+          filter: 'blur(40px)',
+        }}
+      />
+
+      {/* Scanline overlay */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background: 'repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.02) 3px, rgba(0,0,0,0.02) 4px)',
         }}
       />
     </div>

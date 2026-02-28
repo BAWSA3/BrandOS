@@ -84,15 +84,31 @@ export default function JourneyEnd({
 
   return (
     <>
-      {/* Persistent solid background - always present to prevent flash during stage transitions */}
+      {/* Persistent pixel background - always present to prevent flash during stage transitions */}
       <div
         style={{
           position: 'fixed',
           inset: 0,
           zIndex: 99,
-          background: '#050505',
+          background: 'linear-gradient(180deg, #050510 0%, #0A0A1A 40%, #0D1020 100%)',
+          imageRendering: 'pixelated',
         }}
-      />
+      >
+        {/* Subtle pixel stars in celebration background */}
+        {Array.from({ length: 12 }, (_, i) => (
+          <div
+            key={i}
+            style={{
+              position: 'absolute',
+              left: `${(i * 31 + 11) % 100}%`,
+              top: `${(i * 19 + 5) % 100}%`,
+              width: 2,
+              height: 2,
+              background: 'rgba(176, 216, 240, 0.15)',
+            }}
+          />
+        ))}
+      </div>
 
       <AnimatePresence mode="wait">
         {/* ACHIEVEMENT UNLOCK TRANSITION */}

@@ -18,12 +18,10 @@ export default function AchievementUnlock({
   score,
   personalityType,
   onComplete,
-  theme,
 }: AchievementUnlockProps) {
   const [stage, setStage] = useState<'enter' | 'hold' | 'exit'>('enter');
 
   useEffect(() => {
-    // Stage timing
     const holdTimer = setTimeout(() => setStage('hold'), 800);
     const exitTimer = setTimeout(() => setStage('exit'), 3000);
     const completeTimer = setTimeout(onComplete, 3500);
@@ -35,12 +33,11 @@ export default function AchievementUnlock({
     };
   }, [onComplete]);
 
-  // Get score tier for XP bar visualization
   const getScoreTier = (score: number) => {
     if (score >= 90) return { tier: 'S', color: '#FFD700', next: 100 };
-    if (score >= 80) return { tier: 'A', color: '#10B981', next: 90 };
-    if (score >= 70) return { tier: 'B', color: '#0047FF', next: 80 };
-    if (score >= 60) return { tier: 'C', color: '#F59E0B', next: 70 };
+    if (score >= 80) return { tier: 'A', color: '#5ABF3E', next: 90 };
+    if (score >= 70) return { tier: 'B', color: '#FFE066', next: 80 };
+    if (score >= 60) return { tier: 'C', color: '#E88A4A', next: 70 };
     return { tier: 'D', color: '#EF4444', next: 60 };
   };
 
@@ -57,26 +54,26 @@ export default function AchievementUnlock({
         alignItems: 'center',
         justifyContent: 'center',
         overflow: 'hidden',
+        imageRendering: 'pixelated',
       }}
     >
-      {/* Background glow effect */}
+      {/* Pixel glow effect */}
       <motion.div
         initial={{ opacity: 0, scale: 0.5 }}
-        animate={{ opacity: 0.3, scale: 1.5 }}
+        animate={{ opacity: 0.25, scale: 1.2 }}
         transition={{ duration: 1.5, ease: 'easeOut' }}
         style={{
           position: 'absolute',
-          width: '400px',
-          height: '400px',
-          borderRadius: '50%',
-          background: `radial-gradient(circle, ${tierInfo.color}40 0%, transparent 70%)`,
-          filter: 'blur(60px)',
+          width: 300,
+          height: 300,
+          background: `radial-gradient(circle, ${tierInfo.color}30 0%, transparent 70%)`,
+          filter: 'blur(40px)',
         }}
       />
 
-      {/* Achievement Badge */}
+      {/* Pixel Achievement Card */}
       <motion.div
-        initial={{ x: '100vw', rotate: 10 }}
+        initial={{ x: '100vw', rotate: 5 }}
         animate={{
           x: stage === 'exit' ? '-100vw' : 0,
           rotate: 0,
@@ -88,20 +85,35 @@ export default function AchievementUnlock({
           duration: stage === 'exit' ? 0.5 : undefined,
         }}
         style={{
-          background: 'linear-gradient(145deg, #1a1a1a 0%, #0a0a0a 100%)',
-          borderRadius: '24px',
+          background: 'rgba(10, 8, 20, 0.95)',
           padding: '32px 48px',
-          border: `2px solid ${tierInfo.color}`,
+          border: `3px solid ${tierInfo.color}`,
           boxShadow: `
-            0 0 40px ${tierInfo.color}40,
-            0 20px 60px rgba(0,0,0,0.5),
-            inset 0 1px 0 rgba(255,255,255,0.1)
+            0 0 30px ${tierInfo.color}30,
+            inset 3px 3px 0 rgba(255,255,255,0.06),
+            inset -3px -3px 0 rgba(0,0,0,0.3)
           `,
           position: 'relative',
           overflow: 'hidden',
         }}
       >
-        {/* Shimmer effect */}
+        {/* Corner decorations */}
+        {['top-left', 'top-right', 'bottom-left', 'bottom-right'].map((corner) => (
+          <div
+            key={corner}
+            style={{
+              position: 'absolute',
+              [corner.includes('top') ? 'top' : 'bottom']: -3,
+              [corner.includes('left') ? 'left' : 'right']: -3,
+              width: 10,
+              height: 10,
+              background: tierInfo.color,
+              opacity: 0.7,
+            }}
+          />
+        ))}
+
+        {/* Pixel scanline shimmer */}
         <motion.div
           initial={{ x: '-100%' }}
           animate={{ x: '200%' }}
@@ -112,67 +124,63 @@ export default function AchievementUnlock({
             left: 0,
             right: 0,
             bottom: 0,
-            background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent)',
+            background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent)',
             pointerEvents: 'none',
           }}
         />
 
-        {/* Content */}
         <div style={{ position: 'relative', zIndex: 1, textAlign: 'center' }}>
-          {/* Unlocked label */}
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
             style={{
-              fontFamily: "'VCR OSD Mono', monospace",
-              fontSize: '10px',
-              letterSpacing: '0.2em',
+              fontFamily: "'VCR OSD Mono', 'Press Start 2P', monospace",
+              fontSize: '9px',
+              letterSpacing: '0.25em',
               color: tierInfo.color,
               marginBottom: '16px',
             }}
           >
-            ACHIEVEMENT UNLOCKED
+            ▸ ACHIEVEMENT UNLOCKED ◂
           </motion.div>
 
-          {/* Emoji */}
           <motion.div
             initial={{ scale: 0, rotate: -180 }}
             animate={{ scale: 1, rotate: 0 }}
             transition={{ type: 'spring', damping: 10, stiffness: 100, delay: 0.4 }}
-            style={{ fontSize: '64px', marginBottom: '16px' }}
+            style={{ fontSize: '56px', marginBottom: '16px' }}
           >
             {archetypeEmoji || '🧬'}
           </motion.div>
 
-          {/* Archetype name */}
           <motion.h2
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
             style={{
-              fontFamily: "'Inter', sans-serif",
-              fontSize: '24px',
-              fontWeight: 700,
+              fontFamily: "'VCR OSD Mono', 'Press Start 2P', monospace",
+              fontSize: '20px',
+              fontWeight: 400,
               color: '#FFFFFF',
               margin: '0 0 8px 0',
+              letterSpacing: '0.1em',
             }}
           >
             {archetype}
           </motion.h2>
 
-          {/* Personality type badge */}
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.6 }}
             style={{
               display: 'inline-block',
-              padding: '6px 12px',
-              borderRadius: '8px',
-              background: 'rgba(255,255,255,0.1)',
+              padding: '5px 12px',
+              background: `${tierInfo.color}15`,
+              border: `1px solid ${tierInfo.color}40`,
               fontFamily: "'VCR OSD Mono', monospace",
-              fontSize: '11px',
+              fontSize: '10px',
               letterSpacing: '0.1em',
               color: 'rgba(255,255,255,0.7)',
               marginBottom: '20px',
@@ -181,33 +189,24 @@ export default function AchievementUnlock({
             {personalityType}
           </motion.div>
 
-          {/* XP Bar */}
+          {/* Pixel XP Bar */}
           <motion.div
             initial={{ opacity: 0, scaleX: 0 }}
             animate={{ opacity: 1, scaleX: 1 }}
             transition={{ delay: 0.7, duration: 0.5 }}
             style={{ originX: 0 }}
           >
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                marginTop: '8px',
-              }}
-            >
-              {/* Tier badge */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '8px' }}>
               <div
                 style={{
-                  width: '32px',
-                  height: '32px',
-                  borderRadius: '8px',
+                  width: 28,
+                  height: 28,
                   background: tierInfo.color,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontFamily: "'Inter', sans-serif",
-                  fontSize: '16px',
+                  fontFamily: "'VCR OSD Mono', monospace",
+                  fontSize: '14px',
                   fontWeight: 800,
                   color: '#000',
                 }}
@@ -215,13 +214,12 @@ export default function AchievementUnlock({
                 {tierInfo.tier}
               </div>
 
-              {/* Progress bar */}
               <div style={{ flex: 1 }}>
                 <div
                   style={{
-                    height: '8px',
-                    borderRadius: '4px',
+                    height: 8,
                     background: 'rgba(255,255,255,0.1)',
+                    border: '1px solid rgba(255,255,255,0.15)',
                     overflow: 'hidden',
                   }}
                 >
@@ -231,8 +229,7 @@ export default function AchievementUnlock({
                     transition={{ delay: 1, duration: 0.8, ease: 'easeOut' }}
                     style={{
                       height: '100%',
-                      background: `linear-gradient(90deg, ${tierInfo.color}, ${tierInfo.color}CC)`,
-                      borderRadius: '4px',
+                      background: `repeating-linear-gradient(90deg, ${tierInfo.color} 0px, ${tierInfo.color} 4px, ${tierInfo.color}80 4px, ${tierInfo.color}80 6px)`,
                     }}
                   />
                 </div>
@@ -242,7 +239,7 @@ export default function AchievementUnlock({
                     justifyContent: 'space-between',
                     marginTop: '4px',
                     fontFamily: "'VCR OSD Mono', monospace",
-                    fontSize: '9px',
+                    fontSize: '8px',
                     color: 'rgba(255,255,255,0.5)',
                   }}
                 >
@@ -255,34 +252,28 @@ export default function AchievementUnlock({
         </div>
       </motion.div>
 
-      {/* Particle burst */}
+      {/* Square pixel particle burst */}
       <AnimatePresence>
         {stage === 'enter' && (
           <>
-            {[...Array(12)].map((_, i) => (
+            {[...Array(16)].map((_, i) => (
               <motion.div
                 key={i}
-                initial={{
-                  opacity: 1,
-                  scale: 0,
-                  x: 0,
-                  y: 0,
-                }}
+                initial={{ opacity: 1, scale: 0, x: 0, y: 0 }}
                 animate={{
                   opacity: 0,
                   scale: 1,
-                  x: Math.cos((i / 12) * Math.PI * 2) * 200,
-                  y: Math.sin((i / 12) * Math.PI * 2) * 200,
+                  x: Math.cos((i / 16) * Math.PI * 2) * 180,
+                  y: Math.sin((i / 16) * Math.PI * 2) * 180,
                 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 1, delay: 0.3 + i * 0.02 }}
                 style={{
                   position: 'absolute',
-                  width: '8px',
-                  height: '8px',
-                  borderRadius: '50%',
+                  width: 6,
+                  height: 6,
                   background: tierInfo.color,
-                  boxShadow: `0 0 10px ${tierInfo.color}`,
+                  boxShadow: `0 0 8px ${tierInfo.color}`,
                 }}
               />
             ))}

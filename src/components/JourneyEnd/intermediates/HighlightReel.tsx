@@ -62,64 +62,78 @@ export default function HighlightReel({
         padding: '24px',
       }}
     >
-      {/* Card */}
+      {/* Pixel Art Card */}
       <motion.div
         initial={{ opacity: 0, y: 30, scale: 0.95 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
         style={{
-          background: '#0F1115',
-          borderRadius: '24px',
+          background: 'rgba(10, 8, 20, 0.95)',
           padding: '32px',
           maxWidth: '420px',
           width: '100%',
-          border: '1px solid rgba(255,255,255,0.1)',
+          border: `3px solid ${scoreColor}40`,
+          imageRendering: 'pixelated',
+          position: 'relative',
           boxShadow: `
-            0 0 60px ${scoreColor}20,
-            0 25px 50px rgba(0,0,0,0.5)
+            0 0 40px ${scoreColor}15,
+            inset 3px 3px 0 rgba(255,255,255,0.04),
+            inset -3px -3px 0 rgba(0,0,0,0.3)
           `,
         }}
       >
+        {/* Corner decorations */}
+        {['top-left', 'top-right', 'bottom-left', 'bottom-right'].map((corner) => (
+          <div
+            key={corner}
+            style={{
+              position: 'absolute',
+              [corner.includes('top') ? 'top' : 'bottom']: -3,
+              [corner.includes('left') ? 'left' : 'right']: -3,
+              width: 8,
+              height: 8,
+              background: scoreColor,
+              opacity: 0.6,
+            }}
+          />
+        ))}
+
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
           style={{
-            fontFamily: "'VCR OSD Mono', monospace",
-            fontSize: '10px',
-            letterSpacing: '0.2em',
+            fontFamily: "'VCR OSD Mono', 'Press Start 2P', monospace",
+            fontSize: '9px',
+            letterSpacing: '0.25em',
             color: scoreColor,
             marginBottom: '24px',
           }}
         >
-          YOUR BRAND HIGHLIGHTS
+          ▸ YOUR BRAND HIGHLIGHTS ◂
         </motion.div>
 
         {/* Highlight Items */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
           {/* Score */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.3 }}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '16px',
-            }}
+            style={{ display: 'flex', alignItems: 'center', gap: '16px' }}
           >
             <div
               style={{
-                width: '64px',
-                height: '64px',
-                borderRadius: '16px',
-                background: `linear-gradient(135deg, ${scoreColor}, ${scoreColor}99)`,
+                width: 56,
+                height: 56,
+                background: `${scoreColor}20`,
+                border: `2px solid ${scoreColor}60`,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontFamily: "'Inter', sans-serif",
-                fontSize: '28px',
+                fontFamily: "'VCR OSD Mono', monospace",
+                fontSize: '24px',
                 fontWeight: 800,
                 color: '#FFFFFF',
               }}
@@ -127,24 +141,10 @@ export default function HighlightReel({
               {data.score}
             </div>
             <div>
-              <div
-                style={{
-                  fontFamily: "'Inter', sans-serif",
-                  fontSize: '16px',
-                  fontWeight: 600,
-                  color: '#FFFFFF',
-                }}
-              >
+              <div style={{ fontFamily: "'VCR OSD Mono', monospace", fontSize: '15px', fontWeight: 600, color: '#FFFFFF' }}>
                 Brand Score
               </div>
-              <div
-                style={{
-                  fontFamily: "'VCR OSD Mono', monospace",
-                  fontSize: '11px',
-                  color: 'rgba(255,255,255,0.5)',
-                  marginTop: '2px',
-                }}
-              >
+              <div style={{ fontFamily: "'VCR OSD Mono', monospace", fontSize: '10px', color: 'rgba(255,255,255,0.5)', marginTop: '2px' }}>
                 {percentile.toUpperCase()}
               </div>
             </div>
@@ -155,45 +155,27 @@ export default function HighlightReel({
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.4 }}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '16px',
-            }}
+            style={{ display: 'flex', alignItems: 'center', gap: '16px' }}
           >
             <div
               style={{
-                width: '64px',
-                height: '64px',
-                borderRadius: '16px',
-                background: 'linear-gradient(135deg, #E8C49A 0%, #D4A574 100%)',
+                width: 56,
+                height: 56,
+                background: 'rgba(232, 138, 74, 0.15)',
+                border: '2px solid rgba(232, 138, 74, 0.3)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: '32px',
+                fontSize: '28px',
               }}
             >
               {data.archetypeEmoji || '🧬'}
             </div>
             <div>
-              <div
-                style={{
-                  fontFamily: "'Inter', sans-serif",
-                  fontSize: '16px',
-                  fontWeight: 600,
-                  color: '#FFFFFF',
-                }}
-              >
+              <div style={{ fontFamily: "'VCR OSD Mono', monospace", fontSize: '15px', fontWeight: 600, color: '#FFFFFF' }}>
                 {data.archetype}
               </div>
-              <div
-                style={{
-                  fontFamily: "'VCR OSD Mono', monospace",
-                  fontSize: '11px',
-                  color: 'rgba(255,255,255,0.5)',
-                  marginTop: '2px',
-                }}
-              >
+              <div style={{ fontFamily: "'VCR OSD Mono', monospace", fontSize: '10px', color: 'rgba(255,255,255,0.5)', marginTop: '2px' }}>
                 {data.personalityType}
               </div>
             </div>
@@ -205,49 +187,30 @@ export default function HighlightReel({
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.5 }}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '16px',
-              }}
+              style={{ display: 'flex', alignItems: 'center', gap: '16px' }}
             >
               <div
                 style={{
-                  width: '64px',
-                  height: '64px',
-                  borderRadius: '16px',
-                  background: 'rgba(16, 185, 129, 0.2)',
-                  border: '1px solid rgba(16, 185, 129, 0.3)',
+                  width: 56,
+                  height: 56,
+                  background: 'rgba(90, 191, 62, 0.15)',
+                  border: '2px solid rgba(90, 191, 62, 0.3)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontFamily: "'Inter', sans-serif",
-                  fontSize: '18px',
+                  fontFamily: "'VCR OSD Mono', monospace",
+                  fontSize: '16px',
                   fontWeight: 700,
-                  color: '#10B981',
+                  color: '#5ABF3E',
                 }}
               >
                 +{data.bestPhase.diff}
               </div>
               <div>
-                <div
-                  style={{
-                    fontFamily: "'Inter', sans-serif",
-                    fontSize: '16px',
-                    fontWeight: 600,
-                    color: '#FFFFFF',
-                  }}
-                >
+                <div style={{ fontFamily: "'VCR OSD Mono', monospace", fontSize: '15px', fontWeight: 600, color: '#FFFFFF' }}>
                   {data.bestPhase.name} Phase
                 </div>
-                <div
-                  style={{
-                    fontFamily: "'VCR OSD Mono', monospace",
-                    fontSize: '11px',
-                    color: 'rgba(255,255,255,0.5)',
-                    marginTop: '2px',
-                  }}
-                >
+                <div style={{ fontFamily: "'VCR OSD Mono', monospace", fontSize: '10px', color: 'rgba(255,255,255,0.5)', marginTop: '2px' }}>
                   ABOVE AVERAGE
                 </div>
               </div>
@@ -255,32 +218,38 @@ export default function HighlightReel({
           )}
         </div>
 
+        {/* Pixel divider */}
+        <div
+          style={{
+            margin: '24px 0',
+            height: 2,
+            background: 'repeating-linear-gradient(90deg, rgba(255,255,255,0.1) 0px, rgba(255,255,255,0.1) 4px, transparent 4px, transparent 6px)',
+          }}
+        />
+
         {/* Action */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
-          style={{
-            marginTop: '32px',
-          }}
         >
           <motion.button
             onClick={onContinue}
-            whileHover={{ scale: 1.02, y: -2 }}
+            whileHover={{ scale: 1.02, y: -2, boxShadow: '0 0 30px rgba(90, 191, 62, 0.3)' }}
             whileTap={{ scale: 0.98 }}
             style={{
               width: '100%',
               padding: '16px 24px',
-              borderRadius: '12px',
-              border: 'none',
-              background: 'linear-gradient(135deg, #E8C49A 0%, #D4A574 100%)',
+              border: '2px solid #6BD04A',
+              background: 'linear-gradient(135deg, #5ABF3E 0%, #4AA235 100%)',
               color: '#050505',
-              fontFamily: "'VCR OSD Mono', monospace",
-              fontSize: '12px',
-              letterSpacing: '0.08em',
+              fontFamily: "'VCR OSD Mono', 'Press Start 2P', monospace",
+              fontSize: '11px',
+              letterSpacing: '0.1em',
               cursor: 'pointer',
-              boxShadow: '0 4px 24px rgba(212, 165, 116, 0.4)',
+              boxShadow: '0 4px 24px rgba(90, 191, 62, 0.3)',
               fontWeight: 600,
+              imageRendering: 'pixelated',
             }}
           >
             CLAIM YOUR BRAND DNA

@@ -245,12 +245,34 @@
 }
 
 @theme inline {
+  --radius: 0.75rem;
+
+  /* shadcn/ui component tokens (mapped to BrandOS design tokens) */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-muted: var(--muted);
+  --color-card: var(--surface);
+  --color-card-foreground: var(--foreground);
+  --color-popover: var(--surface);
+  --color-popover-foreground: var(--foreground);
+  --color-primary: var(--accent);
+  --color-primary-foreground: #FFFFFF;
+  --color-secondary: var(--surface-tertiary);
+  --color-secondary-foreground: var(--foreground);
+  --color-muted: var(--surface-tertiary);
+  --color-muted-foreground: var(--text-secondary);
+  --color-accent: var(--surface-hover);
+  --color-accent-foreground: var(--foreground);
+  --color-destructive: var(--danger);
+  --color-destructive-foreground: #FFFFFF;
   --color-border: var(--border);
+  --color-input: var(--border);
+  --color-ring: var(--accent);
   --color-surface: var(--surface);
-  --color-accent: var(--accent);
+  --color-chart-1: #0A84FF;
+  --color-chart-2: #34C759;
+  --color-chart-3: #FF9F0A;
+  --color-chart-4: #AF52DE;
+  --color-chart-5: #FF3B30;
 
   /* Legacy dashboard colors */
   --color-brand-black: var(--brand-black);

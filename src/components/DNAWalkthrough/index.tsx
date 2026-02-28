@@ -13,6 +13,7 @@ import KeywordsWalkthrough from './sections/KeywordsWalkthrough';
 import PillarsWalkthrough from './sections/PillarsWalkthrough';
 import JourneyEnd, { JourneyEndData } from '../JourneyEnd';
 import { useDNAWalkthroughDemoCapture } from '@/hooks/useDemoCaptureIntegration';
+import ParallaxBackground from './ParallaxBackground';
 
 // Types
 interface XProfileData {
@@ -147,6 +148,9 @@ export default function DNAWalkthrough({
 
   return (
     <div ref={containerRef} className="relative min-h-screen bg-[#050505]">
+      {/* Pixel art parallax background */}
+      <ParallaxBackground theme={theme} />
+
       {/* Progress Indicator */}
       <WalkthroughProgress
         sections={SECTION_NAMES}
@@ -238,47 +242,64 @@ export default function DNAWalkthrough({
             transition={{ duration: 0.5, delay: 0.2 }}
             className="w-full max-w-[500px] flex flex-col items-center"
           >
-            {/* CTA Card */}
+            {/* Pixel CTA Card */}
             <div
               style={{
                 width: '100%',
                 padding: '48px 40px',
-                borderRadius: '24px',
-                background: theme === 'dark' ? 'rgba(26, 26, 26, 0.6)' : 'rgba(255, 255, 255, 0.8)',
-                border: `1px solid ${theme === 'dark' ? 'rgba(212, 165, 116, 0.15)' : 'rgba(212, 165, 116, 0.3)'}`,
-                backdropFilter: 'blur(10px)',
+                background: 'rgba(10, 8, 20, 0.85)',
+                border: '3px solid rgba(90, 191, 62, 0.2)',
+                imageRendering: 'pixelated',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
+                position: 'relative',
+                boxShadow: 'inset 3px 3px 0 rgba(255,255,255,0.04), inset -3px -3px 0 rgba(0,0,0,0.3)',
               }}
             >
-              {/* Decorative line */}
+              {/* Corner accents */}
+              {['top-left', 'top-right', 'bottom-left', 'bottom-right'].map((corner) => (
+                <div
+                  key={corner}
+                  style={{
+                    position: 'absolute',
+                    [corner.includes('top') ? 'top' : 'bottom']: -3,
+                    [corner.includes('left') ? 'left' : 'right']: -3,
+                    width: 8,
+                    height: 8,
+                    background: '#5ABF3E',
+                    opacity: 0.5,
+                  }}
+                />
+              ))}
+
+              {/* Pixel decorative line */}
               <div
                 style={{
                   width: '80px',
-                  height: '2px',
-                  background: `linear-gradient(90deg, transparent, ${theme === 'dark' ? 'rgba(212, 165, 116, 0.6)' : 'rgba(212, 165, 116, 0.8)'}, transparent)`,
+                  height: '3px',
+                  background: 'repeating-linear-gradient(90deg, #5ABF3E 0px, #5ABF3E 4px, transparent 4px, transparent 6px)',
                   marginBottom: '32px',
+                  opacity: 0.6,
                 }}
               />
 
-              {/* Encouraging tagline */}
               <h3
                 style={{
-                  fontFamily: "'VCR OSD Mono', monospace",
-                  fontSize: '14px',
+                  fontFamily: "'VCR OSD Mono', 'Press Start 2P', monospace",
+                  fontSize: '13px',
                   letterSpacing: '0.25em',
-                  color: '#D4A574',
+                  color: '#5ABF3E',
                   marginBottom: '16px',
                   textTransform: 'uppercase',
                 }}
               >
-                Your Brand DNA is Ready
+                Your Brand World is Ready
               </h3>
               <p
                 style={{
-                  fontSize: '17px',
-                  color: theme === 'dark' ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)',
+                  fontSize: '16px',
+                  color: 'rgba(255, 255, 255, 0.55)',
                   marginBottom: '32px',
                   textAlign: 'center',
                   maxWidth: '420px',
@@ -288,41 +309,44 @@ export default function DNAWalkthrough({
                 Take control of your personal brand with AI-powered tools to check, generate, and scale your content.
               </p>
 
-              {/* View Dashboard Button */}
               <motion.button
                 onClick={handleViewDashboard}
-                whileHover={{ scale: 1.03, boxShadow: '0 0 40px rgba(212, 165, 116, 0.4)' }}
+                whileHover={{ scale: 1.03, boxShadow: '0 0 30px rgba(90, 191, 62, 0.3)' }}
                 whileTap={{ scale: 0.98 }}
-                className="px-10 py-5 rounded-xl cursor-pointer border-none font-semibold"
+                className="px-10 py-5 cursor-pointer border-none font-semibold"
                 style={{
-                  fontFamily: "'VCR OSD Mono', monospace",
-                  fontSize: '15px',
+                  fontFamily: "'VCR OSD Mono', 'Press Start 2P', monospace",
+                  fontSize: '14px',
                   letterSpacing: '0.12em',
                   color: '#050505',
-                  background: 'linear-gradient(135deg, #E8C49A 0%, #D4A574 100%)',
-                  boxShadow: '0 4px 24px rgba(212, 165, 116, 0.3)',
+                  background: 'linear-gradient(135deg, #5ABF3E 0%, #4AA235 100%)',
+                  boxShadow: '0 4px 24px rgba(90, 191, 62, 0.3)',
+                  border: '2px solid #6BD04A',
+                  imageRendering: 'pixelated',
                 }}
               >
                 VIEW YOUR DASHBOARD
               </motion.button>
             </div>
 
-            {/* Bottom decorative element */}
+            {/* Bottom pixel decorative element */}
             <div
               style={{
                 marginTop: '40px',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '12px',
-                color: theme === 'dark' ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0, 0, 0, 0.3)',
-                fontSize: '11px',
-                fontFamily: "'VCR OSD Mono', monospace",
+                color: 'rgba(255, 255, 255, 0.25)',
+                fontSize: '10px',
+                fontFamily: "'VCR OSD Mono', 'Press Start 2P', monospace",
                 letterSpacing: '0.15em',
               }}
             >
-              <div style={{ width: '30px', height: '1px', background: theme === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)' }} />
+              <div style={{ width: 4, height: 4, background: 'rgba(90,191,62,0.3)' }} />
+              <div style={{ width: 4, height: 4, background: 'rgba(255,224,102,0.3)' }} />
               POWERED BY BRANDOS
-              <div style={{ width: '30px', height: '1px', background: theme === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)' }} />
+              <div style={{ width: 4, height: 4, background: 'rgba(232,138,74,0.3)' }} />
+              <div style={{ width: 4, height: 4, background: 'rgba(176,216,240,0.3)' }} />
             </div>
           </motion.div>
         </motion.div>

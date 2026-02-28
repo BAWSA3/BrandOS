@@ -1,2 +1,5 @@
 # Run secrets scanning before commit
 bash scripts/check-secrets.sh
+
+# Check formatting on staged files
+npx prettier --check $(git diff --cached --name-only --diff-filter=ACM -- '*.ts' '*.tsx' '*.js' '*.jsx' '*.json' '*.css' | tr '\n' ' ') 2>/dev/null || true
