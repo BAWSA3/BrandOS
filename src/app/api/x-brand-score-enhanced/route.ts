@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { geminiFlash, xBrandScorePrompt, enhancedBrandScorePrompt, XProfileData } from '@/lib/gemini';
 import { features, getTierInfo } from '@/lib/features';
+import { analyzeVoiceConsistency } from '@/lib/voice-consistency';
+import type { VoiceConsistencyReport } from '@/lib/schemas/voice-consistency.schema';
 
 /**
  * Enhanced Brand Score API
@@ -83,6 +85,11 @@ async function fetchTweets(username: string, origin: string) {
         replies: t.public_metrics?.reply_count || 0,
         impressions: t.public_metrics?.impression_count,
       })) as TweetData[],
+      rawTweets: data.tweets.map((t: { id: string; text: string; created_at: string }) => ({
+        id: t.id,
+        text: t.text,
+        created_at: t.created_at,
+      })) as { id: string; text: string; created_at: string }[],
       stats: data.analysis.stats,
       contentPatterns: data.analysis.contentPatterns,
     };
@@ -138,9 +145,21 @@ export async function POST(request: NextRequest) {
       prompt = xBrandScorePrompt(profile);
     }
 
-    // Call Gemini
-    const result = await geminiFlash.generateContent(prompt);
-    const responseText = result.response.text();
+    // Run brand score and voice consistency analysis in parallel
+    const voiceConsistencyPromise: Promise<VoiceConsistencyReport | null> =
+      isEnhanced && tweetData?.rawTweets
+        ? analyzeVoiceConsistency(tweetData.rawTweets).catch((err) => {
+            console.error('Voice consistency analysis failed (non-blocking):', err);
+            return null;
+          })
+        : Promise.resolve(null);
+
+    const [geminiResult, voiceConsistency] = await Promise.all([
+      geminiFlash.generateContent(prompt),
+      voiceConsistencyPromise,
+    ]);
+
+    const responseText = geminiResult.response.text();
 
     // Parse JSON response
     let brandScore;
@@ -157,6 +176,30 @@ export async function POST(request: NextRequest) {
         { error: 'Failed to analyze profile' },
         { status: 500 }
       );
+    }
+
+    // Blend voice consistency into CHECK phase:
+    // CHECK phase score = (existing * 0.5) + (voice_consistency * 0.5)
+    if (voiceConsistency && brandScore.phases?.check) {
+      const originalCheck = brandScore.phases.check.score;
+      const blended = Math.round(originalCheck * 0.5 + voiceConsistency.overallScore * 0.5);
+      brandScore.phases.check.score = blended;
+      brandScore.phases.check.insights.push(
+        `Voice consistency: ${voiceConsistency.overallScore}/100 (${voiceConsistency.drift.direction})`
+      );
+
+      // Recalculate overall score: DEFINE×0.30 + CHECK×0.25 + GENERATE×0.25 + SCALE×0.20
+      const phases = brandScore.phases;
+      const recalculated = Math.round(
+        (phases.define?.score ?? 0) * 0.3 +
+        phases.check.score * 0.25 +
+        (phases.generate?.score ?? 0) * 0.25 +
+        (phases.scale?.score ?? 0) * 0.2
+      );
+      brandScore.overallScore = Math.min(100, recalculated);
+
+      console.log(`Voice consistency blended into CHECK: ${originalCheck} -> ${blended}`);
+      console.log(`Recalculated overall: ${brandScore.overallScore}`);
     }
 
     // Save to leaderboard
@@ -179,8 +222,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       profile,
       brandScore,
+      voiceConsistency: voiceConsistency ?? undefined,
       meta: {
         enhanced: isEnhanced,
+        voiceConsistencyAvailable: voiceConsistency !== null,
         tier: features.xApiTier,
         tierInfo: getTierInfo(),
         analyzedAt: new Date().toISOString(),

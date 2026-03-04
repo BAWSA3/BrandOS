@@ -9,6 +9,9 @@ function getSupabase() {
   return getSupabaseBrowser();
 }
 
+export type SubscriptionTier = 'FREE' | 'CREATOR' | 'PRO' | 'AGENCY' | 'ENTERPRISE';
+export type SubscriptionStatus = 'ACTIVE' | 'PAST_DUE' | 'CANCELED' | 'TRIALING' | 'INCOMPLETE';
+
 export interface AuthUser {
   id: string;
   supabaseId: string;
@@ -19,6 +22,10 @@ export interface AuthUser {
   email: string | null;
   isInnerCircle: boolean;
   invitedBy: string | null;
+  subscriptionTier: SubscriptionTier;
+  subscriptionStatus: SubscriptionStatus;
+  billingInterval: string | null;
+  currentPeriodEnd: string | null;
 }
 
 interface UseAuthReturn {

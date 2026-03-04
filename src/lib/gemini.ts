@@ -2154,3 +2154,142 @@ export async function analyzeTweetVoice(
   }
 }
 
+// =============================================================================
+// VOICE CONSISTENCY ANALYSIS (Per-Post Scoring Against Fingerprint)
+// =============================================================================
+
+export interface VoiceConsistencyGeminiInput {
+  text: string;
+  id: string;
+  postedAt: string;
+}
+
+export interface VoiceConsistencyGeminiOutput {
+  postScores: {
+    tweetId: string;
+    score: number;
+    flags: string[];
+  }[];
+  dimensions: {
+    toneConsistency: number;
+    vocabularyConsistency: number;
+    structureConsistency: number;
+    topicConsistency: number;
+  };
+  drift: {
+    direction: 'stable' | 'drifting' | 'evolving';
+    trendLine: number[];
+    explanation: string;
+  };
+  insights: string[];
+}
+
+export function voiceConsistencyPrompt(
+  fingerprint: string,
+  tweets: VoiceConsistencyGeminiInput[]
+): string {
+  const tweetBlock = tweets
+    .map(
+      (t, i) =>
+        `[${i + 1}] (id: ${t.id}, date: ${t.postedAt})\n"${t.text.substring(0, 400)}"`
+    )
+    .join('\n\n');
+
+  return `You are a voice consistency analyst. You will compare a creator's posts against their established voice fingerprint and score each post on how well it matches.
+
+${fingerprint}
+
+---
+
+POSTS TO ANALYZE (${tweets.length} posts, ordered oldest to newest):
+
+${tweetBlock}
+
+---
+
+SCORING INSTRUCTIONS:
+
+For each post, score 0-100 on voice alignment:
+- 90-100: Unmistakably this person. Hits signature markers, matches rhythm, vocabulary, and tone perfectly.
+- 70-89: Clearly on-brand. Minor deviations but recognizably them.
+- 50-69: Mixed signals. Some elements match but noticeable shifts in tone, vocabulary, or structure.
+- 30-49: Off-brand. Sounds generic or like a different person. Missing key voice markers.
+- 0-29: Completely inconsistent. Could be AI-generated, ghostwritten, or a completely different voice.
+
+For each post that scores below 70, add specific flags explaining what's off:
+- "tone shift" -- emotional register doesn't match fingerprint
+- "unusual vocabulary" -- word choices foreign to their patterns
+- "structural mismatch" -- sentence patterns, formatting differ from norm
+- "missing signature markers" -- their distinctive elements are absent
+- "topic drift" -- subject matter outside their established pillars
+- "overly formal/casual" -- register mismatch vs. their baseline
+
+DIMENSION SCORING (0-100 each):
+- toneConsistency: How uniform is the emotional register across all posts?
+- vocabularyConsistency: How similar is word choice, complexity, jargon usage across posts?
+- structureConsistency: How consistent is sentence length, formatting, hook/close patterns?
+- topicConsistency: How focused are they on their established content pillars?
+
+DRIFT DETECTION:
+Compare the first third of posts (oldest) vs the last third (newest). Are they:
+- "stable": Scores stay roughly the same over time
+- "drifting": Voice is becoming less consistent (scores dropping)
+- "evolving": Voice is deliberately shifting but staying coherent (scores changing but not dropping)
+
+Provide a trendLine array of ${tweets.length} numbers, one score per post in chronological order.
+
+Return ONLY valid JSON:
+{
+  "postScores": [
+    { "tweetId": "<id>", "score": 0-100, "flags": ["flag1", "flag2"] }
+  ],
+  "dimensions": {
+    "toneConsistency": 0-100,
+    "vocabularyConsistency": 0-100,
+    "structureConsistency": 0-100,
+    "topicConsistency": 0-100
+  },
+  "drift": {
+    "direction": "stable|drifting|evolving",
+    "trendLine": [score1, score2, ...],
+    "explanation": "Brief explanation of the drift pattern"
+  },
+  "insights": [
+    "Actionable insight 1",
+    "Actionable insight 2",
+    "Actionable insight 3"
+  ]
+}`;
+}
+
+export async function analyzeVoiceConsistency(
+  fingerprint: string,
+  tweets: VoiceConsistencyGeminiInput[]
+): Promise<VoiceConsistencyGeminiOutput | null> {
+  try {
+    const prompt = voiceConsistencyPrompt(fingerprint, tweets);
+    const result = await geminiFlash.generateContent(prompt);
+    const response = await result.response;
+    const text = response.text();
+
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      console.error('No JSON found in voice consistency response');
+      return null;
+    }
+
+    const analysis = JSON.parse(jsonMatch[0]) as VoiceConsistencyGeminiOutput;
+
+    console.log('=== VOICE CONSISTENCY ANALYSIS COMPLETE ===');
+    console.log(`Posts analyzed: ${analysis.postScores.length}`);
+    console.log(`Drift: ${analysis.drift.direction}`);
+    console.log(`Dimensions: tone=${analysis.dimensions.toneConsistency}, vocab=${analysis.dimensions.vocabularyConsistency}, struct=${analysis.dimensions.structureConsistency}, topic=${analysis.dimensions.topicConsistency}`);
+    console.log('============================================');
+
+    return analysis;
+  } catch (error) {
+    console.error('Voice consistency analysis error:', error);
+    return null;
+  }
+}
+

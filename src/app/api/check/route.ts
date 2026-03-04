@@ -4,9 +4,27 @@ import { buildCheckPrompt } from '@/prompts/brand-guardian';
 import { BrandDNA } from '@/lib/types';
 import { VoiceFingerprint, AuthenticityScore } from '@/lib/voice-fingerprint';
 import { buildAuthenticityCheckPrompt } from '@/prompts/voice-fingerprint';
+import { getUser } from '@/lib/auth';
+import { checkAndIncrementUsage } from '@/lib/usage';
 
 export async function POST(request: NextRequest) {
   try {
+    const user = await getUser();
+    if (user) {
+      const { allowed, usage } = await checkAndIncrementUsage(user.id, 'check');
+      if (!allowed) {
+        return NextResponse.json(
+          {
+            error: 'Usage limit reached',
+            code: 'USAGE_LIMIT',
+            usage,
+            upgradeUrl: '/pricing',
+          },
+          { status: 429 }
+        );
+      }
+    }
+
     const apiKey = process.env.ANTHROPIC_API_KEY;
 
     if (!apiKey) {

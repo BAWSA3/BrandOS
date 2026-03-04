@@ -16,7 +16,14 @@ import { AuthenticityAnalysis, ActivityAnalysis } from '@/lib/gemini';
 import { useXBrandScoreDemoCapture } from '@/hooks/useDemoCaptureIntegration';
 import DemoModeControls from './DemoModeControls';
 import { AttestScoreButton } from '@/components/onchain';
-import { PixelWorldScene, PixelHeroBackground, PixelProgressBar, PixelPhaseCard, PixelConfetti } from '@/components/pixel-world';
+import dynamic from 'next/dynamic';
+import { AsciiDNAHero } from '@/components/ascii-dna';
+import { PixelProgressBar, PixelPhaseCard, PixelConfetti } from '@/components/pixel-world';
+
+const DNAJourneyScene = dynamic(() => import('./DNAJourneyScene'), {
+  ssr: false,
+  loading: () => null,
+});
 
 // ============================================================================
 // Types
@@ -299,10 +306,10 @@ interface PhaseConfigItem {
 }
 
 const PHASE_COLORS = [
-  '#5ABF3E', // Phase 1 (Define) - Spring green
-  '#FFE066', // Phase 2 (Check) - Summer gold
-  '#E88A4A', // Phase 3 (Generate) - Autumn orange
-  '#B0D8F0', // Phase 4 (Scale) - Winter ice
+  '#E8A838', // Phase 1 (Define) - Golden Amber
+  '#00ff88', // Phase 2 (Check) - Green
+  '#9d4edd', // Phase 3 (Generate) - Purple
+  '#ff6b35', // Phase 4 (Scale) - Orange
 ];
 
 const phaseConfig: PhaseConfigItem[] = [
@@ -626,6 +633,7 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
   const [generatedBrandDNA, setGeneratedBrandDNA] = useState<GeneratedBrandDNA | null>(null);
   const [accountAuthenticity, setAccountAuthenticity] = useState<AuthenticityAnalysis | null>(null);
   const [accountActivity, setAccountActivity] = useState<ActivityAnalysis | null>(null);
+  const [rawTweets, setRawTweets] = useState<{ id: string; text: string; created_at: string; public_metrics?: { like_count: number; retweet_count: number; reply_count: number; quote_count: number; impression_count?: number } }[]>([]);
   const [currentPhase, setCurrentPhase] = useState(1);
   const [itemProgress, setItemProgress] = useState(0);
   const [showConfetti, setShowConfetti] = useState(false);
@@ -709,6 +717,19 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
       setItemProgress(0);
       apiCompleteRef.current = false;
       apiErrorRef.current = null;
+
+      // Fetch tweets in parallel (non-blocking, requires Basic tier)
+      fetch('/api/x-tweets', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: username.trim(), maxResults: 50 }),
+      })
+        .then(async (res) => {
+          if (!res.ok) return;
+          const data = await res.json();
+          if (data.tweets?.length) setRawTweets(data.tweets);
+        })
+        .catch(() => {});
 
       // Start full brand score API call in background
       fetch('/api/x-brand-score', {
@@ -941,7 +962,7 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
         overflow: (flowState === 'walkthrough' || flowState === 'journey') ? 'visible' : 'hidden',
       }}
     >
-      {/* Video Sky Background — visible during input state */}
+      {/* ASCII DNA Helix Background — visible during input state */}
       <motion.div
         initial={{ opacity: 1 }}
         animate={{ opacity: flowState === 'input' ? 1 : 0 }}
@@ -950,24 +971,20 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
           position: 'absolute',
           inset: 0,
           zIndex: 0,
-          pointerEvents: 'none',
         }}
       >
-        <PixelHeroBackground />
+        <AsciiDNAHero backgroundColor="#2F54EB" textColor="#ffffff" />
       </motion.div>
 
-      {/* Pixel World Background - Hidden during input, visible during journey, hidden during reveal */}
+      {/* DNA Background - Hidden during input, visible during journey, hidden during reveal */}
       <div
         style={{
-          position: 'absolute',
-          inset: 0,
-          zIndex: flowState === 'journey' ? 5 : 0,
           opacity: flowState === 'input' ? 0 : flowState === 'journey' ? 1 : flowState === 'reveal' ? 0 : 0.6,
           transition: 'opacity 0.8s ease',
           pointerEvents: 'none',
         }}
       >
-        <PixelWorldScene
+        <DNAJourneyScene
           flowState={flowState}
           currentPhase={currentPhase}
           itemProgress={itemProgress}
@@ -989,71 +1006,94 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
       {/* Confetti */}
       <PixelConfetti isActive={showConfetti} />
 
-      {/* Pixel vine corner decorations */}
+      {/* System UI Decorations — corner brackets, status labels */}
       <AnimatePresence>
         {flowState === 'input' && (
           <>
-            {[
-              { top: 12, left: 12, rotate: '0deg' },
-              { top: 12, right: 12, rotate: '90deg' },
-              { bottom: 12, left: 12, rotate: '270deg' },
-              { bottom: 12, right: 12, rotate: '180deg' },
-            ].map((pos, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 0.25 }}
-                exit={{ opacity: 0 }}
-                transition={{ delay: 1.2 + i * 0.1, duration: 0.5 }}
-                style={{
-                  position: 'fixed', ...pos,
-                  width: 24, height: 24,
-                  pointerEvents: 'none', zIndex: 20,
-                  imageRendering: 'pixelated' as const,
-                  transform: `rotate(${pos.rotate})`,
-                }}
-              >
-                <svg width="24" height="24" viewBox="0 0 24 24" style={{ imageRendering: 'pixelated' }}>
-                  <rect x="0" y="0" width="4" height="2" fill="#4A7A2A" />
-                  <rect x="0" y="0" width="2" height="4" fill="#4A7A2A" />
-                  <rect x="4" y="2" width="3" height="2" fill="#3A6B1E" />
-                  <rect x="2" y="4" width="2" height="3" fill="#3A6B1E" />
-                  <rect x="6" y="0" width="2" height="2" fill="#5ABF3E" opacity="0.5" />
-                  <rect x="0" y="6" width="2" height="2" fill="#5ABF3E" opacity="0.5" />
-                </svg>
-              </motion.div>
-            ))}
-
-            {/* Version label */}
-            <motion.span
+            {/* Corner brackets — all 4 viewport corners */}
+            {/* Top-left */}
+            <motion.div
               initial={{ opacity: 0 }}
-              animate={{ opacity: 0.35 }}
+              animate={{ opacity: 0.15 }}
               exit={{ opacity: 0 }}
               transition={{ delay: 1.2, duration: 0.5 }}
               style={{
-                position: 'fixed', top: 18, right: 44,
-                fontFamily: "'VCR OSD Mono', 'PP NeueBit', monospace", fontSize: '10px',
-                letterSpacing: '0.15em', color: 'rgba(245,222,179,0.3)',
+                position: 'fixed', top: 16, left: 16, width: 30, height: 30,
+                borderTop: '1px solid rgba(255,255,255,0.2)',
+                borderLeft: '1px solid rgba(255,255,255,0.2)',
+                pointerEvents: 'none', zIndex: 20,
+              }}
+            />
+            {/* Top-right */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.15 }}
+              exit={{ opacity: 0 }}
+              transition={{ delay: 1.2, duration: 0.5 }}
+              style={{
+                position: 'fixed', top: 16, right: 16, width: 30, height: 30,
+                borderTop: '1px solid rgba(255,255,255,0.2)',
+                borderRight: '1px solid rgba(255,255,255,0.2)',
+                pointerEvents: 'none', zIndex: 20,
+              }}
+            />
+            {/* Bottom-left */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.15 }}
+              exit={{ opacity: 0 }}
+              transition={{ delay: 1.2, duration: 0.5 }}
+              style={{
+                position: 'fixed', bottom: 16, left: 16, width: 30, height: 30,
+                borderBottom: '1px solid rgba(255,255,255,0.2)',
+                borderLeft: '1px solid rgba(255,255,255,0.2)',
+                pointerEvents: 'none', zIndex: 20,
+              }}
+            />
+            {/* Bottom-right */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.15 }}
+              exit={{ opacity: 0 }}
+              transition={{ delay: 1.2, duration: 0.5 }}
+              style={{
+                position: 'fixed', bottom: 16, right: 16, width: 30, height: 30,
+                borderBottom: '1px solid rgba(255,255,255,0.2)',
+                borderRight: '1px solid rgba(255,255,255,0.2)',
+                pointerEvents: 'none', zIndex: 20,
+              }}
+            />
+
+            {/* Version label — top-right */}
+            <motion.span
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.3 }}
+              exit={{ opacity: 0 }}
+              transition={{ delay: 1.2, duration: 0.5 }}
+              style={{
+                position: 'fixed', top: 22, right: 54,
+                fontFamily: "'PP NeueBit', monospace", fontSize: '11px',
+                letterSpacing: '0.15em', color: 'rgba(255,255,255,0.25)',
                 pointerEvents: 'none', zIndex: 20,
               }}
             >
               v2.0
             </motion.span>
 
-            {/* Bottom-center label */}
+            {/* Bottom-center — POWERED BY AI */}
             <motion.span
               initial={{ opacity: 0 }}
-              animate={{ opacity: 0.3 }}
+              animate={{ opacity: 0.25 }}
               exit={{ opacity: 0 }}
               transition={{ delay: 1.4, duration: 0.5 }}
               style={{
-                position: 'fixed', bottom: 18, left: '50%', transform: 'translateX(-50%)',
-                fontFamily: "'VCR OSD Mono', 'PP NeueBit', monospace", fontSize: '10px',
-                letterSpacing: '0.2em', color: 'rgba(245,222,179,0.25)',
+                position: 'fixed', bottom: 22, left: '50%', transform: 'translateX(-50%)',
+                fontFamily: "'PP NeueBit', monospace", fontSize: '11px',
+                letterSpacing: '0.2em', color: 'rgba(255,255,255,0.2)',
                 whiteSpace: 'nowrap', pointerEvents: 'none', zIndex: 20,
               }}
             >
-              ▸▸ POWERED BY AI ◂◂
+              ── POWERED BY AI ──
             </motion.span>
           </>
         )}
@@ -1118,7 +1158,7 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
               <span style={{
                 fontFamily: "'M42 Flight 721', sans-serif",
                 fontSize: 'clamp(0.75rem, 1.8vw, 1.1rem)',
-                color: 'rgba(0,0,0,0.85)',
+                color: 'rgba(255,255,255,0.85)',
                 letterSpacing: '0.15em',
                 marginTop: '-160px',
                 marginBottom: '48px',
@@ -1248,7 +1288,7 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
                 fontFamily: "'PP NeueBit', monospace",
                 fontSize: '11px',
                 letterSpacing: '0.15em',
-                color: 'rgba(0,0,0,0.85)',
+                color: 'rgba(255,255,255,0.6)',
                 textAlign: 'center',
                 marginTop: '1.5rem',
               }}
@@ -1308,6 +1348,7 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
             generatedBrandDNA={generatedBrandDNA}
             authenticity={accountAuthenticity}
             activity={accountActivity}
+            rawTweets={rawTweets}
             onComplete={() => {
               setFlowState('reveal');
               // Show confetti for high scores after walkthrough

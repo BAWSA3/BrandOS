@@ -2,7 +2,7 @@
 
 import { motion } from 'motion/react';
 
-const SEASON_LABELS = ['SPRING', 'SUMMER', 'AUTUMN', 'WINTER'];
+const PHASE_LABELS = ['DEFINE', 'CHECK', 'GENERATE', 'SCALE'];
 const SEASON_COLORS = [
   '#5ABF3E', // Spring green
   '#FFE066', // Summer gold
@@ -56,7 +56,7 @@ export default function PixelProgressBar({
           `,
         }}
       >
-        {SEASON_LABELS.map((season, index) => {
+        {PHASE_LABELS.map((season, index) => {
           const phaseNum = index + 1;
           const isActive = currentPhase === phaseNum;
           const isCompleted = currentPhase > phaseNum;

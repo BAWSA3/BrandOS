@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'motion/react';
+import type { VoiceConsistencyReport } from '@/lib/schemas/voice-consistency.schema';
 
 // =============================================================================
 // BRAND DNA PREVIEW COMPONENT
@@ -60,6 +61,8 @@ export interface GeneratedBrandDNA {
   analysisMode?: 'content-primary' | 'limited-tweets' | 'profile-only';
   analysisConfidence?: 'high' | 'medium' | 'low';
   dataLimitations?: string[];
+  // Rich voice consistency data from the Voice Consistency Analyzer
+  voiceConsistencyReport?: VoiceConsistencyReport;
 }
 
 interface BrandDNAPreviewProps {
@@ -163,6 +166,193 @@ function ToneSliderPreview({
           {rightLabel}
         </span>
       </div>
+    </div>
+  );
+}
+
+const DIMENSION_LABELS: Record<string, string> = {
+  toneConsistency: 'Tone',
+  vocabularyConsistency: 'Vocabulary',
+  structureConsistency: 'Structure',
+  topicConsistency: 'Topic',
+};
+
+const DRIFT_ICONS: Record<string, string> = {
+  stable: '→',
+  drifting: '↘',
+  evolving: '↗',
+};
+
+function VoiceConsistencyDetail({
+  report,
+  theme,
+}: {
+  report: VoiceConsistencyReport;
+  theme: string;
+}) {
+  const isDark = theme === 'dark';
+  const scoreColor =
+    report.overallScore >= 70 ? '#10B981' : report.overallScore >= 50 ? '#F59E0B' : '#EF4444';
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+      {/* Overall score + drift */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          padding: '12px',
+          background: `${scoreColor}15`,
+          borderRadius: '8px',
+        }}
+      >
+        <span style={{ fontSize: '20px' }}>
+          {report.overallScore >= 70 ? '✓' : report.overallScore >= 50 ? '⚠️' : '✕'}
+        </span>
+        <div style={{ flex: 1 }}>
+          <span
+            style={{
+              fontFamily: "'Helvetica Neue', sans-serif",
+              fontSize: '13px',
+              fontWeight: 600,
+              color: isDark ? '#FFFFFF' : '#000000',
+              display: 'block',
+            }}
+          >
+            Voice Consistency: {report.overallScore}%
+          </span>
+          <span
+            style={{
+              fontFamily: "'Helvetica Neue', sans-serif",
+              fontSize: '11px',
+              color: isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)',
+            }}
+          >
+            {DRIFT_ICONS[report.drift.direction] ?? '→'} {report.drift.explanation}
+          </span>
+        </div>
+      </div>
+
+      {/* Dimension bars */}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
+          gap: '6px',
+        }}
+      >
+        {Object.entries(report.dimensions).map(([key, value]) => (
+          <div
+            key={key}
+            style={{
+              padding: '8px 10px',
+              background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)',
+              borderRadius: '6px',
+            }}
+          >
+            <div
+              style={{
+                fontFamily: "'VCR OSD Mono', monospace",
+                fontSize: '9px',
+                letterSpacing: '0.08em',
+                color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)',
+                marginBottom: '4px',
+              }}
+            >
+              {DIMENSION_LABELS[key] ?? key}
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <div
+                style={{
+                  flex: 1,
+                  height: '3px',
+                  background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+                  borderRadius: '2px',
+                  overflow: 'hidden',
+                }}
+              >
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${value}%` }}
+                  transition={{ duration: 0.6 }}
+                  style={{
+                    height: '100%',
+                    background: value >= 70 ? '#10B981' : value >= 50 ? '#F59E0B' : '#EF4444',
+                    borderRadius: '2px',
+                  }}
+                />
+              </div>
+              <span
+                style={{
+                  fontFamily: "'Helvetica Neue', sans-serif",
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  color: isDark ? '#FFFFFF' : '#000000',
+                  minWidth: '28px',
+                  textAlign: 'right',
+                }}
+              >
+                {value}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Outlier posts */}
+      {report.outliers.length > 0 && (
+        <div
+          style={{
+            padding: '10px',
+            background: isDark ? 'rgba(239,68,68,0.08)' : 'rgba(239,68,68,0.05)',
+            borderRadius: '6px',
+            border: '1px solid rgba(239,68,68,0.15)',
+          }}
+        >
+          <div
+            style={{
+              fontFamily: "'VCR OSD Mono', monospace",
+              fontSize: '9px',
+              letterSpacing: '0.08em',
+              color: '#EF4444',
+              marginBottom: '6px',
+            }}
+          >
+            OFF-BRAND POSTS ({report.outliers.length})
+          </div>
+          {report.outliers.slice(0, 2).map((outlier) => (
+            <div
+              key={outlier.tweetId}
+              style={{
+                fontFamily: "'Helvetica Neue', sans-serif",
+                fontSize: '11px',
+                color: isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)',
+                padding: '4px 0',
+                borderBottom: '1px solid rgba(239,68,68,0.1)',
+              }}
+            >
+              <span style={{ color: '#EF4444', fontWeight: 600, marginRight: '6px' }}>
+                {outlier.score}%
+              </span>
+              "{outlier.text.substring(0, 80)}
+              {outlier.text.length > 80 ? '...' : ''}"
+              {outlier.flags.length > 0 && (
+                <span
+                  style={{
+                    display: 'block',
+                    fontSize: '10px',
+                    color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)',
+                    marginTop: '2px',
+                  }}
+                >
+                  {outlier.flags.join(' · ')}
+                </span>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -645,46 +835,53 @@ export default function BrandDNAPreview({
           )}
 
           {/* Voice Consistency */}
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px',
-              padding: '12px',
-              background: generatedDNA.performanceInsights.voiceConsistency >= 70
-                ? 'rgba(16,185,129,0.1)'
-                : 'rgba(245,158,11,0.1)',
-              borderRadius: '8px',
-            }}
-          >
-            <span style={{ fontSize: '20px' }}>
-              {generatedDNA.performanceInsights.voiceConsistency >= 70 ? '✓' : '⚠️'}
-            </span>
-            <div>
-              <span
-                style={{
-                  fontFamily: "'Helvetica Neue', sans-serif",
-                  fontSize: '13px',
-                  fontWeight: 600,
-                  color: theme === 'dark' ? '#FFFFFF' : '#000000',
-                  display: 'block',
-                }}
-              >
-                Voice Consistency: {generatedDNA.performanceInsights.voiceConsistency}%
+          {generatedDNA.voiceConsistencyReport ? (
+            <VoiceConsistencyDetail
+              report={generatedDNA.voiceConsistencyReport}
+              theme={theme}
+            />
+          ) : (
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                padding: '12px',
+                background: generatedDNA.performanceInsights.voiceConsistency >= 70
+                  ? 'rgba(16,185,129,0.1)'
+                  : 'rgba(245,158,11,0.1)',
+                borderRadius: '8px',
+              }}
+            >
+              <span style={{ fontSize: '20px' }}>
+                {generatedDNA.performanceInsights.voiceConsistency >= 70 ? '✓' : '⚠️'}
               </span>
-              <span
-                style={{
-                  fontFamily: "'Helvetica Neue', sans-serif",
-                  fontSize: '11px',
-                  color: theme === 'dark' ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)',
-                }}
-              >
-                {generatedDNA.performanceInsights.voiceConsistency >= 70
-                  ? 'Your content maintains a consistent voice'
-                  : 'Consider strengthening your voice consistency'}
-              </span>
+              <div>
+                <span
+                  style={{
+                    fontFamily: "'Helvetica Neue', sans-serif",
+                    fontSize: '13px',
+                    fontWeight: 600,
+                    color: theme === 'dark' ? '#FFFFFF' : '#000000',
+                    display: 'block',
+                  }}
+                >
+                  Voice Consistency: {generatedDNA.performanceInsights.voiceConsistency}%
+                </span>
+                <span
+                  style={{
+                    fontFamily: "'Helvetica Neue', sans-serif",
+                    fontSize: '11px',
+                    color: theme === 'dark' ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)',
+                  }}
+                >
+                  {generatedDNA.performanceInsights.voiceConsistency >= 70
+                    ? 'Your content maintains a consistent voice'
+                    : 'Consider strengthening your voice consistency'}
+                </span>
+              </div>
             </div>
-          </div>
+          )}
         </motion.div>
       )}
 

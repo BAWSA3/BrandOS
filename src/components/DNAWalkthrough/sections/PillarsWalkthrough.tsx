@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import WalkthroughSection from '../WalkthroughSection';
 import { StaggerContainer, StaggerItem } from '../motion';
 import type { ParallaxLayerConfig } from '../motion';
+import type { VoiceConsistencyReport } from '@/lib/schemas/voice-consistency.schema';
 
 interface ContentPillar {
   name: string;
@@ -23,6 +24,7 @@ interface PerformanceInsights {
 interface PillarsWalkthroughProps {
   contentPillars?: ContentPillar[];
   performanceInsights?: PerformanceInsights;
+  voiceConsistencyReport?: VoiceConsistencyReport;
   theme: string;
   parallaxLayers?: ParallaxLayerConfig[];
 }
@@ -63,6 +65,7 @@ function getEngagementEfficiency(pillars: ContentPillar[]): { best: string; wors
 export default function PillarsWalkthrough({
   contentPillars,
   performanceInsights,
+  voiceConsistencyReport,
   theme,
   parallaxLayers,
 }: PillarsWalkthroughProps) {
@@ -352,9 +355,7 @@ export default function PillarsWalkthrough({
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: 0.4 }}
                   className="rounded-[4px] p-4"
-                  style={{
-                    background: '#FFFFFF',
-                  }}
+                  style={{ background: '#FFFFFF' }}
                 >
                   <div
                     className="text-[10px] tracking-wider mb-2"
@@ -368,20 +369,92 @@ export default function PillarsWalkthrough({
                   <div
                     className="text-2xl font-semibold"
                     style={{
-                      color: performanceInsights.voiceConsistency >= 70 ? '#10B981' : '#F59E0B',
+                      color:
+                        (voiceConsistencyReport?.overallScore ?? performanceInsights.voiceConsistency) >= 70
+                          ? '#10B981'
+                          : '#F59E0B',
                     }}
                   >
-                    {performanceInsights.voiceConsistency}%
+                    {voiceConsistencyReport?.overallScore ?? performanceInsights.voiceConsistency}%
                   </div>
-                  <div
-                    className="text-xs mt-1"
-                    style={{
-                      fontFamily: "'Helvetica Neue', sans-serif",
-                      color: 'rgba(0,0,0,0.5)',
-                    }}
-                  >
-                    {performanceInsights.voiceConsistency >= 70 ? 'Strong consistency' : 'Room to improve'}
-                  </div>
+
+                  {voiceConsistencyReport ? (
+                    <div className="mt-2 space-y-2">
+                      {/* Dimension mini-bars */}
+                      {Object.entries(voiceConsistencyReport.dimensions).map(([key, val]) => (
+                        <div key={key} className="flex items-center gap-2">
+                          <span
+                            className="text-[9px] w-16 truncate"
+                            style={{
+                              fontFamily: "'VCR OSD Mono', monospace",
+                              color: 'rgba(0,0,0,0.35)',
+                            }}
+                          >
+                            {key.replace('Consistency', '').toUpperCase()}
+                          </span>
+                          <div
+                            className="flex-1 h-[3px] rounded-full overflow-hidden"
+                            style={{ background: 'rgba(0,0,0,0.08)' }}
+                          >
+                            <motion.div
+                              initial={{ width: 0 }}
+                              whileInView={{ width: `${val}%` }}
+                              viewport={{ once: true }}
+                              transition={{ duration: 0.6 }}
+                              className="h-full rounded-full"
+                              style={{
+                                background: val >= 70 ? '#10B981' : val >= 50 ? '#F59E0B' : '#EF4444',
+                              }}
+                            />
+                          </div>
+                          <span
+                            className="text-[10px] font-medium w-6 text-right"
+                            style={{ color: 'rgba(0,0,0,0.6)' }}
+                          >
+                            {val}
+                          </span>
+                        </div>
+                      ))}
+
+                      {/* Drift indicator */}
+                      <div
+                        className="text-[10px] pt-1"
+                        style={{
+                          fontFamily: "'Helvetica Neue', sans-serif",
+                          color: 'rgba(0,0,0,0.45)',
+                        }}
+                      >
+                        {voiceConsistencyReport.drift.direction === 'stable' && '→ Voice is stable'}
+                        {voiceConsistencyReport.drift.direction === 'drifting' && '↘ Voice is drifting'}
+                        {voiceConsistencyReport.drift.direction === 'evolving' && '↗ Voice is evolving'}
+                      </div>
+
+                      {/* Outlier count */}
+                      {voiceConsistencyReport.outliers.length > 0 && (
+                        <div
+                          className="text-[10px]"
+                          style={{
+                            fontFamily: "'Helvetica Neue', sans-serif",
+                            color: '#EF4444',
+                          }}
+                        >
+                          {voiceConsistencyReport.outliers.length} off-brand post{voiceConsistencyReport.outliers.length !== 1 ? 's' : ''} detected
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div
+                      className="text-xs mt-1"
+                      style={{
+                        fontFamily: "'Helvetica Neue', sans-serif",
+                        color: 'rgba(0,0,0,0.5)',
+                      }}
+                    >
+                      {performanceInsights.voiceConsistency >= 70
+                        ? 'Strong consistency'
+                        : 'Room to improve'}
+                    </div>
+                  )}
                 </motion.div>
               )}
             </div>

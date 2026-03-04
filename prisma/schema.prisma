@@ -8,6 +8,22 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+enum SubscriptionTier {
+  FREE
+  CREATOR
+  PRO
+  AGENCY
+  ENTERPRISE
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  TRIALING
+  INCOMPLETE
+}
+
 model User {
   id            String    @id @default(cuid())
   supabaseId    String    @unique    // Links to Supabase Auth
@@ -22,13 +38,31 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
+  // Subscription & billing
+  stripeCustomerId     String?            @unique
+  stripeSubscriptionId String?            @unique
+  subscriptionTier     SubscriptionTier   @default(FREE)
+  subscriptionStatus   SubscriptionStatus @default(ACTIVE)
+  billingInterval      String?            // "monthly" | "annual"
+  currentPeriodEnd     DateTime?
+
+  // Usage tracking (resets monthly)
+  checksUsedThisMonth      Int      @default(0)
+  generationsUsedThisMonth Int      @default(0)
+  usageResetDate           DateTime @default(now())
+
   // Relationships
-  brands       Brand[]
-  teamMembers  TeamMember[]
-  sharedBrands SharedBrand[]
-  feedback     Feedback[]
+  brands              Brand[]
+  teamMembers         TeamMember[]
+  sharedBrands        SharedBrand[]
+  feedback            Feedback[]
+  purchases           Purchase[]
+  platformConnections PlatformConnection[]
+  submittedApprovals  ApprovalRequest[]  @relation("SubmittedApprovals")
+  reviewedApprovals   ApprovalRequest[]  @relation("ReviewedApprovals")
 
   @@index([xUsername])
+  @@index([stripeCustomerId])
 }
 
 model Brand {
@@ -71,6 +105,15 @@ model Brand {
 
   // Drift alerts
   driftAlerts DriftAlert[]
+
+  // Cross-platform content
+  crossPlatformContent BrandContent[]
+
+  // Visual DNA
+  visualDNA BrandVisualDNA?
+
+  // Approval workflows
+  approvalRequests ApprovalRequest[]
 
   @@index([userId])
   @@index([teamId])
@@ -158,6 +201,102 @@ model BrandTweet {
   @@index([brandId, postedAt(sort: Desc)])
 }
 
+// ===== CROSS-PLATFORM CONTENT =====
+
+model BrandContent {
+  id              String   @id @default(cuid())
+  externalId      String                 // Platform-specific content ID (dedup key per platform)
+  platform        String                 // x, linkedin, instagram, youtube, tiktok, threads
+  contentType     String                 // text, image, video, carousel, story, reel, thread, article, short, poll
+  textContent     String?                // Post text, caption, description
+  transcript      String?                // Video/audio transcript
+  mediaUrls       String?                // JSON array of media URLs
+  metrics         String                 // JSON: EngagementMetrics
+  hashtags        String?                // JSON array
+  mentions        String?                // JSON array
+  url             String?                // Permalink to original content
+  authorUsername  String?
+  alignmentScore  Int?                   // 0-100, null = not yet scored
+  voiceScore      Int?                   // 0-100, voice consistency score
+  visualScore     Int?                   // 0-100, visual consistency score
+  rawData         String?                // JSON: original platform response
+  postedAt        DateTime               // When content was posted on the platform
+  syncedAt        DateTime @default(now())
+  createdAt       DateTime @default(now())
+
+  brandId String
+  brand   Brand  @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  @@unique([platform, externalId])
+  @@index([brandId, platform])
+  @@index([brandId, postedAt(sort: Desc)])
+  @@index([platform])
+}
+
+model PlatformConnection {
+  id                String    @id @default(cuid())
+  platform          String    // x, linkedin, instagram, youtube, tiktok, threads
+  platformUserId    String    // User's ID on the external platform
+  platformUsername  String    // Display username on the external platform
+  accessToken       String    // OAuth access token (encrypted at rest)
+  refreshToken      String?   // OAuth refresh token
+  tokenExpiresAt    DateTime?
+  scopes            String    // JSON array of granted scopes
+  profileData       String?   // JSON: platform-specific profile info
+  lastSyncAt        DateTime?
+  connectedAt       DateTime  @default(now())
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, platform])
+  @@index([userId])
+  @@index([platform])
+}
+
+// ===== VISUAL DNA =====
+
+model BrandVisualDNA {
+  id              String   @id @default(cuid())
+  logoUsageRules  String   // JSON array of rules
+  colorPalette    String   // JSON: {primary, secondary, accent, tolerancePercent}
+  typography      String   // JSON: {headingFont, bodyFont, style}
+  imageStyle      String   // photography, illustration, flat-design, mixed, minimal
+  filterPreset    String?
+  moodKeywords    String   // JSON array
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  brandId String @unique
+  brand   Brand  @relation(fields: [brandId], references: [id], onDelete: Cascade)
+}
+
+// ===== APPROVAL WORKFLOWS =====
+
+model ApprovalRequest {
+  id              String    @id @default(cuid())
+  content         String
+  platform        String
+  contentType     String?
+  status          String    @default("pending") // pending, approved, rejected, revision_requested
+  brandCheckScore Int?      // 0-100
+  feedback        String?
+  submittedById   String
+  submittedBy     User      @relation("SubmittedApprovals", fields: [submittedById], references: [id])
+  reviewedById    String?
+  reviewedBy      User?     @relation("ReviewedApprovals", fields: [reviewedById], references: [id])
+  createdAt       DateTime  @default(now())
+  resolvedAt      DateTime?
+
+  brandId String
+  brand   Brand  @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  @@index([brandId, status])
+  @@index([submittedById])
+}
+
 model HistoryEntry {
   id          String   @id @default(cuid())
   type        String   // "check" or "generate"
@@ -198,6 +337,27 @@ model InviteCode {
 
   @@index([code])
   @@index([createdBy])
+}
+
+// ===== PURCHASES (one-time payments) =====
+
+model Purchase {
+  id               String   @id @default(cuid())
+  type             String   // "brand_dna_report", "workshop_ticket", etc.
+  amount           Int      // in cents
+  currency         String   @default("usd")
+  stripePaymentId  String   @unique
+  stripeSessionId  String?
+  status           String   @default("completed") // "completed", "refunded"
+  metadata         String?  // JSON for extra context
+  createdAt        DateTime @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([type])
+  @@index([createdAt])
 }
 
 // ===== RESEARCH AGENT MODELS =====

@@ -74,6 +74,10 @@ export async function GET(request: NextRequest) {
             email: user.email,
             isInnerCircle: user.isInnerCircle,
             invitedBy: user.invitedBy,
+            subscriptionTier: user.subscriptionTier,
+            subscriptionStatus: user.subscriptionStatus,
+            billingInterval: user.billingInterval,
+            currentPeriodEnd: user.currentPeriodEnd,
           },
         });
       }
@@ -101,6 +105,10 @@ export async function GET(request: NextRequest) {
         email: user.email,
         isInnerCircle: user.isInnerCircle,
         invitedBy: user.invitedBy,
+        subscriptionTier: user.subscriptionTier,
+        subscriptionStatus: user.subscriptionStatus,
+        billingInterval: user.billingInterval,
+        currentPeriodEnd: user.currentPeriodEnd,
       },
     });
   } catch (error) {

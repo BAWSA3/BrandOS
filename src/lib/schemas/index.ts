@@ -20,3 +20,16 @@ export {
   SubmitFeedbackSchema,
   type SubmitFeedbackInput,
 } from './feedback.schema';
+
+export {
+  PostVoiceScoreSchema,
+  VoiceDriftSchema,
+  VoiceDimensionsSchema,
+  VoiceConsistencyReportSchema,
+  VoiceConsistencyRequestSchema,
+  type PostVoiceScore,
+  type VoiceDrift,
+  type VoiceDimensions,
+  type VoiceConsistencyReport,
+  type VoiceConsistencyRequest,
+} from './voice-consistency.schema';

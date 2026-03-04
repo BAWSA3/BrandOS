@@ -3,9 +3,27 @@ import { NextRequest, NextResponse } from 'next/server';
 import { buildGeneratePrompt } from '@/prompts/brand-guardian';
 import { BrandDNA, ContentType } from '@/lib/types';
 import { VoiceFingerprintSummary } from '@/lib/voice-fingerprint';
+import { getUser } from '@/lib/auth';
+import { checkAndIncrementUsage } from '@/lib/usage';
 
 export async function POST(request: NextRequest) {
   try {
+    const user = await getUser();
+    if (user) {
+      const { allowed, usage } = await checkAndIncrementUsage(user.id, 'generation');
+      if (!allowed) {
+        return NextResponse.json(
+          {
+            error: 'Usage limit reached',
+            code: 'USAGE_LIMIT',
+            usage,
+            upgradeUrl: '/pricing',
+          },
+          { status: 429 }
+        );
+      }
+    }
+
     const apiKey = process.env.ANTHROPIC_API_KEY;
 
     if (!apiKey) {

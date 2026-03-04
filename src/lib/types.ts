@@ -152,7 +152,7 @@ export interface CohesionAnalysis {
 }
 
 // Platform Adaptation
-export type Platform = 'twitter' | 'instagram' | 'linkedin' | 'website' | 'email' | 'tiktok';
+export type Platform = 'twitter' | 'instagram' | 'linkedin' | 'website' | 'email' | 'tiktok' | 'youtube' | 'threads';
 
 export interface PlatformRules {
   platform: Platform;

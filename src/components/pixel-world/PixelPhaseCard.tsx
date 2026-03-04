@@ -10,7 +10,7 @@ const SEASON_COLORS = [
   '#B0D8F0', // Phase 4 (Scale) - Winter ice
 ];
 
-const SEASON_NAMES = ['SPRING', 'SUMMER', 'AUTUMN', 'WINTER'];
+const PHASE_NAMES = ['DEFINE', 'CHECK', 'GENERATE', 'SCALE'];
 
 interface PhaseItem {
   label: string;
@@ -116,7 +116,7 @@ export default function PixelPhaseCard({
   profileImage?: string;
 }) {
   const phaseColor = SEASON_COLORS[phase.number - 1] || SEASON_COLORS[0];
-  const seasonName = SEASON_NAMES[phase.number - 1] || 'SPRING';
+  const phaseName = PHASE_NAMES[phase.number - 1] || 'DEFINE';
   const progress = isCompleted ? 100 : Math.round((itemProgress / phase.items.length) * 100);
 
   return (
@@ -192,7 +192,7 @@ export default function PixelPhaseCard({
           imageRendering: 'pixelated',
         }}
       >
-        {seasonName} — PHASE {phase.number} OF 4
+        {phaseName} — PHASE {phase.number} OF 4
       </motion.div>
 
       {/* Phase title */}
