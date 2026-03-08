@@ -25,7 +25,7 @@ export default function LandingPage() {
       className="aura-background"
       style={{
         minHeight: '100vh',
-        background: '#2F54EB',
+        background: '#ffffff',
         position: 'relative',
         overflowX: 'hidden',
         overflowY: 'auto',

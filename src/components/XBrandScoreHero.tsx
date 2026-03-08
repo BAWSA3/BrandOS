@@ -596,7 +596,7 @@ function TypewriterPlaceholder({ text }: { text: string }) {
         transform: 'translateY(-50%)',
         fontFamily: "'VCR OSD Mono', monospace",
         fontSize: '1.125rem',
-        color: 'rgba(255,255,255,0.35)',
+        color: 'rgba(0,0,0,0.35)',
         pointerEvents: 'none',
         zIndex: 2,
       }}
@@ -973,7 +973,7 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
           zIndex: 0,
         }}
       >
-        <AsciiDNAHero backgroundColor="#2F54EB" textColor="#ffffff" />
+        <AsciiDNAHero backgroundColor="#ffffff" textColor="#000000" />
       </motion.div>
 
       {/* DNA Background - Hidden during input, visible during journey, hidden during reveal */}
@@ -1019,8 +1019,8 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
               transition={{ delay: 1.2, duration: 0.5 }}
               style={{
                 position: 'fixed', top: 16, left: 16, width: 30, height: 30,
-                borderTop: '1px solid rgba(255,255,255,0.2)',
-                borderLeft: '1px solid rgba(255,255,255,0.2)',
+                borderTop: '1px solid rgba(0,0,0,0.15)',
+                borderLeft: '1px solid rgba(0,0,0,0.15)',
                 pointerEvents: 'none', zIndex: 20,
               }}
             />
@@ -1032,8 +1032,8 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
               transition={{ delay: 1.2, duration: 0.5 }}
               style={{
                 position: 'fixed', top: 16, right: 16, width: 30, height: 30,
-                borderTop: '1px solid rgba(255,255,255,0.2)',
-                borderRight: '1px solid rgba(255,255,255,0.2)',
+                borderTop: '1px solid rgba(0,0,0,0.15)',
+                borderRight: '1px solid rgba(0,0,0,0.15)',
                 pointerEvents: 'none', zIndex: 20,
               }}
             />
@@ -1045,8 +1045,8 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
               transition={{ delay: 1.2, duration: 0.5 }}
               style={{
                 position: 'fixed', bottom: 16, left: 16, width: 30, height: 30,
-                borderBottom: '1px solid rgba(255,255,255,0.2)',
-                borderLeft: '1px solid rgba(255,255,255,0.2)',
+                borderBottom: '1px solid rgba(0,0,0,0.15)',
+                borderLeft: '1px solid rgba(0,0,0,0.15)',
                 pointerEvents: 'none', zIndex: 20,
               }}
             />
@@ -1058,8 +1058,8 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
               transition={{ delay: 1.2, duration: 0.5 }}
               style={{
                 position: 'fixed', bottom: 16, right: 16, width: 30, height: 30,
-                borderBottom: '1px solid rgba(255,255,255,0.2)',
-                borderRight: '1px solid rgba(255,255,255,0.2)',
+                borderBottom: '1px solid rgba(0,0,0,0.15)',
+                borderRight: '1px solid rgba(0,0,0,0.15)',
                 pointerEvents: 'none', zIndex: 20,
               }}
             />
@@ -1073,7 +1073,7 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
               style={{
                 position: 'fixed', top: 22, right: 54,
                 fontFamily: "'PP NeueBit', monospace", fontSize: '11px',
-                letterSpacing: '0.15em', color: 'rgba(255,255,255,0.25)',
+                letterSpacing: '0.15em', color: 'rgba(0,0,0,0.25)',
                 pointerEvents: 'none', zIndex: 20,
               }}
             >
@@ -1089,7 +1089,7 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
               style={{
                 position: 'fixed', bottom: 22, left: '50%', transform: 'translateX(-50%)',
                 fontFamily: "'PP NeueBit', monospace", fontSize: '11px',
-                letterSpacing: '0.2em', color: 'rgba(255,255,255,0.2)',
+                letterSpacing: '0.2em', color: 'rgba(0,0,0,0.2)',
                 whiteSpace: 'nowrap', pointerEvents: 'none', zIndex: 20,
               }}
             >
@@ -1158,13 +1158,12 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
               <span style={{
                 fontFamily: "'M42 Flight 721', sans-serif",
                 fontSize: 'clamp(0.75rem, 1.8vw, 1.1rem)',
-                color: 'rgba(255,255,255,0.85)',
+                color: 'rgba(0,0,0,0.7)',
                 letterSpacing: '0.15em',
                 marginTop: '-160px',
                 marginBottom: '48px',
                 textAlign: 'center',
                 whiteSpace: 'nowrap',
-                filter: 'drop-shadow(0 1px 6px rgba(0,0,0,0.5))',
               }}>
                 The AI-powered OS that builds your brand
               </span>
@@ -1195,7 +1194,7 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
                   <span style={{
                     position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)',
                     fontFamily: "'VCR OSD Mono', monospace", fontSize: '1.125rem',
-                    color: 'rgba(255,255,255,0.3)', pointerEvents: 'none', zIndex: 1,
+                    color: 'rgba(0,0,0,0.3)', pointerEvents: 'none', zIndex: 1,
                   }}>
                     &gt;
                   </span>
@@ -1216,10 +1215,10 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
                       padding: '1rem 1rem 1rem 32px',
                       textAlign: 'left',
                       borderRadius: '10px',
-                      border: `1px solid ${error ? '#EF4444' : 'rgba(255,255,255,0.15)'}`,
-                      background: 'rgba(0,0,0,0.45)',
+                      border: `1px solid ${error ? '#EF4444' : 'rgba(0,0,0,0.15)'}`,
+                      background: 'rgba(0,0,0,0.05)',
                       backdropFilter: 'blur(8px)',
-                      color: '#ffffff',
+                      color: '#000000',
                       outline: 'none',
                       transition: 'all 0.3s ease',
                     }}
@@ -1228,7 +1227,7 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
                       e.currentTarget.style.boxShadow = '0 0 20px rgba(0, 71, 255, 0.15)';
                     }}
                     onBlur={(e) => {
-                      e.currentTarget.style.borderColor = error ? '#EF4444' : 'rgba(255,255,255,0.15)';
+                      e.currentTarget.style.borderColor = error ? '#EF4444' : 'rgba(0,0,0,0.15)';
                       e.currentTarget.style.boxShadow = 'none';
                     }}
                   />
@@ -1288,7 +1287,7 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
                 fontFamily: "'PP NeueBit', monospace",
                 fontSize: '11px',
                 letterSpacing: '0.15em',
-                color: 'rgba(255,255,255,0.6)',
+                color: 'rgba(0,0,0,0.45)',
                 textAlign: 'center',
                 marginTop: '1.5rem',
               }}
