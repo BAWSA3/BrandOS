@@ -248,6 +248,22 @@ export function getArchetypeHistory(username: string): ArchetypeHistoryEntry[] {
 }
 
 /**
+ * Get a recent score for a user (within maxAge ms, default 24h)
+ * Used by the extension API to serve cached scores without re-scoring.
+ */
+export function getRecentScore(
+  username: string,
+  maxAgeMs: number = 24 * 60 * 60 * 1000
+): UserProfile | null {
+  const profile = getUserProfile(username);
+  if (!profile) return null;
+
+  if (Date.now() - profile.lastScannedAt > maxAgeMs) return null;
+
+  return profile;
+}
+
+/**
  * Get all profiles (for admin/debugging)
  */
 export function getAllProfiles(): UserProfile[] {

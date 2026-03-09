@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BrandOS</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="popup">
+    <!-- Logged Out State -->
+    <div id="view-login" class="view">
+      <div class="logo">
+        <span class="logo-text">BrandOS</span>
+      </div>
+      <p class="subtitle">See brand scores on every X profile</p>
+      <button id="btn-login" class="btn btn--primary">Sign in with X</button>
+      <p class="hint">Requires a BrandOS account</p>
+    </div>
+
+    <!-- Logged In State -->
+    <div id="view-main" class="view hidden">
+      <div class="header">
+        <div class="user-info">
+          <img id="user-avatar" class="avatar" src="" alt="" />
+          <div>
+            <div id="user-name" class="user-name"></div>
+            <div id="user-handle" class="user-handle"></div>
+          </div>
+        </div>
+        <span class="logo-text logo-text--small">BrandOS</span>
+      </div>
+
+      <div class="stats">
+        <div class="stat">
+          <span id="stat-cached" class="stat-value">0</span>
+          <span class="stat-label">Cached</span>
+        </div>
+        <div class="stat">
+          <span id="stat-status" class="stat-value status-dot status-dot--active"></span>
+          <span class="stat-label">Active</span>
+        </div>
+      </div>
+
+      <div class="settings">
+        <label class="setting">
+          <span>Show badges on timeline</span>
+          <input type="checkbox" id="toggle-badges" checked />
+        </label>
+        <label class="setting">
+          <span>API Server</span>
+          <input type="text" id="input-api-url" class="input--small" placeholder="http://localhost:3000" />
+        </label>
+      </div>
+
+      <div class="actions">
+        <button id="btn-clear-cache" class="btn btn--secondary">Clear Cache</button>
+        <button id="btn-logout" class="btn btn--danger">Sign Out</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="popup.js" type="module"></script>
+</body>
+</html>
