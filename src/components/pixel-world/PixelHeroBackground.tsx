@@ -45,7 +45,7 @@ export default function PixelHeroBackground() {
             duration: star.duration,
             delay: star.delay,
             repeat: Infinity,
-            ease: 'steps(4)',
+            ease: 'linear',
           }}
           style={{
             position: 'absolute',
