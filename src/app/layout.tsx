@@ -4,7 +4,6 @@ import ThemeProvider from "@/components/ThemeProvider";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { ToastProvider } from "@/components/ToastProvider";
-import FeedbackButton from "@/components/FeedbackButton";
 import BetaBadge from "@/components/BetaBadge";
 import PostHogProvider from "@/components/PostHogProvider";
 
@@ -72,7 +71,6 @@ export default function RootLayout({
             <ThemeProvider>
               <BetaBadge variant="banner" />
               {children}
-              <FeedbackButton />
             </ThemeProvider>
           </ToastProvider>
         </PostHogProvider>
