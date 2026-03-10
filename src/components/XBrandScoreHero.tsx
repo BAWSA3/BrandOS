@@ -52,7 +52,6 @@ interface XProfileData {
   verified: boolean;
   location?: string;
   url?: string;
-  [key: string]: unknown;
 }
 
 interface BrandScoreResult {
@@ -307,7 +306,7 @@ function TypewriterText({ text, speed = 25 }: TypewriterTextProps) {
 interface PhaseItem {
   label: string;
   description: string;
-  dataKey?: keyof XProfileData | 'ratio' | 'account_age' | 'influence_tier';
+  dataKey?: string;
 }
 
 interface PhaseConfigItem {
@@ -1417,7 +1416,7 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
                   isCompleted={false}
                   itemProgress={itemProgress}
                   theme={theme}
-                  profile={profile}
+                  profile={profile as any}
                   profileImage={profile?.profile_image_url}
                 />
               </AnimatePresence>
