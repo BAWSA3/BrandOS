@@ -69,7 +69,7 @@ export default function ExtensionAuthPage() {
         type: 'AUTH_TOKENS',
         accessToken,
         refreshToken,
-      }, (response) => {
+      }, (response: any) => {
         if (chrome.runtime.lastError || !response?.success) {
           // Fallback to postMessage
           window.postMessage({
