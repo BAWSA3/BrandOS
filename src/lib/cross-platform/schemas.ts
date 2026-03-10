@@ -53,7 +53,7 @@ export const ContentItemSchema = z.object({
   transcript: z.string().optional(),
   mediaUrls: z.array(z.string()).optional(),
   metadata: ContentMetadataSchema,
-  rawData: z.record(z.unknown()).optional(),
+  rawData: z.record(z.string(), z.unknown()).optional(),
 });
 
 // Manual content input (paste/upload flow)
