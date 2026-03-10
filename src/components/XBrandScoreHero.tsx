@@ -52,6 +52,7 @@ interface XProfileData {
   verified: boolean;
   location?: string;
   url?: string;
+  [key: string]: unknown;
 }
 
 interface BrandScoreResult {
