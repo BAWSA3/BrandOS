@@ -87,9 +87,6 @@ async function searchNicheTweets(
   // Filter for quality: exclude retweets, English only
   query += ' -is:retweet lang:en';
 
-  // Add min engagement filter to only get potentially viral content
-  query += ' min_faves:50';
-
   try {
     const params = new URLSearchParams({
       query,
