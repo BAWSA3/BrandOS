@@ -37,6 +37,16 @@ const PLATFORM_SPECS: Record<Platform, { maxLength: number; style: string; rules
     style: 'Casual, trendy, hook-first.',
     rules: ['Hook in 1 second', 'Casual language', 'Trend-aware', 'Conversational'],
   },
+  youtube: {
+    maxLength: 5000,
+    style: 'Descriptive, searchable, value-packed.',
+    rules: ['Keyword-rich title', 'Timestamps if long', 'Clear description', 'Subscribe CTA'],
+  },
+  threads: {
+    maxLength: 500,
+    style: 'Conversational, authentic, community-driven.',
+    rules: ['Conversational tone', 'Short paragraphs', 'Engage directly', 'No hashtag overload'],
+  },
 };
 
 export async function POST(request: NextRequest) {

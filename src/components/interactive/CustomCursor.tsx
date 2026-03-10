@@ -54,7 +54,7 @@ export default function CustomCursor({ mode = 'default' }: CustomCursorProps) {
         target.closest('button') ||
         target.closest('a') ||
         target.dataset.interactive === 'true';
-      setIsPointer(isInteractive);
+      setIsPointer(!!isInteractive);
     };
 
     const handleMouseLeave = () => {

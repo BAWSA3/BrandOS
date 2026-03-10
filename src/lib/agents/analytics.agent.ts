@@ -47,9 +47,19 @@ const platformBenchmarks: Record<Platform | 'default', PlatformBenchmarks> = {
     description: 'Open rate for engagement, click-through rate for clicks',
   },
   website: {
-    engagementRate: { good: 0.03, great: 0.05 }, // Time on page / bounce rate proxy
+    engagementRate: { good: 0.03, great: 0.05 },
     clickRate: { good: 0.02, great: 0.05 },
     description: 'Engagement proxy via scroll depth and time on page',
+  },
+  youtube: {
+    engagementRate: { good: 0.04, great: 0.08 },
+    clickRate: { good: 0.03, great: 0.06 },
+    description: 'Engagement = (likes + comments) / views, CTR from impressions',
+  },
+  threads: {
+    engagementRate: { good: 0.03, great: 0.06 },
+    clickRate: { good: 0.005, great: 0.01 },
+    description: 'Engagement = (likes + replies + reposts) / reach',
   },
   default: {
     engagementRate: { good: 0.03, great: 0.05 },

@@ -57,6 +57,18 @@ const platformGuidelines: Record<Platform | 'default', PlatformGuidelines> = {
     tips: 'Use headers for structure. Write for featured snippets. Include internal links.',
     hashtagStrategy: 'N/A',
   },
+  youtube: {
+    maxLength: 5000,
+    style: 'Descriptive, keyword-rich, value-packed. Optimize for search and watch time.',
+    tips: 'Front-load keywords in title. Use timestamps for long videos. Compelling thumbnail copy.',
+    hashtagStrategy: '3-5 relevant hashtags in description',
+  },
+  threads: {
+    maxLength: 500,
+    style: 'Conversational, authentic, community-first. Less polished, more real.',
+    tips: 'Be genuine. Short paragraphs. Engage in replies. Skip the hashtag overload.',
+    hashtagStrategy: '0-2 hashtags max',
+  },
   default: {
     maxLength: 3000,
     style: 'Clear, on-brand, appropriate for the context.',
