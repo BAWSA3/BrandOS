@@ -95,7 +95,7 @@ export default function SpringBiome({ progress, isActive }: BiomeProps) {
             key={`sprout-${i}`}
             initial={{ scaleY: 0, opacity: 0 }}
             animate={isActive ? { scaleY: 1, opacity: 1 } : {}}
-            transition={{ delay: 0.3 + i * 0.15, duration: 0.4, ease: 'steps(4)' }}
+            transition={{ delay: 0.3 + i * 0.15, duration: 0.4, ease: 'linear' }}
             style={{
               position: 'absolute',
               bottom: '25%',
@@ -124,7 +124,7 @@ export default function SpringBiome({ progress, isActive }: BiomeProps) {
           key={`flower-${i}`}
           initial={{ scale: 0, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: i * 0.2, duration: 0.3, ease: 'steps(3)' }}
+          transition={{ delay: i * 0.2, duration: 0.3, ease: 'linear' }}
           style={{
             position: 'absolute',
             bottom: `${26 + Math.random() * 3}%`,

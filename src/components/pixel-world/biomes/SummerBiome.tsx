@@ -12,7 +12,7 @@ function PixelTree({ x, height, delay }: { x: number; height: number; delay: num
     <motion.div
       initial={{ scaleY: 0, opacity: 0 }}
       animate={{ scaleY: 1, opacity: 1 }}
-      transition={{ delay, duration: 0.5, ease: 'steps(5)' }}
+      transition={{ delay, duration: 0.5, ease: 'linear' }}
       style={{
         position: 'absolute',
         bottom: '28%',
@@ -141,7 +141,7 @@ export default function SummerBiome({ progress, isActive }: BiomeProps) {
             key={`flower-${i}`}
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
-            transition={{ delay: 0.1 * i, duration: 0.2, ease: 'steps(2)' }}
+            transition={{ delay: 0.1 * i, duration: 0.2, ease: 'linear' }}
             style={{
               position: 'absolute',
               bottom: `${29 + Math.random() * 6}%`,

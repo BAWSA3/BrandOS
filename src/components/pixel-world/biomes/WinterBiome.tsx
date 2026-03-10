@@ -13,7 +13,7 @@ function PixelPineTree({ x, height, delay }: { x: number; height: number; delay:
     <motion.div
       initial={{ scaleY: 0, opacity: 0 }}
       animate={{ scaleY: 1, opacity: 1 }}
-      transition={{ delay, duration: 0.4, ease: 'steps(4)' }}
+      transition={{ delay, duration: 0.4, ease: 'linear' }}
       style={{
         position: 'absolute',
         bottom: '25%',
@@ -158,7 +158,7 @@ export default function WinterBiome({ progress, isActive }: BiomeProps) {
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.6, ease: 'steps(4)' }}
+          transition={{ duration: 0.6, ease: 'linear' }}
           style={{
             position: 'absolute',
             bottom: '30%',

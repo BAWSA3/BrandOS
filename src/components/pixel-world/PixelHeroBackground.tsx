@@ -106,7 +106,7 @@ export default function PixelHeroBackground() {
         <motion.div
           initial={{ opacity: 0, scale: 0 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 1.5, duration: 0.4, ease: 'steps(3)' }}
+          transition={{ delay: 1.5, duration: 0.4, ease: 'linear' }}
           className="absolute left-1/2 -translate-x-1/2"
           style={{
             bottom: '18%',
@@ -122,7 +122,7 @@ export default function PixelHeroBackground() {
         <motion.div
           initial={{ scaleY: 0, opacity: 0 }}
           animate={{ scaleY: 1, opacity: 1 }}
-          transition={{ delay: 2, duration: 0.6, ease: 'steps(4)' }}
+          transition={{ delay: 2, duration: 0.6, ease: 'linear' }}
           className="absolute left-1/2 -translate-x-1/2"
           style={{
             bottom: 'calc(18% + 6px)',

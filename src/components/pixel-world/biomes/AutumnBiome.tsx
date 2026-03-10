@@ -20,7 +20,7 @@ function PixelAutumnTree({ x, variant, delay }: { x: number; variant: number; de
     <motion.div
       initial={{ scaleY: 0, opacity: 0 }}
       animate={{ scaleY: 1, opacity: 1 }}
-      transition={{ delay, duration: 0.4, ease: 'steps(4)' }}
+      transition={{ delay, duration: 0.4, ease: 'linear' }}
       style={{
         position: 'absolute',
         bottom: '26%',
@@ -131,7 +131,7 @@ export default function AutumnBiome({ progress, isActive }: BiomeProps) {
           key={`fruit-${i}`}
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
-          transition={{ delay: i * 0.15, ease: 'steps(2)' }}
+          transition={{ delay: i * 0.15, ease: 'linear' }}
           style={{
             position: 'absolute',
             bottom: `${fruit.y}%`,
