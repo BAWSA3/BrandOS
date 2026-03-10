@@ -6,11 +6,11 @@
     },
     {
       "path": "/api/cron/market-scan",
-      "schedule": "0 */6 * * *"
+      "schedule": "0 6 * * *"
     },
     {
       "path": "/api/cron/performance-sync",
-      "schedule": "0 */4 * * *"
+      "schedule": "0 14 * * *"
     },
     {
       "path": "/api/cron/gap-analysis",
