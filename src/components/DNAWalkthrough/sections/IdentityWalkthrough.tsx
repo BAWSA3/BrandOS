@@ -51,15 +51,14 @@ function getFollowerRatio(followers: number, following: number): { ratio: number
   return { ratio, label: 'Growing', color: '#EF4444' };
 }
 
-function getProfileCompleteness(profile: XProfileData): { score: number; items: { name: string; complete: boolean; weight: number }[] } {
+function getContentStrength(profile: XProfileData): { score: number; items: { name: string; complete: boolean; weight: number }[] } {
   const items = [
-    { name: 'Profile Picture', complete: !!profile.profile_image_url && !profile.profile_image_url.includes('default_profile'), weight: 20 },
-    { name: 'Display Name', complete: !!profile.name && profile.name !== profile.username, weight: 15 },
-    { name: 'Bio', complete: (profile.description?.length || 0) >= 50, weight: 25 },
-    { name: 'Full Bio (100+ chars)', complete: (profile.description?.length || 0) >= 100, weight: 10 },
-    { name: 'Website Link', complete: !!profile.url, weight: 15 },
-    { name: 'Location', complete: !!profile.location, weight: 10 },
-    { name: 'Post History', complete: profile.tweet_count >= 100, weight: 5 },
+    { name: 'Has Posted (1+)', complete: profile.tweet_count >= 1, weight: 10 },
+    { name: 'Content Foundation (100+)', complete: profile.tweet_count >= 100, weight: 20 },
+    { name: 'Active Creator (500+)', complete: profile.tweet_count >= 500, weight: 25 },
+    { name: 'Prolific Output (2K+)', complete: profile.tweet_count >= 2000, weight: 20 },
+    { name: 'Audience Response (1K+ followers)', complete: profile.followers_count >= 1000, weight: 15 },
+    { name: 'Curated by Others (100+ lists)', complete: (profile as any).listed_count >= 100 || profile.followers_count >= 10000, weight: 10 },
   ];
   const score = items.reduce((total, item) => total + (item.complete ? item.weight : 0), 0);
   return { score, items };
@@ -81,42 +80,22 @@ export default function IdentityWalkthrough({
   parallaxLayers,
 }: IdentityWalkthroughProps) {
   const isDark = theme === 'dark';
-  const bioLength = profile.description?.length || 0;
-  const hasLink = !!profile.url;
-  const hasLocation = !!profile.location;
   const authScore = authenticity ? (100 - authenticity.score) : 100;
   const activityLabel = getActivityLabel(activity);
 
   const followerRatio = getFollowerRatio(profile.followers_count, profile.following_count);
-  const profileCompleteness = getProfileCompleteness(profile);
+  const contentStrength = getContentStrength(profile);
   const influenceTier = getInfluenceTier(profile.followers_count);
 
-  // Build a cleaner calculation explanation
-  const signals: string[] = [];
-  signals.push(`bio length (${bioLength}/160 chars)`);
-  if (hasLink) signals.push('website linked');
-  if (hasLocation) signals.push('location set');
-  signals.push(`${formatFollowers(profile.followers_count)} followers`);
+  const howWeCalculated = `We analyzed your content output (${formatFollowers(profile.tweet_count)} posts), audience response (${formatFollowers(profile.followers_count)} followers), and reputation signals (${followerRatio.ratio === Infinity ? '∞' : followerRatio.ratio.toFixed(1)}:1 ratio)${authenticity ? `. Authenticity: ${authScore}%` : ''}.`;
 
-  const howWeCalculated = `We analyzed ${signals.length} profile signals: ${signals.join(', ')}${authenticity ? `. Authenticity score: ${authScore}%` : ''}.`;
-
-  const whyItMatters = `Your profile is your first impression. Complete profiles see up to 40% more follows. Your profile is ${profileCompleteness.score}% complete.`;
+  const whyItMatters = `Your brand is your reputation — what you're known for, built entirely through your content. Content strength: ${contentStrength.score}%.`;
 
   const whatYouCanDo: string[] = [];
 
-  if (bioLength < 100) {
+  if (profile.tweet_count < 500) {
     whatYouCanDo.push(
-      `Expand your bio from ${bioLength} to 160 characters - include your value proposition, what you post about, and a call-to-action.`
-    );
-  }
-  if (!hasLink) {
-    whatYouCanDo.push(
-      'Add a link to your website, newsletter, or featured content to drive traffic.'
-    );
-  }
-  if (!hasLocation) {
-    whatYouCanDo.push(
-      'Add a location (real or brand-related) to help with discoverability and relatability.'
+      'Post more consistently. Your brand is built through content output — aim for 3-5 posts per week minimum.'
     );
   }
   if (authScore < 80) {
@@ -124,9 +103,14 @@ export default function IdentityWalkthrough({
       'Improve engagement authenticity by focusing on genuine interactions rather than growth hacks.'
     );
   }
+  if (followerRatio.ratio < 1) {
+    whatYouCanDo.push(
+      'Focus on creating original content. Your follower ratio shows room to build an audience that follows for your content specifically.'
+    );
+  }
   if (whatYouCanDo.length === 0) {
     whatYouCanDo.push(
-      'Your profile is well-optimized! Consider A/B testing different bio variations to maximize conversions.'
+      'Strong content foundation. Focus on deepening your content pillars and maintaining voice consistency.'
     );
   }
 
@@ -242,15 +226,15 @@ export default function IdentityWalkthrough({
                 className="text-[10px] tracking-wider"
                 style={{ fontFamily: "'VCR OSD Mono', monospace", color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)' }}
               >
-                PROFILE COMPLETENESS
+                CONTENT STRENGTH
               </span>
               <span
                 className="text-lg font-semibold"
                 style={{
-                  color: profileCompleteness.score >= 80 ? '#10B981' : profileCompleteness.score >= 60 ? '#F59E0B' : '#EF4444',
+                  color: contentStrength.score >= 80 ? '#10B981' : contentStrength.score >= 60 ? '#F59E0B' : '#EF4444',
                 }}
               >
-                {profileCompleteness.score}%
+                {contentStrength.score}%
               </span>
             </div>
 
@@ -261,19 +245,19 @@ export default function IdentityWalkthrough({
             >
               <motion.div
                 initial={{ width: 0 }}
-                whileInView={{ width: `${profileCompleteness.score}%` }}
+                whileInView={{ width: `${contentStrength.score}%` }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.8, delay: 0.2 }}
                 className="h-full rounded-full"
                 style={{
-                  background: profileCompleteness.score >= 80 ? '#10B981' : profileCompleteness.score >= 60 ? '#F59E0B' : '#EF4444',
+                  background: contentStrength.score >= 80 ? '#10B981' : contentStrength.score >= 60 ? '#F59E0B' : '#EF4444',
                 }}
               />
             </div>
 
             {/* Checklist */}
             <div className="space-y-1.5">
-              {profileCompleteness.items.slice(0, 5).map((item) => (
+              {contentStrength.items.slice(0, 5).map((item) => (
                 <div key={item.name} className="flex items-center gap-2 text-xs">
                   <span style={{ color: item.complete ? '#10B981' : isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)' }}>
                     {item.complete ? '✓' : '○'}
@@ -335,9 +319,9 @@ export default function IdentityWalkthrough({
           </motion.div>
         </div>
 
-        {/* Bottom Row: Bio + Authenticity + Growth */}
+        {/* Bottom Row: Content Output + Authenticity + Growth */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
-          {/* Bio Analysis Card */}
+          {/* Content Output Card */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -353,37 +337,37 @@ export default function IdentityWalkthrough({
               className="text-[10px] tracking-wider mb-3"
               style={{ fontFamily: "'VCR OSD Mono', monospace", color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)' }}
             >
-              BIO ANALYSIS
+              CONTENT OUTPUT
             </div>
 
             <div className="flex items-center justify-between mb-2">
-              <span className="text-2xl font-semibold" style={{ color: bioLength >= 100 ? '#10B981' : bioLength >= 50 ? '#F59E0B' : '#EF4444' }}>
-                {bioLength}
+              <span className="text-2xl font-semibold" style={{ color: profile.tweet_count >= 1000 ? '#10B981' : profile.tweet_count >= 500 ? '#F59E0B' : '#EF4444' }}>
+                {formatFollowers(profile.tweet_count)}
               </span>
               <span className="text-sm" style={{ color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)' }}>
-                /160 chars
+                posts
               </span>
             </div>
 
             <div className="h-2 rounded-full overflow-hidden mb-3" style={{ background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' }}>
               <motion.div
                 initial={{ width: 0 }}
-                whileInView={{ width: `${(bioLength / 160) * 100}%` }}
+                whileInView={{ width: `${Math.min((profile.tweet_count / 5000) * 100, 100)}%` }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: 0.3 }}
                 className="h-full rounded-full"
-                style={{ background: bioLength >= 100 ? '#10B981' : bioLength >= 50 ? '#F59E0B' : '#EF4444' }}
+                style={{ background: profile.tweet_count >= 1000 ? '#10B981' : profile.tweet_count >= 500 ? '#F59E0B' : '#EF4444' }}
               />
             </div>
 
             <p className="text-xs" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)' }}>
-              {bioLength >= 120
-                ? 'Excellent bio length - maximizing space'
-                : bioLength >= 80
-                ? 'Good bio length - room for more detail'
-                : bioLength >= 50
-                ? 'Short bio - missing opportunity to sell yourself'
-                : 'Bio too short - visitors leave without context'}
+              {profile.tweet_count >= 5000
+                ? 'High output creator - strong content foundation'
+                : profile.tweet_count >= 1000
+                ? 'Consistent content history - building brand equity'
+                : profile.tweet_count >= 500
+                ? 'Growing content library - keep posting consistently'
+                : 'Low content output - your brand is built through what you post'}
             </p>
           </motion.div>
 

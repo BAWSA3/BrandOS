@@ -631,18 +631,10 @@ function analyzeInfluence(profile: XProfileData): InfluenceAnalysis {
     authorityScore += 5;
   }
   
-  // Detect intentional minimalism (large accounts with short bios)
-  // Elite/influential accounts often have minimal bios BY CHOICE
+  // Detect intentional minimalism (large accounts)
   const isIntentionallyMinimal = (
-    (tier === 'elite' || tier === 'influential' || tier === 'notable') &&
-    bioLength < 100 &&
-    bioLength > 0
+    tier === 'elite' || tier === 'influential' || tier === 'notable'
   );
-  
-  if (isIntentionallyMinimal) {
-    signals.push('Intentional minimalism: Large account with concise bio (brand confidence)');
-    authorityScore += 10;
-  }
   
   return {
     tier,
@@ -912,55 +904,29 @@ export const xBrandScorePrompt = (profile: XProfileData) => {
   const influenceAnalysis = analyzeInfluence(profile);
   
   // Base prompt with influence tier context
-  let prompt = `You are an expert brand strategist analyzing an X (Twitter) profile. Your goal is to evaluate brand effectiveness relative to their influence tier.
+  let prompt = `You are an expert brand strategist analyzing an X (Twitter) creator. A brand is a REPUTATION — what someone is known for, how they demonstrate it through content, and why they should be remembered. Your goal is to evaluate brand effectiveness based entirely on CONTENT and its impact on reputation.
 
-PROFILE DATA:
-- Display Name: ${profile.name}
-- Username: @${profile.username}
-- Bio: ${profile.description || '(No bio set)'}
-- Bio Length: ${(profile.description || '').length} characters
-- Profile Image: ${profile.profile_image_url ? 'Present' : 'Missing'}
+DO NOT evaluate: bio text, username/name alignment, profile picture, banner, location, links, or any other visual/profile elements. These are personal expression, NOT brand signals. Brand = what you post and how the audience responds.
+
+CREATOR DATA:
+- Name: ${profile.name}
+- Handle: @${profile.username}
 - Followers: ${profile.public_metrics.followers_count.toLocaleString()}
 - Following: ${profile.public_metrics.following_count.toLocaleString()}
-- Follower/Following Ratio: ${(profile.public_metrics.followers_count / Math.max(profile.public_metrics.following_count, 1)).toFixed(1)}:1
-- Tweets: ${profile.public_metrics.tweet_count.toLocaleString()}
-- Listed Count: ${profile.public_metrics.listed_count.toLocaleString()} (people curated this account into lists)
-${profile.location ? `- Location: ${profile.location}` : '- Location: (None)'}
-${profile.url ? `- Website: ${profile.url}` : '- Website: (None)'}
-- Verified Badge: ${profile.verified ? 'YES ✓ (Blue checkmark present)' : 'NO (No verification badge)'}
+- Total Posts: ${profile.public_metrics.tweet_count.toLocaleString()}
+- Listed Count: ${profile.public_metrics.listed_count.toLocaleString()} (curated by others)
+- Verified: ${profile.verified ? 'YES' : 'NO'}
 
 ═══════════════════════════════════════════════════════════════════════
 INFLUENCE TIER: ${influenceAnalysis.tierLabel}
 ═══════════════════════════════════════════════════════════════════════
 
-AUTHORITY SIGNALS DETECTED:
+REPUTATION SIGNALS:
 ${influenceAnalysis.signals.map(s => `✦ ${s}`).join('\n')}
 
 SCORING ADJUSTMENT: +${influenceAnalysis.followerTierBonus + influenceAnalysis.authorityScore} bonus points available
 - Tier Bonus: +${influenceAnalysis.followerTierBonus} (for ${influenceAnalysis.tier} tier)
-- Authority Bonus: +${influenceAnalysis.authorityScore} (from ratio, listed count, influence signals)
-
-CRITICAL CONTEXT FOR ${influenceAnalysis.tier.toUpperCase()} TIER:
-${influenceAnalysis.tier === 'elite' || influenceAnalysis.tier === 'influential' ? `
-⚠️ THIS IS A HIGH-INFLUENCE ACCOUNT. Evaluate differently:
-- Minimalist bios are often INTENTIONAL for elite accounts (brand confidence, not incompleteness)
-- These accounts are discovered through REPUTATION, not bio SEO
-- A short, punchy bio at this level shows restraint and clarity
-- Missing links may be strategic (they don't need to drive traffic to themselves)
-- Judge EFFECTIVENESS of their brand, not "optimization checklist" compliance
-- Their follower count IS the social proof - they've already proven brand-market fit
-- High listed count means OTHERS vouch for their value (external validation)
-` : influenceAnalysis.tier === 'notable' ? `
-⚠️ NOTABLE TIER - Evaluate with growth context:
-- They've built significant audience - bio clarity matters but they have traction
-- Listed count shows they're being recognized and curated
-- Evaluate if their brand is positioned for the NEXT level
-` : `
-📈 EMERGING/ESTABLISHED TIER - Standard evaluation:
-- Bio optimization matters more at this stage for discoverability
-- CTAs and links help convert visitors to followers
-- Profile completeness signals professionalism
-`}`;
+- Authority Bonus: +${influenceAnalysis.authorityScore} (from ratio, listed count, influence signals)`;
 
   // Add crypto context if detected
   if (cryptoAnalysis.isCrypto) {
@@ -979,45 +945,39 @@ CRYPTO-SPECIFIC STANDARDS:
   prompt += `
 
 ═══════════════════════════════════════════════════════════════════════
-BRAND ANALYSIS FRAMEWORK (Adjust for influence tier!)
+BRAND ANALYSIS FRAMEWORK — CONTENT & REPUTATION ONLY
 ═══════════════════════════════════════════════════════════════════════
+
+A brand is a REPUTATION. Score based on what this creator is known for, how their content demonstrates it, and whether the audience responds.
 
 Score each pillar 0-100, then ADD the tier/authority bonuses to the overall score.
 
-1. DEFINE (Weight: 30%) - Brand Identity Clarity
-   For ${influenceAnalysis.tier} tier, evaluate:
-   ${influenceAnalysis.tier === 'elite' || influenceAnalysis.tier === 'influential' ? `
-   - Is their identity CLEAR even if minimal? (Elite accounts often need fewer words)
-   - Does their reputation precede them? (Are they known for something specific?)
-   - Is the bio punchy and memorable vs. keyword-stuffed?
-   - Does the name alone carry brand weight?` : `
-   - Is the bio clear about who they are and what they offer?
-   - Does the display name effectively communicate their brand?
-   - Is the value proposition immediately apparent?
-   - Is there a clear target audience implied?`}
+1. DEFINE (Weight: 30%) - What Are They Known For?
+   - Can you identify their content pillars (what they consistently post about)?
+   - Is there a clear niche or are they scattered across random topics?
+   - What would someone say this person is "known for" based on their output?
+   - Is there a defined audience who would seek them out?
+   - How focused is their content identity?
 
-2. CHECK (Weight: 25%) - Brand Consistency & Credibility  
-   - Username ↔ Display name alignment
-   - Tone consistency (does it feel cohesive?)
-   - ${profile.verified ? '✓ VERIFIED: +10 credibility bonus' : 'Not verified (no penalty, but verified adds trust)'}
-   - Professional presentation quality
-   - ${influenceAnalysis.tier === 'elite' || influenceAnalysis.tier === 'influential' ? 'At this tier: consistency of reputation matters more than bio details' : 'Everything working together as unified brand?'}
+2. CHECK (Weight: 25%) - Content Consistency & Voice
+   - Is their tone and voice consistent across posts?
+   - Do they stay on-topic or drift between unrelated subjects?
+   - Does the content voice feel like ONE person with a clear perspective?
+   - Is there a recognizable style or cadence to how they post?
+   - Would you recognize their post without seeing the username?
 
-3. GENERATE (Weight: 25%) - Profile Completeness & Quality
-   ${influenceAnalysis.isIntentionallyMinimal ? `
-   ⚠️ INTENTIONAL MINIMALISM DETECTED - Don't penalize for brevity
-   - Is the SHORT bio effective and memorable?
-   - Quality over quantity for elite accounts
-   - Profile image present and professional?` : `
-   - Profile complete (bio, image, links)?
-   - Bio well-formatted and readable?
-   - Call-to-action or link present?
-   - Using platform features effectively?`}
+3. GENERATE (Weight: 25%) - Content Quality & Output
+   - How strong is their content output volume and posting cadence?
+   - Are they using effective formats (threads, media, questions, polls)?
+   - Does their content demonstrate expertise, insight, or entertainment value?
+   - Are they creating original content vs just reposting/reacting?
+   - Is the content quality appropriate for their influence tier?
 
-4. SCALE (Weight: 20%) - Growth & Influence Signals
-   - Follower/following ratio: ${(profile.public_metrics.followers_count / Math.max(profile.public_metrics.following_count, 1)).toFixed(1)}:1 ${profile.public_metrics.followers_count / Math.max(profile.public_metrics.following_count, 1) >= 10 ? '(EXCELLENT - thought leader signal)' : profile.public_metrics.followers_count / Math.max(profile.public_metrics.following_count, 1) >= 2 ? '(Healthy)' : '(Room to grow)'}
-   - Listed count: ${profile.public_metrics.listed_count.toLocaleString()} ${profile.public_metrics.listed_count >= 10000 ? '(EXCEPTIONAL - high authority)' : profile.public_metrics.listed_count >= 1000 ? '(Strong curation signal)' : '(Building influence)'}
-   - ${influenceAnalysis.tier === 'elite' ? 'Already at scale - evaluate sustainability' : 'Growth trajectory and potential'}
+4. SCALE (Weight: 20%) - Reputation Signals
+   - Follower/following ratio: ${(profile.public_metrics.followers_count / Math.max(profile.public_metrics.following_count, 1)).toFixed(1)}:1 — do people follow for the content?
+   - Listed count: ${profile.public_metrics.listed_count.toLocaleString()} — are others curating this creator?
+   - Verified status: ${profile.verified ? 'YES — platform-endorsed credibility' : 'NO'}
+   - ${influenceAnalysis.tier === 'elite' ? 'Already at scale - is the reputation sustainable?' : 'Growth trajectory — is the audience responding?'}
 
 ═══════════════════════════════════════════════════════════════════════
 FINAL SCORING FORMULA
@@ -1027,7 +987,7 @@ Base Score = (DEFINE × 0.30) + (CHECK × 0.25) + (GENERATE × 0.25) + (SCALE ×
 Final Score = Base Score + Tier Bonus (${influenceAnalysis.followerTierBonus}) + Authority Bonus (${influenceAnalysis.authorityScore})
 Cap at 100.
 
-A profile like @naval with 2M+ followers, 50K+ lists, and a clean minimal bio should score 85-95, not 70.
+REMEMBER: Do NOT factor in bio, username alignment, profile picture, banner, location, or links. Only content and reputation.
 
 CREATOR ARCHETYPE (Choose ONE that best fits):
 1. 🎓 THE PROFESSOR - Deep knowledge authority, niche expert, educational content
@@ -1090,19 +1050,18 @@ export const enhancedBrandScorePrompt = (input: TweetAnalysisInput) => {
     `${i + 1}. "${t.text.substring(0, 200)}${t.text.length > 200 ? '...' : ''}" (❤️${t.likes} 🔁${t.retweets} 💬${t.replies})`
   ).join('\n');
 
-  return `You are an expert brand strategist analyzing an X (Twitter) profile WITH their actual tweet content for comprehensive brand analysis.
+  return `You are an expert brand strategist analyzing an X (Twitter) creator's CONTENT to evaluate their brand (reputation). A brand is what someone is known for, how they demonstrate it through content, and why they should be remembered.
 
-PROFILE DATA:
-- Display Name: ${profile.name}
-- Username: @${profile.username}
-- Bio: ${profile.description || '(No bio set)'}
+DO NOT evaluate: bio, username/name alignment, profile picture, banner, location, links, or any visual/profile elements. ONLY evaluate content and reputation signals.
+
+CREATOR DATA:
+- Name: ${profile.name}
+- Handle: @${profile.username}
 - Followers: ${profile.public_metrics.followers_count.toLocaleString()}
 - Following: ${profile.public_metrics.following_count.toLocaleString()}
-- Total Tweets: ${profile.public_metrics.tweet_count.toLocaleString()}
+- Total Posts: ${profile.public_metrics.tweet_count.toLocaleString()}
 - Listed Count: ${profile.public_metrics.listed_count.toLocaleString()}
-${profile.location ? `- Location: ${profile.location}` : ''}
-${profile.url ? `- Website: ${profile.url}` : ''}
-- Verified: ${profile.verified ? 'YES ✓' : 'NO'}
+- Verified: ${profile.verified ? 'YES' : 'NO'}
 
 TWEET ANALYTICS:
 - Tweets Analyzed: ${stats.totalTweets}
@@ -1129,38 +1088,36 @@ CRYPTO/WEB3 CONTEXT DETECTED:
 ${cryptoAnalysis.signals.map(s => `- ${s}`).join('\n')}
 ` : ''}
 
-Perform a DEEP ANALYSIS using BrandOS's enhanced framework:
+Perform a DEEP ANALYSIS — brand = reputation, built entirely through content:
 
-1. DEFINE (30%) - Brand Identity & Voice
-   - Bio clarity and value proposition
-   - Voice consistency across tweets (is their tone consistent?)
-   - Signature phrases or patterns
-   - Target audience clarity
-   - Professional vs personal balance
+1. DEFINE (30%) - What Are They Known For?
+   - What are their content pillars? What topics do they own?
+   - Can you clearly identify their niche from the tweets?
+   - Signature phrases, recurring themes, and voice patterns
+   - Who is their target audience based on what they post?
    Score 0-100 with specific insights from their ACTUAL CONTENT.
 
-2. CHECK (25%) - Consistency Over Time
-   - Does their bio match their tweet content?
-   - Are they staying on-brand or drifting?
-   - Topic focus consistency (how many topics do they cover?)
-   - Any contradictory messaging?
-   - Verified status impact on credibility
+2. CHECK (25%) - Content Voice Consistency
+   - Is their voice consistent across tweets or does it drift?
+   - Do they stay on-topic or scatter across unrelated subjects?
+   - Any contradictory messaging or identity confusion?
+   - Would you recognize their tweet without seeing the handle?
    Score 0-100 with specific insights.
 
 3. GENERATE (25%) - Content Quality & Performance
    - Engagement rate analysis (is it good for their size?)
    - Content format effectiveness (threads, media, questions)
    - Hook quality (do tweets grab attention?)
-   - CTA usage and effectiveness
-   - Posting frequency optimization
+   - Original content vs reposting/reacting
+   - Posting frequency and cadence
    Score 0-100 with specific insights.
 
-4. SCALE (20%) - Growth & Influence
-   - Follower/following ratio health
-   - Growth trajectory (based on engagement)
-   - Audience quality signals
-   - Viral potential (based on content type)
-   - Influence indicators (listed count, retweet patterns)
+4. SCALE (20%) - Reputation Signals
+   - Follower/following ratio (do people follow for the content?)
+   - Growth trajectory (based on engagement patterns)
+   - Listed count (are others curating this creator?)
+   - Verified status as platform-endorsed credibility
+   - Viral potential (based on content type and engagement)
    Score 0-100 with specific insights.
 
 VOICE ANALYSIS:
@@ -1352,14 +1309,13 @@ export interface CompleteBrandIdentity {
 export const profileImageAnalysisPrompt = (imageDescription: string, profileContext: {
   name: string;
   username: string;
-  bio: string;
+  bio?: string;
   followers: number;
 }) => `You are a brand identity expert analyzing a profile picture for brand signals.
 
 PROFILE CONTEXT:
 - Name: ${profileContext.name}
 - Handle: @${profileContext.username}
-- Bio: ${profileContext.bio || '(No bio)'}
 - Followers: ${(profileContext.followers || 0).toLocaleString()}
 
 ANALYZE THE PROFILE IMAGE:
@@ -1706,42 +1662,21 @@ CONTENT ANALYSIS (PRIMARY - Base your analysis on this):
 - Voice Consistency: ${tweetVoice.consistencyScore}/100
 ` : '';
 
-  const contentPrimaryNote = tweetVoice ? `
-IMPORTANT: This analysis should be CONTENT-PRIMARY. Base the archetype, voice profile, and positioning primarily on the CONTENT ANALYSIS section above, which reflects what this creator actually posts about. The bio should only be used for context - many X creators have personality-driven bios that don't reflect their professional brand.
-` : '';
+  const contentPrimaryNote = `
+IMPORTANT: A brand is a REPUTATION — what someone is known for, demonstrated through their content. Do NOT evaluate bio, username alignment, profile picture, or any visual/profile elements. Only analyze content and reputation.`;
 
   return `You are an expert brand strategist creating a comprehensive Brand DNA profile.
 ${contentPrimaryNote}
 ${contentAnalysisSection}
-PROFILE DATA:
+CREATOR DATA:
 - Name: ${profile.name}
 - Handle: @${profile.username}
-- Bio: ${profile.description || '(No bio)'}${tweetVoice ? ' [Use for personality context only]' : ''}
 - Followers: ${followersCount.toLocaleString()}
 - Influence Tier: ${influenceAnalysis.tierLabel}
 
-BIO ANALYSIS${tweetVoice ? ' (Secondary - personality hints only)' : ''}:
-- Structure: ${bioLinguistics.structure}
-- Word Count: ${bioLinguistics.wordCount}
-- Power Words: ${bioLinguistics.powerWords.map(p => p.word).join(', ') || 'None detected'}
-- Voice: Professional ${bioLinguistics.voiceSpectrum.professional}/100, Casual ${bioLinguistics.voiceSpectrum.casual}/100
-- Emoji Personality: ${bioLinguistics.emojiAnalysis.personality}
+Generate a comprehensive Brand DNA profile based on CONTENT and REPUTATION only:
 
-NAME ANALYSIS:
-- Name Type: ${nameAnalysis.displayName.type}
-- Memorability: ${nameAnalysis.displayName.memorability}/100
-- Handle Alignment: ${nameAnalysis.alignmentScore}/100
-${imageAnalysis ? `
-VISUAL ANALYSIS:
-- Image Type: ${imageAnalysis.imageType}
-- Colors: ${imageAnalysis.dominantColors.map(c => c.name).join(', ')}
-- Style: Professional ${imageAnalysis.styleSignals.professional}/100, Playful ${imageAnalysis.styleSignals.playful}/100
-- Visual Signals: ${imageAnalysis.brandSignals.join(', ')}
-` : ''}
-
-Generate a comprehensive Brand DNA profile:
-
-1. COLORS - Based on profile image (or infer from bio tone if no image analysis)
+1. COLORS - Infer from content tone and energy (NOT from profile image)
 2. ARCHETYPE - Best fit from these 8 archetypes:
    - 🎓 The Professor (knowledge authority)
    - 🔌 The Plug (super connector)
@@ -1784,13 +1719,12 @@ Return ONLY valid JSON:
 // AI-GENERATED IMPROVEMENTS
 // =============================================================================
 
-export const brandImprovementsPrompt = (profile: XProfileData, brandDNA: BrandDNA, bioLinguistics: BioLinguistics) => {
-  return `You are an expert brand copywriter helping optimize a personal/professional brand on X.
+export const brandImprovementsPrompt = (profile: XProfileData, brandDNA: BrandDNA) => {
+  return `You are an expert brand strategist helping optimize a personal/professional brand on X through content strategy.
 
 CURRENT PROFILE:
 - Name: ${profile.name}
 - Handle: @${profile.username}
-- Current Bio: ${profile.description || '(No bio)'}
 - Followers: ${profile.public_metrics.followers_count.toLocaleString()}
 
 BRAND DNA:
@@ -1801,48 +1735,21 @@ BRAND DNA:
 - Target Audience: ${brandDNA.targetAudience}
 - Content Pillars: ${brandDNA.contentPillars.join(', ')}
 
-CURRENT BIO ANALYSIS:
-- Structure: ${bioLinguistics.structure}
-- CTA Strength: ${bioLinguistics.ctaStrength}/100
-- Voice Balance: Professional ${bioLinguistics.voiceSpectrum.professional}, Casual ${bioLinguistics.voiceSpectrum.casual}
+Generate specific content and brand improvements (do NOT suggest bio changes — bios are personal expression):
 
-Generate specific improvements:
+1. TAGLINE OPTIONS - 5 memorable taglines (3-7 words each)
 
-1. BIO OPTIONS - 3 alternative bios (different styles: punchy, detailed, authoritative)
-   - Each under 160 characters
-   - Match their archetype and voice
-   - Include a clear value proposition
-   - Consider their audience size (${profile.public_metrics.followers_count > 100000 ? 'large audience - can be more minimal' : 'growing audience - should be more descriptive'})
-
-2. TAGLINE OPTIONS - 5 memorable taglines (3-7 words each)
-
-3. CONTENT PILLARS - 3 strategic content pillars with:
+2. CONTENT PILLARS - 3 strategic content pillars with:
    - Pillar name
    - Description
    - 3 example topics
 
-4. QUICK WINS - 3 immediately actionable improvements
-5. STRATEGIC MOVES - 3 longer-term brand building strategies
+3. QUICK WINS - 3 immediately actionable content improvements
+4. STRATEGIC MOVES - 3 longer-term brand building strategies
 
 Return ONLY valid JSON:
 {
-  "bioOptions": [
-    {
-      "style": "Punchy/Minimal",
-      "bio": "The new bio text...",
-      "reasoning": "Why this works for their brand"
-    },
-    {
-      "style": "Value-Focused",
-      "bio": "The new bio text...",
-      "reasoning": "Why this works"
-    },
-    {
-      "style": "Authority",
-      "bio": "The new bio text...",
-      "reasoning": "Why this works"
-    }
-  ],
+  "bioOptions": [],
   "taglineOptions": [
     "Tagline 1",
     "Tagline 2",
@@ -1858,9 +1765,9 @@ Return ONLY valid JSON:
     }
   ],
   "quickWins": [
-    "Quick actionable improvement 1",
-    "Quick actionable improvement 2",
-    "Quick actionable improvement 3"
+    "Quick actionable content improvement 1",
+    "Quick actionable content improvement 2",
+    "Quick actionable content improvement 3"
   ],
   "strategicMoves": [
     "Strategic long-term move 1",
@@ -1876,7 +1783,7 @@ Return ONLY valid JSON:
 
 export async function analyzeProfileImageWithVision(
   imageUrl: string,
-  profileContext: { name: string; username: string; bio: string; followers: number }
+  profileContext: { name: string; username: string; bio?: string; followers: number }
 ): Promise<ProfileImageAnalysis | null> {
   try {
     const finalUrl = imageUrl.replace('_normal', '_400x400');
@@ -1961,8 +1868,7 @@ export async function generateBrandImprovements(
   brandDNA: BrandDNA
 ): Promise<BrandImprovements | null> {
   try {
-    const bioLinguistics = analyzeBioLinguistics(profile.description || '', profile.name);
-    const prompt = brandImprovementsPrompt(profile, brandDNA, bioLinguistics);
+    const prompt = brandImprovementsPrompt(profile, brandDNA);
 
     const result = await geminiFlash.generateContent(prompt);
     const response = await result.response;

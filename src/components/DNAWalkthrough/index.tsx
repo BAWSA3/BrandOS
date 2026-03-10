@@ -1,16 +1,18 @@
 'use client';
 
-import { useRef, useState, useEffect } from 'react';
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { GeneratedBrandDNA } from '../BrandDNAPreview';
 import { AuthenticityAnalysis, ActivityAnalysis } from '@/lib/gemini';
 import WalkthroughProgress from './WalkthroughProgress';
 import DataRevealSection from './sections/DataRevealSection';
+import PostDeepDiveSection from './sections/PostDeepDiveSection';
 import AnalysisSection from './sections/AnalysisSection';
 import BrandDNASection from './sections/BrandDNASection';
 import ActionPlanSection from './sections/ActionPlanSection';
 import JourneyEnd, { JourneyEndData } from '../JourneyEnd';
 import { useDNAWalkthroughDemoCapture } from '@/hooks/useDemoCaptureIntegration';
-import ParallaxBackground from './ParallaxBackground';
+import CodeParallaxBackground from '../backgrounds/CodeParallaxBackground';
 import type { RawTweet } from './TweetExcerpt';
 
 interface XProfileData {
@@ -52,6 +54,7 @@ interface DNAWalkthroughProps {
 
 const SECTION_NAMES = [
   'DEFINE: What We Found',
+  'DEEP-DIVE: Post Analysis',
   'CHECK: What It Means',
   'GENERATE: Your Brand DNA',
   'SCALE: Start Here',
@@ -65,12 +68,15 @@ export default function DNAWalkthrough({
   onComplete,
   theme,
 }: DNAWalkthroughProps) {
-  const [activeSection, setActiveSection] = useState(0);
+  // Click-based section navigation
+  const [currentSection, setCurrentSection] = useState(0);
   const [showJourneyEnd, setShowJourneyEnd] = useState(false);
-  const sectionRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const containerRef = useRef<HTMLDivElement>(null);
 
-  useDNAWalkthroughDemoCapture({ activeSection });
+  // If no tweets, skip section 1 (PostDeepDive)
+  const hasTweets = rawTweets.length > 0;
+  const totalSections = hasTweets ? 5 : 4;
+
+  useDNAWalkthroughDemoCapture({ activeSection: currentSection });
 
   function getBestPhase(phases: BrandScoreResult['phases']) {
     const phaseEntries = Object.entries(phases) as [string, { score: number }][];
@@ -99,32 +105,20 @@ export default function DNAWalkthrough({
     keywords: generatedBrandDNA.keywords,
   };
 
-  useEffect(() => {
-    const observers: IntersectionObserver[] = [];
+  const advanceSection = () => {
+    if (currentSection < totalSections - 1) {
+      setCurrentSection(prev => prev + 1);
+      // Scroll to top smoothly when section changes
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
 
-    sectionRefs.current.forEach((ref, index) => {
-      if (!ref) return;
-
-      const observer = new IntersectionObserver(
-        ([entry]) => {
-          if (entry.isIntersecting && entry.intersectionRatio > 0.3) {
-            setActiveSection(index);
-          }
-        },
-        { threshold: [0.3, 0.5] }
-      );
-
-      observer.observe(ref);
-      observers.push(observer);
-    });
-
-    return () => {
-      observers.forEach((obs) => obs.disconnect());
-    };
-  }, []);
-
-  const scrollToSection = (index: number) => {
-    sectionRefs.current[index]?.scrollIntoView({ behavior: 'smooth' });
+  const handleSectionClick = (index: number) => {
+    // Only allow navigating to completed sections or current
+    if (index <= currentSection) {
+      setCurrentSection(index);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
   const handleViewDashboard = () => {
@@ -142,14 +136,33 @@ export default function DNAWalkthrough({
     ?? generatedBrandDNA.performanceInsights?.voiceConsistency
     ?? null;
 
+  // Map currentSection to actual section based on whether we have tweets
+  // With tweets: 0=DataReveal, 1=PostDeepDive, 2=Analysis, 3=BrandDNA, 4=ActionPlan
+  // No tweets:   0=DataReveal, 1=Analysis, 2=BrandDNA, 3=ActionPlan
+  const getSectionToRender = () => {
+    if (hasTweets) {
+      return currentSection;
+    }
+    // Skip PostDeepDive (section 1)
+    if (currentSection === 0) return 0;
+    return currentSection + 1;
+  };
+
+  const actualSection = getSectionToRender();
+
+  // Adjust section names based on whether we have tweets
+  const displayedSections = hasTweets
+    ? SECTION_NAMES
+    : [SECTION_NAMES[0], SECTION_NAMES[2], SECTION_NAMES[3], SECTION_NAMES[4]];
+
   return (
-    <div ref={containerRef} className="relative min-h-screen bg-[#050505]">
-      <ParallaxBackground theme={theme} />
+    <div className="relative min-h-screen bg-white overflow-hidden">
+      <CodeParallaxBackground theme="light" />
 
       <WalkthroughProgress
-        sections={SECTION_NAMES}
-        activeIndex={activeSection}
-        onSectionClick={scrollToSection}
+        sections={displayedSections}
+        activeIndex={currentSection}
+        onSectionClick={handleSectionClick}
       />
 
       <div
@@ -160,64 +173,129 @@ export default function DNAWalkthrough({
           opacity: showJourneyEnd ? 0.3 : 1,
         }}
       >
-        {/* Chapter 1: What We Found */}
-        <div ref={(el) => { sectionRefs.current[0] = el; }}>
-          <DataRevealSection
-            profile={profile}
-            rawTweets={rawTweets}
-            theme={theme}
-          />
-        </div>
+        <AnimatePresence mode="wait">
+          {/* Section 0: DataReveal */}
+          {actualSection === 0 && (
+            <motion.div
+              key="data-reveal"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.4 }}
+            >
+              <DataRevealSection
+                profile={profile}
+                rawTweets={rawTweets}
+                theme="light"
+                onComplete={advanceSection}
+              />
+            </motion.div>
+          )}
 
-        {/* Chapter 2: What It Means */}
-        <div ref={(el) => { sectionRefs.current[1] = el; }}>
-          <AnalysisSection
-            profile={profile}
-            brandScore={brandScore}
-            tone={generatedBrandDNA.tone}
-            voiceProfile={generatedBrandDNA.voiceProfile}
-            archetype={generatedBrandDNA.archetype}
-            archetypeEmoji={generatedBrandDNA.archetypeEmoji}
-            personalityType={generatedBrandDNA.personalityType}
-            personalitySummary={generatedBrandDNA.personalitySummary}
-            rawTweets={rawTweets}
-            theme={theme}
-          />
-        </div>
+          {/* Section 1: PostDeepDive (only if tweets exist) */}
+          {actualSection === 1 && hasTweets && (
+            <motion.div
+              key="post-deep-dive"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.4 }}
+            >
+              <PostDeepDiveSection
+                profile={profile}
+                rawTweets={rawTweets}
+                brandScore={brandScore}
+                brandDNA={{
+                  archetype: generatedBrandDNA.archetype,
+                  archetypeEmoji: generatedBrandDNA.archetypeEmoji,
+                  keywords: generatedBrandDNA.keywords,
+                  tone: generatedBrandDNA.tone,
+                  voiceProfile: generatedBrandDNA.voiceProfile,
+                  contentPillars: generatedBrandDNA.contentPillars,
+                  doPatterns: generatedBrandDNA.doPatterns,
+                  dontPatterns: generatedBrandDNA.dontPatterns,
+                }}
+                onComplete={advanceSection}
+              />
+            </motion.div>
+          )}
 
-        {/* Chapter 3: Your Brand DNA */}
-        <div ref={(el) => { sectionRefs.current[2] = el; }}>
-          <BrandDNASection
-            keywords={generatedBrandDNA.keywords}
-            voiceSamples={generatedBrandDNA.voiceSamples}
-            doPatterns={generatedBrandDNA.doPatterns}
-            dontPatterns={generatedBrandDNA.dontPatterns}
-            contentPillars={generatedBrandDNA.contentPillars}
-            performanceInsights={generatedBrandDNA.performanceInsights}
-            voiceConsistencyReport={generatedBrandDNA.voiceConsistencyReport}
-            rawTweets={rawTweets}
-            theme={theme}
-          />
-        </div>
+          {/* Section 2: Analysis */}
+          {actualSection === 2 && (
+            <motion.div
+              key="analysis"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.4 }}
+            >
+              <AnalysisSection
+                profile={profile}
+                brandScore={brandScore}
+                tone={generatedBrandDNA.tone}
+                voiceProfile={generatedBrandDNA.voiceProfile}
+                archetype={generatedBrandDNA.archetype}
+                archetypeEmoji={generatedBrandDNA.archetypeEmoji}
+                personalityType={generatedBrandDNA.personalityType}
+                personalitySummary={generatedBrandDNA.personalitySummary}
+                rawTweets={rawTweets}
+                theme="light"
+                onComplete={advanceSection}
+              />
+            </motion.div>
+          )}
 
-        {/* Chapter 4: Start Here */}
-        <div ref={(el) => { sectionRefs.current[3] = el; }}>
-          <ActionPlanSection
-            profile={profile}
-            brandScore={brandScore}
-            keywords={generatedBrandDNA.keywords}
-            doPatterns={generatedBrandDNA.doPatterns}
-            voiceConsistencyScore={voiceConsistencyScore}
-            onViewDashboard={handleViewDashboard}
-            theme={theme}
-          />
-        </div>
+          {/* Section 3: BrandDNA */}
+          {actualSection === 3 && (
+            <motion.div
+              key="brand-dna"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.4 }}
+            >
+              <BrandDNASection
+                keywords={generatedBrandDNA.keywords}
+                voiceSamples={generatedBrandDNA.voiceSamples}
+                doPatterns={generatedBrandDNA.doPatterns}
+                dontPatterns={generatedBrandDNA.dontPatterns}
+                contentPillars={generatedBrandDNA.contentPillars}
+                performanceInsights={generatedBrandDNA.performanceInsights}
+                voiceConsistencyReport={generatedBrandDNA.voiceConsistencyReport}
+                rawTweets={rawTweets}
+                theme="light"
+                onComplete={advanceSection}
+              />
+            </motion.div>
+          )}
+
+          {/* Section 4: ActionPlan */}
+          {actualSection === 4 && (
+            <motion.div
+              key="action-plan"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.4 }}
+            >
+              <ActionPlanSection
+                profile={profile}
+                brandScore={brandScore}
+                keywords={generatedBrandDNA.keywords}
+                doPatterns={generatedBrandDNA.doPatterns}
+                voiceConsistencyScore={voiceConsistencyScore}
+                onViewDashboard={handleViewDashboard}
+                theme="light"
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {showJourneyEnd && (
         <JourneyEnd
           data={journeyEndData}
-          theme={theme}
+          theme="light"
           onComplete={handleJourneyEndComplete}
         />
       )}

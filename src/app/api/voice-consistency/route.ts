@@ -43,8 +43,8 @@ async function fetchStoredFingerprint(username: string, origin: string) {
 
     if (!response.ok) return null;
     const data = await response.json();
-    return data.profile?.description
-      ? `Based on bio: "${data.profile.description}". Account created ${data.profile.created_at ?? 'unknown date'}.`
+    return data.profile?.created_at
+      ? `Account created ${data.profile.created_at}.`
       : null;
   } catch {
     return null;

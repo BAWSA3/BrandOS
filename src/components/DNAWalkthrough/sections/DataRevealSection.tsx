@@ -3,8 +3,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { XTweetEmbed, RawTweet } from '../TweetExcerpt';
-import type { ParallaxLayerConfig } from '../motion';
-import WalkthroughSection from '../WalkthroughSection';
+import ConversationalGate from '../ConversationalGate';
 
 interface XProfileData {
   name: string;
@@ -23,7 +22,7 @@ interface DataRevealSectionProps {
   profile: XProfileData;
   rawTweets: RawTweet[];
   theme: string;
-  parallaxLayers?: ParallaxLayerConfig[];
+  onComplete?: () => void;
 }
 
 function formatNumber(n: number): string {
@@ -32,348 +31,464 @@ function formatNumber(n: number): string {
   return n.toString();
 }
 
-function getSignals(profile: XProfileData, tweetCount: number) {
-  const signals: { label: string; value: string; status: 'found' | 'missing' }[] = [
-    { label: 'Display name', value: profile.name, status: 'found' },
-    { label: 'Username', value: `@${profile.username}`, status: 'found' },
-    {
-      label: 'Profile photo',
-      value: profile.profile_image_url ? 'Present' : 'Missing',
-      status: profile.profile_image_url ? 'found' : 'missing',
-    },
-    { label: 'Followers', value: formatNumber(profile.followers_count), status: 'found' },
-    { label: 'Following', value: formatNumber(profile.following_count), status: 'found' },
-    { label: 'Total posts', value: formatNumber(profile.tweet_count), status: 'found' },
-    {
-      label: 'Recent posts analyzed',
-      value: tweetCount > 0 ? `${tweetCount} posts` : 'Unavailable',
-      status: tweetCount > 0 ? 'found' : 'missing',
-    },
-  ];
-  return signals;
-}
-
-// ── Accordion Item ────────────────────────────────────────────
-
-interface AccordionItemProps {
-  title: string;
-  summary: string;
-  defaultOpen?: boolean;
-  theme: string;
-  children: React.ReactNode;
-}
-
-function AccordionItem({ title, summary, defaultOpen = false, theme, children }: AccordionItemProps) {
-  const [open, setOpen] = useState(defaultOpen);
-  const isDark = theme === 'dark';
-
-  return (
-    <div
-      style={{
-        background: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.015)',
-        border: isDark ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(0,0,0,0.05)',
-        borderRadius: '4px',
-        overflow: 'hidden',
-      }}
-    >
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        style={{
-          width: '100%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '14px 18px',
-          background: 'transparent',
-          border: 'none',
-          cursor: 'pointer',
-          textAlign: 'left',
-        }}
-      >
-        <div>
-          <span
-            style={{
-              fontFamily: "'VCR OSD Mono', monospace",
-              fontSize: '10px',
-              letterSpacing: '0.12em',
-              color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)',
-              display: 'block',
-              marginBottom: '2px',
-            }}
-          >
-            {title}
-          </span>
-          <span
-            style={{
-              fontSize: '13px',
-              color: isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)',
-            }}
-          >
-            {summary}
-          </span>
-        </div>
-        <motion.span
-          animate={{ rotate: open ? 180 : 0 }}
-          transition={{ duration: 0.2 }}
-          style={{
-            fontSize: '14px',
-            color: isDark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.35)',
-            flexShrink: 0,
-            marginLeft: '12px',
-          }}
-        >
-          ▾
-        </motion.span>
-      </button>
-
-      <AnimatePresence initial={false}>
-        {open && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.25, ease: 'easeInOut' }}
-            style={{ overflow: 'hidden' }}
-          >
-            <div style={{ padding: '0 18px 18px' }}>
-              {children}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}
-
-// ── Main Section ──────────────────────────────────────────────
+type RevealStage = 'intro' | 'profile' | 'scanning' | 'results';
 
 export default function DataRevealSection({
   profile,
   rawTweets,
   theme,
-  parallaxLayers,
+  onComplete,
 }: DataRevealSectionProps) {
-  const isDark = theme === 'dark';
+  const [stage, setStage] = useState<RevealStage>('intro');
+  const [scanProgress, setScanProgress] = useState(0);
+
   const topTweets = [...rawTweets]
     .sort((a, b) => (b.public_metrics?.like_count ?? 0) - (a.public_metrics?.like_count ?? 0))
     .slice(0, 3);
 
-  const signals = getSignals(profile, rawTweets.length);
-  const foundCount = signals.filter((s) => s.status === 'found').length;
-
-  const truncatedBio = profile.description
-    ? profile.description.length > 100
-      ? profile.description.slice(0, 97) + '...'
-      : profile.description
-    : null;
+  const handleStartScan = () => {
+    setStage('scanning');
+    // Animate scan progress
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress += 3;
+      const clampedProgress = Math.min(progress, 100);
+      setScanProgress(clampedProgress);
+      if (clampedProgress >= 100) {
+        clearInterval(interval);
+        setTimeout(() => setStage('results'), 400);
+      }
+    }, 50);
+  };
 
   return (
-    <WalkthroughSection
-      label="DEFINE: What We Found"
-      theme={theme}
-      accentColor="#2E6AFF"
-      parallaxLayers={parallaxLayers}
-      narrativeBlocks={[
-        {
-          type: 'context',
-          content: `We pulled your public X profile and ${rawTweets.length > 0 ? `analyzed ${rawTweets.length} of your recent posts` : 'your profile data'} to understand how your content builds your brand.`,
-        },
-        ...(rawTweets.length > 0
-          ? [
-              {
-                type: 'callout' as const,
-                label: 'CONTENT ANALYZED',
-                content: `${rawTweets.length} posts scanned for voice, topics, and engagement patterns.`,
-              },
-            ]
-          : []),
-      ]}
+    <section
+      className="min-h-screen"
+      style={{ background: '#ffffff', position: 'relative' }}
     >
-      <div className="space-y-4">
-        {/* ── Compact Profile Snapshot ── */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '14px',
-            flexWrap: 'wrap',
-          }}
-        >
-          {profile.profile_image_url && (
-            <img
-              src={profile.profile_image_url.replace('_normal', '_200x200')}
-              alt={profile.name}
-              style={{
-                width: 48,
-                height: 48,
-                borderRadius: '50%',
-                objectFit: 'cover',
-                border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.1)',
-                flexShrink: 0,
-              }}
-            />
-          )}
+      {/* Stage 1: Introduction */}
+      <AnimatePresence mode="wait">
+        {stage === 'intro' && (
+          <ConversationalGate
+            key="intro"
+            message={`Hey @${profile.username}. I've been looking at your profile.`}
+            subtext="Let me show you what I see when I analyze your brand presence on X."
+            buttonLabel="SHOW ME"
+            onContinue={() => setStage('profile')}
+            dataPoint={{ label: 'PROFILE', value: `@${profile.username}` }}
+          />
+        )}
 
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ fontSize: '15px', fontWeight: 600, color: isDark ? '#fff' : '#000' }}>
-                {profile.name}
-              </span>
-              {profile.verified && (
-                <span style={{ fontSize: '12px', color: '#1D9BF0' }}>&#10003;</span>
+        {/* Stage 2: Profile reveal */}
+        {stage === 'profile' && (
+          <motion.div
+            key="profile"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+              minHeight: '100vh',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '40px 24px',
+            }}
+          >
+            {/* Profile card */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2, duration: 0.5 }}
+              style={{
+                background: 'rgba(0, 0, 0, 0.02)',
+                border: '1px solid rgba(0, 0, 0, 0.08)',
+                borderRadius: '8px',
+                padding: '32px',
+                maxWidth: '400px',
+                width: '100%',
+                textAlign: 'center',
+                marginBottom: '32px',
+              }}
+            >
+              {profile.profile_image_url && (
+                <motion.img
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ delay: 0.4 }}
+                  src={profile.profile_image_url.replace('_normal', '_200x200')}
+                  alt={profile.name}
+                  style={{
+                    width: 80,
+                    height: 80,
+                    borderRadius: '50%',
+                    objectFit: 'cover',
+                    border: '3px solid #fff',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+                    margin: '0 auto 16px',
+                  }}
+                />
               )}
+
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5 }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '4px' }}>
+                  <span style={{ fontSize: '20px', fontWeight: 600, color: '#000' }}>
+                    {profile.name}
+                  </span>
+                  {profile.verified && (
+                    <span style={{ fontSize: '14px', color: '#1D9BF0' }}>✓</span>
+                  )}
+                </div>
+                <span
+                  style={{
+                    fontFamily: "'VCR OSD Mono', monospace",
+                    fontSize: '12px',
+                    color: 'rgba(0, 0, 0, 0.5)',
+                  }}
+                >
+                  @{profile.username}
+                </span>
+              </motion.div>
+
+              {/* Stats row */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.7 }}
+                style={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  gap: '32px',
+                  marginTop: '24px',
+                  paddingTop: '20px',
+                  borderTop: '1px solid rgba(0, 0, 0, 0.06)',
+                }}
+              >
+                {[
+                  { label: 'Followers', value: formatNumber(profile.followers_count) },
+                  { label: 'Following', value: formatNumber(profile.following_count) },
+                  { label: 'Posts', value: formatNumber(profile.tweet_count) },
+                ].map((stat) => (
+                  <div key={stat.label} style={{ textAlign: 'center' }}>
+                    <div
+                      style={{
+                        fontFamily: "'VCR OSD Mono', monospace",
+                        fontSize: '18px',
+                        fontWeight: 600,
+                        color: '#000',
+                      }}
+                    >
+                      {stat.value}
+                    </div>
+                    <div
+                      style={{
+                        fontFamily: "'VCR OSD Mono', monospace",
+                        fontSize: '9px',
+                        letterSpacing: '0.1em',
+                        color: 'rgba(0, 0, 0, 0.4)',
+                        marginTop: '4px',
+                      }}
+                    >
+                      {stat.label.toUpperCase()}
+                    </div>
+                  </div>
+                ))}
+              </motion.div>
+            </motion.div>
+
+            {/* AI message */}
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1 }}
+              style={{
+                fontSize: '18px',
+                color: '#000',
+                textAlign: 'center',
+                maxWidth: '450px',
+                lineHeight: 1.5,
+                marginBottom: '8px',
+              }}
+            >
+              I found {formatNumber(profile.tweet_count)} posts on your profile.
+            </motion.p>
+
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.3 }}
+              style={{
+                fontSize: '14px',
+                color: 'rgba(0, 0, 0, 0.5)',
+                textAlign: 'center',
+                maxWidth: '400px',
+                marginBottom: '32px',
+              }}
+            >
+              {rawTweets.length > 0
+                ? `Let me scan your ${rawTweets.length} most recent posts to understand your voice and content patterns.`
+                : "I'll analyze your profile data to understand your brand presence."}
+            </motion.p>
+
+            {/* Scan button */}
+            <motion.button
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1.6 }}
+              onClick={handleStartScan}
+              style={{
+                padding: '16px 32px',
+                background: '#0047FF',
+                border: 'none',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                transition: 'background 0.2s ease',
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.background = '#0038CC'}
+              onMouseLeave={(e) => e.currentTarget.style.background = '#0047FF'}
+            >
               <span
                 style={{
                   fontFamily: "'VCR OSD Mono', monospace",
                   fontSize: '11px',
-                  color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)',
+                  letterSpacing: '0.12em',
+                  color: '#fff',
                 }}
               >
-                @{profile.username}
+                {rawTweets.length > 0 ? 'SCAN MY POSTS' : 'ANALYZE MY PROFILE'}
               </span>
-            </div>
-            {truncatedBio && (
-              <p
-                style={{
-                  margin: '2px 0 0',
-                  fontSize: '12px',
-                  lineHeight: 1.4,
-                  color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)',
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                }}
-              >
-                {truncatedBio}
-              </p>
-            )}
-          </div>
+            </motion.button>
+          </motion.div>
+        )}
 
-          {/* Inline stats */}
-          <div style={{ display: 'flex', gap: '16px', flexShrink: 0 }}>
-            {[
-              { label: 'Followers', value: formatNumber(profile.followers_count) },
-              { label: 'Posts', value: formatNumber(profile.tweet_count) },
-              { label: 'Analyzed', value: rawTweets.length > 0 ? `${rawTweets.length}` : '—' },
-            ].map((stat) => (
-              <div key={stat.label} style={{ textAlign: 'center' }}>
-                <div
-                  style={{
-                    fontFamily: "'VCR OSD Mono', monospace",
-                    fontSize: '15px',
-                    fontWeight: 600,
-                    color: isDark ? '#fff' : '#000',
-                    lineHeight: 1,
-                  }}
-                >
-                  {stat.value}
-                </div>
-                <div
-                  style={{
-                    fontFamily: "'VCR OSD Mono', monospace",
-                    fontSize: '8px',
-                    letterSpacing: '0.1em',
-                    color: isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)',
-                    marginTop: '2px',
-                  }}
-                >
-                  {stat.label.toUpperCase()}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* ── Accordion: Profile Signals ── */}
-        <AccordionItem
-          title="PROFILE SIGNALS"
-          summary={`${foundCount} of ${signals.length} signals found`}
-          defaultOpen={false}
-          theme={theme}
-        >
-          <div
+        {/* Stage 3: Scanning animation */}
+        {stage === 'scanning' && (
+          <motion.div
+            key="scanning"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
-              gap: '6px',
+              minHeight: '100vh',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '40px 24px',
             }}
           >
-            {signals.map((signal, i) => (
-              <motion.div
-                key={signal.label}
-                initial={{ opacity: 0, x: -8 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.25, delay: i * 0.04 }}
+            <div
+              style={{
+                fontFamily: "'VCR OSD Mono', monospace",
+                fontSize: '11px',
+                letterSpacing: '0.12em',
+                color: '#0047FF',
+                marginBottom: '24px',
+              }}
+            >
+              SCANNING POSTS...
+            </div>
+
+            {/* ASCII progress bar */}
+            <div
+              style={{
+                fontFamily: "'JetBrains Mono', monospace",
+                fontSize: '14px',
+                color: '#000',
+                marginBottom: '16px',
+              }}
+            >
+              [{Array(20).fill(null).map((_, i) => (
+                <span key={i} style={{ color: i < Math.floor(scanProgress / 5) ? '#0047FF' : 'rgba(0,0,0,0.15)' }}>
+                  {i < Math.floor(scanProgress / 5) ? '█' : '░'}
+                </span>
+              ))}] {scanProgress}%
+            </div>
+
+            <div
+              style={{
+                fontFamily: "'VCR OSD Mono', monospace",
+                fontSize: '10px',
+                color: 'rgba(0, 0, 0, 0.4)',
+              }}
+            >
+              {scanProgress < 30 && 'Reading post content...'}
+              {scanProgress >= 30 && scanProgress < 60 && 'Analyzing voice patterns...'}
+              {scanProgress >= 60 && scanProgress < 90 && 'Detecting content themes...'}
+              {scanProgress >= 90 && 'Finalizing analysis...'}
+            </div>
+          </motion.div>
+        )}
+
+        {/* Stage 4: Results */}
+        {stage === 'results' && (
+          <motion.div
+            key="results"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+              minHeight: '100vh',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '40px 24px',
+            }}
+          >
+            {/* Success message */}
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.4 }}
+              style={{
+                textAlign: 'center',
+                marginBottom: '40px',
+              }}
+            >
+              <div
                 style={{
+                  width: '64px',
+                  height: '64px',
+                  borderRadius: '50%',
+                  background: 'rgba(16, 185, 129, 0.1)',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '8px',
-                  padding: '8px 10px',
-                  borderRadius: '3px',
-                  background:
-                    signal.status === 'found'
-                      ? isDark
-                        ? 'rgba(16,185,129,0.06)'
-                        : 'rgba(16,185,129,0.04)'
-                      : isDark
-                        ? 'rgba(245,158,11,0.06)'
-                        : 'rgba(245,158,11,0.04)',
+                  justifyContent: 'center',
+                  margin: '0 auto 20px',
+                  fontSize: '28px',
+                  color: '#10B981',
                 }}
               >
-                <span style={{ fontSize: '12px', flexShrink: 0 }}>
-                  {signal.status === 'found' ? '✓' : '—'}
-                </span>
-                <span
-                  style={{
-                    fontSize: '12px',
-                    color: isDark ? 'rgba(255,255,255,0.65)' : 'rgba(0,0,0,0.65)',
-                  }}
-                >
-                  {signal.label}
-                </span>
-                <span
-                  style={{
-                    marginLeft: 'auto',
-                    fontFamily: "'VCR OSD Mono', monospace",
-                    fontSize: '10px',
-                    color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)',
-                    maxWidth: '100px',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  {signal.value}
-                </span>
-              </motion.div>
-            ))}
-          </div>
-        </AccordionItem>
+                ✓
+              </div>
+              <h2
+                style={{
+                  fontSize: '24px',
+                  fontWeight: 600,
+                  color: '#000',
+                  margin: '0 0 8px 0',
+                }}
+              >
+                Analysis Complete
+              </h2>
+              <p
+                style={{
+                  fontSize: '14px',
+                  color: 'rgba(0, 0, 0, 0.5)',
+                }}
+              >
+                I found some interesting patterns in your content.
+              </p>
+            </motion.div>
 
-        {/* ── Accordion: Top Posts (Expanded by default) ── */}
-        {topTweets.length > 0 && (
-          <AccordionItem
-            title="TOP POSTS"
-            summary={`${topTweets.length} highest-engagement posts`}
-            defaultOpen={true}
-            theme={theme}
-          >
-            <div className="space-y-3">
-              {topTweets.map((tweet, i) => (
-                <XTweetEmbed
-                  key={tweet.id}
-                  tweetId={tweet.id}
-                  theme={theme}
-                  index={i}
-                  accentColor="#2E6AFF"
-                />
+            {/* Quick stats */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              style={{
+                display: 'flex',
+                gap: '24px',
+                marginBottom: '40px',
+                flexWrap: 'wrap',
+                justifyContent: 'center',
+              }}
+            >
+              {[
+                { label: 'Posts Scanned', value: rawTweets.length || '—' },
+                { label: 'Total Engagement', value: formatNumber(rawTweets.reduce((sum, t) => sum + (t.public_metrics?.like_count || 0) + (t.public_metrics?.retweet_count || 0), 0)) },
+                { label: 'Top Post Likes', value: topTweets[0] ? formatNumber(topTweets[0].public_metrics?.like_count || 0) : '—' },
+              ].map((stat, i) => (
+                <motion.div
+                  key={stat.label}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4 + i * 0.1 }}
+                  style={{
+                    padding: '20px 28px',
+                    background: 'rgba(0, 0, 0, 0.02)',
+                    border: '1px solid rgba(0, 0, 0, 0.06)',
+                    borderRadius: '6px',
+                    textAlign: 'center',
+                  }}
+                >
+                  <div
+                    style={{
+                      fontFamily: "'VCR OSD Mono', monospace",
+                      fontSize: '24px',
+                      fontWeight: 600,
+                      color: '#0047FF',
+                    }}
+                  >
+                    {stat.value}
+                  </div>
+                  <div
+                    style={{
+                      fontFamily: "'VCR OSD Mono', monospace",
+                      fontSize: '9px',
+                      letterSpacing: '0.1em',
+                      color: 'rgba(0, 0, 0, 0.4)',
+                      marginTop: '6px',
+                    }}
+                  >
+                    {stat.label.toUpperCase()}
+                  </div>
+                </motion.div>
               ))}
-            </div>
-          </AccordionItem>
+            </motion.div>
+
+            {/* AI message + continue */}
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.7 }}
+              style={{
+                fontSize: '16px',
+                color: '#000',
+                textAlign: 'center',
+                maxWidth: '450px',
+                lineHeight: 1.6,
+                marginBottom: '24px',
+              }}
+            >
+              Now let me show you exactly why your best content works — and how you can replicate it.
+            </motion.p>
+
+            <motion.button
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.9 }}
+              onClick={() => onComplete?.()}
+              style={{
+                padding: '16px 32px',
+                background: '#0047FF',
+                border: 'none',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                transition: 'background 0.2s ease',
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.background = '#0038CC'}
+              onMouseLeave={(e) => e.currentTarget.style.background = '#0047FF'}
+            >
+              <span
+                style={{
+                  fontFamily: "'VCR OSD Mono', monospace",
+                  fontSize: '11px',
+                  letterSpacing: '0.12em',
+                  color: '#fff',
+                }}
+              >
+                CONTINUE
+              </span>
+            </motion.button>
+          </motion.div>
         )}
-      </div>
-    </WalkthroughSection>
+      </AnimatePresence>
+    </section>
   );
 }

@@ -5,16 +5,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import {
   XProfileData,
-  analyzeBioLinguistics,
-  analyzeNameHandle,
   analyzeProfileImageWithVision,
   generateBrandDNA,
   generateBrandImprovements,
   analyzeTweetVoice,
   analyzeAccountAuthenticity,
   analyzeActivityLevel,
-  BioLinguistics,
-  NameAnalysis,
   ProfileImageAnalysis,
   BrandDNA,
   BrandImprovements,
@@ -43,8 +39,8 @@ export interface BrandIdentityResponse {
     verified: boolean;
   };
   analysis: {
-    bioLinguistics: BioLinguistics;
-    nameAnalysis: NameAnalysis;
+    bioLinguistics: any;
+    nameAnalysis: any;
     profileImage: ProfileImageAnalysis | null;
     extractedColors: ExtractedColors | null;
     brandDNA: BrandDNA | null;
@@ -73,18 +69,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Step 1: Instant algorithmic analysis (no API calls)
-    const bioLinguistics = analyzeBioLinguistics(
-      profile.description || '',
-      profile.name
-    );
-    const nameAnalysis = analyzeNameHandle(profile.name, profile.username);
+    // Step 1: Skip bio/name analysis — Brand = Reputation (content-only)
+    // bioLinguistics and nameAnalysis are kept as null for backward compat
+    const bioLinguistics = null;
+    const nameAnalysis = null;
 
     // Step 2: Profile image vision analysis (parallel with brand DNA)
     const profileContext = {
       name: profile.name,
       username: profile.username,
-      bio: profile.description || '',
       followers: profile.public_metrics.followers_count,
     };
 

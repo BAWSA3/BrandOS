@@ -40,6 +40,9 @@ export interface BrandOSDashboardData {
   };
 }
 
+// Theme toggle for reveal state - easy comparison between light and dark
+type RevealTheme = 'light' | 'dark';
+
 interface BrandOSDashboardProps {
   data: BrandOSDashboardData;
   authenticity?: AuthenticityAnalysis | null;
@@ -47,6 +50,7 @@ interface BrandOSDashboardProps {
   onCopyToClipboard?: () => Promise<void>;
   onDownload?: () => Promise<void>;
   onShareToX?: () => void;
+  revealTheme?: RevealTheme;
 }
 
 const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({
@@ -55,10 +59,19 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({
   activity,
   onCopyToClipboard,
   onDownload,
-  onShareToX
+  onShareToX,
+  revealTheme = 'dark', // Default to dark for dramatic reveal
 }) => {
   const [copyStatus, setCopyStatus] = useState<'idle' | 'copying' | 'copied'>('idle');
   const { isInnerCircle } = useInnerCircle();
+
+  // Theme-aware colors
+  const isLight = revealTheme === 'light';
+  const bgPrimary = isLight ? '#ffffff' : '#050505';
+  const bgCard = isLight ? '#f8f8f8' : '#1A1A1A';
+  const textPrimary = isLight ? '#000000' : '#ffffff';
+  const textSecondary = isLight ? 'rgba(0, 0, 0, 0.6)' : 'rgba(255, 255, 255, 0.6)';
+  const borderColor = isLight ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.1)';
 
   // Format DNA voice text with > prefix per sentence for terminal look
   const formattedVoice = useMemo(() => {
@@ -79,7 +92,13 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({
   };
 
   return (
-    <div className="text-white p-4 md:p-8 font-sans selection:bg-[#2E6AFF] selection:text-white flex items-center justify-center">
+    <div
+      className="p-4 md:p-8 font-sans selection:bg-[#2E6AFF] flex items-center justify-center"
+      style={{
+        color: textPrimary,
+        background: bgPrimary,
+      }}
+    >
 
       {/* GLOBAL STYLES FOR FONTS */}
       <style>{`

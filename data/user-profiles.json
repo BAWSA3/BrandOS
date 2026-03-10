@@ -170,22 +170,6 @@
       ],
       "scores": [
         {
-          "value": 93,
-          "scannedAt": 1768895525086
-        },
-        {
-          "value": 95,
-          "scannedAt": 1768895839301
-        },
-        {
-          "value": 95,
-          "scannedAt": 1768895873510
-        },
-        {
-          "value": 92,
-          "scannedAt": 1768896303151
-        },
-        {
           "value": 98,
           "scannedAt": 1768896489913
         },
@@ -248,13 +232,29 @@
         {
           "value": 95,
           "scannedAt": 1772245896385
+        },
+        {
+          "value": 94,
+          "scannedAt": 1773116747487
+        },
+        {
+          "value": 94,
+          "scannedAt": 1773117668002
+        },
+        {
+          "value": 94,
+          "scannedAt": 1773117917253
+        },
+        {
+          "value": 93,
+          "scannedAt": 1773119267140
         }
       ],
       "highestScore": 98,
-      "currentScore": 95,
+      "currentScore": 93,
       "firstScannedAt": 1768895525086,
-      "lastScannedAt": 1772245896385,
-      "totalScans": 20
+      "lastScannedAt": 1773119267140,
+      "totalScans": 24
     },
     "leap_xyz": {
       "username": "leap_xyz",
@@ -384,26 +384,6 @@
       ],
       "scores": [
         {
-          "value": 76,
-          "scannedAt": 1768904843172
-        },
-        {
-          "value": 77,
-          "scannedAt": 1768905109945
-        },
-        {
-          "value": 76,
-          "scannedAt": 1768905715999
-        },
-        {
-          "value": 77,
-          "scannedAt": 1768988403249
-        },
-        {
-          "value": 76,
-          "scannedAt": 1769071075178
-        },
-        {
           "value": 79,
           "scannedAt": 1769073849933
         },
@@ -450,13 +430,45 @@
         {
           "value": 80,
           "scannedAt": 1772505694824
+        },
+        {
+          "value": 78,
+          "scannedAt": 1773114495517
+        },
+        {
+          "value": 78,
+          "scannedAt": 1773118024262
+        },
+        {
+          "value": 78,
+          "scannedAt": 1773118790458
+        },
+        {
+          "value": 78,
+          "scannedAt": 1773120922583
+        },
+        {
+          "value": 78,
+          "scannedAt": 1773121679749
+        },
+        {
+          "value": 78,
+          "scannedAt": 1773123654813
+        },
+        {
+          "value": 78,
+          "scannedAt": 1773124079576
+        },
+        {
+          "value": 78,
+          "scannedAt": 1773128294957
         }
       ],
       "highestScore": 87,
-      "currentScore": 80,
+      "currentScore": 78,
       "firstScannedAt": 1768904843172,
-      "lastScannedAt": 1772505694824,
-      "totalScans": 17
+      "lastScannedAt": 1773128294957,
+      "totalScans": 25
     },
     "web3pingu": {
       "username": "web3pingu",
@@ -554,13 +566,29 @@
         {
           "value": 77,
           "scannedAt": 1772505131477
+        },
+        {
+          "value": 76,
+          "scannedAt": 1773115610077
+        },
+        {
+          "value": 79,
+          "scannedAt": 1773118296562
+        },
+        {
+          "value": 84,
+          "scannedAt": 1773118959817
+        },
+        {
+          "value": 78,
+          "scannedAt": 1773120563800
         }
       ],
       "highestScore": 88,
-      "currentScore": 77,
+      "currentScore": 78,
       "firstScannedAt": 1768905521780,
-      "lastScannedAt": 1772505131477,
-      "totalScans": 4
+      "lastScannedAt": 1773120563800,
+      "totalScans": 8
     },
     "levelsio": {
       "username": "levelsio",
@@ -701,7 +729,107 @@
       "firstScannedAt": 1769049448000,
       "lastScannedAt": 1769051373678,
       "totalScans": 2
+    },
+    "andrewaskshow": {
+      "username": "andrewaskshow",
+      "displayName": "Andrew Forte",
+      "archetype": {
+        "primary": "The Plug",
+        "emoji": "🔌",
+        "tagline": "Heeboo & Claynosaurz Connector",
+        "description": "Given his involvement with multiple companies, 'The Plug' archetype fits. He's likely connecting people and opportunities within his network, making him valuable within his sphere of influence. His established status allows him to leverage connections more effectively.",
+        "strengths": [
+          "Networking Ability",
+          "Access to Opportunities"
+        ],
+        "growthTip": "Highlight your connections and the value you bring to Heeboo and Claynosaurz by sharing insights and updates on their progress.",
+        "assignedAt": 1773115968701
+      },
+      "archetypeHistory": [
+        {
+          "archetype": {
+            "primary": "The Plug",
+            "emoji": "🔌",
+            "tagline": "Heeboo & Claynosaurz Connector",
+            "description": "Given his involvement with multiple companies, 'The Plug' archetype fits. He's likely connecting people and opportunities within his network, making him valuable within his sphere of influence. His established status allows him to leverage connections more effectively.",
+            "strengths": [
+              "Networking Ability",
+              "Access to Opportunities"
+            ],
+            "growthTip": "Highlight your connections and the value you bring to Heeboo and Claynosaurz by sharing insights and updates on their progress.",
+            "assignedAt": 1773115968701
+          },
+          "reason": "initial",
+          "score": 82,
+          "timestamp": 1773115968701
+        }
+      ],
+      "scores": [
+        {
+          "value": 82,
+          "scannedAt": 1773115968701
+        },
+        {
+          "value": 79,
+          "scannedAt": 1773116620879
+        },
+        {
+          "value": 84,
+          "scannedAt": 1773122322873
+        }
+      ],
+      "highestScore": 84,
+      "currentScore": 84,
+      "firstScannedAt": 1773115968701,
+      "lastScannedAt": 1773122322873,
+      "totalScans": 3
+    },
+    "xeer": {
+      "username": "xeer",
+      "displayName": "Xeer",
+      "archetype": {
+        "primary": "The Professor",
+        "emoji": "🎓",
+        "tagline": "Tech Future Expert",
+        "description": "Xeer's content focuses on providing insights and analysis of emerging technologies, aligning with the Professor archetype. Their influence level allows them to become a source of knowledge for others.",
+        "strengths": [
+          "Deep Niche Expertise",
+          "Authority Building"
+        ],
+        "growthTip": "Focus on creating original research or whitepapers to establish yourself as a leading voice in your niche.",
+        "assignedAt": 1773125366660
+      },
+      "archetypeHistory": [
+        {
+          "archetype": {
+            "primary": "The Professor",
+            "emoji": "🎓",
+            "tagline": "Tech Future Expert",
+            "description": "Xeer's content focuses on providing insights and analysis of emerging technologies, aligning with the Professor archetype. Their influence level allows them to become a source of knowledge for others.",
+            "strengths": [
+              "Deep Niche Expertise",
+              "Authority Building"
+            ],
+            "growthTip": "Focus on creating original research or whitepapers to establish yourself as a leading voice in your niche.",
+            "assignedAt": 1773125366660
+          },
+          "reason": "initial",
+          "score": 79,
+          "timestamp": 1773125366660
+        }
+      ],
+      "scores": [
+        {
+          "value": 79,
+          "scannedAt": 1773125366660
+        }
+      ],
+      "highestScore": 79,
+      "currentScore": 79,
+      "firstScannedAt": 1773125366660,
+      "lastScannedAt": 1773125366660,
+      "totalScans": 1
     }
   },
-  "lastUpdated": 1772505694824
+  "lastUpdated": 1773128294958
 }

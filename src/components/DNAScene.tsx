@@ -3,8 +3,7 @@
 import * as THREE from 'three';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
-import { EffectComposer, Bloom, ChromaticAberration, Vignette, Noise } from '@react-three/postprocessing';
-import { BlendFunction } from 'postprocessing';
+// Post-processing removed for performance
 import GlassDNA from './GlassDNA';
 import AutoOrbitCamera from './AutoOrbitCamera';
 
@@ -30,7 +29,6 @@ export default function DNAScene({ onPhaseChange, flowState = 'input' }: DNAScen
           alpha: true,
         }}
         style={{ background: 'transparent' }}
-        shadows
       >
         {/* Background handled by GradientSphere inside GlassDNA */}
         <GlassDNA onPhaseChange={onPhaseChange} />
@@ -48,27 +46,7 @@ export default function DNAScene({ onPhaseChange, flowState = 'input' }: DNAScen
           <AutoOrbitCamera radius={40} speed={0.15} height={5} />
         )}
 
-        {/* Post-processing - subtle effects only */}
-        <EffectComposer>
-          <Bloom
-            intensity={0.15}
-            luminanceThreshold={0.9}
-            luminanceSmoothing={0.3}
-            radius={0.4}
-            mipmapBlur
-          />
-
-          <ChromaticAberration
-            blendFunction={BlendFunction.NORMAL}
-            offset={[0.0003, 0.0003]}
-          />
-
-          <Vignette
-            offset={0.3}
-            darkness={0.4}
-            blendFunction={BlendFunction.NORMAL}
-          />
-        </EffectComposer>
+        {/* Post-processing removed for performance */}
       </Canvas>
     </div>
   );

@@ -90,7 +90,7 @@ model Brand {
 
   // Shared access
   sharedWith SharedBrand[]
-  
+
   // History
   history   HistoryEntry[]
 
@@ -114,6 +114,12 @@ model Brand {
 
   // Approval workflows
   approvalRequests ApprovalRequest[]
+
+  // Content Intelligence
+  contentNiches        ContentNiche[]
+  viralBenchmarks      ViralBenchmark[]
+  performanceSnapshots PerformanceSnapshot[]
+  gapAnalyses          GapAnalysis[]
 
   @@index([userId])
   @@index([teamId])
@@ -521,6 +527,101 @@ model DriftAlert {
   @@index([brandId])
   @@index([brandId, status])
   @@index([createdAt])
+}
+
+// ===== CONTENT INTELLIGENCE =====
+
+model ContentNiche {
+  id               String   @id @default(cuid())
+  name             String                // e.g. "creator economy", "crypto creators"
+  keywords         String                // JSON array of search keywords
+  hashtags         String                // JSON array of hashtags to monitor
+  referenceAccounts String               // JSON array of X handles to monitor
+  platform         String   @default("x") // x, linkedin, etc.
+  isActive         Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  brandId String
+  brand   Brand  @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  @@unique([brandId, name])
+  @@index([brandId])
+  @@index([isActive])
+}
+
+model ViralBenchmark {
+  id          String   @id @default(cuid())
+  platform    String   @default("x")
+  externalId  String                    // Tweet ID for dedup
+  authorUsername String?
+  content     String                    // Full text of the viral post
+  metrics     String                    // JSON: {likes, retweets, replies, impressions, quotes}
+  viralScore  Int                       // 0-100 computed viral score
+  patterns    String                    // JSON: {hookType, format, tone, cta, length, topic}
+  niche       String                    // Which niche this benchmark belongs to
+  scannedAt   DateTime @default(now())
+  createdAt   DateTime @default(now())
+
+  brandId String
+  brand   Brand  @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  @@unique([platform, externalId])
+  @@index([brandId])
+  @@index([brandId, niche])
+  @@index([viralScore])
+  @@index([scannedAt])
+}
+
+model PerformanceSnapshot {
+  id              String   @id @default(cuid())
+  windowDays      Int                    // 3, 7, or 30
+  totalPosts      Int
+  totalImpressions Int
+  totalLikes      Int
+  totalRetweets   Int
+  totalReplies    Int
+  avgEngagementRate Float
+  avgImpressions  Float
+  bestPostingHour Int?                   // 0-23
+  bestPostingDay  String?                // monday, tuesday, etc.
+  bestContentType String?                // tweet, thread, etc.
+  avgPostLength   Int?
+  topTweetId      String?
+  bottomTweetId   String?
+  postingPattern  String?                // JSON: frequency, timing breakdown
+  computedAt      DateTime @default(now())
+  createdAt       DateTime @default(now())
+
+  brandId String
+  brand   Brand  @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  @@index([brandId])
+  @@index([brandId, windowDays])
+  @@index([computedAt])
+}
+
+model GapAnalysis {
+  id                String   @id @default(cuid())
+  overallGapScore   Int                    // 0-100 average of all dimensions
+  hookStrength      Int                    // 0-100
+  formatMatch       Int                    // 0-100
+  toneAlignment     Int                    // 0-100
+  ctaEffectiveness  Int                    // 0-100
+  engagementVelocity Int                   // 0-100
+  postingConsistency Int                   // 0-100
+  strengths         String                 // JSON array of strength descriptions
+  gaps              String                 // JSON array of gap descriptions
+  actionItems       String                 // JSON array of prioritized action items
+  rawAnalysis       String?                // Full AI analysis text
+  computedAt        DateTime @default(now())
+  createdAt         DateTime @default(now())
+
+  brandId String
+  brand   Brand  @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  @@index([brandId])
+  @@index([computedAt])
 }
 
 // ===== ONCHAIN ATTESTATIONS =====

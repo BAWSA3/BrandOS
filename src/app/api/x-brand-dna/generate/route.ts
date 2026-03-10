@@ -11,7 +11,6 @@ import {
   BioVibeAnalysis,
   ProfileImageAnalysis,
   TweetVoiceAnalysis,
-  analyzeBioLinguistics,
   analyzeBioVibe,
 } from '@/lib/gemini';
 import { BrandDNA as StoreBrandDNA } from '@/lib/types';
@@ -444,49 +443,42 @@ function generateAccentColor(baseHex: string): string {
 }
 
 // Helper: Map voice spectrum to tone sliders
+// Uses image analysis and Gemini brand DNA — bio is NOT used as a brand signal
 function mapToToneSliders(
-  bioLinguistics: BioLinguistics,
   imageAnalysis: ProfileImageAnalysis | null,
   geminiBrandDNA: GeminiBrandDNA | null
 ): { minimal: number; playful: number; bold: number; experimental: number } {
-  const voice = bioLinguistics.voiceSpectrum;
   const imageStyle = imageAnalysis?.styleSignals;
 
-  // Combine bio voice analysis with image style signals
+  // Use Gemini brand DNA scores and image signals (no bio)
+  const coherence = geminiBrandDNA?.coherenceScore || 50;
+  const differentiation = geminiBrandDNA?.differentiationScore || 50;
+  const memorability = geminiBrandDNA?.memorabilityScore || 50;
+
   return {
-    // Minimal: High professional + low emoji usage = more minimal
     minimal: Math.round(
-      (voice.professional * 0.4 +
-        (100 - bioLinguistics.emojiAnalysis.count * 10) * 0.3 +
-        (imageStyle?.minimal || 50) * 0.3)
+      (coherence * 0.4 +
+        (imageStyle?.minimal || 50) * 0.6)
     ),
-
-    // Playful: Direct from voice spectrum + emoji personality
     playful: Math.round(
-      (voice.playful * 0.5 +
-        (bioLinguistics.emojiAnalysis.count > 2 ? 70 : 40) * 0.3 +
-        (imageStyle?.playful || 50) * 0.2)
+      ((100 - coherence) * 0.3 +
+        (imageStyle?.playful || 50) * 0.4 +
+        (memorability > 70 ? 60 : 40) * 0.3)
     ),
-
-    // Bold: Authoritative + CTA strength + image boldness
     bold: Math.round(
-      (voice.authoritative * 0.4 +
-        bioLinguistics.ctaStrength * 0.3 +
-        (imageStyle?.bold || 50) * 0.3)
+      (differentiation * 0.4 +
+        (imageStyle?.bold || 50) * 0.6)
     ),
-
-    // Experimental: Low professional + unique value prop
     experimental: Math.round(
-      ((100 - voice.professional) * 0.3 +
-        (bioLinguistics.uniqueValueProp ? 60 : 30) * 0.4 +
-        (geminiBrandDNA?.differentiationScore || 50) * 0.3)
+      (differentiation * 0.5 +
+        (imageStyle?.minimal ? (100 - imageStyle.minimal) : 50) * 0.2 +
+        (memorability * 0.3))
     ),
   };
 }
 
 // Helper: Extract keywords from analysis
 function extractKeywords(
-  bioLinguistics: BioLinguistics,
   geminiBrandDNA: GeminiBrandDNA | null,
   profile: XProfileData
 ): string[] {
@@ -494,14 +486,7 @@ function extractKeywords(
 
   // From Gemini brand DNA
   if (geminiBrandDNA?.brandKeywords) {
-    keywords.push(...geminiBrandDNA.brandKeywords.slice(0, 4));
-  }
-
-  // From power words in bio
-  if (bioLinguistics.powerWords) {
-    keywords.push(
-      ...bioLinguistics.powerWords.slice(0, 3).map((pw) => pw.word)
-    );
+    keywords.push(...geminiBrandDNA.brandKeywords.slice(0, 6));
   }
 
   // From archetype
@@ -514,41 +499,40 @@ function extractKeywords(
 }
 
 // Helper: Generate do/don't patterns from analysis
+// Derived from Gemini brand DNA and tweet voice — not bio
 function generatePatterns(
-  bioLinguistics: BioLinguistics,
-  geminiBrandDNA: GeminiBrandDNA | null
+  geminiBrandDNA: GeminiBrandDNA | null,
+  tweetVoice?: TweetVoiceAnalysis | null
 ): { doPatterns: string[]; dontPatterns: string[] } {
   const doPatterns: string[] = [];
   const dontPatterns: string[] = [];
-  const voice = bioLinguistics.voiceSpectrum;
 
-  // Based on formality
-  if (voice.professional > 60) {
-    doPatterns.push('Use professional, credible language');
-    dontPatterns.push('Avoid slang and casual abbreviations');
+  // Use tweet voice if available, otherwise use Gemini brand DNA voice
+  const voice = tweetVoice?.voiceSpectrum;
+
+  if (voice) {
+    if (voice.professional > 60) {
+      doPatterns.push('Use professional, credible language');
+      dontPatterns.push('Avoid slang and casual abbreviations');
+    } else {
+      doPatterns.push('Keep it conversational and approachable');
+      dontPatterns.push('Avoid corporate jargon');
+    }
+
+    if (voice.authoritative > 60) {
+      doPatterns.push('Lead with expertise and authority');
+      dontPatterns.push('Avoid hedging language (maybe, perhaps)');
+    }
+
+    if (voice.casual > 50) {
+      doPatterns.push('Include personality and humor');
+    } else {
+      dontPatterns.push('Avoid excessive emojis or informal language');
+    }
   } else {
-    doPatterns.push('Keep it conversational and approachable');
-    dontPatterns.push('Avoid corporate jargon');
-  }
-
-  // Based on energy
-  if (voice.authoritative > 60) {
-    doPatterns.push('Lead with expertise and authority');
-    dontPatterns.push('Avoid hedging language (maybe, perhaps)');
-  }
-
-  // Based on playfulness
-  if (voice.playful > 50) {
-    doPatterns.push('Include personality and humor');
-  } else {
-    dontPatterns.push('Avoid excessive emojis or informal language');
-  }
-
-  // Based on CTA style
-  if (bioLinguistics.ctaType === 'direct') {
-    doPatterns.push('Use clear, direct calls-to-action');
-  } else if (bioLinguistics.ctaType === 'soft') {
-    doPatterns.push('Guide gently rather than pushing hard');
+    // Defaults when no tweet voice is available
+    doPatterns.push('Stay consistent with your content voice');
+    dontPatterns.push('Avoid drifting between too many different tones');
   }
 
   // From Gemini avoid keywords
@@ -565,11 +549,6 @@ function generateVoiceSamples(
   geminiBrandDNA: GeminiBrandDNA | null
 ): string[] {
   const samples: string[] = [];
-
-  // Bio as primary sample
-  if (profile.description && profile.description.length > 20) {
-    samples.push(profile.description);
-  }
 
   // Inferred mission as a voice sample
   if (geminiBrandDNA?.inferredMission) {
@@ -650,7 +629,7 @@ export async function POST(request: NextRequest) {
     }: {
       profile: XProfileData;
       brandIdentity: {
-        bioLinguistics: BioLinguistics;
+        bioLinguistics?: BioLinguistics;
         profileImage: ProfileImageAnalysis | null;
         extractedColors?: ExtractedColors | null;
         brandDNA: GeminiBrandDNA | null;
@@ -665,11 +644,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { bioLinguistics, profileImage, extractedColors, brandDNA: geminiBrandDNA, tweetVoice } = brandIdentity;
+    const { profileImage, extractedColors, brandDNA: geminiBrandDNA, tweetVoice } = brandIdentity;
 
     // Generate store-compatible Brand DNA
     const colors = extractColors(extractedColors || null, profileImage, geminiBrandDNA);
-    let tone = mapToToneSliders(bioLinguistics, profileImage, geminiBrandDNA);
+    let tone = mapToToneSliders(profileImage, geminiBrandDNA);
 
     // If tweet voice analysis available, use it for more accurate tone
     if (tweetVoice) {
@@ -677,8 +656,8 @@ export async function POST(request: NextRequest) {
       console.log('=== USING TWEET-ENHANCED TONE ===');
     }
 
-    const keywords = extractKeywords(bioLinguistics, geminiBrandDNA, profile);
-    const { doPatterns, dontPatterns } = generatePatterns(bioLinguistics, geminiBrandDNA);
+    const keywords = extractKeywords(geminiBrandDNA, profile);
+    const { doPatterns, dontPatterns } = generatePatterns(geminiBrandDNA, tweetVoice);
     const voiceSamples = generateVoiceSamples(profile, geminiBrandDNA);
 
     // Extract tweet-enhanced data
@@ -692,8 +671,8 @@ export async function POST(request: NextRequest) {
       personal: tweetVoice.voiceSpectrum.personal,
     } : undefined;
 
-    // CONTENT-PRIMARY: Generate bio vibe for personality hints only (not brand positioning)
-    const bioVibe = analyzeBioVibe(profile.description || '');
+    // Brand = Reputation: Bio is not a brand signal. Pass empty for neutral defaults.
+    const bioVibe = analyzeBioVibe('');
 
     // Detect personality type - CONTENT-PRIMARY approach
     // If tweets available, use content-based detection; otherwise fall back to Gemini archetype

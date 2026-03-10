@@ -19,6 +19,7 @@ const tonePillColors: Record<string, { bg: string; text: string }> = {
   'announcement': { bg: 'rgba(100,210,255,0.12)', text: '#64D2FF' },
   'engagement-bait': { bg: 'rgba(255,214,10,0.12)', text: '#FFD60A' },
   'thread-starter': { bg: 'rgba(172,142,104,0.12)', text: '#AC8E68' },
+  'intelligence': { bg: 'rgba(6,182,212,0.12)', text: '#06B6D4' },
 };
 
 const categoryLabels: Record<string, string> = {
@@ -26,6 +27,7 @@ const categoryLabels: Record<string, string> = {
   'best-performing': 'Based on your best posts',
   'brand-aligned': 'Matches your brand DNA',
   timely: 'Timely opportunity',
+  intelligence: 'Intelligence-generated',
 };
 
 export default function AIIdeaFeed({ ideas, isLoading, onRefresh, onCreatePost, onSaveToCalendar }: AIIdeaFeedProps) {

@@ -1,9 +1,9 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import { XTweetEmbed, RawTweet } from '../TweetExcerpt';
-import WalkthroughSection from '../WalkthroughSection';
-import type { ParallaxLayerConfig } from '../motion';
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { RawTweet } from '../TweetExcerpt';
+import ConversationalGate from '../ConversationalGate';
 
 interface XProfileData {
   name: string;
@@ -54,29 +54,29 @@ interface AnalysisSectionProps {
   personalitySummary?: string;
   rawTweets: RawTweet[];
   theme: string;
-  parallaxLayers?: ParallaxLayerConfig[];
+  onComplete?: () => void;
 }
 
 const PHASE_META: Record<string, { label: string; color: string; what: string }> = {
   define: {
     label: 'DEFINE',
     color: '#E8A838',
-    what: 'How clear and recognizable your brand identity is from your profile alone.',
+    what: 'Brand clarity & recognition',
   },
   check: {
     label: 'CHECK',
-    color: '#00ff88',
-    what: 'How consistently your posts, tone, and visuals reinforce the same brand message.',
+    color: '#10B981',
+    what: 'Voice consistency',
   },
   generate: {
     label: 'GENERATE',
-    color: '#9d4edd',
-    what: 'How well your profile is set up for AI-powered content generation that sounds like you.',
+    color: '#9D4EDD',
+    what: 'AI-readiness',
   },
   scale: {
     label: 'SCALE',
-    color: '#ff6b35',
-    what: 'How ready your account is to grow audience reach while keeping brand integrity.',
+    color: '#0047FF',
+    what: 'Growth potential',
   },
 };
 
@@ -101,22 +101,14 @@ function getVoiceStyle(tone: ToneData): { style: string; description: string } {
   const formality = (100 - tone.playful + tone.minimal) / 2;
   const energy = (tone.bold + tone.experimental) / 2;
 
-  if (formality > 65 && energy > 55) return { style: 'Authority', description: 'You lead with confidence and substance. Your audience expects expert takes.' };
-  if (formality > 65) return { style: 'Expert', description: 'Your voice carries weight through depth. People come to you for reliable, well-reasoned analysis.' };
-  if (energy > 65) return { style: 'Entertainer', description: 'You blend insight with energy. Your content gets shared because it\'s both valuable and engaging.' };
-  if (formality < 40 && energy < 40) return { style: 'Relatable', description: 'You connect through authenticity. Your audience relates because you keep it real.' };
-  return { style: 'Versatile', description: 'You adapt your voice to the message. This flexibility helps you reach broader audiences.' };
+  if (formality > 65 && energy > 55) return { style: 'Authority', description: 'You lead with confidence and substance.' };
+  if (formality > 65) return { style: 'Expert', description: 'Your voice carries weight through depth.' };
+  if (energy > 65) return { style: 'Entertainer', description: 'You blend insight with energy.' };
+  if (formality < 40 && energy < 40) return { style: 'Relatable', description: 'You connect through authenticity.' };
+  return { style: 'Versatile', description: 'You adapt your voice to the message.' };
 }
 
-function pickAnnotatedTweet(tweets: RawTweet[], keywords: string[]): { tweet: RawTweet; annotation: string } | null {
-  if (!tweets.length) return null;
-  const sorted = [...tweets].sort((a, b) => (b.public_metrics?.like_count ?? 0) - (a.public_metrics?.like_count ?? 0));
-  const best = sorted[0];
-  return {
-    tweet: best,
-    annotation: `This is your highest-engagement post. ${keywords.length ? `It touches on your brand themes: ${keywords.slice(0, 3).join(', ')}.` : 'It shows the voice and tone your audience responds to most.'}`,
-  };
-}
+type Stage = 'intro' | 'score-reveal' | 'phases' | 'voice' | 'strengths';
 
 export default function AnalysisSection({
   profile,
@@ -129,425 +121,655 @@ export default function AnalysisSection({
   personalitySummary,
   rawTweets,
   theme,
-  parallaxLayers,
+  onComplete,
 }: AnalysisSectionProps) {
-  const isDark = theme === 'dark';
+  const [stage, setStage] = useState<Stage>('intro');
+  const [revealedPhases, setRevealedPhases] = useState<number>(0);
+
   const scoreColor = getScoreColor(brandScore.overallScore);
   const voice = getVoiceStyle(tone);
-
   const phases = Object.entries(brandScore.phases) as [string, PhaseData][];
   const sortedPhases = [...phases].sort((a, b) => b[1].score - a[1].score);
   const strongestPhase = sortedPhases[0];
-  const weakestPhase = sortedPhases[sortedPhases.length - 1];
-
-  const annotatedTweet = pickAnnotatedTweet(rawTweets, []);
 
   return (
-    <WalkthroughSection
-      label="CHECK: What It Means"
-      theme={theme}
-      accentColor={scoreColor}
-      parallaxLayers={parallaxLayers}
-      narrativeBlocks={[
-        {
-          type: 'context',
-          content: `We ran your data through four analysis dimensions. Here's how your brand scores — and what each number actually tells you about @${profile.username}.`,
-        },
-        {
-          type: 'callout',
-          label: 'THE BOTTOM LINE',
-          content: brandScore.summary,
-        },
-      ]}
+    <section
+      className="min-h-screen"
+      style={{ background: '#ffffff', position: 'relative' }}
     >
-      <div className="space-y-6">
-        {/* Overall Score Hero */}
-        <div className="flex flex-col md:flex-row items-center gap-6">
-          <div className="flex flex-col items-center">
+      <AnimatePresence mode="wait">
+        {/* Stage 1: Intro */}
+        {stage === 'intro' && (
+          <ConversationalGate
+            key="intro"
+            message="Now let me show you what your content actually reveals about your brand."
+            subtext="I've scored your presence across four key dimensions."
+            buttonLabel="REVEAL MY SCORE"
+            onContinue={() => setStage('score-reveal')}
+          />
+        )}
+
+        {/* Stage 2: Score Reveal */}
+        {stage === 'score-reveal' && (
+          <motion.div
+            key="score"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+              minHeight: '100vh',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '40px 24px',
+            }}
+          >
+            {/* Big score reveal */}
             <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              whileInView={{ scale: 1, opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, ease: [0.34, 1.56, 0.64, 1] }}
+              initial={{ scale: 0.5, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.6, ease: [0.34, 1.56, 0.64, 1] }}
               style={{
-                width: 120,
-                height: 120,
+                width: 160,
+                height: 160,
                 borderRadius: '50%',
-                background: `conic-gradient(${scoreColor} ${brandScore.overallScore * 3.6}deg, ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'} 0deg)`,
+                background: `conic-gradient(${scoreColor} ${brandScore.overallScore * 3.6}deg, rgba(0,0,0,0.06) 0deg)`,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
+                marginBottom: '32px',
               }}
             >
               <div
                 style={{
-                  width: 96,
-                  height: 96,
+                  width: 130,
+                  height: 130,
                   borderRadius: '50%',
-                  background: isDark ? '#1A1A1A' : '#F8F8F8',
+                  background: '#fff',
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
                 }}
               >
-                <span
+                <motion.span
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.5 }}
                   style={{
                     fontFamily: "'VCR OSD Mono', monospace",
-                    fontSize: '32px',
+                    fontSize: '48px',
                     fontWeight: 700,
                     color: scoreColor,
                     lineHeight: 1,
                   }}
                 >
                   {brandScore.overallScore}
-                </span>
-                <span
+                </motion.span>
+                <motion.span
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.7 }}
                   style={{
                     fontFamily: "'VCR OSD Mono', monospace",
-                    fontSize: '8px',
+                    fontSize: '10px',
                     letterSpacing: '0.12em',
                     color: scoreColor,
-                    marginTop: '4px',
+                    marginTop: '6px',
                   }}
                 >
                   {getScoreLabel(brandScore.overallScore)}
-                </span>
+                </motion.span>
               </div>
             </motion.div>
-          </div>
 
-          <div className="flex-1 space-y-2">
-            <h3
+            <motion.h2
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8 }}
               style={{
-                fontSize: '20px',
+                fontSize: '24px',
                 fontWeight: 600,
-                color: isDark ? '#fff' : '#000',
-                margin: 0,
+                color: '#000',
+                textAlign: 'center',
+                margin: '0 0 12px 0',
               }}
             >
-              Brand Score: {brandScore.overallScore}/100
-            </h3>
-            <p
+              Your Brand Score
+            </motion.h2>
+
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1 }}
               style={{
-                fontSize: '14px',
+                fontSize: '15px',
+                color: 'rgba(0, 0, 0, 0.6)',
+                textAlign: 'center',
+                maxWidth: '400px',
                 lineHeight: 1.6,
-                color: isDark ? 'rgba(255,255,255,0.65)' : 'rgba(0,0,0,0.65)',
-                margin: 0,
-                maxWidth: '500px',
+                marginBottom: '32px',
               }}
             >
-              Your strongest dimension is{' '}
-              <strong style={{ color: PHASE_META[strongestPhase[0]].color }}>
-                {PHASE_META[strongestPhase[0]].label}
-              </strong>{' '}
-              ({strongestPhase[1].score}/100). Your biggest opportunity is{' '}
-              <strong style={{ color: PHASE_META[weakestPhase[0]].color }}>
-                {PHASE_META[weakestPhase[0]].label}
-              </strong>{' '}
-              ({weakestPhase[1].score}/100).
-            </p>
-          </div>
-        </div>
+              {brandScore.summary}
+            </motion.p>
 
-        {/* Phase Breakdown */}
-        <div>
-          <h4
-            style={{
-              fontFamily: "'VCR OSD Mono', monospace",
-              fontSize: '10px',
-              letterSpacing: '0.12em',
-              color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)',
-              marginBottom: '14px',
-            }}
-          >
-            HOW EACH DIMENSION SCORED
-          </h4>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {phases.map(([key, phase], i) => {
-              const meta = PHASE_META[key];
-              return (
-                <motion.div
-                  key={key}
-                  initial={{ opacity: 0, y: 10 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.3, delay: i * 0.08 }}
-                  style={{
-                    padding: '16px',
-                    background: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.015)',
-                    border: isDark ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(0,0,0,0.05)',
-                    borderRadius: '4px',
-                  }}
-                >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                    <span
-                      style={{
-                        fontFamily: "'VCR OSD Mono', monospace",
-                        fontSize: '12px',
-                        letterSpacing: '0.08em',
-                        color: meta.color,
-                      }}
-                    >
-                      {meta.label}
-                    </span>
-                    <span
-                      style={{
-                        fontFamily: "'VCR OSD Mono', monospace",
-                        fontSize: '16px',
-                        fontWeight: 600,
-                        color: isDark ? '#fff' : '#000',
-                      }}
-                    >
-                      {phase.score}
-                    </span>
-                  </div>
-
-                  {/* Progress bar */}
-                  <div
-                    style={{
-                      height: 6,
-                      background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)',
-                      borderRadius: '3px',
-                      overflow: 'hidden',
-                      marginBottom: '10px',
-                    }}
-                  >
-                    <motion.div
-                      initial={{ width: 0 }}
-                      whileInView={{ width: `${phase.score}%` }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.6, delay: 0.2 + i * 0.1 }}
-                      style={{
-                        height: '100%',
-                        background: meta.color,
-                        borderRadius: '3px',
-                      }}
-                    />
-                  </div>
-
-                  <p
-                    style={{
-                      fontSize: '12px',
-                      lineHeight: 1.5,
-                      color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)',
-                      margin: '0 0 6px 0',
-                    }}
-                  >
-                    {meta.what}
-                  </p>
-
-                  {/* Top insight */}
-                  {phase.insights[0] && (
-                    <p
-                      style={{
-                        fontSize: '12px',
-                        lineHeight: 1.5,
-                        color: isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)',
-                        margin: 0,
-                        fontStyle: 'italic',
-                      }}
-                    >
-                      &ldquo;{phase.insights[0]}&rdquo;
-                    </p>
-                  )}
-                </motion.div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Voice & Archetype */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Voice Style */}
-          <div
-            style={{
-              padding: '20px',
-              background: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.015)',
-              border: isDark ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(0,0,0,0.05)',
-              borderRadius: '4px',
-            }}
-          >
-            <h4
+            <motion.button
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1.3 }}
+              onClick={() => setStage('phases')}
               style={{
-                fontFamily: "'VCR OSD Mono', monospace",
-                fontSize: '10px',
-                letterSpacing: '0.12em',
-                color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)',
-                marginBottom: '12px',
+                padding: '16px 32px',
+                background: '#0047FF',
+                border: 'none',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                transition: 'background 0.2s ease',
               }}
+              onMouseEnter={(e) => e.currentTarget.style.background = '#0038CC'}
+              onMouseLeave={(e) => e.currentTarget.style.background = '#0047FF'}
             >
-              YOUR VOICE STYLE
-            </h4>
-            <div style={{ fontSize: '24px', fontWeight: 600, color: isDark ? '#fff' : '#000', marginBottom: '6px' }}>
-              {voice.style}
-            </div>
-            <p
-              style={{
-                fontSize: '13px',
-                lineHeight: 1.6,
-                color: isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)',
-                margin: 0,
-              }}
-            >
-              {voice.description}
-            </p>
-            {voiceProfile && (
-              <p
-                style={{
-                  marginTop: '10px',
-                  fontSize: '12px',
-                  color: isDark ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.45)',
-                  fontStyle: 'italic',
-                }}
-              >
-                Signature: {voiceProfile}
-              </p>
-            )}
-          </div>
-
-          {/* Archetype */}
-          <div
-            style={{
-              padding: '20px',
-              background: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.015)',
-              border: isDark ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(0,0,0,0.05)',
-              borderRadius: '4px',
-            }}
-          >
-            <h4
-              style={{
-                fontFamily: "'VCR OSD Mono', monospace",
-                fontSize: '10px',
-                letterSpacing: '0.12em',
-                color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)',
-                marginBottom: '12px',
-              }}
-            >
-              YOUR BRAND ARCHETYPE
-            </h4>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-              <span style={{ fontSize: '28px' }}>{archetypeEmoji}</span>
-              <span style={{ fontSize: '22px', fontWeight: 600, color: isDark ? '#fff' : '#000' }}>
-                {archetype}
-              </span>
-            </div>
-            {personalityType && (
               <span
                 style={{
                   fontFamily: "'VCR OSD Mono', monospace",
-                  fontSize: '10px',
-                  letterSpacing: '0.08em',
-                  padding: '4px 10px',
-                  background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
-                  borderRadius: '3px',
-                  color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)',
-                  display: 'inline-block',
-                  marginBottom: '8px',
+                  fontSize: '11px',
+                  letterSpacing: '0.12em',
+                  color: '#fff',
                 }}
               >
-                {personalityType}
+                BREAK IT DOWN
               </span>
-            )}
-            {personalitySummary && (
-              <p
-                style={{
-                  marginTop: '8px',
-                  fontSize: '13px',
-                  lineHeight: 1.6,
-                  color: isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)',
-                }}
-              >
-                {personalitySummary}
-              </p>
-            )}
-          </div>
-        </div>
+            </motion.button>
+          </motion.div>
+        )}
 
-        {/* Annotated Best Tweet */}
-        {annotatedTweet && (
-          <div>
-            <h4
+        {/* Stage 3: Phase breakdown */}
+        {stage === 'phases' && (
+          <motion.div
+            key="phases"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+              minHeight: '100vh',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '40px 24px',
+            }}
+          >
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
               style={{
                 fontFamily: "'VCR OSD Mono', monospace",
                 fontSize: '10px',
                 letterSpacing: '0.12em',
-                color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)',
-                marginBottom: '12px',
+                color: 'rgba(0, 0, 0, 0.4)',
+                marginBottom: '24px',
               }}
             >
-              YOUR VOICE IN ACTION
-            </h4>
-            <XTweetEmbed
-              tweetId={annotatedTweet.tweet.id}
-              annotation={annotatedTweet.annotation}
-              theme={theme}
-              accentColor={scoreColor}
-            />
-          </div>
+              YOUR FOUR DIMENSIONS
+            </motion.p>
+
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(2, 1fr)',
+                gap: '16px',
+                maxWidth: '500px',
+                width: '100%',
+                marginBottom: '32px',
+              }}
+            >
+              {phases.map(([key, phase], i) => {
+                const meta = PHASE_META[key];
+                const isRevealed = i < revealedPhases;
+
+                return (
+                  <motion.div
+                    key={key}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{
+                      opacity: isRevealed ? 1 : 0.3,
+                      y: 0,
+                      scale: isRevealed ? 1 : 0.95,
+                    }}
+                    transition={{ delay: i * 0.1, duration: 0.4 }}
+                    style={{
+                      padding: '20px',
+                      background: isRevealed ? 'rgba(0, 0, 0, 0.02)' : 'rgba(0, 0, 0, 0.01)',
+                      border: `1px solid ${isRevealed ? meta.color + '40' : 'rgba(0,0,0,0.06)'}`,
+                      borderRadius: '8px',
+                      textAlign: 'center',
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontFamily: "'VCR OSD Mono', monospace",
+                        fontSize: '10px',
+                        letterSpacing: '0.1em',
+                        color: isRevealed ? meta.color : 'rgba(0,0,0,0.3)',
+                        marginBottom: '8px',
+                      }}
+                    >
+                      {meta.label}
+                    </div>
+                    <div
+                      style={{
+                        fontFamily: "'VCR OSD Mono', monospace",
+                        fontSize: '32px',
+                        fontWeight: 700,
+                        color: isRevealed ? '#000' : 'rgba(0,0,0,0.2)',
+                        marginBottom: '4px',
+                      }}
+                    >
+                      {isRevealed ? phase.score : '??'}
+                    </div>
+                    <div
+                      style={{
+                        fontSize: '11px',
+                        color: isRevealed ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.2)',
+                      }}
+                    >
+                      {meta.what}
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+
+            {/* Reveal button or continue */}
+            {revealedPhases < 4 ? (
+              <motion.button
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5 }}
+                onClick={() => setRevealedPhases(prev => prev + 1)}
+                style={{
+                  padding: '14px 28px',
+                  background: PHASE_META[phases[revealedPhases][0]].color,
+                  border: 'none',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  transition: 'opacity 0.2s ease',
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.opacity = '0.9'}
+                onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+              >
+                <span
+                  style={{
+                    fontFamily: "'VCR OSD Mono', monospace",
+                    fontSize: '11px',
+                    letterSpacing: '0.12em',
+                    color: '#fff',
+                  }}
+                >
+                  REVEAL {PHASE_META[phases[revealedPhases][0]].label}
+                </span>
+              </motion.button>
+            ) : (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                style={{ textAlign: 'center' }}
+              >
+                <p
+                  style={{
+                    fontSize: '16px',
+                    color: '#000',
+                    marginBottom: '20px',
+                  }}
+                >
+                  Your strongest dimension is{' '}
+                  <strong style={{ color: PHASE_META[strongestPhase[0]].color }}>
+                    {PHASE_META[strongestPhase[0]].label}
+                  </strong>
+                </p>
+                <button
+                  onClick={() => setStage('voice')}
+                  style={{
+                    padding: '16px 32px',
+                    background: '#0047FF',
+                    border: 'none',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    transition: 'background 0.2s ease',
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.background = '#0038CC'}
+                  onMouseLeave={(e) => e.currentTarget.style.background = '#0047FF'}
+                >
+                  <span
+                    style={{
+                      fontFamily: "'VCR OSD Mono', monospace",
+                      fontSize: '11px',
+                      letterSpacing: '0.12em',
+                      color: '#fff',
+                    }}
+                  >
+                    ANALYZE MY VOICE
+                  </span>
+                </button>
+              </motion.div>
+            )}
+          </motion.div>
         )}
 
-        {/* Top Strengths & Improvements */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <div
+        {/* Stage 4: Voice & Archetype */}
+        {stage === 'voice' && (
+          <motion.div
+            key="voice"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             style={{
-              padding: '16px',
-              background: isDark ? 'rgba(16,185,129,0.04)' : 'rgba(16,185,129,0.03)',
-              border: '1px solid rgba(16,185,129,0.12)',
-              borderRadius: '4px',
+              minHeight: '100vh',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '40px 24px',
             }}
           >
-            <h4
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
               style={{
-                fontFamily: "'VCR OSD Mono', monospace",
-                fontSize: '10px',
-                letterSpacing: '0.1em',
-                color: '#10B981',
-                marginBottom: '10px',
+                fontSize: '16px',
+                color: 'rgba(0, 0, 0, 0.6)',
+                marginBottom: '32px',
+                textAlign: 'center',
               }}
             >
-              TOP STRENGTHS
-            </h4>
-            <div className="space-y-2">
-              {brandScore.topStrengths.slice(0, 3).map((s, i) => (
-                <div key={i} style={{ display: 'flex', gap: '8px', fontSize: '13px', lineHeight: 1.5 }}>
-                  <span style={{ color: '#10B981', flexShrink: 0 }}>+</span>
-                  <span style={{ color: isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)' }}>{s}</span>
-                </div>
-              ))}
-            </div>
-          </div>
+              Based on your content, here's your brand identity:
+            </motion.p>
 
-          <div
-            style={{
-              padding: '16px',
-              background: isDark ? 'rgba(245,158,11,0.04)' : 'rgba(245,158,11,0.03)',
-              border: '1px solid rgba(245,158,11,0.12)',
-              borderRadius: '4px',
-            }}
-          >
-            <h4
+            {/* Archetype card */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
               style={{
-                fontFamily: "'VCR OSD Mono', monospace",
-                fontSize: '10px',
-                letterSpacing: '0.1em',
-                color: '#F59E0B',
-                marginBottom: '10px',
+                padding: '32px 48px',
+                background: 'rgba(0, 71, 255, 0.04)',
+                border: '1px solid rgba(0, 71, 255, 0.15)',
+                borderRadius: '12px',
+                textAlign: 'center',
+                marginBottom: '24px',
               }}
             >
-              GROWTH OPPORTUNITIES
-            </h4>
-            <div className="space-y-2">
-              {brandScore.topImprovements.slice(0, 3).map((s, i) => (
-                <div key={i} style={{ display: 'flex', gap: '8px', fontSize: '13px', lineHeight: 1.5 }}>
-                  <span style={{ color: '#F59E0B', flexShrink: 0 }}>→</span>
-                  <span style={{ color: isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)' }}>{s}</span>
+              <div style={{ fontSize: '48px', marginBottom: '12px' }}>{archetypeEmoji}</div>
+              <div
+                style={{
+                  fontFamily: "'VCR OSD Mono', monospace",
+                  fontSize: '10px',
+                  letterSpacing: '0.12em',
+                  color: 'rgba(0, 0, 0, 0.4)',
+                  marginBottom: '8px',
+                }}
+              >
+                YOUR ARCHETYPE
+              </div>
+              <div style={{ fontSize: '28px', fontWeight: 600, color: '#000', marginBottom: '8px' }}>
+                {archetype}
+              </div>
+              {personalityType && (
+                <span
+                  style={{
+                    fontFamily: "'VCR OSD Mono', monospace",
+                    fontSize: '11px',
+                    padding: '6px 12px',
+                    background: 'rgba(0, 0, 0, 0.04)',
+                    borderRadius: '4px',
+                    color: 'rgba(0, 0, 0, 0.5)',
+                  }}
+                >
+                  {personalityType}
+                </span>
+              )}
+            </motion.div>
+
+            {/* Voice style */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              style={{
+                padding: '24px 32px',
+                background: 'rgba(0, 0, 0, 0.02)',
+                border: '1px solid rgba(0, 0, 0, 0.06)',
+                borderRadius: '8px',
+                textAlign: 'center',
+                maxWidth: '400px',
+                marginBottom: '32px',
+              }}
+            >
+              <div
+                style={{
+                  fontFamily: "'VCR OSD Mono', monospace",
+                  fontSize: '10px',
+                  letterSpacing: '0.12em',
+                  color: 'rgba(0, 0, 0, 0.4)',
+                  marginBottom: '8px',
+                }}
+              >
+                YOUR VOICE STYLE
+              </div>
+              <div style={{ fontSize: '22px', fontWeight: 600, color: '#000', marginBottom: '8px' }}>
+                {voice.style}
+              </div>
+              <p style={{ fontSize: '14px', color: 'rgba(0, 0, 0, 0.6)', margin: 0, lineHeight: 1.5 }}>
+                {voice.description}
+              </p>
+            </motion.div>
+
+            <motion.button
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.8 }}
+              onClick={() => setStage('strengths')}
+              style={{
+                padding: '16px 32px',
+                background: '#0047FF',
+                border: 'none',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                transition: 'background 0.2s ease',
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.background = '#0038CC'}
+              onMouseLeave={(e) => e.currentTarget.style.background = '#0047FF'}
+            >
+              <span
+                style={{
+                  fontFamily: "'VCR OSD Mono', monospace",
+                  fontSize: '11px',
+                  letterSpacing: '0.12em',
+                  color: '#fff',
+                }}
+              >
+                SHOW MY STRENGTHS
+              </span>
+            </motion.button>
+          </motion.div>
+        )}
+
+        {/* Stage 5: Strengths & Opportunities */}
+        {stage === 'strengths' && (
+          <motion.div
+            key="strengths"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+              minHeight: '100vh',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '40px 24px',
+            }}
+          >
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              style={{
+                fontSize: '18px',
+                color: '#000',
+                marginBottom: '32px',
+                textAlign: 'center',
+              }}
+            >
+              Here's what's working — and where you can grow:
+            </motion.p>
+
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                gap: '20px',
+                maxWidth: '700px',
+                width: '100%',
+                marginBottom: '40px',
+              }}
+            >
+              {/* Strengths */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.3 }}
+                style={{
+                  padding: '24px',
+                  background: 'rgba(16, 185, 129, 0.04)',
+                  border: '1px solid rgba(16, 185, 129, 0.15)',
+                  borderRadius: '8px',
+                }}
+              >
+                <div
+                  style={{
+                    fontFamily: "'VCR OSD Mono', monospace",
+                    fontSize: '10px',
+                    letterSpacing: '0.12em',
+                    color: '#10B981',
+                    marginBottom: '16px',
+                  }}
+                >
+                  ✓ YOUR STRENGTHS
                 </div>
-              ))}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {brandScore.topStrengths.slice(0, 3).map((s, i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.5 + i * 0.1 }}
+                      style={{
+                        display: 'flex',
+                        gap: '10px',
+                        fontSize: '14px',
+                        lineHeight: 1.5,
+                      }}
+                    >
+                      <span style={{ color: '#10B981', flexShrink: 0 }}>+</span>
+                      <span style={{ color: 'rgba(0, 0, 0, 0.7)' }}>{s}</span>
+                    </motion.div>
+                  ))}
+                </div>
+              </motion.div>
+
+              {/* Opportunities */}
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.4 }}
+                style={{
+                  padding: '24px',
+                  background: 'rgba(245, 158, 11, 0.04)',
+                  border: '1px solid rgba(245, 158, 11, 0.15)',
+                  borderRadius: '8px',
+                }}
+              >
+                <div
+                  style={{
+                    fontFamily: "'VCR OSD Mono', monospace",
+                    fontSize: '10px',
+                    letterSpacing: '0.12em',
+                    color: '#F59E0B',
+                    marginBottom: '16px',
+                  }}
+                >
+                  → GROWTH OPPORTUNITIES
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {brandScore.topImprovements.slice(0, 3).map((s, i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0, x: 10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.6 + i * 0.1 }}
+                      style={{
+                        display: 'flex',
+                        gap: '10px',
+                        fontSize: '14px',
+                        lineHeight: 1.5,
+                      }}
+                    >
+                      <span style={{ color: '#F59E0B', flexShrink: 0 }}>→</span>
+                      <span style={{ color: 'rgba(0, 0, 0, 0.7)' }}>{s}</span>
+                    </motion.div>
+                  ))}
+                </div>
+              </motion.div>
             </div>
-          </div>
-        </div>
-      </div>
-    </WalkthroughSection>
+
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1 }}
+              style={{
+                fontSize: '15px',
+                color: 'rgba(0, 0, 0, 0.6)',
+                textAlign: 'center',
+                maxWidth: '450px',
+                marginBottom: '24px',
+              }}
+            >
+              Next, I'll show you your complete Brand DNA — the patterns and keywords that define your unique voice.
+            </motion.p>
+
+            <motion.button
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1.2 }}
+              onClick={() => onComplete?.()}
+              style={{
+                padding: '16px 32px',
+                background: '#0047FF',
+                border: 'none',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                transition: 'background 0.2s ease',
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.background = '#0038CC'}
+              onMouseLeave={(e) => e.currentTarget.style.background = '#0047FF'}
+            >
+              <span
+                style={{
+                  fontFamily: "'VCR OSD Mono', monospace",
+                  fontSize: '11px',
+                  letterSpacing: '0.12em',
+                  color: '#fff',
+                }}
+              >
+                REVEAL MY BRAND DNA
+              </span>
+            </motion.button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </section>
   );
 }

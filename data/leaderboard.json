@@ -2,17 +2,17 @@
   {
     "username": "banditxbt",
     "displayName": "banditxbt",
-    "score": 77,
+    "score": 84,
     "profileImage": "",
-    "timestamp": 1772505131488,
+    "timestamp": 1773118959839,
     "isCrypto": false
   },
   {
     "username": "BawsaXBT",
     "displayName": "BawsaXBT",
-    "score": 80,
+    "score": 78,
     "profileImage": "",
-    "timestamp": 1772505694834,
+    "timestamp": 1773114495634,
     "isCrypto": false
   },
   {
@@ -26,9 +26,9 @@
   {
     "username": "elonmusk",
     "displayName": "elonmusk",
-    "score": 95,
+    "score": 94,
     "profileImage": "",
-    "timestamp": 1772245896397,
+    "timestamp": 1773116747499,
     "isCrypto": false
   },
   {
@@ -50,9 +50,9 @@
   {
     "username": "AndrewAsksHow",
     "displayName": "AndrewAsksHow",
-    "score": 83,
+    "score": 84,
     "profileImage": "",
-    "timestamp": 1768343669609,
+    "timestamp": 1773122322888,
     "isCrypto": false
   },
   {
@@ -205,6 +205,14 @@
     "score": 33,
     "profileImage": "",
     "timestamp": 1769051373689,
+    "isCrypto": false
+  },
+  {
+    "username": "Xeer",
+    "displayName": "Xeer",
+    "score": 79,
+    "profileImage": "",
+    "timestamp": 1773125366748,
     "isCrypto": false
   }
 ]

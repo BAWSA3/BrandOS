@@ -70,33 +70,6 @@ function detectIssues(
     });
   }
 
-  // Bio issues
-  const bioLength = profile.description?.length || 0;
-  if (bioLength < 80) {
-    issues.push({
-      title: 'Bio Underutilized',
-      severity: bioLength < 40 ? 'critical' : 'warning',
-      metric: `${bioLength}/160 chars`,
-      description: 'Your bio is too short to effectively communicate your value proposition.',
-      fix: 'Expand your bio with: who you are, what you post about, and a clear call-to-action.',
-      impact: bioLength < 40 ? 12 : 8,
-      priority: bioLength < 40 ? 1 : 2,
-    });
-  }
-
-  // Missing link
-  if (!profile.url) {
-    issues.push({
-      title: 'No Website Link',
-      severity: 'warning',
-      metric: 'Missing',
-      description: 'You are missing an opportunity to drive traffic from your profile.',
-      fix: 'Add a link to your website, newsletter, or featured content.',
-      impact: 5,
-      priority: 3,
-    });
-  }
-
   // Low phase scores
   const phases = [
     { name: 'Define', score: brandScore.phases.define.score },
@@ -114,11 +87,11 @@ function detectIssues(
         description: `Your ${phase.name.toLowerCase()} phase is underperforming.`,
         fix:
           phase.name === 'Define'
-            ? 'Clarify your brand identity with a stronger bio and consistent visual style.'
+            ? 'Clarify your brand identity through focused content themes and consistent voice.'
             : phase.name === 'Check'
             ? 'Improve consistency in your posting frequency and voice.'
             : phase.name === 'Generate'
-            ? 'Complete your profile and create more engaging content.'
+            ? 'Increase your content output and experiment with engaging formats.'
             : 'Focus on growth tactics and engagement optimization.',
         impact: phase.score < 30 ? 10 : 6,
         priority: phase.score < 30 ? 2 : 3,

@@ -27,7 +27,7 @@ export default function WalkthroughProgress({
       <motion.div
         className="hidden md:block fixed top-0 left-0 right-0 h-1 z-50 origin-left"
         style={{
-          background: 'linear-gradient(90deg, #D4A574, #E8C49A)',
+          background: 'linear-gradient(90deg, #0047FF, #4B7BFF)',
           scaleX,
         }}
       />
@@ -47,8 +47,8 @@ export default function WalkthroughProgress({
                 fontFamily: "'VCR OSD Mono', monospace",
                 fontSize: '10px',
                 letterSpacing: '0.05em',
-                background: 'rgba(255, 255, 255, 0.1)',
-                color: 'rgba(255, 255, 255, 0.7)',
+                background: 'rgba(0, 0, 0, 0.05)',
+                color: 'rgba(0, 0, 0, 0.7)',
                 backdropFilter: 'blur(8px)',
               }}
             >
@@ -61,15 +61,15 @@ export default function WalkthroughProgress({
                 scale: activeIndex === index ? 1.2 : 1,
                 backgroundColor:
                   activeIndex === index
-                    ? '#D4A574'
+                    ? '#0047FF'
                     : index < activeIndex
-                    ? 'rgba(212, 165, 116, 0.5)'
-                    : 'rgba(255, 255, 255, 0.2)',
+                    ? 'rgba(0, 71, 255, 0.5)'
+                    : 'rgba(0, 0, 0, 0.15)',
               }}
               transition={{ duration: 0.2 }}
               className="w-2.5 h-2.5 rounded-full cursor-pointer"
               style={{
-                boxShadow: activeIndex === index ? '0 0 12px rgba(212, 165, 116, 0.6)' : 'none',
+                boxShadow: activeIndex === index ? '0 0 12px rgba(0, 71, 255, 0.5)' : 'none',
               }}
             />
 
@@ -80,8 +80,8 @@ export default function WalkthroughProgress({
                 style={{
                   background:
                     index < activeIndex
-                      ? 'rgba(212, 165, 116, 0.4)'
-                      : 'rgba(255, 255, 255, 0.1)',
+                      ? 'rgba(0, 71, 255, 0.4)'
+                      : 'rgba(0, 0, 0, 0.1)',
                 }}
               />
             )}
@@ -95,8 +95,8 @@ export default function WalkthroughProgress({
             fontFamily: "'VCR OSD Mono', monospace",
             fontSize: '9px',
             letterSpacing: '0.1em',
-            color: '#D4A574',
-            background: 'rgba(212, 165, 116, 0.1)',
+            color: '#0047FF',
+            background: 'rgba(0, 71, 255, 0.08)',
           }}
         >
           {activeIndex + 1}/{sections.length}
@@ -104,14 +104,14 @@ export default function WalkthroughProgress({
       </div>
 
       {/* Mobile - Bottom progress bar */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 px-4 py-3 bg-[#050505]/90 backdrop-blur-lg border-t border-white/10">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 px-4 py-3 bg-white/95 backdrop-blur-lg border-t border-black/10">
         <div className="flex items-center justify-between mb-2">
           <span
             style={{
               fontFamily: "'VCR OSD Mono', monospace",
               fontSize: '10px',
               letterSpacing: '0.1em',
-              color: 'rgba(255, 255, 255, 0.5)',
+              color: 'rgba(0, 0, 0, 0.5)',
             }}
           >
             {sections[activeIndex]}
@@ -121,7 +121,7 @@ export default function WalkthroughProgress({
               fontFamily: "'VCR OSD Mono', monospace",
               fontSize: '10px',
               letterSpacing: '0.1em',
-              color: '#D4A574',
+              color: '#0047FF',
             }}
           >
             {activeIndex + 1}/{sections.length}
@@ -129,11 +129,11 @@ export default function WalkthroughProgress({
         </div>
 
         {/* Progress bar - scroll-linked */}
-        <div className="h-1 bg-white/10 rounded-full overflow-hidden">
+        <div className="h-1 bg-black/10 rounded-full overflow-hidden">
           <motion.div
             className="h-full rounded-full origin-left"
             style={{
-              background: 'linear-gradient(90deg, #D4A574, #E8C49A)',
+              background: 'linear-gradient(90deg, #0047FF, #4B7BFF)',
               scaleX,
             }}
           />
@@ -152,10 +152,10 @@ export default function WalkthroughProgress({
                 style={{
                   backgroundColor:
                     activeIndex === index
-                      ? '#D4A574'
+                      ? '#0047FF'
                       : index < activeIndex
-                      ? 'rgba(212, 165, 116, 0.5)'
-                      : 'rgba(255, 255, 255, 0.2)',
+                      ? 'rgba(0, 71, 255, 0.5)'
+                      : 'rgba(0, 0, 0, 0.15)',
                 }}
               />
             </button>

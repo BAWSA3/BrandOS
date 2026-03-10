@@ -90,14 +90,14 @@ export default function ScoreWalkthrough({ score, phases, summary, theme, parall
   const scoreDiff = score - AVERAGE_SCORES.overall;
   const scoreDiffText = scoreDiff >= 0 ? `+${scoreDiff}` : `${scoreDiff}`;
 
-  const howWeCalculated = `Composite of Define (${phases.define.score}) for identity clarity, Check (${phases.check.score}) for consistency, Generate (${phases.generate.score}) for profile completeness, and Scale (${phases.scale.score}) for growth readiness. Weighted equally across all dimensions.`;
+  const howWeCalculated = `Composite of Define (${phases.define.score}) for identity clarity, Check (${phases.check.score}) for consistency, Generate (${phases.generate.score}) for content quality & output, and Scale (${phases.scale.score}) for growth readiness. Weighted equally across all dimensions.`;
 
   const whyItMatters = `${getScoreTier(score)} Creators with scores above 70 see 2-3x better engagement rates. Your strongest area is ${highestPhase.name} (${highestPhase.score}).`;
 
   const whatYouCanDo = [
     `Focus on your ${lowestPhase.name} score (${lowestPhase.score}) - this is your biggest opportunity for improvement.`,
     score < 70
-      ? 'Optimize your profile bio and visual consistency to boost your Define score.'
+      ? 'Focus your content on clear themes and maintain a consistent voice to boost your Define score.'
       : 'Maintain your strong foundation while experimenting with new content formats.',
     'Use the detailed breakdown in your dashboard to target specific metrics.',
   ];
@@ -366,9 +366,9 @@ export default function ScoreWalkthrough({ score, phases, summary, theme, parall
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {[
-              { name: 'DEFINE', score: phases.define.score, avg: AVERAGE_SCORES.define, desc: 'Identity clarity & recognition' },
+              { name: 'DEFINE', score: phases.define.score, avg: AVERAGE_SCORES.define, desc: 'Content identity & clarity' },
               { name: 'CHECK', score: phases.check.score, avg: AVERAGE_SCORES.check, desc: 'Consistency & coherence' },
-              { name: 'GENERATE', score: phases.generate.score, avg: AVERAGE_SCORES.generate, desc: 'Profile completeness' },
+              { name: 'GENERATE', score: phases.generate.score, avg: AVERAGE_SCORES.generate, desc: 'Content quality & output' },
               { name: 'SCALE', score: phases.scale.score, avg: AVERAGE_SCORES.scale, desc: 'Growth readiness' },
             ].map((phase, index) => {
               const diff = phase.score - phase.avg;

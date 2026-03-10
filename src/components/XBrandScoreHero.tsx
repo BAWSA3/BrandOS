@@ -10,6 +10,7 @@ import DNAWalkthrough from './DNAWalkthrough';
 import BrandOSDashboard, { BrandOSDashboardData } from './BrandOSDashboard';
 import BrandIssuesSection from './BrandIssuesSection';
 import { SaveResultsPrompt } from './SaveResultsPrompt';
+import SignupPrompt from './SignupPrompt';
 import { useAuth } from '@/hooks/useAuth';
 import { domToPng } from 'modern-screenshot';
 import { AuthenticityAnalysis, ActivityAnalysis } from '@/lib/gemini';
@@ -18,7 +19,19 @@ import DemoModeControls from './DemoModeControls';
 import { AttestScoreButton } from '@/components/onchain';
 import dynamic from 'next/dynamic';
 import { AsciiDNAHero } from '@/components/ascii-dna';
-import { PixelProgressBar, PixelPhaseCard, PixelConfetti } from '@/components/pixel-world';
+import TypeScriptInterfaceBg from '@/components/backgrounds/TypeScriptInterfaceBg';
+import SystemLogsBg from '@/components/backgrounds/SystemLogsBg';
+import HybridCodeBg from '@/components/backgrounds/HybridCodeBg';
+import { PixelConfetti } from '@/components/pixel-world';
+import { TerminalProgressBar, TerminalPhaseCard } from '@/components/terminal';
+
+// Background style options for easy switching
+type BgStyle = 'ascii-dna' | 'typescript' | 'system-logs' | 'hybrid';
+const ACTIVE_BG: BgStyle = 'hybrid'; // Change this to preview different backgrounds
+
+// Reveal theme options - 'light' for full consistency, 'dark' for dramatic payoff
+type RevealTheme = 'light' | 'dark';
+const REVEAL_THEME: RevealTheme = 'dark'; // Toggle to compare light vs dark reveal
 
 const DNAJourneyScene = dynamic(() => import('./DNAJourneyScene'), {
   ssr: false,
@@ -568,6 +581,90 @@ function ScoreGauge({ score, isVisible, theme }: { score: number; isVisible: boo
 // ============================================================================
 // Typewriter Placeholder
 // ============================================================================
+const ROTATING_TAGLINES = [
+  'The AI-powered OS that builds your brand',
+  'Your reputation, decoded',
+  'What are you known for?',
+  'Brand = Reputation',
+  'Content in. Identity out.',
+];
+
+function RotatingTagline() {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [displayed, setDisplayed] = useState('');
+  const [phase, setPhase] = useState<'typing' | 'holding' | 'deleting'>('typing');
+
+  useEffect(() => {
+    const text = ROTATING_TAGLINES[currentIndex];
+
+    if (phase === 'typing') {
+      if (displayed.length < text.length) {
+        const timer = setTimeout(() => {
+          setDisplayed(text.slice(0, displayed.length + 1));
+        }, 50);
+        return () => clearTimeout(timer);
+      } else {
+        const timer = setTimeout(() => setPhase('deleting'), 3500);
+        return () => clearTimeout(timer);
+      }
+    }
+
+    if (phase === 'deleting') {
+      if (displayed.length > 0) {
+        const timer = setTimeout(() => {
+          setDisplayed(displayed.slice(0, -1));
+        }, 30);
+        return () => clearTimeout(timer);
+      } else {
+        setCurrentIndex((currentIndex + 1) % ROTATING_TAGLINES.length);
+        setPhase('typing');
+      }
+    }
+  }, [displayed, phase, currentIndex]);
+
+  // Find the longest tagline to reserve fixed space
+  const longest = ROTATING_TAGLINES.reduce((a, b) => a.length > b.length ? a : b);
+
+  const textStyle: React.CSSProperties = {
+    fontFamily: "'M42 Flight 721', sans-serif",
+    fontSize: 'clamp(0.75rem, 1.8vw, 1.1rem)',
+    letterSpacing: '0.15em',
+    whiteSpace: 'nowrap',
+  };
+
+  return (
+    <div style={{
+      marginTop: '-160px',
+      marginBottom: '48px',
+      textAlign: 'center',
+      position: 'relative',
+    }}>
+      {/* Invisible spacer — holds the width of the longest tagline */}
+      <span style={{ ...textStyle, visibility: 'hidden' }} aria-hidden="true">
+        {longest}|
+      </span>
+      {/* Visible typing text — absolutely positioned so width changes don't shift layout */}
+      <span style={{
+        ...textStyle,
+        color: 'rgba(0,0,0,0.7)',
+        position: 'absolute',
+        left: '50%',
+        top: '50%',
+        transform: 'translate(-50%, -50%)',
+      }}>
+        {displayed}
+        <motion.span
+          animate={{ opacity: [1, 0] }}
+          transition={{ duration: 0.5, repeat: Infinity, repeatType: 'reverse' }}
+          style={{ marginLeft: '2px', fontWeight: 300 }}
+        >
+          |
+        </motion.span>
+      </span>
+    </div>
+  );
+}
+
 function TypewriterPlaceholder({ text }: { text: string }) {
   const [displayed, setDisplayed] = useState('');
   const [showCursor, setShowCursor] = useState(true);
@@ -962,26 +1059,33 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
         overflow: (flowState === 'walkthrough' || flowState === 'journey') ? 'visible' : 'hidden',
       }}
     >
-      {/* ASCII DNA Helix Background — visible during input state */}
+      {/* Background — visible during input and journey states */}
       <motion.div
         initial={{ opacity: 1 }}
-        animate={{ opacity: flowState === 'input' ? 1 : 0 }}
+        animate={{ opacity: (flowState === 'input' || flowState === 'journey') ? 1 : 0 }}
         transition={{ duration: 0.8 }}
         style={{
           position: 'absolute',
           inset: 0,
           zIndex: 0,
+          background: '#ffffff',
         }}
       >
-        <AsciiDNAHero backgroundColor="#ffffff" textColor="#000000" />
+        {ACTIVE_BG === 'ascii-dna' && (
+          <AsciiDNAHero backgroundColor="#ffffff" textColor="#000000" />
+        )}
+        {ACTIVE_BG === 'typescript' && <TypeScriptInterfaceBg />}
+        {ACTIVE_BG === 'system-logs' && <SystemLogsBg />}
+        {ACTIVE_BG === 'hybrid' && <HybridCodeBg />}
       </motion.div>
 
-      {/* DNA Background - Hidden during input, visible during journey, hidden during reveal */}
+      {/* DNA Background - Hidden during all states (replaced by code aesthetic) */}
       <div
         style={{
-          opacity: flowState === 'input' ? 0 : flowState === 'journey' ? 1 : flowState === 'reveal' ? 0 : 0.6,
+          opacity: 0,
           transition: 'opacity 0.8s ease',
           pointerEvents: 'none',
+          display: 'none',
         }}
       >
         <DNAJourneyScene
@@ -995,7 +1099,7 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
       {/* Journey Progress */}
       <AnimatePresence>
         {flowState === 'journey' && (
-          <PixelProgressBar
+          <TerminalProgressBar
             currentPhase={currentPhase}
             phaseProgress={itemProgress / phaseConfig[currentPhase - 1]?.items.length || 0}
             theme={theme}
@@ -1154,19 +1258,8 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
                 />
               </motion.div>
 
-              {/* Tagline — positioned between logo and CTA */}
-              <span style={{
-                fontFamily: "'M42 Flight 721', sans-serif",
-                fontSize: 'clamp(0.75rem, 1.8vw, 1.1rem)',
-                color: 'rgba(0,0,0,0.7)',
-                letterSpacing: '0.15em',
-                marginTop: '-160px',
-                marginBottom: '48px',
-                textAlign: 'center',
-                whiteSpace: 'nowrap',
-              }}>
-                The AI-powered OS that builds your brand
-              </span>
+              {/* Tagline — rotating text with typing effect */}
+              <RotatingTagline />
 
               {/* Input Form */}
               <motion.form
@@ -1297,7 +1390,7 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
           </motion.div>
         )}
 
-        {/* JOURNEY STATE - Split screen layout (responsive) */}
+        {/* JOURNEY STATE - Centered terminal layout with code aesthetic */}
         {flowState === 'journey' && (
           <motion.div
             key="journey"
@@ -1305,26 +1398,18 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.5 }}
-            className="flex flex-col md:flex-row w-full min-h-screen md:h-screen relative z-[1]"
+            className="flex w-full min-h-screen relative z-[1] items-center justify-center"
+            style={{ background: '#ffffff' }}
           >
-            {/* DNA takes left portion - hidden on mobile, 60% on desktop */}
-            <div className="hidden md:block md:w-[60%] h-full relative" />
-
-            {/* Analysis panel - Full width on mobile, 40% on desktop */}
+            {/* Analysis panel - Centered with terminal styling, extra top padding for fixed progress bar */}
             <motion.div
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
-              className="w-full md:w-[40%] min-h-screen md:h-full flex flex-col justify-center items-center px-4 py-20 md:px-8 md:py-20"
-              style={{
-                background: theme === 'dark'
-                  ? 'linear-gradient(180deg, rgba(10, 10, 18, 0.95) 0%, rgba(10, 10, 18, 0.98) 100%)'
-                  : 'linear-gradient(180deg, rgba(20, 20, 30, 0.95) 0%, rgba(20, 20, 30, 0.98) 100%)',
-                backdropFilter: 'blur(12px)',
-              }}
+              className="w-full max-w-[640px] flex flex-col justify-center items-center px-4 pt-36 pb-12 md:px-8"
             >
               <AnimatePresence mode="wait">
-                <PixelPhaseCard
+                <TerminalPhaseCard
                   key={currentPhase}
                   phase={phaseConfig[currentPhase - 1]}
                   isActive={true}
@@ -1372,7 +1457,7 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
               minHeight: '100vh',
               position: 'relative',
               zIndex: 10,
-              background: '#050505',
+              background: REVEAL_THEME === 'light' ? '#ffffff' : '#050505',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
@@ -1382,7 +1467,7 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
             <div
               id="brandos-dashboard-capture"
               style={{
-                background: '#050505',
+                background: REVEAL_THEME === 'light' ? '#ffffff' : '#050505',
                 padding: '24px',
                 borderRadius: '8px',
               }}
@@ -1422,6 +1507,7 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
                 } as BrandOSDashboardData}
                 authenticity={accountAuthenticity}
                 activity={accountActivity}
+                revealTheme={REVEAL_THEME}
                 onCopyToClipboard={async () => {
                   const element = document.getElementById('brandos-dashboard-capture');
                   if (!element) return;
@@ -1431,7 +1517,7 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
                   element.style.width = '1200px';
                   element.style.minWidth = '1200px';
                   const dataUrl = await domToPng(element, {
-                    backgroundColor: '#050505',
+                    backgroundColor: REVEAL_THEME === 'light' ? '#ffffff' : '#050505',
                     scale: 2,
                     quality: 1,
                     width: 1200,
@@ -1454,7 +1540,7 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
                   element.style.width = '1200px';
                   element.style.minWidth = '1200px';
                   const dataUrl = await domToPng(element, {
-                    backgroundColor: '#050505',
+                    backgroundColor: REVEAL_THEME === 'light' ? '#ffffff' : '#050505',
                     scale: 2,
                     quality: 1,
                     width: 1200,
@@ -1505,163 +1591,20 @@ Get yours → mybrandos.app`;
             </motion.div>
 
             {/* Save Results Prompt - Show for unauthenticated users */}
-            {!user && !isAuthLoading && showSavePrompt && (
-              <SaveResultsPrompt
-                inviteCode={pendingInviteCode}
-                onDismiss={() => setShowSavePrompt(false)}
-              />
-            )}
-
-            {/* Dashboard CTA - Navigate to the real dashboard */}
+            {/* Sign Up CTA */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4, duration: 0.5 }}
-              className="w-full max-w-[600px] mt-16 flex flex-col items-center"
+              className="w-full flex flex-col items-center mt-16"
             >
-              {/* CTA Card */}
-              <div
-                style={{
-                  width: '100%',
-                  padding: '48px 40px',
-                  borderRadius: '24px',
-                  background: 'rgba(26, 26, 26, 0.6)',
-                  border: '1px solid rgba(10, 132, 255, 0.15)',
-                  backdropFilter: 'blur(10px)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                }}
-              >
-                {/* Decorative line */}
-                <div
-                  style={{
-                    width: '80px',
-                    height: '2px',
-                    background: 'linear-gradient(90deg, transparent, rgba(10, 132, 255, 0.6), transparent)',
-                    marginBottom: '32px',
-                  }}
-                />
-
-                <h3
-                  style={{
-                    fontFamily: "'VCR OSD Mono', monospace",
-                    fontSize: '14px',
-                    letterSpacing: '0.25em',
-                    color: '#0A84FF',
-                    marginBottom: '16px',
-                    textTransform: 'uppercase',
-                  }}
-                >
-                  Your Dashboard Awaits
-                </h3>
-                <p
-                  style={{
-                    fontSize: '17px',
-                    color: 'rgba(255, 255, 255, 0.6)',
-                    marginBottom: '32px',
-                    textAlign: 'center',
-                    maxWidth: '420px',
-                    lineHeight: '1.6',
-                  }}
-                >
-                  Your Brand DNA has been analyzed. Open your personalized command center to check, generate, and scale your brand content.
-                </p>
-
-                <MagneticButton
-                  onClick={() => {
-                    // Navigate to the real dashboard — import brand DNA if available
-                    if (generatedBrandDNA && profile) {
-                      // Store the generated DNA so it can be imported on the dashboard
-                      const importData = {
-                        name: generatedBrandDNA.name || profile.name,
-                        colors: {
-                          primary: generatedBrandDNA.colors?.primary || '#000000',
-                          secondary: generatedBrandDNA.colors?.secondary || '#ffffff',
-                          accent: generatedBrandDNA.colors?.accent || '#6366f1',
-                        },
-                        tone: generatedBrandDNA.tone || { minimal: 50, playful: 50, bold: 50, experimental: 30 },
-                        keywords: generatedBrandDNA.keywords || [],
-                        doPatterns: generatedBrandDNA.doPatterns || [],
-                        dontPatterns: generatedBrandDNA.dontPatterns || [],
-                        voiceSamples: generatedBrandDNA.voiceSamples || [],
-                      };
-                      try { sessionStorage.setItem('brandos-import', JSON.stringify(importData)); } catch {}
-                    }
-                    window.location.href = '/app?imported=true';
-                  }}
-                  style={{
-                    fontFamily: "'VCR OSD Mono', monospace",
-                    fontSize: '14px',
-                    letterSpacing: '0.12em',
-                    color: '#FFFFFF',
-                    background: 'linear-gradient(135deg, #0A84FF 0%, #0060DF 100%)',
-                    border: 'none',
-                    padding: '18px 40px',
-                    borderRadius: '14px',
-                    cursor: 'pointer',
-                    boxShadow: '0 10px 40px -10px rgba(10, 132, 255, 0.4)',
-                  }}
-                >
-                  OPEN YOUR DASHBOARD →
-                </MagneticButton>
-
-                {/* Secondary: share/compare options */}
-                <div className="flex gap-3 mt-6">
-                  <motion.button
-                    onClick={async () => {
-                      const shareUrl = `${window.location.origin}/score/${profile.username}`;
-                      try {
-                        await navigator.clipboard.writeText(shareUrl);
-                        const btn = document.activeElement as HTMLButtonElement;
-                        const originalText = btn.innerText;
-                        btn.innerText = '✓ COPIED!';
-                        setTimeout(() => { btn.innerText = originalText; }, 2000);
-                      } catch { window.open(shareUrl, '_blank'); }
-                    }}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    style={{
-                      fontFamily: "'VCR OSD Mono', monospace",
-                      fontSize: '11px',
-                      letterSpacing: '0.08em',
-                      color: 'rgba(255,255,255,0.4)',
-                      background: 'transparent',
-                      border: '1px solid rgba(255,255,255,0.12)',
-                      cursor: 'pointer',
-                      padding: '10px 16px',
-                      borderRadius: '8px',
-                    }}
-                  >
-                    SHARE SCORE
-                  </motion.button>
-                  <motion.button
-                    onClick={() => {
-                      setFlowState('input');
-                      setUsername('');
-                      setProfile(null);
-                      setBrandScore(null);
-                      setGeneratedBrandDNA(null);
-                      setShowConfetti(false);
-                    }}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    style={{
-                      fontFamily: "'VCR OSD Mono', monospace",
-                      fontSize: '11px',
-                      letterSpacing: '0.08em',
-                      color: 'rgba(255,255,255,0.4)',
-                      background: 'transparent',
-                      border: '1px solid rgba(255,255,255,0.12)',
-                      cursor: 'pointer',
-                      padding: '10px 16px',
-                      borderRadius: '8px',
-                    }}
-                  >
-                    ANALYZE ANOTHER
-                  </motion.button>
-                </div>
-              </div>
+              <SignupPrompt
+                xUsername={profile.username}
+                brandScore={brandScore.overallScore}
+                archetype={generatedBrandDNA.archetype}
+                archetypeEmoji={generatedBrandDNA.archetypeEmoji}
+                inviteCode={pendingInviteCode}
+              />
 
               {/* Bottom decorative element */}
               <div

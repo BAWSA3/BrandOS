@@ -197,6 +197,18 @@ export const agentRegistry: Record<AgentName, AgentCapability> = {
       'audience-targeting',
     ],
   },
+  intelligence: {
+    name: 'intelligence',
+    description: 'Content intelligence system. Scans niches for viral patterns, tracks performance, runs gap analysis, and generates content ideas matched to viral patterns in the user\'s voice.',
+    capabilities: [
+      'market-scanning',
+      'performance-tracking',
+      'gap-analysis',
+      'intelligent-content-generation',
+      'viral-pattern-extraction',
+      'niche-monitoring',
+    ],
+  },
 };
 
 /**

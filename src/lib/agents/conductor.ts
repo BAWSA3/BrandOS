@@ -80,6 +80,24 @@ const routingPatterns: Record<AgentName, {
       /content\s+(ideas?|topics?)\s+(from|based)/i,
     ],
   },
+  intelligence: {
+    keywords: [
+      'viral', 'benchmark', 'gap', 'scanner', 'market scan', 'what\'s working',
+      'competitors', 'content intelligence', 'niche', 'viral patterns',
+      'gap analysis', 'performance tracker', 'intelligence feed', 'scan my niche',
+      'viral score', 'content ideas', 'what should i post', 'what\'s trending',
+    ],
+    patterns: [
+      /scan\s+(my\s+)?niche/i,
+      /viral\s+(patterns?|benchmarks?|content)/i,
+      /gap\s+analysis/i,
+      /content\s+intelligence/i,
+      /what('s|\s+is)\s+(working|trending|viral)\s+in/i,
+      /run\s+(the\s+)?intelligence/i,
+      /market\s+scan/i,
+      /performance\s+(track|sync|snapshot)/i,
+    ],
+  },
   authority: {
     keywords: [
       'authority', 'positioning', 'thought leadership', 'expert', 'position',
@@ -119,6 +137,7 @@ export function quickRoute(message: string): RoutingDecision | null {
     analytics: 0,
     research: 0,
     authority: 0,
+    intelligence: 0,
   };
 
   // Score based on keywords
@@ -187,6 +206,7 @@ AVAILABLE AGENTS:
 3. analytics - Performance Analyst: Analyzes metrics, identifies patterns, provides optimization recommendations
 4. research - Trends Researcher: Aggregates TCG/collectibles news from social media, Reddit, YouTube. Finds trending topics for content creation.
 5. authority - Brand Authority Expert: Creates thought leadership, educational content, handles objections, competitive positioning for Relique. Positions the brand as a trusted expert in RWA collectibles.
+6. intelligence - Content Intelligence: Scans niche for viral content, tracks performance, runs gap analysis, generates content ideas based on viral patterns and gaps.
 
 USER MESSAGE:
 "${message}"
@@ -210,7 +230,7 @@ Which agent is best suited? Return ONLY valid JSON:
     if (jsonMatch) {
       const decision = JSON.parse(jsonMatch[0]) as RoutingDecision;
       // Validate agent name
-      if (['campaign', 'content', 'analytics', 'research', 'authority'].includes(decision.agent)) {
+      if (['campaign', 'content', 'analytics', 'research', 'authority', 'intelligence'].includes(decision.agent)) {
         return decision;
       }
     }
@@ -275,6 +295,14 @@ function getSuggestedAction(agent: AgentName, message: string): string {
     if (lowerMessage.includes('content') && lowerMessage.includes('trend')) return 'research_to_content';
     if (lowerMessage.includes('summary')) return 'quick_summary';
     return 'aggregate_trends';
+  }
+
+  if (agent === 'intelligence') {
+    if (lowerMessage.includes('scan')) return 'market_scan';
+    if (lowerMessage.includes('gap')) return 'gap_analysis';
+    if (lowerMessage.includes('performance') || lowerMessage.includes('track')) return 'performance_sync';
+    if (lowerMessage.includes('viral') || lowerMessage.includes('benchmark')) return 'view_benchmarks';
+    return 'run_intelligence';
   }
 
   if (agent === 'authority') {

@@ -3,6 +3,22 @@
     {
       "path": "/api/cron/send-emails",
       "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/cron/market-scan",
+      "schedule": "0 */6 * * *"
+    },
+    {
+      "path": "/api/cron/performance-sync",
+      "schedule": "0 */4 * * *"
+    },
+    {
+      "path": "/api/cron/gap-analysis",
+      "schedule": "0 8 * * *"
+    },
+    {
+      "path": "/api/cron/content-intelligence",
+      "schedule": "0 10 * * *"
     }
   ]
 }

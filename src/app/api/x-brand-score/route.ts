@@ -14,22 +14,22 @@ const getMockBrandScore = (profile: XProfileData) => ({
       score: 92,
       insights: [
         "Strong personal brand identity with memorable name",
-        "Bio effectively communicates philosophical approach",
-        "Clear positioning as a thought leader"
+        "Content consistently reflects philosophical approach",
+        "Clear positioning as a thought leader through posts"
       ]
     },
     check: {
       score: 88,
       insights: [
         "Username and display name are perfectly aligned",
-        "Consistent minimalist brand voice",
+        "Consistent minimalist brand voice across content",
         "High credibility through follower ratio"
       ]
     },
     generate: {
       score: 82,
       insights: [
-        "Intentionally minimal bio shows brand confidence",
+        "Content output demonstrates brand confidence",
         "Profile image present and professional",
         "No CTA needed at this influence level"
       ]
@@ -51,9 +51,9 @@ const getMockBrandScore = (profile: XProfileData) => ({
   topImprovements: [
     "Consider adding a link to latest project",
     "Verification badge would add extra credibility",
-    "Could expand bio slightly for new visitors"
+    "Experiment with thread-based content for deeper engagement"
   ],
-  summary: `@${profile.username} represents an elite-tier personal brand with exceptional reach and influence. The minimalist approach to their bio demonstrates brand confidence that comes with their level of recognition. Their follower-to-following ratio signals strong thought leadership authority.`,
+  summary: `@${profile.username} represents an elite-tier personal brand with exceptional reach and influence. Their content consistently reflects strong brand positioning. Their follower-to-following ratio signals strong thought leadership authority.`,
   archetype: {
     primary: "The Prophet",
     emoji: "🔮",
