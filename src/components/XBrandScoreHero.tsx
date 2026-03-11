@@ -1578,6 +1578,17 @@ Get yours → mybrandos.app`;
                 const potential = Math.min(100, current + Math.round((100 - current) * 0.6));
                 return (
                   <div style={{ width: '100%', maxWidth: '480px', textAlign: 'center' }}>
+                    {/* Headline */}
+                    <h3 style={{
+                      fontFamily: "'VCR OSD Mono', monospace",
+                      fontSize: '18px',
+                      letterSpacing: '0.1em',
+                      color: '#fff',
+                      marginBottom: '16px',
+                    }}>
+                      Your brand can be better.
+                    </h3>
+
                     {/* Score comparison text */}
                     <div style={{ marginBottom: '20px' }}>
                       <p style={{
