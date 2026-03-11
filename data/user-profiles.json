@@ -385,10 +385,6 @@
       "scores": [
         {
           "value": 79,
-          "scannedAt": 1769073849933
-        },
-        {
-          "value": 79,
           "scannedAt": 1769074146627
         },
         {
@@ -462,13 +458,17 @@
         {
           "value": 78,
           "scannedAt": 1773128294957
+        },
+        {
+          "value": 79,
+          "scannedAt": 1773130159626
         }
       ],
       "highestScore": 87,
-      "currentScore": 78,
+      "currentScore": 79,
       "firstScannedAt": 1768904843172,
-      "lastScannedAt": 1773128294957,
-      "totalScans": 25
+      "lastScannedAt": 1773130159626,
+      "totalScans": 26
     },
     "web3pingu": {
       "username": "web3pingu",
@@ -829,7 +829,61 @@
       "firstScannedAt": 1773125366660,
       "lastScannedAt": 1773125366660,
       "totalScans": 1
+    },
+    "waleswoosh": {
+      "username": "waleswoosh",
+      "displayName": "wale.moca 🐳",
+      "archetype": {
+        "primary": "The Prophet",
+        "emoji": "🔮",
+        "tagline": "Web3 Insight Alchemist",
+        "description": "Their focus on predicting and interpreting trends in web3, coupled with significant reach, aligns with 'The Prophet' archetype, making them a sought-after voice for understanding the future.",
+        "strengths": [
+          "Visionary",
+          "Insightful"
+        ],
+        "growthTip": "Consider leading a public educational initiative, such as a weekly livestream or newsletter, to capitalize on your 'Prophet' status and grow influence.",
+        "assignedAt": 1773232929754
+      },
+      "archetypeHistory": [
+        {
+          "archetype": {
+            "primary": "The Prophet",
+            "emoji": "🔮",
+            "tagline": "Web3 Insight Alchemist",
+            "description": "Their focus on predicting and interpreting trends in web3, coupled with significant reach, aligns with 'The Prophet' archetype, making them a sought-after voice for understanding the future.",
+            "strengths": [
+              "Visionary",
+              "Insightful"
+            ],
+            "growthTip": "Consider leading a public educational initiative, such as a weekly livestream or newsletter, to capitalize on your 'Prophet' status and grow influence.",
+            "assignedAt": 1773232929754
+          },
+          "reason": "initial",
+          "score": 88,
+          "timestamp": 1773232929754
+        }
+      ],
+      "scores": [
+        {
+          "value": 88,
+          "scannedAt": 1773232929754
+        },
+        {
+          "value": 81,
+          "scannedAt": 1773233035911
+        },
+        {
+          "value": 78,
+          "scannedAt": 1773233088361
+        }
+      ],
+      "highestScore": 88,
+      "currentScore": 78,
+      "firstScannedAt": 1773232929754,
+      "lastScannedAt": 1773233088361,
+      "totalScans": 3
     }
   },
-  "lastUpdated": 1773128294958
+  "lastUpdated": 1773233088361
 }
