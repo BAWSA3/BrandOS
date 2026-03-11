@@ -13,26 +13,31 @@ import posthog from 'posthog-js';
 // Types
 // =============================================================================
 
-export type BetaEvent = 
+export type BetaEvent =
   // Onboarding & Setup
   | 'beta_onboarding_started'
   | 'beta_onboarding_completed'
   | 'beta_onboarding_skipped'
   | 'beta_template_selected'
   | 'beta_brand_imported'
-  
+
   // Core Features
   | 'beta_content_checked'
   | 'beta_content_generated'
   | 'beta_brand_exported'
   | 'beta_brand_shared'
-  
+
+  // Content Engine Sessions
+  | 'beta_content_engine_session_start'
+  | 'beta_content_engine_session_end'
+  | 'beta_invite_sent'
+
   // Engagement
   | 'beta_feedback_opened'
   | 'beta_feedback_submitted'
   | 'beta_phase_visited'
   | 'beta_feature_used'
-  
+
   // Errors & Issues
   | 'beta_error_encountered'
   | 'beta_rate_limit_hit';
@@ -117,10 +122,18 @@ export const analytics = {
   featureUsed: (feature: string) => 
     trackBetaEvent('beta_feature_used', { feature }),
 
+  // Content Engine Sessions
+  contentEngineSessionStart: (feature: string) =>
+    trackBetaEvent('beta_content_engine_session_start', { feature }),
+  contentEngineSessionEnd: (feature: string) =>
+    trackBetaEvent('beta_content_engine_session_end', { feature }),
+  inviteSent: (source?: string) =>
+    trackBetaEvent('beta_invite_sent', { source }),
+
   // Errors
-  errorEncountered: (errorType: string, errorMessage?: string) => 
+  errorEncountered: (errorType: string, errorMessage?: string) =>
     trackBetaEvent('beta_error_encountered', { errorType, errorMessage }),
-  rateLimitHit: (endpoint: string) => 
+  rateLimitHit: (endpoint: string) =>
     trackBetaEvent('beta_rate_limit_hit', { endpoint }),
 };
 

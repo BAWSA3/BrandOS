@@ -30,7 +30,14 @@ import {
   generateContentBatch,
   adaptContentForPlatform,
   generateContentIdeas,
+  generateScheduledContent,
 } from './content.agent';
+
+import {
+  ContentEngineConfig,
+  ContentEngineRequest,
+  ContentEngineOutput,
+} from './content-engine.types';
 
 import {
   analyzePerformance,
@@ -97,6 +104,7 @@ export * from './chat.types';
 export * from './conductor';
 export * from './research.types';
 export * from './authority.types';
+export * from './content-engine.types';
 
 // Re-export individual agent functions for direct use
 export {
@@ -108,6 +116,7 @@ export {
   generateContentBatch,
   adaptContentForPlatform,
   generateContentIdeas,
+  generateScheduledContent,
   // Analytics Agent
   analyzePerformance,
   quickPerformanceCheck,
@@ -328,6 +337,18 @@ export class BrandAgents {
     count?: number
   ): Promise<AgentResponse<{ ideas: { platform: Platform; hook: string; angle: string }[] }>> {
     return generateContentIdeas(this.context, topic, platforms, count);
+  }
+
+  // ===== CONTENT ENGINE METHODS =====
+
+  /**
+   * Generate content using the scheduled content engine (day + slot + CTA rotation)
+   */
+  async createScheduledContent(
+    engineConfig: ContentEngineConfig,
+    request: ContentEngineRequest
+  ): Promise<AgentResponse<ContentEngineOutput>> {
+    return generateScheduledContent(this.context, engineConfig, request);
   }
 
   // ===== ANALYTICS AGENT METHODS =====

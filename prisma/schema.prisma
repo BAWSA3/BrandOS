@@ -60,6 +60,7 @@ model User {
   platformConnections PlatformConnection[]
   submittedApprovals  ApprovalRequest[]  @relation("SubmittedApprovals")
   reviewedApprovals   ApprovalRequest[]  @relation("ReviewedApprovals")
+  sessions            UserSession[]
 
   @@index([xUsername])
   @@index([stripeCustomerId])
@@ -622,6 +623,21 @@ model GapAnalysis {
 
   @@index([brandId])
   @@index([computedAt])
+}
+
+// ===== USER SESSIONS (time tracking) =====
+
+model UserSession {
+  id         String    @id @default(cuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  feature    String    // "content-engine", "dashboard", "growth-plan"
+  startedAt  DateTime  @default(now())
+  endedAt    DateTime?
+  durationMs Int?
+
+  @@index([userId])
+  @@index([feature])
 }
 
 // ===== ONCHAIN ATTESTATIONS =====

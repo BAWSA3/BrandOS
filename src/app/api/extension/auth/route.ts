@@ -4,20 +4,25 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
+// Specific extension ID — update when published to Chrome Web Store
+const BRANDOS_EXTENSION_ID = process.env.BRANDOS_CHROME_EXTENSION_ID;
+
 const ALLOWED_ORIGINS = [
-  'chrome-extension://*',  // Chrome extensions
   'https://brandos.app',
   'https://www.brandos.app',
   'http://localhost:3000',
 ];
 
 function corsHeaders(origin?: string | null) {
-  // Check if origin matches (support chrome-extension:// prefix)
   const isAllowed = origin && (
     ALLOWED_ORIGINS.includes(origin) ||
-    origin.startsWith('chrome-extension://')
+    // Only allow the specific extension ID, or any in dev
+    (origin.startsWith('chrome-extension://') && (
+      !BRANDOS_EXTENSION_ID ||
+      origin === `chrome-extension://${BRANDOS_EXTENSION_ID}`
+    ))
   );
-  const corsOrigin = isAllowed ? origin : ALLOWED_ORIGINS[1];
+  const corsOrigin = isAllowed ? origin : ALLOWED_ORIGINS[0];
 
   return {
     'Access-Control-Allow-Origin': corsOrigin,

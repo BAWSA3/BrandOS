@@ -1,7 +1,9 @@
+import { useState, useEffect } from 'react';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { BrandDNA, HistoryItem, SafeZone, MemoryEvent, DesignIntentBlock } from './types';
 import { VoiceFingerprint } from './voice-fingerprint';
+import { ContentEngineConfig } from './agents/content-engine.types';
 import { v4 as uuidv4 } from 'uuid';
 
 type Theme = 'light' | 'dark';
@@ -92,7 +94,23 @@ interface BrandStore {
   voiceFingerprints: Record<string, VoiceFingerprint>;
   setVoiceFingerprint: (brandId: string, fp: VoiceFingerprint) => void;
   clearVoiceFingerprint: (brandId: string) => void;
-  
+
+  // Content Engine Configs (per brand)
+  contentEngineConfigs: Record<string, ContentEngineConfig>;
+  setContentEngineConfig: (brandId: string, config: ContentEngineConfig) => void;
+  updateContentEngineConfig: (brandId: string, partial: Partial<ContentEngineConfig>) => void;
+  clearContentEngineConfig: (brandId: string) => void;
+
+  // Generation tracking & referral
+  generationsUsed: number;
+  generationLimit: number;
+  referralCode: string | null;
+  isUnlocked: boolean;
+  incrementGeneration: () => void;
+  unlockUnlimited: () => void;
+  grantBonusGeneration: () => void;
+  initReferralCode: () => string;
+
   // Phase Progress (for guided experience)
   phaseProgress: PhaseProgress;
   completeOnboarding: () => void;
@@ -148,7 +166,14 @@ export const useBrandStore = create<BrandStore>()(
       brandMemory: {},
       designIntents: {},
       voiceFingerprints: {},
-      
+      contentEngineConfigs: {},
+
+      // Generation tracking & referral
+      generationsUsed: 0,
+      generationLimit: 5,
+      referralCode: null,
+      isUnlocked: true,
+
       // Phase progress initial state
       phaseProgress: {
         hasCompletedOnboarding: false,
@@ -193,6 +218,7 @@ export const useBrandStore = create<BrandStore>()(
           const { [id]: _mem, ...restMemory } = state.brandMemory;
           const { [id]: _di, ...restIntents } = state.designIntents;
           const { [id]: _vf, ...restFingerprints } = state.voiceFingerprints;
+          const { [id]: _ce, ...restEngineConfigs } = state.contentEngineConfigs;
           return {
             brands: newBrands,
             currentBrandId: state.currentBrandId === id
@@ -202,6 +228,7 @@ export const useBrandStore = create<BrandStore>()(
             brandMemory: restMemory,
             designIntents: restIntents,
             voiceFingerprints: restFingerprints,
+            contentEngineConfigs: restEngineConfigs,
           };
         }),
       
@@ -368,6 +395,50 @@ export const useBrandStore = create<BrandStore>()(
           return { voiceFingerprints: rest };
         }),
 
+      // Content Engine Configs
+      setContentEngineConfig: (brandId, config) =>
+        set((state) => ({
+          contentEngineConfigs: {
+            ...state.contentEngineConfigs,
+            [brandId]: config,
+          },
+        })),
+
+      updateContentEngineConfig: (brandId, partial) =>
+        set((state) => ({
+          contentEngineConfigs: {
+            ...state.contentEngineConfigs,
+            [brandId]: {
+              ...(state.contentEngineConfigs[brandId] || {}),
+              ...partial,
+            } as ContentEngineConfig,
+          },
+        })),
+
+      clearContentEngineConfig: (brandId) =>
+        set((state) => {
+          const { [brandId]: _, ...rest } = state.contentEngineConfigs;
+          return { contentEngineConfigs: rest };
+        }),
+
+      // Generation tracking & referral
+      incrementGeneration: () =>
+        set((state) => ({ generationsUsed: state.generationsUsed + 1 })),
+
+      unlockUnlimited: () =>
+        set({ isUnlocked: true }),
+
+      grantBonusGeneration: () =>
+        set((state) => ({ generationLimit: state.generationLimit + 1 })),
+
+      initReferralCode: () => {
+        const state = get();
+        if (state.referralCode) return state.referralCode;
+        const code = uuidv4().replace(/-/g, '').slice(0, 8).toUpperCase();
+        set({ referralCode: code });
+        return code;
+      },
+
       // Phase Progress Methods
       completeOnboarding: () =>
         set((state) => ({
@@ -463,11 +534,28 @@ export const useBrandStore = create<BrandStore>()(
         brandMemory: state.brandMemory,
         designIntents: state.designIntents,
         voiceFingerprints: state.voiceFingerprints,
+        // contentEngineConfigs excluded — session-only, resets on refresh
+        generationsUsed: state.generationsUsed,
+        generationLimit: state.generationLimit,
+        referralCode: state.referralCode,
+        isUnlocked: state.isUnlocked,
         phaseProgress: state.phaseProgress,
       }),
     }
   )
 );
+
+// Hydration hook — returns false during SSR/first render, true after Zustand rehydrates from localStorage
+export const useHasHydrated = () => {
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => {
+    const unsub = useBrandStore.persist.onFinishHydration(() => setHydrated(true));
+    // If already hydrated (e.g. fast load), set immediately
+    if (useBrandStore.persist.hasHydrated()) setHydrated(true);
+    return unsub;
+  }, []);
+  return hydrated;
+};
 
 // Helper hook to get current brand
 export const useCurrentBrand = () => {

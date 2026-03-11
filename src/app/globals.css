@@ -994,8 +994,28 @@ code { padding: 2px 6px; }
   caret-color: #0047FF;
 }
 
+/* Content engine slide-in animation */
+@keyframes slideIn {
+  from { opacity: 0; transform: scaleX(0.3); }
+  to { opacity: 1; transform: scaleX(1); }
+}
+
+/* Subtle motion for content engine toggle buttons — 25% effect */
+.btn-engine {
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.btn-engine:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+.btn-engine:active {
+  transform: translateY(0px) scale(0.97);
+  box-shadow: none;
+}
+
 .terminal-input::placeholder {
-  color: rgba(255, 255, 255, 0.2);
+  color: var(--text-quaternary);
+  opacity: 0.5;
   font-family: 'VCR OSD Mono', monospace;
 }
 

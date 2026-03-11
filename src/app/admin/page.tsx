@@ -18,7 +18,9 @@ import {
   Star,
   ChevronDown,
   Trash2,
+  Zap,
 } from "lucide-react";
+import ContentEngineDashboard from "@/components/content-engine/dashboard/ContentEngineDashboard";
 
 // ===== TYPES =====
 
@@ -69,7 +71,7 @@ interface FeedbackStats {
   npsScore: number | null;
 }
 
-type TabType = "invites" | "feedback";
+type TabType = "invites" | "feedback" | "content-engine";
 
 // ===== LOADING FALLBACK =====
 
@@ -477,6 +479,17 @@ function AdminPageContent() {
                 {feedbackStats.new}
               </span>
             )}
+          </button>
+          <button
+            onClick={() => setActiveTab("content-engine")}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+              activeTab === "content-engine"
+                ? "bg-white/10 text-white border border-white/20"
+                : "bg-white/5 text-white/60 border border-transparent hover:bg-white/10"
+            }`}
+          >
+            <Zap className="w-4 h-4" />
+            Content Engine
           </button>
         </div>
 
@@ -925,6 +938,11 @@ function AdminPageContent() {
               )}
             </div>
           </>
+        )}
+
+        {/* ===== CONTENT ENGINE TAB ===== */}
+        {activeTab === "content-engine" && adminKey && (
+          <ContentEngineDashboard adminKey={adminKey} />
         )}
       </div>
     </div>

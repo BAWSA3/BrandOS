@@ -11,6 +11,11 @@ import {
   GeneratedContent,
   ContentBatch
 } from './types';
+import {
+  ContentEngineConfig,
+  ContentEngineRequest,
+  ContentEngineOutput,
+} from './content-engine.types';
 
 // Platform-specific guidelines
 interface PlatformGuidelines {
@@ -510,8 +515,227 @@ Return ONLY valid JSON:
   }
 }
 
+// ===== CONTENT ENGINE (SCHEDULED CONTENT GENERATION) =====
 
+function buildScheduledContentSystemPrompt(
+  brand: BrandDNA,
+  config: ContentEngineConfig,
+  request: ContentEngineRequest,
+  context?: AgentContext
+): string {
+  const daySchedule = config.schedule[request.day];
+  const dayCTA = config.ctaRotation[request.day];
+  const slotConfig = request.slot === 'post1' ? daySchedule.post1 : daySchedule.post2;
+  const ctaType = request.slot === 'post1' ? dayCTA.post1 : dayCTA.post2;
+  const slotLabel = request.slot === 'post1' ? 'Post 1 (Anchor)' : 'Post 2 (Lighter)';
 
+  // Build tone descriptors from brand DNA
+  const toneDescriptors: string[] = [];
+  if (brand.tone.minimal >= 70) toneDescriptors.push('clean and direct');
+  if (brand.tone.minimal <= 30) toneDescriptors.push('rich and detailed');
+  if (brand.tone.playful >= 70) toneDescriptors.push('fun and conversational');
+  if (brand.tone.playful <= 30) toneDescriptors.push('serious and professional');
+  if (brand.tone.bold >= 70) toneDescriptors.push('confident and impactful');
+  if (brand.tone.bold <= 30) toneDescriptors.push('subtle and understated');
+  if (brand.tone.experimental >= 70) toneDescriptors.push('innovative and edgy');
+  if (brand.tone.experimental <= 30) toneDescriptors.push('classic and reliable');
+  const toneStr = toneDescriptors.length > 0 ? toneDescriptors.join(', ') : 'balanced and professional';
 
+  // Engagement context section
+  const eng = config.engagement;
+  const engLines: string[] = [];
+  if (eng.followerCount) engLines.push(`- Current followers: ${eng.followerCount.toLocaleString()}`);
+  if (eng.followerTarget) {
+    const targetLine = eng.targetDate
+      ? `- Target: ${eng.followerTarget.toLocaleString()} by ${eng.targetDate}`
+      : `- Target: ${eng.followerTarget.toLocaleString()}`;
+    engLines.push(targetLine);
+  }
+  if (eng.engagementRate) engLines.push(`- Engagement rate: ${eng.engagementRate}%`);
+  if (eng.avgRetweets) engLines.push(`- Avg retweets: ${eng.avgRetweets}`);
+  if (eng.rtToLikeRatio) engLines.push(`- RT-to-like ratio: ${eng.rtToLikeRatio}%`);
+  if (eng.ctaScore != null && eng.ctaTarget != null) engLines.push(`- CTA effectiveness: ${eng.ctaScore}/100 (target ${eng.ctaTarget}+)`);
+  if (eng.topGaps.length > 0) engLines.push(`- Top gaps to address: ${eng.topGaps.join(', ')}`);
+
+  // Voice constraints
+  const voiceLines: string[] = [];
+  // Default formatting rules
+  voiceLines.push(`FORMATTING: Never use bold (**), italic (*), or any markdown formatting. Output plain text only.`);
+  const usesEmDashes = config.voiceConstraints.some(v => v.toLowerCase().includes('em dash') || v.includes('—'));
+  if (!usesEmDashes) {
+    voiceLines.push(`PUNCTUATION: Never use em dashes (—). Use commas, periods, or line breaks instead.`);
+  }
+
+  // Scanned voice profile — this is the creator's ACTUAL voice from their real posts
+  if (config.voiceConstraints.length > 0) {
+    voiceLines.push(`\nCRITICAL — VOICE TONE (from scanning their real posts): ${config.voiceConstraints.join(', ')}`);
+    voiceLines.push(`You MUST write in this exact tone. Every sentence should feel like THEY wrote it, not an AI.`);
+  }
+  if ((config.doPatterns || []).length > 0) {
+    voiceLines.push(`\nSTYLE PATTERNS (things they actually do in their writing — replicate these):`);
+    (config.doPatterns || []).forEach(p => voiceLines.push(`  + ${p}`));
+  }
+  if (config.neverSay.length > 0) {
+    voiceLines.push(`\nTHINGS THEY NEVER DO (avoid all of these completely):`);
+    config.neverSay.forEach(p => voiceLines.push(`  - ${p}`));
+  }
+
+  // Also include brand-level patterns
+  if (brand.doPatterns.length > 0) voiceLines.push(`\nBRAND DO: ${brand.doPatterns.join('; ')}`);
+  if (brand.dontPatterns.length > 0) voiceLines.push(`BRAND DON'T: ${brand.dontPatterns.join('; ')}`);
+
+  // Voice fingerprint
+  let voiceFingerprintSection = '';
+  if (context?.voiceFingerprint) {
+    voiceFingerprintSection = `\n${formatSummaryForPrompt(summarizeFingerprint(context.voiceFingerprint))}\n\nCRITICAL: Match the creator's actual voice. If any phrase sounds like "ChatGPT wrote this", rewrite it.`;
+  }
+
+  // Full schedule context (just today's format info)
+  const formatGuide = buildFormatGuide(slotConfig.format);
+
+  const hasScannedVoice = config.voiceConstraints.length > 0 || (config.doPatterns || []).length > 0;
+
+  return `You are the Content Engine for "${brand.name}".${hasScannedVoice ? `\n\nIMPORTANT: This creator's voice was scanned from their real posts. Your #1 job is to sound EXACTLY like them. Not like a polished AI. Not like a copywriter. Like THEM. Match their sentence length, their word choices, their energy. If they're sarcastic, be sarcastic. If they're blunt, be blunt. If they use slang, use slang. Read the voice profile below carefully and embody it completely.` : ''}
+${engLines.length > 0 ? `\nCONTEXT:\n${engLines.join('\n')}\n- Every post MUST have a CTA. No exceptions.` : '\nEvery post MUST have a CTA. No exceptions.'}
+
+BRAND VOICE:
+- Overall tone: ${toneStr}
+- Keywords: ${brand.keywords.length > 0 ? brand.keywords.join(', ') : 'none specified'}
+${brand.voiceSamples.length > 0 ? `- Voice samples: ${brand.voiceSamples.join(' | ')}` : ''}
+${voiceLines.length > 0 ? voiceLines.join('\n') : ''}
+${voiceFingerprintSection}
+
+TODAY'S ASSIGNMENT:
+- Day: ${request.day}
+- Slot: ${slotLabel}
+- Format: ${slotConfig.format}${slotConfig.description ? ` (${slotConfig.description})` : ''}
+- CTA Type: ${ctaType}
+${formatGuide}
+
+OUTPUT — use exactly this structure, nothing else before SLOT:
+SLOT: ${slotLabel}
+FORMAT: ${slotConfig.format}
+CTA TYPE: ${ctaType}
+
+---
+
+[POST CONTENT]
+
+---`;
+}
+
+function buildFormatGuide(format: string): string {
+  const f = format.toLowerCase();
+  if (f.includes('thread')) return '\nFORMAT GUIDE: 5-7 tweets numbered 1/ to 7/, strong hook in tweet 1. Use the CTA TYPE specified above.';
+  if (f.includes('thought')) return '\nFORMAT GUIDE: A focused, concise thought or observation — one clear idea stated plainly. Use the CTA TYPE specified above.';
+  if (f.includes('framework')) return '\nFORMAT GUIDE: Numbered/labeled system with clear structure. Use the CTA TYPE specified above.';
+  if (f.includes('hot take')) return '\nFORMAT GUIDE: Bold claim, 2-3 lines reasoning. Use the CTA TYPE specified above.';
+  if (f.includes('build log')) return '\nFORMAT GUIDE: Timestamp, what shipped, why it matters. Use the CTA TYPE specified above.';
+  if (f.includes('reflection')) return '\nFORMAT GUIDE: Look back at the week, key insight or lesson, reflective tone. Use the CTA TYPE specified above.';
+  if (f.includes('community')) return '\nFORMAT GUIDE: Engage the community, spotlight others, ask for participation. Use the CTA TYPE specified above.';
+  if (f.includes('story')) return '\nFORMAT GUIDE: Personal narrative, real moment or experience, relatable arc. Use the CTA TYPE specified above.';
+  if (f.includes('conversational')) return '\nFORMAT GUIDE: Casual, direct tone like talking to a friend. Use the CTA TYPE specified above.';
+  return '';
+}
+
+function parseScheduledOutput(raw: string): ContentEngineOutput {
+  const lines = raw.split('\n');
+  const meta: Record<string, string> = {};
+  const afterMeta: Record<string, string> = {};
+  const post: string[] = [];
+  let inPost = false, dashes = 0;
+
+  for (const line of lines) {
+    if (line.trim() === '---') {
+      dashes++;
+      inPost = dashes === 1;
+      if (dashes === 2) inPost = false;
+      continue;
+    }
+    if (dashes === 0) {
+      const ci = line.indexOf(':');
+      if (ci > 0) meta[line.slice(0, ci).trim().toUpperCase()] = line.slice(ci + 1).trim();
+    } else if (inPost) {
+      post.push(line);
+    } else if (dashes >= 2) {
+      const ci = line.indexOf(':');
+      if (ci > 0) afterMeta[line.slice(0, ci).trim().toUpperCase()] = line.slice(ci + 1).trim();
+    }
+  }
+
+  return {
+    meta: {
+      slot: meta['SLOT'] || '',
+      format: meta['FORMAT'] || '',
+      ctaType: meta['CTA TYPE'] || '',
+      gapTargeted: meta['GAP TARGETED'] || '',
+    },
+    content: post.join('\n').trim(),
+    footer: {
+      postingWindow: afterMeta['POSTING WINDOW'] || '',
+      hashtags: afterMeta['HASHTAGS'] || '',
+    },
+    raw,
+  };
+}
+
+/**
+ * Generate content using the content engine schedule + CTA rotation
+ */
+export async function generateScheduledContent(
+  context: AgentContext,
+  engineConfig: ContentEngineConfig,
+  request: ContentEngineRequest
+): Promise<AgentResponse<ContentEngineOutput>> {
+  const startTime = Date.now();
+
+  try {
+    const apiKey = process.env.ANTHROPIC_API_KEY;
+    if (!apiKey) {
+      return { success: false, error: 'API key not configured', confidence: 0, processingTime: Date.now() - startTime };
+    }
+
+    if (!context.brandDNA?.name) {
+      return { success: false, error: 'Brand DNA is required', confidence: 0, processingTime: Date.now() - startTime };
+    }
+
+    const system = buildScheduledContentSystemPrompt(context.brandDNA, engineConfig, request, context);
+    const topicLine = request.topic
+      ? `Topic: ${request.topic}`
+      : 'Pick the best topic for today based on the format and brand context.';
+    const slotLabel = request.slot === 'post1' ? 'Post 1 (Anchor)' : 'Post 2 (Lighter)';
+    const prompt = `Today is ${request.day}. Generate ${slotLabel} for "${context.brandDNA.name}".\n${topicLine}\nMake it feel specific, real, and true to the voice.`;
+
+    const anthropic = new Anthropic({ apiKey });
+    const message = await anthropic.messages.create({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1000,
+      system,
+      messages: [{ role: 'user', content: prompt }],
+    });
+
+    const responseText = message.content[0].type === 'text' ? message.content[0].text : '';
+    if (!responseText) {
+      return { success: false, error: 'Empty response from model', confidence: 0, processingTime: Date.now() - startTime };
+    }
+
+    const output = parseScheduledOutput(responseText);
+
+    return {
+      success: true,
+      data: output,
+      confidence: output.content ? 0.85 : 0.3,
+      processingTime: Date.now() - startTime,
+    };
+  } catch (error) {
+    let errorMessage = 'Scheduled content generation failed';
+    if (error instanceof Error) {
+      errorMessage = error.message.includes('credit balance is too low')
+        ? 'API credits depleted. Please check your Anthropic account.'
+        : error.message;
+    }
+    return { success: false, error: errorMessage, confidence: 0, processingTime: Date.now() - startTime };
+  }
+}
 
 

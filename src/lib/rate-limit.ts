@@ -85,32 +85,43 @@ export function checkRateLimit(
 export function getClientIdentifier(request: Request): string {
   const headers = request.headers;
 
-  // Check common proxy headers
-  const forwarded = headers.get('x-forwarded-for');
-  if (forwarded) {
-    // x-forwarded-for can contain multiple IPs, take the first one
-    return forwarded.split(',')[0].trim();
-  }
-
-  const realIp = headers.get('x-real-ip');
-  if (realIp) {
-    return realIp;
-  }
-
-  // Vercel-specific header
+  // Vercel-set header (unspoofable in Vercel deployments) — prefer first
   const vercelIp = headers.get('x-vercel-forwarded-for');
   if (vercelIp) {
     return vercelIp.split(',')[0].trim();
   }
 
-  // Cloudflare-specific header
+  // Cloudflare-specific header (unspoofable behind Cloudflare)
   const cfIp = headers.get('cf-connecting-ip');
   if (cfIp) {
     return cfIp;
   }
 
-  // Fallback - this won't work in serverless but provides a default
+  // x-real-ip (typically set by reverse proxy)
+  const realIp = headers.get('x-real-ip');
+  if (realIp) {
+    return realIp;
+  }
+
+  // x-forwarded-for — last resort, client-spoofable
+  const forwarded = headers.get('x-forwarded-for');
+  if (forwarded) {
+    return forwarded.split(',')[0].trim();
+  }
+
+  // Fallback
   return 'unknown';
+}
+
+/**
+ * Rate limit by authenticated user ID.
+ * Use after auth so limits follow the user, not the IP.
+ */
+export function withUserRateLimit(
+  userId: string,
+  preset: keyof typeof rateLimiters
+): { limited: boolean; remaining: number; resetIn: number } {
+  return checkRateLimit(`user:${userId}`, rateLimiters[preset]);
 }
 
 // Pre-configured rate limiters for common use cases

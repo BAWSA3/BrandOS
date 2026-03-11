@@ -155,6 +155,13 @@ export async function POST(request: NextRequest) {
   const startTime = Date.now();
 
   try {
+    // Auth guard — this endpoint calls expensive AI APIs
+    const { getUser } = await import('@/lib/auth');
+    const user = await getUser();
+    if (!user) {
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+    }
+
     const body = await request.json();
     const { agentName, brandId, brandDNA, message, history = [] } = body as ChatRequest;
 
