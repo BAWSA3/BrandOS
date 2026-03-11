@@ -7,6 +7,7 @@ import BrandDNAPreview, { GeneratedBrandDNA } from './BrandDNAPreview';
 import ShareableScoreCard, { ShareCardData } from './ShareableScoreCard';
 import BrandAdvisorChat from './BrandAdvisorChat';
 import DNAWalkthrough from './DNAWalkthrough';
+import BrandBreakdown from './BrandBreakdown';
 import BrandOSDashboard, { BrandOSDashboardData } from './BrandOSDashboard';
 import BrandIssuesSection from './BrandIssuesSection';
 import { SaveResultsPrompt } from './SaveResultsPrompt';
@@ -1424,23 +1425,19 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
           </motion.div>
         )}
 
-        {/* WALKTHROUGH STATE - Guided DNA Overview */}
+        {/* WALKTHROUGH STATE - Single-page Brand Breakdown */}
         {flowState === 'walkthrough' && brandScore && profile && generatedBrandDNA && (
-          <DNAWalkthrough
+          <BrandBreakdown
             profile={profile}
             brandScore={brandScore}
             generatedBrandDNA={generatedBrandDNA}
-            authenticity={accountAuthenticity}
-            activity={accountActivity}
             rawTweets={rawTweets}
             onComplete={() => {
               setFlowState('reveal');
-              // Show confetti for high scores after walkthrough
               if (brandScore.overallScore >= 70) {
                 setTimeout(() => setShowConfetti(true), 500);
               }
             }}
-            theme={theme}
           />
         )}
 
