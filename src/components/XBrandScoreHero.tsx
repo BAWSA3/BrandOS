@@ -17,7 +17,6 @@ import { domToPng } from 'modern-screenshot';
 import { AuthenticityAnalysis, ActivityAnalysis } from '@/lib/gemini';
 import { useXBrandScoreDemoCapture } from '@/hooks/useDemoCaptureIntegration';
 import DemoModeControls from './DemoModeControls';
-import { AttestScoreButton } from '@/components/onchain';
 import dynamic from 'next/dynamic';
 import { AsciiDNAHero } from '@/components/ascii-dna';
 import TypeScriptInterfaceBg from '@/components/backgrounds/TypeScriptInterfaceBg';
@@ -1567,41 +1566,96 @@ Get yours → mybrandos.app`;
               />
             </div>
 
-            {/* Mint Score Onchain */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6, duration: 0.5 }}
-              className="w-full max-w-[400px] mt-8"
-            >
-              <AttestScoreButton
-                username={profile.username}
-                overallScore={brandScore.overallScore}
-                phases={{
-                  define: { score: brandScore.phases.define.score },
-                  check: { score: brandScore.phases.check.score },
-                  generate: { score: brandScore.phases.generate.score },
-                  scale: { score: brandScore.phases.scale.score },
-                }}
-                archetype={stripEmoji(generatedBrandDNA?.archetype || 'The Creator')}
-              />
-            </motion.div>
-
-            {/* Save Results Prompt - Show for unauthenticated users */}
-            {/* Sign Up CTA */}
+            {/* Potential Score CTA */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4, duration: 0.5 }}
               className="w-full flex flex-col items-center mt-16"
             >
-              <SignupPrompt
-                xUsername={profile.username}
-                brandScore={brandScore.overallScore}
-                archetype={generatedBrandDNA.archetype}
-                archetypeEmoji={generatedBrandDNA.archetypeEmoji}
-                inviteCode={pendingInviteCode}
-              />
+              {(() => {
+                const current = brandScore.overallScore;
+                const potential = Math.min(100, current + Math.round((100 - current) * 0.6));
+                return (
+                  <div style={{ width: '100%', maxWidth: '480px', textAlign: 'center' }}>
+                    {/* Score comparison text */}
+                    <div style={{ marginBottom: '20px' }}>
+                      <p style={{
+                        fontSize: '15px',
+                        color: 'rgba(255, 255, 255, 0.6)',
+                        lineHeight: 1.7,
+                      }}>
+                        Your score is{' '}
+                        <span style={{
+                          fontFamily: "'VCR OSD Mono', monospace",
+                          fontSize: '18px',
+                          color: '#fff',
+                          fontWeight: 'bold',
+                        }}>
+                          {current}
+                        </span>
+                        , but it could be{' '}
+                        <span style={{
+                          fontFamily: "'VCR OSD Mono', monospace",
+                          fontSize: '18px',
+                          color: '#0047FF',
+                          fontWeight: 'bold',
+                        }}>
+                          {potential}
+                        </span>
+                        {' '}if you build with BrandOS.
+                      </p>
+                    </div>
+
+                    {/* Visual bar comparison */}
+                    <div style={{ marginBottom: '28px', padding: '0 20px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+                        <span style={{
+                          fontFamily: "'VCR OSD Mono', monospace",
+                          fontSize: '10px',
+                          letterSpacing: '0.1em',
+                          color: 'rgba(255,255,255,0.35)',
+                          width: '50px',
+                        }}>
+                          NOW
+                        </span>
+                        <div style={{ flex: 1, height: '6px', background: 'rgba(255,255,255,0.08)', borderRadius: '3px', overflow: 'hidden' }}>
+                          <div style={{ width: `${current}%`, height: '100%', background: 'rgba(255,255,255,0.4)', borderRadius: '3px' }} />
+                        </div>
+                        <span style={{ fontFamily: "'VCR OSD Mono', monospace", fontSize: '12px', color: 'rgba(255,255,255,0.5)', width: '28px', textAlign: 'right' }}>
+                          {current}
+                        </span>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <span style={{
+                          fontFamily: "'VCR OSD Mono', monospace",
+                          fontSize: '10px',
+                          letterSpacing: '0.1em',
+                          color: '#0047FF',
+                          width: '50px',
+                        }}>
+                          AFTER
+                        </span>
+                        <div style={{ flex: 1, height: '6px', background: 'rgba(255,255,255,0.08)', borderRadius: '3px', overflow: 'hidden' }}>
+                          <div style={{ width: `${potential}%`, height: '100%', background: '#0047FF', borderRadius: '3px' }} />
+                        </div>
+                        <span style={{ fontFamily: "'VCR OSD Mono', monospace", fontSize: '12px', color: '#0047FF', fontWeight: 'bold', width: '28px', textAlign: 'right' }}>
+                          {potential}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* SignupPrompt renders its own card */}
+                    <SignupPrompt
+                      xUsername={profile.username}
+                      brandScore={brandScore.overallScore}
+                      archetype={generatedBrandDNA.archetype}
+                      archetypeEmoji={generatedBrandDNA.archetypeEmoji}
+                      inviteCode={pendingInviteCode}
+                    />
+                  </div>
+                );
+              })()}
 
               {/* Bottom decorative element */}
               <div

@@ -172,7 +172,7 @@ export default function SignupPrompt({
             marginBottom: '12px',
           }}
         >
-          SAVE YOUR RESULTS
+          SIGN UP FOR EARLY ACCESS
         </h3>
         <p
           style={{
@@ -181,7 +181,7 @@ export default function SignupPrompt({
             lineHeight: 1.5,
           }}
         >
-          Create an account to keep your Brand DNA and track your progress.
+          Create an account to save your Brand DNA and start building.
         </p>
       </div>
 
