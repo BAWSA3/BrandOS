@@ -131,10 +131,6 @@ function EarlyAccessContent() {
               <p className="font-mono text-[11px] text-[var(--text-quaternary)] mb-2">
                 we'll reach out when it's your turn.
               </p>
-              <p className="font-mono text-[11px] text-[var(--accent)] mb-5">
-                here's one free generation on the house.
-              </p>
-
               <Link
                 href="/content-engine"
                 className="btn-engine label-mono inline-block px-6 py-3 rounded-[var(--radius-sm)]"

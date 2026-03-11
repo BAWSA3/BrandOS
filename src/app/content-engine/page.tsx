@@ -368,7 +368,7 @@ export default function ContentEnginePage() {
                       : 'text-[var(--text-tertiary)] border border-[var(--surface-tertiary)] hover:border-[var(--text-quaternary)]'
                   }`}
                 >
-                  Post 1 — Anchor
+                  Post 1
                 </button>
                 {posts.includes('post1') && posts.length > 1 && (
                   <button
@@ -402,7 +402,7 @@ export default function ContentEnginePage() {
                         : 'text-[var(--text-tertiary)] border border-[var(--surface-tertiary)] hover:border-[var(--text-quaternary)]'
                     }`}
                   >
-                    Post 2 — Lighter
+                    Post 2
                   </button>
                   <button
                     onClick={(e) => { e.stopPropagation(); removePost('post2'); }}
