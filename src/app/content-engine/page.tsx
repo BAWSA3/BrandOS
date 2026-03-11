@@ -517,9 +517,9 @@ export default function ContentEnginePage() {
           ) : (
             <button
               onClick={generate}
-              disabled={loading || !topic.trim() || selectedFormat === '--' || selectedCTA === '--'}
+              disabled={loading || !topic.trim()}
               className="btn-engine label-mono w-full py-3.5 rounded-[var(--radius-sm)]"
-              style={loading || !topic.trim() || selectedFormat === '--' || selectedCTA === '--'
+              style={loading || !topic.trim()
                 ? { background: 'var(--surface-tertiary)', color: 'var(--text-quaternary)', cursor: 'default' }
                 : { background: 'var(--accent)', color: '#fff', cursor: 'pointer' }
               }
