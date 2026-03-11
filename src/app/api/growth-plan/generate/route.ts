@@ -3,10 +3,11 @@ import { cookies } from 'next/headers';
 import { createClient } from '@supabase/supabase-js';
 import prisma from '@/lib/db';
 import Anthropic from '@anthropic-ai/sdk';
+import { withRateLimit, rateLimiters } from '@/lib/rate-limit';
 
 export const maxDuration = 60;
 
-export async function POST(request: NextRequest) {
+async function handlePost(request: NextRequest) {
   try {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -65,8 +66,8 @@ export async function POST(request: NextRequest) {
     ]);
 
     // Get follower count from request or default
-    const currentFollowers = inputFollowers || 1000;
-    const target = targetFollowers || Math.round(currentFollowers * 1.5);
+    const currentFollowers = inputFollowers ?? 1000;
+    const target = targetFollowers ?? Math.round(currentFollowers * 1.5);
     const months = deadlineMonths || 4;
 
     // Build performance context
@@ -89,8 +90,10 @@ export async function POST(request: NextRequest) {
 
     // Build tweet context
     const tweetContext = recentTweets.map((t, i) => {
-      const m = JSON.parse(t.metrics);
-      return `[${i + 1}] ${t.text}\n    ${m.likes || 0}L / ${m.retweets || 0}RT / ${m.replies || 0}R / ${m.impressions || 0} imp`;
+      let m: Record<string, number> = {};
+      try { m = JSON.parse(t.metrics); } catch { /* use default */ }
+      const truncatedText = t.text.length > 200 ? t.text.substring(0, 200) + '...' : t.text;
+      return `[${i + 1}] ${truncatedText}\n    ${m.likes || 0}L / ${m.retweets || 0}RT / ${m.replies || 0}R / ${m.impressions || 0} imp`;
     }).join('\n\n');
 
     // Build gap context
@@ -110,8 +113,10 @@ GAP ANALYSIS (latest):
     // Build benchmark context
     const benchmarkContext = benchmarks.length > 0
       ? benchmarks.map((b, i) => {
-          const p = JSON.parse(b.patterns);
-          const m = JSON.parse(b.metrics);
+          let p: Record<string, string> = {};
+          let m: Record<string, number> = {};
+          try { p = JSON.parse(b.patterns); } catch { /* use default */ }
+          try { m = JSON.parse(b.metrics); } catch { /* use default */ }
           return `[${i + 1}] score:${b.viralScore} | hook:${p.hookType} format:${p.format} cta:${p.cta} | ${m.like_count || 0}L ${m.retweet_count || 0}RT`;
         }).join('\n')
       : '';
@@ -191,7 +196,16 @@ Rules:
       return NextResponse.json({ error: 'Failed to generate plan' }, { status: 500 });
     }
 
-    const plan = JSON.parse(jsonMatch[0]);
+    let plan;
+    try {
+      plan = JSON.parse(jsonMatch[0]);
+    } catch {
+      return NextResponse.json({ error: 'Failed to parse plan' }, { status: 500 });
+    }
+
+    if (!plan.strengths || !plan.levers || !plan.milestones) {
+      return NextResponse.json({ error: 'Incomplete plan generated' }, { status: 500 });
+    }
 
     // Add computed fields
     plan.currentFollowers = currentFollowers;
@@ -217,3 +231,5 @@ Rules:
     return NextResponse.json({ error: 'Internal error' }, { status: 500 });
   }
 }
+
+export const POST = withRateLimit(handlePost, rateLimiters.aiStrict);

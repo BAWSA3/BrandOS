@@ -20,6 +20,7 @@ import {
 } from '@/lib/gemini';
 import { features } from '@/lib/features';
 import { extractColorsFromImage, ExtractedColors } from '@/lib/color-extraction';
+import { withRateLimit, rateLimiters } from '@/lib/rate-limit';
 
 // Minimum tweets required for content-primary analysis
 const MINIMUM_TWEETS_FOR_CONTENT_ANALYSIS = 10;
@@ -58,7 +59,7 @@ export interface BrandIdentityResponse {
   error?: string;
 }
 
-export async function POST(request: NextRequest) {
+async function handlePost(request: NextRequest) {
   try {
     const { profile }: { profile: XProfileData } = await request.json();
 
@@ -216,6 +217,5 @@ export async function POST(request: NextRequest) {
   }
 }
 
-
-
+export const POST = withRateLimit(handlePost, rateLimiters.ai);
 

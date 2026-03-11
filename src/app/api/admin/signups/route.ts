@@ -1,14 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAllSignups, getSignupCount, getSignupsBySource } from '@/lib/newsletter';
 
-// Simple admin key check - in production use proper auth
+// Admin API key check - always enforced
 const ADMIN_KEY = process.env.ADMIN_API_KEY;
 
 function isAuthorized(request: NextRequest): boolean {
-  // In development, allow access
-  if (process.env.NODE_ENV === 'development') return true;
-  
-  // In production, require API key
   const authHeader = request.headers.get('authorization');
   const apiKey = authHeader?.replace('Bearer ', '');
   return apiKey === ADMIN_KEY && !!ADMIN_KEY;

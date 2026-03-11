@@ -596,8 +596,8 @@ model PerformanceSnapshot {
   brandId String
   brand   Brand  @relation(fields: [brandId], references: [id], onDelete: Cascade)
 
+  @@unique([brandId, windowDays])
   @@index([brandId])
-  @@index([brandId, windowDays])
   @@index([computedAt])
 }
 

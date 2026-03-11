@@ -25,12 +25,12 @@ function isCallbackUrlSafe(urlString: string): boolean {
 function validateApiKey(request: NextRequest): boolean {
   const apiKey = request.headers.get('x-api-key');
   const validKey = process.env.BRANDOS_API_KEY;
-  
+
   if (!validKey) {
-    console.warn('BRANDOS_API_KEY not set - webhook authentication disabled');
-    return true; // Allow if no key is set (dev mode)
+    console.error('BRANDOS_API_KEY not set - rejecting webhook request');
+    return false;
   }
-  
+
   return apiKey === validKey;
 }
 

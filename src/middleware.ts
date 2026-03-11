@@ -2,8 +2,10 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 // Routes that require authentication
-// NOTE: /app temporarily removed for dev testing - restore before production
-const protectedRoutes: string[] = [];
+const protectedRoutes: string[] = [
+  '/app',
+  '/growth-plan',
+];
 
 // Routes that are always public
 const publicRoutes = [

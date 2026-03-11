@@ -15,6 +15,7 @@ import {
 } from '@/lib/gemini';
 import { BrandDNA as StoreBrandDNA } from '@/lib/types';
 import { ExtractedColors, generateHarmoniousColors } from '@/lib/color-extraction';
+import { withRateLimit, rateLimiters } from '@/lib/rate-limit';
 
 // =============================================================================
 // CRYPTO TWITTER PERSONALITY TYPES
@@ -620,7 +621,7 @@ function extractPerformanceInsights(tweetVoice: TweetVoiceAnalysis | null): Gene
 }
 
 // Main handler
-export async function POST(request: NextRequest) {
+async function handlePost(request: NextRequest) {
   try {
     const body = await request.json();
     const {
@@ -779,6 +780,4 @@ export async function POST(request: NextRequest) {
   }
 }
 
-
-
-
+export const POST = withRateLimit(handlePost, rateLimiters.ai);

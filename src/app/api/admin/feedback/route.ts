@@ -5,8 +5,6 @@ import prisma from '@/lib/db';
 const ADMIN_KEY = process.env.ADMIN_API_KEY;
 
 function isAuthorized(request: NextRequest): boolean {
-  if (process.env.NODE_ENV === 'development') return true;
-
   const authHeader = request.headers.get('authorization');
   const apiKey = authHeader?.replace('Bearer ', '');
   return apiKey === ADMIN_KEY && !!ADMIN_KEY;

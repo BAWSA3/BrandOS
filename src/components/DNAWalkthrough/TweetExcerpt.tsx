@@ -83,7 +83,7 @@ export function XTweetEmbed({
 
   const renderEmbed = useCallback(async () => {
     if (!containerRef.current || !window.twttr) return;
-    containerRef.current.innerHTML = '';
+    containerRef.current.textContent = '';
 
     try {
       const el = await window.twttr.widgets.createTweet(tweetId, containerRef.current, {

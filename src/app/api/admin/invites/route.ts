@@ -2,14 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { randomBytes } from 'crypto';
 import prisma from '@/lib/db';
 
-// Simple admin key check - same pattern as signups
+// Admin API key check - always enforced
 const ADMIN_KEY = process.env.ADMIN_API_KEY;
 
 function isAuthorized(request: NextRequest): boolean {
-  // In development, allow access
-  if (process.env.NODE_ENV === 'development') return true;
-
-  // In production, require API key
   const authHeader = request.headers.get('authorization');
   const apiKey = authHeader?.replace('Bearer ', '');
   return apiKey === ADMIN_KEY && !!ADMIN_KEY;

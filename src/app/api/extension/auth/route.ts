@@ -4,9 +4,23 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
+const ALLOWED_ORIGINS = [
+  'chrome-extension://*',  // Chrome extensions
+  'https://brandos.app',
+  'https://www.brandos.app',
+  'http://localhost:3000',
+];
+
 function corsHeaders(origin?: string | null) {
+  // Check if origin matches (support chrome-extension:// prefix)
+  const isAllowed = origin && (
+    ALLOWED_ORIGINS.includes(origin) ||
+    origin.startsWith('chrome-extension://')
+  );
+  const corsOrigin = isAllowed ? origin : ALLOWED_ORIGINS[1];
+
   return {
-    'Access-Control-Allow-Origin': origin || '*',
+    'Access-Control-Allow-Origin': corsOrigin,
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Authorization, Content-Type',
     'Access-Control-Max-Age': '86400',

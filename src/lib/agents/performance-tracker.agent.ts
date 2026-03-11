@@ -103,8 +103,28 @@ async function computeSnapshot(brandId: string, windowDays: number): Promise<voi
 
   if (tweets.length === 0) {
     // Still create a snapshot with zeros so UI can show "no data"
-    await prisma.performanceSnapshot.create({
-      data: {
+    await prisma.performanceSnapshot.upsert({
+      where: {
+        brandId_windowDays: { brandId, windowDays },
+      },
+      update: {
+        totalPosts: 0,
+        totalImpressions: 0,
+        totalLikes: 0,
+        totalRetweets: 0,
+        totalReplies: 0,
+        avgEngagementRate: 0,
+        avgImpressions: 0,
+        bestPostingHour: null,
+        bestPostingDay: null,
+        bestContentType: null,
+        avgPostLength: null,
+        topTweetId: null,
+        bottomTweetId: null,
+        postingPattern: null,
+        computedAt: new Date(),
+      },
+      create: {
         brandId,
         windowDays,
         totalPosts: 0,
@@ -182,23 +202,32 @@ async function computeSnapshot(brandId: string, windowDays: number): Promise<voi
     ),
   });
 
-  await prisma.performanceSnapshot.create({
-    data: {
+  const snapshotData = {
+    totalPosts: parsed.length,
+    totalImpressions,
+    totalLikes,
+    totalRetweets,
+    totalReplies,
+    avgEngagementRate: Math.round(avgEngagement * 100) / 100,
+    avgImpressions: Math.round(avgImpressions),
+    bestPostingHour: bestHour,
+    bestPostingDay: bestDay,
+    avgPostLength: avgLength,
+    topTweetId,
+    bottomTweetId,
+    postingPattern,
+    computedAt: new Date(),
+  };
+
+  await prisma.performanceSnapshot.upsert({
+    where: {
+      brandId_windowDays: { brandId, windowDays },
+    },
+    update: snapshotData,
+    create: {
       brandId,
       windowDays,
-      totalPosts: parsed.length,
-      totalImpressions,
-      totalLikes,
-      totalRetweets,
-      totalReplies,
-      avgEngagementRate: Math.round(avgEngagement * 100) / 100,
-      avgImpressions: Math.round(avgImpressions),
-      bestPostingHour: bestHour,
-      bestPostingDay: bestDay,
-      avgPostLength: avgLength,
-      topTweetId,
-      bottomTweetId,
-      postingPattern,
+      ...snapshotData,
     },
   });
 }

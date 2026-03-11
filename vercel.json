@@ -10,7 +10,7 @@
     },
     {
       "path": "/api/cron/performance-sync",
-      "schedule": "0 14 * * *"
+      "schedule": "0 7 * * *"
     },
     {
       "path": "/api/cron/gap-analysis",

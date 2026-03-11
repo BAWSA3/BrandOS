@@ -126,6 +126,12 @@ export const rateLimiters = {
 
   // Burst: 10 requests per 10 seconds (for endpoints that might have bursts)
   burst: { interval: 10 * 1000, maxRequests: 10 },
+
+  // AI: 10 requests per minute (for AI-powered endpoints that cost money)
+  ai: { interval: 60 * 1000, maxRequests: 10 },
+
+  // AI strict: 5 requests per minute (for expensive AI endpoints)
+  aiStrict: { interval: 60 * 1000, maxRequests: 5 },
 };
 
 /**

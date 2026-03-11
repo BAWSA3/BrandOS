@@ -1,21 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { processPendingEmails, getPendingEmailsCount } from '@/lib/email';
 
+export const maxDuration = 300;
+
 /**
  * Cron job endpoint to process scheduled emails
  *
  * This endpoint should be called periodically (e.g., every hour) by Vercel Cron
  * or an external cron service to send emails that are due.
- *
- * Security: In production, validate the cron secret to prevent unauthorized access
  */
 export async function GET(request: NextRequest) {
   try {
-    // Optional: Verify cron secret for security
-    const authHeader = request.headers.get('authorization');
+    // Verify cron secret — REQUIRED
     const cronSecret = process.env.CRON_SECRET;
+    const authHeader = request.headers.get('authorization');
 
-    if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+    if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }

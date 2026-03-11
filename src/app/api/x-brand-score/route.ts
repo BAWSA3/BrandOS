@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { geminiFlash, xBrandScorePrompt, XProfileData } from '@/lib/gemini';
 import { resolveArchetype, getEvolutionInfo } from '@/lib/archetype-engine';
+import { withRateLimit, rateLimiters } from '@/lib/rate-limit';
 
 /**
  * Brand Score API - Profile-only analysis
@@ -100,7 +101,7 @@ async function fetchProfile(username: string, origin: string): Promise<XProfileD
   }
 }
 
-export async function POST(request: NextRequest) {
+async function handlePost(request: NextRequest) {
   try {
     const { username, forceReevaluate = false } = await request.json() as {
       username: string;
@@ -220,3 +221,5 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+export const POST = withRateLimit(handlePost, rateLimiters.ai);
