@@ -634,7 +634,7 @@ function RotatingTagline() {
 
   return (
     <div style={{
-      marginTop: '56px',
+      marginTop: '16px',
       marginBottom: '48px',
       textAlign: 'center',
       position: 'relative',
@@ -1250,17 +1250,15 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
-                  overflow: 'hidden',
-                  marginBottom: '-12vh',
                 }}
               >
                 <img
-                  src="/brandos-hero-logo.png"
+                  src="/brandos-hero-logo.svg"
                   alt="BrandOS"
                   style={{
-                    width: 'clamp(550px, 90vw, 1100px)',
+                    width: 'clamp(500px, 85vw, 1000px)',
                     height: 'auto',
-                    maxHeight: '45vh',
+                    maxHeight: '30vh',
                     objectFit: 'contain',
                   }}
                 />
@@ -1489,7 +1487,7 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
                 }}
               >
                 <img
-                  src={REVEAL_THEME === 'light' ? '/brandos-logo.png' : '/brandos-logo-dark.png'}
+                  src={REVEAL_THEME === 'light' ? '/brandos-hero-logo.svg' : '/brandos-hero-logo.svg'}
                   alt="BrandOS"
                   style={{ height: '28px', width: 'auto' }}
                 />
