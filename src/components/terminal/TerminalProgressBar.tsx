@@ -33,20 +33,22 @@ export default function TerminalProgressBar({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: -20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -20 }}
       transition={{ duration: 0.5 }}
       style={{
         position: 'fixed',
-        top: '24px',
+        top: 0,
         left: 0,
-        right: 0,
+        bottom: 0,
         zIndex: 100,
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
+        justifyContent: 'center',
         gap: '8px',
+        padding: '24px',
       }}
     >
       {/* Terminal window container */}
@@ -63,11 +65,11 @@ export default function TerminalProgressBar({
           backdropFilter: 'blur(8px)',
         }}
       >
-        {/* Phase indicators - centered */}
+        {/* Phase indicators - stacked vertically */}
         <div
           style={{
             display: 'flex',
-            justifyContent: 'center',
+            flexDirection: 'column',
             gap: '4px',
           }}
         >
