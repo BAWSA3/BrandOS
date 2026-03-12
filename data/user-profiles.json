@@ -384,10 +384,6 @@
       ],
       "scores": [
         {
-          "value": 79,
-          "scannedAt": 1769074146627
-        },
-        {
           "value": 78,
           "scannedAt": 1769118544955
         },
@@ -462,13 +458,17 @@
         {
           "value": 79,
           "scannedAt": 1773130159626
+        },
+        {
+          "value": 89,
+          "scannedAt": 1773307674989
         }
       ],
-      "highestScore": 87,
-      "currentScore": 79,
+      "highestScore": 89,
+      "currentScore": 89,
       "firstScannedAt": 1768904843172,
-      "lastScannedAt": 1773130159626,
-      "totalScans": 26
+      "lastScannedAt": 1773307674989,
+      "totalScans": 27
     },
     "web3pingu": {
       "username": "web3pingu",
@@ -508,13 +508,17 @@
         {
           "value": 79,
           "scannedAt": 1768905125670
+        },
+        {
+          "value": 79,
+          "scannedAt": 1773305869770
         }
       ],
       "highestScore": 79,
       "currentScore": 79,
       "firstScannedAt": 1768905125670,
-      "lastScannedAt": 1768905125670,
-      "totalScans": 1
+      "lastScannedAt": 1773305869770,
+      "totalScans": 2
     },
     "banditxbt": {
       "username": "banditxbt",
@@ -582,13 +586,25 @@
         {
           "value": 78,
           "scannedAt": 1773120563800
+        },
+        {
+          "value": 89,
+          "scannedAt": 1773310535410
+        },
+        {
+          "value": 84,
+          "scannedAt": 1773314511280
+        },
+        {
+          "value": 79,
+          "scannedAt": 1773316203204
         }
       ],
-      "highestScore": 88,
-      "currentScore": 78,
+      "highestScore": 89,
+      "currentScore": 79,
       "firstScannedAt": 1768905521780,
-      "lastScannedAt": 1773120563800,
-      "totalScans": 8
+      "lastScannedAt": 1773316203204,
+      "totalScans": 11
     },
     "levelsio": {
       "username": "levelsio",
@@ -876,14 +892,202 @@
         {
           "value": 78,
           "scannedAt": 1773233088361
+        },
+        {
+          "value": 78,
+          "scannedAt": 1773304398334
         }
       ],
       "highestScore": 88,
       "currentScore": 78,
       "firstScannedAt": 1773232929754,
-      "lastScannedAt": 1773233088361,
-      "totalScans": 3
+      "lastScannedAt": 1773304398334,
+      "totalScans": 4
+    },
+    "foruai": {
+      "username": "foruai",
+      "displayName": "ForU AI | ฅ^◡ ⩊ ◡^ฅ",
+      "archetype": {
+        "primary": "The Professor",
+        "emoji": "🎓",
+        "tagline": "Your AI Insights Hub",
+        "description": "The Professor archetype suits ForU AI due to its focus on educating and informing the audience about AI. Their role is to curate knowledge, share insights, and guide followers through the rapidly evolving landscape of artificial intelligence.",
+        "strengths": [
+          "Knowledge curation",
+          "Industry insights"
+        ],
+        "growthTip": "Create short, explainer videos about key AI concepts to engage with a broader audience.",
+        "assignedAt": 1773298534099
+      },
+      "archetypeHistory": [
+        {
+          "archetype": {
+            "primary": "The Professor",
+            "emoji": "🎓",
+            "tagline": "Your AI Insights Hub",
+            "description": "The Professor archetype suits ForU AI due to its focus on educating and informing the audience about AI. Their role is to curate knowledge, share insights, and guide followers through the rapidly evolving landscape of artificial intelligence.",
+            "strengths": [
+              "Knowledge curation",
+              "Industry insights"
+            ],
+            "growthTip": "Create short, explainer videos about key AI concepts to engage with a broader audience.",
+            "assignedAt": 1773298534099
+          },
+          "reason": "initial",
+          "score": 88,
+          "timestamp": 1773298534099
+        }
+      ],
+      "scores": [
+        {
+          "value": 88,
+          "scannedAt": 1773298534099
+        }
+      ],
+      "highestScore": 88,
+      "currentScore": 88,
+      "firstScannedAt": 1773298534099,
+      "lastScannedAt": 1773298534099,
+      "totalScans": 1
+    },
+    "orpheuskaze": {
+      "username": "orpheuskaze",
+      "displayName": "orpheuzkaze",
+      "archetype": {
+        "primary": "The Professor",
+        "emoji": "🎓",
+        "tagline": "AI Insight and Analysis",
+        "description": "Their content revolves around educating and analyzing AI, exhibiting traits of The Professor. The established follower count suggests their insights are valuable to many.",
+        "strengths": [
+          "Deep knowledge",
+          "Niche expertise"
+        ],
+        "growthTip": "Publish original research or thought experiments to cement authority.",
+        "assignedAt": 1773299820525
+      },
+      "archetypeHistory": [
+        {
+          "archetype": {
+            "primary": "The Professor",
+            "emoji": "🎓",
+            "tagline": "AI Insight and Analysis",
+            "description": "Their content revolves around educating and analyzing AI, exhibiting traits of The Professor. The established follower count suggests their insights are valuable to many.",
+            "strengths": [
+              "Deep knowledge",
+              "Niche expertise"
+            ],
+            "growthTip": "Publish original research or thought experiments to cement authority.",
+            "assignedAt": 1773299820525
+          },
+          "reason": "initial",
+          "score": 78,
+          "timestamp": 1773299820525
+        }
+      ],
+      "scores": [
+        {
+          "value": 78,
+          "scannedAt": 1773299820525
+        }
+      ],
+      "highestScore": 78,
+      "currentScore": 78,
+      "firstScannedAt": 1773299820525,
+      "lastScannedAt": 1773299820525,
+      "totalScans": 1
+    },
+    "web3rj": {
+      "username": "web3rj",
+      "displayName": "bigmanrj",
+      "archetype": {
+        "primary": "The Professor",
+        "emoji": "🎓",
+        "tagline": "Web3 Knowledge Broker",
+        "description": "The Professor archetype aligns with bigmanrj's consistent output of educational and insightful content in the Web3 space. As an established creator, they likely possess deep knowledge and the ability to distill complex information for their audience.",
+        "strengths": [
+          "Deep subject matter expertise",
+          "Ability to educate and inform"
+        ],
+        "growthTip": "Focus on creating long-form content (e.g., threads, newsletters) that showcase deeper expertise and build a more engaged community around specific Web3 sub-niches.",
+        "assignedAt": 1773305685648
+      },
+      "archetypeHistory": [
+        {
+          "archetype": {
+            "primary": "The Professor",
+            "emoji": "🎓",
+            "tagline": "Web3 Knowledge Broker",
+            "description": "The Professor archetype aligns with bigmanrj's consistent output of educational and insightful content in the Web3 space. As an established creator, they likely possess deep knowledge and the ability to distill complex information for their audience.",
+            "strengths": [
+              "Deep subject matter expertise",
+              "Ability to educate and inform"
+            ],
+            "growthTip": "Focus on creating long-form content (e.g., threads, newsletters) that showcase deeper expertise and build a more engaged community around specific Web3 sub-niches.",
+            "assignedAt": 1773305685648
+          },
+          "reason": "initial",
+          "score": 87,
+          "timestamp": 1773305685648
+        }
+      ],
+      "scores": [
+        {
+          "value": 87,
+          "scannedAt": 1773305685648
+        }
+      ],
+      "highestScore": 87,
+      "currentScore": 87,
+      "firstScannedAt": 1773305685648,
+      "lastScannedAt": 1773305685648,
+      "totalScans": 1
+    },
+    "shivst3r": {
+      "username": "shivst3r",
+      "displayName": "Shiv",
+      "archetype": {
+        "primary": "The Prophet",
+        "emoji": "🔮",
+        "tagline": "Thinking Ahead, Sharing Now",
+        "description": "This archetype fits because Shiv shares insights and perspectives on emerging trends and societal shifts, positioned as a thought leader within their network.",
+        "strengths": [
+          "Future-focused perspective",
+          "Early adopter mentality"
+        ],
+        "growthTip": "Focus on a primary niche to attract a more dedicated audience and solidify your reputation as an expert.",
+        "assignedAt": 1773310001403
+      },
+      "archetypeHistory": [
+        {
+          "archetype": {
+            "primary": "The Prophet",
+            "emoji": "🔮",
+            "tagline": "Thinking Ahead, Sharing Now",
+            "description": "This archetype fits because Shiv shares insights and perspectives on emerging trends and societal shifts, positioned as a thought leader within their network.",
+            "strengths": [
+              "Future-focused perspective",
+              "Early adopter mentality"
+            ],
+            "growthTip": "Focus on a primary niche to attract a more dedicated audience and solidify your reputation as an expert.",
+            "assignedAt": 1773310001403
+          },
+          "reason": "initial",
+          "score": 78,
+          "timestamp": 1773310001403
+        }
+      ],
+      "scores": [
+        {
+          "value": 78,
+          "scannedAt": 1773310001403
+        }
+      ],
+      "highestScore": 78,
+      "currentScore": 78,
+      "firstScannedAt": 1773310001403,
+      "lastScannedAt": 1773310001403,
+      "totalScans": 1
     }
   },
-  "lastUpdated": 1773233088361
+  "lastUpdated": 1773316203204
 }

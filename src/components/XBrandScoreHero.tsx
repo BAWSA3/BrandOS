@@ -12,7 +12,6 @@ import BrandOSDashboard, { BrandOSDashboardData } from './BrandOSDashboard';
 import BrandScoreCard from './BrandScoreCard';
 import BrandIssuesSection from './BrandIssuesSection';
 import { SaveResultsPrompt } from './SaveResultsPrompt';
-import BreakdownTeaser from './BreakdownTeaser';
 import { useAuth } from '@/hooks/useAuth';
 import { domToPng } from 'modern-screenshot';
 import { AuthenticityAnalysis, ActivityAnalysis } from '@/lib/gemini';
@@ -1411,8 +1410,8 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.5 }}
-            className="flex w-full min-h-screen relative z-[1] items-center justify-center"
-            style={{ background: '#ffffff' }}
+            className="flex w-full h-screen relative z-[1] items-center justify-center"
+            style={{ background: '#ffffff', overflow: 'hidden' }}
           >
             {/* Analysis panel - Centered with terminal styling, extra top padding for fixed progress bar */}
             <motion.div
@@ -1463,16 +1462,17 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
             transition={{ duration: 0.6 }}
             style={{
               width: '100%',
-              minHeight: '100vh',
-              position: 'relative',
+              height: '100vh',
+              position: 'fixed',
+              top: 0,
+              left: 0,
               zIndex: 10,
               background: 'transparent',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              justifyContent: 'flex-start',
-              paddingTop: 'clamp(24px, 5vw, 48px)',
-              paddingBottom: 'clamp(24px, 5vw, 48px)',
+              justifyContent: 'center',
+              overflow: 'hidden',
             }}
           >
             <div
@@ -1516,7 +1516,12 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
                 profileImageUrl={profile.profile_image_url?.replace('_normal', '_200x200') || ''}
                 username={profile.username}
                 displayName={profile.name}
-                summary={generatedBrandDNA.personalitySummary || brandScore.summary}
+                phaseScores={{
+                  define: brandScore.phases.define.score,
+                  check: brandScore.phases.check.score,
+                  generate: brandScore.phases.generate.score,
+                  scale: brandScore.phases.scale.score,
+                }}
               />
               {/* Share buttons */}
               <div className="capture-hide flex flex-col sm:flex-row justify-center items-center gap-3 mt-6 pt-4 border-t border-black/10">
@@ -1528,32 +1533,22 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
                     onClick={async () => {
                       const scoreCard = document.getElementById('brandos-score-card');
                       if (!scoreCard) return;
-                      const wrapper = document.createElement('div');
-                      wrapper.style.cssText = `background:#ffffff;padding:32px;border-radius:12px;display:inline-block;`;
-                      const header = document.createElement('div');
-                      header.style.cssText = 'display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding:0 4px;';
-                      const logo = document.createElement('img');
-                      logo.src = '/brandos-logo-capture.svg';
-                      logo.style.cssText = 'height:40px;width:auto;';
-                      const url = document.createElement('span');
-                      url.textContent = 'mybrandos.app';
-                      url.style.cssText = `font-family:'VCR OSD Mono','JetBrains Mono',monospace;font-size:12px;letter-spacing:0.12em;color:rgba(0,0,0,0.4);`;
-                      header.appendChild(logo);
-                      header.appendChild(url);
-                      wrapper.appendChild(header);
-                      const clone = scoreCard.cloneNode(true) as HTMLElement;
-                      clone.style.width = '1100px';
-                      clone.style.minHeight = '440px';
-                      clone.style.borderRadius = '8px';
-                      wrapper.appendChild(clone);
-                      document.body.appendChild(wrapper);
-                      await new Promise(r => setTimeout(r, 150));
-                      const dataUrl = await domToPng(wrapper, {
-                        backgroundColor: '#ffffff',
-                        scale: 2,
-                        quality: 1,
-                      });
-                      document.body.removeChild(wrapper);
+                      // Swap PFP to base64 on the LIVE element to bypass CORS
+                      const pfpImg = scoreCard.querySelector(`img[alt="${profile.name}"]`) as HTMLImageElement | null;
+                      const originalSrc = pfpImg?.src || '';
+                      try {
+                        const pfpRes = await fetch(`/api/image-proxy?url=${encodeURIComponent(profile.profile_image_url?.replace('_normal', '_200x200') || '')}`);
+                        if (pfpRes.ok && pfpImg) {
+                          const blob = await pfpRes.blob();
+                          const dataUrl = await new Promise<string>((r) => { const fr = new FileReader(); fr.onloadend = () => r(fr.result as string); fr.readAsDataURL(blob); });
+                          pfpImg.src = dataUrl;
+                          await new Promise(r => setTimeout(r, 50));
+                        }
+                      } catch {}
+                      // Capture the actual on-screen element directly
+                      const dataUrl = await domToPng(scoreCard, { scale: 2, quality: 1 });
+                      // Restore original PFP src
+                      if (pfpImg) pfpImg.src = originalSrc;
                       const response = await fetch(dataUrl);
                       const blob = await response.blob();
                       await navigator.clipboard.write([
@@ -1572,32 +1567,22 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
                     onClick={async () => {
                       const scoreCard = document.getElementById('brandos-score-card');
                       if (!scoreCard) return;
-                      const wrapper = document.createElement('div');
-                      wrapper.style.cssText = `background:#ffffff;padding:32px;border-radius:12px;display:inline-block;`;
-                      const header = document.createElement('div');
-                      header.style.cssText = 'display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding:0 4px;';
-                      const logo = document.createElement('img');
-                      logo.src = '/brandos-logo-capture.svg';
-                      logo.style.cssText = 'height:40px;width:auto;';
-                      const url = document.createElement('span');
-                      url.textContent = 'mybrandos.app';
-                      url.style.cssText = `font-family:'VCR OSD Mono','JetBrains Mono',monospace;font-size:12px;letter-spacing:0.12em;color:rgba(0,0,0,0.4);`;
-                      header.appendChild(logo);
-                      header.appendChild(url);
-                      wrapper.appendChild(header);
-                      const clone = scoreCard.cloneNode(true) as HTMLElement;
-                      clone.style.width = '1100px';
-                      clone.style.minHeight = '440px';
-                      clone.style.borderRadius = '8px';
-                      wrapper.appendChild(clone);
-                      document.body.appendChild(wrapper);
-                      await new Promise(r => setTimeout(r, 150));
-                      const dataUrl = await domToPng(wrapper, {
-                        backgroundColor: '#ffffff',
-                        scale: 2,
-                        quality: 1,
-                      });
-                      document.body.removeChild(wrapper);
+                      // Swap PFP to base64 on the LIVE element to bypass CORS
+                      const pfpImg = scoreCard.querySelector(`img[alt="${profile.name}"]`) as HTMLImageElement | null;
+                      const originalSrc = pfpImg?.src || '';
+                      try {
+                        const pfpRes = await fetch(`/api/image-proxy?url=${encodeURIComponent(profile.profile_image_url?.replace('_normal', '_200x200') || '')}`);
+                        if (pfpRes.ok && pfpImg) {
+                          const blob = await pfpRes.blob();
+                          const dataUrl = await new Promise<string>((r) => { const fr = new FileReader(); fr.onloadend = () => r(fr.result as string); fr.readAsDataURL(blob); });
+                          pfpImg.src = dataUrl;
+                          await new Promise(r => setTimeout(r, 50));
+                        }
+                      } catch {}
+                      // Capture the actual on-screen element directly
+                      const dataUrl = await domToPng(scoreCard, { scale: 2, quality: 1 });
+                      // Restore original PFP src
+                      if (pfpImg) pfpImg.src = originalSrc;
                       const a = document.createElement('a');
                       a.href = dataUrl;
                       a.download = `brandos-score-${profile.username}.png`;
@@ -1615,67 +1600,6 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
                 </div>
               </div>
             </div>
-
-            {/* Score comparison + Breakdown Teaser */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4, duration: 0.5 }}
-              className="w-full flex flex-col items-center mt-16"
-            >
-              {(() => {
-                const current = brandScore.overallScore;
-                const potential = Math.min(100, current + Math.round((100 - current) * 0.6));
-                return (
-                  <div style={{ width: '100%', maxWidth: '480px', textAlign: 'center', marginBottom: '24px' }}>
-                    <h3 style={{
-                      fontFamily: "'VCR OSD Mono', monospace",
-                      fontSize: '18px',
-                      letterSpacing: '0.1em',
-                      color: '#fff',
-                      marginBottom: '16px',
-                    }}>
-                      Your brand can be better.
-                    </h3>
-                    <p style={{
-                      fontSize: '15px',
-                      color: 'rgba(255, 255, 255, 0.6)',
-                      lineHeight: 1.7,
-                    }}>
-                      Your score is{' '}
-                      <span style={{ fontFamily: "'VCR OSD Mono', monospace", fontSize: '18px', color: '#fff', fontWeight: 'bold' }}>{current}</span>
-                      , but it could be{' '}
-                      <span style={{ fontFamily: "'VCR OSD Mono', monospace", fontSize: '18px', color: '#0047FF', fontWeight: 'bold' }}>{potential}</span>.
-                    </p>
-                  </div>
-                );
-              })()}
-
-              <BreakdownTeaser
-                brandScore={brandScore.overallScore}
-                archetype={generatedBrandDNA.archetype}
-                strengths={brandScore.topStrengths}
-                improvements={brandScore.topImprovements}
-              />
-
-              {/* Bottom decorative element */}
-              <div
-                style={{
-                  marginTop: '40px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                  color: 'rgba(255, 255, 255, 0.3)',
-                  fontSize: '11px',
-                  fontFamily: "'VCR OSD Mono', monospace",
-                  letterSpacing: '0.15em',
-                }}
-              >
-                <div style={{ width: '30px', height: '1px', background: 'rgba(255,255,255,0.2)' }} />
-                POWERED BY BRANDOS
-                <div style={{ width: '30px', height: '1px', background: 'rgba(255,255,255,0.2)' }} />
-              </div>
-            </motion.div>
 
           </motion.div>
         )}

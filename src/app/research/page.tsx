@@ -24,10 +24,9 @@ export default function ResearchPage() {
           <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-neutral-900 flex items-center justify-center text-4xl">
             🔍
           </div>
-          <h1 className="text-2xl font-bold text-white mb-3">Set Up Your Brand First</h1>
+          <h1 className="text-2xl font-bold text-white mb-3">set up your brand first_</h1>
           <p className="text-neutral-400 mb-6">
-            The Research Agent needs your brand DNA to find relevant content opportunities.
-            Set up your brand to get started.
+            the research agent needs your brand dna to find content opportunities. set up your brand to get started.
           </p>
           <Link
             href="/app"
@@ -36,7 +35,7 @@ export default function ResearchPage() {
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
             </svg>
-            Create Brand
+            create brand
           </Link>
         </div>
       </div>

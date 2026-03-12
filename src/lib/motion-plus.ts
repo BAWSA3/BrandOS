@@ -119,6 +119,7 @@ interface TypewriterProps {
   children: string
   as?: string
   className?: string
+  style?: CSSProperties
   speed?: "slow" | "normal" | "fast" | number
   variance?: "none" | "natural"
   cursorStyle?: CSSProperties
@@ -130,6 +131,7 @@ export function Typewriter({
   children,
   as = "span",
   className,
+  style,
   speed = "normal",
   variance = "none",
   cursorStyle,
@@ -171,5 +173,5 @@ export function Typewriter({
     },
   })
 
-  return createElement(as, { className }, displayed, cursorEl)
+  return createElement(as, { className, style }, displayed, cursorEl)
 }

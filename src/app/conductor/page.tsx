@@ -44,10 +44,9 @@ export default function ConductorPage() {
               🎼
             </div>
           </div>
-          <h1 className="text-2xl font-bold text-white mb-3">Set Up Your Brand First</h1>
+          <h1 className="text-2xl font-bold text-white mb-3">set up your brand first_</h1>
           <p className="text-neutral-400 mb-6">
-            The Conductor needs your brand DNA to orchestrate the AI agents effectively.
-            Create your brand to get started.
+            the conductor needs your brand dna to orchestrate the ai agents. create your brand to get started.
           </p>
           <Link
             href="/app"
@@ -56,7 +55,7 @@ export default function ConductorPage() {
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
             </svg>
-            Create Brand
+            create brand
           </Link>
         </motion.div>
       </div>
@@ -91,7 +90,7 @@ export default function ConductorPage() {
                   </span>
                 </h1>
                 <p className="text-sm text-neutral-400">
-                  AI Orchestration for {brand.name}
+                  ai orchestration for {brand.name}
                 </p>
               </div>
             </div>
@@ -108,7 +107,7 @@ export default function ConductorPage() {
                 <span className="w-4 h-4 rounded-full bg-emerald-500/20 flex items-center justify-center text-[10px]">✍️</span>
                 <span className="w-4 h-4 rounded-full bg-amber-500/20 flex items-center justify-center text-[10px]">📊</span>
               </span>
-              Direct Agents
+              direct agents
             </Link>
           </div>
         </div>

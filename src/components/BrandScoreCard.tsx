@@ -12,6 +12,7 @@ export interface BrandScoreCardProps {
   username: string;
   displayName: string;
   summary?: string;
+  phaseScores?: { define: number; check: number; generate: number; scale: number };
 }
 
 const BrandScoreCard: React.FC<BrandScoreCardProps> = ({
@@ -21,6 +22,8 @@ const BrandScoreCard: React.FC<BrandScoreCardProps> = ({
   profileImageUrl,
   username,
   displayName,
+  summary,
+  phaseScores,
 }) => {
   return (
     <>
@@ -47,12 +50,12 @@ const BrandScoreCard: React.FC<BrandScoreCardProps> = ({
             <Info className="w-3 h-3 text-white/50 hover:text-white/80 cursor-help" />
           </span>
           {/* Profile image + username */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
             <div className="text-right">
-              <span className="font-brand font-bold text-white text-sm leading-none block">{displayName}</span>
-              <span className="font-os text-[11px] text-white/70 block mt-0.5">@{username}</span>
+              <span className="font-brand font-bold text-white text-lg md:text-xl leading-none block">{displayName}</span>
+              <span className="font-os text-sm text-white/70 block mt-1">@{username}</span>
             </div>
-            <div className="w-[52px] h-[52px] rounded-full border-2 border-white/40 overflow-hidden shrink-0">
+            <div className="w-[72px] h-[72px] rounded-full border-2 border-white/40 overflow-hidden shrink-0">
               <img
                 src={profileImageUrl}
                 alt={displayName}
@@ -62,9 +65,9 @@ const BrandScoreCard: React.FC<BrandScoreCardProps> = ({
           </div>
         </div>
 
-        {/* Score number */}
-        <div className="relative z-10 my-auto">
-          <h1 className="font-brand font-black italic text-[120px] md:text-[180px] leading-none tracking-tighter text-white drop-shadow-xl">
+        {/* Score number + summary */}
+        <div className="relative z-10 my-auto flex items-center justify-between">
+          <h1 className="font-brand font-black italic text-[160px] md:text-[240px] leading-none tracking-tighter text-white drop-shadow-xl shrink-0">
             <AnimateNumber
               transition={{
                 y: { type: "spring", duration: 0.8, bounce: 0 },
@@ -76,6 +79,32 @@ const BrandScoreCard: React.FC<BrandScoreCardProps> = ({
               {score}
             </AnimateNumber>
           </h1>
+          {phaseScores ? (
+            <div className="flex flex-col gap-2.5 text-right max-w-[240px]">
+              {(() => {
+                const phases = [
+                  { label: 'IDENTITY', value: phaseScores.define },
+                  { label: 'CONSISTENCY', value: phaseScores.check },
+                  { label: 'CONTENT', value: phaseScores.generate },
+                  { label: 'GROWTH', value: phaseScores.scale },
+                ];
+                const total = phases.reduce((sum, p) => sum + p.value, 0);
+                return phases.map(({ label, value }) => {
+                  const contribution = Math.round((value / total) * score);
+                  return (
+                    <div key={label} className="flex items-center justify-end gap-3">
+                      <span className="font-os text-[10px] md:text-xs tracking-wider text-white/40">{label}</span>
+                      <span className="font-os text-base md:text-lg font-bold text-white/90">+{contribution}</span>
+                    </div>
+                  );
+                });
+              })()}
+            </div>
+          ) : summary ? (
+            <p className="font-os text-sm md:text-base text-white/70 leading-relaxed max-w-[340px] text-right line-clamp-3">
+              {summary}
+            </p>
+          ) : null}
         </div>
 
         {/* Bottom stats */}

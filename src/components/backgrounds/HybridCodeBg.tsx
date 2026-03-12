@@ -432,8 +432,23 @@ function TypedBox({ side }: { side: 0 | 1 }) {
   );
 }
 
+// ── Hook to detect mobile ──
+function useIsMobile(breakpoint = 768) {
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const mql = window.matchMedia(`(max-width: ${breakpoint}px)`);
+    setIsMobile(mql.matches);
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mql.addEventListener('change', handler);
+    return () => mql.removeEventListener('change', handler);
+  }, [breakpoint]);
+  return isMobile;
+}
+
 // ── Main Component ──
 export default function HybridCodeBg() {
+  const isMobile = useIsMobile();
+
   return (
     <div
       style={{
@@ -443,19 +458,24 @@ export default function HybridCodeBg() {
         pointerEvents: 'none',
       }}
     >
-      {/* TypeScript code blocks — typed, cycle every ~8s */}
-      <TypedCodeBlock setIndex={0} />
-      <TypedCodeBlock setIndex={1} />
+      {/* Hide decorative code elements on mobile — they overlap hero content */}
+      {!isMobile && (
+        <>
+          {/* TypeScript code blocks — typed, cycle every ~8s */}
+          <TypedCodeBlock setIndex={0} />
+          <TypedCodeBlock setIndex={1} />
 
-      {/* Left terminal logs — cycle every ~7s */}
-      <TypedLogBlock />
+          {/* Left terminal logs — cycle every ~7s */}
+          <TypedLogBlock />
 
-      {/* Right comment block — cycle every ~6s */}
-      <TypedCommentBlock />
+          {/* Right comment block — cycle every ~6s */}
+          <TypedCommentBlock />
 
-      {/* Bottom decorative boxes — cycle every ~5.5s */}
-      <TypedBox side={0} />
-      <TypedBox side={1} />
+          {/* Bottom decorative boxes — cycle every ~5.5s */}
+          <TypedBox side={0} />
+          <TypedBox side={1} />
+        </>
+      )}
     </div>
   );
 }

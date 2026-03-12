@@ -75,7 +75,7 @@ export default function EnterprisePage() {
           href="/pricing"
           className="flex items-center gap-1 text-sm text-white/50 transition-colors hover:text-white/80"
         >
-          <ArrowLeft className="h-4 w-4" /> Back to Pricing
+          <ArrowLeft className="h-4 w-4" /> back to pricing
         </Link>
       </nav>
 
@@ -89,58 +89,57 @@ export default function EnterprisePage() {
             </div>
 
             <h1 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl">
-              Brand consistency
+              brand consistency
               <br />
-              at scale.
+              at scale_
             </h1>
             <p className="mt-4 text-lg text-white/50">
-              Give your team the tools to maintain perfect brand alignment across
+              give your team the tools to maintain brand alignment across
               every piece of content, every channel, every time.
             </p>
 
             <div className="mt-10 space-y-6">
               <EnterpriseFeature
                 icon={<Users className="h-5 w-5" />}
-                title="Unlimited team members"
-                description="Role-based access for content creators, brand managers, and executives."
+                title="unlimited team members"
+                description="role-based access for creators, brand managers, and executives."
               />
               <EnterpriseFeature
                 icon={<Globe className="h-5 w-5" />}
-                title="Unlimited brands & platforms"
-                description="Manage every brand in your portfolio across all social platforms."
+                title="unlimited brands & platforms"
+                description="manage every brand in your portfolio across all platforms."
               />
               <EnterpriseFeature
                 icon={<Lock className="h-5 w-5" />}
-                title="SSO / SAML authentication"
-                description="Enterprise-grade security with your existing identity provider."
+                title="sso / saml"
+                description="enterprise-grade security with your existing identity provider."
               />
               <EnterpriseFeature
                 icon={<Shield className="h-5 w-5" />}
-                title="Audit logs & compliance"
-                description="Full audit trail for regulated industries and compliance requirements."
+                title="audit logs & compliance"
+                description="full audit trail for regulated industries and compliance."
               />
               <EnterpriseFeature
                 icon={<Zap className="h-5 w-5" />}
-                title="Custom AI training"
-                description="Train the AI on your specific brand voice for even better results."
+                title="custom ai training"
+                description="train the ai on your specific brand voice."
               />
               <EnterpriseFeature
                 icon={<BarChart3 className="h-5 w-5" />}
-                title="Advanced analytics dashboard"
-                description="Cross-brand consistency reporting and team performance metrics."
+                title="advanced analytics"
+                description="cross-brand consistency reporting and team performance."
               />
               <EnterpriseFeature
                 icon={<Headphones className="h-5 w-5" />}
-                title="Dedicated support + SLA"
-                description="Named account manager, 99.9% uptime SLA, and priority response."
+                title="dedicated support + sla"
+                description="named account manager, 99.9% uptime, and priority response."
               />
             </div>
 
             <div className="mt-10 rounded-xl border border-white/10 bg-white/[0.02] p-5">
-              <p className="text-sm font-medium text-white">Trusted by teams who care about brand</p>
+              <p className="text-sm font-medium text-white">trusted by teams who care about brand</p>
               <p className="mt-1 text-xs text-white/40">
-                Starting at $500/month for teams of 5+. Custom pricing based on seats and usage.
-                Annual contracts available with preferred rates.
+                starting at $500/mo for teams of 5+. custom pricing based on seats and usage.
               </p>
             </div>
           </div>
@@ -152,16 +151,15 @@ export default function EnterprisePage() {
                 <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-500/20">
                   <Check className="h-8 w-8 text-emerald-400" />
                 </div>
-                <h2 className="text-2xl font-bold text-white">We&apos;ll be in touch!</h2>
+                <h2 className="text-2xl font-bold text-white">we&apos;ll be in touch_</h2>
                 <p className="mt-2 text-white/50">
-                  Thanks for your interest in BrandOS Enterprise. Our team will reach out
-                  within 1 business day to discuss your needs.
+                  thanks for your interest. we&apos;ll reach out within 1 business day.
                 </p>
                 <Link
                   href="/pricing"
                   className="mt-6 inline-flex items-center gap-2 rounded-xl bg-white/10 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-white/15"
                 >
-                  <ArrowLeft className="h-4 w-4" /> Back to Pricing
+                  <ArrowLeft className="h-4 w-4" /> back to pricing
                 </Link>
               </div>
             ) : (
@@ -169,18 +167,18 @@ export default function EnterprisePage() {
                 onSubmit={handleSubmit}
                 className="rounded-2xl border border-white/10 bg-white/[0.02] p-8"
               >
-                <h2 className="mb-6 text-xl font-bold text-white">Talk to our team</h2>
+                <h2 className="mb-6 text-xl font-bold text-white">talk to our team_</h2>
 
                 <div className="space-y-4">
                   <div className="grid gap-4 sm:grid-cols-2">
                     <FormField
-                      label="Name"
+                      label="name"
                       value={formData.name}
                       onChange={(v) => updateField('name', v)}
                       required
                     />
                     <FormField
-                      label="Work Email"
+                      label="work email"
                       type="email"
                       value={formData.email}
                       onChange={(v) => updateField('email', v)}
@@ -189,20 +187,20 @@ export default function EnterprisePage() {
                   </div>
                   <div className="grid gap-4 sm:grid-cols-2">
                     <FormField
-                      label="Company"
+                      label="company"
                       value={formData.company}
                       onChange={(v) => updateField('company', v)}
                       required
                     />
                     <FormField
-                      label="Role / Title"
+                      label="role / title"
                       value={formData.role}
                       onChange={(v) => updateField('role', v)}
                     />
                   </div>
                   <div className="grid gap-4 sm:grid-cols-2">
                     <SelectField
-                      label="Team Size"
+                      label="team size"
                       value={formData.teamSize}
                       onChange={(v) => updateField('teamSize', v)}
                       options={[
@@ -216,7 +214,7 @@ export default function EnterprisePage() {
                       required
                     />
                     <SelectField
-                      label="Brands Managed"
+                      label="brands managed"
                       value={formData.brandsManaged}
                       onChange={(v) => updateField('brandsManaged', v)}
                       options={[
@@ -231,7 +229,7 @@ export default function EnterprisePage() {
                   </div>
                   <div>
                     <label className="mb-1.5 block text-sm font-medium text-white/60">
-                      Tell us about your needs
+                      tell us about your needs
                     </label>
                     <textarea
                       value={formData.message}
@@ -252,13 +250,13 @@ export default function EnterprisePage() {
                     <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
                   ) : (
                     <>
-                      Request a Demo <ArrowRight className="h-4 w-4" />
+                      request a demo <ArrowRight className="h-4 w-4" />
                     </>
                   )}
                 </button>
 
                 <p className="mt-3 text-center text-xs text-white/30">
-                  We&apos;ll respond within 1 business day. No spam, ever.
+                  we&apos;ll respond within 1 business day. no spam, ever.
                 </p>
               </form>
             )}

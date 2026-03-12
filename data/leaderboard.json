@@ -2,17 +2,17 @@
   {
     "username": "banditxbt",
     "displayName": "banditxbt",
-    "score": 84,
+    "score": 89,
     "profileImage": "",
-    "timestamp": 1773118959839,
+    "timestamp": 1773310535429,
     "isCrypto": false
   },
   {
     "username": "BawsaXBT",
     "displayName": "BawsaXBT",
-    "score": 79,
+    "score": 89,
     "profileImage": "",
-    "timestamp": 1773130159690,
+    "timestamp": 1773307675007,
     "isCrypto": false
   },
   {
@@ -98,9 +98,9 @@
   {
     "username": "web3rj",
     "displayName": "web3rj",
-    "score": 72,
+    "score": 87,
     "profileImage": "",
-    "timestamp": 1767642543688,
+    "timestamp": 1773305685662,
     "isCrypto": false
   },
   {
@@ -188,7 +188,7 @@
     "displayName": "web3pingu",
     "score": 79,
     "profileImage": "",
-    "timestamp": 1768905125679,
+    "timestamp": 1773305869792,
     "isCrypto": false
   },
   {
@@ -221,6 +221,30 @@
     "score": 88,
     "profileImage": "",
     "timestamp": 1773232929855,
+    "isCrypto": false
+  },
+  {
+    "username": "foruai",
+    "displayName": "foruai",
+    "score": 88,
+    "profileImage": "",
+    "timestamp": 1773298534206,
+    "isCrypto": false
+  },
+  {
+    "username": "orpheuskaze",
+    "displayName": "orpheuskaze",
+    "score": 78,
+    "profileImage": "",
+    "timestamp": 1773299820558,
+    "isCrypto": false
+  },
+  {
+    "username": "shivst3r",
+    "displayName": "shivst3r",
+    "score": 78,
+    "profileImage": "",
+    "timestamp": 1773310001431,
     "isCrypto": false
   }
 ]

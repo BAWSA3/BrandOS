@@ -43,24 +43,24 @@ interface FeatureRow {
 }
 
 const COMPARISON_FEATURES: FeatureRow[] = [
-  { label: 'Brand Profiles', free: '1', creator: '1', pro: '3', agency: '15', enterprise: 'Unlimited' },
-  { label: 'Content Checks / month', free: '5', creator: '50', pro: '200', agency: '1,000', enterprise: 'Unlimited' },
-  { label: 'AI Generations / month', free: '3', creator: '25', pro: '100', agency: '500', enterprise: 'Unlimited' },
-  { label: 'History Retention', free: '7 days', creator: '30 days', pro: 'Unlimited', agency: 'Unlimited', enterprise: 'Unlimited' },
-  { label: 'Team Members', free: '1', creator: '1', pro: '3', agency: '10', enterprise: 'Unlimited' },
-  { label: 'Social Platforms', free: '1', creator: '1', pro: '3', agency: '5', enterprise: 'Unlimited' },
-  { label: 'Brand Score Tracking', free: true, creator: true, pro: true, agency: true, enterprise: true },
-  { label: 'Brand DNA Report', free: 'Basic', creator: 'Full + PDF', pro: 'Full + PDF', agency: 'Full + PDF', enterprise: 'Custom' },
-  { label: 'Voice Fingerprint', free: false, creator: false, pro: true, agency: true, enterprise: true },
-  { label: 'Content Calendar', free: false, creator: false, pro: true, agency: true, enterprise: true },
-  { label: 'AI Agents', free: false, creator: false, pro: true, agency: true, enterprise: true },
-  { label: 'Brand Sharing', free: false, creator: false, pro: 'Read-only', agency: 'Full', enterprise: 'Full' },
-  { label: 'Advanced Analytics', free: false, creator: false, pro: false, agency: true, enterprise: true },
-  { label: 'API Access', free: false, creator: false, pro: false, agency: true, enterprise: true },
-  { label: 'White-Label Reports', free: false, creator: false, pro: false, agency: true, enterprise: true },
-  { label: 'SSO / SAML', free: false, creator: false, pro: false, agency: false, enterprise: true },
-  { label: 'Priority Support', free: false, creator: false, pro: false, agency: true, enterprise: true },
-  { label: 'Custom AI Training', free: false, creator: false, pro: false, agency: false, enterprise: true },
+  { label: 'brand profiles', free: '1', creator: '1', pro: '3', agency: '15', enterprise: 'unlimited' },
+  { label: 'content checks / month', free: '5', creator: '50', pro: '200', agency: '1,000', enterprise: 'unlimited' },
+  { label: 'ai generations / month', free: '3', creator: '25', pro: '100', agency: '500', enterprise: 'unlimited' },
+  { label: 'history retention', free: '7 days', creator: '30 days', pro: 'unlimited', agency: 'unlimited', enterprise: 'unlimited' },
+  { label: 'team members', free: '1', creator: '1', pro: '3', agency: '10', enterprise: 'unlimited' },
+  { label: 'social platforms', free: '1', creator: '1', pro: '3', agency: '5', enterprise: 'unlimited' },
+  { label: 'brand score tracking', free: true, creator: true, pro: true, agency: true, enterprise: true },
+  { label: 'brand dna report', free: 'basic', creator: 'full + pdf', pro: 'full + pdf', agency: 'full + pdf', enterprise: 'custom' },
+  { label: 'voice fingerprint', free: false, creator: false, pro: true, agency: true, enterprise: true },
+  { label: 'content calendar', free: false, creator: false, pro: true, agency: true, enterprise: true },
+  { label: 'ai agents', free: false, creator: false, pro: true, agency: true, enterprise: true },
+  { label: 'brand sharing', free: false, creator: false, pro: 'read-only', agency: 'full', enterprise: 'full' },
+  { label: 'advanced analytics', free: false, creator: false, pro: false, agency: true, enterprise: true },
+  { label: 'api access', free: false, creator: false, pro: false, agency: true, enterprise: true },
+  { label: 'white-label reports', free: false, creator: false, pro: false, agency: true, enterprise: true },
+  { label: 'sso / saml', free: false, creator: false, pro: false, agency: false, enterprise: true },
+  { label: 'priority support', free: false, creator: false, pro: false, agency: true, enterprise: true },
+  { label: 'custom ai training', free: false, creator: false, pro: false, agency: false, enterprise: true },
 ];
 
 export default function PricingPage() {
@@ -109,14 +109,14 @@ export default function PricingPage() {
               href="/app"
               className="rounded-lg bg-white/10 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-white/15"
             >
-              Go to App
+              go to app
             </Link>
           ) : (
             <Link
               href="/"
               className="rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 px-4 py-2 text-sm font-semibold text-white transition-all hover:from-blue-600 hover:to-purple-700"
             >
-              Get Started Free
+              get started free
             </Link>
           )}
         </div>
@@ -127,15 +127,15 @@ export default function PricingPage() {
         <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-blue-500/20 bg-blue-500/10 px-4 py-1.5">
           <Sparkles className="h-3.5 w-3.5 text-blue-400" />
           <span className="text-xs font-medium text-blue-300">
-            Founder&apos;s pricing — lock in these rates forever
+            founder&apos;s pricing — lock in these rates forever
           </span>
         </div>
         <h1 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl">
-          Plans that scale with your brand
+          plans that scale with your brand_
         </h1>
         <p className="mx-auto mt-4 max-w-2xl text-lg text-white/50">
-          Start free. Upgrade when you need more power. Every plan includes our
-          core brand analysis engine.
+          start free. upgrade when you need more. every plan includes our
+          core brand engine.
         </p>
 
         {/* Interval toggle */}
@@ -148,7 +148,7 @@ export default function PricingPage() {
                 : 'text-white/50 hover:text-white/70'
             }`}
           >
-            Monthly
+            monthly
           </button>
           <button
             onClick={() => setInterval('annual')}
@@ -158,9 +158,9 @@ export default function PricingPage() {
                 : 'text-white/50 hover:text-white/70'
             }`}
           >
-            Annual
+            annual
             <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs font-semibold text-emerald-400">
-              Save 20%
+              save 20%
             </span>
           </button>
         </div>
@@ -187,7 +187,7 @@ export default function PricingPage() {
                 {isPro && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                     <span className="rounded-full bg-gradient-to-r from-blue-500 to-purple-600 px-4 py-1 text-xs font-bold text-white shadow-lg">
-                      MOST POPULAR
+                      most popular
                     </span>
                   </div>
                 )}
@@ -201,7 +201,7 @@ export default function PricingPage() {
 
                 <div className="mt-4">
                   {price === 0 ? (
-                    <div className="text-3xl font-extrabold text-white">Free</div>
+                    <div className="text-3xl font-extrabold text-white">free</div>
                   ) : (
                     <div className="flex items-baseline gap-1">
                       <span className="text-3xl font-extrabold text-white">${price}</span>
@@ -221,13 +221,13 @@ export default function PricingPage() {
                     <FeatureItem>{plan.limits.checksPerMonth} checks/month</FeatureItem>
                     <FeatureItem>{plan.limits.generationsPerMonth} generations/month</FeatureItem>
                     <FeatureItem>
-                      {plan.limits.historyDays === -1 ? 'Unlimited' : `${plan.limits.historyDays}-day`} history
+                      {plan.limits.historyDays === -1 ? 'unlimited' : `${plan.limits.historyDays}-day`} history
                     </FeatureItem>
-                    {plan.limits.voiceFingerprint && <FeatureItem>Voice Fingerprint</FeatureItem>}
-                    {plan.limits.aiAgents && <FeatureItem>All AI Agents</FeatureItem>}
-                    {plan.limits.contentCalendar && <FeatureItem>Content Calendar</FeatureItem>}
-                    {plan.limits.apiAccess && <FeatureItem>API Access</FeatureItem>}
-                    {plan.limits.whiteLabel && <FeatureItem>White-Label Reports</FeatureItem>}
+                    {plan.limits.voiceFingerprint && <FeatureItem>voice fingerprint</FeatureItem>}
+                    {plan.limits.aiAgents && <FeatureItem>all ai agents</FeatureItem>}
+                    {plan.limits.contentCalendar && <FeatureItem>content calendar</FeatureItem>}
+                    {plan.limits.apiAccess && <FeatureItem>api access</FeatureItem>}
+                    {plan.limits.whiteLabel && <FeatureItem>white-label reports</FeatureItem>}
                     {plan.limits.teamMembers > 1 && (
                       <FeatureItem>{plan.limits.teamMembers} team members</FeatureItem>
                     )}
@@ -240,14 +240,14 @@ export default function PricingPage() {
                       disabled
                       className="w-full rounded-xl bg-white/5 py-3 text-sm font-semibold text-white/40"
                     >
-                      Current Plan
+                      current plan
                     </button>
                   ) : tier === 'FREE' ? (
                     <Link
                       href="/"
                       className="block w-full rounded-xl border border-white/10 py-3 text-center text-sm font-semibold text-white transition-all hover:bg-white/5"
                     >
-                      Get Started
+                      get started
                     </Link>
                   ) : (
                     <button
@@ -263,7 +263,7 @@ export default function PricingPage() {
                         <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
                       ) : (
                         <>
-                          Get {plan.name} <ArrowRight className="h-4 w-4" />
+                          get {plan.name} <ArrowRight className="h-4 w-4" />
                         </>
                       )}
                     </button>
@@ -282,10 +282,10 @@ export default function PricingPage() {
                 <Building2 className="h-7 w-7" />
               </div>
               <div>
-                <h3 className="text-xl font-bold text-white">Enterprise</h3>
+                <h3 className="text-xl font-bold text-white">enterprise_</h3>
                 <p className="mt-1 text-sm text-white/50">
-                  Unlimited everything. SSO, audit logs, custom AI training, dedicated support, and SLA.
-                  Built for agencies and large teams.
+                  unlimited everything. sso, audit logs, custom ai training, dedicated support, and sla.
+                  built for agencies and large teams.
                 </p>
               </div>
             </div>
@@ -298,7 +298,7 @@ export default function PricingPage() {
                 onClick={handleEnterprise}
                 className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 px-6 py-3 text-sm font-bold text-white transition-all hover:from-amber-600 hover:to-orange-600 shadow-lg shadow-amber-500/20"
               >
-                Contact Sales <ArrowRight className="h-4 w-4" />
+                contact sales <ArrowRight className="h-4 w-4" />
               </button>
             </div>
           </div>
@@ -311,7 +311,7 @@ export default function PricingPage() {
           onClick={() => setShowComparison(!showComparison)}
           className="mx-auto mb-8 flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.02] px-6 py-3 text-sm font-medium text-white/60 transition-all hover:border-white/20 hover:text-white/80"
         >
-          {showComparison ? 'Hide' : 'Show'} full feature comparison
+          {showComparison ? 'hide' : 'show'} full feature comparison
         </button>
 
         {showComparison && (
@@ -349,8 +349,8 @@ export default function PricingPage() {
         <div className="mx-auto max-w-4xl px-6 py-16 text-center">
           <div className="flex flex-wrap items-center justify-center gap-8">
             <TrustBadge icon={<Shield className="h-5 w-5" />} label="14-day money-back guarantee" />
-            <TrustBadge icon={<Globe className="h-5 w-5" />} label="Cancel anytime" />
-            <TrustBadge icon={<Zap className="h-5 w-5" />} label="Instant access" />
+            <TrustBadge icon={<Globe className="h-5 w-5" />} label="cancel anytime" />
+            <TrustBadge icon={<Zap className="h-5 w-5" />} label="instant access" />
           </div>
         </div>
       </div>
@@ -358,28 +358,28 @@ export default function PricingPage() {
       {/* FAQ */}
       <div className="mx-auto max-w-3xl px-6 py-16">
         <h2 className="mb-10 text-center text-2xl font-bold text-white">
-          Frequently Asked Questions
+          questions_
         </h2>
         <div className="space-y-4">
           <FaqItem
-            q="Can I change plans later?"
-            a="Absolutely. Upgrade, downgrade, or cancel at any time from your account settings. Changes take effect immediately and we'll prorate your billing."
+            q="can i change plans later?"
+            a="absolutely. upgrade, downgrade, or cancel anytime from your account settings. changes take effect immediately and we'll prorate your billing."
           />
           <FaqItem
-            q="What happens when I hit my usage limit?"
-            a="You'll see a friendly prompt to upgrade. Your existing data and settings are never affected — you just won't be able to run new checks or generations until the next billing cycle or you upgrade."
+            q="what happens when i hit my usage limit?"
+            a="you'll see a prompt to upgrade. your existing data and settings are never affected — you just can't run new checks or generations until the next cycle or you upgrade."
           />
           <FaqItem
-            q="Is there a free trial for paid plans?"
-            a="We offer a generous free tier so you can experience BrandOS firsthand. For the Pro plan and above, we offer a 14-day money-back guarantee — no questions asked."
+            q="is there a free trial for paid plans?"
+            a="we offer a generous free tier so you can try brandos firsthand. for pro and above, there's a 14-day money-back guarantee — no questions asked."
           />
           <FaqItem
-            q="What payment methods do you accept?"
-            a="We accept all major credit and debit cards through Stripe. Enterprise customers can also pay via ACH or wire transfer with annual invoicing."
+            q="what payment methods do you accept?"
+            a="all major credit and debit cards through stripe. enterprise customers can also pay via ach or wire transfer with annual invoicing."
           />
           <FaqItem
-            q="What are Founder's prices?"
-            a="Early adopters who sign up now lock in their current rate forever, even as we add features and raise prices for new customers."
+            q="what are founder's prices?"
+            a="early adopters who sign up now lock in their current rate forever, even as we add features and raise prices."
           />
         </div>
       </div>

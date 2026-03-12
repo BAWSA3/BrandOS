@@ -969,6 +969,8 @@ code { padding: 2px 6px; }
 .landing-input::placeholder { color: #f5f0e8 !important; opacity: 0.7; }
 .landing-input-light::placeholder { color: #666666 !important; opacity: 0.8; }
 .capturing .grayscale, .capturing img.grayscale { filter: none !important; }
+.capturing .capture-logo { display: flex !important; }
+.capturing .capture-hide { display: none !important; }
 
 /* ============================================
    RETRO OS — CRT SCANLINES & TERMINAL INPUT
@@ -1056,3 +1058,45 @@ code { padding: 2px 6px; }
 .workflow-controls button:last-child { border-bottom: none !important; }
 .workflow-controls button svg { fill: currentColor !important; }
 .react-flow__minimap { background: var(--surface) !important; }
+
+/* ============================================
+   MOBILE RESPONSIVE — HERO & HOMEPAGE
+   ============================================ */
+
+/* Hero logo — desktop */
+.hero-logo-wrapper {
+  margin-top: -148px;
+  margin-bottom: -120px;
+}
+.hero-logo-img {
+  width: clamp(1500px, 250vw, 3500px);
+  max-height: 55vh;
+}
+
+/* Hero logo — mobile */
+@media (max-width: 768px) {
+  .hero-logo-wrapper {
+    margin-top: -60px;
+    margin-bottom: -50px;
+  }
+  .hero-logo-img {
+    width: clamp(600px, 180vw, 1200px);
+    max-height: 35vh;
+  }
+
+  /* Make label-mono readable on mobile */
+  .label-mono {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-logo-wrapper {
+    margin-top: -40px;
+    margin-bottom: -35px;
+  }
+  .hero-logo-img {
+    width: clamp(400px, 160vw, 800px);
+    max-height: 30vh;
+  }
+}

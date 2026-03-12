@@ -104,7 +104,7 @@ export default function GrowthPlanPage() {
             color: '#000',
             margin: '0 0 12px 0',
           }}>
-            Growth Plan Generator
+            growth plan generator_
           </h1>
 
           <p style={{
@@ -114,7 +114,7 @@ export default function GrowthPlanPage() {
             lineHeight: 1.6,
             marginBottom: '40px',
           }}>
-            Data-driven growth plan built from your content intelligence system. Every recommendation is based on your real numbers.
+            growth plans built from your content data. every recommendation based on your real numbers.
           </p>
 
           {/* Input fields */}
@@ -127,7 +127,7 @@ export default function GrowthPlanPage() {
                 color: 'rgba(0,0,0,0.4)',
                 display: 'block',
                 marginBottom: '8px',
-              }}>CURRENT FOLLOWERS</label>
+              }}>current followers</label>
               <input
                 type="number"
                 value={currentFollowers}
@@ -160,7 +160,7 @@ export default function GrowthPlanPage() {
                 color: 'rgba(0,0,0,0.4)',
                 display: 'block',
                 marginBottom: '8px',
-              }}>TARGET FOLLOWERS</label>
+              }}>target followers</label>
               <input
                 type="number"
                 value={targetFollowers}
@@ -188,7 +188,7 @@ export default function GrowthPlanPage() {
                 color: 'rgba(0,0,0,0.4)',
                 display: 'block',
                 marginBottom: '8px',
-              }}>TIMELINE (MONTHS)</label>
+              }}>timeline (months)</label>
               <select
                 value={deadlineMonths}
                 onChange={(e) => setDeadlineMonths(e.target.value)}
@@ -250,7 +250,7 @@ export default function GrowthPlanPage() {
               letterSpacing: '0.12em',
               color: brandId ? '#fff' : 'rgba(0,0,0,0.3)',
             }}>
-              {brandId ? 'GENERATE MY GROWTH PLAN' : 'RUN BRAND DNA FIRST'}
+              {brandId ? '\u2192 generate growth plan' : 'run brand dna first'}
             </span>
           </button>
 
@@ -261,7 +261,7 @@ export default function GrowthPlanPage() {
               color: 'rgba(0,0,0,0.4)',
               marginTop: '12px',
             }}>
-              You need a Brand DNA analysis before generating a growth plan.
+              you need a brand dna analysis before generating a growth plan.
             </p>
           )}
         </motion.div>
@@ -293,7 +293,7 @@ export default function GrowthPlanPage() {
             color: 'rgba(0,0,0,0.4)',
             marginBottom: '24px',
           }}>
-            ANALYZING YOUR DATA...
+            analyzing your data...
           </div>
 
           {/* Loading bar */}
@@ -366,7 +366,7 @@ export default function GrowthPlanPage() {
             lineHeight: 1.6,
             marginBottom: '32px',
           }}>
-            Your growth plan is ready. The intelligence system will track your progress automatically.
+            your growth plan is ready. the intelligence system will track your progress.
           </p>
           <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
             <button
@@ -387,7 +387,7 @@ export default function GrowthPlanPage() {
                 fontSize: '11px',
                 letterSpacing: '0.1em',
                 color: 'rgba(0,0,0,0.6)',
-              }}>REVIEW PLAN</span>
+              }}>review plan</span>
             </button>
             <button
               onClick={() => window.location.href = '/app'}
@@ -404,7 +404,7 @@ export default function GrowthPlanPage() {
                 fontSize: '11px',
                 letterSpacing: '0.1em',
                 color: '#fff',
-              }}>GO TO DASHBOARD</span>
+              }}>go to dashboard</span>
             </button>
           </div>
         </motion.div>

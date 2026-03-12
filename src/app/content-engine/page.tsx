@@ -191,15 +191,15 @@ export default function ContentEnginePage() {
           <div className="w-20 h-20 mx-auto mb-6 rounded-[var(--radius-lg)] bg-[var(--surface)] shadow-[var(--shadow-card)] flex items-center justify-center font-mono text-2xl text-[var(--accent)]">
             &gt;_
           </div>
-          <h1 className="text-2xl font-bold text-[var(--text-primary)] mb-3">Set Up Your Brand First</h1>
+          <h1 className="text-2xl font-bold text-[var(--text-primary)] mb-3">set up your brand first_</h1>
           <p className="text-[var(--text-tertiary)] mb-6">
-            The content engine needs your brand DNA to generate on-brand content with your voice.
+            the content engine needs your brand dna to generate on-brand content with your voice.
           </p>
           <Link
             href="/app"
             className="btn-primary inline-flex items-center gap-2 px-6 py-3 font-medium rounded-[var(--radius-md)]"
           >
-            Create Brand
+            create brand
           </Link>
         </div>
       </div>

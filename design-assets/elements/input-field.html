@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html><head><style>
+  body { margin: 0; background: #ffffff; display: flex; align-items: center; justify-content: center; height: 100vh; }
+  .wrapper { position: relative; width: 420px; }
+  .prompt {
+    position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+    font-family: 'VCR OSD Mono', 'Courier New', monospace;
+    font-size: 1.125rem; color: rgba(0,0,0,0.3); z-index: 1;
+  }
+  .placeholder {
+    position: absolute; left: 32px; top: 50%; transform: translateY(-50%);
+    font-family: 'VCR OSD Mono', 'Courier New', monospace;
+    font-size: 1.125rem; color: rgba(0,0,0,0.35); pointer-events: none;
+  }
+  input {
+    width: 100%; box-sizing: border-box;
+    font-size: 1.125rem; padding: 1rem 1rem 1rem 32px;
+    text-align: left; border-radius: 10px;
+    border: 1px solid rgba(0,0,0,0.15);
+    background: rgba(0,0,0,0.05);
+    backdrop-filter: blur(8px);
+    color: #000000; outline: none;
+    font-family: 'VCR OSD Mono', 'Courier New', monospace;
+  }
+  input:focus { border-color: rgba(0, 71, 255, 0.5); box-shadow: 0 0 20px rgba(0, 71, 255, 0.15); }
+</style></head>
+<body>
+  <div class="wrapper">
+    <span class="prompt">&gt;</span>
+    <span class="placeholder">enter @username</span>
+    <input type="text" />
+  </div>
+</body></html>
