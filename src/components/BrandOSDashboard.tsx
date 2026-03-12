@@ -328,16 +328,16 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({
                </span>
              ))}
            </div>
-           <div className="bg-black/90 p-3 md:p-4 rounded-[2px] min-h-[100px] md:min-h-[120px]">
+           <div className="bg-white border border-black/20 p-3 md:p-4 rounded-[2px] min-h-[100px] md:min-h-[120px]">
              <Typewriter
                as="pre"
-               className="font-os text-xs md:text-sm text-[#E0E0E0] leading-relaxed whitespace-pre-wrap"
+               className="font-os text-xs md:text-sm text-black leading-relaxed whitespace-pre-wrap"
                speed="fast"
                variance="natural"
                cursorStyle={{
                  width: '6px',
                  height: '14px',
-                 backgroundColor: '#E0E0E0',
+                 backgroundColor: '#000',
                  top: '0.05em',
                }}
              >
