@@ -1094,10 +1094,15 @@ code { padding: 2px 6px; }
 
   .hero-tagline {
     margin-top: 40px !important;
+    height: 24px;
+  }
+  .hero-tagline-spacer {
+    display: none;
   }
   .hero-tagline-text {
     font-size: clamp(0.55rem, 2.8vw, 0.85rem);
     letter-spacing: 0.08em;
+    white-space: nowrap;
   }
 
   .label-mono {
@@ -1118,9 +1123,14 @@ code { padding: 2px 6px; }
 
   .hero-tagline {
     margin-top: 20px !important;
+    height: 20px;
+  }
+  .hero-tagline-spacer {
+    display: none;
   }
   .hero-tagline-text {
     font-size: clamp(0.5rem, 2.5vw, 0.75rem);
     letter-spacing: 0.06em;
+    white-space: nowrap;
   }
 }

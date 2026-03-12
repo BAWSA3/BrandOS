@@ -91,11 +91,11 @@ function formatFollowersDisplay(count: number): string {
 
 function getArchetypePixelEmoji(archetype?: string): string {
   const emojiMap: Record<string, string> = {
-    'The Prophet': '/emojis/Creatures & Nature/👽 - Alien.svg',
+    'FORESIGHT': '/emojis/Creatures & Nature/👽 - Alien.svg',
     'The Alpha': '/emojis/Symbols & Objects/⚡ - High Voltage.svg',
     'The Builder': '/emojis/Activities & Objects/🚀 - Rocket.svg',
     'The Educator': '/emojis/Faces & Emotions/🤓 - Nerd Face.svg',
-    'The Degen': '/emojis/Faces & Emotions/🤪 - Zany Face.svg',
+    'ENTROPY': '/emojis/Faces & Emotions/🤪 - Zany Face.svg',
     'The Analyst': '/emojis/Creatures & Nature/👀 - Eyes.svg',
     'The Philosopher': '/emojis/Faces & Emotions/🤓 - Nerd Face.svg',
     'The Networker': '/emojis/Gestures & Hands/🤝 - Handshake.svg',
@@ -107,11 +107,11 @@ function getArchetypePixelEmoji(archetype?: string): string {
 
 function getPersonalityTypeCode(archetype?: string): string {
   const typeMap: Record<string, string> = {
-    'The Prophet': 'INTJ',
+    'FORESIGHT': 'INTJ',
     'The Alpha': 'ENTJ',
     'The Builder': 'ISTP',
     'The Educator': 'ENFJ',
-    'The Degen': 'ESTP',
+    'ENTROPY': 'ESTP',
     'The Analyst': 'INTP',
     'The Philosopher': 'INFJ',
     'The Networker': 'ESFJ',
@@ -632,8 +632,8 @@ function RotatingTagline() {
       textAlign: 'center',
       position: 'relative',
     }}>
-      {/* Invisible spacer — holds the width of the longest tagline */}
-      <span className="hero-tagline-text" style={{ visibility: 'hidden' }} aria-hidden="true">
+      {/* Invisible spacer — holds the width of the longest tagline (hidden on mobile) */}
+      <span className="hero-tagline-text hero-tagline-spacer" style={{ visibility: 'hidden' }} aria-hidden="true">
         {longest}|
       </span>
       {/* Visible typing text — absolutely positioned so width changes don't shift layout */}
@@ -643,6 +643,7 @@ function RotatingTagline() {
         left: '50%',
         top: '50%',
         transform: 'translate(-50%, -50%)',
+        width: 'max-content',
       }}>
         {displayed}
         <motion.span
