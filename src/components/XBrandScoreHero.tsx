@@ -625,13 +625,6 @@ function RotatingTagline() {
   // Find the longest tagline to reserve fixed space
   const longest = ROTATING_TAGLINES.reduce((a, b) => a.length > b.length ? a : b);
 
-  const textStyle: React.CSSProperties = {
-    fontFamily: "'M42 Flight 721', sans-serif",
-    fontSize: 'clamp(0.75rem, 1.8vw, 1.1rem)',
-    letterSpacing: '0.15em',
-    whiteSpace: 'nowrap',
-  };
-
   return (
     <div className="hero-tagline" style={{
       marginTop: '100px',
@@ -640,12 +633,11 @@ function RotatingTagline() {
       position: 'relative',
     }}>
       {/* Invisible spacer — holds the width of the longest tagline */}
-      <span style={{ ...textStyle, visibility: 'hidden' }} aria-hidden="true">
+      <span className="hero-tagline-text" style={{ visibility: 'hidden' }} aria-hidden="true">
         {longest}|
       </span>
       {/* Visible typing text — absolutely positioned so width changes don't shift layout */}
-      <span style={{
-        ...textStyle,
+      <span className="hero-tagline-text" style={{
         color: 'rgba(0,0,0,0.7)',
         position: 'absolute',
         left: '50%',

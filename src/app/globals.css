@@ -1073,6 +1073,14 @@ code { padding: 2px 6px; }
   max-height: 55vh;
 }
 
+/* Hero tagline text — desktop */
+.hero-tagline-text {
+  font-family: 'M42 Flight 721', sans-serif;
+  font-size: clamp(0.75rem, 1.8vw, 1.1rem);
+  letter-spacing: 0.15em;
+  white-space: nowrap;
+}
+
 /* Hero logo — tablet */
 @media (max-width: 768px) {
   .hero-logo-wrapper {
@@ -1084,13 +1092,14 @@ code { padding: 2px 6px; }
     max-height: 30vh;
   }
 
-  /* Push tagline closer to logo on mobile */
   .hero-tagline {
     margin-top: 40px !important;
-    font-size: clamp(0.65rem, 3vw, 0.9rem) !important;
+  }
+  .hero-tagline-text {
+    font-size: clamp(0.55rem, 2.8vw, 0.85rem);
+    letter-spacing: 0.08em;
   }
 
-  /* Make label-mono readable on mobile */
   .label-mono {
     font-size: 11px;
   }
@@ -1108,7 +1117,10 @@ code { padding: 2px 6px; }
   }
 
   .hero-tagline {
-    margin-top: 24px !important;
-    font-size: clamp(0.6rem, 3.2vw, 0.85rem) !important;
+    margin-top: 20px !important;
+  }
+  .hero-tagline-text {
+    font-size: clamp(0.5rem, 2.5vw, 0.75rem);
+    letter-spacing: 0.06em;
   }
 }
