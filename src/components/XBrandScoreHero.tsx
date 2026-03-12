@@ -634,7 +634,7 @@ function RotatingTagline() {
 
   return (
     <div style={{
-      marginTop: '-160px',
+      marginTop: '0',
       marginBottom: '48px',
       textAlign: 'center',
       position: 'relative',
@@ -1049,14 +1049,15 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
     <div
       className={flowState === 'input' ? 'crt-scanlines' : ''}
       style={{
-        minHeight: '100vh',
+        height: flowState === 'input' ? '100vh' : undefined,
+        minHeight: flowState === 'input' ? undefined : '100vh',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
         alignItems: 'center',
-        padding: flowState === 'journey' ? '0' : '48px 24px',
+        padding: flowState === 'input' ? '0' : flowState === 'journey' ? '0' : '48px 24px',
         position: 'relative',
-        overflow: (flowState === 'walkthrough' || flowState === 'journey') ? 'visible' : 'hidden',
+        overflow: flowState === 'input' ? 'hidden' : (flowState === 'walkthrough' || flowState === 'journey') ? 'visible' : 'hidden',
       }}
     >
       {/* Background — visible during input and journey states */}
@@ -1220,8 +1221,11 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
               maxWidth: '640px',
               width: '100%',
               height: '100vh',
+              maxHeight: '100vh',
               position: 'relative',
               zIndex: 10,
+              padding: '24px',
+              boxSizing: 'border-box',
             }}
           >
             {/* Floating content with radial shadow for readability */}
@@ -1246,14 +1250,18 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
+                  overflow: 'hidden',
+                  marginBottom: '-12vh',
                 }}
               >
                 <img
                   src="/brandos-hero-logo.png"
                   alt="BrandOS"
                   style={{
-                    width: 'clamp(600px, 85vw, 1050px)',
+                    width: 'clamp(400px, 70vw, 850px)',
                     height: 'auto',
+                    maxHeight: '35vh',
+                    objectFit: 'contain',
                   }}
                 />
               </motion.div>
@@ -1466,8 +1474,34 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
                 background: REVEAL_THEME === 'light' ? '#ffffff' : '#050505',
                 padding: '24px',
                 borderRadius: '8px',
+                position: 'relative',
               }}
             >
+              {/* BrandOS logo — hidden normally, visible in screenshot capture */}
+              <div
+                className="capture-logo"
+                style={{
+                  display: 'none',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  marginBottom: '16px',
+                  padding: '0 4px',
+                }}
+              >
+                <img
+                  src={REVEAL_THEME === 'light' ? '/brandos-logo.png' : '/brandos-logo-dark.png'}
+                  alt="BrandOS"
+                  style={{ height: '28px', width: 'auto' }}
+                />
+                <span style={{
+                  fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace",
+                  fontSize: '12px',
+                  letterSpacing: '0.12em',
+                  color: REVEAL_THEME === 'light' ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.4)',
+                }}>
+                  mybrandos.app
+                </span>
+              </div>
               <BrandOSDashboard
                 data={{
                   profile: {
