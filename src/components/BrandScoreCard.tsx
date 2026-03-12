@@ -50,10 +50,10 @@ const BrandScoreCard: React.FC<BrandScoreCardProps> = ({
             <Info className="w-3 h-3 text-white/50 hover:text-white/80 cursor-help" />
           </span>
           {/* Profile image + username */}
-          <div className="flex items-center gap-4">
-            <div className="text-right">
-              <span className="font-brand font-bold text-white text-lg md:text-xl leading-none block">{displayName}</span>
-              <span className="font-os text-sm text-white/70 block mt-1">@{username}</span>
+          <div className="flex items-center gap-4 min-w-0">
+            <div className="text-right min-w-0 max-w-[200px] md:max-w-[280px]">
+              <span className="font-brand font-bold text-white text-lg md:text-xl leading-none block truncate">{displayName}</span>
+              <span className="font-os text-sm text-white/70 block mt-1 truncate">@{username}</span>
             </div>
             <div className="w-[72px] h-[72px] rounded-full border-2 border-white/40 overflow-hidden shrink-0">
               <img

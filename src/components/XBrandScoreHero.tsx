@@ -1530,29 +1530,29 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
                 </span>
                 <div className="flex gap-2">
                   <button
-                    onClick={async () => {
+                    onClick={() => {
                       const scoreCard = document.getElementById('brandos-score-card');
                       if (!scoreCard) return;
-                      // Swap PFP to base64 on the LIVE element to bypass CORS
-                      const pfpImg = scoreCard.querySelector(`img[alt="${profile.name}"]`) as HTMLImageElement | null;
-                      const originalSrc = pfpImg?.src || '';
-                      try {
-                        const pfpRes = await fetch(`/api/image-proxy?url=${encodeURIComponent(profile.profile_image_url?.replace('_normal', '_200x200') || '')}`);
-                        if (pfpRes.ok && pfpImg) {
-                          const blob = await pfpRes.blob();
-                          const dataUrl = await new Promise<string>((r) => { const fr = new FileReader(); fr.onloadend = () => r(fr.result as string); fr.readAsDataURL(blob); });
-                          pfpImg.src = dataUrl;
-                          await new Promise(r => setTimeout(r, 50));
-                        }
-                      } catch {}
-                      // Capture the actual on-screen element directly
-                      const dataUrl = await domToPng(scoreCard, { scale: 2, quality: 1 });
-                      // Restore original PFP src
-                      if (pfpImg) pfpImg.src = originalSrc;
-                      const response = await fetch(dataUrl);
-                      const blob = await response.blob();
-                      await navigator.clipboard.write([
-                        new ClipboardItem({ 'image/png': blob })
+                      // Use ClipboardItem with a lazy blob promise to preserve user-gesture context
+                      const blobPromise = (async () => {
+                        const pfpImg = scoreCard.querySelector(`img[alt="${profile.name}"]`) as HTMLImageElement | null;
+                        const originalSrc = pfpImg?.src || '';
+                        try {
+                          const pfpRes = await fetch(`/api/image-proxy?url=${encodeURIComponent(profile.profile_image_url?.replace('_normal', '_200x200') || '')}`);
+                          if (pfpRes.ok && pfpImg) {
+                            const blob = await pfpRes.blob();
+                            const dataUrl = await new Promise<string>((r) => { const fr = new FileReader(); fr.onloadend = () => r(fr.result as string); fr.readAsDataURL(blob); });
+                            pfpImg.src = dataUrl;
+                            await new Promise(r => setTimeout(r, 50));
+                          }
+                        } catch {}
+                        const dataUrl = await domToPng(scoreCard, { scale: 2, quality: 1 });
+                        if (pfpImg) pfpImg.src = originalSrc;
+                        const response = await fetch(dataUrl);
+                        return await response.blob();
+                      })();
+                      navigator.clipboard.write([
+                        new ClipboardItem({ 'image/png': blobPromise })
                       ]);
                     }}
                     className="flex items-center gap-2 px-4 py-2.5 bg-[#1A1A1A] hover:bg-[#2E6AFF] border border-[#333] hover:border-[#2E6AFF] rounded-[4px] text-white font-os text-[11px] tracking-wider transition-all duration-300"
