@@ -634,7 +634,7 @@ function RotatingTagline() {
 
   return (
     <div style={{
-      marginTop: '0',
+      marginTop: '56px',
       marginBottom: '48px',
       textAlign: 'center',
       position: 'relative',
@@ -1258,9 +1258,9 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
                   src="/brandos-hero-logo.png"
                   alt="BrandOS"
                   style={{
-                    width: 'clamp(400px, 70vw, 850px)',
+                    width: 'clamp(550px, 90vw, 1100px)',
                     height: 'auto',
-                    maxHeight: '35vh',
+                    maxHeight: '45vh',
                     objectFit: 'contain',
                   }}
                 />
