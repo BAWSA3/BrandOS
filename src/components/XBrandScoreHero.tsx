@@ -633,7 +633,7 @@ function RotatingTagline() {
   };
 
   return (
-    <div style={{
+    <div className="hero-tagline" style={{
       marginTop: '100px',
       marginBottom: '16px',
       textAlign: 'center',

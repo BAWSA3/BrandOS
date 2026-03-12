@@ -1073,15 +1073,21 @@ code { padding: 2px 6px; }
   max-height: 55vh;
 }
 
-/* Hero logo — mobile */
+/* Hero logo — tablet */
 @media (max-width: 768px) {
   .hero-logo-wrapper {
-    margin-top: -60px;
-    margin-bottom: -50px;
+    margin-top: -20px;
+    margin-bottom: -30px;
   }
   .hero-logo-img {
     width: clamp(600px, 180vw, 1200px);
-    max-height: 35vh;
+    max-height: 30vh;
+  }
+
+  /* Push tagline closer to logo on mobile */
+  .hero-tagline {
+    margin-top: 40px !important;
+    font-size: clamp(0.65rem, 3vw, 0.9rem) !important;
   }
 
   /* Make label-mono readable on mobile */
@@ -1090,13 +1096,19 @@ code { padding: 2px 6px; }
   }
 }
 
+/* Hero logo — phone */
 @media (max-width: 480px) {
   .hero-logo-wrapper {
-    margin-top: -40px;
-    margin-bottom: -35px;
+    margin-top: 0px;
+    margin-bottom: -20px;
   }
   .hero-logo-img {
     width: clamp(400px, 160vw, 800px);
-    max-height: 30vh;
+    max-height: 25vh;
+  }
+
+  .hero-tagline {
+    margin-top: 24px !important;
+    font-size: clamp(0.6rem, 3.2vw, 0.85rem) !important;
   }
 }
