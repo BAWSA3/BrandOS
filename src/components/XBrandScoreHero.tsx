@@ -634,8 +634,8 @@ function RotatingTagline() {
 
   return (
     <div style={{
-      marginTop: '16px',
-      marginBottom: '48px',
+      marginTop: '100px',
+      marginBottom: '16px',
       textAlign: 'center',
       position: 'relative',
     }}>
@@ -1218,7 +1218,7 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              maxWidth: '640px',
+              maxWidth: '100%',
               width: '100%',
               height: '100vh',
               maxHeight: '100vh',
@@ -1237,28 +1237,34 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
+                justifyContent: 'center',
                 gap: '0px',
-                padding: '0px 32px',
+                padding: '48px 32px 0px 32px',
+                width: '100%',
+                height: '100%',
               }}
             >
-              {/* Logo */}
+              {/* Logo — in flow, directly above subheader */}
               <motion.div
                 initial={{ opacity: 0, scale: 0.9, filter: 'blur(8px)' }}
                 animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
                 transition={{ duration: 0.5, delay: 0.5 }}
                 style={{
                   display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '100%',
+                  overflow: 'visible',
+                  marginTop: '-148px',
+                  marginBottom: '-120px',
                 }}
               >
                 <img
                   src="/brandos-hero-logo.svg"
                   alt="BrandOS"
                   style={{
-                    width: 'clamp(500px, 85vw, 1000px)',
+                    width: 'clamp(1500px, 250vw, 3500px)',
                     height: 'auto',
-                    maxHeight: '30vh',
+                    maxHeight: '55vh',
                     objectFit: 'contain',
                   }}
                 />
