@@ -9,9 +9,10 @@ import BrandAdvisorChat from './BrandAdvisorChat';
 import DNAWalkthrough from './DNAWalkthrough';
 import BrandBreakdown from './BrandBreakdown';
 import BrandOSDashboard, { BrandOSDashboardData } from './BrandOSDashboard';
+import BrandScoreCard from './BrandScoreCard';
 import BrandIssuesSection from './BrandIssuesSection';
 import { SaveResultsPrompt } from './SaveResultsPrompt';
-import SignupPrompt from './SignupPrompt';
+import BreakdownTeaser from './BreakdownTeaser';
 import { useAuth } from '@/hooks/useAuth';
 import { domToPng } from 'modern-screenshot';
 import { AuthenticityAnalysis, ActivityAnalysis } from '@/lib/gemini';
@@ -486,7 +487,7 @@ function ScoreGauge({ score, isVisible, theme }: { score: number; isVisible: boo
   };
 
   return (
-    <div style={{ position: 'relative', width: '220px', height: '220px' }}>
+    <div style={{ position: 'relative', width: 'clamp(160px, 50vw, 220px)', height: 'clamp(160px, 50vw, 220px)' }}>
       {/* Glow effect */}
       <motion.div
         initial={{ opacity: 0, scale: 0.8 }}
@@ -497,15 +498,15 @@ function ScoreGauge({ score, isVisible, theme }: { score: number; isVisible: boo
           top: '50%',
           left: '50%',
           transform: 'translate(-50%, -50%)',
-          width: '280px',
-          height: '280px',
+          width: '130%',
+          height: '130%',
           background: `radial-gradient(circle, ${getScoreColor(currentScore)}50 0%, transparent 70%)`,
           filter: 'blur(30px)',
           pointerEvents: 'none',
         }}
       />
 
-      <svg width="220" height="220" viewBox="0 0 220 220">
+      <svg width="100%" height="100%" viewBox="0 0 220 220">
         <circle
           cx="110"
           cy="110"
@@ -549,7 +550,7 @@ function ScoreGauge({ score, isVisible, theme }: { score: number; isVisible: boo
           <span
             style={{
               fontFamily: "'Helvetica Neue', sans-serif",
-              fontSize: '64px',
+              fontSize: 'clamp(40px, 12vw, 64px)',
               fontWeight: 700,
               color: theme === 'dark' ? '#FFFFFF' : '#000000',
               lineHeight: 1,
@@ -969,8 +970,10 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
                 };
                 setProfile(flatProfile);
                 setBrandScore(apiResultRef.current!.brandScore);
-                setFlowState('walkthrough');
-                // Confetti will show after walkthrough completes
+                setFlowState('reveal');
+                if (apiResultRef.current!.brandScore.overallScore >= 70) {
+                  setTimeout(() => setShowConfetti(true), 500);
+                }
               }, 600);
             } else if (apiErrorRef.current) {
               // API failed - show error and go back to input
@@ -1063,7 +1066,7 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
       {/* Background — visible during input and journey states */}
       <motion.div
         initial={{ opacity: 1 }}
-        animate={{ opacity: (flowState === 'input' || flowState === 'journey') ? 1 : 0 }}
+        animate={{ opacity: (flowState === 'input' || flowState === 'journey' || flowState === 'reveal') ? 1 : 0 }}
         transition={{ duration: 0.8 }}
         style={{
           position: 'absolute',
@@ -1239,7 +1242,7 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '0px',
-                padding: '48px 32px 0px 32px',
+                padding: 'clamp(16px, 4vw, 48px) clamp(16px, 4vw, 32px) 0px clamp(16px, 4vw, 32px)',
                 width: '100%',
                 height: '100%',
               }}
@@ -1249,22 +1252,20 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
                 initial={{ opacity: 0, scale: 0.9, filter: 'blur(8px)' }}
                 animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
                 transition={{ duration: 0.5, delay: 0.5 }}
+                className="hero-logo-wrapper"
                 style={{
                   display: 'flex',
                   justifyContent: 'center',
                   width: '100%',
                   overflow: 'visible',
-                  marginTop: '-148px',
-                  marginBottom: '-120px',
                 }}
               >
                 <img
                   src="/brandos-hero-logo.svg"
                   alt="BrandOS"
+                  className="hero-logo-img"
                   style={{
-                    width: 'clamp(1500px, 250vw, 3500px)',
                     height: 'auto',
-                    maxHeight: '55vh',
                     objectFit: 'contain',
                   }}
                 />
@@ -1465,17 +1466,19 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
               minHeight: '100vh',
               position: 'relative',
               zIndex: 10,
-              background: REVEAL_THEME === 'light' ? '#ffffff' : '#050505',
+              background: 'transparent',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              justifyContent: 'center',
+              justifyContent: 'flex-start',
+              paddingTop: 'clamp(24px, 5vw, 48px)',
+              paddingBottom: 'clamp(24px, 5vw, 48px)',
             }}
           >
             <div
               id="brandos-dashboard-capture"
               style={{
-                background: REVEAL_THEME === 'light' ? '#ffffff' : '#050505',
+                background: 'transparent',
                 padding: '24px',
                 borderRadius: '8px',
                 position: 'relative',
@@ -1493,118 +1496,127 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
                 }}
               >
                 <img
-                  src={REVEAL_THEME === 'light' ? '/brandos-hero-logo.svg' : '/brandos-hero-logo.svg'}
+                  src="/brandos-logo-capture.svg"
                   alt="BrandOS"
-                  style={{ height: '28px', width: 'auto' }}
+                  style={{ height: '40px', width: 'auto' }}
                 />
                 <span style={{
                   fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace",
                   fontSize: '12px',
                   letterSpacing: '0.12em',
-                  color: REVEAL_THEME === 'light' ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.4)',
+                  color: 'rgba(0,0,0,0.4)',
                 }}>
                   mybrandos.app
                 </span>
               </div>
-              <BrandOSDashboard
-                data={{
-                  profile: {
-                    username: profile.username,
-                    displayName: profile.name,
-                    profileImageUrl: profile.profile_image_url?.replace('_normal', '_200x200') || '',
-                    followersCount: formatFollowersDisplay(profile.followers_count || 0),
-                    verified: profile.verified,
-                  },
-                  scores: {
-                    brandScore: brandScore.overallScore,
-                    voiceConsistency: generatedBrandDNA.performanceInsights?.voiceConsistency || brandScore.phases.check.score,
-                    engagementScore: brandScore.phases.scale.score,
-                  },
-                  personality: {
-                    archetype: stripEmoji(generatedBrandDNA.archetype || 'The Creator'),
-                    emoji: getArchetypePixelEmoji(stripEmoji(generatedBrandDNA.archetype || '')),
-                    type: getPersonalityTypeCode(stripEmoji(generatedBrandDNA.archetype || '')),
-                  },
-                  tone: {
-                    formality: generatedBrandDNA.tone?.minimal || Math.round((brandScore.phases.define.score + brandScore.phases.check.score) / 2),
-                    energy: generatedBrandDNA.tone?.playful || Math.round(brandScore.phases.generate.score * 0.8),
-                    confidence: generatedBrandDNA.tone?.bold || Math.round((brandScore.phases.scale.score + brandScore.phases.define.score) / 2),
-                  },
-                  pillars: generatedBrandDNA.contentPillars?.slice(0, 3).map(pillar => ({
-                    label: pillar.name,
-                    value: pillar.frequency,
-                  })) || [],
-                  dna: {
-                    keywords: generatedBrandDNA.keywords?.slice(0, 5) || brandScore.topStrengths.slice(0, 5).map(s => s.split(' ').filter(w => w.length > 4)[0] || s.split(' ')[0]),
-                    voice: generatedBrandDNA.personalitySummary || brandScore.summary || 'Authentic voice that resonates with your audience.',
-                  },
-                } as BrandOSDashboardData}
-                authenticity={accountAuthenticity}
-                activity={accountActivity}
-                revealTheme={REVEAL_THEME}
-                onCopyToClipboard={async () => {
-                  const element = document.getElementById('brandos-dashboard-capture');
-                  if (!element) return;
-                  const originalWidth = element.style.width;
-                  const originalMinWidth = element.style.minWidth;
-                  element.classList.add('capturing');
-                  element.style.width = '1200px';
-                  element.style.minWidth = '1200px';
-                  const dataUrl = await domToPng(element, {
-                    backgroundColor: REVEAL_THEME === 'light' ? '#ffffff' : '#050505',
-                    scale: 2,
-                    quality: 1,
-                    width: 1200,
-                  });
-                  element.style.width = originalWidth;
-                  element.style.minWidth = originalMinWidth;
-                  element.classList.remove('capturing');
-                  const response = await fetch(dataUrl);
-                  const blob = await response.blob();
-                  await navigator.clipboard.write([
-                    new ClipboardItem({ 'image/png': blob })
-                  ]);
-                }}
-                onDownload={async () => {
-                  const element = document.getElementById('brandos-dashboard-capture');
-                  if (!element) return;
-                  const originalWidth = element.style.width;
-                  const originalMinWidth = element.style.minWidth;
-                  element.classList.add('capturing');
-                  element.style.width = '1200px';
-                  element.style.minWidth = '1200px';
-                  const dataUrl = await domToPng(element, {
-                    backgroundColor: REVEAL_THEME === 'light' ? '#ffffff' : '#050505',
-                    scale: 2,
-                    quality: 1,
-                    width: 1200,
-                  });
-                  element.style.width = originalWidth;
-                  element.style.minWidth = originalMinWidth;
-                  element.classList.remove('capturing');
-                  const a = document.createElement('a');
-                  a.href = dataUrl;
-                  a.download = `brandos-dna-${profile.username}.png`;
-                  a.click();
-                }}
-                onShareToX={() => {
-                  const archetype = stripEmoji(generatedBrandDNA?.archetype || 'The Creator');
-                  const tweetText = `Just discovered I'm "${archetype}" on @BrandOS_xyz
-
-Brand Score: ${brandScore.overallScore}/100
-
-What's YOUR brand archetype?
-Get yours → mybrandos.app`;
-                  window.open(
-                    `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`,
-                    '_blank',
-                    'noopener,noreferrer,width=600,height=400'
-                  );
-                }}
+              <BrandScoreCard
+                score={brandScore.overallScore}
+                voiceConsistency={generatedBrandDNA.performanceInsights?.voiceConsistency || brandScore.phases.check.score}
+                engagementScore={brandScore.phases.scale.score}
+                profileImageUrl={profile.profile_image_url?.replace('_normal', '_200x200') || ''}
+                username={profile.username}
+                displayName={profile.name}
+                summary={generatedBrandDNA.personalitySummary || brandScore.summary}
               />
+              {/* Share buttons */}
+              <div className="capture-hide flex flex-col sm:flex-row justify-center items-center gap-3 mt-6 pt-4 border-t border-black/10">
+                <span className="font-os text-[10px] text-gray-500 tracking-widest mr-2 hidden sm:inline">
+                  SHARE_DNA
+                </span>
+                <div className="flex gap-2">
+                  <button
+                    onClick={async () => {
+                      const scoreCard = document.getElementById('brandos-score-card');
+                      if (!scoreCard) return;
+                      const wrapper = document.createElement('div');
+                      wrapper.style.cssText = `background:#ffffff;padding:32px;border-radius:12px;display:inline-block;`;
+                      const header = document.createElement('div');
+                      header.style.cssText = 'display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding:0 4px;';
+                      const logo = document.createElement('img');
+                      logo.src = '/brandos-logo-capture.svg';
+                      logo.style.cssText = 'height:40px;width:auto;';
+                      const url = document.createElement('span');
+                      url.textContent = 'mybrandos.app';
+                      url.style.cssText = `font-family:'VCR OSD Mono','JetBrains Mono',monospace;font-size:12px;letter-spacing:0.12em;color:rgba(0,0,0,0.4);`;
+                      header.appendChild(logo);
+                      header.appendChild(url);
+                      wrapper.appendChild(header);
+                      const clone = scoreCard.cloneNode(true) as HTMLElement;
+                      clone.style.width = '1100px';
+                      clone.style.minHeight = '440px';
+                      clone.style.borderRadius = '8px';
+                      wrapper.appendChild(clone);
+                      document.body.appendChild(wrapper);
+                      await new Promise(r => setTimeout(r, 150));
+                      const dataUrl = await domToPng(wrapper, {
+                        backgroundColor: '#ffffff',
+                        scale: 2,
+                        quality: 1,
+                      });
+                      document.body.removeChild(wrapper);
+                      const response = await fetch(dataUrl);
+                      const blob = await response.blob();
+                      await navigator.clipboard.write([
+                        new ClipboardItem({ 'image/png': blob })
+                      ]);
+                    }}
+                    className="flex items-center gap-2 px-4 py-2.5 bg-[#1A1A1A] hover:bg-[#2E6AFF] border border-[#333] hover:border-[#2E6AFF] rounded-[4px] text-white font-os text-[11px] tracking-wider transition-all duration-300"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                    </svg>
+                    COPY
+                  </button>
+                  <button
+                    onClick={async () => {
+                      const scoreCard = document.getElementById('brandos-score-card');
+                      if (!scoreCard) return;
+                      const wrapper = document.createElement('div');
+                      wrapper.style.cssText = `background:#ffffff;padding:32px;border-radius:12px;display:inline-block;`;
+                      const header = document.createElement('div');
+                      header.style.cssText = 'display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding:0 4px;';
+                      const logo = document.createElement('img');
+                      logo.src = '/brandos-logo-capture.svg';
+                      logo.style.cssText = 'height:40px;width:auto;';
+                      const url = document.createElement('span');
+                      url.textContent = 'mybrandos.app';
+                      url.style.cssText = `font-family:'VCR OSD Mono','JetBrains Mono',monospace;font-size:12px;letter-spacing:0.12em;color:rgba(0,0,0,0.4);`;
+                      header.appendChild(logo);
+                      header.appendChild(url);
+                      wrapper.appendChild(header);
+                      const clone = scoreCard.cloneNode(true) as HTMLElement;
+                      clone.style.width = '1100px';
+                      clone.style.minHeight = '440px';
+                      clone.style.borderRadius = '8px';
+                      wrapper.appendChild(clone);
+                      document.body.appendChild(wrapper);
+                      await new Promise(r => setTimeout(r, 150));
+                      const dataUrl = await domToPng(wrapper, {
+                        backgroundColor: '#ffffff',
+                        scale: 2,
+                        quality: 1,
+                      });
+                      document.body.removeChild(wrapper);
+                      const a = document.createElement('a');
+                      a.href = dataUrl;
+                      a.download = `brandos-score-${profile.username}.png`;
+                      a.click();
+                    }}
+                    className="flex items-center gap-2 px-4 py-2.5 bg-[#1A1A1A] hover:bg-[#2E6AFF] border border-[#333] hover:border-[#2E6AFF] rounded-[4px] text-white font-os text-[11px] tracking-wider transition-all duration-300"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                      <polyline points="7 10 12 15 17 10"/>
+                      <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                    DOWNLOAD
+                  </button>
+                </div>
+              </div>
             </div>
 
-            {/* Potential Score CTA */}
+            {/* Score comparison + Breakdown Teaser */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -1615,8 +1627,7 @@ Get yours → mybrandos.app`;
                 const current = brandScore.overallScore;
                 const potential = Math.min(100, current + Math.round((100 - current) * 0.6));
                 return (
-                  <div style={{ width: '100%', maxWidth: '480px', textAlign: 'center' }}>
-                    {/* Headline */}
+                  <div style={{ width: '100%', maxWidth: '480px', textAlign: 'center', marginBottom: '24px' }}>
                     <h3 style={{
                       fontFamily: "'VCR OSD Mono', monospace",
                       fontSize: '18px',
@@ -1626,85 +1637,26 @@ Get yours → mybrandos.app`;
                     }}>
                       Your brand can be better.
                     </h3>
-
-                    {/* Score comparison text */}
-                    <div style={{ marginBottom: '20px' }}>
-                      <p style={{
-                        fontSize: '15px',
-                        color: 'rgba(255, 255, 255, 0.6)',
-                        lineHeight: 1.7,
-                      }}>
-                        Your score is{' '}
-                        <span style={{
-                          fontFamily: "'VCR OSD Mono', monospace",
-                          fontSize: '18px',
-                          color: '#fff',
-                          fontWeight: 'bold',
-                        }}>
-                          {current}
-                        </span>
-                        , but it could be{' '}
-                        <span style={{
-                          fontFamily: "'VCR OSD Mono', monospace",
-                          fontSize: '18px',
-                          color: '#0047FF',
-                          fontWeight: 'bold',
-                        }}>
-                          {potential}
-                        </span>
-                        {' '}if you build with BrandOS.
-                      </p>
-                    </div>
-
-                    {/* Visual bar comparison */}
-                    <div style={{ marginBottom: '28px', padding: '0 20px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
-                        <span style={{
-                          fontFamily: "'VCR OSD Mono', monospace",
-                          fontSize: '10px',
-                          letterSpacing: '0.1em',
-                          color: 'rgba(255,255,255,0.35)',
-                          width: '50px',
-                        }}>
-                          NOW
-                        </span>
-                        <div style={{ flex: 1, height: '6px', background: 'rgba(255,255,255,0.08)', borderRadius: '3px', overflow: 'hidden' }}>
-                          <div style={{ width: `${current}%`, height: '100%', background: 'rgba(255,255,255,0.4)', borderRadius: '3px' }} />
-                        </div>
-                        <span style={{ fontFamily: "'VCR OSD Mono', monospace", fontSize: '12px', color: 'rgba(255,255,255,0.5)', width: '28px', textAlign: 'right' }}>
-                          {current}
-                        </span>
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <span style={{
-                          fontFamily: "'VCR OSD Mono', monospace",
-                          fontSize: '10px',
-                          letterSpacing: '0.1em',
-                          color: '#0047FF',
-                          width: '50px',
-                        }}>
-                          AFTER
-                        </span>
-                        <div style={{ flex: 1, height: '6px', background: 'rgba(255,255,255,0.08)', borderRadius: '3px', overflow: 'hidden' }}>
-                          <div style={{ width: `${potential}%`, height: '100%', background: '#0047FF', borderRadius: '3px' }} />
-                        </div>
-                        <span style={{ fontFamily: "'VCR OSD Mono', monospace", fontSize: '12px', color: '#0047FF', fontWeight: 'bold', width: '28px', textAlign: 'right' }}>
-                          {potential}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* SignupPrompt renders its own card */}
-                    <SignupPrompt
-                      xUsername={profile.username}
-                      brandScore={brandScore.overallScore}
-                      archetype={generatedBrandDNA.archetype}
-                      archetypeEmoji={generatedBrandDNA.archetypeEmoji}
-                      inviteCode={pendingInviteCode}
-                    />
+                    <p style={{
+                      fontSize: '15px',
+                      color: 'rgba(255, 255, 255, 0.6)',
+                      lineHeight: 1.7,
+                    }}>
+                      Your score is{' '}
+                      <span style={{ fontFamily: "'VCR OSD Mono', monospace", fontSize: '18px', color: '#fff', fontWeight: 'bold' }}>{current}</span>
+                      , but it could be{' '}
+                      <span style={{ fontFamily: "'VCR OSD Mono', monospace", fontSize: '18px', color: '#0047FF', fontWeight: 'bold' }}>{potential}</span>.
+                    </p>
                   </div>
                 );
               })()}
+
+              <BreakdownTeaser
+                brandScore={brandScore.overallScore}
+                archetype={generatedBrandDNA.archetype}
+                strengths={brandScore.topStrengths}
+                improvements={brandScore.topImprovements}
+              />
 
               {/* Bottom decorative element */}
               <div

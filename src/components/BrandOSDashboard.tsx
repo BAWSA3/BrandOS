@@ -119,11 +119,11 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({
       <div className="w-full max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-3 md:gap-4 auto-rows-[minmax(140px,auto)] md:auto-rows-[minmax(180px,auto)]">
 
         {/* --- CARD 1: HERO SCORE --- */}
-        <div className="md:col-span-2 md:row-span-2 bg-[#2E6AFF] rounded-[4px] relative p-6 md:p-10 flex flex-col justify-between overflow-visible group hover:brightness-110 transition-all duration-500">
+        <div id="brandos-score-card" className="md:col-span-2 md:row-span-2 bg-[#2E6AFF] rounded-[4px] relative p-6 md:p-10 flex flex-col justify-between overflow-visible group hover:brightness-110 transition-all duration-500">
           <div className="absolute inset-0 bg-grid-pattern opacity-30 pointer-events-none" />
           <div className="flex justify-between items-start z-10">
             <span className="font-os text-xs md:text-sm text-white/90 tracking-widest border border-white/40 px-2 py-1 rounded-[2px] bg-[#2E6AFF] relative group/info inline-flex items-center gap-1.5">
-              SYSTEM_SCORE
+              BRAND_SCORE
               <Info className="w-3 h-3 text-white/50 hover:text-white/80 cursor-help" />
               <span className="absolute bottom-full left-0 mb-2 px-2 py-1 bg-white text-black text-[10px] font-normal rounded whitespace-nowrap opacity-0 group-hover/info:opacity-100 transition-opacity pointer-events-none z-50 shadow-lg">
                 Your brand strength (0-100)
@@ -149,7 +149,7 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({
              <div>
                 <span className="font-os text-[10px] md:text-xs text-white/70 block mb-1 uppercase tracking-wider">Voice Consistency</span>
                 <div className="flex items-center gap-2">
-                  <span className="text-2xl font-brand font-bold italic">
+                  <span className="text-2xl font-brand font-bold italic text-white">
                     <AnimateNumber suffix="%" trend={1}>
                       {data.scores.voiceConsistency}
                     </AnimateNumber>
@@ -161,7 +161,7 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({
              </div>
              <div className="text-right">
                 <span className="font-os text-[10px] md:text-xs text-white/70 block mb-1 uppercase tracking-wider">Engagement</span>
-                <span className="text-2xl font-brand font-bold italic">
+                <span className="text-2xl font-brand font-bold italic text-white">
                   <AnimateNumber suffix="/100" trend={1}>
                     {data.scores.engagementScore}
                   </AnimateNumber>
@@ -412,9 +412,9 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({
            )}
         </div>
 
-        {/* --- SHARE ROW --- */}
+        {/* --- SHARE ROW --- hidden during screenshot capture */}
         {(onCopyToClipboard || onDownload || onShareToX) && (
-          <div className="md:col-span-4 flex flex-col sm:flex-row justify-center items-center gap-3 mt-2 pt-4 border-t border-[#222]">
+          <div className="capture-hide md:col-span-4 flex flex-col sm:flex-row justify-center items-center gap-3 mt-2 pt-4 border-t border-[#222]">
             <span className="font-os text-[10px] text-gray-500 tracking-widest mr-2 hidden sm:inline">
               SHARE_DNA
             </span>
