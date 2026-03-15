@@ -30,15 +30,21 @@ interface ShareableBadgeProps {
 // =============================================================================
 
 const ARCHETYPE_COLORS: Record<string, { primary: string; secondary: string; glow: string }> = {
-  'The Prophet': { primary: '#9D4EDD', secondary: '#7B2CBF', glow: 'rgba(157, 78, 221, 0.5)' },
+  'FORESIGHT': { primary: '#9D4EDD', secondary: '#7B2CBF', glow: 'rgba(157, 78, 221, 0.5)' },
   'The Alpha': { primary: '#FF6B35', secondary: '#E85D04', glow: 'rgba(255, 107, 53, 0.5)' },
   'The Builder': { primary: '#2E6AFF', secondary: '#1E4BC8', glow: 'rgba(46, 106, 255, 0.5)' },
   'The Educator': { primary: '#10B981', secondary: '#059669', glow: 'rgba(16, 185, 129, 0.5)' },
-  'The Degen': { primary: '#F59E0B', secondary: '#D97706', glow: 'rgba(245, 158, 11, 0.5)' },
+  'ENTROPY': { primary: '#F59E0B', secondary: '#D97706', glow: 'rgba(245, 158, 11, 0.5)' },
   'The Analyst': { primary: '#06B6D4', secondary: '#0891B2', glow: 'rgba(6, 182, 212, 0.5)' },
   'The Philosopher': { primary: '#8B5CF6', secondary: '#7C3AED', glow: 'rgba(139, 92, 246, 0.5)' },
   'The Networker': { primary: '#EC4899', secondary: '#DB2777', glow: 'rgba(236, 72, 153, 0.5)' },
   'The Contrarian': { primary: '#EF4444', secondary: '#DC2626', glow: 'rgba(239, 68, 68, 0.5)' },
+  'ARC': { primary: '#10B981', secondary: '#059669', glow: 'rgba(16, 185, 129, 0.5)' },
+  'NULL': { primary: '#8B5CF6', secondary: '#7C3AED', glow: 'rgba(139, 92, 246, 0.5)' },
+  'FREQ': { primary: '#EC4899', secondary: '#DB2777', glow: 'rgba(236, 72, 153, 0.5)' },
+  'RELAY': { primary: '#06B6D4', secondary: '#0891B2', glow: 'rgba(6, 182, 212, 0.5)' },
+  'BUILD.EXE': { primary: '#EF4444', secondary: '#DC2626', glow: 'rgba(239, 68, 68, 0.5)' },
+  'SIGNAL_SAGE': { primary: '#3B82F6', secondary: '#2563EB', glow: 'rgba(59, 130, 246, 0.5)' },
 };
 
 const DEFAULT_COLORS = { primary: '#2E6AFF', secondary: '#1E4BC8', glow: 'rgba(46, 106, 255, 0.5)' };

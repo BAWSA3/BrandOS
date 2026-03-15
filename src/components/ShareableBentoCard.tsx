@@ -1086,7 +1086,7 @@ export function mapToBentoData(
     archetype: generatedDNA.archetype || 'Creator',
     archetypeEmoji: generatedDNA.archetypeEmoji || '✨',
     // Personality system
-    personalityType: generatedDNA.personalityType || 'The Builder',
+    personalityType: generatedDNA.personalityType || 'BUILD.EXE',
     personalityEmoji: generatedDNA.personalityEmoji || '🛠️',
     personalitySummary: generatedDNA.personalitySummary || 'You bring ideas to life with precision and purpose. Your community trusts you to deliver substance over hype. Keep building—the market rewards those who ship.',
     influenceTier,

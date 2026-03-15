@@ -2,6 +2,7 @@
 
 import React from 'react';
 import BrandOSDashboard, { BrandOSDashboardData } from './BrandOSDashboard';
+import { normalizeArchetypeName } from '@/lib/archetype-engine';
 
 // Types matching the API response
 interface XProfileData {
@@ -92,6 +93,12 @@ function getPersonalityType(archetype?: string): string {
     'The Philosopher': 'INFJ',
     'The Networker': 'ESFJ',
     'The Contrarian': 'ENTP',
+    'ARC': 'ESTP',
+    'NULL': 'INTJ',
+    'FREQ': 'ESFJ',
+    'RELAY': 'ESFJ',
+    'BUILD.EXE': 'ISTP',
+    'SIGNAL_SAGE': 'ENFJ',
   };
   return typeMap[archetype || ''] || 'INTJ';
 }
@@ -140,7 +147,7 @@ function transformToDashboardData(
       engagementScore: brandScore.phases.scale.score,
     },
     personality: {
-      archetype: brandScore.archetype?.primary || 'The Creator',
+      archetype: normalizeArchetypeName(brandScore.archetype?.primary || 'BUILD.EXE'),
       emoji: brandScore.archetype?.emoji || '/archetypes/SIGNAL_SAGE.svg',
       type: getPersonalityType(brandScore.archetype?.primary),
     },

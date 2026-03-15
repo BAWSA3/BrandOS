@@ -2,6 +2,7 @@
 
 import { motion } from 'motion/react';
 import type { VoiceConsistencyReport } from '@/lib/schemas/voice-consistency.schema';
+import MetalArchetypeIcon from '@/components/MetalArchetypeIcon';
 
 // =============================================================================
 // BRAND DNA PREVIEW COMPONENT
@@ -490,7 +491,11 @@ export default function BrandDNAPreview({
             borderRadius: '20px',
           }}
         >
-          <span style={{ fontSize: '20px' }}>{generatedDNA.archetypeEmoji}</span>
+          <MetalArchetypeIcon
+            src={generatedDNA.archetypeEmoji || '🧬'}
+            alt={generatedDNA.archetype || 'archetype'}
+            size={24}
+          />
           <span
             style={{
               fontFamily: "'VCR OSD Mono', monospace",

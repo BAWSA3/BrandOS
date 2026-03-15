@@ -5,6 +5,18 @@ import { Terminal, Shield, BarChart3, Activity, Info, AlertTriangle } from 'luci
 import { AuthenticityAnalysis, ActivityAnalysis } from '@/lib/gemini';
 import { InnerCircleBadge, useInnerCircle } from '@/components/InnerCircleBadge';
 import { AnimateNumber, Typewriter, ScrambleText } from '@/lib/motion-plus';
+import MetalArchetypeIcon from '@/components/MetalArchetypeIcon';
+
+const ARCHETYPE_META: Record<string, { tier: number; tierLabel: string; tagline: string; color: string }> = {
+  'ARC': { tier: 1, tierLabel: 'ENTRY', tagline: 'Rising star. Growth story.', color: '#10B981' },
+  'ENTROPY': { tier: 2, tierLabel: 'RISING', tagline: 'Risk-taker. Cult builder.', color: '#F59E0B' },
+  'NULL': { tier: 2, tierLabel: 'RISING', tagline: 'Ideas over identity.', color: '#8B5CF6' },
+  'FREQ': { tier: 2, tierLabel: 'RISING', tagline: 'Entertainer. Community builder.', color: '#EC4899' },
+  'RELAY': { tier: 3, tierLabel: 'ADVANCED', tagline: 'Super connector.', color: '#06B6D4' },
+  'BUILD.EXE': { tier: 3, tierLabel: 'ADVANCED', tagline: 'Builder. Shipper. Doer.', color: '#EF4444' },
+  'SIGNAL_SAGE': { tier: 4, tierLabel: 'EXPERT', tagline: 'Knowledge authority.', color: '#3B82F6' },
+  'FORESIGHT': { tier: 5, tierLabel: 'PEAK', tagline: 'Shapes the narrative.', color: '#9D4EDD' },
+};
 
 /* DATA STRUCTURE TYPES */
 export interface BrandOSDashboardData {
@@ -282,15 +294,11 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({
             </span>
           </div>
           <div className="absolute -right-4 top-6 leading-none opacity-100 transform rotate-12 drop-shadow-lg filter hover:rotate-0 transition-transform duration-300">
-            {data.personality.emoji.startsWith('/') ? (
-              <img
-                src={data.personality.emoji}
-                alt={data.personality.archetype}
-                className="w-[85px] h-[85px] object-contain"
-              />
-            ) : (
-              <span className="text-[85px]">{data.personality.emoji}</span>
-            )}
+            <MetalArchetypeIcon
+              src={data.personality.emoji}
+              alt={data.personality.archetype}
+              size={85}
+            />
           </div>
           <div className="z-10 mt-auto">
             <h3 className="text-2xl font-brand font-black italic text-black leading-tight max-w-[80%]">
@@ -411,6 +419,91 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({
              </div>
            )}
         </div>
+
+        {/* --- CARD 7: ARCHETYPE SHOWCASE --- */}
+        {(() => {
+          const meta = ARCHETYPE_META[data.personality.archetype] || ARCHETYPE_META['SIGNAL_SAGE'];
+          return (
+            <div
+              className="md:col-span-4 rounded-[4px] p-5 md:p-6 flex items-center gap-6 relative overflow-hidden"
+              style={{
+                background: isLight ? '#f8f8f8' : '#111111',
+                border: `1px solid ${isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)'}`,
+              }}
+            >
+              {/* Subtle accent glow */}
+              <div
+                className="absolute inset-0 pointer-events-none opacity-[0.06]"
+                style={{
+                  background: `radial-gradient(ellipse at 20% 50%, ${meta.color}, transparent 70%)`,
+                }}
+              />
+
+              {/* Icon */}
+              <div className="relative z-10 shrink-0">
+                <MetalArchetypeIcon
+                  src={data.personality.emoji}
+                  alt={data.personality.archetype}
+                  size={100}
+                />
+              </div>
+
+              {/* Info */}
+              <div className="relative z-10 flex-1 min-w-0">
+                <div className="flex items-center gap-3 mb-1 flex-wrap">
+                  <h3
+                    className="text-2xl md:text-3xl font-brand font-black italic tracking-tight"
+                    style={{ color: textPrimary }}
+                  >
+                    {data.personality.archetype}
+                  </h3>
+                  <span
+                    className="font-os text-[9px] tracking-widest font-bold px-2 py-0.5 rounded-[2px]"
+                    style={{
+                      color: meta.color,
+                      background: `${meta.color}18`,
+                      border: `1px solid ${meta.color}30`,
+                    }}
+                  >
+                    TIER {meta.tier} — {meta.tierLabel}
+                  </span>
+                  <span
+                    className="font-os text-[9px] tracking-wider px-2 py-0.5 rounded-[2px]"
+                    style={{
+                      background: isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.08)',
+                      color: textSecondary,
+                    }}
+                  >
+                    {data.personality.type}
+                  </span>
+                </div>
+                <p
+                  className="font-os text-xs md:text-sm tracking-wide mt-1"
+                  style={{ color: textSecondary }}
+                >
+                  {meta.tagline}
+                </p>
+              </div>
+
+              {/* Tier bar */}
+              <div className="relative z-10 hidden md:flex flex-col items-center gap-1 shrink-0">
+                <span className="font-os text-[8px] tracking-widest" style={{ color: textSecondary }}>TIER</span>
+                <div className="flex flex-col-reverse gap-[3px]">
+                  {[1, 2, 3, 4, 5].map((t) => (
+                    <div
+                      key={t}
+                      className="w-6 h-2 rounded-[1px] transition-all"
+                      style={{
+                        background: t <= meta.tier ? meta.color : (isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)'),
+                        boxShadow: t <= meta.tier ? `0 0 6px ${meta.color}40` : 'none',
+                      }}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+          );
+        })()}
 
         {/* --- SHARE ROW --- hidden during screenshot capture */}
         {(onCopyToClipboard || onDownload || onShareToX) && (

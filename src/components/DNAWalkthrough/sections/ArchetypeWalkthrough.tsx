@@ -1,8 +1,8 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import Image from 'next/image';
 import WalkthroughSection from '../WalkthroughSection';
+import MetalArchetypeIcon from '@/components/MetalArchetypeIcon';
 import { TypewriterText, ParallaxCard, StaggerContainer, StaggerItem } from '../motion';
 import type { ParallaxLayerConfig } from '../motion';
 
@@ -279,13 +279,11 @@ export default function ArchetypeWalkthrough({
                   className="mb-3"
                 >
                   {customEmojiPath ? (
-                    <Image
+                    <MetalArchetypeIcon
                       src={customEmojiPath}
                       alt={normalizedArchetype}
-                      width={80}
-                      height={80}
+                      size={80}
                       className="w-16 h-16 md:w-20 md:h-20"
-                      style={{ objectFit: 'contain' }}
                     />
                   ) : (
                     <span className="text-6xl md:text-7xl">{archetypeEmoji || '🎭'}</span>

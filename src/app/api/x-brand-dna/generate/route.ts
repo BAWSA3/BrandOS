@@ -21,53 +21,53 @@ import { withRateLimit, rateLimiters } from '@/lib/rate-limit';
 // CRYPTO TWITTER PERSONALITY TYPES
 // =============================================================================
 const PERSONALITY_TYPES = {
-  alpha: {
-    name: 'The Alpha',
-    mbti: 'ENTJ', // Commander - bold, strategic leader
-    emoji: '👑',
-    traits: ['confident', 'bold predictions', 'market caller', 'trend setter'],
+  foresight: {
+    name: 'FORESIGHT',
+    mbti: 'INTJ',
+    emoji: '🔮',
+    traits: ['visionary', 'thought leader', 'strategic', 'shapes narrative'],
   },
-  builder: {
-    name: 'The Builder',
-    mbti: 'ISTP', // Virtuoso - practical, hands-on creator
-    emoji: '🛠️',
+  buildexe: {
+    name: 'BUILD.EXE',
+    mbti: 'ISTP',
+    emoji: '🚢',
     traits: ['ships products', 'technical', 'creation focused', 'pragmatic'],
   },
-  educator: {
-    name: 'The Educator',
-    mbti: 'ENFJ', // Protagonist - inspiring teacher
-    emoji: '📚',
-    traits: ['breaks down complex topics', 'thread master', 'helpful', 'patient'],
+  signal_sage: {
+    name: 'SIGNAL_SAGE',
+    mbti: 'ENFJ',
+    emoji: '🎓',
+    traits: ['breaks down complex topics', 'thread master', 'helpful', 'knowledge authority'],
   },
-  degen: {
-    name: 'The Degen',
-    mbti: 'ESTP', // Entrepreneur - risk-taking, action-oriented
+  entropy: {
+    name: 'ENTROPY',
+    mbti: 'ESTP',
     emoji: '🎰',
-    traits: ['high risk', 'ape mentality', 'meme-friendly', 'YOLO'],
+    traits: ['high risk', 'risk-taker', 'meme-friendly', 'cult builder'],
   },
-  analyst: {
-    name: 'The Analyst',
-    mbti: 'INTJ', // Architect - strategic, analytical
-    emoji: '📊',
-    traits: ['data-driven', 'charts', 'technical analysis', 'methodical'],
+  null_type: {
+    name: 'NULL',
+    mbti: 'INTJ',
+    emoji: '👻',
+    traits: ['pseudonymous', 'ideas over identity', 'mysterious', 'influential'],
   },
-  philosopher: {
-    name: 'The Philosopher',
-    mbti: 'INFJ', // Advocate - insightful, visionary
-    emoji: '🧠',
-    traits: ['big picture', 'macro views', 'thought leader', 'visionary'],
+  freq: {
+    name: 'FREQ',
+    mbti: 'ESFP',
+    emoji: '🎪',
+    traits: ['entertainer', 'community builder', 'personality-driven', 'relatable'],
   },
-  networker: {
-    name: 'The Networker',
-    mbti: 'ESFJ', // Consul - social connector
+  relay: {
+    name: 'RELAY',
+    mbti: 'ESFJ',
     emoji: '🤝',
-    traits: ['community builder', 'connects people', 'social glue', 'collaborative'],
+    traits: ['super connector', 'community glue', 'brings people together', 'collaborative'],
   },
-  contrarian: {
-    name: 'The Contrarian',
-    mbti: 'ENTP', // Debater - innovative challenger
-    emoji: '🔥',
-    traits: ['against the crowd', 'unpopular opinions', 'provocative', 'independent'],
+  arc: {
+    name: 'ARC',
+    mbti: 'ENFP',
+    emoji: '🐕',
+    traits: ['rising star', 'growth story', 'up-only trajectory', 'main character'],
   },
 } as const;
 
@@ -75,22 +75,20 @@ type PersonalityType = keyof typeof PERSONALITY_TYPES;
 
 // Map Gemini archetypes to personality types for consistency
 function mapArchetypeToPersonalityType(archetype: string | undefined): PersonalityType {
-  if (!archetype) return 'builder';
+  if (!archetype) return 'buildexe';
 
   const lower = archetype.toLowerCase();
 
-  // Direct mappings
-  if (lower.includes('alpha') || lower.includes('leader') || lower.includes('king')) return 'alpha';
-  if (lower.includes('builder') || lower.includes('ship') || lower.includes('maker') || lower.includes('creator')) return 'builder';
-  if (lower.includes('professor') || lower.includes('educator') || lower.includes('teacher') || lower.includes('mentor')) return 'educator';
-  if (lower.includes('degen') || lower.includes('ape') || lower.includes('gambler')) return 'degen';
-  if (lower.includes('analyst') || lower.includes('data') || lower.includes('chart') || lower.includes('quant')) return 'analyst';
-  if (lower.includes('prophet') || lower.includes('philosopher') || lower.includes('visionary') || lower.includes('sage') || lower.includes('oracle')) return 'philosopher';
-  if (lower.includes('networker') || lower.includes('connector') || lower.includes('plug') || lower.includes('community')) return 'networker';
-  if (lower.includes('contrarian') || lower.includes('rebel') || lower.includes('provocateur')) return 'contrarian';
+  if (lower.includes('foresight') || lower.includes('philosopher') || lower.includes('visionary') || lower.includes('alpha') || lower.includes('analyst') || lower.includes('oracle')) return 'foresight';
+  if (lower.includes('build') || lower.includes('ship') || lower.includes('maker') || lower.includes('creator')) return 'buildexe';
+  if (lower.includes('signal_sage') || lower.includes('educator') || lower.includes('teacher') || lower.includes('mentor') || lower.includes('professor')) return 'signal_sage';
+  if (lower.includes('entropy') || lower.includes('degen') || lower.includes('ape') || lower.includes('gambler') || lower.includes('contrarian')) return 'entropy';
+  if (lower.includes('null') || lower.includes('anon') || lower.includes('pseudonym')) return 'null_type';
+  if (lower.includes('freq') || lower.includes('vibe') || lower.includes('entertainer')) return 'freq';
+  if (lower.includes('relay') || lower.includes('networker') || lower.includes('connector') || lower.includes('plug') || lower.includes('community')) return 'relay';
+  if (lower.includes('arc') || lower.includes('underdog') || lower.includes('rising')) return 'arc';
 
-  // Default fallback
-  return 'builder';
+  return 'buildexe';
 }
 
 // Types for the response
@@ -190,60 +188,63 @@ function detectPersonalityType(
 
   // Score each personality type - TWEET VOICE IS PRIMARY (70%), Gemini DNA (20%), Bio Vibe (10%)
   const scores: Record<PersonalityType, number> = {
-    alpha: 0,
-    builder: 0,
-    educator: 0,
-    degen: 0,
-    analyst: 0,
-    philosopher: 0,
-    networker: 0,
-    contrarian: 0,
+    foresight: 0,
+    buildexe: 0,
+    signal_sage: 0,
+    entropy: 0,
+    null_type: 0,
+    freq: 0,
+    relay: 0,
+    arc: 0,
   };
 
-  // Alpha: High confidence, authoritative, opinionated content
-  scores.alpha = (tv.authoritative * 0.50) +
-    (tv.opinionated * 0.35) +
-    (vibeBonus.serious * 0.15);
+  // FORESIGHT: Big picture, visionary, strategic, authoritative content
+  scores.foresight = (tv.authoritative * 0.45) +
+    (tv.educational * 0.25) +
+    (geminiBrandDNA?.differentiationScore || 50) * 0.30;
 
-  // Builder: Technical, professional, practical content
-  scores.builder = (tv.professional * 0.50) +
+  // BUILD.EXE: Technical, professional, practical content
+  scores.buildexe = (tv.professional * 0.50) +
     ((100 - tv.casual) * 0.30) +
     (geminiBrandDNA?.differentiationScore || 50) * 0.20;
 
-  // Educator: Educational content, helpful, clear explanations
-  scores.educator = (tv.educational * 0.60) +
+  // SIGNAL_SAGE: Educational content, helpful, clear explanations
+  scores.signal_sage = (tv.educational * 0.60) +
     (tv.approachable * 0.25) +
     ((100 - tv.promotional) * 0.15);
 
-  // Degen: Playful, casual, high energy content
-  scores.degen = (tv.casual * 0.40) +
-    ((100 - tv.professional) * 0.30) +
-    (vibeBonus.playful * 0.20) +
+  // ENTROPY: Playful, casual, high energy, risk-taking content
+  scores.entropy = (tv.casual * 0.35) +
+    ((100 - tv.professional) * 0.25) +
+    (tv.opinionated * 0.20) +
+    (vibeBonus.playful * 0.10) +
     (bioVibe.emojiCount * 5);
 
-  // Analyst: Data-focused, methodical, professional content
-  scores.analyst = (tv.professional * 0.45) +
-    ((100 - tv.casual) * 0.30) +
-    (tv.authoritative * 0.25);
+  // NULL: Mysterious, ideas-focused, less personal content
+  scores.null_type = ((100 - tv.personal) * 0.40) +
+    (tv.authoritative * 0.30) +
+    ((100 - tv.approachable) * 0.30);
 
-  // Philosopher: Big picture, thoughtful, visionary content
-  scores.philosopher = (tv.educational * 0.35) +
-    (tv.authoritative * 0.35) +
-    (geminiBrandDNA?.differentiationScore || 50) * 0.30;
+  // FREQ: Entertaining, personality-driven, community builder
+  scores.freq = (tv.casual * 0.35) +
+    (tv.approachable * 0.30) +
+    (tv.personal * 0.20) +
+    (vibeBonus.playful * 0.15);
 
-  // Networker: Community-focused, approachable, collaborative content
-  scores.networker = (tv.approachable * 0.50) +
+  // RELAY: Community-focused, approachable, collaborative content
+  scores.relay = (tv.approachable * 0.50) +
     (tv.personal * 0.30) +
     ((100 - tv.authoritative) * 0.20);
 
-  // Contrarian: Opinionated, independent, provocative content
-  scores.contrarian = (tv.opinionated * 0.55) +
-    (tv.authoritative * 0.25) +
-    ((100 - tv.approachable) * 0.20);
+  // ARC: Rising star, opinionated, growing presence
+  scores.arc = (tv.opinionated * 0.40) +
+    (tv.casual * 0.25) +
+    ((100 - tv.authoritative) * 0.15) +
+    (vibeBonus.casual * 0.20);
 
   // Find highest scoring personality
   let maxScore = 0;
-  let detected: PersonalityType = 'builder';
+  let detected: PersonalityType = 'buildexe';
 
   for (const [type, score] of Object.entries(scores)) {
     if (score > maxScore) {
@@ -363,14 +364,14 @@ function generateFallbackSummary(
 
   // Templates use the actual archetype name for consistency with displayed card
   const templates: Record<PersonalityType, string> = {
-    alpha: `You are ${archetypeName}—you lead with conviction and your bold takes cut through the noise. But ${consistencyIssue}. Fix this: Write down your 3 non-negotiable topics and delete any draft that doesn't hit one of them.`,
-    builder: `You are ${archetypeName}—you ship while others talk, and your technical depth has built real credibility. But ${consistencyIssue}. Fix this: Create a pinned thread showcasing your 3 best builds with clear before/after results.`,
-    educator: `You are ${archetypeName}—you turn complexity into clarity, and people trust you to break things down. But ${consistencyIssue}. Fix this: Batch your educational threads into a series with consistent formatting—same hook style, same structure, same CTA.`,
-    degen: `You are ${archetypeName}—you embrace the chaos and your community loves the energy. But ${consistencyIssue}. Fix this: Pick ONE chain or protocol to be known for this month. Go deep, not wide.`,
-    analyst: `You are ${archetypeName}—data doesn't lie and neither do you, your methodical approach has built serious credibility. But ${consistencyIssue}. Fix this: Start every analysis with a TL;DR prediction at the top. Make your stance impossible to miss.`,
-    philosopher: `You are ${archetypeName}—you see the forest while others argue about trees, your macro perspective sets you apart. But ${consistencyIssue}. Fix this: Turn your biggest idea into a 10-tweet thread with one clear takeaway. Repeat it weekly until it sticks.`,
-    networker: `You are ${archetypeName}—you're the connective tissue of the timeline, approachable and community-first. But ${consistencyIssue}. Fix this: Create a "People to follow" thread featuring 5 accounts weekly. Become the curator, not just the connector.`,
-    contrarian: `You are ${archetypeName}—you say what others won't and your audience values your independent thinking. But ${consistencyIssue}. Fix this: Keep a "receipts" doc of your past calls. When one hits, quote-tweet yourself with proof.`,
+    foresight: `You are ${archetypeName}—you see the forest while others argue about trees, your macro perspective and strategic vision set you apart. But ${consistencyIssue}. Fix this: Turn your biggest idea into a 10-tweet thread with one clear takeaway. Repeat it weekly until it sticks.`,
+    buildexe: `You are ${archetypeName}—you ship while others talk, and your technical depth has built real credibility. But ${consistencyIssue}. Fix this: Create a pinned thread showcasing your 3 best builds with clear before/after results.`,
+    signal_sage: `You are ${archetypeName}—you turn complexity into clarity, and people trust you to break things down. But ${consistencyIssue}. Fix this: Batch your educational threads into a series with consistent formatting—same hook style, same structure, same CTA.`,
+    entropy: `You are ${archetypeName}—you embrace the chaos and your community loves the energy. But ${consistencyIssue}. Fix this: Pick ONE chain or protocol to be known for this month. Go deep, not wide.`,
+    null_type: `You are ${archetypeName}—your ideas speak louder than identity, and your mysterious presence creates intrigue. But ${consistencyIssue}. Fix this: Write down your 3 non-negotiable topics and delete any draft that doesn't hit one of them.`,
+    freq: `You are ${archetypeName}—your personality is your brand, and your community vibes with your energy. But ${consistencyIssue}. Fix this: Create a recurring format (daily take, weekly roundup) that your audience can count on showing up.`,
+    relay: `You are ${archetypeName}—you're the connective tissue of the timeline, approachable and community-first. But ${consistencyIssue}. Fix this: Create a "People to follow" thread featuring 5 accounts weekly. Become the curator, not just the connector.`,
+    arc: `You are ${archetypeName}—your growth story is your superpower and people are watching your trajectory. But ${consistencyIssue}. Fix this: Keep a "receipts" doc of your past calls. When one hits, quote-tweet yourself with proof.`,
   };
 
   return templates[personalityType];
@@ -743,7 +744,7 @@ async function handlePost(request: NextRequest) {
       dontPatterns,
       voiceSamples,
       // Extra metadata
-      archetype: geminiBrandDNA?.archetype || 'Creator',
+      archetype: geminiBrandDNA?.archetype || 'BUILD.EXE',
       archetypeEmoji: geminiBrandDNA?.archetypeEmoji || '✨',
       // Personality system (Brand Guardian) - use MBTI code for clarity
       personalityType: personality.mbti,

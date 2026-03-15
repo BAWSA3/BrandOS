@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'motion/react';
 import BrandOSDashboard, { BrandOSDashboardData } from './BrandOSDashboard';
+import { normalizeArchetypeName } from '@/lib/archetype-engine';
 
 // =============================================================================
 // TYPES
@@ -91,6 +92,12 @@ function getPersonalityType(archetype?: string): string {
     'The Philosopher': 'INFJ',
     'The Networker': 'ESFJ',
     'The Contrarian': 'ENTP',
+    'ARC': 'ESTP',
+    'NULL': 'INTJ',
+    'FREQ': 'ESFJ',
+    'RELAY': 'ESFJ',
+    'BUILD.EXE': 'ISTP',
+    'SIGNAL_SAGE': 'ENFJ',
   };
   return typeMap[archetype || ''] || 'INTJ';
 }
@@ -149,7 +156,7 @@ function transformToDashboardData(
       engagementScore: brandScore.phases.scale.score,
     },
     personality: {
-      archetype: brandScore.archetype?.primary || 'The Creator',
+      archetype: normalizeArchetypeName(brandScore.archetype?.primary || 'BUILD.EXE'),
       emoji: getArchetypeEmoji(brandScore.archetype),
       type: getPersonalityType(brandScore.archetype?.primary),
     },

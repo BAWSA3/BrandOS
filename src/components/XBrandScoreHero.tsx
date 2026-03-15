@@ -24,6 +24,7 @@ import SystemLogsBg from '@/components/backgrounds/SystemLogsBg';
 import HybridCodeBg from '@/components/backgrounds/HybridCodeBg';
 import { PixelConfetti } from '@/components/pixel-world';
 import { TerminalProgressBar, TerminalPhaseCard } from '@/components/terminal';
+import { normalizeArchetypeName } from '@/lib/archetype-engine';
 
 // Background style options for easy switching
 type BgStyle = 'ascii-dna' | 'typescript' | 'system-logs' | 'hybrid';
@@ -115,6 +116,12 @@ function getPersonalityTypeCode(archetype?: string): string {
     'The Networker': 'ESFJ',
     'The Contrarian': 'ENTP',
     'The Creator': 'ENFP',
+    'ARC': 'ESTP',
+    'NULL': 'INTJ',
+    'FREQ': 'ESFJ',
+    'RELAY': 'ESFJ',
+    'BUILD.EXE': 'ISTP',
+    'SIGNAL_SAGE': 'ENFJ',
   };
   return typeMap[archetype || ''] || 'INTJ';
 }
@@ -580,11 +587,10 @@ function ScoreGauge({ score, isVisible, theme }: { score: number; isVisible: boo
 // Typewriter Placeholder
 // ============================================================================
 const ROTATING_TAGLINES = [
-  'The AI-powered OS that builds your brand',
+  'Drop your handle. See what you\'re known for.',
   'Your reputation, decoded',
-  'What are you known for?',
-  'Brand = Reputation',
   'Content in. Identity out.',
+  'Brand = Reputation',
 ];
 
 function RotatingTagline() {
@@ -727,6 +733,7 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
   const [showConfetti, setShowConfetti] = useState(false);
   const [email, setEmail] = useState('');
   const [signupStatus, setSignupStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [scoreCardImage, setScoreCardImage] = useState<string | null>(null);
   const [showAdvisorChat, setShowAdvisorChat] = useState(false);
 
   // Compare state (coming soon)
@@ -1001,7 +1008,7 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
         checkScore: brandScore.phases.check.score,
         generateScore: brandScore.phases.generate.score,
         scaleScore: brandScore.phases.scale.score,
-        archetype: generatedBrandDNA.archetype || 'The Creator',
+        archetype: normalizeArchetypeName(generatedBrandDNA.archetype || 'BUILD.EXE'),
         archetypeEmoji: '✨',
         archetypeTagline: generatedBrandDNA.personalitySummary?.split('.')[0] || '',
         archetypeDescription: generatedBrandDNA.personalitySummary || '',
@@ -1018,10 +1025,11 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
           source: 'x-brand-score',
           xUsername: username,
           brandData,
+          scoreCardImage: scoreCardImage || undefined,
         }),
       });
 
-      if (!response.ok) {
+      if (!response.ok && response.status !== 409) {
         throw new Error('Failed to sign up');
       }
 
@@ -1354,7 +1362,7 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
                     transition: 'opacity 0.3s ease, box-shadow 0.3s ease',
                   }}
                 >
-                  {isValidating ? 'PROCESSING...' : 'RUN ANALYSIS →'}
+                  {isValidating ? 'PROCESSING...' : 'DECODE MY BRAND →'}
                 </motion.button>
 
                 {error && (
@@ -1590,6 +1598,40 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
                   </button>
                 </div>
               </div>
+              <motion.button
+                onClick={async () => {
+                  // Capture score card image before transitioning
+                  const scoreCard = document.getElementById('brandos-score-card');
+                  if (scoreCard) {
+                    try {
+                      const pfpImg = scoreCard.querySelector(`img[alt="${profile.name}"]`) as HTMLImageElement | null;
+                      const originalSrc = pfpImg?.src || '';
+                      try {
+                        const pfpRes = await fetch(`/api/image-proxy?url=${encodeURIComponent(profile.profile_image_url?.replace('_normal', '_200x200') || '')}`);
+                        if (pfpRes.ok && pfpImg) {
+                          const blob = await pfpRes.blob();
+                          const dataUrl = await new Promise<string>((r) => { const fr = new FileReader(); fr.onloadend = () => r(fr.result as string); fr.readAsDataURL(blob); });
+                          pfpImg.src = dataUrl;
+                          await new Promise(r => setTimeout(r, 50));
+                        }
+                      } catch {}
+                      const dataUrl = await domToPng(scoreCard, { scale: 2, quality: 1 });
+                      if (pfpImg) pfpImg.src = originalSrc;
+                      setScoreCardImage(dataUrl);
+                    } catch (err) {
+                      console.error('Failed to capture score card:', err);
+                    }
+                  }
+                  setFlowState('signup');
+                }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.8 }}
+                className="capture-hide mt-3 bg-transparent border-none text-[11px] tracking-[0.15em] text-black/50 hover:text-[#0047FF] cursor-pointer py-2 underline underline-offset-4 decoration-black/25 hover:decoration-[#0047FF]/50 transition-all duration-300 w-full text-center uppercase"
+                style={{ fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace" }}
+              >
+                WHY IS MY BRAND SCORE {brandScore.overallScore}?
+              </motion.button>
             </div>
 
           </motion.div>
@@ -1836,83 +1878,196 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
         {flowState === 'signup' && profile && (
           <motion.div
             key="signup"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.5 }}
             style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100vw',
+              height: '100vh',
+              background: '#0A0A0A',
               display: 'flex',
-              flexDirection: 'column',
               alignItems: 'center',
-              gap: '24px',
-              maxWidth: '500px',
-              width: '100%',
-              textAlign: 'center',
-              position: 'relative',
-              zIndex: 10,
+              justifyContent: 'center',
+              zIndex: 50,
             }}
           >
-            <motion.h2
+            {/* Subtle grid lines */}
+            <div style={{
+              position: 'absolute',
+              inset: 0,
+              backgroundImage: 'linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)',
+              backgroundSize: '40px 40px',
+              pointerEvents: 'none',
+            }} />
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
               style={{
-                fontFamily: "'Helvetica Neue', sans-serif",
-                fontSize: 'clamp(24px, 5vw, 36px)',
-                fontWeight: 600,
-                color: theme === 'dark' ? '#FFFFFF' : '#000000',
-                margin: 0,
-                lineHeight: 1.3,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '24px',
+                maxWidth: '460px',
+                width: '100%',
+                textAlign: 'center',
+                padding: '0 24px',
+                position: 'relative',
+                zIndex: 10,
               }}
             >
-              You're almost in, @{profile.username}
+            {/* Terminal-style comment header */}
+            <div style={{
+              fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace",
+              fontSize: '10px',
+              letterSpacing: '0.2em',
+              color: 'rgba(255,255,255,0.25)',
+              textAlign: 'center',
+              width: '100%',
+            }}>
+              {'// BRAND_BREAKDOWN > EMAIL_ACCESS'}
+            </div>
+
+            <motion.h2
+              style={{
+                fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace",
+                fontSize: 'clamp(16px, 4vw, 22px)',
+                fontWeight: 400,
+                letterSpacing: '0.08em',
+                color: '#F2F0EF',
+                margin: 0,
+                lineHeight: 1.4,
+                textTransform: 'uppercase',
+              }}
+            >
+              GET YOUR FULL BRAND BREAKDOWN, @{profile.username}
             </motion.h2>
 
             <motion.p
               style={{
-                fontFamily: "'Helvetica Neue', sans-serif",
-                fontSize: '16px',
-                color: theme === 'dark' ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)',
+                fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace",
+                fontSize: '11px',
+                letterSpacing: '0.05em',
+                color: 'rgba(255,255,255,0.4)',
                 margin: 0,
-                lineHeight: 1.6,
+                lineHeight: 1.7,
               }}
             >
-              Drop your email to secure your spot. We'll notify you the moment BrandOS is ready.
+              Sign up for early access and we&apos;ll email you your brand breakdown.
             </motion.p>
 
             {signupStatus === 'success' ? (
               <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.6 }}
                 style={{
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
-                  gap: '16px',
-                  padding: '32px',
-                  background: 'rgba(16, 185, 129, 0.1)',
-                  border: '1px solid rgba(16, 185, 129, 0.3)',
-                  borderRadius: '20px',
+                  gap: '28px',
+                  width: '100%',
+                  paddingTop: '8px',
                 }}
               >
-                <span style={{ fontSize: '48px' }}>✓</span>
-                <span
+                {/* Animated checkmark circle */}
+                <motion.div
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ type: 'spring', stiffness: 200, damping: 15, delay: 0.2 }}
                   style={{
-                    fontFamily: "'VCR OSD Mono', monospace",
-                    fontSize: '14px',
-                    letterSpacing: '0.1em',
-                    color: '#10B981',
+                    width: '80px',
+                    height: '80px',
+                    borderRadius: '50%',
+                    border: '2px solid #10B981',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: 'rgba(16, 185, 129, 0.06)',
+                    boxShadow: '0 0 30px rgba(16, 185, 129, 0.15), 0 0 60px rgba(16, 185, 129, 0.05)',
                   }}
                 >
-                  YOU'RE IN!
-                </span>
-                <p
+                  <motion.svg
+                    width="36"
+                    height="36"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#10B981"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    initial={{ pathLength: 0, opacity: 0 }}
+                    animate={{ pathLength: 1, opacity: 1 }}
+                    transition={{ delay: 0.5, duration: 0.4 }}
+                  >
+                    <motion.polyline
+                      points="20 6 9 17 4 12"
+                      initial={{ pathLength: 0 }}
+                      animate={{ pathLength: 1 }}
+                      transition={{ delay: 0.5, duration: 0.4, ease: 'easeOut' }}
+                    />
+                  </motion.svg>
+                </motion.div>
+
+                {/* Status label */}
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.7 }}
                   style={{
-                    fontFamily: "'Helvetica Neue', sans-serif",
-                    fontSize: '14px',
-                    color: theme === 'dark' ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)',
-                    margin: 0,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: '16px',
                   }}
                 >
-                  We'll reach out when brandOS is ready for you.
-                </p>
+                  <span
+                    style={{
+                      fontFamily: "'VCR OSD Mono', monospace",
+                      fontSize: '14px',
+                      letterSpacing: '0.2em',
+                      color: '#10B981',
+                    }}
+                  >
+                    EMAIL_SENT
+                  </span>
+
+                  <div style={{
+                    width: '40px',
+                    height: '1px',
+                    background: 'rgba(255,255,255,0.1)',
+                  }} />
+
+                  <p
+                    style={{
+                      fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace",
+                      fontSize: '12px',
+                      letterSpacing: '0.05em',
+                      color: 'rgba(255,255,255,0.45)',
+                      margin: 0,
+                      lineHeight: 1.7,
+                    }}
+                  >
+                    Your brand breakdown is on the way.
+                  </p>
+
+                  <span
+                    style={{
+                      fontFamily: "'VCR OSD Mono', monospace",
+                      fontSize: '10px',
+                      letterSpacing: '0.15em',
+                      color: 'rgba(255,255,255,0.2)',
+                      marginTop: '4px',
+                    }}
+                  >
+                    {'// CHECK YOUR INBOX'}
+                  </span>
+                </motion.div>
               </motion.div>
             ) : (
               <motion.form
@@ -1920,7 +2075,7 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
                 style={{
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '16px',
+                  gap: '12px',
                   width: '100%',
                 }}
               >
@@ -1928,26 +2083,27 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email"
+                  placeholder="enter your email"
                   required
                   style={{
                     width: '100%',
-                    fontFamily: "'Helvetica Neue', sans-serif",
-                    fontSize: '16px',
-                    padding: '18px 20px',
-                    borderRadius: '14px',
-                    border: `2px solid ${theme === 'dark' ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)'}`,
-                    background: theme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
-                    color: theme === 'dark' ? '#FFFFFF' : '#000000',
+                    fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace",
+                    fontSize: '13px',
+                    letterSpacing: '0.05em',
+                    padding: '14px 16px',
+                    borderRadius: '4px',
+                    border: '1px solid rgba(255,255,255,0.12)',
+                    background: 'rgba(255,255,255,0.04)',
+                    color: '#F2F0EF',
                     outline: 'none',
                     transition: 'all 0.3s ease',
                   }}
                   onFocus={(e) => {
-                    e.currentTarget.style.borderColor = '#D4A574';
-                    e.currentTarget.style.boxShadow = '0 0 0 4px rgba(212, 165, 116, 0.15)';
+                    e.currentTarget.style.borderColor = '#0047FF';
+                    e.currentTarget.style.boxShadow = '0 0 0 3px rgba(0, 71, 255, 0.15)';
                   }}
                   onBlur={(e) => {
-                    e.currentTarget.style.borderColor = theme === 'dark' ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)';
+                    e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)';
                     e.currentTarget.style.boxShadow = 'none';
                   }}
                 />
@@ -1955,25 +2111,46 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
                 <motion.button
                   type="submit"
                   disabled={signupStatus === 'loading'}
-                  whileHover={{ scale: 1.02, boxShadow: '0 0 40px rgba(212, 165, 116, 0.5)' }}
+                  whileHover={{ scale: 1.01 }}
                   whileTap={{ scale: 0.98 }}
                   style={{
                     width: '100%',
                     fontFamily: "'VCR OSD Mono', monospace",
-                    fontSize: '14px',
+                    fontSize: '12px',
                     letterSpacing: '0.15em',
                     color: '#FFFFFF',
-                    background: '#D4A574',
-                    border: 'none',
-                    padding: '18px 32px',
-                    borderRadius: '14px',
+                    background: '#0047FF',
+                    border: '1px solid #0047FF',
+                    padding: '14px 32px',
+                    borderRadius: '4px',
                     cursor: signupStatus === 'loading' ? 'wait' : 'pointer',
-                    boxShadow: '0 0 30px rgba(212, 165, 116, 0.3)',
                     opacity: signupStatus === 'loading' ? 0.7 : 1,
+                    transition: 'all 0.3s ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = '#003AD6';
+                    e.currentTarget.style.boxShadow = '0 0 20px rgba(0, 71, 255, 0.3)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = '#0047FF';
+                    e.currentTarget.style.boxShadow = 'none';
                   }}
                 >
-                  {signupStatus === 'loading' ? 'JOINING...' : 'JOIN THE WAITLIST'}
+                  {signupStatus === 'loading' ? 'SENDING...' : signupStatus === 'error' ? 'RETRY' : 'SEND MY BREAKDOWN'}
                 </motion.button>
+
+                {signupStatus === 'error' && (
+                  <p style={{
+                    fontFamily: "'VCR OSD Mono', monospace",
+                    fontSize: '11px',
+                    letterSpacing: '0.05em',
+                    color: '#EF4444',
+                    margin: 0,
+                    textAlign: 'center',
+                  }}>
+                    [ERROR: SIGNUP FAILED — TRY AGAIN]
+                  </p>
+                )}
               </motion.form>
             )}
 
@@ -1982,18 +2159,22 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
               onClick={() => setFlowState('reveal')}
               style={{
                 fontFamily: "'VCR OSD Mono', monospace",
-                fontSize: '12px',
+                fontSize: '11px',
                 letterSpacing: '0.1em',
-                color: theme === 'dark' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)',
+                color: 'rgba(255,255,255,0.3)',
                 background: 'transparent',
                 border: 'none',
                 cursor: 'pointer',
                 padding: '8px 16px',
                 marginTop: '8px',
+                transition: 'color 0.3s ease',
               }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = 'rgba(255,255,255,0.6)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = 'rgba(255,255,255,0.3)'; }}
             >
               ← BACK TO RESULTS
             </motion.button>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>

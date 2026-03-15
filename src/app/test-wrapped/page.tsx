@@ -16,7 +16,7 @@ const mockData: WrappedRevealData = {
   voiceConsistency: 78,
   
   // Personality
-  archetype: 'The Creator',
+  archetype: 'BUILD.EXE',
   archetypeEmoji: '🎨',
   personalityType: 'ENTP',
   personalitySummary: 'You bring ideas to life with precision and purpose. Your community trusts you to deliver substance over hype. Known for blending technical depth with accessible explanations.',

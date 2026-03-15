@@ -3,6 +3,7 @@
 import { motion } from 'motion/react';
 import { GeneratedBrandDNA } from './BrandDNAPreview';
 import type { RawTweet } from './DNAWalkthrough/TweetExcerpt';
+import MetalArchetypeIcon from '@/components/MetalArchetypeIcon';
 
 // ============================================================================
 // Types
@@ -272,7 +273,11 @@ export default function BrandBreakdown({
         >
           <SectionLabel>Your Archetype</SectionLabel>
           <div className="flex items-start gap-5 p-5 border border-black/8 rounded-xl bg-white/80">
-            <div className="text-4xl">{generatedBrandDNA.archetypeEmoji || '🧬'}</div>
+            <MetalArchetypeIcon
+              src={generatedBrandDNA.archetypeEmoji || '🧬'}
+              alt={generatedBrandDNA.archetype || 'archetype'}
+              size={48}
+            />
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-1">
                 <span className="text-lg font-bold text-black">{generatedBrandDNA.archetype}</span>

@@ -2,6 +2,7 @@
 
 import { motion, Variants, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
+import MetalArchetypeIcon from '@/components/MetalArchetypeIcon';
 
 // Custom AnimateNumber replacement
 function AnimateNumber({ children, format }: { children: number; format?: Intl.NumberFormatOptions }) {
@@ -640,9 +641,9 @@ function ArchetypeCard({
           initial={{ scale: 0, rotate: -180 }}
           animate={{ scale: 1, rotate: 0 }}
           transition={{ delay: 0.7, type: 'spring' }}
-          style={{ fontSize: '64px', marginBottom: '10px' }}
+          style={{ marginBottom: '10px' }}
         >
-          {emoji}
+          <MetalArchetypeIcon src={emoji} alt={name} size={64} />
         </motion.div>
         <div
           style={{

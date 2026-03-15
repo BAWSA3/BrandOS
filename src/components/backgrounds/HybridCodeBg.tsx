@@ -375,7 +375,7 @@ function TypedCommentBlock() {
       transition={{ duration: 1, delay: 1.2 }}
       style={{
         position: 'absolute',
-        top: '35%',
+        top: '6%',
         right: '5%',
         fontFamily: "'VCR OSD Mono', monospace",
         fontSize: 'clamp(9px, 1vw, 11px)',
@@ -461,10 +461,6 @@ export default function HybridCodeBg() {
       {/* Hide decorative code elements on mobile — they overlap hero content */}
       {!isMobile && (
         <>
-          {/* TypeScript code blocks — typed, cycle every ~8s */}
-          <TypedCodeBlock setIndex={0} />
-          <TypedCodeBlock setIndex={1} />
-
           {/* Left terminal logs — cycle every ~7s */}
           <TypedLogBlock />
 

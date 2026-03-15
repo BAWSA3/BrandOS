@@ -23,29 +23,57 @@ const EVOLUTION_CONFIG = {
   MAX_DAYS_BEFORE_AUTO_ELIGIBLE: 90,
 };
 
+// Legacy name migration — converts any old archetype name to the current one
+const LEGACY_NAME_MAP: Record<string, string> = {
+  // "The X" era names
+  'The Alpha': 'FORESIGHT',
+  'The Builder': 'BUILD.EXE',
+  'The Educator': 'SIGNAL_SAGE',
+  'The Degen': 'ENTROPY',
+  'The Analyst': 'FORESIGHT',
+  'The Philosopher': 'FORESIGHT',
+  'The Networker': 'RELAY',
+  'The Contrarian': 'ENTROPY',
+  'The Creator': 'BUILD.EXE',
+  // "Descriptor" era names
+  'Professor': 'SIGNAL_SAGE',
+  'Plug': 'RELAY',
+  'Chief Vibes Officer': 'FREQ',
+  'Prophet': 'FORESIGHT',
+  'Ship-or-Die': 'BUILD.EXE',
+  'Underdog-Arc': 'ARC',
+  'Degen': 'ENTROPY',
+  'Anon': 'NULL',
+};
+
+/** Normalize any archetype name (legacy or current) to the current name */
+export function normalizeArchetypeName(name: string): string {
+  return LEGACY_NAME_MAP[name] || name;
+}
+
 // Archetype evolution paths (directional progression)
 // Key = current archetype, Value = array of valid next archetypes
 const EVOLUTION_PATHS: Record<string, string[]> = {
-  'Underdog Arc': ['The Degen', 'The Anon', 'Chief Vibes Officer', 'The Plug', 'Ship or Die', 'The Professor', 'The Prophet'],
-  'The Degen': ['Ship or Die', 'The Prophet'],
-  'The Anon': ['The Prophet', 'The Professor'],
-  'Chief Vibes Officer': ['The Plug', 'The Prophet'],
-  'The Plug': ['The Prophet', 'The Professor'],
-  'Ship or Die': ['The Professor', 'The Prophet'],
-  'The Professor': [], // Terminal - doesn't evolve
-  'The Prophet': [], // Terminal - peak archetype
+  'ARC': ['ENTROPY', 'NULL', 'FREQ', 'RELAY', 'BUILD.EXE', 'SIGNAL_SAGE', 'FORESIGHT'],
+  'ENTROPY': ['BUILD.EXE', 'FORESIGHT'],
+  'NULL': ['FORESIGHT', 'SIGNAL_SAGE'],
+  'FREQ': ['RELAY', 'FORESIGHT'],
+  'RELAY': ['FORESIGHT', 'SIGNAL_SAGE'],
+  'BUILD.EXE': ['SIGNAL_SAGE', 'FORESIGHT'],
+  'SIGNAL_SAGE': [], // Terminal - doesn't evolve
+  'FORESIGHT': [], // Terminal - peak archetype
 };
 
 // Archetype tier levels (higher = more evolved)
 const ARCHETYPE_TIERS: Record<string, number> = {
-  'Underdog Arc': 1,
-  'The Degen': 2,
-  'The Anon': 2,
-  'Chief Vibes Officer': 2,
-  'The Plug': 3,
-  'Ship or Die': 3,
-  'The Professor': 4,
-  'The Prophet': 5, // Peak
+  'ARC': 1,
+  'ENTROPY': 2,
+  'NULL': 2,
+  'FREQ': 2,
+  'RELAY': 3,
+  'BUILD.EXE': 3,
+  'SIGNAL_SAGE': 4,
+  'FORESIGHT': 5, // Peak
 };
 
 export interface ArchetypeDecision {
