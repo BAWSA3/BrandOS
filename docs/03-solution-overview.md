@@ -47,7 +47,7 @@ Transform implicit brand knowledge into explicit, queryable rules.
 
 | Component | What It Captures | Example |
 |-----------|------------------|---------|
-| **Colors** | Primary, secondary, accent | #000000, #FFFFFF, #0071e3 |
+| **Colors** | Primary, secondary, accent | #000000, #F2F0EF, #0071e3 |
 | **Tone Sliders** | Voice personality spectrum | Minimal (85%), Playful (20%), Bold (60%) |
 | **Keywords** | Brand vocabulary | "innovative", "seamless", "premium" |
 | **Do Patterns** | Encouraged behaviors | "Use short, impactful sentences" |

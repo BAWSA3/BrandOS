@@ -254,7 +254,7 @@ function HomeContent() {
       setBrandDNA({
         colors: {
           primary: extractedBrand.colors.primary?.value || brandDNA?.colors?.primary || '#000000',
-          secondary: extractedBrand.colors.secondary?.value || brandDNA?.colors?.secondary || '#ffffff',
+          secondary: extractedBrand.colors.secondary?.value || brandDNA?.colors?.secondary || '#F2F0EF',
           accent: extractedBrand.colors.accent?.value || brandDNA?.colors?.accent || '#6366f1',
         },
       });

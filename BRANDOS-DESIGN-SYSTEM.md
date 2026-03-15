@@ -9,7 +9,7 @@
 |-------|-------|-------|
 | `--background` | `#E8E8ED` | Page background (silver matte) |
 | `--foreground` | `#1D1D1F` | Primary text, dark elements |
-| `--surface` | `#FFFFFF` | Card/panel backgrounds |
+| `--surface` | `#F2F0EF` | Card/panel backgrounds |
 | `--surface-hover` | `#F5F5F7` | Hover state for surfaces |
 | `--surface-tertiary` | `#E8E8ED` | Tertiary surfaces, input backgrounds |
 | `--muted` | `#86868B` | Muted/placeholder text |

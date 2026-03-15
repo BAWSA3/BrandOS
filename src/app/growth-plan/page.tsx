@@ -74,7 +74,7 @@ export default function GrowthPlanPage() {
     return (
       <div style={{
         minHeight: '100vh',
-        background: '#ffffff',
+        background: '#F2F0EF',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -274,7 +274,7 @@ export default function GrowthPlanPage() {
     return (
       <div style={{
         minHeight: '100vh',
-        background: '#ffffff',
+        background: '#F2F0EF',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -338,7 +338,7 @@ export default function GrowthPlanPage() {
     return (
       <div style={{
         minHeight: '100vh',
-        background: '#ffffff',
+        background: '#F2F0EF',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',

@@ -40,7 +40,7 @@ Home → Define → Check → Generate → Scale
 |-------|-----|--------|-------|
 | `--background` | `#E8E8ED` | ![#E8E8ED](https://via.placeholder.com/16/E8E8ED/E8E8ED) | Page background (Silver Matte Light) |
 | `--foreground` | `#1D1D1F` | ![#1D1D1F](https://via.placeholder.com/16/1D1D1F/1D1D1F) | Primary text, dark elements |
-| `--surface` | `#FFFFFF` | ![#FFFFFF](https://via.placeholder.com/16/FFFFFF/FFFFFF) | Card/panel backgrounds |
+| `--surface` | `#F2F0EF` | ![#F2F0EF](https://via.placeholder.com/16/F2F0EF/F2F0EF) | Card/panel backgrounds |
 | `--surface-hover` | `#F5F5F7` | ![#F5F5F7](https://via.placeholder.com/16/F5F5F7/F5F5F7) | Hover states |
 | `--surface-tertiary` | `#E8E8ED` | ![#E8E8ED](https://via.placeholder.com/16/E8E8ED/E8E8ED) | Input backgrounds, tertiary surfaces |
 

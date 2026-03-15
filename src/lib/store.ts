@@ -133,7 +133,7 @@ const createDefaultBrandDNA = (name: string = ''): BrandDNA => ({
   name,
   colors: {
     primary: '#000000',
-    secondary: '#ffffff',
+    secondary: '#F2F0EF',
     accent: '#6366f1',
   },
   tone: {
@@ -241,7 +241,7 @@ export const useBrandStore = create<BrandStore>()(
           name: dna.name || `@${twitterUsername}`,
           colors: dna.colors || {
             primary: '#000000',
-            secondary: '#ffffff',
+            secondary: '#F2F0EF',
             accent: '#6366f1',
           },
           tone: dna.tone || {
