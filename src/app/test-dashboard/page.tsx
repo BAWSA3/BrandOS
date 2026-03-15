@@ -16,8 +16,8 @@ const mockData: BrandOSDashboardData = {
     engagementScore: 78,
   },
   personality: {
-    archetype: 'The Philosopher',
-    emoji: '/emojis/Faces & Emotions/🤓 - Nerd Face.svg',
+    archetype: 'FORESIGHT',
+    emoji: '/archetypes/FORESIGHT.svg',
     type: 'INTJ',
   },
   tone: {

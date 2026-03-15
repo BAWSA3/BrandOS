@@ -82,11 +82,11 @@ function formatFollowers(count: number): string {
 
 function getPersonalityType(archetype?: string): string {
   const typeMap: Record<string, string> = {
-    'The Prophet': 'INTJ',
+    'FORESIGHT': 'INTJ',
     'The Alpha': 'ENTJ',
     'The Builder': 'ISTP',
     'The Educator': 'ENFJ',
-    'The Degen': 'ESTP',
+    'ENTROPY': 'ESTP',
     'The Analyst': 'INTP',
     'The Philosopher': 'INFJ',
     'The Networker': 'ESFJ',
@@ -97,21 +97,20 @@ function getPersonalityType(archetype?: string): string {
 
 // Map archetype to pixel emoji path
 function getArchetypeEmoji(archetype?: CreatorArchetype): string {
-  if (!archetype) return '/emojis/Faces & Emotions/🤓 - Nerd Face.svg';
+  if (!archetype) return '/archetypes/SIGNAL_SAGE.svg';
 
   const emojiMap: Record<string, string> = {
-    'The Prophet': '/emojis/Creatures & Nature/👽 - Alien.svg',
-    'The Alpha': '/emojis/Symbols & Objects/⚡ - High Voltage.svg',
-    'The Builder': '/emojis/Activities & Objects/🚀 - Rocket.svg',
-    'The Educator': '/emojis/Faces & Emotions/🤓 - Nerd Face.svg',
-    'The Degen': '/emojis/Faces & Emotions/🤪 - Zany Face.svg',
-    'The Analyst': '/emojis/Creatures & Nature/👀 - Eyes.svg',
-    'The Philosopher': '/emojis/Faces & Emotions/🤓 - Nerd Face.svg',
-    'The Networker': '/emojis/Gestures & Hands/🤝 - Handshake.svg',
-    'The Contrarian': '/emojis/Creatures & Nature/🔥 - Fire.svg',
+    'ARC': '/archetypes/ARC.svg',
+    'ENTROPY': '/archetypes/ENTROPY.svg',
+    'NULL': '/archetypes/NULL.svg',
+    'FREQ': '/archetypes/FREQ.svg',
+    'RELAY': '/archetypes/RELAY.svg',
+    'BUILD.EXE': '/archetypes/BUILD.EXE.svg',
+    'SIGNAL_SAGE': '/archetypes/SIGNAL_SAGE.svg',
+    'FORESIGHT': '/archetypes/FORESIGHT.svg',
   };
 
-  return emojiMap[archetype.primary] || archetype.emoji || '/emojis/Faces & Emotions/🤓 - Nerd Face.svg';
+  return emojiMap[archetype.primary] || archetype.emoji || '/archetypes/SIGNAL_SAGE.svg';
 }
 
 function transformToDashboardData(

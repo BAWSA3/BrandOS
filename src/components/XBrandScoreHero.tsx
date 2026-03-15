@@ -91,18 +91,16 @@ function formatFollowersDisplay(count: number): string {
 
 function getArchetypePixelEmoji(archetype?: string): string {
   const emojiMap: Record<string, string> = {
-    'FORESIGHT': '/emojis/Creatures & Nature/👽 - Alien.svg',
-    'The Alpha': '/emojis/Symbols & Objects/⚡ - High Voltage.svg',
-    'The Builder': '/emojis/Activities & Objects/🚀 - Rocket.svg',
-    'The Educator': '/emojis/Faces & Emotions/🤓 - Nerd Face.svg',
-    'ENTROPY': '/emojis/Faces & Emotions/🤪 - Zany Face.svg',
-    'The Analyst': '/emojis/Creatures & Nature/👀 - Eyes.svg',
-    'The Philosopher': '/emojis/Faces & Emotions/🤓 - Nerd Face.svg',
-    'The Networker': '/emojis/Gestures & Hands/🤝 - Handshake.svg',
-    'The Contrarian': '/emojis/Creatures & Nature/🔥 - Fire.svg',
-    'The Creator': '/emojis/Activities & Objects/🚀 - Rocket.svg',
+    'ARC': '/archetypes/ARC.svg',
+    'ENTROPY': '/archetypes/ENTROPY.svg',
+    'NULL': '/archetypes/NULL.svg',
+    'FREQ': '/archetypes/FREQ.svg',
+    'RELAY': '/archetypes/RELAY.svg',
+    'BUILD.EXE': '/archetypes/BUILD.EXE.svg',
+    'SIGNAL_SAGE': '/archetypes/SIGNAL_SAGE.svg',
+    'FORESIGHT': '/archetypes/FORESIGHT.svg',
   };
-  return emojiMap[archetype || ''] || '/emojis/Faces & Emotions/🤓 - Nerd Face.svg';
+  return emojiMap[archetype || ''] || '/archetypes/SIGNAL_SAGE.svg';
 }
 
 function getPersonalityTypeCode(archetype?: string): string {

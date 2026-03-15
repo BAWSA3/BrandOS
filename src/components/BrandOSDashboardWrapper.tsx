@@ -83,11 +83,11 @@ function formatFollowers(count: number): string {
 // Determine personality type label
 function getPersonalityType(archetype?: string): string {
   const typeMap: Record<string, string> = {
-    'The Prophet': 'INTJ',
+    'FORESIGHT': 'INTJ',
     'The Alpha': 'ENTJ',
     'The Builder': 'ISTP',
     'The Educator': 'ENFJ',
-    'The Degen': 'ESTP',
+    'ENTROPY': 'ESTP',
     'The Analyst': 'INTP',
     'The Philosopher': 'INFJ',
     'The Networker': 'ESFJ',
@@ -141,7 +141,7 @@ function transformToDashboardData(
     },
     personality: {
       archetype: brandScore.archetype?.primary || 'The Creator',
-      emoji: brandScore.archetype?.emoji || '/emojis/Faces & Emotions/🤓 - Nerd Face.svg',
+      emoji: brandScore.archetype?.emoji || '/archetypes/SIGNAL_SAGE.svg',
       type: getPersonalityType(brandScore.archetype?.primary),
     },
     tone: brandScore.toneAnalysis || defaultTone,

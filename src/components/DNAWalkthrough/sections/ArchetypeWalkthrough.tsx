@@ -17,14 +17,14 @@ interface ArchetypeWalkthroughProps {
 
 // Map archetype names to custom SVG emoji paths
 const ARCHETYPE_EMOJI_MAP: Record<string, string> = {
-  'The Professor': '/emojis/Faces & Emotions/🤓 - Nerd Face.svg',
-  'The Plug': '/emojis/Gestures & Hands/🤝 - Handshake.svg',
-  'Chief Vibes Officer': '/emojis/Faces & Emotions/😎 - Smiling Face with Sunglasses.svg',
-  'The Prophet': '/emojis/Creatures & Nature/👀 - Eyes.svg',
-  'Ship or Die': '/emojis/Activities & Objects/🚀 - Rocket.svg',
-  'Underdog Arc': '/emojis/Gestures & Hands/💪 - Flexed Biceps.svg',
-  'The Degen': '/emojis/Creatures & Nature/🔥 - Fire.svg',
-  'The Anon': '/emojis/Creatures & Nature/👽 - Alien.svg',
+  'ARC': '/archetypes/ARC.svg',
+  'ENTROPY': '/archetypes/ENTROPY.svg',
+  'NULL': '/archetypes/NULL.svg',
+  'FREQ': '/archetypes/FREQ.svg',
+  'RELAY': '/archetypes/RELAY.svg',
+  'BUILD.EXE': '/archetypes/BUILD.EXE.svg',
+  'SIGNAL_SAGE': '/archetypes/SIGNAL_SAGE.svg',
+  'FORESIGHT': '/archetypes/FORESIGHT.svg',
 };
 
 // Helper to normalize archetype name (strip emoji prefix if present)
@@ -44,7 +44,7 @@ interface ArchetypeData {
 }
 
 const ARCHETYPE_DESCRIPTIONS: Record<string, ArchetypeData> = {
-  'The Professor': {
+  'SIGNAL_SAGE': {
     short: 'a knowledge authority who builds trust through education and deep expertise',
     strengths: ['Educational threads', 'How-to guides', 'Industry analysis'],
     contentTypes: ['Long-form threads', 'Breakdown posts', 'Case studies'],
@@ -59,7 +59,7 @@ const ARCHETYPE_DESCRIPTIONS: Record<string, ArchetypeData> = {
       { trait: 'Virality', score: 60 },
     ],
   },
-  'The Plug': {
+  'RELAY': {
     short: 'a super connector who brings people and opportunities together',
     strengths: ['Networking content', 'Introductions', 'Resource sharing'],
     contentTypes: ['Curated lists', 'Recommendations', 'Community highlights'],
@@ -74,7 +74,7 @@ const ARCHETYPE_DESCRIPTIONS: Record<string, ArchetypeData> = {
       { trait: 'Virality', score: 65 },
     ],
   },
-  'Chief Vibes Officer': {
+  'FREQ': {
     short: 'an entertainer who builds community through personality and relatability',
     strengths: ['Engagement bait', 'Memes', 'Hot takes'],
     contentTypes: ['Short punchy posts', 'Relatable content', 'Commentary'],
@@ -89,7 +89,7 @@ const ARCHETYPE_DESCRIPTIONS: Record<string, ArchetypeData> = {
       { trait: 'Authority', score: 55 },
     ],
   },
-  'The Prophet': {
+  'FORESIGHT': {
     short: 'a thought leader who shapes narratives and sees what others miss',
     strengths: ['Predictions', 'Contrarian takes', 'Big picture thinking'],
     contentTypes: ['Thought pieces', 'Industry predictions', 'Manifesto posts'],
@@ -104,7 +104,7 @@ const ARCHETYPE_DESCRIPTIONS: Record<string, ArchetypeData> = {
       { trait: 'Engagement', score: 70 },
     ],
   },
-  'Ship or Die': {
+  'BUILD.EXE': {
     short: 'a builder who earns credibility by shipping and sharing the journey',
     strengths: ['Build in public', 'Progress updates', 'Technical insights'],
     contentTypes: ['Ship updates', 'Lessons learned', 'Behind-the-scenes'],
@@ -119,7 +119,7 @@ const ARCHETYPE_DESCRIPTIONS: Record<string, ArchetypeData> = {
       { trait: 'Virality', score: 70 },
     ],
   },
-  'Underdog Arc': {
+  'ARC': {
     short: 'a rising star whose growth story inspires and creates connection',
     strengths: ['Personal stories', 'Milestone posts', 'Vulnerability'],
     contentTypes: ['Journey updates', 'Win/loss reflections', 'Growth metrics'],
@@ -134,7 +134,7 @@ const ARCHETYPE_DESCRIPTIONS: Record<string, ArchetypeData> = {
       { trait: 'Authority', score: 60 },
     ],
   },
-  'The Degen': {
+  'ENTROPY': {
     short: 'a risk-taker who thrives in chaos and builds cult-like followings',
     strengths: ['FOMO creation', 'Bold calls', 'Community rallying'],
     contentTypes: ['Hot takes', 'Speculation', 'Community memes'],
@@ -149,7 +149,7 @@ const ARCHETYPE_DESCRIPTIONS: Record<string, ArchetypeData> = {
       { trait: 'Trust', score: 50 },
     ],
   },
-  'The Anon': {
+  'NULL': {
     short: 'a mysterious voice whose ideas speak louder than identity',
     strengths: ['Pure ideas', 'Controversial takes', 'Anonymity mystique'],
     contentTypes: ['Insight threads', 'Philosophical posts', 'Industry secrets'],
