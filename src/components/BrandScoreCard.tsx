@@ -38,7 +38,11 @@ const BrandScoreCard: React.FC<BrandScoreCardProps> = ({
       <div
         id="brandos-score-card"
         className="w-full max-w-[1100px] bg-[#2E6AFF] rounded-[8px] relative p-8 md:p-14 flex flex-col justify-between overflow-visible"
-        style={{ minHeight: '480px', aspectRatio: '16 / 10', boxShadow: '0 8px 40px rgba(46, 106, 255, 0.35), 0 2px 20px rgba(0, 0, 0, 0.15)' }}
+        style={{
+          minHeight: '480px',
+          aspectRatio: '16 / 10',
+          boxShadow: '0 8px 40px rgba(46, 106, 255, 0.35), 0 2px 20px rgba(0, 0, 0, 0.15)',
+        }}
       >
         <div className="absolute inset-0 bg-grid-pattern opacity-30 pointer-events-none" />
 
@@ -46,20 +50,23 @@ const BrandScoreCard: React.FC<BrandScoreCardProps> = ({
         <div className="flex justify-between items-start z-10">
           <span className="font-os text-xs md:text-sm text-white/90 tracking-widest border border-white/40 px-2 py-1 rounded-[2px] bg-[#2E6AFF] relative group/info inline-flex items-center gap-1.5">
             BRAND_SCORE
-            <Info className="w-3 h-3 text-white/50 hover:text-white/80 cursor-help" />
+            <span className="relative">
+              <Info className="w-3 h-3 text-white/50 hover:text-white/80 cursor-help peer" />
+              <span className="absolute left-full bottom-0 ml-2 w-[220px] px-3 py-2 bg-black/95 border border-white/15 rounded text-[10px] leading-relaxed text-white/70 font-os tracking-wide opacity-0 peer-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50">
+                Your Brand Score measures how strong, consistent, and recognizable your brand is across identity, content, voice, and growth.
+              </span>
+            </span>
           </span>
           {/* Profile image + username */}
           <div className="flex items-center gap-4 min-w-0">
             <div className="text-right min-w-0 max-w-[200px] md:max-w-[280px]">
-              <span className="font-brand font-bold text-white text-lg md:text-xl leading-none block truncate">{displayName}</span>
+              <span className="font-brand font-bold text-white text-lg md:text-xl leading-none block truncate">
+                {displayName}
+              </span>
               <span className="font-os text-sm text-white/70 block mt-1 truncate">@{username}</span>
             </div>
             <div className="w-[72px] h-[72px] rounded-full border-2 border-white/40 overflow-hidden shrink-0">
-              <img
-                src={profileImageUrl}
-                alt={displayName}
-                className="w-full h-full object-cover"
-              />
+              <img src={profileImageUrl} alt={displayName} className="w-full h-full object-cover" />
             </div>
           </div>
         </div>
@@ -69,8 +76,8 @@ const BrandScoreCard: React.FC<BrandScoreCardProps> = ({
           <h1 className="font-brand font-black italic text-[160px] md:text-[240px] leading-none tracking-tighter text-white drop-shadow-xl shrink-0">
             <AnimateNumber
               transition={{
-                y: { type: "spring", duration: 0.8, bounce: 0 },
-                width: { type: "spring", duration: 0.5, bounce: 0 },
+                y: { type: 'spring', duration: 0.8, bounce: 0 },
+                width: { type: 'spring', duration: 0.5, bounce: 0 },
                 opacity: { duration: 0.4 },
               }}
               trend={1}
@@ -92,8 +99,12 @@ const BrandScoreCard: React.FC<BrandScoreCardProps> = ({
                   const contribution = Math.round((value / total) * score);
                   return (
                     <div key={label} className="flex items-center justify-end gap-3">
-                      <span className="font-os text-[10px] md:text-xs tracking-wider text-white/40">{label}</span>
-                      <span className="font-os text-base md:text-lg font-bold text-white/90">+{contribution}</span>
+                      <span className="font-os text-[10px] md:text-xs tracking-wider text-white/40">
+                        {label}
+                      </span>
+                      <span className="font-os text-base md:text-lg font-bold text-white/90">
+                        +{contribution}
+                      </span>
                     </div>
                   );
                 });
@@ -109,7 +120,9 @@ const BrandScoreCard: React.FC<BrandScoreCardProps> = ({
         {/* Bottom stats */}
         <div className="z-10 grid grid-cols-2 gap-8 border-t border-white/20 pt-6">
           <div>
-            <span className="font-os text-[10px] md:text-xs text-white/70 block mb-1 uppercase tracking-wider">Voice Consistency</span>
+            <span className="font-os text-[10px] md:text-xs text-white/70 block mb-1 uppercase tracking-wider">
+              Voice Consistency
+            </span>
             <div className="flex items-center gap-2">
               <span className="text-2xl font-brand font-bold italic text-white">
                 <AnimateNumber suffix="%" trend={1}>
@@ -117,12 +130,17 @@ const BrandScoreCard: React.FC<BrandScoreCardProps> = ({
                 </AnimateNumber>
               </span>
               <div className="h-1.5 w-12 bg-white/30 rounded-full overflow-hidden">
-                <div style={{ width: `${voiceConsistency}%` }} className="h-full bg-white transition-all duration-700" />
+                <div
+                  style={{ width: `${voiceConsistency}%` }}
+                  className="h-full bg-white transition-all duration-700"
+                />
               </div>
             </div>
           </div>
           <div className="text-right">
-            <span className="font-os text-[10px] md:text-xs text-white/70 block mb-1 uppercase tracking-wider">Engagement</span>
+            <span className="font-os text-[10px] md:text-xs text-white/70 block mb-1 uppercase tracking-wider">
+              Engagement
+            </span>
             <span className="text-2xl font-brand font-bold italic text-white">
               <AnimateNumber suffix="/100" trend={1}>
                 {engagementScore}
