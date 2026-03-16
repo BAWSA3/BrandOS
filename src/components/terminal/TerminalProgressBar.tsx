@@ -1,5 +1,7 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { motion } from 'motion/react';
 
 const PHASE_LABELS = ['DEFINE', 'CHECK', 'GENERATE', 'SCALE'];
@@ -27,15 +29,21 @@ export default function TerminalProgressBar({
   currentPhase,
   phaseProgress,
 }: TerminalProgressBarProps) {
+  const [mounted, setMounted] = useState(false);
   const overallProgress = (currentPhase - 1 + phaseProgress) / 4;
   const overallPercent = Math.round(overallProgress * 100);
   const currentCommand = PHASE_COMMANDS[currentPhase - 1] || PHASE_COMMANDS[0];
 
-  return (
+  useEffect(() => {
+    setMounted(true);
+    return () => setMounted(false);
+  }, []);
+
+  const content = (
     <motion.div
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -20 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
       transition={{ duration: 0.5 }}
       style={{
         position: 'fixed',
@@ -181,4 +189,7 @@ export default function TerminalProgressBar({
       </div>
     </motion.div>
   );
+
+  if (!mounted) return null;
+  return createPortal(content, document.body);
 }
