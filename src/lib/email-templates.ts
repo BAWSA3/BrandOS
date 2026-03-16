@@ -95,6 +95,27 @@ export interface EmailTemplate {
 // Helper Functions
 // =============================================================================
 
+/** Strip prompt instruction fragments that sometimes leak through LLM output */
+function sanitizeAIText(text: string): string {
+  const leakPatterns = [
+    /Sentence \d+:\s*/gi,
+    /Point out ONE specific\b[^.]*?[.:]\s*/gi,
+    /Be direct about what'?s holding them back[.:]\s*/gi,
+    /Give ONE concrete,? actionable step\b[^.]*?[.:]\s*/gi,
+    /Structure your \d+ sentences exactly like this[.:]\s*/gi,
+    /Write in second person\b[^.]*?\.\s*/gi,
+    /A positive observation about their\b[^.]*?[.:]\s*/gi,
+    /Reference their actual content patterns[^.]*?\.\s*/gi,
+    /No quotes around the response\.?\s*/gi,
+  ];
+
+  let cleaned = text;
+  for (const pattern of leakPatterns) {
+    cleaned = cleaned.replace(pattern, '');
+  }
+  return cleaned.replace(/ {2,}/g, ' ').trim();
+}
+
 function getScoreMessage(score: number): { intro: string; advice: string } {
   if (score >= 80) {
     return {
@@ -199,7 +220,7 @@ export const email1ScoreExplainer: EmailTemplate = {
       .map((i) => `→ ${i}`)
       .join('\n');
 
-    const summaryBlock = data.summary ? `\n${data.summary}\n` : '';
+    const summaryBlock = data.summary ? `\n${sanitizeAIText(data.summary)}\n` : '';
 
     return `Hey @${data.username}!
 
@@ -245,7 +266,7 @@ ${data.archetypeIconUrl ? `{{ARCHETYPE_IMAGE:${data.archetypeIconUrl}}}` : ''}
 
 **YOUR ARCHETYPE: ${data.archetype}**
 ${data.archetypeTagline ? `"${data.archetypeTagline}"` : ''}
-${data.archetypeDescription || 'A unique brand identity we detected from your content.'}
+${sanitizeAIText(data.archetypeDescription) || 'A unique brand identity we detected from your content.'}
 ${summaryBlock}
 This is just the start — BrandOS is building something much bigger. Expect updates from me on how we can better improve your brand.
 

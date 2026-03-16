@@ -291,6 +291,31 @@ function detectPersonalityType(
   return detected;
 }
 
+/**
+ * Strip prompt instruction fragments that sometimes leak into LLM output.
+ */
+function stripPromptLeaks(text: string): string {
+  const leakPatterns = [
+    /Sentence \d+:\s*/gi,
+    /Point out ONE specific\b[^.]*?[.:]\s*/gi,
+    /Be direct about what'?s holding them back[.:]\s*/gi,
+    /Give ONE concrete,? actionable step\b[^.]*?[.:]\s*/gi,
+    /Structure your \d+ sentences exactly like this[.:]\s*/gi,
+    /Write in second person\b[^.]*?\.\s*/gi,
+    /A positive observation about their\b[^.]*?[.:]\s*/gi,
+    /Reference their actual content patterns[^.]*?\.\s*/gi,
+    /No quotes around the response\.?\s*/gi,
+    /Be specific \(e\.g\.,?\s*"[^"]*"\s*(not\s*"[^"]*")?\)\.?\s*/gi,
+  ];
+
+  let cleaned = text;
+  for (const pattern of leakPatterns) {
+    cleaned = cleaned.replace(pattern, '');
+  }
+
+  return cleaned.replace(/\n{3,}/g, '\n\n').replace(/ {2,}/g, ' ').trim();
+}
+
 // Generate AI personality summary using Claude API
 // CONTENT-PRIMARY: Uses tweet voice for context, not bio
 async function generatePersonalitySummary(
@@ -364,12 +389,13 @@ High engagement topics: ${context.highEngagementTopics.length > 0 ? context.high
 Follower count: ${context.followers.toLocaleString()}
 Voice consistency: ${context.voiceConsistency}%
 
-Structure your 3 sentences exactly like this:
-Sentence 1: A positive observation about their CONTENT patterns and what makes them effective (reference their actual content themes, not their bio)
-Sentence 2: Point out ONE specific weakness or gap in their CONTENT strategy based on their metrics. Be direct about what's holding them back.
-Sentence 3: Give ONE concrete, actionable step they can take THIS WEEK to fix that weakness. Be specific (e.g., "Pin your best thread to your profile" not "improve your content").
+Reply with ONLY the 3 sentences—no labels, no prefixes, no numbering, no meta-commentary.
 
-Write in second person ("You..."). Be direct and specific—no fluff. Reference their actual content patterns, NOT their bio text. No quotes around the response.`,
+First sentence: praise a specific CONTENT pattern that makes them effective (reference actual themes, not bio).
+Second sentence: name their single biggest content gap or weakness based on the metrics above. Be blunt.
+Third sentence: one concrete action they can take this week to fix it (e.g. "Pin your best-performing thread to your profile").
+
+Use second person ("You..."). Be direct, specific, no fluff. Reference content patterns, not bio text.`,
           },
         ],
       }),
@@ -377,9 +403,11 @@ Write in second person ("You..."). Be direct and specific—no fluff. Reference 
 
     if (response.ok) {
       const data = await response.json();
-      return (
-        data.content?.[0]?.text || generateFallbackSummary(personalityType, archetypeName, context)
-      );
+      const rawText: string = data.content?.[0]?.text || '';
+      if (rawText) {
+        return stripPromptLeaks(rawText);
+      }
+      return generateFallbackSummary(personalityType, archetypeName, context);
     }
   } catch (error) {
     console.error('Claude API error:', error);
