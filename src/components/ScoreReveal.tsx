@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'motion/react';
 import BrandOSDashboard, { BrandOSDashboardData } from './BrandOSDashboard';
-import { normalizeArchetypeName } from '@/lib/archetype-engine';
+import { normalizeArchetypeName } from '@/lib/archetype-names';
 
 // =============================================================================
 // TYPES

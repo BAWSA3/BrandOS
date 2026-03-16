@@ -68,7 +68,7 @@ const DEMO_DATA = {
     engagementScore: 85,
   },
   personality: {
-    archetype: 'The Professor',
+    archetype: 'SIGNAL_SAGE',
     emoji: '🎓',
     type: 'INTJ',
   },
@@ -84,8 +84,8 @@ const DEMO_DATA = {
   ],
   dna: {
     keywords: ['philosophy', 'web3', 'growth', 'blockchain'],
-    archetypeTag: 'the professor',
-    voice: `> As the Professor, you excel at breaking down complex topics and guiding your audience with patience and expertise.
+    archetypeTag: 'SIGNAL_SAGE',
+    voice: `> As SIGNAL_SAGE, you excel at breaking down complex topics and guiding your audience with patience and expertise.
 > However, your voice consistency of 75% suggests a lack of cohesion in your brand presence, which may leave your followers unsure of your true persona.
 > This week, focus on crafting a clear and consistent tone across all your content.`,
   },

@@ -8,7 +8,7 @@ identities that inform content strategy.
 
 ---
 
-### 🎓 THE PROFESSOR
+### 🎓 SIGNAL_SAGE
 **Tagline:** "the one who makes you smarter"
 
 **Signals:**
@@ -25,7 +25,7 @@ identities that inform content strategy.
 
 ---
 
-### 🔌 THE PLUG
+### 🔌 RELAY
 **Tagline:** "the one who connects everyone"
 
 **Signals:**
@@ -42,7 +42,7 @@ identities that inform content strategy.
 
 ---
 
-### 🎪 CHIEF VIBES OFFICER
+### 🎪 FREQ
 **Tagline:** "the one who makes the timeline fun"
 
 **Signals:**
@@ -59,7 +59,7 @@ identities that inform content strategy.
 
 ---
 
-### 🔮 THE PROPHET
+### 🔮 FORESIGHT
 **Tagline:** "the one who sees what's coming"
 
 **Signals:**
@@ -76,7 +76,7 @@ identities that inform content strategy.
 
 ---
 
-### 🚢 SHIP OR DIE
+### 🚢 BUILD.EXE
 **Tagline:** "the one who builds in public"
 
 **Signals:**
@@ -93,7 +93,7 @@ identities that inform content strategy.
 
 ---
 
-### 🐕 UNDERDOG ARC
+### 🐕 ARC
 **Tagline:** "the one on the come-up"
 
 **Signals:**
@@ -110,7 +110,7 @@ identities that inform content strategy.
 
 ---
 
-### 🎰 THE DEGEN
+### 🎰 ENTROPY
 **Tagline:** "the one who bets big"
 
 **Signals:**
@@ -127,7 +127,7 @@ identities that inform content strategy.
 
 ---
 
-### 👻 THE ANON
+### 👻 NULL
 **Tagline:** "the one you can't identify but can't ignore"
 
 **Signals:**
@@ -148,27 +148,27 @@ identities that inform content strategy.
 
 1. **One archetype only.** Pick the strongest signal. Don't hedge.
 2. **Crypto context matters.** If the creator is clearly in crypto/web3, weight
-   The Degen and The Anon higher in consideration.
+   ENTROPY and NULL higher in consideration.
 3. **Follower count doesn't determine archetype.** A 500-follower account can
-   be The Professor. A 100K account can be Underdog Arc (if they grew fast
+   be SIGNAL_SAGE. A 100K account can be ARC (if they grew fast
    and haven't defined their brand yet).
 4. **When in doubt, go with voice.** The archetype should match HOW they
    communicate, not just WHAT they talk about.
-5. **Underdog Arc is the default for unclear signals.** If you genuinely can't
-   determine a clear archetype, default to Underdog Arc — it implies growth
+5. **ARC is the default for unclear signals.** If you genuinely can't
+   determine a clear archetype, default to ARC — it implies growth
    potential, not weakness.
 
 ## Evolution Paths (for reference — this is tracked in the full product)
 
 ```
-Underdog Arc → [any archetype]
-The Degen → Ship or Die, The Prophet
-The Anon → The Prophet, The Professor
-Chief Vibes Officer → The Plug, The Prophet
-The Plug → The Prophet, The Professor
-Ship or Die → The Professor, The Prophet
-The Professor → (terminal)
-The Prophet → (terminal / peak)
+ARC → [any archetype]
+ENTROPY → BUILD.EXE, FORESIGHT
+NULL → FORESIGHT, SIGNAL_SAGE
+FREQ → RELAY, FORESIGHT
+RELAY → FORESIGHT, SIGNAL_SAGE
+BUILD.EXE → SIGNAL_SAGE, FORESIGHT
+SIGNAL_SAGE → (terminal)
+FORESIGHT → (terminal / peak)
 ```
 
 Archetypes only evolve UPWARD. The full BrandOS product tracks this over time.

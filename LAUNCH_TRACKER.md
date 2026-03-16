@@ -129,14 +129,14 @@
 ### Archetype Distribution
 | Archetype | Count | % |
 |-----------|-------|---|
-| Underdog Arc | | |
-| The Degen | | |
-| The Anon | | |
-| Chief Vibes Officer | | |
-| The Plug | | |
-| Ship or Die | | |
-| The Professor | | |
-| The Prophet | | |
+| ARC | | |
+| ENTROPY | | |
+| NULL | | |
+| FREQ | | |
+| RELAY | | |
+| BUILD.EXE | | |
+| SIGNAL_SAGE | | |
+| FORESIGHT | | |
 
 ---
 

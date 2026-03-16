@@ -2,7 +2,7 @@
 
 import React from 'react';
 import BrandOSDashboard, { BrandOSDashboardData } from './BrandOSDashboard';
-import { normalizeArchetypeName } from '@/lib/archetype-engine';
+import { normalizeArchetypeName } from '@/lib/archetype-names';
 
 // Types matching the API response
 interface XProfileData {

@@ -168,14 +168,14 @@ Source: `docs/SCORING-FRAMEWORK.md`
 
 > every creator on X falls into one of 8 archetypes:
 >
-> THE PROFESSOR — deep knowledge, niche expert
-> THE PLUG — super connector, everyone's bridge
-> CHIEF VIBES OFFICER — entertainer, meme energy
-> THE PROPHET — visionary, called it before everyone
-> SHIP OR DIE — builder, maker, ships relentlessly
-> UNDERDOG ARC — rising star, up-only trajectory
-> THE DEGEN — high-risk, ape mentality
-> THE ANON — pseudonymous legend
+> SIGNAL_SAGE — deep knowledge, niche expert
+> RELAY — super connector, everyone's bridge
+> FREQ — entertainer, meme energy
+> FORESIGHT — visionary, called it before everyone
+> BUILD.EXE — builder, maker, ships relentlessly
+> ARC — rising star, up-only trajectory
+> ENTROPY — high-risk, ape mentality
+> NULL — pseudonymous legend
 >
 > knowing yours changes how you build
 >

@@ -239,7 +239,7 @@ export default function ResearchPage() {
       </aside>
 
       {/* Main content */}
-      <main style={{ flex: 1, overflow: 'auto', position: 'relative' }}>
+      <main style={{ flex: 1, overflow: 'auto', position: 'relative', padding: '32px 40px', maxWidth: 960, margin: '0 auto' }}>
         {view === 'dashboard' && (
           <Dashboard
             interviews={interviews}

@@ -3,7 +3,7 @@
 ## Quick Reference
 - **Product URL:** mybrandos.app
 - **Invite URL Format:** mybrandos.app?invite=[CODE]
-- **8 Archetypes:** Underdog Arc → The Degen/The Anon/Chief Vibes Officer → The Plug/Ship or Die → The Professor → The Prophet
+- **8 Archetypes:** ARC → ENTROPY/NULL/FREQ → RELAY/BUILD.EXE → SIGNAL_SAGE → FORESIGHT
 - **5 Agents:** Campaign, Content, Analytics, Research, Authority
 
 ---
@@ -30,7 +30,7 @@ Inner Circle only for now.
 
 ## Afternoon Post (Your Brand DNA Reveal)
 ```
-Just found out I'm The Prophet.
+Just found out I'm FORESIGHT.
 
 Brand DNA Score: 87/100
 
@@ -88,16 +88,16 @@ But the most interesting part?
 It assigned me an archetype.
 
 There are 8 total:
-• Underdog Arc
-• The Degen
-• The Anon
-• Chief Vibes Officer
-• The Plug
-• Ship or Die
-• The Professor
-• The Prophet
+• ARC
+• ENTROPY
+• NULL
+• FREQ
+• RELAY
+• BUILD.EXE
+• SIGNAL_SAGE
+• FORESIGHT
 
-I'm The Prophet.
+I'm FORESIGHT.
 ```
 
 ```
@@ -105,7 +105,7 @@ Each archetype has an evolution path.
 
 You start somewhere. You level up.
 
-Underdog Arc → The Degen → Ship or Die → The Professor → The Prophet
+ARC → ENTROPY → BUILD.EXE → SIGNAL_SAGE → FORESIGHT
 
 Your archetype isn't random. It's earned.
 ```
@@ -152,7 +152,7 @@ Inner Circle update:
 
 → 47 people scanned their Brand DNA
 → 23 shared their score cards
-→ Most common archetype: Chief Vibes Officer
+→ Most common archetype: FREQ
 → Highest score so far: 94
 
 The data is getting interesting.
@@ -183,7 +183,7 @@ Some reactions from Inner Circle:
 
 "How did it know I was rebuilding my positioning?"
 
-"The Degen archetype called me out hard"
+"The ENTROPY archetype called me out hard"
 
 "94/100 but somehow I feel attacked"
 
@@ -284,7 +284,7 @@ Here's the framework:
 ```
 
 ```
-Level 1: UNDERDOG ARC
+Level 1: ARC
 
 Just getting started.
 Finding your voice.
@@ -294,57 +294,57 @@ Everyone starts here. The goal is to evolve.
 ```
 
 ```
-Level 2: THE DEGEN
+Level 2: ENTROPY
 
 High risk. High reward.
 You move fast and break things.
 Your timeline is chaos — but strategic chaos.
 
-Evolution path: Ship or Die → The Prophet
+Evolution path: BUILD.EXE → FORESIGHT
 ```
 
 ```
-Level 2: THE ANON
+Level 2: NULL
 
 You let the ideas speak.
 No face. All substance.
 Mystery is part of your brand.
 
-Evolution path: The Prophet → The Professor
+Evolution path: FORESIGHT → SIGNAL_SAGE
 ```
 
 ```
-Level 2: CHIEF VIBES OFFICER
+Level 2: FREQ
 
 You're the energy.
 Community first.
 People follow you for the vibes, stay for the value.
 
-Evolution path: The Plug → The Prophet
+Evolution path: RELAY → FORESIGHT
 ```
 
 ```
-Level 3: THE PLUG
+Level 3: RELAY
 
 You connect people.
 You share opportunities.
 Your DMs are legendary.
 
-Evolution path: The Prophet → The Professor
+Evolution path: FORESIGHT → SIGNAL_SAGE
 ```
 
 ```
-Level 3: SHIP OR DIE
+Level 3: BUILD.EXE
 
 You build in public.
 You ship fast.
 Your brand is your product velocity.
 
-Evolution path: The Professor → The Prophet
+Evolution path: SIGNAL_SAGE → FORESIGHT
 ```
 
 ```
-Level 4: THE PROFESSOR
+Level 4: SIGNAL_SAGE
 
 Deep expertise.
 Long-form content.
@@ -354,7 +354,7 @@ Terminal archetype. Peak knowledge.
 ```
 
 ```
-Level 5: THE PROPHET
+Level 5: FORESIGHT
 
 Peak brand.
 You shape conversations.
@@ -564,7 +564,7 @@ Find yours: mybrandos.app
 
 ## Wednesday - Archetype Deep Dive
 ```
-Let's talk about The Degen archetype.
+Let's talk about the ENTROPY archetype.
 
 If this is you:
 
@@ -573,13 +573,13 @@ If this is you:
 → You take risks others won't
 → You build in public (loudly)
 
-How to evolve to Ship or Die:
+How to evolve to BUILD.EXE:
 
 → Add more "shipped" posts
 → Show receipts, not just ideas
 → Build credibility through delivery
 
-Are you a Degen? Reply with your score.
+Are you ENTROPY? Reply with your score.
 ```
 
 ## Thursday - Improvement Challenge
@@ -607,7 +607,7 @@ Week 1 of BrandOS:
 → [X] Brand DNA scans completed
 → [Y] score cards shared
 → [Z] average score
-→ Most rare archetype: The Prophet ([X]% of users)
+→ Most rare archetype: FORESIGHT ([X]% of users)
 → Most common: [Y]
 
 Top insight: [Something interesting from the data]
@@ -652,14 +652,14 @@ What's your score? mybrandos.app
 
 ## Comparison Content
 ```
-The Prophet vs. The Professor
+FORESIGHT vs. SIGNAL_SAGE
 
 Both are peak archetypes. Both are rare.
 
 The difference:
 
-Prophet → Shapes the narrative
-Professor → Teaches the narrative
+FORESIGHT → Shapes the narrative
+SIGNAL_SAGE → Teaches the narrative
 
 Which path are you on?
 ```
@@ -738,18 +738,18 @@ But the score wasn't the interesting part.
 
 The AI assigned me an archetype. After analyzing thousands of data points — my engagement patterns, my word choices, my positioning signals — it placed me in one of eight distinct creator archetypes:
 
-- **Underdog Arc** — Just getting started, finding your voice
-- **The Degen** — High risk, high reward, strategic chaos
-- **The Anon** — Ideas over identity, substance over face
-- **Chief Vibes Officer** — Energy first, community always
-- **The Plug** — The connector, the opportunity sharer
-- **Ship or Die** — Build in public, ship fast, iterate faster
-- **The Professor** — Deep expertise, long-form teaching
-- **The Prophet** — Peak brand, shaping conversations
+- **ARC** — Just getting started, finding your voice
+- **ENTROPY** — High risk, high reward, strategic chaos
+- **NULL** — Ideas over identity, substance over face
+- **FREQ** — Energy first, community always
+- **RELAY** — The connector, the opportunity sharer
+- **BUILD.EXE** — Build in public, ship fast, iterate faster
+- **SIGNAL_SAGE** — Deep expertise, long-form teaching
+- **FORESIGHT** — Peak brand, shaping conversations
 
-I'm The Prophet.
+I'm FORESIGHT.
 
-Here's what makes this different from every other AI tool: each archetype has an evolution path. You don't get randomly assigned. You earn your archetype through consistent behavior over time. Underdog Arc evolves to The Degen. The Degen evolves to Ship or Die. Ship or Die evolves to The Professor. The Professor evolves to The Prophet.
+Here's what makes this different from every other AI tool: each archetype has an evolution path. You don't get randomly assigned. You earn your archetype through consistent behavior over time. ARC evolves to ENTROPY. ENTROPY evolves to BUILD.EXE. BUILD.EXE evolves to SIGNAL_SAGE. SIGNAL_SAGE evolves to FORESIGHT.
 
 Your archetype isn't a label. It's a trajectory.
 
@@ -811,49 +811,49 @@ After analyzing over a thousand creator profiles, patterns started to emerge. No
 
 Eight distinct archetypes crystallized. Here's the framework:
 
-**Level 1: Underdog Arc**
+**Level 1: ARC**
 
 Everyone starts here. You're finding your voice, experimenting with formats, building in public without a clear destination. The posts are inconsistent. The positioning is fuzzy. But there's energy and potential.
 
 The goal isn't to stay here. The goal is to evolve.
 
-**Level 2: The Degen**
+**Level 2: ENTROPY**
 
 High risk, high reward. You move fast and break things. Your timeline is chaos — but it's strategic chaos. You take positions others won't. You're polarizing, and you're okay with that.
 
-Evolution path: Ship or Die → The Prophet
+Evolution path: BUILD.EXE → FORESIGHT
 
-**Level 2: The Anon**
+**Level 2: NULL**
 
 You let the ideas speak. No face. All substance. Mystery is part of your brand. People follow you for what you think, not who you are. There's power in the separation of identity from insight.
 
-Evolution path: The Professor → The Prophet
+Evolution path: SIGNAL_SAGE → FORESIGHT
 
-**Level 2: Chief Vibes Officer**
+**Level 2: FREQ**
 
 You're the energy. Community first, always. People follow you for the vibes and stay for the value. You make everyone feel like they're part of something. Connection is your currency.
 
-Evolution path: The Plug → The Prophet
+Evolution path: RELAY → FORESIGHT
 
-**Level 3: The Plug**
+**Level 3: RELAY**
 
 You connect people. You share opportunities before anyone else. Your DMs are legendary. You're the node in the network that makes things happen. Access is your brand.
 
-Evolution path: The Professor → The Prophet
+Evolution path: SIGNAL_SAGE → FORESIGHT
 
-**Level 3: Ship or Die**
+**Level 3: BUILD.EXE**
 
 You build in public. You ship fast. Your brand is your product velocity. Every week there's something new. You don't just talk about building — you show the receipts.
 
-Evolution path: The Professor → The Prophet
+Evolution path: SIGNAL_SAGE → FORESIGHT
 
-**Level 4: The Professor**
+**Level 4: SIGNAL_SAGE**
 
 Deep expertise. Long-form content. You teach what others are still trying to learn. People come to you for education, not entertainment. You've earned authority through demonstrated knowledge.
 
-This is a terminal archetype. Peak knowledge. Some Professors stay Professors forever — and that's a feature, not a bug.
+This is a terminal archetype. Peak knowledge. Some SIGNAL_SAGEs stay SIGNAL_SAGEs forever — and that's a feature, not a bug.
 
-**Level 5: The Prophet**
+**Level 5: FORESIGHT**
 
 Peak brand. You shape conversations before they happen. You call the trends others will follow. People quote your tweets. You've transcended tactics and operate at the level of ideas.
 
@@ -908,7 +908,7 @@ The result is five AI agents that actually sound like you:
 
 **Research Agent** — Spots trends early. But filters them through your lens. Which trends are relevant to your positioning? Which ones would dilute it?
 
-**Authority Agent** — Builds your positioning over time. Tracks your archetype evolution. Keeps you on the path to Prophet.
+**Authority Agent** — Builds your positioning over time. Tracks your archetype evolution. Keeps you on the path to FORESIGHT.
 
 All five agents are trained on your Brand DNA. They share context. They maintain consistency. They make sure that everything you publish — across every platform, in every format — sounds unmistakably like you.
 

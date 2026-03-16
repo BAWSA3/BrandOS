@@ -77,14 +77,14 @@ Based on the content and score profile, assign ONE primary archetype:
 
 | Archetype | Signal |
 |-----------|--------|
-| The Professor | Deep expertise, educational threads, framework-heavy |
-| The Plug | Connector energy, curates others, community builder |
-| Chief Vibes Officer | Entertainment-first, shitposts, personality-driven |
-| The Prophet | Strong opinions, visionary takes, philosophical |
-| Ship or Die | Builder-first, shipping updates, product-focused |
-| Underdog Arc | Rising star, raw energy, growing fast |
-| The Degen | High-risk takes, crypto/trading energy, YOLO vibes |
-| The Anon | Pseudonymous, mysterious authority, pfp-based identity |
+| SIGNAL_SAGE | Deep expertise, educational threads, framework-heavy |
+| RELAY | Connector energy, curates others, community builder |
+| FREQ | Entertainment-first, shitposts, personality-driven |
+| FORESIGHT | Strong opinions, visionary takes, philosophical |
+| BUILD.EXE | Builder-first, shipping updates, product-focused |
+| ARC | Rising star, raw energy, growing fast |
+| ENTROPY | High-risk takes, crypto/trading energy, YOLO vibes |
+| NULL | Pseudonymous, mysterious authority, pfp-based identity |
 
 ### Step 5: Output the Report
 

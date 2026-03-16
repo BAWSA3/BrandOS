@@ -157,7 +157,7 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({
               </AnimateNumber>
             </h1>
           </div>
-          <div className="z-10 grid grid-cols-2 gap-8 border-t border-white/20 pt-6">
+          <div className="z-10 grid grid-cols-3 gap-4 md:gap-6 border-t border-white/20 pt-6 items-end">
              <div>
                 <span className="font-os text-[10px] md:text-xs text-white/70 block mb-1 uppercase tracking-wider">Voice Consistency</span>
                 <div className="flex items-center gap-2">
@@ -170,6 +170,20 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({
                     <div style={{width: `${data.scores.voiceConsistency}%`}} className="h-full bg-white transition-all duration-700" />
                   </div>
                 </div>
+             </div>
+             {/* Archetype badge — center bottom */}
+             <div className="flex flex-col items-center gap-1.5">
+                <MetalArchetypeIcon
+                  src={data.personality.emoji}
+                  alt={data.personality.archetype}
+                  size={48}
+                />
+                <span className="font-os text-[10px] md:text-xs text-white font-bold tracking-widest">
+                  {data.personality.archetype}
+                </span>
+                <span className="font-os text-[8px] md:text-[9px] text-white/60 tracking-wide text-center leading-tight">
+                  {ARCHETYPE_META[data.personality.archetype]?.tagline || ''}
+                </span>
              </div>
              <div className="text-right">
                 <span className="font-os text-[10px] md:text-xs text-white/70 block mb-1 uppercase tracking-wider">Engagement</span>

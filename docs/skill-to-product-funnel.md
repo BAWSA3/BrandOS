@@ -36,7 +36,7 @@ Right now the funnel has a **hard break** between skill and product:
 
 When someone runs `/brandos`, the skill should **also** write the score data somewhere the product can read. Two options:
 
-- **Option A**: Skill generates a unique URL with encoded score data (e.g., `mybrandos.app/scan?u=bawsaxbt&s=65&a=professor&d=65&c=62&g=55&sc=55`) — product decodes and renders a public score card
+- **Option A**: Skill generates a unique URL with encoded score data (e.g., `mybrandos.app/scan?u=bawsaxbt&s=65&a=signal_sage&d=65&c=62&g=55&sc=55`) — product decodes and renders a public score card
 - **Option B**: Skill hits an API endpoint (`/api/scan/submit`) that persists the scan to `user-profiles.json` or the DB, returns a shareable link
 
 Option A is simpler and works without auth. The score page becomes the bridge.

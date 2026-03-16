@@ -388,14 +388,14 @@
   ┌─────┬──────────────────────┬───────────────────────────────────────────┐
   │     │ ARCHETYPE            │ SIGNAL                                    │
   ├─────┼──────────────────────┼───────────────────────────────────────────┤
-  │ 🎓  │ THE PROFESSOR        │ Deep knowledge, niche expert, educational │
-  │ 🔌  │ THE PLUG             │ Super connector, networker, DMs open      │
-  │ 🎪  │ CHIEF VIBES OFFICER  │ Entertainer, shitposter, meme energy      │
-  │ 🔮  │ THE PROPHET          │ Visionary, strong opinions, called it     │
-  │ 🚢  │ SHIP OR DIE          │ Builder, maker, product-focused           │
-  │ 🐕  │ UNDERDOG ARC         │ Rising star, up-only trajectory           │
-  │ 🎰  │ THE DEGEN            │ High-risk, crypto trader, ape mentality   │
-  │ 👻  │ THE ANON             │ Pseudonymous legend, mysterious authority │
+  │ 🎓  │ SIGNAL_SAGE          │ Deep knowledge, niche expert, educational │
+  │ 🔌  │ RELAY                │ Super connector, networker, DMs open      │
+  │ 🎪  │ FREQ                 │ Entertainer, shitposter, meme energy      │
+  │ 🔮  │ FORESIGHT            │ Visionary, strong opinions, called it     │
+  │ 🚢  │ BUILD.EXE            │ Builder, maker, product-focused           │
+  │ 🐕  │ ARC                  │ Rising star, up-only trajectory           │
+  │ 🎰  │ ENTROPY              │ High-risk, crypto trader, ape mentality   │
+  │ 👻  │ NULL                 │ Pseudonymous legend, mysterious authority │
   └─────┴──────────────────────┴───────────────────────────────────────────┘
 ```
 

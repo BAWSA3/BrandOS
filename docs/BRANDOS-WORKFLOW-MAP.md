@@ -204,7 +204,7 @@ interface BrandScoreResult {
 ### GeneratedBrandDNA
 ```typescript
 interface GeneratedBrandDNA {
-  archetype: string;             // "The Prophet", "The Builder", etc.
+  archetype: string;             // "FORESIGHT", "The Builder", etc.
   archetypeEmoji: string;
   personalityType: string;       // MBTI code
   personalitySummary: string;
@@ -335,11 +335,11 @@ src/lib/store.ts - useBrandStore
 
 | Type | MBTI | Emoji | Traits |
 |------|------|-------|--------|
-| The Prophet | ENTP | Alien | Bold predictions, thought leader |
+| FORESIGHT | ENTP | Alien | Bold predictions, thought leader |
 | The Alpha | ENTJ | Lightning | Confident, commanding |
 | The Builder | ISTP | Rocket | Ships products, technical |
 | The Educator | ENFJ | Book | Explains, thread master |
-| The Degen | ESTP | Dice | High risk, meme-friendly |
+| ENTROPY | ESTP | Dice | High risk, meme-friendly |
 | The Analyst | INTP | Eyes | Data-driven, charts |
 | The Philosopher | INFJ | Brain | Big picture, visionary |
 | The Networker | ESFJ | Handshake | Community, connector |

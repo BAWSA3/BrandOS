@@ -3,14 +3,14 @@ import { VoiceFingerprintSummary, formatSummaryForPrompt } from '@/lib/voice-fin
 
 // Archetype descriptions for the welcome message
 const ARCHETYPE_DESCRIPTIONS: Record<string, string> = {
-  'The Professor': 'a knowledge authority who builds trust through education and deep expertise',
-  'The Plug': 'a super connector who brings people and opportunities together',
-  'Chief Vibes Officer': 'an entertainer who builds community through personality and relatability',
-  'The Prophet': 'a thought leader who shapes narratives and sees what others miss',
-  'Ship or Die': 'a builder who earns credibility by shipping and sharing the journey',
-  'Underdog Arc': 'a rising star whose growth story inspires and creates connection',
-  'The Degen': 'a risk-taker who thrives in chaos and builds cult-like followings',
-  'The Anon': 'a mysterious voice whose ideas speak louder than identity',
+  'SIGNAL_SAGE': 'a knowledge authority who builds trust through education and deep expertise',
+  'RELAY': 'a super connector who brings people and opportunities together',
+  'FREQ': 'an entertainer who builds community through personality and relatability',
+  'FORESIGHT': 'a thought leader who shapes narratives and sees what others miss',
+  'BUILD.EXE': 'a builder who earns credibility by shipping and sharing the journey',
+  'ARC': 'a rising star whose growth story inspires and creates connection',
+  'ENTROPY': 'a risk-taker who thrives in chaos and builds cult-like followings',
+  'NULL': 'a mysterious voice whose ideas speak louder than identity',
 };
 
 /**
