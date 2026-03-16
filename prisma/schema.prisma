@@ -324,10 +324,25 @@ model HistoryEntry {
 model EmailSignup {
   id        String   @id @default(cuid())
   email     String   @unique
+  xUsername String?  // X username if provided
   source    String   @default("landing") // where they signed up from
   createdAt DateTime @default(now())
 
   @@index([createdAt])
+  @@index([xUsername])
+}
+
+// Brand score scan history (created via Supabase)
+model BrandScans {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  username  String
+  score     Int
+  archetype String?
+  enhanced  Boolean?
+  createdAt DateTime? @default(now()) @map("created_at") @db.Timestamptz
+
+  @@index([username])
+  @@index([createdAt(sort: Desc)])
 }
 
 // Invite codes for Inner Circle referrals
