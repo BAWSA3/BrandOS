@@ -587,7 +587,7 @@ function ScoreGauge({ score, isVisible, theme }: { score: number; isVisible: boo
 // Typewriter Placeholder
 // ============================================================================
 const ROTATING_TAGLINES = [
-  'Drop your handle. See what you\'re known for.',
+  'Drop your username. Decode your brand.',
   'Your reputation, decoded',
   'Content in. Identity out.',
   'Brand = Reputation',
