@@ -284,25 +284,29 @@ export async function sendWelcomeSequence(
 
   // Process each email in the sequence
   for (const template of sequence) {
-    const content = generateEmailContent(template.id, templateData as EmailTemplateData);
-    if (!content) continue;
+    try {
+      const content = generateEmailContent(template.id, templateData as EmailTemplateData);
+      if (!content) continue;
 
-    if (template.sendDelay === 'immediate') {
-      // Send immediately (pass score card image for the first email)
-      const result = await sendEmail(
-        email,
-        content.subject,
-        content.body,
-        templateData.scoreCardImage
-      );
-      if (result.success) {
-        emailsSent++;
+      if (template.sendDelay === 'immediate') {
+        // Send immediately (pass score card image for the first email)
+        const result = await sendEmail(
+          email,
+          content.subject,
+          content.body,
+          templateData.scoreCardImage
+        );
+        if (result.success) {
+          emailsSent++;
+        }
+      } else {
+        // Schedule for later (may fail on read-only filesystems like Vercel)
+        const delayMs = parseDelay(template.sendDelay);
+        await schedulePendingEmail(email, template.id, templateData, delayMs);
+        emailsScheduled++;
       }
-    } else {
-      // Schedule for later
-      const delayMs = parseDelay(template.sendDelay);
-      await schedulePendingEmail(email, template.id, templateData, delayMs);
-      emailsScheduled++;
+    } catch (templateErr) {
+      console.warn(`[Email] Failed to process template ${template.id}:`, templateErr);
     }
   }
 
