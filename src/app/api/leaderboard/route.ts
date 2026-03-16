@@ -1,9 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { promises as fs } from 'fs';
 import path from 'path';
+import { checkRateLimit, getClientIdentifier, rateLimiters } from '@/lib/rate-limit';
 
 // Simple file-based storage for leaderboard (bootstrap phase)
 // In production, use a proper database like Supabase, PlanetScale, or Redis
+
+// Strip HTML/script tags to prevent XSS
+function sanitize(str: string): string {
+  return str.replace(/[<>"'&]/g, '').slice(0, 100);
+}
 
 interface LeaderboardEntry {
   username: string;
@@ -45,6 +51,12 @@ async function writeLeaderboard(entries: LeaderboardEntry[]): Promise<void> {
 
 // GET - Fetch leaderboard
 export async function GET(request: NextRequest) {
+  const clientId = getClientIdentifier(request);
+  const { limited } = checkRateLimit(`leaderboard-read:${clientId}`, rateLimiters.relaxed);
+  if (limited) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+  }
+
   try {
     const { searchParams } = new URL(request.url);
     const range = searchParams.get('range') || 'week';
@@ -87,6 +99,13 @@ export async function GET(request: NextRequest) {
 
 // POST - Add/update score on leaderboard
 export async function POST(request: NextRequest) {
+  // Rate limit: 10 requests per minute per IP
+  const clientId = getClientIdentifier(request);
+  const { limited } = checkRateLimit(`leaderboard:${clientId}`, rateLimiters.ai);
+  if (limited) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+  }
+
   try {
     const body = await request.json();
     const { username, displayName, score, profileImage, isCrypto } = body;
@@ -98,6 +117,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Validate score range
+    const clampedScore = Math.max(0, Math.min(100, Math.round(score)));
+
     const entries = await readLeaderboard();
     const now = Date.now();
 
@@ -107,9 +129,9 @@ export async function POST(request: NextRequest) {
     );
 
     const newEntry: LeaderboardEntry = {
-      username,
-      displayName: displayName || username,
-      score,
+      username: sanitize(username),
+      displayName: sanitize(displayName || username),
+      score: clampedScore,
       profileImage: profileImage || '',
       timestamp: now,
       isCrypto: isCrypto || false,

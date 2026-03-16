@@ -93,7 +93,6 @@ export async function sendEmail(
   // Skip if no API key (development mode)
   if (!resend) {
     console.log('[Email] No RESEND_API_KEY - skipping send');
-    console.log('[Email] Would send to:', to);
     console.log('[Email] Subject:', subject);
     return { success: true, id: 'dev-mode-skip' };
   }
@@ -210,7 +209,7 @@ export async function schedulePendingEmail(
   pending.push(newEmail);
   await writePendingEmails(pending);
 
-  console.log(`[Email] Scheduled ${templateId} for ${to} at ${newEmail.scheduledFor}`);
+  console.log(`[Email] Scheduled ${templateId} at ${newEmail.scheduledFor}`);
   return { success: true, id: newEmail.id };
 }
 
