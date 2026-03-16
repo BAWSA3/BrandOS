@@ -49,14 +49,7 @@ export default function TerminalProgressBar({
         }
         @media (max-width: 768px) {
           .terminal-progress-container {
-            bottom: auto;
-            right: 0;
-            padding: 12px 16px;
-            flex-direction: row;
-            justify-content: center;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(8px);
-            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            display: none;
           }
         }
         .terminal-progress-window {
@@ -70,37 +63,14 @@ export default function TerminalProgressBar({
           box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
           backdrop-filter: blur(8px);
         }
-        @media (max-width: 768px) {
-          .terminal-progress-window {
-            padding: 6px 12px;
-            gap: 4px;
-            box-shadow: none;
-            border: none;
-            background: transparent;
-            backdrop-filter: none;
-            flex-direction: row;
-            align-items: center;
-          }
-        }
         .terminal-phase-list {
           display: flex;
           flex-direction: column;
           gap: 4px;
         }
-        @media (max-width: 768px) {
-          .terminal-phase-list {
-            flex-direction: row;
-            gap: 6px;
-          }
-        }
         .terminal-phase-item {
           padding: 4px 10px;
           border-radius: 2px;
-        }
-        @media (max-width: 768px) {
-          .terminal-phase-item {
-            padding: 2px 6px;
-          }
         }
         .terminal-ascii-bar {
           display: flex;
@@ -108,21 +78,11 @@ export default function TerminalProgressBar({
           justify-content: center;
           gap: 12px;
         }
-        @media (max-width: 768px) {
-          .terminal-ascii-bar {
-            gap: 6px;
-          }
-        }
         .terminal-command-line {
           display: flex;
           align-items: center;
           justify-content: center;
           gap: 4px;
-        }
-        @media (max-width: 768px) {
-          .terminal-command-line {
-            display: none;
-          }
         }
       `}</style>
       <motion.div
