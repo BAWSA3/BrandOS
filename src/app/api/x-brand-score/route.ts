@@ -3,6 +3,11 @@ import { geminiFlash, xBrandScorePrompt, XProfileData } from '@/lib/gemini';
 import { resolveArchetype, getEvolutionInfo } from '@/lib/archetype-engine';
 import { withRateLimit, rateLimiters } from '@/lib/rate-limit';
 import { recordScan } from '@/lib/scan-tracking';
+import { brandScoreCache } from '@/lib/cache';
+import { getUserProfile } from '@/lib/user-profiles';
+
+/** How long a cached score stays valid (6 hours in ms) */
+const SCORE_CACHE_TTL_MINUTES = 360;
 
 /**
  * Brand Score API - Profile-only analysis
@@ -127,6 +132,48 @@ async function handlePost(request: NextRequest) {
     console.log(`Username: @${cleanUsername}`);
     console.log('============================');
 
+    // === SCORE CACHING: return consistent score within 6h window ===
+    const cacheKey = `score:${cleanUsername}`;
+    const cachedResult = brandScoreCache.get<{
+      brandScore: Record<string, unknown>;
+      archetypeDecision: { reason: string; evolved: boolean; previousArchetype?: string; archetype: Record<string, unknown> } | null;
+      cachedAt: string;
+    }>(cacheKey);
+
+    // Build score context from user history
+    const userProfile = getUserProfile(cleanUsername);
+    const scoreHistory = userProfile?.scores || [];
+    const scoreValues = scoreHistory.map((s) => s.value);
+    const scoreRange = scoreValues.length >= 2
+      ? { low: Math.min(...scoreValues), high: Math.max(...scoreValues), samples: scoreValues.length }
+      : null;
+
+    if (cachedResult && !forceReevaluate) {
+      console.log(`[BrandScore] Returning cached score for @${cleanUsername}`);
+
+      const evolutionInfo = getEvolutionInfo(cleanUsername);
+
+      return NextResponse.json({
+        profile,
+        brandScore: cachedResult.brandScore,
+        meta: {
+          enhanced: false,
+          analyzedAt: cachedResult.cachedAt,
+          archetypeSource: cachedResult.archetypeDecision?.reason || 'cached',
+          evolved: cachedResult.archetypeDecision?.evolved || false,
+          previousArchetype: cachedResult.archetypeDecision?.previousArchetype,
+          evolutionInfo: evolutionInfo || undefined,
+          cached: true,
+          scoreContext: scoreRange
+            ? {
+                range: scoreRange,
+                note: `Based on ${scoreRange.samples} scans, your score typically falls between ${scoreRange.low}–${scoreRange.high}.`,
+              }
+            : undefined,
+        },
+      });
+    }
+
     // Generate prompt and call Gemini (with fallback to mock)
     let brandScore;
     try {
@@ -144,7 +191,7 @@ async function handlePost(request: NextRequest) {
       // Check if it's a quota error (429) - use mock data for testing
       const errorMessage = geminiError instanceof Error ? geminiError.message : '';
       if (errorMessage.includes('429') || errorMessage.includes('quota')) {
-        console.log('⚠️ Gemini quota exceeded - using mock data for testing');
+        console.log('Gemini quota exceeded - using mock data for testing');
         brandScore = getMockBrandScore(profile);
       } else {
         console.error('Failed to get Gemini response:', geminiError);
@@ -174,6 +221,20 @@ async function handlePost(request: NextRequest) {
       console.error('Archetype resolution error:', archetypeError);
       // Continue with Gemini's result if archetype engine fails
     }
+
+    // Cache the computed score + archetype for consistency
+    const analyzedAt = new Date().toISOString();
+    brandScoreCache.set(
+      cacheKey,
+      {
+        brandScore,
+        archetypeDecision: archetypeDecision
+          ? { reason: archetypeDecision.reason, evolved: archetypeDecision.evolved, previousArchetype: archetypeDecision.previousArchetype, archetype: archetypeDecision.archetype }
+          : null,
+        cachedAt: analyzedAt,
+      },
+      SCORE_CACHE_TTL_MINUTES
+    );
 
     // Get evolution info for UI
     const evolutionInfo = getEvolutionInfo(cleanUsername);
@@ -208,11 +269,18 @@ async function handlePost(request: NextRequest) {
       brandScore,
       meta: {
         enhanced: false,
-        analyzedAt: new Date().toISOString(),
+        analyzedAt,
         archetypeSource: archetypeDecision?.reason || 'gemini',
         evolved: archetypeDecision?.evolved || false,
         previousArchetype: archetypeDecision?.previousArchetype,
         evolutionInfo: evolutionInfo || undefined,
+        cached: false,
+        scoreContext: scoreRange
+          ? {
+              range: scoreRange,
+              note: `Based on ${scoreRange.samples} scans, your score typically falls between ${scoreRange.low}–${scoreRange.high}.`,
+            }
+          : undefined,
       },
     });
   } catch (error) {

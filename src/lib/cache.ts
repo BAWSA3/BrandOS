@@ -66,3 +66,6 @@ export const tweetsCache = new MemoryCache(15);
 
 // Negative cache - remember "not found" usernames for 1 hour to avoid wasting lookups
 export const notFoundCache = new MemoryCache(60);
+
+// Brand score cache - 6 hour TTL to ensure consistent scores for returning users
+export const brandScoreCache = new MemoryCache(360);

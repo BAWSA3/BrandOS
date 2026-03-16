@@ -4,6 +4,11 @@ import React from 'react';
 import { Activity, Info } from 'lucide-react';
 import { AnimateNumber } from '@/lib/motion-plus';
 
+export interface ScoreContext {
+  range: { low: number; high: number; samples: number };
+  note: string;
+}
+
 export interface BrandScoreCardProps {
   score: number;
   voiceConsistency: number;
@@ -13,6 +18,7 @@ export interface BrandScoreCardProps {
   displayName: string;
   summary?: string;
   phaseScores?: { define: number; check: number; generate: number; scale: number };
+  scoreContext?: ScoreContext | null;
 }
 
 const BrandScoreCard: React.FC<BrandScoreCardProps> = ({
@@ -24,6 +30,7 @@ const BrandScoreCard: React.FC<BrandScoreCardProps> = ({
   displayName,
   summary,
   phaseScores,
+  scoreContext,
 }) => {
   return (
     <>
@@ -54,7 +61,7 @@ const BrandScoreCard: React.FC<BrandScoreCardProps> = ({
               <Info className="w-3 h-3 text-white/50 hover:text-white/80 cursor-help peer" />
               <span className="absolute left-full bottom-0 ml-2 w-[220px] px-3 py-2 bg-black/95 border border-white/15 rounded text-[10px] leading-relaxed text-white/70 font-os tracking-wide opacity-0 peer-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50">
                 Your Brand Score measures how strong, consistent, and recognizable your brand is
-                across identity, content, voice, and growth.
+                across identity, content, voice, and growth. Scores may shift slightly between scans as your profile evolves.
               </span>
             </span>
           </span>
@@ -149,6 +156,17 @@ const BrandScoreCard: React.FC<BrandScoreCardProps> = ({
             </span>
           </div>
         </div>
+
+        {/* Score range context for returning users */}
+        {scoreContext && scoreContext.range.samples >= 2 && (
+          <div className="z-10 mt-4 pt-3 border-t border-white/10 flex items-center gap-2">
+            <Activity className="w-3 h-3 text-white/40 shrink-0" />
+            <span className="font-os text-[9px] md:text-[10px] text-white/40 tracking-wide leading-relaxed">
+              Your score typically ranges {scoreContext.range.low}–{scoreContext.range.high} based on {scoreContext.range.samples} scans.
+              Minor shifts reflect real-time profile and content changes.
+            </span>
+          </div>
+        )}
       </div>
     </>
   );

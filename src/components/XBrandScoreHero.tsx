@@ -756,6 +756,11 @@ export default function XBrandScoreHero({
   const [error, setError] = useState('');
   const [profile, setProfile] = useState<XProfileData | null>(null);
   const [brandScore, setBrandScore] = useState<BrandScoreResult | null>(null);
+  const [scoreMeta, setScoreMeta] = useState<{
+    cached?: boolean;
+    analyzedAt?: string;
+    scoreContext?: { range: { low: number; high: number; samples: number }; note: string };
+  } | null>(null);
   const [generatedBrandDNA, setGeneratedBrandDNA] = useState<GeneratedBrandDNA | null>(null);
   const [accountAuthenticity, setAccountAuthenticity] = useState<AuthenticityAnalysis | null>(null);
   const [accountActivity, setAccountActivity] = useState<ActivityAnalysis | null>(null);
@@ -787,7 +792,7 @@ export default function XBrandScoreHero({
   // Compare state (coming soon)
   const [compareUsername, setCompareUsername] = useState('');
 
-  const apiResultRef = useRef<{ profile: XProfileData; brandScore: BrandScoreResult } | null>(null);
+  const apiResultRef = useRef<{ profile: XProfileData; brandScore: BrandScoreResult; meta?: Record<string, unknown> } | null>(null);
   const apiCompleteRef = useRef(false);
   const apiErrorRef = useRef<string | null>(null);
   const autoStartTriggered = useRef(false);
@@ -1022,6 +1027,7 @@ export default function XBrandScoreHero({
                 };
                 setProfile(flatProfile);
                 setBrandScore(apiResultRef.current!.brandScore);
+                setScoreMeta(apiResultRef.current!.meta || null);
                 setFlowState('reveal');
                 if (apiResultRef.current!.brandScore.overallScore >= 70) {
                   setTimeout(() => setShowConfetti(true), 500);
@@ -1645,6 +1651,7 @@ export default function XBrandScoreHero({
                   generate: brandScore.phases.generate.score,
                   scale: brandScore.phases.scale.score,
                 }}
+                scoreContext={scoreMeta?.scoreContext}
               />
               {/* Share buttons */}
               <div className="capture-hide flex flex-col sm:flex-row justify-center items-center gap-3 mt-6 pt-4 border-t border-black/10">
