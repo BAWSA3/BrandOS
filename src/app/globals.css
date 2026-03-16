@@ -1684,8 +1684,7 @@ code {
   }
 
   .hero-tagline {
-    margin-top: 20px !important;
-    height: 20px;
+    display: none;
   }
   .hero-tagline-spacer {
     display: none;
@@ -1694,5 +1693,12 @@ code {
     font-size: clamp(0.5rem, 2.5vw, 0.75rem);
     letter-spacing: 0.06em;
     white-space: nowrap;
+  }
+
+  .hero-footer-hint {
+    display: none;
+  }
+  .hero-powered-label {
+    display: none;
   }
 }

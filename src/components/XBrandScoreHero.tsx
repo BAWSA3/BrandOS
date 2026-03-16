@@ -1293,6 +1293,7 @@ export default function XBrandScoreHero({
 
             {/* Bottom-center — POWERED BY AI */}
             <motion.span
+              className="hero-powered-label"
               initial={{ opacity: 0 }}
               animate={{ opacity: 0.25 }}
               exit={{ opacity: 0 }}
@@ -1502,6 +1503,7 @@ export default function XBrandScoreHero({
 
             {/* Footer hint — retro terminal style */}
             <motion.p
+              className="hero-footer-hint"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 1.4, duration: 0.4 }}
