@@ -24,20 +24,14 @@ export async function GET(request: NextRequest) {
   }
 
   if (!username) {
-    return NextResponse.json(
-      { error: 'Username is required' },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: 'Username is required' }, { status: 400 });
   }
 
   const normalized = normalizeUsername(username);
   const profile = getUserProfile(normalized);
 
   if (!profile) {
-    return NextResponse.json(
-      { error: 'User not found', username: normalized },
-      { status: 404 }
-    );
+    return NextResponse.json({ error: 'User not found', username: normalized }, { status: 404 });
   }
 
   const history = getArchetypeHistory(normalized);
@@ -63,23 +57,17 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const { username, action } = await request.json() as {
+    const { username, action } = (await request.json()) as {
       username: string;
       action: 'reevaluate';
     };
 
     if (!username) {
-      return NextResponse.json(
-        { error: 'Username is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Username is required' }, { status: 400 });
     }
 
     if (action !== 'reevaluate') {
-      return NextResponse.json(
-        { error: 'Invalid action. Supported: reevaluate' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid action. Supported: reevaluate' }, { status: 400 });
     }
 
     // Reevaluate by calling brand score API with forceReevaluate
@@ -109,12 +97,8 @@ export async function POST(request: NextRequest) {
       archetype: result.brandScore.archetype,
       meta: result.meta,
     });
-
   } catch (error) {
     console.error('Archetype reevaluate error:', error);
-    return NextResponse.json(
-      { error: 'Reevaluation failed' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Reevaluation failed' }, { status: 500 });
   }
 }

@@ -51,7 +51,7 @@ export async function captureElement(
   try {
     // Wait for the specified delay to let animations complete
     if (moment.delay > 0) {
-      await new Promise(resolve => setTimeout(resolve, moment.delay));
+      await new Promise((resolve) => setTimeout(resolve, moment.delay));
     }
 
     const dataUrl = await domToPng(element, {
@@ -68,7 +68,9 @@ export async function captureElement(
       dataUrl,
       timestamp: Date.now(),
       width: finalConfig.width! * finalConfig.scale!,
-      height: Math.round((element.offsetHeight / element.offsetWidth) * finalConfig.width! * finalConfig.scale!),
+      height: Math.round(
+        (element.offsetHeight / element.offsetWidth) * finalConfig.width! * finalConfig.scale!
+      ),
       sessionId,
     };
 

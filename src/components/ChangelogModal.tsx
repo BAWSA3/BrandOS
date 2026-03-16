@@ -91,21 +91,22 @@ export default function ChangelogModal({ forceOpen, onClose }: ChangelogModalPro
   return (
     <>
       {/* Backdrop */}
-      <div 
+      <div
         className="fixed inset-0 z-[150] bg-black/60 backdrop-blur-sm animate-fade-in"
         onClick={handleClose}
       />
 
       {/* Modal */}
-      <div 
+      <div
         className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[151] w-[440px] max-h-[80vh] overflow-hidden rounded-2xl shadow-2xl animate-modal-in"
         style={{
-          background: 'linear-gradient(180deg, rgba(20, 20, 20, 0.98) 0%, rgba(15, 15, 15, 0.98) 100%)',
+          background:
+            'linear-gradient(180deg, rgba(20, 20, 20, 0.98) 0%, rgba(15, 15, 15, 0.98) 100%)',
           border: '1px solid rgba(255, 255, 255, 0.1)',
         }}
       >
         {/* Header */}
-        <div 
+        <div
           className="p-6 text-center"
           style={{
             background: 'linear-gradient(180deg, rgba(99, 102, 241, 0.1) 0%, transparent 100%)',
@@ -113,25 +114,23 @@ export default function ChangelogModal({ forceOpen, onClose }: ChangelogModalPro
         >
           {/* Animated sparkle icon */}
           <div className="relative w-16 h-16 mx-auto mb-4">
-            <div 
+            <div
               className="absolute inset-0 rounded-2xl animate-pulse"
               style={{
-                background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.3) 0%, rgba(139, 92, 246, 0.3) 100%)',
+                background:
+                  'linear-gradient(135deg, rgba(99, 102, 241, 0.3) 0%, rgba(139, 92, 246, 0.3) 100%)',
               }}
             />
-            <div className="absolute inset-0 flex items-center justify-center text-3xl">
-              ✨
-            </div>
+            <div className="absolute inset-0 flex items-center justify-center text-3xl">✨</div>
           </div>
 
           <h2 className="text-xl font-semibold text-white mb-1">
-            {isFirstVisit ? "Welcome to BrandOS Beta!" : "What's New"}
+            {isFirstVisit ? 'Welcome to BrandOS Beta!' : "What's New"}
           </h2>
           <p className="text-white/50 text-sm">
-            {isFirstVisit 
+            {isFirstVisit
               ? "Thanks for joining the beta! Here's what you can do:"
-              : `Version ${latestEntry.version} • ${latestEntry.date}`
-            }
+              : `Version ${latestEntry.version} • ${latestEntry.date}`}
           </p>
         </div>
 
@@ -140,34 +139,40 @@ export default function ChangelogModal({ forceOpen, onClose }: ChangelogModalPro
           {/* Latest Release */}
           <div className="mb-4">
             <div className="flex items-center gap-2 mb-3">
-              <span 
+              <span
                 className="px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider"
                 style={{
-                  background: latestEntry.type === 'major' 
-                    ? 'rgba(34, 197, 94, 0.2)' 
-                    : latestEntry.type === 'minor' 
-                    ? 'rgba(59, 130, 246, 0.2)'
-                    : 'rgba(156, 163, 175, 0.2)',
-                  color: latestEntry.type === 'major' 
-                    ? '#22c55e' 
-                    : latestEntry.type === 'minor' 
-                    ? '#3b82f6'
-                    : '#9ca3af',
+                  background:
+                    latestEntry.type === 'major'
+                      ? 'rgba(34, 197, 94, 0.2)'
+                      : latestEntry.type === 'minor'
+                        ? 'rgba(59, 130, 246, 0.2)'
+                        : 'rgba(156, 163, 175, 0.2)',
+                  color:
+                    latestEntry.type === 'major'
+                      ? '#22c55e'
+                      : latestEntry.type === 'minor'
+                        ? '#3b82f6'
+                        : '#9ca3af',
                 }}
               >
-                {latestEntry.type === 'major' ? 'New' : latestEntry.type === 'minor' ? 'Update' : 'Fix'}
+                {latestEntry.type === 'major'
+                  ? 'New'
+                  : latestEntry.type === 'minor'
+                    ? 'Update'
+                    : 'Fix'}
               </span>
               <span className="text-white font-medium">{latestEntry.title}</span>
             </div>
-            
+
             <ul className="space-y-2">
               {latestEntry.highlights.map((highlight, index) => (
                 <li key={index} className="flex items-start gap-2 text-sm">
-                  <svg 
-                    className="w-4 h-4 mt-0.5 flex-shrink-0" 
-                    fill="none" 
-                    viewBox="0 0 24 24" 
-                    stroke="#22c55e" 
+                  <svg
+                    className="w-4 h-4 mt-0.5 flex-shrink-0"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="#22c55e"
                     strokeWidth="2"
                   >
                     <polyline points="20 6 9 17 4 12" />
@@ -209,7 +214,7 @@ export default function ChangelogModal({ forceOpen, onClose }: ChangelogModalPro
               color: 'white',
             }}
           >
-            {isFirstVisit ? "Let's Go!" : "Got it"}
+            {isFirstVisit ? "Let's Go!" : 'Got it'}
           </button>
         </div>
       </div>
@@ -247,8 +252,6 @@ export function useChangelog() {
     showChangelog,
     openChangelog,
     closeChangelog,
-    ChangelogModal: showChangelog ? (
-      <ChangelogModal forceOpen onClose={closeChangelog} />
-    ) : null,
+    ChangelogModal: showChangelog ? <ChangelogModal forceOpen onClose={closeChangelog} /> : null,
   };
 }

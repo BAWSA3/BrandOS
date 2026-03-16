@@ -50,10 +50,13 @@ export interface PlatformConnector {
   fetchProfile(accessToken: string): Promise<PlatformProfile>;
 
   /** Fetch recent content from the authenticated user's account. */
-  fetchContent(accessToken: string, options?: {
-    maxResults?: number;
-    since?: string;
-  }): Promise<ContentItem[]>;
+  fetchContent(
+    accessToken: string,
+    options?: {
+      maxResults?: number;
+      since?: string;
+    }
+  ): Promise<ContentItem[]>;
 }
 
 /**

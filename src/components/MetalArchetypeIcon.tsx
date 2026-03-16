@@ -13,7 +13,12 @@ interface MetalArchetypeIconProps {
  * Renders an archetype SVG icon with a polished metal sheen effect.
  * Falls back to plain emoji text if src doesn't start with '/'.
  */
-export default function MetalArchetypeIcon({ src, alt, size = 80, className }: MetalArchetypeIconProps) {
+export default function MetalArchetypeIcon({
+  src,
+  alt,
+  size = 80,
+  className,
+}: MetalArchetypeIconProps) {
   if (!src.startsWith('/')) {
     return <span style={{ fontSize: size * 0.8 }}>{src}</span>;
   }
@@ -56,8 +61,7 @@ export default function MetalArchetypeIcon({ src, alt, size = 80, className }: M
           position: 'absolute',
           inset: 0,
           borderRadius: 12,
-          boxShadow:
-            'inset 0 1px 2px rgba(255,255,255,0.6), inset 0 -1px 2px rgba(0,0,0,0.1)',
+          boxShadow: 'inset 0 1px 2px rgba(255,255,255,0.6), inset 0 -1px 2px rgba(0,0,0,0.1)',
           pointerEvents: 'none',
         }}
       />

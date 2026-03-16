@@ -103,7 +103,14 @@ export default function BrandOSLogo({
       role="heading"
       aria-level={1}
       aria-label="BrandOS"
-      style={{ fontSize, lineHeight: 1, margin: 0, display: 'flex', alignItems: 'baseline', letterSpacing: '-0.03em' }}
+      style={{
+        fontSize,
+        lineHeight: 1,
+        margin: 0,
+        display: 'flex',
+        alignItems: 'baseline',
+        letterSpacing: '-0.03em',
+      }}
     >
       <span style={{ fontWeight: 700, color: 'var(--foreground)' }}>Brand</span>
       <span style={{ fontWeight: 700, color: 'var(--accent)' }}>OS</span>

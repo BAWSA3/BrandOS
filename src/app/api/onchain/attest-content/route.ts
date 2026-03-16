@@ -17,7 +17,10 @@ async function getAuthUser() {
   if (!accessToken) return null;
 
   const supabase = createClient(supabaseUrl, supabaseAnonKey);
-  const { data: { user }, error } = await supabase.auth.getUser(accessToken);
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser(accessToken);
   if (error || !user) return null;
 
   return prisma.user.findUnique({ where: { supabaseId: user.id } });
@@ -117,10 +120,7 @@ export async function POST(request: NextRequest) {
     );
 
     if (!result.success || !result.attestation) {
-      return NextResponse.json(
-        { error: result.error || 'Attestation failed' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: result.error || 'Attestation failed' }, { status: 500 });
     }
 
     const record = await prisma.onchainAttestation.create({
@@ -160,10 +160,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('[Attest Content] Error:', error);
-    return NextResponse.json(
-      { error: 'Failed to create content attestation' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to create content attestation' }, { status: 500 });
   }
 }
 
@@ -200,9 +197,6 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error('[Attest Content] GET error:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch content attestations' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch content attestations' }, { status: 500 });
   }
 }

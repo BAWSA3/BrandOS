@@ -63,15 +63,13 @@ export function checkFeatureAccess(
     allowed,
     requiredTier,
     currentTier,
-    upgradeMessage: allowed
-      ? ''
-      : `${featureName} requires the ${tierName} plan or higher.`,
+    upgradeMessage: allowed ? '' : `${featureName} requires the ${tierName} plan or higher.`,
   };
 }
 
 export function getAvailableFeatures(tier: SubscriptionTier): GatedFeature[] {
-  return (Object.keys(FEATURE_MINIMUM_TIER) as GatedFeature[]).filter(
-    (feature) => canAccessFeature(tier, feature)
+  return (Object.keys(FEATURE_MINIMUM_TIER) as GatedFeature[]).filter((feature) =>
+    canAccessFeature(tier, feature)
   );
 }
 

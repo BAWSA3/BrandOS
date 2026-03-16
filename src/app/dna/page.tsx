@@ -23,15 +23,15 @@ export default function DNAPage() {
       style={{
         width: '100vw',
         height: '100vh',
-        background: theme === 'dark'
-          ? 'linear-gradient(180deg, #0a0a0f 0%, #0d0d18 50%, #141428 100%)'
-          : 'linear-gradient(180deg, #faf8f5 0%, #f5f0e8 50%, #efe8df 100%)',
+        background:
+          theme === 'dark'
+            ? 'linear-gradient(180deg, #0a0a0f 0%, #0d0d18 50%, #141428 100%)'
+            : 'linear-gradient(180deg, #faf8f5 0%, #f5f0e8 50%, #efe8df 100%)',
         position: 'relative',
         overflow: 'hidden',
         transition: 'background 0.3s ease',
       }}
     >
-
       {/* Title */}
       <div
         style={{

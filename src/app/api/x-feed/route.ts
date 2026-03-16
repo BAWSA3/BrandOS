@@ -19,7 +19,10 @@ export async function GET(request: NextRequest) {
     }
 
     const supabase = createClient(supabaseUrl, supabaseAnonKey);
-    const { data: { user: authUser }, error } = await supabase.auth.getUser(accessToken);
+    const {
+      data: { user: authUser },
+      error,
+    } = await supabase.auth.getUser(accessToken);
     if (error || !authUser) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
@@ -69,7 +72,7 @@ export async function GET(request: NextRequest) {
     ]);
 
     return NextResponse.json({
-      tweets: tweets.map(t => ({
+      tweets: tweets.map((t) => ({
         id: t.id,
         tweetId: t.tweetId,
         text: t.text,

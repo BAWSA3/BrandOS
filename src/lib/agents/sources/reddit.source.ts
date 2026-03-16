@@ -1,11 +1,6 @@
 // ===== REDDIT DATA SOURCE =====
 
-import {
-  RedditPost,
-  TCGVertical,
-  VERTICAL_CONFIGS,
-  SourceStatus,
-} from '../research.types';
+import { RedditPost, TCGVertical, VERTICAL_CONFIGS, SourceStatus } from '../research.types';
 
 interface RedditListingResponse {
   data: {
@@ -89,14 +84,11 @@ async function fetchSubreddit(
       t: timeframe,
     });
 
-    const response = await fetch(
-      `${REDDIT_BASE}/r/${subreddit}/${sort}.json?${params}`,
-      {
-        headers: {
-          'User-Agent': 'BrandOS Research Agent/1.0',
-        },
-      }
-    );
+    const response = await fetch(`${REDDIT_BASE}/r/${subreddit}/${sort}.json?${params}`, {
+      headers: {
+        'User-Agent': 'BrandOS Research Agent/1.0',
+      },
+    });
 
     if (!response.ok) {
       if (response.status === 429) {
@@ -149,18 +141,13 @@ async function searchReddit(
       params.set('restrict_sr', 'on');
     }
 
-    const subredditPath = subreddits?.length
-      ? `r/${subreddits.join('+')}`
-      : 'r/all';
+    const subredditPath = subreddits?.length ? `r/${subreddits.join('+')}` : 'r/all';
 
-    const response = await fetch(
-      `${REDDIT_BASE}/${subredditPath}/search.json?${params}`,
-      {
-        headers: {
-          'User-Agent': 'BrandOS Research Agent/1.0',
-        },
-      }
-    );
+    const response = await fetch(`${REDDIT_BASE}/${subredditPath}/search.json?${params}`, {
+      headers: {
+        'User-Agent': 'BrandOS Research Agent/1.0',
+      },
+    });
 
     if (!response.ok) {
       console.error(`Reddit search error: ${response.status}`);
@@ -214,9 +201,9 @@ export async function fetchRedditForVerticals(
     }
 
     // Sort by score and dedupe
-    const uniquePosts = Array.from(
-      new Map(allPosts.map((p) => [p.id, p])).values()
-    ).sort((a, b) => b.score - a.score);
+    const uniquePosts = Array.from(new Map(allPosts.map((p) => [p.id, p])).values()).sort(
+      (a, b) => b.score - a.score
+    );
 
     results.push({ vertical, posts: uniquePosts });
   }

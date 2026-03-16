@@ -48,7 +48,10 @@ export default function KeywordsWalkthrough({
   const whyItMatters = `Keywords are your brand's signature - they trigger recognition. Consistent usage improves discoverability and reach.`;
 
   const whatYouCanDo = [
-    `Use your top keywords (${keywordStats.slice(0, 3).map(k => k.word).join(', ')}) consistently to reinforce brand recognition.`,
+    `Use your top keywords (${keywordStats
+      .slice(0, 3)
+      .map((k) => k.word)
+      .join(', ')}) consistently to reinforce brand recognition.`,
     doPatterns.length > 0
       ? `Continue doing: ${doPatterns[0]}`
       : 'Develop signature phrases that become uniquely associated with your brand.',
@@ -110,12 +113,8 @@ export default function KeywordsWalkthrough({
                     >
                       [{stat.word}]
                     </span>
-                    {stat.trending === 'up' && (
-                      <span className="text-xs text-green-500">+</span>
-                    )}
-                    {stat.trending === 'down' && (
-                      <span className="text-xs text-red-500">-</span>
-                    )}
+                    {stat.trending === 'up' && <span className="text-xs text-green-500">+</span>}
+                    {stat.trending === 'down' && <span className="text-xs text-red-500">-</span>}
                   </div>
                   <span
                     className="text-xs"
@@ -170,16 +169,10 @@ export default function KeywordsWalkthrough({
               VOCABULARY SCORE
             </div>
             <div className="flex items-baseline gap-1">
-              <span
-                className="text-3xl font-bold"
-                style={{ color: '#FFFFFF' }}
-              >
+              <span className="text-3xl font-bold" style={{ color: '#FFFFFF' }}>
                 {Math.round(vocabularyScore)}
               </span>
-              <span
-                className="text-sm"
-                style={{ color: 'rgba(255,255,255,0.7)' }}
-              >
+              <span className="text-sm" style={{ color: 'rgba(255,255,255,0.7)' }}>
                 /100
               </span>
             </div>
@@ -190,7 +183,11 @@ export default function KeywordsWalkthrough({
                 color: 'rgba(255,255,255,0.6)',
               }}
             >
-              {vocabularyScore >= 80 ? 'Distinctive voice' : vocabularyScore >= 60 ? 'Developing voice' : 'Building voice'}
+              {vocabularyScore >= 80
+                ? 'Distinctive voice'
+                : vocabularyScore >= 60
+                  ? 'Developing voice'
+                  : 'Building voice'}
             </div>
           </motion.div>
 
@@ -255,16 +252,10 @@ export default function KeywordsWalkthrough({
               SIGNATURE TERMS
             </div>
             <div className="flex items-baseline gap-1">
-              <span
-                className="text-2xl font-bold"
-                style={{ color: '#000000' }}
-              >
+              <span className="text-2xl font-bold" style={{ color: '#000000' }}>
                 {totalKeywords}
               </span>
-              <span
-                className="text-sm"
-                style={{ color: 'rgba(0,0,0,0.5)' }}
-              >
+              <span className="text-sm" style={{ color: 'rgba(0,0,0,0.5)' }}>
                 detected
               </span>
             </div>
@@ -289,7 +280,9 @@ export default function KeywordsWalkthrough({
               className="px-4 py-2 flex items-center gap-2"
               style={{
                 background: 'rgba(0, 71, 255, 0.1)',
-                borderBottom: isDark ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(0,0,0,0.05)',
+                borderBottom: isDark
+                  ? '1px solid rgba(255,255,255,0.05)'
+                  : '1px solid rgba(0,0,0,0.05)',
               }}
             >
               <span
@@ -311,13 +304,15 @@ export default function KeywordsWalkthrough({
                   color: isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)',
                 }}
               >
-                "<TypewriterText
+                "
+                <TypewriterText
                   text={voiceSample}
                   delay={400}
                   charDelay={20}
                   cursorColor="#0047FF"
                   showCursor={true}
-                />"
+                />
+                "
               </p>
             </div>
           </motion.div>
@@ -438,11 +433,8 @@ export default function KeywordsWalkthrough({
           }}
         >
           <div className="text-center">
-            <div
-              className="text-lg font-bold"
-              style={{ color: '#10B981' }}
-            >
-              {keywordStats.filter(k => k.trending === 'up').length}
+            <div className="text-lg font-bold" style={{ color: '#10B981' }}>
+              {keywordStats.filter((k) => k.trending === 'up').length}
             </div>
             <div
               className="text-[9px] tracking-wider"
@@ -459,11 +451,8 @@ export default function KeywordsWalkthrough({
             style={{ background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' }}
           />
           <div className="text-center">
-            <div
-              className="text-lg font-bold"
-              style={{ color: isDark ? '#FFFFFF' : '#000000' }}
-            >
-              {keywordStats.filter(k => k.trending === 'stable').length}
+            <div className="text-lg font-bold" style={{ color: isDark ? '#FFFFFF' : '#000000' }}>
+              {keywordStats.filter((k) => k.trending === 'stable').length}
             </div>
             <div
               className="text-[9px] tracking-wider"
@@ -480,11 +469,8 @@ export default function KeywordsWalkthrough({
             style={{ background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' }}
           />
           <div className="text-center">
-            <div
-              className="text-lg font-bold"
-              style={{ color: '#F59E0B' }}
-            >
-              {keywordStats.filter(k => k.trending === 'down').length}
+            <div className="text-lg font-bold" style={{ color: '#F59E0B' }}>
+              {keywordStats.filter((k) => k.trending === 'down').length}
             </div>
             <div
               className="text-[9px] tracking-wider"

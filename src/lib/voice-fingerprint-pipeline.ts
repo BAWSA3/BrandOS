@@ -113,8 +113,6 @@ export async function generateWithAuthenticity(
  * Build a fingerprint summary suitable for injection into prompts.
  * Thin wrapper for use in components that don't want to import voice-fingerprint directly.
  */
-export function getFingerprintSummary(
-  fingerprint: VoiceFingerprint
-): VoiceFingerprintSummary {
+export function getFingerprintSummary(fingerprint: VoiceFingerprint): VoiceFingerprintSummary {
   return summarizeFingerprint(fingerprint);
 }

@@ -5,11 +5,14 @@
 Themes are NOT topics. They're the underlying messages a creator repeats.
 
 ### Topic vs Theme
+
 - Topic: "personal branding" — too broad
 - Theme: "systems beat random posting" — specific belief
 
 ### The 5-Question Test
+
 For each post, ask:
+
 1. What belief does this reinforce?
 2. What would someone who disagrees say?
 3. Is this the same message as another post, just said differently?
@@ -19,6 +22,7 @@ For each post, ask:
 ## Common Creator Theme Categories
 
 ### Builder Themes
+
 - Ship fast, iterate later
 - Show your work publicly
 - Revenue/metrics transparency
@@ -26,6 +30,7 @@ For each post, ask:
 - Build in public philosophy
 
 ### Educator Themes
+
 - Framework/system reveals
 - Data-backed insights
 - How-to breakdowns
@@ -33,6 +38,7 @@ For each post, ask:
 - Industry analysis
 
 ### Provocateur Themes
+
 - Contrarian takes on popular advice
 - Calling out industry BS
 - "Everyone is wrong about X"
@@ -40,6 +46,7 @@ For each post, ask:
 - Uncomfortable truths
 
 ### Curator Themes
+
 - Spotlighting others' work
 - Trend analysis
 - Best-of lists
@@ -47,6 +54,7 @@ For each post, ask:
 - Community building
 
 ### Storyteller Themes
+
 - Personal journey narratives
 - Failure and recovery arcs
 - Behind-the-scenes vulnerability
@@ -56,11 +64,13 @@ For each post, ask:
 ## Ratio Analysis
 
 ### Healthy Ratios for Growth Accounts (10K-50K)
+
 - Tactical : Philosophical = 60:40 (lean into useful)
 - Authority : Vulnerability = 70:30 (earned respect + human)
 - Hot Takes : Helpful = 30:70 (spice it up but stay useful)
 
 ### Red Flag Ratios
+
 - 100% tactical = robot, no personality
 - 100% philosophical = all talk, no proof
 - 100% vulnerability = pity follows, low quality audience
@@ -69,6 +79,7 @@ For each post, ask:
 ## Voice Analysis Markers
 
 ### Things to Look For
+
 - Do they use "I" or "you" more? (self-focused vs audience-focused)
 - Average sentence length (under 10 words = punchy, over 20 = flowing)
 - Do they use formatting? (line breaks, bullets, dashes)

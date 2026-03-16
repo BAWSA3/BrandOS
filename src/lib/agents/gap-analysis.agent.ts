@@ -46,7 +46,7 @@ export async function runGapAnalysis(brandId: string): Promise<GapAnalysisResult
     where: { brandId, isActive: true },
     select: { name: true },
   });
-  const nicheNames = niches.map(n => n.name);
+  const nicheNames = niches.map((n) => n.name);
 
   // Get top 20 viral benchmarks from user's niches
   const benchmarks = await prisma.viralBenchmark.findMany({
@@ -67,19 +67,25 @@ export async function runGapAnalysis(brandId: string): Promise<GapAnalysisResult
   if (!brand) return null;
 
   // Build the prompt
-  const userTweetsText = recentTweets.length > 0
-    ? recentTweets.map((t, i) => {
-        const m = JSON.parse(t.metrics);
-        return `[${i + 1}] ${t.text}\n    engagement: ${m.likes || 0}L / ${m.retweets || 0}RT / ${m.replies || 0}R / ${m.impressions || 0} imp`;
-      }).join('\n\n')
-    : 'No recent tweets available.';
+  const userTweetsText =
+    recentTweets.length > 0
+      ? recentTweets
+          .map((t, i) => {
+            const m = JSON.parse(t.metrics);
+            return `[${i + 1}] ${t.text}\n    engagement: ${m.likes || 0}L / ${m.retweets || 0}RT / ${m.replies || 0}R / ${m.impressions || 0} imp`;
+          })
+          .join('\n\n')
+      : 'No recent tweets available.';
 
-  const benchmarkText = benchmarks.length > 0
-    ? benchmarks.map((b, i) => {
-        const p = JSON.parse(b.patterns);
-        return `[${i + 1}] (score: ${b.viralScore}) ${b.content}\n    patterns: hook=${p.hookType}, format=${p.format}, tone=${p.tone}, cta=${p.cta}`;
-      }).join('\n\n')
-    : 'No viral benchmarks available yet.';
+  const benchmarkText =
+    benchmarks.length > 0
+      ? benchmarks
+          .map((b, i) => {
+            const p = JSON.parse(b.patterns);
+            return `[${i + 1}] (score: ${b.viralScore}) ${b.content}\n    patterns: hook=${p.hookType}, format=${p.format}, tone=${p.tone}, cta=${p.cta}`;
+          })
+          .join('\n\n')
+      : 'No viral benchmarks available yet.';
 
   const snapshotText = snapshot
     ? `7-Day Performance:
@@ -97,9 +103,10 @@ export async function runGapAnalysis(brandId: string): Promise<GapAnalysisResult
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 2000,
-      messages: [{
-        role: 'user',
-        content: `You are a brand growth analyst. Compare this creator's content performance against viral benchmarks in their niche.
+      messages: [
+        {
+          role: 'user',
+          content: `You are a brand growth analyst. Compare this creator's content performance against viral benchmarks in their niche.
 
 CREATOR: ${brand.name}
 ${brand.voiceFingerprint ? `VOICE FINGERPRINT: ${brand.voiceFingerprint}` : ''}
@@ -142,7 +149,8 @@ Return ONLY valid JSON:
   ],
   "analysis": "2-3 sentence overall assessment"
 }`,
-      }],
+        },
+      ],
     });
 
     const responseText = response.content[0].type === 'text' ? response.content[0].text : '';
@@ -169,8 +177,13 @@ Return ONLY valid JSON:
     };
 
     result.overallGapScore = Math.round(
-      (result.hookStrength + result.formatMatch + result.toneAlignment +
-        result.ctaEffectiveness + result.engagementVelocity + result.postingConsistency) / 6
+      (result.hookStrength +
+        result.formatMatch +
+        result.toneAlignment +
+        result.ctaEffectiveness +
+        result.engagementVelocity +
+        result.postingConsistency) /
+        6
     );
 
     // Store in DB

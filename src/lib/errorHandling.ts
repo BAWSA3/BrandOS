@@ -1,6 +1,6 @@
 /**
  * BrandOS Error Handling Utilities
- * 
+ *
  * Provides user-friendly error messages and rate limit detection.
  */
 
@@ -10,7 +10,7 @@ import analytics from './analytics';
 // Types
 // =============================================================================
 
-export type ErrorType = 
+export type ErrorType =
   | 'rate_limit'
   | 'quota_exceeded'
   | 'network'
@@ -67,33 +67,34 @@ const errorMessages: Record<ErrorType, { title: string; message: string; shouldR
     shouldRetry: true,
   },
   quota_exceeded: {
-    title: "Daily limit reached",
-    message: "We've reached our daily AI quota. Please try again tomorrow, or contact support if urgent.",
+    title: 'Daily limit reached',
+    message:
+      "We've reached our daily AI quota. Please try again tomorrow, or contact support if urgent.",
     shouldRetry: false,
   },
   network: {
-    title: "Connection issue",
+    title: 'Connection issue',
     message: "We couldn't reach our servers. Please check your internet connection.",
     shouldRetry: true,
   },
   auth: {
-    title: "Authentication error",
+    title: 'Authentication error',
     message: "There's an issue with our API configuration. We're looking into it.",
     shouldRetry: false,
   },
   validation: {
-    title: "Invalid input",
-    message: "Please check your input and try again.",
+    title: 'Invalid input',
+    message: 'Please check your input and try again.',
     shouldRetry: true,
   },
   server: {
-    title: "Something went wrong",
-    message: "Our servers are having trouble. Please try again in a few minutes.",
+    title: 'Something went wrong',
+    message: 'Our servers are having trouble. Please try again in a few minutes.',
     shouldRetry: true,
   },
   unknown: {
-    title: "Unexpected error",
-    message: "Something unexpected happened. Please try again.",
+    title: 'Unexpected error',
+    message: 'Something unexpected happened. Please try again.',
     shouldRetry: true,
   },
 };
@@ -107,7 +108,7 @@ const errorMessages: Record<ErrorType, { title: string; message: string; shouldR
  */
 export function detectErrorType(error: unknown): ErrorType {
   const errorString = getErrorString(error);
-  
+
   for (const { pattern, type } of errorPatterns) {
     if (typeof pattern === 'string') {
       if (errorString.includes(pattern)) return type;
@@ -115,7 +116,7 @@ export function detectErrorType(error: unknown): ErrorType {
       return type;
     }
   }
-  
+
   return 'unknown';
 }
 
@@ -137,15 +138,15 @@ function getErrorString(error: unknown): string {
 export function processError(error: unknown, endpoint?: string): ProcessedError {
   const type = detectErrorType(error);
   const config = errorMessages[type];
-  
+
   // Track the error
   analytics.errorEncountered(type, getErrorString(error));
-  
+
   // Track rate limits specifically
   if (type === 'rate_limit' && endpoint) {
     analytics.rateLimitHit(endpoint);
   }
-  
+
   return {
     type,
     ...config,
@@ -168,30 +169,28 @@ export async function withRetry<T>(
   } = {}
 ): Promise<T> {
   const { maxAttempts = 3, baseDelay = 1000, onRetry } = options;
-  
+
   let lastError: unknown;
-  
+
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
       return await fn();
     } catch (error) {
       lastError = error;
-      
+
       // Don't retry if it's not a retryable error
       const errorType = detectErrorType(error);
       if (!errorMessages[errorType].shouldRetry) {
         throw error;
       }
-      
+
       if (attempt < maxAttempts) {
         onRetry?.(attempt, error);
-        await new Promise(resolve => 
-          setTimeout(resolve, baseDelay * Math.pow(2, attempt - 1))
-        );
+        await new Promise((resolve) => setTimeout(resolve, baseDelay * Math.pow(2, attempt - 1)));
       }
     }
   }
-  
+
   throw lastError;
 }
 

@@ -110,7 +110,15 @@ export async function checkAndIncrementUsage(
   if (!user) {
     return {
       allowed: false,
-      usage: { type, used: 0, limit: 0, remaining: 0, isUnlimited: false, percentUsed: 100, canUse: false },
+      usage: {
+        type,
+        used: 0,
+        limit: 0,
+        remaining: 0,
+        isUnlimited: false,
+        percentUsed: 100,
+        canUse: false,
+      },
     };
   }
 
@@ -164,8 +172,7 @@ export async function checkAndIncrementUsage(
 async function maybeResetUsage(userId: string, resetDate: Date) {
   const now = new Date();
   const monthsSinceReset =
-    (now.getFullYear() - resetDate.getFullYear()) * 12 +
-    (now.getMonth() - resetDate.getMonth());
+    (now.getFullYear() - resetDate.getFullYear()) * 12 + (now.getMonth() - resetDate.getMonth());
 
   if (monthsSinceReset >= 1) {
     await prisma.user.update({

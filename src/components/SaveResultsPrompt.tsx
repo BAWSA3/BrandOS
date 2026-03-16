@@ -79,7 +79,8 @@ export function SaveResultsPrompt({ onDismiss, inviteCode }: SaveResultsPromptPr
           style={{
             width: '80px',
             height: '2px',
-            background: 'linear-gradient(90deg, transparent, rgba(212, 165, 116, 0.6), transparent)',
+            background:
+              'linear-gradient(90deg, transparent, rgba(212, 165, 116, 0.6), transparent)',
             marginBottom: '32px',
           }}
         />
@@ -88,7 +89,8 @@ export function SaveResultsPrompt({ onDismiss, inviteCode }: SaveResultsPromptPr
         <div
           className="w-14 h-14 rounded-2xl flex items-center justify-center mb-6"
           style={{
-            background: 'linear-gradient(135deg, rgba(29, 161, 242, 0.2) 0%, rgba(13, 139, 219, 0.1) 100%)',
+            background:
+              'linear-gradient(135deg, rgba(29, 161, 242, 0.2) 0%, rgba(13, 139, 219, 0.1) 100%)',
             border: '1px solid rgba(29, 161, 242, 0.3)',
           }}
         >
@@ -126,19 +128,40 @@ export function SaveResultsPrompt({ onDismiss, inviteCode }: SaveResultsPromptPr
         {/* Benefits */}
         <div className="flex flex-wrap justify-center gap-4 mb-8">
           <div className="flex items-center gap-2 text-white/70 text-sm">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D4A574" strokeWidth="2">
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#D4A574"
+              strokeWidth="2"
+            >
               <polyline points="20 6 9 17 4 12" />
             </svg>
             <span>Cloud sync</span>
           </div>
           <div className="flex items-center gap-2 text-white/70 text-sm">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D4A574" strokeWidth="2">
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#D4A574"
+              strokeWidth="2"
+            >
               <polyline points="20 6 9 17 4 12" />
             </svg>
             <span>Multi-device</span>
           </div>
           <div className="flex items-center gap-2 text-white/70 text-sm">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D4A574" strokeWidth="2">
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#D4A574"
+              strokeWidth="2"
+            >
               <polyline points="20 6 9 17 4 12" />
             </svg>
             <span>Invite friends</span>
@@ -174,8 +197,19 @@ export function SaveResultsPrompt({ onDismiss, inviteCode }: SaveResultsPromptPr
             {isSigningIn ? (
               <>
                 <svg className="animate-spin w-5 h-5" viewBox="0 0 24 24" fill="none">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  />
                 </svg>
                 <span>CONNECTING...</span>
               </>

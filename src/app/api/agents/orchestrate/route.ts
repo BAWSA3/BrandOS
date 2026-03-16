@@ -13,18 +13,18 @@ import {
 } from '@/lib/agents';
 import { BrandDNA, Platform } from '@/lib/types';
 
-type WorkflowType = 'idea-to-campaign-content' | 'analyze-and-improve' | 'research-to-content' | 'research-to-authority-content';
+type WorkflowType =
+  | 'idea-to-campaign-content'
+  | 'analyze-and-improve'
+  | 'research-to-content'
+  | 'research-to-authority-content';
 
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
-  
+
   try {
     const body = await request.json();
-    const { 
-      brandDNA, 
-      workflow,
-      params,
-    } = body as {
+    const { brandDNA, workflow, params } = body as {
       brandDNA: BrandDNA;
       workflow: WorkflowType;
       params: Record<string, unknown>;
@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
     // Validate brand DNA
     if (!validateBrandDNA(brandDNA)) {
       return NextResponse.json(
-        { 
+        {
           error: 'Invalid or missing brand DNA',
           details: 'Brand DNA must include at least a name and tone profile',
         },
@@ -45,7 +45,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           error: 'Workflow type is required',
-          availableWorkflows: ['idea-to-campaign-content', 'analyze-and-improve', 'research-to-content', 'research-to-authority-content'],
+          availableWorkflows: [
+            'idea-to-campaign-content',
+            'analyze-and-improve',
+            'research-to-content',
+            'research-to-authority-content',
+          ],
         },
         { status: 400 }
       );
@@ -115,7 +120,8 @@ export async function POST(request: NextRequest) {
         analysis: result.analysis.success ? result.analysis.data : null,
         analysisError: result.analysis.success ? null : result.analysis.error,
         improvedContent: result.improvedContent?.success ? result.improvedContent.data : null,
-        improvedContentError: result.improvedContent?.success === false ? result.improvedContent.error : null,
+        improvedContentError:
+          result.improvedContent?.success === false ? result.improvedContent.error : null,
         confidence: {
           analysis: result.analysis.confidence,
           content: result.improvedContent?.confidence,
@@ -185,20 +191,22 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         error: `Unknown workflow: ${workflow}`,
-        availableWorkflows: ['idea-to-campaign-content', 'analyze-and-improve', 'research-to-content', 'research-to-authority-content'],
+        availableWorkflows: [
+          'idea-to-campaign-content',
+          'analyze-and-improve',
+          'research-to-content',
+          'research-to-authority-content',
+        ],
       },
       { status: 400 }
     );
-
   } catch (error) {
     console.error('Orchestration API error:', error);
-    
-    const errorMessage = error instanceof Error 
-      ? error.message 
-      : 'Workflow execution failed';
-    
+
+    const errorMessage = error instanceof Error ? error.message : 'Workflow execution failed';
+
     return NextResponse.json(
-      { 
+      {
         error: errorMessage,
         processingTime: Date.now() - startTime,
       },
@@ -252,13 +260,15 @@ export async function GET() {
         },
       },
       'research-to-authority-content': {
-        description: 'Researches trends and creates authority positioning content that positions Relique as the expert',
+        description:
+          'Researches trends and creates authority positioning content that positions Relique as the expert',
         agents: ['research', 'authority'],
         params: {
           verticals: 'TCGVertical[] (optional) - pokemon, mtg, yugioh, sports-cards, collectibles',
           audiences: 'TargetAudience[] (optional) - collector, trader, seller',
           platforms: 'Platform[] (optional) - Platforms to optimize content for',
-          contentTypes: 'AuthorityContentType[] (optional) - thought-leadership, educational, competitive, trust-building',
+          contentTypes:
+            'AuthorityContentType[] (optional) - thought-leadership, educational, competitive, trust-building',
           maxAnglesPerTopic: 'number (optional, default 2) - Authority angles per trending topic',
         },
         response: {
@@ -278,9 +288,3 @@ export async function GET() {
     },
   });
 }
-
-
-
-
-
-

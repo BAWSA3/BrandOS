@@ -77,11 +77,7 @@ export default function XPostPreview({
           <div className="w-10 h-10 rounded-full overflow-hidden shrink-0 bg-[#2F3336]">
             {avatarUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={avatarUrl}
-                alt={displayName}
-                className="w-full h-full object-cover"
-              />
+              <img src={avatarUrl} alt={displayName} className="w-full h-full object-cover" />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-[#71767B] text-sm font-bold">
                 {displayName.charAt(0).toUpperCase()}
@@ -104,13 +100,9 @@ export default function XPostPreview({
                   />
                 </svg>
               )}
-              <span className="text-[15px] text-[#71767B] leading-5">
-                @{username}
-              </span>
+              <span className="text-[15px] text-[#71767B] leading-5">@{username}</span>
               <span className="text-[15px] text-[#71767B] leading-5">·</span>
-              <span className="text-[15px] text-[#71767B] leading-5">
-                {timestamp}
-              </span>
+              <span className="text-[15px] text-[#71767B] leading-5">{timestamp}</span>
             </div>
 
             {/* Post Text */}
@@ -124,14 +116,10 @@ export default function XPostPreview({
                   );
                 }
                 if (part.type === 'link') {
-                  const display = part.value
-                    .replace(/^https?:\/\//, '')
-                    .replace(/\/$/, '');
+                  const display = part.value.replace(/^https?:\/\//, '').replace(/\/$/, '');
                   return (
                     <span key={i} className="text-[#1D9BF0]">
-                      {display.length > 30
-                        ? display.slice(0, 30) + '...'
-                        : display}
+                      {display.length > 30 ? display.slice(0, 30) + '...' : display}
                     </span>
                   );
                 }
@@ -147,26 +135,18 @@ export default function XPostPreview({
                 {mediaUrls.slice(0, 4).map((url, i) => (
                   <div
                     key={i}
-                    className={`relative ${
-                      mediaUrls.length === 3 && i === 0
-                        ? 'row-span-2'
-                        : ''
-                    }`}
+                    className={`relative ${mediaUrls.length === 3 && i === 0 ? 'row-span-2' : ''}`}
                     style={{
                       aspectRatio:
                         mediaUrls.length === 1
                           ? '16/9'
                           : mediaUrls.length === 3 && i === 0
-                          ? '1/1'
-                          : '1/1',
+                            ? '1/1'
+                            : '1/1',
                     }}
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={url}
-                      alt={`Media ${i + 1}`}
-                      className="w-full h-full object-cover"
-                    />
+                    <img src={url} alt={`Media ${i + 1}`} className="w-full h-full object-cover" />
                   </div>
                 ))}
               </div>
@@ -177,13 +157,9 @@ export default function XPostPreview({
               <div className="mt-3 rounded-2xl border border-[#2F3336] overflow-hidden">
                 <div className="bg-[#16181C] p-3">
                   <p className="text-[13px] text-[#71767B]">
-                    {linkUrl
-                      .replace(/^https?:\/\//, '')
-                      .split('/')[0]}
+                    {linkUrl.replace(/^https?:\/\//, '').split('/')[0]}
                   </p>
-                  <p className="text-[15px] text-[#E7E9EA] mt-0.5 line-clamp-2">
-                    {linkUrl}
-                  </p>
+                  <p className="text-[15px] text-[#E7E9EA] mt-0.5 line-clamp-2">{linkUrl}</p>
                 </div>
               </div>
             )}
@@ -246,10 +222,7 @@ export default function XPostPreview({
 
           {/* Three dot menu */}
           <div className="shrink-0 mt-0.5">
-            <svg
-              viewBox="0 0 24 24"
-              className="w-[18px] h-[18px] fill-[#71767B]"
-            >
+            <svg viewBox="0 0 24 24" className="w-[18px] h-[18px] fill-[#71767B]">
               <path d="M3 12c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2zm9 2c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm7 0c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z" />
             </svg>
           </div>

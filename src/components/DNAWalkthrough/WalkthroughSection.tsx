@@ -64,9 +64,15 @@ function TerminalWindow({
         }}
       >
         <div style={{ display: 'flex', gap: '6px' }}>
-          <div style={{ width: 10, height: 10, borderRadius: '50%', background: 'rgba(0,0,0,0.15)' }} />
-          <div style={{ width: 10, height: 10, borderRadius: '50%', background: 'rgba(0,0,0,0.15)' }} />
-          <div style={{ width: 10, height: 10, borderRadius: '50%', background: 'rgba(0,0,0,0.15)' }} />
+          <div
+            style={{ width: 10, height: 10, borderRadius: '50%', background: 'rgba(0,0,0,0.15)' }}
+          />
+          <div
+            style={{ width: 10, height: 10, borderRadius: '50%', background: 'rgba(0,0,0,0.15)' }}
+          />
+          <div
+            style={{ width: 10, height: 10, borderRadius: '50%', background: 'rgba(0,0,0,0.15)' }}
+          />
         </div>
         <span
           style={{
@@ -81,9 +87,7 @@ function TerminalWindow({
         </span>
       </div>
       {/* Terminal content */}
-      <div style={{ padding: '20px' }}>
-        {children}
-      </div>
+      <div style={{ padding: '20px' }}>{children}</div>
     </div>
   );
 }
@@ -111,11 +115,7 @@ export default function WalkthroughSection({
       style={{ boxSizing: 'border-box' }}
     >
       {parallaxLayers.map((layer) => (
-        <ParallaxLayer
-          key={layer.id}
-          {...layer}
-          containerRef={sectionRef}
-        />
+        <ParallaxLayer key={layer.id} {...layer} containerRef={sectionRef} />
       ))}
 
       <div className="w-full max-w-4xl relative z-10">
@@ -135,7 +135,7 @@ export default function WalkthroughSection({
           }}
         >
           <div>/* ═══════════════════════════════════════ */</div>
-          <div style={{ color: accentColor, fontWeight: 500 }}>/*  {label.toUpperCase()}  */</div>
+          <div style={{ color: accentColor, fontWeight: 500 }}>/* {label.toUpperCase()} */</div>
           <div>/* ═══════════════════════════════════════ */</div>
         </motion.div>
 
@@ -147,32 +147,45 @@ export default function WalkthroughSection({
           viewport={{ once: true, amount: 0.2 }}
           transition={{ duration: 0.4, delay: 0.1 }}
         >
-          <TerminalWindow title={`brandos://analysis/${label.split(':')[0]?.toLowerCase() || 'section'}`}>
+          <TerminalWindow
+            title={`brandos://analysis/${label.split(':')[0]?.toLowerCase() || 'section'}`}
+          >
             <div className="space-y-5">
               {/* Narrative context block */}
-              {useNarrative && narrativeBlocks.filter(b => b.type === 'context').map((block, i) => (
-                <div
-                  key={`ctx-${i}`}
-                  style={{
-                    padding: '12px 16px',
-                    background: 'rgba(0, 71, 255, 0.04)',
-                    border: '1px solid rgba(0, 71, 255, 0.1)',
-                    borderRadius: '4px',
-                  }}
-                >
-                  <p
-                    className="text-sm leading-relaxed"
-                    style={{
-                      fontFamily: "'Helvetica Neue', Arial, sans-serif",
-                      color: 'rgba(0, 0, 0, 0.75)',
-                      margin: 0,
-                    }}
-                  >
-                    <span style={{ color: accentColor, fontFamily: "'VCR OSD Mono', monospace", marginRight: '8px' }}>&gt;</span>
-                    {block.content}
-                  </p>
-                </div>
-              ))}
+              {useNarrative &&
+                narrativeBlocks
+                  .filter((b) => b.type === 'context')
+                  .map((block, i) => (
+                    <div
+                      key={`ctx-${i}`}
+                      style={{
+                        padding: '12px 16px',
+                        background: 'rgba(0, 71, 255, 0.04)',
+                        border: '1px solid rgba(0, 71, 255, 0.1)',
+                        borderRadius: '4px',
+                      }}
+                    >
+                      <p
+                        className="text-sm leading-relaxed"
+                        style={{
+                          fontFamily: "'Helvetica Neue', Arial, sans-serif",
+                          color: 'rgba(0, 0, 0, 0.75)',
+                          margin: 0,
+                        }}
+                      >
+                        <span
+                          style={{
+                            color: accentColor,
+                            fontFamily: "'VCR OSD Mono', monospace",
+                            marginRight: '8px',
+                          }}
+                        >
+                          &gt;
+                        </span>
+                        {block.content}
+                      </p>
+                    </div>
+                  ))}
 
               {/* Main Visualization */}
               <div
@@ -189,82 +202,31 @@ export default function WalkthroughSection({
               {/* Narrative blocks below visualization */}
               {useNarrative && (
                 <>
-                  {narrativeBlocks.filter(b => b.type === 'callout').map((block, i) => (
-                    <div
-                      key={`callout-${i}`}
-                      style={{
-                        padding: '12px 16px',
-                        background: 'rgba(0, 0, 0, 0.02)',
-                        borderLeft: `3px solid ${accentColor}`,
-                        borderRadius: '0 4px 4px 0',
-                      }}
-                    >
-                      {block.label && (
-                        <h3
-                          style={{
-                            fontFamily: "'VCR OSD Mono', monospace",
-                            fontSize: '10px',
-                            letterSpacing: '0.1em',
-                            color: accentColor,
-                            marginBottom: '8px',
-                          }}
-                        >
-                          [{block.label}]
-                        </h3>
-                      )}
-                      <p
-                        className="text-sm leading-relaxed"
+                  {narrativeBlocks
+                    .filter((b) => b.type === 'callout')
+                    .map((block, i) => (
+                      <div
+                        key={`callout-${i}`}
                         style={{
-                          fontFamily: "'Helvetica Neue', Arial, sans-serif",
-                          color: 'rgba(0, 0, 0, 0.7)',
-                          margin: 0,
+                          padding: '12px 16px',
+                          background: 'rgba(0, 0, 0, 0.02)',
+                          borderLeft: `3px solid ${accentColor}`,
+                          borderRadius: '0 4px 4px 0',
                         }}
                       >
-                        {block.content}
-                      </p>
-                    </div>
-                  ))}
-
-                  {narrativeBlocks.filter(b => b.type === 'action').map((block, i) => (
-                    <div
-                      key={`action-${i}`}
-                      style={{
-                        padding: '12px 16px',
-                        background: 'rgba(16, 185, 129, 0.04)',
-                        border: '1px solid rgba(16, 185, 129, 0.15)',
-                        borderRadius: '4px',
-                      }}
-                    >
-                      {block.label && (
-                        <h3
-                          style={{
-                            fontFamily: "'VCR OSD Mono', monospace",
-                            fontSize: '10px',
-                            letterSpacing: '0.1em',
-                            color: '#10B981',
-                            marginBottom: '8px',
-                          }}
-                        >
-                          [{block.label}]
-                        </h3>
-                      )}
-                      {block.items?.length ? (
-                        <div className="space-y-2">
-                          {block.items.map((item, idx) => (
-                            <div
-                              key={idx}
-                              className="flex items-start gap-3 text-sm"
-                              style={{
-                                fontFamily: "'Helvetica Neue', Arial, sans-serif",
-                                color: 'rgba(0, 0, 0, 0.75)',
-                              }}
-                            >
-                              <span style={{ color: '#10B981', fontFamily: "'VCR OSD Mono', monospace" }}>[✓]</span>
-                              <span>{item}</span>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
+                        {block.label && (
+                          <h3
+                            style={{
+                              fontFamily: "'VCR OSD Mono', monospace",
+                              fontSize: '10px',
+                              letterSpacing: '0.1em',
+                              color: accentColor,
+                              marginBottom: '8px',
+                            }}
+                          >
+                            [{block.label}]
+                          </h3>
+                        )}
                         <p
                           className="text-sm leading-relaxed"
                           style={{
@@ -275,9 +237,71 @@ export default function WalkthroughSection({
                         >
                           {block.content}
                         </p>
-                      )}
-                    </div>
-                  ))}
+                      </div>
+                    ))}
+
+                  {narrativeBlocks
+                    .filter((b) => b.type === 'action')
+                    .map((block, i) => (
+                      <div
+                        key={`action-${i}`}
+                        style={{
+                          padding: '12px 16px',
+                          background: 'rgba(16, 185, 129, 0.04)',
+                          border: '1px solid rgba(16, 185, 129, 0.15)',
+                          borderRadius: '4px',
+                        }}
+                      >
+                        {block.label && (
+                          <h3
+                            style={{
+                              fontFamily: "'VCR OSD Mono', monospace",
+                              fontSize: '10px',
+                              letterSpacing: '0.1em',
+                              color: '#10B981',
+                              marginBottom: '8px',
+                            }}
+                          >
+                            [{block.label}]
+                          </h3>
+                        )}
+                        {block.items?.length ? (
+                          <div className="space-y-2">
+                            {block.items.map((item, idx) => (
+                              <div
+                                key={idx}
+                                className="flex items-start gap-3 text-sm"
+                                style={{
+                                  fontFamily: "'Helvetica Neue', Arial, sans-serif",
+                                  color: 'rgba(0, 0, 0, 0.75)',
+                                }}
+                              >
+                                <span
+                                  style={{
+                                    color: '#10B981',
+                                    fontFamily: "'VCR OSD Mono', monospace",
+                                  }}
+                                >
+                                  [✓]
+                                </span>
+                                <span>{item}</span>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <p
+                            className="text-sm leading-relaxed"
+                            style={{
+                              fontFamily: "'Helvetica Neue', Arial, sans-serif",
+                              color: 'rgba(0, 0, 0, 0.7)',
+                              margin: 0,
+                            }}
+                          >
+                            {block.content}
+                          </p>
+                        )}
+                      </div>
+                    ))}
                 </>
               )}
 
@@ -378,7 +402,11 @@ export default function WalkthroughSection({
                               color: 'rgba(0, 0, 0, 0.75)',
                             }}
                           >
-                            <span style={{ color: '#10B981', fontFamily: "'VCR OSD Mono', monospace" }}>[✓]</span>
+                            <span
+                              style={{ color: '#10B981', fontFamily: "'VCR OSD Mono', monospace" }}
+                            >
+                              [✓]
+                            </span>
                             <span>{item}</span>
                           </div>
                         ))}

@@ -122,7 +122,19 @@ export default function AsciiSky({
     });
 
     pre.innerHTML = gridToHtml(grid);
-  }, [dimensions, showHills, skyColorTop, skyColorBottom, cloudColor, hillColor, hillColorFar, season, path, groundElements, timeOfDay]);
+  }, [
+    dimensions,
+    showHills,
+    skyColorTop,
+    skyColorBottom,
+    cloudColor,
+    hillColor,
+    hillColorFar,
+    season,
+    path,
+    groundElements,
+    timeOfDay,
+  ]);
 
   useEffect(() => {
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;

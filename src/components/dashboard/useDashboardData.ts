@@ -55,9 +55,7 @@ export function useDashboardData(): DashboardData {
   // Calculate posts this week and avg engagement from fetched posts
   const now = Date.now();
   const oneWeekAgo = now - 7 * 24 * 60 * 60 * 1000;
-  const postsThisWeek = posts.filter(
-    (p) => new Date(p.created_at).getTime() > oneWeekAgo
-  ).length;
+  const postsThisWeek = posts.filter((p) => new Date(p.created_at).getTime() > oneWeekAgo).length;
 
   const avgEngagementRate =
     posts.length > 0
@@ -134,9 +132,7 @@ export function useDashboardData(): DashboardData {
     setIsLoadingIdeas(true);
     try {
       // Extract recent topics from posts
-      const recentTopics = posts
-        .slice(0, 5)
-        .map((p) => p.text.slice(0, 100));
+      const recentTopics = posts.slice(0, 5).map((p) => p.text.slice(0, 100));
 
       const res = await fetch('/api/dashboard/ideas', {
         method: 'POST',

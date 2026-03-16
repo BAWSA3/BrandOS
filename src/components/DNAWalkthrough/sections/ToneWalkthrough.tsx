@@ -30,20 +30,44 @@ function getToneDescription(tone: ToneWalkthroughProps['tone']): string {
   return traits.join(', ');
 }
 
-function getVoiceStyle(formality: number, energy: number, confidence: number): { style: string; description: string; tip: string } {
+function getVoiceStyle(
+  formality: number,
+  energy: number,
+  confidence: number
+): { style: string; description: string; tip: string } {
   if (confidence > 70 && energy > 70) {
-    return { style: 'Authority', description: 'Bold thought leader who commands attention', tip: 'Leverage your strong voice for manifesto-style content' };
+    return {
+      style: 'Authority',
+      description: 'Bold thought leader who commands attention',
+      tip: 'Leverage your strong voice for manifesto-style content',
+    };
   }
   if (formality > 70 && confidence > 60) {
-    return { style: 'Expert', description: 'Professional voice that builds trust', tip: 'Add more personal stories to humanize your expertise' };
+    return {
+      style: 'Expert',
+      description: 'Professional voice that builds trust',
+      tip: 'Add more personal stories to humanize your expertise',
+    };
   }
   if (energy > 70 && formality < 50) {
-    return { style: 'Entertainer', description: 'High-energy communicator who engages easily', tip: 'Balance entertainment with value-driven insights' };
+    return {
+      style: 'Entertainer',
+      description: 'High-energy communicator who engages easily',
+      tip: 'Balance entertainment with value-driven insights',
+    };
   }
   if (formality < 40 && confidence < 50) {
-    return { style: 'Relatable', description: 'Approachable voice that connects personally', tip: 'Build more authority through stronger opinions' };
+    return {
+      style: 'Relatable',
+      description: 'Approachable voice that connects personally',
+      tip: 'Build more authority through stronger opinions',
+    };
   }
-  return { style: 'Versatile', description: 'Balanced communicator who adapts well', tip: 'Consider leaning into one direction for stronger brand identity' };
+  return {
+    style: 'Versatile',
+    description: 'Balanced communicator who adapts well',
+    tip: 'Consider leaning into one direction for stronger brand identity',
+  };
 }
 
 // Average creator tone values for comparison
@@ -53,7 +77,12 @@ const AVERAGE_TONE = {
   confidence: 48,
 };
 
-export default function ToneWalkthrough({ tone, voiceProfile, theme, parallaxLayers }: ToneWalkthroughProps) {
+export default function ToneWalkthrough({
+  tone,
+  voiceProfile,
+  theme,
+  parallaxLayers,
+}: ToneWalkthroughProps) {
   const isDark = theme === 'dark';
   const toneDesc = getToneDescription(tone);
 
@@ -65,9 +94,30 @@ export default function ToneWalkthrough({ tone, voiceProfile, theme, parallaxLay
   const voiceStyle = getVoiceStyle(formality, energy, confidence);
 
   const bars = [
-    { label: 'FRM', fullLabel: 'Formality', value: formality, avg: AVERAGE_TONE.formality, color: '#6B7280', description: 'How professional vs casual' },
-    { label: 'NRG', fullLabel: 'Energy', value: energy, avg: AVERAGE_TONE.energy, color: '#00FF41', description: 'How dynamic vs measured' },
-    { label: 'CNF', fullLabel: 'Confidence', value: confidence, avg: AVERAGE_TONE.confidence, color: '#2E6AFF', description: 'How assertive vs humble' },
+    {
+      label: 'FRM',
+      fullLabel: 'Formality',
+      value: formality,
+      avg: AVERAGE_TONE.formality,
+      color: '#6B7280',
+      description: 'How professional vs casual',
+    },
+    {
+      label: 'NRG',
+      fullLabel: 'Energy',
+      value: energy,
+      avg: AVERAGE_TONE.energy,
+      color: '#00FF41',
+      description: 'How dynamic vs measured',
+    },
+    {
+      label: 'CNF',
+      fullLabel: 'Confidence',
+      value: confidence,
+      avg: AVERAGE_TONE.confidence,
+      color: '#2E6AFF',
+      description: 'How assertive vs humble',
+    },
   ];
 
   // Calculate radar chart points
@@ -87,7 +137,8 @@ export default function ToneWalkthrough({ tone, voiceProfile, theme, parallaxLay
   const radarValues = [formality, energy, confidence, tone.experimental, tone.minimal];
   const radarLabels = ['Formal', 'Energy', 'Bold', 'Experimental', 'Minimal'];
   const radarPoints = radarValues.map((v, i) => getRadarPoint(v, i, radarValues.length));
-  const radarPath = radarPoints.map((p, i) => (i === 0 ? `M ${p.x} ${p.y}` : `L ${p.x} ${p.y}`)).join(' ') + ' Z';
+  const radarPath =
+    radarPoints.map((p, i) => (i === 0 ? `M ${p.x} ${p.y}` : `L ${p.x} ${p.y}`)).join(' ') + ' Z';
 
   const howWeCalculated = `Linguistic analysis across five dimensions: Formality (${Math.round(formality)}%), Energy (${Math.round(energy)}%), Confidence (${Math.round(confidence)}%), Experimental (${Math.round(tone.experimental)}%), Minimal (${Math.round(tone.minimal)}%).`;
 
@@ -142,10 +193,7 @@ export default function ToneWalkthrough({ tone, voiceProfile, theme, parallaxLay
               VOICE STYLE
             </div>
             <div className="flex items-center gap-3 mb-3">
-              <span
-                className="text-3xl font-bold"
-                style={{ color: '#00AA33' }}
-              >
+              <span className="text-3xl font-bold" style={{ color: '#00AA33' }}>
                 {voiceStyle.style}
               </span>
             </div>
@@ -177,7 +225,10 @@ export default function ToneWalkthrough({ tone, voiceProfile, theme, parallaxLay
           >
             <div
               className="text-[10px] tracking-wider mb-2 text-center"
-              style={{ fontFamily: "'VCR OSD Mono', monospace", color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)' }}
+              style={{
+                fontFamily: "'VCR OSD Mono', monospace",
+                color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)',
+              }}
             >
               VOICE RADAR
             </div>
@@ -260,7 +311,10 @@ export default function ToneWalkthrough({ tone, voiceProfile, theme, parallaxLay
           >
             <div
               className="text-[10px] tracking-wider mb-4"
-              style={{ fontFamily: "'VCR OSD Mono', monospace", color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)' }}
+              style={{
+                fontFamily: "'VCR OSD Mono', monospace",
+                color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)',
+              }}
             >
               VS AVERAGE CREATOR
             </div>
@@ -270,14 +324,18 @@ export default function ToneWalkthrough({ tone, voiceProfile, theme, parallaxLay
                 return (
                   <div key={bar.label}>
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs" style={{ color: isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)' }}>
+                      <span
+                        className="text-xs"
+                        style={{ color: isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)' }}
+                      >
                         {bar.fullLabel}
                       </span>
                       <span
                         className="text-xs font-medium"
                         style={{ color: diff >= 0 ? '#10B981' : '#EF4444' }}
                       >
-                        {diff >= 0 ? '+' : ''}{Math.round(diff)}%
+                        {diff >= 0 ? '+' : ''}
+                        {Math.round(diff)}%
                       </span>
                     </div>
                     <div className="flex items-center gap-1">
@@ -305,7 +363,11 @@ export default function ToneWalkthrough({ tone, voiceProfile, theme, parallaxLay
         </div>
 
         {/* Bar Cards Row */}
-        <StaggerContainer className="grid grid-cols-3 gap-3 md:gap-4" staggerDelay={0.1} initialDelay={0.2}>
+        <StaggerContainer
+          className="grid grid-cols-3 gap-3 md:gap-4"
+          staggerDelay={0.1}
+          initialDelay={0.2}
+        >
           {bars.map((bar, index) => (
             <StaggerItem
               key={bar.label}
@@ -382,17 +444,23 @@ export default function ToneWalkthrough({ tone, voiceProfile, theme, parallaxLay
               border: '1px solid rgba(0, 255, 65, 0.2)',
             }}
           >
-            <div className="text-[10px] tracking-wider mb-2" style={{ fontFamily: "'VCR OSD Mono', monospace", color: '#00FF41' }}>
+            <div
+              className="text-[10px] tracking-wider mb-2"
+              style={{ fontFamily: "'VCR OSD Mono', monospace", color: '#00FF41' }}
+            >
               STRENGTH
             </div>
-            <p className="text-sm" style={{ color: isDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.8)' }}>
+            <p
+              className="text-sm"
+              style={{ color: isDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.8)' }}
+            >
               {confidence > 60
                 ? 'Your confident voice commands attention and builds trust with your audience.'
                 : energy > 60
-                ? 'Your energetic communication style keeps followers engaged and entertained.'
-                : formality > 60
-                ? 'Your professional tone establishes credibility and expertise.'
-                : 'Your balanced approach allows you to connect with diverse audiences.'}
+                  ? 'Your energetic communication style keeps followers engaged and entertained.'
+                  : formality > 60
+                    ? 'Your professional tone establishes credibility and expertise.'
+                    : 'Your balanced approach allows you to connect with diverse audiences.'}
             </p>
           </motion.div>
 
@@ -407,19 +475,25 @@ export default function ToneWalkthrough({ tone, voiceProfile, theme, parallaxLay
               border: '1px solid rgba(46, 106, 255, 0.2)',
             }}
           >
-            <div className="text-[10px] tracking-wider mb-2" style={{ fontFamily: "'VCR OSD Mono', monospace", color: '#2E6AFF' }}>
+            <div
+              className="text-[10px] tracking-wider mb-2"
+              style={{ fontFamily: "'VCR OSD Mono', monospace", color: '#2E6AFF' }}
+            >
               BEST CONTENT TYPES
             </div>
-            <p className="text-sm" style={{ color: isDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.8)' }}>
+            <p
+              className="text-sm"
+              style={{ color: isDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.8)' }}
+            >
               {confidence > 60 && energy > 60
                 ? 'Hot takes, bold predictions, manifesto threads'
                 : confidence > 60
-                ? 'Thought leadership posts, industry analysis, opinion pieces'
-                : energy > 60
-                ? 'Engaging stories, memes, interactive content'
-                : formality > 60
-                ? 'Educational threads, tutorials, professional insights'
-                : 'Personal stories, behind-the-scenes, conversational posts'}
+                  ? 'Thought leadership posts, industry analysis, opinion pieces'
+                  : energy > 60
+                    ? 'Engaging stories, memes, interactive content'
+                    : formality > 60
+                      ? 'Educational threads, tutorials, professional insights'
+                      : 'Personal stories, behind-the-scenes, conversational posts'}
             </p>
           </motion.div>
         </div>

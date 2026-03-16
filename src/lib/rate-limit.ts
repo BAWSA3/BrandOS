@@ -11,8 +11,8 @@ interface RateLimitEntry {
 }
 
 interface RateLimitConfig {
-  interval: number;  // Time window in milliseconds
-  maxRequests: number;  // Max requests per window
+  interval: number; // Time window in milliseconds
+  maxRequests: number; // Max requests per window
 }
 
 // In-memory store for rate limit tracking
@@ -20,14 +20,17 @@ const rateLimitStore = new Map<string, RateLimitEntry>();
 
 // Clean up expired entries periodically (every 5 minutes)
 if (typeof setInterval !== 'undefined') {
-  setInterval(() => {
-    const now = Date.now();
-    for (const [key, entry] of rateLimitStore.entries()) {
-      if (now > entry.resetTime) {
-        rateLimitStore.delete(key);
+  setInterval(
+    () => {
+      const now = Date.now();
+      for (const [key, entry] of rateLimitStore.entries()) {
+        if (now > entry.resetTime) {
+          rateLimitStore.delete(key);
+        }
       }
-    }
-  }, 5 * 60 * 1000);
+    },
+    5 * 60 * 1000
+  );
 }
 
 /**

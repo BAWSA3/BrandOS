@@ -28,11 +28,7 @@ function getPercentile(score: number): string {
   return 'top 60%';
 }
 
-export default function HighlightReel({
-  data,
-  onContinue,
-  theme,
-}: HighlightReelProps) {
+export default function HighlightReel({ data, onContinue, theme }: HighlightReelProps) {
   const [isInnerCircle, setIsInnerCircle] = useState(false);
 
   // Check Inner Circle status on mount
@@ -42,9 +38,10 @@ export default function HighlightReel({
     const localValue = localStorage.getItem('innerCircle');
     const earlyAccessMode = process.env.NEXT_PUBLIC_EARLY_ACCESS_MODE === 'true';
 
-    const hasAccess = earlyAccessMode ||
-                      String(urlValue).toLowerCase() === 'true' ||
-                      String(localValue).toLowerCase() === 'true';
+    const hasAccess =
+      earlyAccessMode ||
+      String(urlValue).toLowerCase() === 'true' ||
+      String(localValue).toLowerCase() === 'true';
     setIsInnerCircle(hasAccess);
   }, []);
 
@@ -141,10 +138,24 @@ export default function HighlightReel({
               {data.score}
             </div>
             <div>
-              <div style={{ fontFamily: "'VCR OSD Mono', monospace", fontSize: '15px', fontWeight: 600, color: '#FFFFFF' }}>
+              <div
+                style={{
+                  fontFamily: "'VCR OSD Mono', monospace",
+                  fontSize: '15px',
+                  fontWeight: 600,
+                  color: '#FFFFFF',
+                }}
+              >
                 Brand Score
               </div>
-              <div style={{ fontFamily: "'VCR OSD Mono', monospace", fontSize: '10px', color: 'rgba(255,255,255,0.5)', marginTop: '2px' }}>
+              <div
+                style={{
+                  fontFamily: "'VCR OSD Mono', monospace",
+                  fontSize: '10px',
+                  color: 'rgba(255,255,255,0.5)',
+                  marginTop: '2px',
+                }}
+              >
                 {percentile.toUpperCase()}
               </div>
             </div>
@@ -172,10 +183,24 @@ export default function HighlightReel({
               {data.archetypeEmoji || '🧬'}
             </div>
             <div>
-              <div style={{ fontFamily: "'VCR OSD Mono', monospace", fontSize: '15px', fontWeight: 600, color: '#FFFFFF' }}>
+              <div
+                style={{
+                  fontFamily: "'VCR OSD Mono', monospace",
+                  fontSize: '15px',
+                  fontWeight: 600,
+                  color: '#FFFFFF',
+                }}
+              >
                 {data.archetype}
               </div>
-              <div style={{ fontFamily: "'VCR OSD Mono', monospace", fontSize: '10px', color: 'rgba(255,255,255,0.5)', marginTop: '2px' }}>
+              <div
+                style={{
+                  fontFamily: "'VCR OSD Mono', monospace",
+                  fontSize: '10px',
+                  color: 'rgba(255,255,255,0.5)',
+                  marginTop: '2px',
+                }}
+              >
                 {data.personalityType}
               </div>
             </div>
@@ -207,10 +232,24 @@ export default function HighlightReel({
                 +{data.bestPhase.diff}
               </div>
               <div>
-                <div style={{ fontFamily: "'VCR OSD Mono', monospace", fontSize: '15px', fontWeight: 600, color: '#FFFFFF' }}>
+                <div
+                  style={{
+                    fontFamily: "'VCR OSD Mono', monospace",
+                    fontSize: '15px',
+                    fontWeight: 600,
+                    color: '#FFFFFF',
+                  }}
+                >
                   {data.bestPhase.name} Phase
                 </div>
-                <div style={{ fontFamily: "'VCR OSD Mono', monospace", fontSize: '10px', color: 'rgba(255,255,255,0.5)', marginTop: '2px' }}>
+                <div
+                  style={{
+                    fontFamily: "'VCR OSD Mono', monospace",
+                    fontSize: '10px',
+                    color: 'rgba(255,255,255,0.5)',
+                    marginTop: '2px',
+                  }}
+                >
                   ABOVE AVERAGE
                 </div>
               </div>
@@ -223,7 +262,8 @@ export default function HighlightReel({
           style={{
             margin: '24px 0',
             height: 2,
-            background: 'repeating-linear-gradient(90deg, rgba(255,255,255,0.1) 0px, rgba(255,255,255,0.1) 4px, transparent 4px, transparent 6px)',
+            background:
+              'repeating-linear-gradient(90deg, rgba(255,255,255,0.1) 0px, rgba(255,255,255,0.1) 4px, transparent 4px, transparent 6px)',
           }}
         />
 

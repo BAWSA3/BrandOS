@@ -1,15 +1,15 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
+import { useState } from 'react';
 
 interface Props {
-  onSave: (key: string) => void
-  onClose: () => void
-  currentKey?: string
+  onSave: (key: string) => void;
+  onClose: () => void;
+  currentKey?: string;
 }
 
 export default function APIKeyModal({ onSave, onClose, currentKey }: Props) {
-  const [key, setKey] = useState(currentKey || '')
+  const [key, setKey] = useState(currentKey || '');
 
   return (
     <div
@@ -83,12 +83,12 @@ export default function APIKeyModal({ onSave, onClose, currentKey }: Props) {
             transition: 'border-color 0.15s, box-shadow 0.15s',
           }}
           onFocus={(e) => {
-            e.currentTarget.style.borderColor = 'rgba(0,71,255,0.5)'
-            e.currentTarget.style.boxShadow = '0 0 0 3px rgba(0,71,255,0.1)'
+            e.currentTarget.style.borderColor = 'rgba(0,71,255,0.5)';
+            e.currentTarget.style.boxShadow = '0 0 0 3px rgba(0,71,255,0.1)';
           }}
           onBlur={(e) => {
-            e.currentTarget.style.borderColor = 'rgba(0,0,0,0.15)'
-            e.currentTarget.style.boxShadow = 'none'
+            e.currentTarget.style.borderColor = 'rgba(0,0,0,0.15)';
+            e.currentTarget.style.boxShadow = 'none';
           }}
         />
 
@@ -138,7 +138,7 @@ export default function APIKeyModal({ onSave, onClose, currentKey }: Props) {
           </button>
           <button
             onClick={() => {
-              if (key.trim()) onSave(key.trim())
+              if (key.trim()) onSave(key.trim());
             }}
             disabled={!key.trim()}
             style={{
@@ -163,5 +163,5 @@ export default function APIKeyModal({ onSave, onClose, currentKey }: Props) {
         </div>
       </div>
     </div>
-  )
+  );
 }

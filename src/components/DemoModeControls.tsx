@@ -18,15 +18,8 @@ interface DemoModeControlsProps {
 }
 
 export default function DemoModeControls({ theme = 'dark' }: DemoModeControlsProps) {
-  const {
-    isActive,
-    sessionId,
-    currentMoment,
-    captureCount,
-    startSession,
-    endSession,
-    capture,
-  } = useDemoCapture();
+  const { isActive, sessionId, currentMoment, captureCount, startSession, endSession, capture } =
+    useDemoCapture();
 
   const [isExpanded, setIsExpanded] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
@@ -250,14 +243,22 @@ export default function DemoModeControls({ theme = 'dark' }: DemoModeControlsPro
               style={{ overflow: 'hidden' }}
             >
               {/* Action Buttons */}
-              <div style={{ padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <div
+                style={{
+                  padding: '12px 16px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '8px',
+                }}
+              >
                 {/* Manual Capture */}
                 <button
                   onClick={handleManualCapture}
                   style={{
                     width: '100%',
                     padding: '10px 16px',
-                    background: theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)',
+                    background:
+                      theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)',
                     border: `1px solid ${theme === 'dark' ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.15)'}`,
                     borderRadius: '8px',
                     color: theme === 'dark' ? '#FFFFFF' : '#000000',
@@ -277,7 +278,8 @@ export default function DemoModeControls({ theme = 'dark' }: DemoModeControlsPro
                   style={{
                     width: '100%',
                     padding: '10px 16px',
-                    background: theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)',
+                    background:
+                      theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)',
                     border: `1px solid ${theme === 'dark' ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.15)'}`,
                     borderRadius: '8px',
                     color: theme === 'dark' ? '#FFFFFF' : '#000000',
@@ -298,7 +300,8 @@ export default function DemoModeControls({ theme = 'dark' }: DemoModeControlsPro
                   style={{
                     width: '100%',
                     padding: '10px 16px',
-                    background: theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)',
+                    background:
+                      theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)',
                     border: `1px solid ${theme === 'dark' ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.15)'}`,
                     borderRadius: '8px',
                     color: theme === 'dark' ? '#FFFFFF' : '#000000',
@@ -319,7 +322,8 @@ export default function DemoModeControls({ theme = 'dark' }: DemoModeControlsPro
                   style={{
                     width: '100%',
                     padding: '10px 16px',
-                    background: 'linear-gradient(135deg, rgba(212, 165, 116, 0.2) 0%, rgba(232, 168, 56, 0.2) 100%)',
+                    background:
+                      'linear-gradient(135deg, rgba(212, 165, 116, 0.2) 0%, rgba(232, 168, 56, 0.2) 100%)',
                     border: '1px solid rgba(212, 165, 116, 0.4)',
                     borderRadius: '8px',
                     color: '#D4A574',
@@ -400,7 +404,8 @@ export default function DemoModeControls({ theme = 'dark' }: DemoModeControlsPro
                 left: '50%',
                 transform: 'translateX(-50%)',
                 padding: '8px 16px',
-                background: theme === 'dark' ? 'rgba(16, 185, 129, 0.9)' : 'rgba(16, 185, 129, 0.95)',
+                background:
+                  theme === 'dark' ? 'rgba(16, 185, 129, 0.9)' : 'rgba(16, 185, 129, 0.95)',
                 borderRadius: '8px',
                 color: '#FFFFFF',
                 fontSize: '11px',

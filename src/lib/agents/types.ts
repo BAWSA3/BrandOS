@@ -5,7 +5,13 @@ import { VoiceFingerprint } from '@/lib/voice-fingerprint';
 
 // ===== AGENT SYSTEM TYPES =====
 
-export type AgentName = 'campaign' | 'content' | 'analytics' | 'research' | 'authority' | 'intelligence';
+export type AgentName =
+  | 'campaign'
+  | 'content'
+  | 'analytics'
+  | 'research'
+  | 'authority'
+  | 'intelligence';
 
 export interface AgentContext {
   brandDNA: BrandDNA;
@@ -249,9 +255,3 @@ export interface IdeaToCampaignResult {
   campaign: AgentResponse<CampaignPlan>;
   content?: AgentResponse<ContentBatch>;
 }
-
-
-
-
-
-

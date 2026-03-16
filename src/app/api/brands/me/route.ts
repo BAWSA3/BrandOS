@@ -18,7 +18,9 @@ export async function GET() {
     }
 
     const supabase = createClient(supabaseUrl, supabaseAnonKey);
-    const { data: { user } } = await supabase.auth.getUser(accessToken);
+    const {
+      data: { user },
+    } = await supabase.auth.getUser(accessToken);
     if (!user) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }

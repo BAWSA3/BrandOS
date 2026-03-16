@@ -21,7 +21,10 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = createClient(supabaseUrl, supabaseAnonKey);
-    const { data: { user: authUser }, error: authError } = await supabase.auth.getUser(accessToken);
+    const {
+      data: { user: authUser },
+      error: authError,
+    } = await supabase.auth.getUser(accessToken);
     if (authError || !authUser) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
@@ -33,7 +36,10 @@ export async function POST(request: NextRequest) {
     }
 
     if (!user.xId) {
-      return NextResponse.json({ error: 'X user ID not found. Re-authenticate with X.' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'X user ID not found. Re-authenticate with X.' },
+        { status: 400 }
+      );
     }
 
     const { brandId } = await request.json();
@@ -57,11 +63,16 @@ export async function POST(request: NextRequest) {
     });
 
     if (mostRecent && Date.now() - mostRecent.syncedAt.getTime() < SYNC_COOLDOWN_MS) {
-      const waitSec = Math.ceil((SYNC_COOLDOWN_MS - (Date.now() - mostRecent.syncedAt.getTime())) / 1000);
-      return NextResponse.json({
-        error: `Rate limited. Try again in ${waitSec}s`,
-        nextSyncAt: new Date(mostRecent.syncedAt.getTime() + SYNC_COOLDOWN_MS).toISOString(),
-      }, { status: 429 });
+      const waitSec = Math.ceil(
+        (SYNC_COOLDOWN_MS - (Date.now() - mostRecent.syncedAt.getTime())) / 1000
+      );
+      return NextResponse.json(
+        {
+          error: `Rate limited. Try again in ${waitSec}s`,
+          nextSyncAt: new Date(mostRecent.syncedAt.getTime() + SYNC_COOLDOWN_MS).toISOString(),
+        },
+        { status: 429 }
+      );
     }
 
     // Use app bearer token (provider_token is ephemeral and unreliable after initial OAuth)
@@ -79,9 +90,12 @@ export async function POST(request: NextRequest) {
 
     if (!xResponse.ok) {
       if (xResponse.status === 403) {
-        return NextResponse.json({
-          error: 'X API access insufficient. Basic tier or higher required.',
-        }, { status: 403 });
+        return NextResponse.json(
+          {
+            error: 'X API access insufficient. Basic tier or higher required.',
+          },
+          { status: 403 }
+        );
       }
       const errorText = await xResponse.text();
       console.error('[x-sync] X API error:', xResponse.status, errorText);
@@ -97,7 +111,11 @@ export async function POST(request: NextRequest) {
 
     for (const tweet of tweets) {
       const metrics = tweet.public_metrics || {
-        like_count: 0, retweet_count: 0, reply_count: 0, quote_count: 0, impression_count: 0,
+        like_count: 0,
+        retweet_count: 0,
+        reply_count: 0,
+        quote_count: 0,
+        impression_count: 0,
       };
 
       const likes = metrics.like_count || 0;

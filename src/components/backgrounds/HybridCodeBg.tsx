@@ -140,17 +140,57 @@ const RIGHT_COMMENT_SETS = [
 const BOTTOM_BOX_SETS = [
   // Left boxes
   [
-    ['┌──────────────────┐', '│  BRAND ANALYSIS  │', '│  MODULE: ACTIVE  │', '└──────────────────┘'],
-    ['┌──────────────────┐', '│  VOICE SCANNER   │', '│  TONE: LOCKED    │', '└──────────────────┘'],
-    ['┌──────────────────┐', '│  PILLAR ENGINE   │', '│  THEMES: 3       │', '└──────────────────┘'],
-    ['┌──────────────────┐', '│  SCORE ENGINE    │', '│  COMPUTING...    │', '└──────────────────┘'],
+    [
+      '┌──────────────────┐',
+      '│  BRAND ANALYSIS  │',
+      '│  MODULE: ACTIVE  │',
+      '└──────────────────┘',
+    ],
+    [
+      '┌──────────────────┐',
+      '│  VOICE SCANNER   │',
+      '│  TONE: LOCKED    │',
+      '└──────────────────┘',
+    ],
+    [
+      '┌──────────────────┐',
+      '│  PILLAR ENGINE   │',
+      '│  THEMES: 3       │',
+      '└──────────────────┘',
+    ],
+    [
+      '┌──────────────────┐',
+      '│  SCORE ENGINE    │',
+      '│  COMPUTING...    │',
+      '└──────────────────┘',
+    ],
   ],
   // Right boxes
   [
-    ['┌──────────────────┐', '│  DNA SEQUENCER   │', '│  STATUS: READY   │', '└──────────────────┘'],
-    ['┌──────────────────┐', '│  GROWTH TRACKER  │', '│  TREND: UP       │', '└──────────────────┘'],
-    ['┌──────────────────┐', '│  CONTENT INDEX   │', '│  POSTS: SCANNED  │', '└──────────────────┘'],
-    ['┌──────────────────┐', '│  REPUTATION DB   │', '│  SIGNAL: STRONG  │', '└──────────────────┘'],
+    [
+      '┌──────────────────┐',
+      '│  DNA SEQUENCER   │',
+      '│  STATUS: READY   │',
+      '└──────────────────┘',
+    ],
+    [
+      '┌──────────────────┐',
+      '│  GROWTH TRACKER  │',
+      '│  TREND: UP       │',
+      '└──────────────────┘',
+    ],
+    [
+      '┌──────────────────┐',
+      '│  CONTENT INDEX   │',
+      '│  POSTS: SCANNED  │',
+      '└──────────────────┘',
+    ],
+    [
+      '┌──────────────────┐',
+      '│  REPUTATION DB   │',
+      '│  SIGNAL: STRONG  │',
+      '└──────────────────┘',
+    ],
   ],
 ];
 
@@ -172,7 +212,10 @@ function useTypewriter(texts: string[], cycleDuration: number, typeSpeed = 35, d
 
     if (phase === 'typing') {
       if (displayed.length < text.length) {
-        const timer = setTimeout(() => setDisplayed(text.slice(0, displayed.length + 1)), typeSpeed);
+        const timer = setTimeout(
+          () => setDisplayed(text.slice(0, displayed.length + 1)),
+          typeSpeed
+        );
         return () => clearTimeout(timer);
       } else {
         const timer = setTimeout(() => setPhase('deleting'), cycleDuration);
@@ -195,11 +238,7 @@ function useTypewriter(texts: string[], cycleDuration: number, typeSpeed = 35, d
 }
 
 // ── Line-by-line typewriter for multi-line blocks ──
-function useLineTypewriter(
-  sets: string[][],
-  cycleDuration: number,
-  lineDelay = 150,
-) {
+function useLineTypewriter(sets: string[][], cycleDuration: number, lineDelay = 150) {
   const [setIndex, setSetIndex] = useState(0);
   const [visibleLines, setVisibleLines] = useState(0);
   const [phase, setPhase] = useState<'typing' | 'holding' | 'clearing'>('typing');
@@ -208,7 +247,7 @@ function useLineTypewriter(
   useEffect(() => {
     if (phase === 'typing') {
       if (visibleLines < lines.length) {
-        const timer = setTimeout(() => setVisibleLines(v => v + 1), lineDelay);
+        const timer = setTimeout(() => setVisibleLines((v) => v + 1), lineDelay);
         return () => clearTimeout(timer);
       } else {
         const timer = setTimeout(() => setPhase('clearing'), cycleDuration);
@@ -218,7 +257,7 @@ function useLineTypewriter(
 
     if (phase === 'clearing') {
       if (visibleLines > 0) {
-        const timer = setTimeout(() => setVisibleLines(v => v - 1), lineDelay / 2);
+        const timer = setTimeout(() => setVisibleLines((v) => v - 1), lineDelay / 2);
         return () => clearTimeout(timer);
       } else {
         setSetIndex((setIndex + 1) % sets.length);
@@ -232,10 +271,14 @@ function useLineTypewriter(
 
 function getLogColor(type: string): string {
   switch (type) {
-    case 'comment': return 'rgba(0, 71, 255, 0.85)';
-    case 'divider': return 'rgba(0, 0, 0, 0.4)';
-    case 'code': return 'rgba(0, 0, 0, 0.65)';
-    default: return 'rgba(0, 0, 0, 0.5)';
+    case 'comment':
+      return 'rgba(0, 71, 255, 0.85)';
+    case 'divider':
+      return 'rgba(0, 0, 0, 0.4)';
+    case 'code':
+      return 'rgba(0, 0, 0, 0.65)';
+    default:
+      return 'rgba(0, 0, 0, 0.5)';
   }
 }
 
@@ -249,7 +292,7 @@ function TypedLogBlock() {
   useEffect(() => {
     if (phase === 'typing') {
       if (visibleLines < logSet.length) {
-        const timer = setTimeout(() => setVisibleLines(v => v + 1), 140);
+        const timer = setTimeout(() => setVisibleLines((v) => v + 1), 140);
         return () => clearTimeout(timer);
       } else {
         const timer = setTimeout(() => setPhase('clearing'), 7000);
@@ -259,7 +302,7 @@ function TypedLogBlock() {
 
     if (phase === 'clearing') {
       if (visibleLines > 0) {
-        const timer = setTimeout(() => setVisibleLines(v => v - 1), 60);
+        const timer = setTimeout(() => setVisibleLines((v) => v - 1), 60);
         return () => clearTimeout(timer);
       } else {
         setSetIndex((setIndex + 1) % LOG_SETS.length);
@@ -311,7 +354,7 @@ function TypedCodeBlock({ setIndex: blockIndex }: { setIndex: number }) {
   const opacity = CODE_OPACITIES[blockIndex];
 
   // Find the longest text to hold space
-  const longest = texts.reduce((a, b) => a.length > b.length ? a : b);
+  const longest = texts.reduce((a, b) => (a.length > b.length ? a : b));
 
   return (
     <div

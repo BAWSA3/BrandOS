@@ -13,6 +13,7 @@ More Content × More Channels × More Creators = Brand Chaos
 ```
 
 Companies are expected to:
+
 - Publish daily across 8+ platforms
 - Work with dozens of external creators
 - Personalize content for multiple segments
@@ -27,12 +28,12 @@ Companies are expected to:
 
 ### Content Volume Has Exploded
 
-| Metric | 2019 | 2024 | Change |
-|--------|------|------|--------|
-| Avg. brand posts/month | 60 | 400+ | +567% |
-| Channels per brand | 4 | 10+ | +150% |
-| Content creators per brand | 2-3 | 15-20 | +600% |
-| AI-generated content | 0% | 35%+ | ∞ |
+| Metric                     | 2019 | 2024  | Change |
+| -------------------------- | ---- | ----- | ------ |
+| Avg. brand posts/month     | 60   | 400+  | +567%  |
+| Channels per brand         | 4    | 10+   | +150%  |
+| Content creators per brand | 2-3  | 15-20 | +600%  |
+| AI-generated content       | 0%   | 35%+  | ∞      |
 
 ### Yet Brand Systems Haven't Evolved
 
@@ -55,17 +56,18 @@ Brand guidelines were designed for print advertising and annual campaigns. Today
 
 Guidelines use subjective terms that different people interpret differently:
 
-| Guideline Says | Creator A Thinks | Creator B Thinks |
-|----------------|------------------|------------------|
-| "Friendly tone" | Casual, uses emoji | Warm but professional |
-| "Bold visuals" | High contrast, neon | Large typography, minimal |
-| "Premium feel" | Luxury, exclusive | High quality, trustworthy |
+| Guideline Says  | Creator A Thinks    | Creator B Thinks          |
+| --------------- | ------------------- | ------------------------- |
+| "Friendly tone" | Casual, uses emoji  | Warm but professional     |
+| "Bold visuals"  | High contrast, neon | Large typography, minimal |
+| "Premium feel"  | Luxury, exclusive   | High quality, trustworthy |
 
 **The gap:** Without quantifiable definitions, brand consistency depends on individual interpretation.
 
 ### 3. Review Bottlenecks Kill Agility
 
 Traditional brand review workflows:
+
 1. Creator submits content
 2. Waits for brand manager availability
 3. Receives subjective feedback ("doesn't feel right")
@@ -78,12 +80,12 @@ Traditional brand review workflows:
 
 Each platform has unique constraints and cultural norms:
 
-| Platform | Character Limit | Tone Expectation | Visual Format |
-|----------|-----------------|------------------|---------------|
-| Twitter/X | 280 | Punchy, reactive | 16:9 or 1:1 |
-| LinkedIn | 3,000 | Professional, thought leadership | 1.91:1 |
-| Instagram | 2,200 | Aspirational, visual-first | 1:1 or 4:5 |
-| TikTok | 4,000 | Casual, authentic | 9:16 |
+| Platform  | Character Limit | Tone Expectation                 | Visual Format |
+| --------- | --------------- | -------------------------------- | ------------- |
+| Twitter/X | 280             | Punchy, reactive                 | 16:9 or 1:1   |
+| LinkedIn  | 3,000           | Professional, thought leadership | 1.91:1        |
+| Instagram | 2,200           | Aspirational, visual-first       | 1:1 or 4:5    |
+| TikTok    | 4,000           | Casual, authentic                | 9:16          |
 
 **The gap:** One piece of content must adapt to each platform while remaining recognizably on-brand.
 
@@ -91,7 +93,7 @@ Each platform has unique constraints and cultural norms:
 
 Generative AI produces grammatically correct, contextually relevant content—but it has no inherent brand understanding.
 
-**The gap:** ChatGPT can write like "a friendly tech company" but not like *your* friendly tech company.
+**The gap:** ChatGPT can write like "a friendly tech company" but not like _your_ friendly tech company.
 
 ---
 
@@ -99,12 +101,12 @@ Generative AI produces grammatically correct, contextually relevant content—bu
 
 ### Quantifiable Losses
 
-| Impact Area | Consequence | Estimated Cost |
-|-------------|-------------|----------------|
-| **Brand equity erosion** | 5-10% brand value decline per year | $2M-50M (varies by brand) |
-| **Rework cycles** | 3-4 revision rounds per asset | $150-500 per asset |
-| **Opportunity cost** | Missed real-time moments | $10K-100K per missed campaign |
-| **Legal/compliance risk** | Off-brand claims, IP issues | $50K-500K per incident |
+| Impact Area               | Consequence                        | Estimated Cost                |
+| ------------------------- | ---------------------------------- | ----------------------------- |
+| **Brand equity erosion**  | 5-10% brand value decline per year | $2M-50M (varies by brand)     |
+| **Rework cycles**         | 3-4 revision rounds per asset      | $150-500 per asset            |
+| **Opportunity cost**      | Missed real-time moments           | $10K-100K per missed campaign |
+| **Legal/compliance risk** | Off-brand claims, IP issues        | $50K-500K per incident        |
 
 ### Qualitative Damage
 
@@ -120,21 +122,25 @@ Generative AI produces grammatically correct, contextually relevant content—bu
 ### Primary Personas
 
 **1. Brand Managers**
+
 - Drowning in review requests
 - Frustrated by subjective feedback loops
 - Unable to scale their expertise
 
 **2. Content Creators (Internal & External)**
+
 - Paralyzed by unclear guidelines
 - Wasting time on revision cycles
 - Afraid to take creative risks
 
 **3. Marketing Leaders**
+
 - Watching brand equity erode
 - Unable to measure brand consistency
 - Struggling to enable distributed teams
 
 **4. Agency Partners**
+
 - Receiving inconsistent briefs
 - Guessing at brand interpretation
 - Losing efficiency to rework
@@ -144,21 +150,25 @@ Generative AI produces grammatically correct, contextually relevant content—bu
 ## Current "Solutions" Fall Short
 
 ### PDF Guidelines
+
 - ❌ Not searchable or queryable
 - ❌ Out of date by publication
 - ❌ Can't provide real-time feedback
 
 ### DAM Systems (Bynder, Brandfolder)
+
 - ✅ Organize approved assets
 - ❌ Don't help with new content creation
 - ❌ No intelligence or guidance
 
 ### Design Systems (Figma, Storybook)
+
 - ✅ Codify visual components
 - ❌ Limited to design, not copy
 - ❌ Don't capture tone and voice
 
 ### AI Writing Tools (Jasper, Copy.ai)
+
 - ✅ Generate content quickly
 - ❌ Generic brand customization
 - ❌ No enforcement or scoring
@@ -192,21 +202,4 @@ BrandOS enables option 3: **Scale content without sacrificing brand.**
 
 ---
 
-*Next: [Solution Overview →](03-solution-overview.md)*
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+_Next: [Solution Overview →](03-solution-overview.md)_

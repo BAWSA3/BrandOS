@@ -29,15 +29,17 @@ function BrandDNANode(_props: NodeProps) {
           <div className="space-y-1.5">
             {toneLabels.map(({ key, label }) => (
               <div key={key} className="flex items-center gap-2">
-                <span className="text-[10px] text-white/40 w-16 shrink-0">
-                  {label}
-                </span>
+                <span className="text-[10px] text-white/40 w-16 shrink-0">{label}</span>
                 <div className="flex-1 h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
                   <div
                     className="h-full rounded-full transition-all duration-500"
                     style={{
                       width: `${brandDNA.tone[key]}%`,
-                      background: `linear-gradient(90deg, #00FF41 0%, #00FF41${Math.round(brandDNA.tone[key] * 2.55).toString(16).padStart(2, '0')} 100%)`,
+                      background: `linear-gradient(90deg, #00FF41 0%, #00FF41${Math.round(
+                        brandDNA.tone[key] * 2.55
+                      )
+                        .toString(16)
+                        .padStart(2, '0')} 100%)`,
                     }}
                   />
                 </div>
@@ -60,9 +62,7 @@ function BrandDNANode(_props: NodeProps) {
                 </span>
               ))}
               {brandDNA.keywords.length > 5 && (
-                <span className="text-[9px] text-white/30">
-                  +{brandDNA.keywords.length - 5}
-                </span>
+                <span className="text-[9px] text-white/30">+{brandDNA.keywords.length - 5}</span>
               )}
             </div>
           )}
@@ -80,7 +80,9 @@ function BrandDNANode(_props: NodeProps) {
               )}
               {brandDNA.dontPatterns.length > 0 && (
                 <div>
-                  <span className="text-[9px] text-red-400/60 uppercase tracking-wider">Don&apos;t</span>
+                  <span className="text-[9px] text-red-400/60 uppercase tracking-wider">
+                    Don&apos;t
+                  </span>
                   <p className="text-[10px] text-white/40 mt-0.5 line-clamp-2">
                     {brandDNA.dontPatterns[0]}
                   </p>

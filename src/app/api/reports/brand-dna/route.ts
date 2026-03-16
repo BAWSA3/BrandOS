@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { brandId } = await request.json() as { brandId: string };
+    const { brandId } = (await request.json()) as { brandId: string };
 
     const purchase = await prisma.purchase.findFirst({
       where: {
@@ -23,7 +23,10 @@ export async function POST(request: NextRequest) {
 
     if (!purchase) {
       return NextResponse.json(
-        { error: 'No purchase found. Please purchase a Brand DNA Report first.', code: 'NO_PURCHASE' },
+        {
+          error: 'No purchase found. Please purchase a Brand DNA Report first.',
+          code: 'NO_PURCHASE',
+        },
         { status: 402 }
       );
     }
@@ -59,24 +62,55 @@ export async function POST(request: NextRequest) {
   }
 }
 
-function generateReportData(brand: {
-  name: string;
-  colors: string;
-  tone: string;
-  keywords: string;
-  doPatterns: string;
-  dontPatterns: string;
-  voiceSamples: string;
-  voiceFingerprint: string | null;
-}, username: string) {
+function generateReportData(
+  brand: {
+    name: string;
+    colors: string;
+    tone: string;
+    keywords: string;
+    doPatterns: string;
+    dontPatterns: string;
+    voiceSamples: string;
+    voiceFingerprint: string | null;
+  },
+  username: string
+) {
   let colors, tone, keywords, doPatterns, dontPatterns, voiceSamples, voiceFingerprint;
-  try { colors = JSON.parse(brand.colors); } catch { colors = {}; }
-  try { tone = JSON.parse(brand.tone); } catch { tone = {}; }
-  try { keywords = JSON.parse(brand.keywords); } catch { keywords = []; }
-  try { doPatterns = JSON.parse(brand.doPatterns); } catch { doPatterns = []; }
-  try { dontPatterns = JSON.parse(brand.dontPatterns); } catch { dontPatterns = []; }
-  try { voiceSamples = JSON.parse(brand.voiceSamples); } catch { voiceSamples = []; }
-  try { voiceFingerprint = brand.voiceFingerprint ? JSON.parse(brand.voiceFingerprint) : null; } catch { voiceFingerprint = null; }
+  try {
+    colors = JSON.parse(brand.colors);
+  } catch {
+    colors = {};
+  }
+  try {
+    tone = JSON.parse(brand.tone);
+  } catch {
+    tone = {};
+  }
+  try {
+    keywords = JSON.parse(brand.keywords);
+  } catch {
+    keywords = [];
+  }
+  try {
+    doPatterns = JSON.parse(brand.doPatterns);
+  } catch {
+    doPatterns = [];
+  }
+  try {
+    dontPatterns = JSON.parse(brand.dontPatterns);
+  } catch {
+    dontPatterns = [];
+  }
+  try {
+    voiceSamples = JSON.parse(brand.voiceSamples);
+  } catch {
+    voiceSamples = [];
+  }
+  try {
+    voiceFingerprint = brand.voiceFingerprint ? JSON.parse(brand.voiceFingerprint) : null;
+  } catch {
+    voiceFingerprint = null;
+  }
 
   return {
     brandName: brand.name,
@@ -102,7 +136,7 @@ function generateReportData(brand: {
       actionPlan: {
         title: 'Action Plan',
         recommendations: [
-          'Establish a consistent posting cadence that aligns with your audience\'s active hours.',
+          "Establish a consistent posting cadence that aligns with your audience's active hours.",
           'Create a brand voice document your team can reference for all content creation.',
           'Audit existing content against your Brand DNA to identify drift areas.',
           'Set up monthly Brand Health checks to track consistency over time.',
@@ -113,7 +147,11 @@ function generateReportData(brand: {
   };
 }
 
-function buildReportEmailBody(brandName: string, username: string, reportData: ReturnType<typeof generateReportData>): string {
+function buildReportEmailBody(
+  brandName: string,
+  username: string,
+  reportData: ReturnType<typeof generateReportData>
+): string {
   const { sections } = reportData;
   const keywords = sections.identity.keywords as string[];
   const doPatterns = sections.patterns.doPatterns as string[];
@@ -139,5 +177,7 @@ function buildReportEmailBody(brandName: string, username: string, reportData: R
     ``,
     `Keep building your brand,`,
     `The BrandOS Team`,
-  ].filter(Boolean).join('\n');
+  ]
+    .filter(Boolean)
+    .join('\n');
 }

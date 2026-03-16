@@ -16,10 +16,7 @@ export {
   type UpdateContentDraftInput,
 } from './content.schema';
 
-export {
-  SubmitFeedbackSchema,
-  type SubmitFeedbackInput,
-} from './feedback.schema';
+export { SubmitFeedbackSchema, type SubmitFeedbackInput } from './feedback.schema';
 
 export {
   PostVoiceScoreSchema,

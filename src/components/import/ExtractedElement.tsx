@@ -28,9 +28,11 @@ export default function ExtractedElement<T>({
   };
 
   return (
-    <div className={`p-4 rounded-xl border transition-all ${
-      included ? 'border-foreground bg-surface' : 'border-border opacity-50'
-    }`}>
+    <div
+      className={`p-4 rounded-xl border transition-all ${
+        included ? 'border-foreground bg-surface' : 'border-border opacity-50'
+      }`}
+    >
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-3">
           <button
@@ -40,8 +42,18 @@ export default function ExtractedElement<T>({
             }`}
           >
             {included && (
-              <svg className="w-3 h-3 text-background" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+              <svg
+                className="w-3 h-3 text-background"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={3}
+                  d="M5 13l4 4L19 7"
+                />
               </svg>
             )}
           </button>
@@ -112,10 +124,7 @@ export default function ExtractedElement<T>({
         {type === 'list' && Array.isArray(value.value) && (
           <div className="flex flex-wrap gap-2">
             {(value.value as string[]).map((item, i) => (
-              <span
-                key={i}
-                className="px-3 py-1 bg-background rounded-full text-sm"
-              >
+              <span key={i} className="px-3 py-1 bg-background rounded-full text-sm">
                 {item}
               </span>
             ))}
@@ -152,9 +161,11 @@ export function ExtractedListItem({
   };
 
   return (
-    <div className={`group flex items-center gap-3 p-3 rounded-lg border transition-all ${
-      included ? 'border-foreground/20 bg-surface' : 'border-border opacity-50'
-    }`}>
+    <div
+      className={`group flex items-center gap-3 p-3 rounded-lg border transition-all ${
+        included ? 'border-foreground/20 bg-surface' : 'border-border opacity-50'
+      }`}
+    >
       <button
         onClick={onToggle}
         className={`w-4 h-4 rounded border flex-shrink-0 flex items-center justify-center transition-colors ${
@@ -162,7 +173,12 @@ export function ExtractedListItem({
         }`}
       >
         {included && (
-          <svg className="w-2.5 h-2.5 text-background" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg
+            className="w-2.5 h-2.5 text-background"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
           </svg>
         )}
@@ -174,25 +190,11 @@ export function ExtractedListItem({
         className="flex-1 bg-transparent outline-none text-sm"
         disabled={!included}
       />
-      <span className={`text-xs ${getConfidenceColor(confidence)} opacity-0 group-hover:opacity-100 transition-opacity`}>
+      <span
+        className={`text-xs ${getConfidenceColor(confidence)} opacity-0 group-hover:opacity-100 transition-opacity`}
+      >
         {confidence}%
       </span>
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

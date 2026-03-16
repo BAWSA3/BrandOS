@@ -108,7 +108,7 @@ export async function deleteSessionScreenshots(sessionId: string): Promise<void>
       return;
     }
 
-    screenshots.forEach(screenshot => {
+    screenshots.forEach((screenshot) => {
       const request = store.delete(screenshot.id);
       request.onerror = () => reject(request.error);
       request.onsuccess = () => {

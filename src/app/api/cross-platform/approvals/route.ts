@@ -111,14 +111,14 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(
-      { error: 'Provide either (brandId + content + platform) to submit or (approvalId + action) to review.' },
+      {
+        error:
+          'Provide either (brandId + content + platform) to submit or (approvalId + action) to review.',
+      },
       { status: 400 }
     );
   } catch (error) {
     console.error('Approval workflow error:', error);
-    return NextResponse.json(
-      { error: 'Approval workflow failed' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Approval workflow failed' }, { status: 500 });
   }
 }

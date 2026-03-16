@@ -36,17 +36,18 @@ const LOG_LINES_LEFT = [
   { text: '// ANALYSIS ACTIVE', type: 'info' },
 ];
 
-const LOG_LINES_RIGHT = [
-  '/* DNA SEQUENCER */',
-  '/* STATUS: OK    */',
-];
+const LOG_LINES_RIGHT = ['/* DNA SEQUENCER */', '/* STATUS: OK    */'];
 
 function getLogColor(type: string): string {
   switch (type) {
-    case 'header': return 'rgba(0, 71, 255, 0.6)';
-    case 'divider': return 'rgba(0, 0, 0, 0.2)';
-    case 'info': return 'rgba(0, 0, 0, 0.35)';
-    default: return 'rgba(0, 0, 0, 0.3)';
+    case 'header':
+      return 'rgba(0, 71, 255, 0.6)';
+    case 'divider':
+      return 'rgba(0, 0, 0, 0.2)';
+    case 'info':
+      return 'rgba(0, 0, 0, 0.35)';
+    default:
+      return 'rgba(0, 0, 0, 0.3)';
   }
 }
 
@@ -57,7 +58,7 @@ export default function CodeParallaxBackground({ theme = 'dark' }: CodeParallaxB
   useEffect(() => {
     if (visibleLines < LOG_LINES_LEFT.length) {
       const timer = setTimeout(() => {
-        setVisibleLines(v => v + 1);
+        setVisibleLines((v) => v + 1);
       }, 150);
       return () => clearTimeout(timer);
     }
@@ -185,7 +186,7 @@ export default function CodeParallaxBackground({ theme = 'dark' }: CodeParallaxB
         }}
       >
         <div>┌────────────────┐</div>
-        <div>│ ANALYSIS: OK   │</div>
+        <div>│ ANALYSIS: OK │</div>
         <div>└────────────────┘</div>
       </motion.div>
 
@@ -204,7 +205,7 @@ export default function CodeParallaxBackground({ theme = 'dark' }: CodeParallaxB
         }}
       >
         <div>┌────────────────┐</div>
-        <div>│ DNA: READY     │</div>
+        <div>│ DNA: READY │</div>
         <div>└────────────────┘</div>
       </motion.div>
 
@@ -213,7 +214,8 @@ export default function CodeParallaxBackground({ theme = 'dark' }: CodeParallaxB
         style={{
           position: 'absolute',
           inset: 0,
-          background: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.01) 2px, rgba(0,0,0,0.01) 3px)',
+          background:
+            'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.01) 2px, rgba(0,0,0,0.01) 3px)',
           pointerEvents: 'none',
         }}
       />

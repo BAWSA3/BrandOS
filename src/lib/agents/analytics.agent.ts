@@ -3,10 +3,10 @@
 
 import Anthropic from '@anthropic-ai/sdk';
 import { BrandDNA, Platform } from '@/lib/types';
-import { 
-  AgentContext, 
-  AgentResponse, 
-  AnalyticsRequest, 
+import {
+  AgentContext,
+  AgentResponse,
+  AnalyticsRequest,
   AnalyticsReport,
   ContentPerformanceData,
   GoalAchievement,
@@ -37,12 +37,12 @@ const platformBenchmarks: Record<Platform | 'default', PlatformBenchmarks> = {
     description: 'Engagement = (likes + comments + saves) / reach',
   },
   tiktok: {
-    engagementRate: { good: 0.05, great: 0.10 },
+    engagementRate: { good: 0.05, great: 0.1 },
     clickRate: { good: 0.01, great: 0.03 },
     description: 'Engagement = (likes + comments + shares) / views',
   },
   email: {
-    engagementRate: { good: 0.25, great: 0.40 }, // Open rate
+    engagementRate: { good: 0.25, great: 0.4 }, // Open rate
     clickRate: { good: 0.025, great: 0.05 },
     description: 'Open rate for engagement, click-through rate for clicks',
   },
@@ -72,42 +72,45 @@ const platformBenchmarks: Record<Platform | 'default', PlatformBenchmarks> = {
 function buildAnalyticsPrompt(brand: BrandDNA, request: AnalyticsRequest): string {
   // Calculate aggregated stats for context
   const totalImpressions = request.performanceData.reduce(
-    (sum, d) => sum + (d.metrics.impressions || 0), 0
+    (sum, d) => sum + (d.metrics.impressions || 0),
+    0
   );
   const totalEngagements = request.performanceData.reduce(
-    (sum, d) => sum + (d.metrics.engagements || 0), 0
+    (sum, d) => sum + (d.metrics.engagements || 0),
+    0
   );
-  const totalClicks = request.performanceData.reduce(
-    (sum, d) => sum + (d.metrics.clicks || 0), 0
-  );
-  
-  const overallEngagementRate = totalImpressions > 0 
-    ? ((totalEngagements / totalImpressions) * 100).toFixed(2) 
-    : 'N/A';
-  const overallClickRate = totalImpressions > 0 
-    ? ((totalClicks / totalImpressions) * 100).toFixed(2) 
-    : 'N/A';
+  const totalClicks = request.performanceData.reduce((sum, d) => sum + (d.metrics.clicks || 0), 0);
+
+  const overallEngagementRate =
+    totalImpressions > 0 ? ((totalEngagements / totalImpressions) * 100).toFixed(2) : 'N/A';
+  const overallClickRate =
+    totalImpressions > 0 ? ((totalClicks / totalImpressions) * 100).toFixed(2) : 'N/A';
 
   // Group data by platform
-  const platformGroups = request.performanceData.reduce((acc, d) => {
-    if (!acc[d.platform]) acc[d.platform] = [];
-    acc[d.platform].push(d);
-    return acc;
-  }, {} as Record<string, ContentPerformanceData[]>);
+  const platformGroups = request.performanceData.reduce(
+    (acc, d) => {
+      if (!acc[d.platform]) acc[d.platform] = [];
+      acc[d.platform].push(d);
+      return acc;
+    },
+    {} as Record<string, ContentPerformanceData[]>
+  );
 
-  const platformSummaries = Object.entries(platformGroups).map(([platform, data]) => {
-    const impressions = data.reduce((sum, d) => sum + (d.metrics.impressions || 0), 0);
-    const engagements = data.reduce((sum, d) => sum + (d.metrics.engagements || 0), 0);
-    const clicks = data.reduce((sum, d) => sum + (d.metrics.clicks || 0), 0);
-    const benchmarks = platformBenchmarks[platform as Platform] || platformBenchmarks.default;
-    
-    return `
+  const platformSummaries = Object.entries(platformGroups)
+    .map(([platform, data]) => {
+      const impressions = data.reduce((sum, d) => sum + (d.metrics.impressions || 0), 0);
+      const engagements = data.reduce((sum, d) => sum + (d.metrics.engagements || 0), 0);
+      const clicks = data.reduce((sum, d) => sum + (d.metrics.clicks || 0), 0);
+      const benchmarks = platformBenchmarks[platform as Platform] || platformBenchmarks.default;
+
+      return `
 ${platform.toUpperCase()} (${data.length} pieces):
 - Impressions: ${impressions.toLocaleString()}
-- Engagements: ${engagements.toLocaleString()} (${impressions > 0 ? ((engagements/impressions)*100).toFixed(2) : 0}%)
-- Clicks: ${clicks.toLocaleString()} (${impressions > 0 ? ((clicks/impressions)*100).toFixed(2) : 0}%)
+- Engagements: ${engagements.toLocaleString()} (${impressions > 0 ? ((engagements / impressions) * 100).toFixed(2) : 0}%)
+- Clicks: ${clicks.toLocaleString()} (${impressions > 0 ? ((clicks / impressions) * 100).toFixed(2) : 0}%)
 - Benchmark: Good eng. rate = ${(benchmarks.engagementRate.good * 100).toFixed(1)}%, Great = ${(benchmarks.engagementRate.great * 100).toFixed(1)}%`;
-  }).join('\n');
+    })
+    .join('\n');
 
   return `You are a marketing analytics expert analyzing content performance for "${brand.name}".
 
@@ -129,24 +132,36 @@ PERFORMANCE BY PLATFORM:
 ${platformSummaries}
 
 DETAILED CONTENT DATA:
-${JSON.stringify(request.performanceData.map(d => ({
-  id: d.contentId,
-  platform: d.platform,
-  type: d.contentType,
-  published: d.publishedAt,
-  metrics: d.metrics,
-  preview: d.content?.substring(0, 100) + '...',
-})), null, 2)}
+${JSON.stringify(
+  request.performanceData.map((d) => ({
+    id: d.contentId,
+    platform: d.platform,
+    type: d.contentType,
+    published: d.publishedAt,
+    metrics: d.metrics,
+    preview: d.content?.substring(0, 100) + '...',
+  })),
+  null,
+  2
+)}
 
-${request.goals && request.goals.length > 0 ? `
+${
+  request.goals && request.goals.length > 0
+    ? `
 CAMPAIGN GOALS:
-${request.goals.map(g => `- ${g.metric}: Target ${g.target}`).join('\n')}
-` : ''}
+${request.goals.map((g) => `- ${g.metric}: Target ${g.target}`).join('\n')}
+`
+    : ''
+}
 
-${request.questions && request.questions.length > 0 ? `
+${
+  request.questions && request.questions.length > 0
+    ? `
 SPECIFIC QUESTIONS TO ANSWER:
 ${request.questions.map((q, i) => `${i + 1}. ${q}`).join('\n')}
-` : ''}
+`
+    : ''
+}
 
 PLATFORM BENCHMARKS FOR CONTEXT:
 - Twitter: Good engagement = 2-3%, Great = 5%+
@@ -232,11 +247,11 @@ function parseAnalyticsReport(responseText: string): AnalyticsReport | null {
   try {
     const jsonMatch = responseText.match(/\{[\s\S]*\}/);
     if (!jsonMatch) return null;
-    
+
     const parsed = JSON.parse(jsonMatch[0]);
-    
+
     if (!parsed.summary || !parsed.channelPerformance) return null;
-    
+
     return parsed as AnalyticsReport;
   } catch {
     return null;
@@ -251,7 +266,7 @@ export async function analyzePerformance(
   request: AnalyticsRequest
 ): Promise<AgentResponse<AnalyticsReport>> {
   const startTime = Date.now();
-  
+
   try {
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) {
@@ -295,12 +310,10 @@ export async function analyzePerformance(
       ],
     });
 
-    const responseText = message.content[0].type === 'text' 
-      ? message.content[0].text 
-      : '';
+    const responseText = message.content[0].type === 'text' ? message.content[0].text : '';
 
     const report = parseAnalyticsReport(responseText);
-    
+
     if (!report) {
       return {
         success: false,
@@ -324,7 +337,7 @@ export async function analyzePerformance(
     };
   } catch (error) {
     console.error('Analytics agent error:', error);
-    
+
     let errorMessage = 'Analytics failed';
     if (error instanceof Error) {
       if (error.message.includes('credit balance is too low')) {
@@ -333,7 +346,7 @@ export async function analyzePerformance(
         errorMessage = error.message;
       }
     }
-    
+
     return {
       success: false,
       error: errorMessage,
@@ -349,9 +362,11 @@ export async function analyzePerformance(
 export async function quickPerformanceCheck(
   context: AgentContext,
   performanceData: ContentPerformanceData[]
-): Promise<AgentResponse<{ status: 'winning' | 'neutral' | 'losing'; keyMetric: string; oneAction: string }>> {
+): Promise<
+  AgentResponse<{ status: 'winning' | 'neutral' | 'losing'; keyMetric: string; oneAction: string }>
+> {
   const startTime = Date.now();
-  
+
   try {
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) {
@@ -365,14 +380,14 @@ export async function quickPerformanceCheck(
 
     // Calculate quick stats
     const totalImpressions = performanceData.reduce(
-      (sum, d) => sum + (d.metrics.impressions || 0), 0
+      (sum, d) => sum + (d.metrics.impressions || 0),
+      0
     );
     const totalEngagements = performanceData.reduce(
-      (sum, d) => sum + (d.metrics.engagements || 0), 0
+      (sum, d) => sum + (d.metrics.engagements || 0),
+      0
     );
-    const engagementRate = totalImpressions > 0 
-      ? (totalEngagements / totalImpressions) * 100 
-      : 0;
+    const engagementRate = totalImpressions > 0 ? (totalEngagements / totalImpressions) * 100 : 0;
 
     const anthropic = new Anthropic({ apiKey });
 
@@ -401,9 +416,7 @@ Return ONLY valid JSON:
       ],
     });
 
-    const responseText = message.content[0].type === 'text' 
-      ? message.content[0].text 
-      : '';
+    const responseText = message.content[0].type === 'text' ? message.content[0].text : '';
 
     const jsonMatch = responseText.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
@@ -440,15 +453,17 @@ export async function comparePerformancePeriods(
   context: AgentContext,
   periodA: { name: string; data: ContentPerformanceData[] },
   periodB: { name: string; data: ContentPerformanceData[] }
-): Promise<AgentResponse<{
-  comparison: string;
-  periodAStats: { impressions: number; engagements: number; rate: number };
-  periodBStats: { impressions: number; engagements: number; rate: number };
-  change: { direction: 'up' | 'down' | 'flat'; percentage: number };
-  insights: string[];
-}>> {
+): Promise<
+  AgentResponse<{
+    comparison: string;
+    periodAStats: { impressions: number; engagements: number; rate: number };
+    periodBStats: { impressions: number; engagements: number; rate: number };
+    change: { direction: 'up' | 'down' | 'flat'; percentage: number };
+    insights: string[];
+  }>
+> {
   const startTime = Date.now();
-  
+
   try {
     // Calculate stats for both periods
     const calcStats = (data: ContentPerformanceData[]) => {
@@ -463,15 +478,11 @@ export async function comparePerformancePeriods(
 
     const statsA = calcStats(periodA.data);
     const statsB = calcStats(periodB.data);
-    
-    const rateChange = statsA.rate > 0 
-      ? ((statsB.rate - statsA.rate) / statsA.rate) * 100 
-      : 0;
-    
-    const direction: 'up' | 'down' | 'flat' = 
-      rateChange > 5 ? 'up' : 
-      rateChange < -5 ? 'down' : 
-      'flat';
+
+    const rateChange = statsA.rate > 0 ? ((statsB.rate - statsA.rate) / statsA.rate) * 100 : 0;
+
+    const direction: 'up' | 'down' | 'flat' =
+      rateChange > 5 ? 'up' : rateChange < -5 ? 'down' : 'flat';
 
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) {
@@ -525,13 +536,11 @@ Return ONLY valid JSON:
       ],
     });
 
-    const responseText = message.content[0].type === 'text' 
-      ? message.content[0].text 
-      : '';
+    const responseText = message.content[0].type === 'text' ? message.content[0].text : '';
 
     const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-    const aiInsights = jsonMatch 
-      ? JSON.parse(jsonMatch[0]) 
+    const aiInsights = jsonMatch
+      ? JSON.parse(jsonMatch[0])
       : { comparison: 'Analysis unavailable', insights: [] };
 
     return {
@@ -555,9 +564,3 @@ Return ONLY valid JSON:
     };
   }
 }
-
-
-
-
-
-

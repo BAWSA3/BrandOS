@@ -5,7 +5,15 @@ import { useRouter } from 'next/navigation';
 import styles from './phantom.module.css';
 
 // Phantom Ghost Logo Component
-const PhantomGhost = ({ size = 48, className = '', glow = false }: { size?: number; className?: string; glow?: boolean }) => (
+const PhantomGhost = ({
+  size = 48,
+  className = '',
+  glow = false,
+}: {
+  size?: number;
+  className?: string;
+  glow?: boolean;
+}) => (
   <svg
     width={size}
     height={size}
@@ -23,9 +31,9 @@ const PhantomGhost = ({ size = 48, className = '', glow = false }: { size?: numb
 const ProductCard = ({
   product,
   index,
-  isVisible
+  isVisible,
 }: {
-  product: typeof products[0];
+  product: (typeof products)[0];
   index: number;
   isVisible: boolean;
 }) => {
@@ -54,7 +62,12 @@ const ProductCard = ({
       {/* Circuit Pattern (revealed on hover) */}
       <div className={`${styles.circuitPattern} ${isHovered ? styles.circuitVisible : ''}`}>
         <svg viewBox="0 0 200 200" className={styles.circuitSvg}>
-          <path d="M20 100 H80 M80 100 V60 M80 60 H120 M120 60 V100 M120 100 H180" stroke="currentColor" strokeWidth="1" fill="none" />
+          <path
+            d="M20 100 H80 M80 100 V60 M80 60 H120 M120 60 V100 M120 100 H180"
+            stroke="currentColor"
+            strokeWidth="1"
+            fill="none"
+          />
           <path d="M40 140 H100 M100 140 V180" stroke="currentColor" strokeWidth="1" fill="none" />
           <circle cx="80" cy="100" r="4" fill="currentColor" />
           <circle cx="120" cy="60" r="4" fill="currentColor" />
@@ -66,9 +79,7 @@ const ProductCard = ({
 
       {/* Product Visual Area */}
       <div className={styles.productVisual}>
-        <div className={styles.productIcon}>
-          {product.icon}
-        </div>
+        <div className={styles.productIcon}>{product.icon}</div>
         <div className={`${styles.ledIndicator} ${isHovered ? styles.ledActive : ''}`} />
       </div>
 
@@ -104,9 +115,9 @@ const ProductCard = ({
 const AccessoryCard = ({
   accessory,
   index,
-  isVisible
+  isVisible,
 }: {
-  accessory: typeof accessories[0];
+  accessory: (typeof accessories)[0];
   index: number;
   isVisible: boolean;
 }) => {
@@ -138,7 +149,7 @@ const products = [
       'Landscape orientation grip',
       'Frosted purple D-pad accent',
       'Embossed ghost icon',
-      'PCB window on back panel'
+      'PCB window on back panel',
     ],
     icon: (
       <svg viewBox="0 0 80 50" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -150,18 +161,18 @@ const products = [
         <rect x="4" y="2" width="12" height="4" rx="1" />
         <rect x="64" y="2" width="12" height="4" rx="1" />
       </svg>
-    )
+    ),
   },
   {
     name: 'Phantom Station',
     category: 'Home Console',
-    tagline: 'A console you\'d see in an architecture magazine.',
+    tagline: "A console you'd see in an architecture magazine.",
     material: 'Anodized Aluminum Trim',
     features: [
       'Compact horizontal profile',
       'Frosted LED edge strip',
       'Embossed top surface',
-      'Hidden ventilation design'
+      'Hidden ventilation design',
     ],
     icon: (
       <svg viewBox="0 0 80 40" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -173,7 +184,7 @@ const products = [
         <rect x="10" y="20" width="5" height="2" rx="1" />
         <circle cx="70" cy="18" r="2" fill="currentColor" opacity="0.5" />
       </svg>
-    )
+    ),
   },
   {
     name: 'Phantom Grip',
@@ -184,7 +195,7 @@ const products = [
       'Symmetrical analog layout',
       'Micro-pattern grip texture',
       'Purple LED light bar',
-      'Translucent trigger option'
+      'Translucent trigger option',
     ],
     icon: (
       <svg viewBox="0 0 80 50" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -194,8 +205,8 @@ const products = [
         <circle cx="42" cy="22" r="3" fill="currentColor" opacity="0.3" />
         <rect x="35" y="8" width="10" height="3" rx="1" />
       </svg>
-    )
-  }
+    ),
+  },
 ];
 
 const accessories = [
@@ -209,7 +220,7 @@ const accessories = [
         <rect x="10" y="24" width="4" height="4" rx="0.5" />
         <rect x="18" y="24" width="4" height="4" rx="0.5" />
       </svg>
-    )
+    ),
   },
   {
     name: 'Phantom Shell',
@@ -220,7 +231,7 @@ const accessories = [
         <path d="M2 16 Q16 12 30 16" strokeOpacity="0.5" />
         <circle cx="28" cy="16" r="2" fill="currentColor" opacity="0.5" />
       </svg>
-    )
+    ),
   },
   {
     name: 'Phantom Base',
@@ -231,7 +242,7 @@ const accessories = [
         <line x1="6" y1="28" x2="26" y2="28" />
         <rect x="12" y="4" width="8" height="6" rx="1" strokeOpacity="0.5" />
       </svg>
-    )
+    ),
   },
   {
     name: 'Phantom Pedestal',
@@ -242,8 +253,8 @@ const accessories = [
         <rect x="10" y="8" width="12" height="12" rx="1" fill="currentColor" opacity="0.1" />
         <line x1="16" y1="8" x2="16" y2="4" strokeOpacity="0.5" />
       </svg>
-    )
-  }
+    ),
+  },
 ];
 
 export default function PhantomShowcase() {
@@ -305,8 +316,14 @@ export default function PhantomShowcase() {
       <div className={styles.orbContainer}>
         <div className={styles.orb} style={{ top: '10%', left: '10%', animationDelay: '0s' }} />
         <div className={styles.orb} style={{ top: '60%', right: '15%', animationDelay: '2s' }} />
-        <div className={styles.orbSmall} style={{ top: '30%', right: '25%', animationDelay: '1s' }} />
-        <div className={styles.orbSmall} style={{ bottom: '20%', left: '20%', animationDelay: '3s' }} />
+        <div
+          className={styles.orbSmall}
+          style={{ top: '30%', right: '25%', animationDelay: '1s' }}
+        />
+        <div
+          className={styles.orbSmall}
+          style={{ bottom: '20%', left: '20%', animationDelay: '3s' }}
+        />
       </div>
 
       {/* Navigation */}
@@ -399,9 +416,7 @@ export default function PhantomShowcase() {
         <div className={styles.sectionHeader}>
           <span className={styles.sectionLabel}>ECOSYSTEM</span>
           <h2 className={styles.sectionTitle}>Accessories</h2>
-          <p className={styles.sectionDesc}>
-            Objects that make ownership feel considered.
-          </p>
+          <p className={styles.sectionDesc}>Objects that make ownership feel considered.</p>
         </div>
 
         <div className={styles.accessoriesGrid}>
@@ -422,8 +437,8 @@ export default function PhantomShowcase() {
           <div className={styles.philosophyQuote}>
             <PhantomGhost size={48} className={styles.quoteGhost} />
             <blockquote>
-              "Premium but not sterile. Confident but not aggressive.
-              Nostalgic but not kitschy. The feeling of unboxing something collectible."
+              "Premium but not sterile. Confident but not aggressive. Nostalgic but not kitschy. The
+              feeling of unboxing something collectible."
             </blockquote>
           </div>
 
@@ -449,8 +464,8 @@ export default function PhantomShowcase() {
         <div className={`${styles.ctaContent} ${visibleSections.has('cta') ? styles.visible : ''}`}>
           <h2 className={styles.ctaTitle}>Import this brand into BrandOS</h2>
           <p className={styles.ctaDesc}>
-            Use Phantom Gaming as a template for your own brand system.
-            Includes color palette, tone settings, and voice samples.
+            Use Phantom Gaming as a template for your own brand system. Includes color palette, tone
+            settings, and voice samples.
           </p>
           <button className={styles.ctaButton} onClick={handleImportBrand}>
             <PhantomGhost size={20} />

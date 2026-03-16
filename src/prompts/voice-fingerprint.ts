@@ -1,4 +1,9 @@
-import { VoiceFingerprint, VoiceFingerprintSummary, AuthenticityFlag, formatSummaryForPrompt } from '@/lib/voice-fingerprint';
+import {
+  VoiceFingerprint,
+  VoiceFingerprintSummary,
+  AuthenticityFlag,
+  formatSummaryForPrompt,
+} from '@/lib/voice-fingerprint';
 
 // ── Extraction Prompts ──────────────────────────────────────────
 
@@ -6,9 +11,7 @@ import { VoiceFingerprint, VoiceFingerprintSummary, AuthenticityFlag, formatSumm
  * Analyzes raw writing samples and extracts a structured VoiceFingerprint.
  */
 export function buildFingerprintExtractionPrompt(samples: string[]): string {
-  const samplesText = samples
-    .map((s, i) => `--- SAMPLE ${i + 1} ---\n${s}`)
-    .join('\n\n');
+  const samplesText = samples.map((s, i) => `--- SAMPLE ${i + 1} ---\n${s}`).join('\n\n');
 
   return `You are a voice forensics expert. Analyze these writing samples to create a detailed voice fingerprint — a structural model of HOW this person writes, not WHAT they write about.
 
@@ -84,9 +87,7 @@ export function buildFingerprintRefinementPrompt(
   existing: VoiceFingerprint,
   newSamples: string[]
 ): string {
-  const samplesText = newSamples
-    .map((s, i) => `--- NEW SAMPLE ${i + 1} ---\n${s}`)
-    .join('\n\n');
+  const samplesText = newSamples.map((s, i) => `--- NEW SAMPLE ${i + 1} ---\n${s}`).join('\n\n');
 
   return `You are a voice forensics expert. You have an existing voice fingerprint and new writing samples. Update the fingerprint by incorporating patterns from the new samples.
 
@@ -187,9 +188,7 @@ export function buildAuthenticityRewritePrompt(
     certainty: fingerprint.thinkingStyle.certaintyLevel,
   };
 
-  const flagDescriptions = flags
-    .map((f, i) => `${i + 1}. "${f.text}" — ${f.reason}`)
-    .join('\n');
+  const flagDescriptions = flags.map((f, i) => `${i + 1}. "${f.text}" — ${f.reason}`).join('\n');
 
   return `You are a voice-matching rewriter. Rewrite the content below so it sounds authentically like this specific creator, fixing all flagged sections.
 
@@ -197,10 +196,10 @@ CREATOR'S VOICE PROFILE:
 ${JSON.stringify(summary, null, 2)}
 
 ANTI-PATTERNS (never use these):
-${fingerprint.antiPatterns.map(a => `- ${a}`).join('\n')}
+${fingerprint.antiPatterns.map((a) => `- ${a}`).join('\n')}
 
 SIGNATURE ELEMENTS (include naturally):
-${fingerprint.signatureElements.map(s => `- ${s}`).join('\n')}
+${fingerprint.signatureElements.map((s) => `- ${s}`).join('\n')}
 
 ORIGINAL CONTENT:
 "${content}"

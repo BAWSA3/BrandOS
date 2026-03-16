@@ -59,42 +59,70 @@ export async function generateIntelligentContent(brandId: string): Promise<{
     const actionItems: string[] = JSON.parse(gapAnalysis.actionItems);
 
     if (gapAnalysis.hookStrength < 50) {
-      gapInstructions.push('PRIORITY: Hooks are weak. Every idea MUST start with a scroll-stopping first line.');
+      gapInstructions.push(
+        'PRIORITY: Hooks are weak. Every idea MUST start with a scroll-stopping first line.'
+      );
     }
     if (gapAnalysis.formatMatch < 50) {
-      gapInstructions.push('PRIORITY: Content format doesn\'t match what goes viral. Vary between threads, lists, stories, and hot takes.');
+      gapInstructions.push(
+        "PRIORITY: Content format doesn't match what goes viral. Vary between threads, lists, stories, and hot takes."
+      );
     }
     if (gapAnalysis.toneAlignment < 50) {
-      gapInstructions.push('PRIORITY: Tone needs adjustment. Study the viral benchmarks\' tone and adapt (don\'t copy).');
+      gapInstructions.push(
+        "PRIORITY: Tone needs adjustment. Study the viral benchmarks' tone and adapt (don't copy)."
+      );
     }
     if (gapAnalysis.ctaEffectiveness < 50) {
-      gapInstructions.push('PRIORITY: CTAs are weak. Include clear, natural calls to action that drive replies or saves.');
+      gapInstructions.push(
+        'PRIORITY: CTAs are weak. Include clear, natural calls to action that drive replies or saves.'
+      );
     }
 
     if (gaps.length > 0) gapInstructions.push(`KEY GAPS: ${gaps.join('; ')}`);
-    if (actionItems.length > 0) gapInstructions.push(`ACTION ITEMS: ${actionItems.slice(0, 3).join('; ')}`);
+    if (actionItems.length > 0)
+      gapInstructions.push(`ACTION ITEMS: ${actionItems.slice(0, 3).join('; ')}`);
   }
 
   // Build viral patterns context
-  const viralPatternsText = benchmarks.length > 0
-    ? benchmarks.map(b => {
-        const p = JSON.parse(b.patterns);
-        return `- "${b.content.substring(0, 100)}..." (score: ${b.viralScore}) → hook: ${p.hookType}, format: ${p.format}, tone: ${p.tone}`;
-      }).join('\n')
-    : 'No viral benchmarks available yet. Generate general best-practice content.';
+  const viralPatternsText =
+    benchmarks.length > 0
+      ? benchmarks
+          .map((b) => {
+            const p = JSON.parse(b.patterns);
+            return `- "${b.content.substring(0, 100)}..." (score: ${b.viralScore}) → hook: ${p.hookType}, format: ${p.format}, tone: ${p.tone}`;
+          })
+          .join('\n')
+      : 'No viral benchmarks available yet. Generate general best-practice content.';
 
   // Parse voice samples
   let voiceSamples: string[] = [];
-  try { voiceSamples = JSON.parse(brand.voiceSamples); } catch { /* ignore */ }
+  try {
+    voiceSamples = JSON.parse(brand.voiceSamples);
+  } catch {
+    /* ignore */
+  }
 
   let keywords: string[] = [];
-  try { keywords = JSON.parse(brand.keywords); } catch { /* ignore */ }
+  try {
+    keywords = JSON.parse(brand.keywords);
+  } catch {
+    /* ignore */
+  }
 
   let doPatterns: string[] = [];
-  try { doPatterns = JSON.parse(brand.doPatterns); } catch { /* ignore */ }
+  try {
+    doPatterns = JSON.parse(brand.doPatterns);
+  } catch {
+    /* ignore */
+  }
 
   let dontPatterns: string[] = [];
-  try { dontPatterns = JSON.parse(brand.dontPatterns); } catch { /* ignore */ }
+  try {
+    dontPatterns = JSON.parse(brand.dontPatterns);
+  } catch {
+    /* ignore */
+  }
 
   try {
     const anthropic = new Anthropic({ apiKey });
@@ -102,9 +130,10 @@ export async function generateIntelligentContent(brandId: string): Promise<{
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 3000,
-      messages: [{
-        role: 'user',
-        content: `You are a content strategist generating viral-pattern-matched content ideas for a personal brand on X/Twitter.
+      messages: [
+        {
+          role: 'user',
+          content: `You are a content strategist generating viral-pattern-matched content ideas for a personal brand on X/Twitter.
 
 BRAND: ${brand.name}
 BRAND TONE: ${brand.tone}
@@ -145,7 +174,8 @@ Return ONLY valid JSON:
     }
   ]
 }`,
-      }],
+        },
+      ],
     });
 
     const responseText = response.content[0].type === 'text' ? response.content[0].text : '';

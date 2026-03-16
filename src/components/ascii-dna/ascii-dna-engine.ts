@@ -18,13 +18,13 @@ export interface DNACell {
 export interface DNAConfig {
   cols: number;
   rows: number;
-  amplitude: number;       // helix half-width in columns
-  frequency: number;       // full rotations visible
-  strandWidth: number;     // chars wide per strand (2-3)
-  textSource: string;      // repeating text
-  textOffset: number;      // scrolling offset (incremented each frame)
-  rungSpacing: number;     // rows between rungs
-  centerCol: number;       // column center of helix
+  amplitude: number; // helix half-width in columns
+  frequency: number; // full rotations visible
+  strandWidth: number; // chars wide per strand (2-3)
+  textSource: string; // repeating text
+  textOffset: number; // scrolling offset (incremented each frame)
+  rungSpacing: number; // rows between rungs
+  centerCol: number; // column center of helix
 }
 
 export interface MouseState {
@@ -63,7 +63,17 @@ export function createGrid(cols: number, rows: number): DNACell[][] {
  * Characters are sampled from textSource with scrolling offset.
  */
 export function computeDNAGrid(grid: DNACell[][], config: DNAConfig): void {
-  const { cols, rows, amplitude, frequency, strandWidth, textSource, textOffset, rungSpacing, centerCol } = config;
+  const {
+    cols,
+    rows,
+    amplitude,
+    frequency,
+    strandWidth,
+    textSource,
+    textOffset,
+    rungSpacing,
+    centerCol,
+  } = config;
   const textLen = textSource.length;
   let strandCharIdx1 = 0;
   let strandCharIdx2 = 0;
@@ -110,10 +120,10 @@ export function computeDNAGrid(grid: DNACell[][], config: DNAConfig): void {
         // Skip cells that will be overwritten by the strand itself
         const distFromCenter = Math.abs(c - sInt);
         if (distFromCenter <= halfStrand) continue;
-        const haloFalloff = 1 - ((distFromCenter - halfStrand) / (haloWidth + 1));
+        const haloFalloff = 1 - (distFromCenter - halfStrand) / (haloWidth + 1);
         const haloOpacity = sOpacity * haloFalloff * 0.2;
         if (haloOpacity < 0.03) continue;
-        const charI = ((c + r) + Math.floor(textOffset * 0.5)) % textLen;
+        const charI = (c + r + Math.floor(textOffset * 0.5)) % textLen;
         const ch = textSource[charI < 0 ? charI + textLen : charI];
         const cell = grid[r][c];
         cell.char = ch;
@@ -192,7 +202,7 @@ export function applyMouseDisplacement(
   radius: number,
   maxForce: number,
   springK: number,
-  damping: number,
+  damping: number
 ): void {
   const rows = grid.length;
   const cols = grid[0]?.length ?? 0;
@@ -228,7 +238,7 @@ export function applyMouseDisplacement(
 
         if (dist < radius && dist > 0.01) {
           // Quadratic falloff
-          const falloff = 1 - (dist / radius);
+          const falloff = 1 - dist / radius;
           const force = falloff * falloff * maxForce;
           const nx = dx / dist;
           const ny = dy / dist;
@@ -264,7 +274,7 @@ export function renderToCanvas(
   bgColor: string,
   textColor: string,
   width: number,
-  height: number,
+  height: number
 ): void {
   const rows = grid.length;
   const cols = grid[0]?.length ?? 0;

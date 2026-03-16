@@ -79,7 +79,13 @@ const AVERAGE_SCORES = {
   scale: 70,
 };
 
-export default function ScoreWalkthrough({ score, phases, summary, theme, parallaxLayers }: ScoreWalkthroughProps) {
+export default function ScoreWalkthrough({
+  score,
+  phases,
+  summary,
+  theme,
+  parallaxLayers,
+}: ScoreWalkthroughProps) {
   const label = getScoreLabel(score);
   const percentile = getPercentile(score);
   const lowestPhase = getLowestPhase(phases);
@@ -317,8 +323,12 @@ export default function ScoreWalkthrough({ score, phases, summary, theme, parall
             <div className="flex items-center gap-2 mt-2">
               <div className="flex-1">
                 <div className="flex justify-between text-[9px] mb-1">
-                  <span style={{ color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)' }}>AVG</span>
-                  <span style={{ color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)' }}>YOU</span>
+                  <span style={{ color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)' }}>
+                    AVG
+                  </span>
+                  <span style={{ color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)' }}>
+                    YOU
+                  </span>
                 </div>
                 <div className="flex items-center gap-1">
                   <div
@@ -366,10 +376,30 @@ export default function ScoreWalkthrough({ score, phases, summary, theme, parall
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {[
-              { name: 'DEFINE', score: phases.define.score, avg: AVERAGE_SCORES.define, desc: 'Content identity & clarity' },
-              { name: 'CHECK', score: phases.check.score, avg: AVERAGE_SCORES.check, desc: 'Consistency & coherence' },
-              { name: 'GENERATE', score: phases.generate.score, avg: AVERAGE_SCORES.generate, desc: 'Content quality & output' },
-              { name: 'SCALE', score: phases.scale.score, avg: AVERAGE_SCORES.scale, desc: 'Growth readiness' },
+              {
+                name: 'DEFINE',
+                score: phases.define.score,
+                avg: AVERAGE_SCORES.define,
+                desc: 'Content identity & clarity',
+              },
+              {
+                name: 'CHECK',
+                score: phases.check.score,
+                avg: AVERAGE_SCORES.check,
+                desc: 'Consistency & coherence',
+              },
+              {
+                name: 'GENERATE',
+                score: phases.generate.score,
+                avg: AVERAGE_SCORES.generate,
+                desc: 'Content quality & output',
+              },
+              {
+                name: 'SCALE',
+                score: phases.scale.score,
+                avg: AVERAGE_SCORES.scale,
+                desc: 'Growth readiness',
+              },
             ].map((phase, index) => {
               const diff = phase.score - phase.avg;
               const isLowest = phase.name.toLowerCase() === lowestPhase.name.toLowerCase();
@@ -421,7 +451,12 @@ export default function ScoreWalkthrough({ score, phases, summary, theme, parall
                           fontFamily: "'Helvetica Neue', sans-serif",
                           fontSize: '18px',
                           fontWeight: 600,
-                          color: phase.score >= 70 ? '#10B981' : phase.score >= 50 ? '#F59E0B' : '#EF4444',
+                          color:
+                            phase.score >= 70
+                              ? '#10B981'
+                              : phase.score >= 50
+                                ? '#F59E0B'
+                                : '#EF4444',
                         }}
                       >
                         {phase.score}
@@ -432,7 +467,8 @@ export default function ScoreWalkthrough({ score, phases, summary, theme, parall
                           color: diff >= 0 ? '#10B981' : '#EF4444',
                         }}
                       >
-                        {diff >= 0 ? '+' : ''}{diff} vs avg
+                        {diff >= 0 ? '+' : ''}
+                        {diff} vs avg
                       </span>
                     </div>
                   </div>
@@ -449,7 +485,8 @@ export default function ScoreWalkthrough({ score, phases, summary, theme, parall
                       transition={{ duration: 0.8, delay: 0.4 + index * 0.1 }}
                       className="h-full rounded-full"
                       style={{
-                        background: phase.score >= 70 ? '#10B981' : phase.score >= 50 ? '#F59E0B' : '#EF4444',
+                        background:
+                          phase.score >= 70 ? '#10B981' : phase.score >= 50 ? '#F59E0B' : '#EF4444',
                       }}
                     />
                   </div>
@@ -479,11 +516,24 @@ export default function ScoreWalkthrough({ score, phases, summary, theme, parall
               border: '1px solid rgba(16, 185, 129, 0.2)',
             }}
           >
-            <div className="text-[10px] tracking-wider text-green-400 mb-2" style={{ fontFamily: "'VCR OSD Mono', monospace" }}>
+            <div
+              className="text-[10px] tracking-wider text-green-400 mb-2"
+              style={{ fontFamily: "'VCR OSD Mono', monospace" }}
+            >
               TOP STRENGTH
             </div>
-            <p className="text-sm" style={{ color: isDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.8)' }}>
-              Your <strong>{highestPhase.name}</strong> score of {highestPhase.score} shows strong {highestPhase.name === 'Define' ? 'brand identity' : highestPhase.name === 'Check' ? 'consistency' : highestPhase.name === 'Generate' ? 'profile optimization' : 'growth potential'}
+            <p
+              className="text-sm"
+              style={{ color: isDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.8)' }}
+            >
+              Your <strong>{highestPhase.name}</strong> score of {highestPhase.score} shows strong{' '}
+              {highestPhase.name === 'Define'
+                ? 'brand identity'
+                : highestPhase.name === 'Check'
+                  ? 'consistency'
+                  : highestPhase.name === 'Generate'
+                    ? 'profile optimization'
+                    : 'growth potential'}
             </p>
           </motion.div>
 
@@ -498,11 +548,23 @@ export default function ScoreWalkthrough({ score, phases, summary, theme, parall
               border: '1px solid rgba(239, 68, 68, 0.2)',
             }}
           >
-            <div className="text-[10px] tracking-wider text-red-400 mb-2" style={{ fontFamily: "'VCR OSD Mono', monospace" }}>
+            <div
+              className="text-[10px] tracking-wider text-red-400 mb-2"
+              style={{ fontFamily: "'VCR OSD Mono', monospace" }}
+            >
               FOCUS AREA
             </div>
-            <p className="text-sm" style={{ color: isDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.8)' }}>
-              <strong>{lowestPhase.name}</strong> at {lowestPhase.score} is {lowestPhase.score - AVERAGE_SCORES[lowestPhase.name.toLowerCase() as keyof typeof AVERAGE_SCORES] >= 0 ? 'still above average but' : ''} your best opportunity to improve
+            <p
+              className="text-sm"
+              style={{ color: isDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.8)' }}
+            >
+              <strong>{lowestPhase.name}</strong> at {lowestPhase.score} is{' '}
+              {lowestPhase.score -
+                AVERAGE_SCORES[lowestPhase.name.toLowerCase() as keyof typeof AVERAGE_SCORES] >=
+              0
+                ? 'still above average but'
+                : ''}{' '}
+              your best opportunity to improve
             </p>
           </motion.div>
 
@@ -517,11 +579,19 @@ export default function ScoreWalkthrough({ score, phases, summary, theme, parall
               border: '1px solid rgba(46, 106, 255, 0.2)',
             }}
           >
-            <div className="text-[10px] tracking-wider text-blue-400 mb-2" style={{ fontFamily: "'VCR OSD Mono', monospace" }}>
+            <div
+              className="text-[10px] tracking-wider text-blue-400 mb-2"
+              style={{ fontFamily: "'VCR OSD Mono', monospace" }}
+            >
               ENGAGEMENT POTENTIAL
             </div>
-            <p className="text-sm" style={{ color: isDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.8)' }}>
-              Scores like yours correlate with <strong>{score >= 80 ? '3-4x' : score >= 70 ? '2-3x' : '1.5-2x'}</strong> higher engagement than average creators
+            <p
+              className="text-sm"
+              style={{ color: isDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.8)' }}
+            >
+              Scores like yours correlate with{' '}
+              <strong>{score >= 80 ? '3-4x' : score >= 70 ? '2-3x' : '1.5-2x'}</strong> higher
+              engagement than average creators
             </p>
           </motion.div>
         </div>

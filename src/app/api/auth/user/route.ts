@@ -23,7 +23,10 @@ export async function GET(request: NextRequest) {
     const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
     // Set the session using the tokens from cookies
-    const { data: { user: supabaseUser }, error } = await supabase.auth.getUser(accessToken);
+    const {
+      data: { user: supabaseUser },
+      error,
+    } = await supabase.auth.getUser(accessToken);
 
     if (error || !supabaseUser) {
       // Try to refresh the session

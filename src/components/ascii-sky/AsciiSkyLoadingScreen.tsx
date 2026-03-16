@@ -52,7 +52,12 @@ export default function AsciiSkyLoadingScreen({
     return { hill: SEASON_PALETTES.spring.hillColor, hillFar: SEASON_PALETTES.spring.hillColorFar };
   }, [stageProgress]);
 
-  const cloudColor = stageProgress <= 1 ? '#1A2535' : stageProgress === 2 ? '#8A6080' : SEASON_PALETTES.spring.cloudColor;
+  const cloudColor =
+    stageProgress <= 1
+      ? '#1A2535'
+      : stageProgress === 2
+        ? '#8A6080'
+        : SEASON_PALETTES.spring.cloudColor;
 
   // Path appears at stage 2+
   const pathConfig = useMemo<PathConfig | undefined>(() => {
@@ -147,7 +152,12 @@ export default function AsciiSkyLoadingScreen({
           <div className="absolute inset-0 pointer-events-none z-20" style={{ opacity: 0.03 }}>
             <svg width="100%" height="100%">
               <filter id="arrival-grain">
-                <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="4" stitchTiles="stitch" />
+                <feTurbulence
+                  type="fractalNoise"
+                  baseFrequency="0.85"
+                  numOctaves="4"
+                  stitchTiles="stitch"
+                />
               </filter>
               <rect width="100%" height="100%" filter="url(#arrival-grain)" />
             </svg>

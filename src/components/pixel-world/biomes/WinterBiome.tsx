@@ -22,24 +22,81 @@ function PixelPineTree({ x, height, delay }: { x: number; height: number; delay:
       }}
     >
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        <div style={{ width: height * 0.3, height: height * 0.12, background: '#1A4A3A', marginBottom: -1 }} />
-        <div style={{ width: height * 0.5, height: height * 0.14, background: '#1E5A44', marginBottom: -1 }} />
-        <div style={{ width: height * 0.7, height: height * 0.14, background: '#1A4A3A', marginBottom: -1 }} />
-        <div style={{ width: height * 0.85, height: height * 0.14, background: '#1E5A44', marginBottom: -1 }} />
+        <div
+          style={{
+            width: height * 0.3,
+            height: height * 0.12,
+            background: '#1A4A3A',
+            marginBottom: -1,
+          }}
+        />
+        <div
+          style={{
+            width: height * 0.5,
+            height: height * 0.14,
+            background: '#1E5A44',
+            marginBottom: -1,
+          }}
+        />
+        <div
+          style={{
+            width: height * 0.7,
+            height: height * 0.14,
+            background: '#1A4A3A',
+            marginBottom: -1,
+          }}
+        />
+        <div
+          style={{
+            width: height * 0.85,
+            height: height * 0.14,
+            background: '#1E5A44',
+            marginBottom: -1,
+          }}
+        />
         <div style={{ width: height, height: height * 0.14, background: '#1A4A3A' }} />
       </div>
       {/* Snow caps */}
-      <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: height * 0.25, height: 3, background: '#E8F0FF' }} />
-      <div style={{ position: 'absolute', top: height * 0.12, left: '50%', transform: 'translateX(-50%)', width: height * 0.45, height: 2, background: 'rgba(232,240,255,0.7)' }} />
+      <div
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: height * 0.25,
+          height: 3,
+          background: '#E8F0FF',
+        }}
+      />
+      <div
+        style={{
+          position: 'absolute',
+          top: height * 0.12,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: height * 0.45,
+          height: 2,
+          background: 'rgba(232,240,255,0.7)',
+        }}
+      />
       {/* Trunk */}
-      <div style={{ width: height * 0.12, height: height * 0.2, background: '#4A3220', margin: '0 auto' }} />
+      <div
+        style={{
+          width: height * 0.12,
+          height: height * 0.2,
+          background: '#4A3220',
+          margin: '0 auto',
+        }}
+      />
     </motion.div>
   );
 }
 
 export default function WinterBiome({ progress, isActive }: BiomeProps) {
   const frostStage = Math.min(progress / 4, 1);
-  const [snowflakes, setSnowflakes] = useState<Array<{ id: number; x: number; delay: number; size: number }>>([]);
+  const [snowflakes, setSnowflakes] = useState<
+    Array<{ id: number; x: number; delay: number; size: number }>
+  >([]);
 
   useEffect(() => {
     if (!isActive) return;
@@ -59,7 +116,8 @@ export default function WinterBiome({ progress, isActive }: BiomeProps) {
       <div
         className="absolute inset-0"
         style={{
-          background: 'linear-gradient(180deg, #0B1428 0%, #152040 25%, #1E3058 45%, #2A4070 60%, #3A5088 75%, #7090B0 90%, #C0D8E8 100%)',
+          background:
+            'linear-gradient(180deg, #0B1428 0%, #152040 25%, #1E3058 45%, #2A4070 60%, #3A5088 75%, #7090B0 90%, #C0D8E8 100%)',
         }}
       />
 
@@ -68,7 +126,11 @@ export default function WinterBiome({ progress, isActive }: BiomeProps) {
         <motion.div
           key={`star-${i}`}
           animate={{ opacity: [0.3, 1, 0.3] }}
-          transition={{ duration: 2 + Math.random() * 2, delay: Math.random() * 3, repeat: Infinity }}
+          transition={{
+            duration: 2 + Math.random() * 2,
+            delay: Math.random() * 3,
+            repeat: Infinity,
+          }}
           style={{
             position: 'absolute',
             left: `${Math.random() * 100}%`,
@@ -92,7 +154,8 @@ export default function WinterBiome({ progress, isActive }: BiomeProps) {
             left: '10%',
             right: '10%',
             height: '35%',
-            background: 'linear-gradient(180deg, transparent 0%, rgba(100,200,150,0.12) 20%, rgba(120,100,220,0.1) 50%, rgba(80,180,200,0.08) 80%, transparent 100%)',
+            background:
+              'linear-gradient(180deg, transparent 0%, rgba(100,200,150,0.12) 20%, rgba(120,100,220,0.1) 50%, rgba(80,180,200,0.08) 80%, transparent 100%)',
             filter: 'blur(12px)',
             pointerEvents: 'none',
           }}
@@ -110,7 +173,8 @@ export default function WinterBiome({ progress, isActive }: BiomeProps) {
             left: '20%',
             right: '20%',
             height: '25%',
-            background: 'linear-gradient(90deg, transparent, rgba(130,220,180,0.1), rgba(100,150,240,0.08), rgba(180,100,220,0.06), transparent)',
+            background:
+              'linear-gradient(90deg, transparent, rgba(130,220,180,0.1), rgba(100,150,240,0.08), rgba(180,100,220,0.06), transparent)',
             filter: 'blur(8px)',
             pointerEvents: 'none',
           }}
@@ -118,8 +182,16 @@ export default function WinterBiome({ progress, isActive }: BiomeProps) {
       )}
 
       {/* Distant mountains with snow */}
-      <svg viewBox="0 0 320 80" preserveAspectRatio="none" className="absolute w-full" style={{ bottom: '25%', height: '25%' }}>
-        <polygon points="0,80 0,40 25,20 50,35 80,10 110,30 140,5 170,28 200,15 230,32 260,8 290,25 320,18 320,80" fill="#2A4070" />
+      <svg
+        viewBox="0 0 320 80"
+        preserveAspectRatio="none"
+        className="absolute w-full"
+        style={{ bottom: '25%', height: '25%' }}
+      >
+        <polygon
+          points="0,80 0,40 25,20 50,35 80,10 110,30 140,5 170,28 200,15 230,32 260,8 290,25 320,18 320,80"
+          fill="#2A4070"
+        />
         <polygon points="75,18 80,10 85,15" fill="#C0D8E8" opacity="0.6" />
         <polygon points="135,12 140,5 145,10" fill="#C0D8E8" opacity="0.6" />
         <polygon points="255,15 260,8 265,12" fill="#C0D8E8" opacity="0.6" />
@@ -135,8 +207,16 @@ export default function WinterBiome({ progress, isActive }: BiomeProps) {
       />
 
       {/* Snow drifts */}
-      <svg viewBox="0 0 320 20" preserveAspectRatio="none" className="absolute w-full" style={{ bottom: '26%', height: '4%' }}>
-        <path d="M0,20 Q40,5 80,15 Q120,0 160,12 Q200,2 240,14 Q280,4 320,10 L320,20 Z" fill="#D0E4F0" />
+      <svg
+        viewBox="0 0 320 20"
+        preserveAspectRatio="none"
+        className="absolute w-full"
+        style={{ bottom: '26%', height: '4%' }}
+      >
+        <path
+          d="M0,20 Q40,5 80,15 Q120,0 160,12 Q200,2 240,14 Q280,4 320,10 L320,20 Z"
+          fill="#D0E4F0"
+        />
       </svg>
 
       {/* Pine trees */}
@@ -167,8 +247,16 @@ export default function WinterBiome({ progress, isActive }: BiomeProps) {
           }}
         >
           <svg width="32" height="40" viewBox="0 0 32 40" style={{ imageRendering: 'pixelated' }}>
-            <polygon points="16,0 20,10 28,12 22,20 24,30 16,26 8,30 10,20 4,12 12,10" fill="#B0D8F0" opacity="0.8" />
-            <polygon points="16,4 19,12 26,14 20,20 22,28 16,24 10,28 12,20 6,14 13,12" fill="#D0ECFF" opacity="0.6" />
+            <polygon
+              points="16,0 20,10 28,12 22,20 24,30 16,26 8,30 10,20 4,12 12,10"
+              fill="#B0D8F0"
+              opacity="0.8"
+            />
+            <polygon
+              points="16,4 19,12 26,14 20,20 22,28 16,24 10,28 12,20 6,14 13,12"
+              fill="#D0ECFF"
+              opacity="0.6"
+            />
           </svg>
           <motion.div
             animate={{ opacity: [0.3, 0.7, 0.3] }}

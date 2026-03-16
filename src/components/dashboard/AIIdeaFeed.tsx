@@ -12,14 +12,14 @@ interface AIIdeaFeedProps {
 
 const tonePillColors: Record<string, { bg: string; text: string }> = {
   'hot-take': { bg: 'rgba(255,69,58,0.12)', text: '#FF453A' },
-  'educational': { bg: 'rgba(48,209,88,0.12)', text: '#30D158' },
-  'casual': { bg: 'rgba(10,132,255,0.12)', text: '#0A84FF' },
-  'launch': { bg: 'rgba(191,90,242,0.12)', text: '#BF5AF2' },
+  educational: { bg: 'rgba(48,209,88,0.12)', text: '#30D158' },
+  casual: { bg: 'rgba(10,132,255,0.12)', text: '#0A84FF' },
+  launch: { bg: 'rgba(191,90,242,0.12)', text: '#BF5AF2' },
   'behind-the-scenes': { bg: 'rgba(255,159,10,0.12)', text: '#FF9F0A' },
-  'announcement': { bg: 'rgba(100,210,255,0.12)', text: '#64D2FF' },
+  announcement: { bg: 'rgba(100,210,255,0.12)', text: '#64D2FF' },
   'engagement-bait': { bg: 'rgba(255,214,10,0.12)', text: '#FFD60A' },
   'thread-starter': { bg: 'rgba(172,142,104,0.12)', text: '#AC8E68' },
-  'intelligence': { bg: 'rgba(6,182,212,0.12)', text: '#06B6D4' },
+  intelligence: { bg: 'rgba(6,182,212,0.12)', text: '#06B6D4' },
 };
 
 const categoryLabels: Record<string, string> = {
@@ -30,11 +30,33 @@ const categoryLabels: Record<string, string> = {
   intelligence: 'Intelligence-generated',
 };
 
-export default function AIIdeaFeed({ ideas, isLoading, onRefresh, onCreatePost, onSaveToCalendar }: AIIdeaFeedProps) {
+export default function AIIdeaFeed({
+  ideas,
+  isLoading,
+  onRefresh,
+  onCreatePost,
+  onSaveToCalendar,
+}: AIIdeaFeedProps) {
   return (
-    <div style={{ background: 'var(--surface)', borderRadius: 16, padding: 24, border: '1px solid var(--border)', boxShadow: 'var(--shadow-card)' }} className="h-full">
+    <div
+      style={{
+        background: 'var(--surface)',
+        borderRadius: 16,
+        padding: 24,
+        border: '1px solid var(--border)',
+        boxShadow: 'var(--shadow-card)',
+      }}
+      className="h-full"
+    >
       <div className="flex items-center justify-between mb-4">
-        <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-secondary)', letterSpacing: '-0.01em' }}>
+        <h3
+          style={{
+            fontSize: 14,
+            fontWeight: 600,
+            color: 'var(--text-secondary)',
+            letterSpacing: '-0.01em',
+          }}
+        >
           Content Ideas
         </h3>
         <button
@@ -76,7 +98,14 @@ export default function AIIdeaFeed({ ideas, isLoading, onRefresh, onCreatePost, 
           />
         </div>
       ) : ideas.length === 0 ? (
-        <p style={{ fontSize: 14, color: 'var(--text-tertiary)', padding: '24px 0', textAlign: 'center' }}>
+        <p
+          style={{
+            fontSize: 14,
+            color: 'var(--text-tertiary)',
+            padding: '24px 0',
+            textAlign: 'center',
+          }}
+        >
           Complete your Brand DNA to get personalized content ideas.
         </p>
       ) : (
@@ -88,10 +117,7 @@ export default function AIIdeaFeed({ ideas, isLoading, onRefresh, onCreatePost, 
                 key={idea.id || i}
                 className="py-3"
                 style={{
-                  borderBottom:
-                    i < ideas.length - 1
-                      ? '1px solid var(--border)'
-                      : 'none',
+                  borderBottom: i < ideas.length - 1 ? '1px solid var(--border)' : 'none',
                 }}
               >
                 <div className="flex items-start justify-between gap-3">
@@ -135,8 +161,8 @@ export default function AIIdeaFeed({ ideas, isLoading, onRefresh, onCreatePost, 
                     {idea.reason && (
                       <p
                         style={{
-                        fontSize: 12,
-                        color: 'var(--text-secondary)',
+                          fontSize: 12,
+                          color: 'var(--text-secondary)',
                           marginTop: 4,
                           lineHeight: 1.4,
                         }}
@@ -205,7 +231,14 @@ export default function AIIdeaFeed({ ideas, isLoading, onRefresh, onCreatePost, 
                           e.currentTarget.style.color = 'var(--text-secondary)';
                         }}
                       >
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <svg
+                          width="12"
+                          height="12"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
                           <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
                           <line x1="16" y1="2" x2="16" y2="6" />
                           <line x1="8" y1="2" x2="8" y2="6" />

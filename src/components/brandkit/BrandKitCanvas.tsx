@@ -1,7 +1,15 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { DndContext, DragEndEvent, DragOverlay, closestCenter, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import {
+  DndContext,
+  DragEndEvent,
+  DragOverlay,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
 import { useBrandKitStore } from '@/lib/brandKitStore';
 import { useBrandStore } from '@/lib/store';
 import BrandKitSidebar from './BrandKitSidebar';
@@ -16,7 +24,7 @@ import TemplateSection from './sections/TemplateSection';
 export default function BrandKitCanvas() {
   const { currentBrandId } = useBrandStore();
   const { getCurrentBrandKit, updateCanvasLayout } = useBrandKitStore();
-  
+
   const brandKit = currentBrandId ? getCurrentBrandKit(currentBrandId) : null;
   const [activeDragId, setActiveDragId] = useState<string | null>(null);
   const [activeSection, setActiveSection] = useState<string>('all');
@@ -112,7 +120,7 @@ export default function BrandKitCanvas() {
           onDragEnd={handleDragEnd}
         >
           <div className="flex-1 overflow-auto bg-surface/30">
-            <div 
+            <div
               className={`min-h-full p-8 transition-transform duration-200 ${
                 brandKit.canvasLayout.gridEnabled ? 'bg-grid-pattern' : ''
               }`}
@@ -156,8 +164,8 @@ export default function BrandKitCanvas() {
                     </CanvasSection>
                   </>
                 ) : (
-                  <CanvasSection 
-                    title={getSectionTitle(activeSection)} 
+                  <CanvasSection
+                    title={getSectionTitle(activeSection)}
                     type={activeSection}
                     expanded
                   >
@@ -193,11 +201,13 @@ function CanvasSection({ title, type, children, expanded = false }: CanvasSectio
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   return (
-    <div className={`bg-background border border-border rounded-xl overflow-hidden transition-all ${
-      expanded ? 'min-h-[400px]' : ''
-    }`}>
+    <div
+      className={`bg-background border border-border rounded-xl overflow-hidden transition-all ${
+        expanded ? 'min-h-[400px]' : ''
+      }`}
+    >
       {/* Section Header */}
-      <div 
+      <div
         className="flex items-center justify-between px-6 py-4 border-b border-border cursor-pointer hover:bg-surface/50 transition-colors"
         onClick={() => setIsCollapsed(!isCollapsed)}
       >
@@ -206,65 +216,96 @@ function CanvasSection({ title, type, children, expanded = false }: CanvasSectio
           <h3 className="text-sm font-medium">{title}</h3>
         </div>
         <button className="text-muted hover:text-foreground transition-colors">
-          <svg 
-            className={`w-5 h-5 transition-transform ${isCollapsed ? '-rotate-90' : ''}`} 
-            fill="none" 
-            viewBox="0 0 24 24" 
+          <svg
+            className={`w-5 h-5 transition-transform ${isCollapsed ? '-rotate-90' : ''}`}
+            fill="none"
+            viewBox="0 0 24 24"
             stroke="currentColor"
           >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 9l-7 7-7-7" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={1.5}
+              d="M19 9l-7 7-7-7"
+            />
           </svg>
         </button>
       </div>
 
       {/* Section Content */}
-      {!isCollapsed && (
-        <div className="p-6">
-          {children}
-        </div>
-      )}
+      {!isCollapsed && <div className="p-6">{children}</div>}
     </div>
   );
 }
 
 function SectionIcon({ type }: { type: string }) {
-  const iconClass = "w-5 h-5 text-muted";
-  
+  const iconClass = 'w-5 h-5 text-muted';
+
   switch (type) {
     case 'logos':
       return (
         <svg className={iconClass} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={1.5}
+            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+          />
         </svg>
       );
     case 'colors':
       return (
         <svg className={iconClass} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={1.5}
+            d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"
+          />
         </svg>
       );
     case 'typography':
       return (
         <svg className={iconClass} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6h16M4 12h16m-7 6h7" />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={1.5}
+            d="M4 6h16M4 12h16m-7 6h7"
+          />
         </svg>
       );
     case 'imagery':
       return (
         <svg className={iconClass} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={1.5}
+            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+          />
         </svg>
       );
     case 'icons':
       return (
         <svg className={iconClass} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5" />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={1.5}
+            d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5"
+          />
         </svg>
       );
     case 'templates':
       return (
         <svg className={iconClass} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={1.5}
+            d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"
+          />
         </svg>
       );
     default:
@@ -283,19 +324,3 @@ function getSectionTitle(type: string): string {
   };
   return titles[type] || type;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

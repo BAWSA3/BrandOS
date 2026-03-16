@@ -1,6 +1,10 @@
 import { BrandDNA } from './types';
 import { buildBrandContext } from '@/prompts/brand-guardian';
-import { VoiceFingerprint, summarizeFingerprint, formatSummaryForPrompt } from './voice-fingerprint';
+import {
+  VoiceFingerprint,
+  summarizeFingerprint,
+  formatSummaryForPrompt,
+} from './voice-fingerprint';
 
 // ── Types ──────────────────────────────────────────────────────
 
@@ -14,7 +18,7 @@ export interface HealthDimensions {
 
 export interface AvailableDataFlags {
   hasCheckEntries: boolean; // ≥ 3 content checks
-  hasPosts: boolean;        // has X posts for voice/engagement
+  hasPosts: boolean; // has X posts for voice/engagement
 }
 
 export interface TrendResult {
@@ -28,7 +32,10 @@ export interface TrendResult {
 export function computeCompleteness(brand: BrandDNA): number {
   const items = [
     { isComplete: Boolean(brand.name?.trim()), weight: 15 },
-    { isComplete: Boolean(brand.colors?.primary && brand.colors?.secondary && brand.colors?.accent), weight: 15 },
+    {
+      isComplete: Boolean(brand.colors?.primary && brand.colors?.secondary && brand.colors?.accent),
+      weight: 15,
+    },
     { isComplete: brand.tone?.minimal !== undefined, weight: 15 },
     { isComplete: Boolean(brand.keywords && brand.keywords.length >= 3), weight: 15 },
     { isComplete: Boolean(brand.doPatterns && brand.doPatterns.length >= 2), weight: 15 },
@@ -37,7 +44,9 @@ export function computeCompleteness(brand: BrandDNA): number {
   ];
 
   const totalWeight = items.reduce((sum, item) => sum + item.weight, 0);
-  const completedWeight = items.filter(i => i.isComplete).reduce((sum, item) => sum + item.weight, 0);
+  const completedWeight = items
+    .filter((i) => i.isComplete)
+    .reduce((sum, item) => sum + item.weight, 0);
 
   return Math.round((completedWeight / totalWeight) * 100);
 }
@@ -47,7 +56,7 @@ export function computeCompleteness(brand: BrandDNA): number {
 
 export function computeConsistency(checkEntries: { score: number | null }[]): number {
   const scores = checkEntries
-    .map(e => e.score)
+    .map((e) => e.score)
     .filter((s): s is number => s !== null)
     .slice(0, 20);
 
@@ -58,7 +67,11 @@ export function computeConsistency(checkEntries: { score: number | null }[]): nu
 // ── Voice Match (25%) ──────────────────────────────────────────
 // Claude call: send last 10 posts + brand DNA → get 0-100 score
 
-export function buildVoiceMatchPrompt(brand: BrandDNA, posts: string[], fingerprint?: VoiceFingerprint): string {
+export function buildVoiceMatchPrompt(
+  brand: BrandDNA,
+  posts: string[],
+  fingerprint?: VoiceFingerprint
+): string {
   const fingerprintSection = fingerprint
     ? `\n\nVOICE FINGERPRINT (use this for more precise matching):\n${formatSummaryForPrompt(summarizeFingerprint(fingerprint))}`
     : '';
@@ -117,7 +130,8 @@ export function computeEngagement(posts: { public_metrics: PostMetrics }[]): num
 
   const avgRate =
     posts.reduce((sum, p) => {
-      const engagement = p.public_metrics.like_count + p.public_metrics.retweet_count + p.public_metrics.reply_count;
+      const engagement =
+        p.public_metrics.like_count + p.public_metrics.retweet_count + p.public_metrics.reply_count;
       const impressions = p.public_metrics.impression_count || 1;
       return sum + (engagement / impressions) * 100;
     }, 0) / posts.length;

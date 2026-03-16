@@ -13,17 +13,17 @@ async function getAuthenticatedUser() {
   if (!accessToken) return null;
 
   const supabase = createClient(supabaseUrl, supabaseAnonKey);
-  const { data: { user: authUser }, error } = await supabase.auth.getUser(accessToken);
+  const {
+    data: { user: authUser },
+    error,
+  } = await supabase.auth.getUser(accessToken);
   if (error || !authUser) return null;
 
   return prisma.user.findUnique({ where: { supabaseId: authUser.id } });
 }
 
 // PATCH /api/calendar/drafts/[id]
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const dbUser = await getAuthenticatedUser();
     if (!dbUser) {

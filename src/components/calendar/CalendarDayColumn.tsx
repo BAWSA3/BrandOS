@@ -102,21 +102,25 @@ export default function CalendarDayColumn({
       {/* Day header */}
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-1.5">
-          <span style={{
-            fontSize: 11,
-            fontWeight: 500,
-            color: isToday ? '#0A84FF' : 'var(--text-tertiary)',
-          }}>
+          <span
+            style={{
+              fontSize: 11,
+              fontWeight: 500,
+              color: isToday ? '#0A84FF' : 'var(--text-tertiary)',
+            }}
+          >
             {dayNames[date.getDay()]}
           </span>
-          <span style={{
-            fontSize: 13,
-            fontWeight: isToday ? 600 : 500,
-            color: isToday ? '#0A84FF' : 'var(--text-primary)',
-            background: isToday ? 'rgba(10,132,255,0.12)' : 'transparent',
-            borderRadius: 6,
-            padding: isToday ? '1px 6px' : '0',
-          }}>
+          <span
+            style={{
+              fontSize: 13,
+              fontWeight: isToday ? 600 : 500,
+              color: isToday ? '#0A84FF' : 'var(--text-primary)',
+              background: isToday ? 'rgba(10,132,255,0.12)' : 'transparent',
+              borderRadius: 6,
+              padding: isToday ? '1px 6px' : '0',
+            }}
+          >
             {date.getDate()}
           </span>
         </div>
@@ -143,24 +147,28 @@ export default function CalendarDayColumn({
 
       {/* Indicators */}
       {isGap && drafts.length === 0 && (
-        <div style={{
-          fontSize: 10,
-          color: 'var(--text-tertiary)',
-          textAlign: 'center',
-          padding: '8px 0',
-          opacity: 0.7,
-        }}>
+        <div
+          style={{
+            fontSize: 10,
+            color: 'var(--text-tertiary)',
+            textAlign: 'center',
+            padding: '8px 0',
+            opacity: 0.7,
+          }}
+        >
           gap
         </div>
       )}
 
       {isOverloaded && (
-        <div style={{
-          fontSize: 10,
-          color: '#FF9F0A',
-          textAlign: 'center',
-          marginBottom: 4,
-        }}>
+        <div
+          style={{
+            fontSize: 10,
+            color: '#FF9F0A',
+            textAlign: 'center',
+            marginBottom: 4,
+          }}
+        >
           {drafts.length} posts
         </div>
       )}

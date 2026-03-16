@@ -27,7 +27,7 @@ export default function TerminalProgressBar({
   currentPhase,
   phaseProgress,
 }: TerminalProgressBarProps) {
-  const overallProgress = ((currentPhase - 1) + phaseProgress) / 4;
+  const overallProgress = (currentPhase - 1 + phaseProgress) / 4;
   const overallPercent = Math.round(overallProgress * 100);
   const currentCommand = PHASE_COMMANDS[currentPhase - 1] || PHASE_COMMANDS[0];
 

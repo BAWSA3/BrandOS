@@ -111,7 +111,9 @@ export default function PlanManagement({
         <div className="p-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br ${TIER_GRADIENTS[currentTier]} text-white`}>
+              <div
+                className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br ${TIER_GRADIENTS[currentTier]} text-white`}
+              >
                 {TIER_ICONS[currentTier]}
               </div>
               <div>
@@ -288,7 +290,9 @@ function UsageMeter({
             <span className="text-emerald-400">Unlimited</span>
           ) : (
             <>
-              <span className={isMax ? 'text-red-400' : isHigh ? 'text-amber-400' : 'text-white/70'}>
+              <span
+                className={isMax ? 'text-red-400' : isHigh ? 'text-amber-400' : 'text-white/70'}
+              >
                 {used}
               </span>
               {' / '}
@@ -303,9 +307,7 @@ function UsageMeter({
           style={{ width: isUnlimited ? '0%' : `${Math.min(100, percent)}%` }}
         />
       </div>
-      {isMax && (
-        <p className="mt-1.5 text-xs text-red-400">Limit reached — upgrade to continue</p>
-      )}
+      {isMax && <p className="mt-1.5 text-xs text-red-400">Limit reached — upgrade to continue</p>}
     </div>
   );
 }

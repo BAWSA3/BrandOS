@@ -9,7 +9,7 @@ const anthropic = new Anthropic({
 
 export async function POST(request: NextRequest) {
   try {
-    const { brandDNA, feedback } = await request.json() as {
+    const { brandDNA, feedback } = (await request.json()) as {
       brandDNA: BrandDNA;
       feedback: string;
     };
@@ -59,13 +59,13 @@ Return ONLY valid JSON with this exact structure:
 
     const responseText = message.content[0].type === 'text' ? message.content[0].text : '';
     const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-    
+
     if (!jsonMatch) {
       throw new Error('Invalid response format');
     }
 
     const parsed = JSON.parse(jsonMatch[0]);
-    
+
     const translation: TasteTranslation = {
       id: uuidv4(),
       feedback,
@@ -75,7 +75,6 @@ Return ONLY valid JSON with this exact structure:
     };
 
     return NextResponse.json(translation);
-
   } catch (error: any) {
     console.error('Taste Translation API error:', error);
     return NextResponse.json(
@@ -84,4 +83,3 @@ Return ONLY valid JSON with this exact structure:
     );
   }
 }
-

@@ -4,7 +4,15 @@ import { useState } from 'react';
 import { useBrandStore } from '@/lib/store';
 import { SafeZone } from '@/lib/types';
 
-const CATEGORIES: SafeZone['category'][] = ['logo', 'color', 'typography', 'voice', 'imagery', 'motion', 'layout'];
+const CATEGORIES: SafeZone['category'][] = [
+  'logo',
+  'color',
+  'typography',
+  'voice',
+  'imagery',
+  'motion',
+  'layout',
+];
 const STATUSES: SafeZone['status'][] = ['locked', 'flexible', 'experimental'];
 
 const statusStyles = {
@@ -20,9 +28,10 @@ const statusDescriptions = {
 };
 
 export default function SafeZones() {
-  const { safeZones, currentBrandId, addSafeZone, updateSafeZone, deleteSafeZone } = useBrandStore();
+  const { safeZones, currentBrandId, addSafeZone, updateSafeZone, deleteSafeZone } =
+    useBrandStore();
   const currentZones = currentBrandId ? safeZones[currentBrandId] || [] : [];
-  
+
   const [isAdding, setIsAdding] = useState(false);
   const [newZone, setNewZone] = useState({
     element: '',
@@ -33,22 +42,25 @@ export default function SafeZones() {
 
   const handleAdd = () => {
     if (!newZone.element.trim()) return;
-    
+
     addSafeZone({
       element: newZone.element,
       category: newZone.category,
       status: newZone.status,
-      rules: newZone.rules.split('\n').filter(r => r.trim()),
+      rules: newZone.rules.split('\n').filter((r) => r.trim()),
     });
-    
+
     setNewZone({ element: '', category: 'voice', status: 'flexible', rules: '' });
     setIsAdding(false);
   };
 
-  const groupedZones = CATEGORIES.reduce((acc, cat) => {
-    acc[cat] = currentZones.filter(z => z.category === cat);
-    return acc;
-  }, {} as Record<SafeZone['category'], SafeZone[]>);
+  const groupedZones = CATEGORIES.reduce(
+    (acc, cat) => {
+      acc[cat] = currentZones.filter((z) => z.category === cat);
+      return acc;
+    },
+    {} as Record<SafeZone['category'], SafeZone[]>
+  );
 
   return (
     <div className="space-y-8">
@@ -56,7 +68,9 @@ export default function SafeZones() {
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-xs uppercase tracking-widest text-muted mb-2">Brand Safe Zones</h3>
-          <p className="text-sm text-muted">Define what&apos;s locked vs. flexible in your brand.</p>
+          <p className="text-sm text-muted">
+            Define what&apos;s locked vs. flexible in your brand.
+          </p>
         </div>
         <button
           onClick={() => setIsAdding(!isAdding)}
@@ -88,22 +102,26 @@ export default function SafeZones() {
               </label>
               <select
                 value={newZone.category}
-                onChange={(e) => setNewZone({ ...newZone, category: e.target.value as SafeZone['category'] })}
+                onChange={(e) =>
+                  setNewZone({ ...newZone, category: e.target.value as SafeZone['category'] })
+                }
                 className="w-full bg-surface border border-border rounded-lg px-4 py-3 outline-none"
               >
-                {CATEGORIES.map(c => (
-                  <option key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</option>
+                {CATEGORIES.map((c) => (
+                  <option key={c} value={c}>
+                    {c.charAt(0).toUpperCase() + c.slice(1)}
+                  </option>
                 ))}
               </select>
             </div>
           </div>
-          
+
           <div className="mb-4">
             <label className="block text-xs uppercase tracking-widest text-muted mb-2">
               Status
             </label>
             <div className="flex gap-2">
-              {STATUSES.map(s => (
+              {STATUSES.map((s) => (
                 <button
                   key={s}
                   onClick={() => setNewZone({ ...newZone, status: s })}
@@ -143,22 +161,24 @@ export default function SafeZones() {
       )}
 
       {/* Zones by Category */}
-      {CATEGORIES.map(category => {
+      {CATEGORIES.map((category) => {
         const zones = groupedZones[category];
         if (zones.length === 0) return null;
-        
+
         return (
           <div key={category}>
             <h4 className="text-xs uppercase tracking-widest text-muted mb-4">
               {category.charAt(0).toUpperCase() + category.slice(1)}
             </h4>
             <div className="space-y-3">
-              {zones.map(zone => (
+              {zones.map((zone) => (
                 <div key={zone.id} className="border border-border rounded-lg p-4 group">
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-3">
                       <span className="font-medium">{zone.element}</span>
-                      <span className={`px-2 py-0.5 rounded-full text-xs border ${statusStyles[zone.status]}`}>
+                      <span
+                        className={`px-2 py-0.5 rounded-full text-xs border ${statusStyles[zone.status]}`}
+                      >
                         {zone.status}
                       </span>
                     </div>
@@ -200,4 +220,3 @@ export default function SafeZones() {
     </div>
   );
 }
-

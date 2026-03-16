@@ -27,11 +27,7 @@ function getScoreLabel(score: number): string {
   return 'CRITICAL';
 }
 
-export default function SpotlightScore({
-  score,
-  children,
-  onReady,
-}: SpotlightScoreProps) {
+export default function SpotlightScore({ score, children, onReady }: SpotlightScoreProps) {
   const [stage, setStage] = useState<'spotlight' | 'expanding' | 'revealed'>('spotlight');
 
   const scoreColor = getScoreColor(score);

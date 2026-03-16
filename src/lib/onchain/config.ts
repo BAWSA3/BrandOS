@@ -4,20 +4,20 @@ import { OnchainChainKey, OnchainConfig } from './types';
 // Placeholder UIDs follow EAS format (bytes32 hex).
 // Replace with real UIDs after registering schemas on each chain.
 const BASE_SCHEMA_UIDS = {
-  brandDna:     '0x' + '0'.repeat(62) + '01',
+  brandDna: '0x' + '0'.repeat(62) + '01',
   contentCheck: '0x' + '0'.repeat(62) + '02',
-  brandScore:   '0x' + '0'.repeat(62) + '03',
+  brandScore: '0x' + '0'.repeat(62) + '03',
   voiceFingerprint: '0x' + '0'.repeat(62) + '04',
-  brandHealth:  '0x' + '0'.repeat(62) + '05',
+  brandHealth: '0x' + '0'.repeat(62) + '05',
 } as const;
 
 // Avalanche schemas are registered separately — fill in after deployment
 const AVAX_SCHEMA_UIDS = {
-  brandDna:     '0x' + '0'.repeat(62) + '01',
+  brandDna: '0x' + '0'.repeat(62) + '01',
   contentCheck: '0x' + '0'.repeat(62) + '02',
-  brandScore:   '0x' + '0'.repeat(62) + '03',
+  brandScore: '0x' + '0'.repeat(62) + '03',
   voiceFingerprint: '0x' + '0'.repeat(62) + '04',
-  brandHealth:  '0x' + '0'.repeat(62) + '05',
+  brandHealth: '0x' + '0'.repeat(62) + '05',
 } as const;
 
 // ── Chain configurations ──────────────────────────────────────────────
@@ -67,9 +67,9 @@ export const AVALANCHE_FUJI: OnchainConfig = {
 // ── Lookup maps ───────────────────────────────────────────────────────
 
 const CHAIN_CONFIGS: Record<OnchainChainKey, OnchainConfig> = {
-  'base': BASE_MAINNET,
+  base: BASE_MAINNET,
   'base-sepolia': BASE_SEPOLIA,
-  'avalanche': AVALANCHE_MAINNET,
+  avalanche: AVALANCHE_MAINNET,
   'avalanche-fuji': AVALANCHE_FUJI,
 };
 
@@ -103,7 +103,7 @@ export function getOnchainConfig(): OnchainConfig {
   if (!config) {
     throw new Error(
       `Invalid NEXT_PUBLIC_ONCHAIN_CHAIN="${chainKey}". ` +
-      `Valid values: ${Object.keys(CHAIN_CONFIGS).join(', ')}`
+        `Valid values: ${Object.keys(CHAIN_CONFIGS).join(', ')}`
     );
   }
   return config;
@@ -123,8 +123,7 @@ export function getExplorerTxUrl(txHash: string): string {
   if (config.chainId === 43114 || config.chainId === 43113) {
     return `${config.explorerUrl}/tx/${txHash}`;
   }
-  const baseExplorer = config.chainId === 8453
-    ? 'https://basescan.org'
-    : 'https://sepolia.basescan.org';
+  const baseExplorer =
+    config.chainId === 8453 ? 'https://basescan.org' : 'https://sepolia.basescan.org';
   return `${baseExplorer}/tx/${txHash}`;
 }

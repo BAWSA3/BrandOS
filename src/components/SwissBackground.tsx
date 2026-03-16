@@ -17,12 +17,14 @@ export default function SwissBackground({
   className = '',
   children,
 }: SwissBackgroundProps) {
-  const clouds = showClouds ?? (mode === 'full');
+  const clouds = showClouds ?? mode === 'full';
   const orbOpacity = mode === 'page' ? 'opacity-30' : '';
 
   if (mode === 'full') {
     return (
-      <div className={`fixed inset-0 z-[100] bg-brand-cream flex flex-col overflow-hidden ${className}`}>
+      <div
+        className={`fixed inset-0 z-[100] bg-brand-cream flex flex-col overflow-hidden ${className}`}
+      >
         {/* Grid lines */}
         <div
           className="absolute inset-0 pointer-events-none"
@@ -39,32 +41,48 @@ export default function SwissBackground({
             <div
               className="absolute"
               style={{
-                width: '50vw', height: '50vh', top: '-5%', left: '-8%',
-                background: 'radial-gradient(ellipse 80% 80% at 55% 60%, rgba(47,84,235,1) 0%, rgba(47,84,235,0.7) 25%, rgba(47,84,235,0.25) 50%, transparent 70%)',
+                width: '50vw',
+                height: '50vh',
+                top: '-5%',
+                left: '-8%',
+                background:
+                  'radial-gradient(ellipse 80% 80% at 55% 60%, rgba(47,84,235,1) 0%, rgba(47,84,235,0.7) 25%, rgba(47,84,235,0.25) 50%, transparent 70%)',
                 filter: 'blur(15px)',
               }}
             />
             <div
               className="absolute"
               style={{
-                width: '18vw', height: '18vw', top: '-4%', right: '8%',
-                background: 'radial-gradient(circle, rgba(47,84,235,1) 0%, rgba(47,84,235,0.6) 35%, transparent 65%)',
+                width: '18vw',
+                height: '18vw',
+                top: '-4%',
+                right: '8%',
+                background:
+                  'radial-gradient(circle, rgba(47,84,235,1) 0%, rgba(47,84,235,0.6) 35%, transparent 65%)',
                 filter: 'blur(10px)',
               }}
             />
             <div
               className="absolute"
               style={{
-                width: '45vw', height: '55vh', top: '5%', right: '-8%',
-                background: 'radial-gradient(ellipse 75% 80% at 45% 50%, rgba(250,140,22,1) 0%, rgba(250,140,22,0.65) 25%, rgba(250,140,22,0.2) 50%, transparent 70%)',
+                width: '45vw',
+                height: '55vh',
+                top: '5%',
+                right: '-8%',
+                background:
+                  'radial-gradient(ellipse 75% 80% at 45% 50%, rgba(250,140,22,1) 0%, rgba(250,140,22,0.65) 25%, rgba(250,140,22,0.2) 50%, transparent 70%)',
                 filter: 'blur(15px)',
               }}
             />
             <div
               className="absolute"
               style={{
-                width: '40vw', height: '40vh', bottom: '-8%', left: '0%',
-                background: 'radial-gradient(ellipse 80% 80% at 50% 40%, rgba(47,84,235,1) 0%, rgba(47,84,235,0.6) 25%, rgba(47,84,235,0.15) 50%, transparent 70%)',
+                width: '40vw',
+                height: '40vh',
+                bottom: '-8%',
+                left: '0%',
+                background:
+                  'radial-gradient(ellipse 80% 80% at 50% 40%, rgba(47,84,235,1) 0%, rgba(47,84,235,0.6) 25%, rgba(47,84,235,0.15) 50%, transparent 70%)',
                 filter: 'blur(12px)',
               }}
             />
@@ -83,9 +101,7 @@ export default function SwissBackground({
         )}
 
         {/* Content */}
-        <div className="relative z-10 flex-1 flex flex-col">
-          {children}
-        </div>
+        <div className="relative z-10 flex-1 flex flex-col">{children}</div>
       </div>
     );
   }
@@ -109,16 +125,24 @@ export default function SwissBackground({
           <div
             className="absolute"
             style={{
-              width: '50vw', height: '50vh', top: '-5%', left: '-8%',
-              background: 'radial-gradient(ellipse 80% 80% at 55% 60%, rgba(47,84,235,1) 0%, rgba(47,84,235,0.7) 25%, rgba(47,84,235,0.25) 50%, transparent 70%)',
+              width: '50vw',
+              height: '50vh',
+              top: '-5%',
+              left: '-8%',
+              background:
+                'radial-gradient(ellipse 80% 80% at 55% 60%, rgba(47,84,235,1) 0%, rgba(47,84,235,0.7) 25%, rgba(47,84,235,0.25) 50%, transparent 70%)',
               filter: 'blur(15px)',
             }}
           />
           <div
             className="absolute"
             style={{
-              width: '45vw', height: '55vh', top: '5%', right: '-8%',
-              background: 'radial-gradient(ellipse 75% 80% at 45% 50%, rgba(250,140,22,1) 0%, rgba(250,140,22,0.65) 25%, rgba(250,140,22,0.2) 50%, transparent 70%)',
+              width: '45vw',
+              height: '55vh',
+              top: '5%',
+              right: '-8%',
+              background:
+                'radial-gradient(ellipse 75% 80% at 45% 50%, rgba(250,140,22,1) 0%, rgba(250,140,22,0.65) 25%, rgba(250,140,22,0.2) 50%, transparent 70%)',
               filter: 'blur(15px)',
             }}
           />
@@ -137,9 +161,7 @@ export default function SwissBackground({
       )}
 
       {/* Content */}
-      <div className="relative z-10">
-        {children}
-      </div>
+      <div className="relative z-10">{children}</div>
     </div>
   );
 }

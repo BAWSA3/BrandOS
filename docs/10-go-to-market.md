@@ -19,6 +19,7 @@ BrandOS follows a **product-led growth (PLG)** strategy with targeted outbound f
 **Target:** Content-heavy startups (Series A-C) with small marketing teams
 
 **Why this wedge:**
+
 - Feel brand consistency pain acutely
 - Can't afford dedicated brand managers
 - Fast decision-making (no procurement)
@@ -50,6 +51,7 @@ BrandOS follows a **product-led growth (PLG)** strategy with targeted outbound f
 ### Phase 2: Expansion (Months 6-12)
 
 **Add targets:**
+
 - Digital-native DTC brands
 - Mid-market B2B SaaS
 - Small agencies (10-50 people)
@@ -57,6 +59,7 @@ BrandOS follows a **product-led growth (PLG)** strategy with targeted outbound f
 ### Phase 3: Scale (Months 12-24)
 
 **Add targets:**
+
 - Enterprise brand teams
 - Large agencies
 - Global brands (English-first markets)
@@ -96,6 +99,7 @@ BrandOS follows a **product-led growth (PLG)** strategy with targeted outbound f
 **Strategy:** Become the definitive resource for brand consistency
 
 **Content pillars:**
+
 1. "Brand Consistency" - Core topic authority
 2. "AI Content Quality" - Emerging topic capture
 3. "Brand Guidelines" - High-intent transactional
@@ -103,37 +107,38 @@ BrandOS follows a **product-led growth (PLG)** strategy with targeted outbound f
 
 **Content types:**
 
-| Type | Frequency | Goal |
-|------|-----------|------|
-| Blog posts | 2-3/week | SEO, thought leadership |
-| Guides/Playbooks | 1/month | Lead generation |
-| Templates | Ongoing | Free value, email capture |
-| Case studies | 2/month | Social proof |
-| Comparison pages | As needed | Bottom-funnel capture |
+| Type             | Frequency | Goal                      |
+| ---------------- | --------- | ------------------------- |
+| Blog posts       | 2-3/week  | SEO, thought leadership   |
+| Guides/Playbooks | 1/month   | Lead generation           |
+| Templates        | Ongoing   | Free value, email capture |
+| Case studies     | 2/month   | Social proof              |
+| Comparison pages | As needed | Bottom-funnel capture     |
 
 **Target keywords:**
 
-| Keyword | Volume | Difficulty | Intent |
-|---------|--------|------------|--------|
-| "brand guidelines template" | 8,100 | Medium | Transactional |
-| "brand voice examples" | 3,600 | Low | Informational |
-| "brand consistency" | 2,900 | Medium | Informational |
-| "AI content checker" | 1,900 | Low | Transactional |
-| "brand tone of voice" | 1,600 | Low | Informational |
+| Keyword                     | Volume | Difficulty | Intent        |
+| --------------------------- | ------ | ---------- | ------------- |
+| "brand guidelines template" | 8,100  | Medium     | Transactional |
+| "brand voice examples"      | 3,600  | Low        | Informational |
+| "brand consistency"         | 2,900  | Medium     | Informational |
+| "AI content checker"        | 1,900  | Low        | Transactional |
+| "brand tone of voice"       | 1,600  | Low        | Informational |
 
 ### Channel 2: Community & Social (30% of Acquisition)
 
 **Platforms:**
 
-| Platform | Strategy | Content Type |
-|----------|----------|--------------|
-| **Twitter/X** | Brand/marketing discourse | Tips, takes, engagement |
-| **LinkedIn** | Professional authority | Long-form, case studies |
-| **Product Hunt** | Launch amplification | Product story |
-| **Indie Hackers** | Builder community | Building in public |
-| **Reddit** | Community help | r/marketing, r/startups |
+| Platform          | Strategy                  | Content Type            |
+| ----------------- | ------------------------- | ----------------------- |
+| **Twitter/X**     | Brand/marketing discourse | Tips, takes, engagement |
+| **LinkedIn**      | Professional authority    | Long-form, case studies |
+| **Product Hunt**  | Launch amplification      | Product story           |
+| **Indie Hackers** | Builder community         | Building in public      |
+| **Reddit**        | Community help            | r/marketing, r/startups |
 
 **Community tactics:**
+
 - Weekly brand teardowns (public analysis of famous brands)
 - Monthly "Brand Roast" events (community submits brands)
 - Brand Manager Slack community
@@ -143,14 +148,15 @@ BrandOS follows a **product-led growth (PLG)** strategy with targeted outbound f
 
 **Budget allocation:**
 
-| Channel | % of Paid | Target CPA |
-|---------|-----------|------------|
-| Google Ads | 50% | $50 |
-| LinkedIn Ads | 30% | $100 |
-| Twitter Ads | 10% | $40 |
-| Retargeting | 10% | $20 |
+| Channel      | % of Paid | Target CPA |
+| ------------ | --------- | ---------- |
+| Google Ads   | 50%       | $50        |
+| LinkedIn Ads | 30%       | $100       |
+| Twitter Ads  | 10%       | $40        |
+| Retargeting  | 10%       | $20        |
 
 **Campaign types:**
+
 - Search: "brand guidelines software", "brand consistency tool"
 - Display: Retargeting blog visitors
 - LinkedIn: Job title targeting (Brand Manager, Head of Marketing)
@@ -160,12 +166,12 @@ BrandOS follows a **product-led growth (PLG)** strategy with targeted outbound f
 
 **Partner types:**
 
-| Partner Type | Value Exchange | Examples |
-|--------------|----------------|----------|
-| **Tool integrations** | Cross-promotion | Figma, Slack, CMS |
-| **Agency partners** | Referral commission | Marketing agencies |
-| **Influencer affiliates** | Revenue share | Marketing creators |
-| **Technology partners** | Joint solutions | AI/content tools |
+| Partner Type              | Value Exchange      | Examples           |
+| ------------------------- | ------------------- | ------------------ |
+| **Tool integrations**     | Cross-promotion     | Figma, Slack, CMS  |
+| **Agency partners**       | Referral commission | Marketing agencies |
+| **Influencer affiliates** | Revenue share       | Marketing creators |
+| **Technology partners**   | Joint solutions     | AI/content tools   |
 
 ---
 
@@ -173,39 +179,42 @@ BrandOS follows a **product-led growth (PLG)** strategy with targeted outbound f
 
 ### Pre-Launch (4 weeks before)
 
-| Week | Activities |
-|------|------------|
-| -4 | Seed content published, waitlist opens |
-| -3 | Beta testers invited, feedback collected |
-| -2 | Product Hunt scheduled, press outreach |
-| -1 | Launch assets finalized, community primed |
+| Week | Activities                                |
+| ---- | ----------------------------------------- |
+| -4   | Seed content published, waitlist opens    |
+| -3   | Beta testers invited, feedback collected  |
+| -2   | Product Hunt scheduled, press outreach    |
+| -1   | Launch assets finalized, community primed |
 
 ### Launch Week
 
 **Day 0: Product Hunt Launch**
+
 - Post live at 12:01 AM PT
 - Team engages all day
 - Social amplification
 - Email to waitlist
 
 **Day 1-3: Press & Outreach**
+
 - Tech press coverage
 - Marketing newsletter mentions
 - Podcast announcements
 
 **Day 4-7: Community Engagement**
+
 - Reddit AMAs
 - Twitter Spaces
 - LinkedIn Live demo
 
 ### Post-Launch (Weeks 1-4)
 
-| Week | Focus |
-|------|-------|
-| 1 | Respond to all feedback, fix critical bugs |
-| 2 | Publish launch retrospective, user stories |
-| 3 | First case study, feature iteration |
-| 4 | Settle into regular content cadence |
+| Week | Focus                                      |
+| ---- | ------------------------------------------ |
+| 1    | Respond to all feedback, fix critical bugs |
+| 2    | Publish launch retrospective, user stories |
+| 3    | First case study, feature iteration        |
+| 4    | Settle into regular content cadence        |
 
 ---
 
@@ -214,12 +223,14 @@ BrandOS follows a **product-led growth (PLG)** strategy with targeted outbound f
 ### Self-Serve (Free → Starter → Pro)
 
 **Conversion triggers:**
+
 - Usage limit hit
 - Feature gating
 - Team growth
 - In-app prompts
 
 **Touchpoints:**
+
 - Onboarding emails (Days 1, 3, 7, 14)
 - In-app upgrade prompts
 - Feature-specific emails
@@ -228,7 +239,8 @@ BrandOS follows a **product-led growth (PLG)** strategy with targeted outbound f
 ### Sales-Assisted (Pro → Enterprise)
 
 **Qualification criteria:**
-- >5 team members
+
+- > 5 team members
 - Multi-brand need
 - Compliance requirements
 - Integration needs
@@ -242,6 +254,7 @@ Discovery Call → Demo → Proposal → Negotiation → Close
 ```
 
 **Sales playbook:**
+
 1. Discovery: Understand pain, current tools, buying process
 2. Demo: Customize to their use case, show ROI
 3. Proposal: Clear pricing, implementation plan
@@ -254,20 +267,20 @@ Discovery Call → Demo → Proposal → Negotiation → Close
 
 ### Launch Pricing
 
-| Offer | Duration | Discount |
-|-------|----------|----------|
-| Early adopter | First 100 | 30% lifetime |
-| Launch week | 7 days | 20% first year |
-| Annual | Ongoing | 20% vs monthly |
+| Offer         | Duration  | Discount       |
+| ------------- | --------- | -------------- |
+| Early adopter | First 100 | 30% lifetime   |
+| Launch week   | 7 days    | 20% first year |
+| Annual        | Ongoing   | 20% vs monthly |
 
 ### Promotional Campaigns
 
-| Campaign | Timing | Offer |
-|----------|--------|-------|
-| Product Hunt | Launch | 3 months Pro free |
-| Q4 Push | Nov-Dec | Annual at 40% off |
-| New Year | Jan | "New brand, new year" bundle |
-| Spring | Mar-Apr | Agency partner launch |
+| Campaign     | Timing  | Offer                        |
+| ------------ | ------- | ---------------------------- |
+| Product Hunt | Launch  | 3 months Pro free            |
+| Q4 Push      | Nov-Dec | Annual at 40% off            |
+| New Year     | Jan     | "New brand, new year" bundle |
+| Spring       | Mar-Apr | Agency partner launch        |
 
 ---
 
@@ -279,22 +292,22 @@ Discovery Call → Demo → Proposal → Negotiation → Close
 
 ### Value Propositions by Persona
 
-| Persona | Primary Pain | BrandOS Value Prop |
-|---------|--------------|-------------------|
-| Brand Manager | "I'm a bottleneck" | "Automate 70% of brand reviews" |
-| Content Creator | "Is this on-brand?" | "Know before you publish" |
-| Marketing Leader | "Brand is diluting" | "Quantify and protect brand equity" |
-| Agency CD | "Revision cycles kill margins" | "First-time approval rate up 40%" |
+| Persona          | Primary Pain                   | BrandOS Value Prop                  |
+| ---------------- | ------------------------------ | ----------------------------------- |
+| Brand Manager    | "I'm a bottleneck"             | "Automate 70% of brand reviews"     |
+| Content Creator  | "Is this on-brand?"            | "Know before you publish"           |
+| Marketing Leader | "Brand is diluting"            | "Quantify and protect brand equity" |
+| Agency CD        | "Revision cycles kill margins" | "First-time approval rate up 40%"   |
 
 ### Messaging by Funnel Stage
 
-| Stage | Message Focus | CTA |
-|-------|---------------|-----|
-| Awareness | Problem agitation | Read more |
-| Interest | Solution overview | See how it works |
+| Stage         | Message Focus     | CTA              |
+| ------------- | ----------------- | ---------------- |
+| Awareness     | Problem agitation | Read more        |
+| Interest      | Solution overview | See how it works |
 | Consideration | Feature deep-dive | Start free trial |
-| Decision | Social proof, ROI | Talk to sales |
-| Retention | Success stories | Refer a friend |
+| Decision      | Social proof, ROI | Talk to sales    |
+| Retention     | Success stories   | Refer a friend   |
 
 ---
 
@@ -322,13 +335,13 @@ FOCUSED ├───────────────────┼───
 
 ### Competitive Differentiation
 
-| Competitor | Their Focus | BrandOS Advantage |
-|------------|-------------|-------------------|
-| Frontify | Asset management | AI-native, content-first |
-| Bynder | Enterprise DAM | Accessible pricing, faster time-to-value |
-| Jasper | AI writing | Brand DNA integration, checking |
-| Copy.ai | AI copy | Deep brand understanding |
-| Grammarly | Grammar/style | Brand-specific, not generic |
+| Competitor | Their Focus      | BrandOS Advantage                        |
+| ---------- | ---------------- | ---------------------------------------- |
+| Frontify   | Asset management | AI-native, content-first                 |
+| Bynder     | Enterprise DAM   | Accessible pricing, faster time-to-value |
+| Jasper     | AI writing       | Brand DNA integration, checking          |
+| Copy.ai    | AI copy          | Deep brand understanding                 |
+| Grammarly  | Grammar/style    | Brand-specific, not generic              |
 
 ---
 
@@ -340,65 +353,48 @@ FOCUSED ├───────────────────┼───
 
 ### Funnel Metrics
 
-| Stage | Metric | Target |
-|-------|--------|--------|
-| Awareness | Monthly unique visitors | 50K |
-| Activation | Free sign-ups | 5K/month |
-| Engagement | Weekly active users | 40% of sign-ups |
-| Revenue | MRR | $50K (Month 6) |
-| Retention | Monthly churn | <5% |
-| Referral | Viral coefficient | 0.3 |
+| Stage      | Metric                  | Target          |
+| ---------- | ----------------------- | --------------- |
+| Awareness  | Monthly unique visitors | 50K             |
+| Activation | Free sign-ups           | 5K/month        |
+| Engagement | Weekly active users     | 40% of sign-ups |
+| Revenue    | MRR                     | $50K (Month 6)  |
+| Retention  | Monthly churn           | <5%             |
+| Referral   | Viral coefficient       | 0.3             |
 
 ### Channel Metrics
 
-| Channel | Metric | Target |
-|---------|--------|--------|
-| SEO | Organic traffic | 30K/month |
-| Content | Email subscribers | 10K |
-| Social | Followers (all) | 25K |
-| Paid | ROAS | 3:1 |
-| Sales | Qualified leads | 50/month |
+| Channel | Metric            | Target    |
+| ------- | ----------------- | --------- |
+| SEO     | Organic traffic   | 30K/month |
+| Content | Email subscribers | 10K       |
+| Social  | Followers (all)   | 25K       |
+| Paid    | ROAS              | 3:1       |
+| Sales   | Qualified leads   | 50/month  |
 
 ---
 
 ## Budget Allocation (Year 1)
 
-| Category | % of Marketing Budget | Activities |
-|----------|----------------------|------------|
-| Content | 35% | Writers, SEO tools, design |
-| Paid | 25% | Ads, sponsorships |
-| Events | 15% | Conferences, webinars |
-| Tools | 10% | Marketing stack |
-| Team | 15% | Contractor/agency support |
+| Category | % of Marketing Budget | Activities                 |
+| -------- | --------------------- | -------------------------- |
+| Content  | 35%                   | Writers, SEO tools, design |
+| Paid     | 25%                   | Ads, sponsorships          |
+| Events   | 15%                   | Conferences, webinars      |
+| Tools    | 10%                   | Marketing stack            |
+| Team     | 15%                   | Contractor/agency support  |
 
 ---
 
 ## Timeline
 
-| Quarter | Focus | Key Milestones |
-|---------|-------|----------------|
-| Q1 | Launch & Learn | PH launch, 1K free users, 50 paid |
-| Q2 | Content Engine | 20K visitors, 200 paid, first case studies |
-| Q3 | Channel Expansion | Integrations live, 500 paid, agency program |
-| Q4 | Scale & Optimize | 50K visitors, 1K paid, first enterprise |
+| Quarter | Focus             | Key Milestones                              |
+| ------- | ----------------- | ------------------------------------------- |
+| Q1      | Launch & Learn    | PH launch, 1K free users, 50 paid           |
+| Q2      | Content Engine    | 20K visitors, 200 paid, first case studies  |
+| Q3      | Channel Expansion | Integrations live, 500 paid, agency program |
+| Q4      | Scale & Optimize  | 50K visitors, 1K paid, first enterprise     |
 
 ---
 
-*Next: [Team & Advisors →](11-team-advisors.md)*
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+_Next: [Team & Advisors →](11-team-advisors.md)_

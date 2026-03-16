@@ -3,18 +3,10 @@
 // Computes unified brand consistency scores across all connected platforms.
 // =============================================================================
 
-import type {
-  ContentItem,
-  SocialPlatform,
-  CrossPlatformScore,
-  PlatformBrandScore,
-} from './types';
+import type { ContentItem, SocialPlatform, CrossPlatformScore, PlatformBrandScore } from './types';
 import { PLATFORM_NORMS, PLATFORM_LABELS } from './types';
 import { computeEngagementFromContent, computeActivityFromContent } from './brand-health-engine';
-import {
-  analyzeVoiceConsistencyByPlatform,
-  computeCrossPlatformVoiceScore,
-} from './voice-engine';
+import { analyzeVoiceConsistencyByPlatform, computeCrossPlatformVoiceScore } from './voice-engine';
 import type { VoiceFingerprint } from '@/lib/voice-fingerprint';
 
 /**
@@ -52,7 +44,12 @@ export async function computeCrossPlatformBrandScore(
     const themeScore = voiceReport?.dimensions?.topicConsistency ?? 0;
 
     // Overall per-platform score
-    const platformOverall = computePlatformOverall(voiceScore, visualScore, themeScore, items.length);
+    const platformOverall = computePlatformOverall(
+      voiceScore,
+      visualScore,
+      themeScore,
+      items.length
+    );
 
     perPlatform[platform] = {
       platform,
@@ -68,22 +65,26 @@ export async function computeCrossPlatformBrandScore(
 
   // 3. Cross-platform consistency metrics
   const platformScores = Object.values(perPlatform).map((p) => p.overallScore);
-  const avgScore = platformScores.length > 0
-    ? Math.round(platformScores.reduce((a, b) => a + b, 0) / platformScores.length)
-    : 0;
+  const avgScore =
+    platformScores.length > 0
+      ? Math.round(platformScores.reduce((a, b) => a + b, 0) / platformScores.length)
+      : 0;
 
-  const variance = platformScores.length > 1
-    ? platformScores.reduce((sum, s) => sum + Math.pow(s - avgScore, 2), 0) / platformScores.length
-    : 0;
+  const variance =
+    platformScores.length > 1
+      ? platformScores.reduce((sum, s) => sum + Math.pow(s - avgScore, 2), 0) /
+        platformScores.length
+      : 0;
   const crossPlatformConsistency = Math.round(Math.max(0, 100 - Math.sqrt(variance) * 2));
 
   // 4. Visual consistency dimension (average of per-platform visual scores)
   const visualScoreValues = platforms
     .map((p) => perPlatform[p]?.visualScore ?? 0)
     .filter((s) => s > 0);
-  const avgVisual = visualScoreValues.length > 0
-    ? Math.round(visualScoreValues.reduce((a, b) => a + b, 0) / visualScoreValues.length)
-    : 0;
+  const avgVisual =
+    visualScoreValues.length > 0
+      ? Math.round(visualScoreValues.reduce((a, b) => a + b, 0) / visualScoreValues.length)
+      : 0;
 
   // 5. Posting cadence health
   const cadenceHealth = computePostingCadenceHealth(grouped);
@@ -150,14 +151,13 @@ function computePostingCadenceHealth(
 
   if (platformActivities.length === 0) return 0;
 
-  const avgActivity =
-    platformActivities.reduce((a, b) => a + b, 0) / platformActivities.length;
+  const avgActivity = platformActivities.reduce((a, b) => a + b, 0) / platformActivities.length;
 
   // Penalize if some platforms are active but others are neglected
   if (platformActivities.length > 1) {
     const minActivity = Math.min(...platformActivities);
     const maxActivity = Math.max(...platformActivities);
-    const imbalancePenalty = (maxActivity - minActivity) > 40 ? 10 : 0;
+    const imbalancePenalty = maxActivity - minActivity > 40 ? 10 : 0;
     return Math.round(Math.max(0, avgActivity - imbalancePenalty));
   }
 
@@ -175,9 +175,10 @@ function detectDrift(
   if (scored.length <= 1) {
     return {
       direction: 'stable',
-      explanation: scored.length === 0
-        ? 'No content to analyze for drift.'
-        : 'Only one platform connected. Connect more for drift detection.',
+      explanation:
+        scored.length === 0
+          ? 'No content to analyze for drift.'
+          : 'Only one platform connected. Connect more for drift detection.',
     };
   }
 
@@ -225,26 +226,24 @@ function computeOverallCrossPlatformScore(dims: {
     // Without visual data, redistribute
     return Math.round(
       dims.voiceConsistency * 0.4 +
-      dims.contentThemeAlignment * 0.25 +
-      dims.postingCadenceHealth * 0.15 +
-      dims.crossPlatformConsistency * 0.2
+        dims.contentThemeAlignment * 0.25 +
+        dims.postingCadenceHealth * 0.15 +
+        dims.crossPlatformConsistency * 0.2
     );
   }
 
   return Math.round(
     dims.voiceConsistency * 0.3 +
-    dims.visualConsistency * 0.2 +
-    dims.contentThemeAlignment * 0.2 +
-    dims.postingCadenceHealth * 0.1 +
-    dims.crossPlatformConsistency * 0.2
+      dims.visualConsistency * 0.2 +
+      dims.contentThemeAlignment * 0.2 +
+      dims.postingCadenceHealth * 0.1 +
+      dims.crossPlatformConsistency * 0.2
   );
 }
 
 // ── Helpers ─────────────────────────────────────────────────────
 
-function groupByPlatform(
-  items: ContentItem[]
-): Partial<Record<SocialPlatform, ContentItem[]>> {
+function groupByPlatform(items: ContentItem[]): Partial<Record<SocialPlatform, ContentItem[]>> {
   const grouped: Partial<Record<SocialPlatform, ContentItem[]>> = {};
   for (const item of items) {
     if (!grouped[item.platform]) grouped[item.platform] = [];

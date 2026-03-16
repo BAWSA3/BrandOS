@@ -17,7 +17,9 @@ export async function GET(request: NextRequest) {
     if (!accessToken) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
 
     const supabase = createClient(supabaseUrl, supabaseAnonKey);
-    const { data: { user } } = await supabase.auth.getUser(accessToken);
+    const {
+      data: { user },
+    } = await supabase.auth.getUser(accessToken);
     if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
 
     const dbUser = await prisma.user.findUnique({ where: { supabaseId: user.id } });

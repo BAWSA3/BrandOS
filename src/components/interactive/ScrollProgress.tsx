@@ -91,11 +91,7 @@ interface SectionProgressProps {
   onSectionClick?: (index: number) => void;
 }
 
-export function SectionProgress({
-  sections,
-  activeIndex,
-  onSectionClick,
-}: SectionProgressProps) {
+export function SectionProgress({ sections, activeIndex, onSectionClick }: SectionProgressProps) {
   return (
     <div
       style={{
@@ -177,8 +173,7 @@ export function SectionProgress({
                   left: '50%',
                   width: 1,
                   height: 12,
-                  background:
-                    i < activeIndex ? 'rgba(16, 185, 129, 0.5)' : 'rgba(0, 0, 0, 0.1)',
+                  background: i < activeIndex ? 'rgba(16, 185, 129, 0.5)' : 'rgba(0, 0, 0, 0.1)',
                   transform: 'translateX(-50%)',
                 }}
               />

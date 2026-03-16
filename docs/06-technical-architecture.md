@@ -47,30 +47,30 @@ BrandOS is built as a modern web application with AI-native capabilities at its 
 
 ### Frontend
 
-| Technology | Purpose | Rationale |
-|------------|---------|-----------|
-| **Next.js 14** | React framework | App Router, Server Components, API routes |
-| **TypeScript** | Type safety | Catch errors early, better DX |
-| **Tailwind CSS** | Styling | Rapid UI development, consistent design |
-| **Zustand** | State management | Lightweight, persistent, simple |
-| **React Hooks** | Component logic | Modern React patterns |
+| Technology       | Purpose          | Rationale                                 |
+| ---------------- | ---------------- | ----------------------------------------- |
+| **Next.js 14**   | React framework  | App Router, Server Components, API routes |
+| **TypeScript**   | Type safety      | Catch errors early, better DX             |
+| **Tailwind CSS** | Styling          | Rapid UI development, consistent design   |
+| **Zustand**      | State management | Lightweight, persistent, simple           |
+| **React Hooks**  | Component logic  | Modern React patterns                     |
 
 ### Backend
 
-| Technology | Purpose | Rationale |
-|------------|---------|-----------|
-| **Next.js API Routes** | API endpoints | Unified deployment, serverless ready |
-| **Prisma** | Database ORM | Type-safe queries, migrations |
-| **SQLite/PostgreSQL** | Database | SQLite for dev, Postgres for prod |
-| **OpenAI API** | AI capabilities | GPT-4 for generation and analysis |
+| Technology             | Purpose         | Rationale                            |
+| ---------------------- | --------------- | ------------------------------------ |
+| **Next.js API Routes** | API endpoints   | Unified deployment, serverless ready |
+| **Prisma**             | Database ORM    | Type-safe queries, migrations        |
+| **SQLite/PostgreSQL**  | Database        | SQLite for dev, Postgres for prod    |
+| **OpenAI API**         | AI capabilities | GPT-4 for generation and analysis    |
 
 ### Infrastructure
 
-| Technology | Purpose | Rationale |
-|------------|---------|-----------|
-| **Vercel** | Hosting | Optimal Next.js deployment |
-| **Edge Functions** | Low-latency API | Global distribution |
-| **Blob Storage** | Asset storage | Images, exports |
+| Technology         | Purpose         | Rationale                  |
+| ------------------ | --------------- | -------------------------- |
+| **Vercel**         | Hosting         | Optimal Next.js deployment |
+| **Edge Functions** | Low-latency API | Global distribution        |
+| **Blob Storage**   | Asset storage   | Images, exports            |
 
 ---
 
@@ -123,7 +123,7 @@ model Brand {
   shareToken   String?  @unique
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
-  
+
   userId       String
   user         User     @relation(fields: [userId], references: [id])
   teamId       String?
@@ -268,13 +268,13 @@ Output Format:
 
 ### AI Model Configuration
 
-| Use Case | Model | Temperature | Max Tokens |
-|----------|-------|-------------|------------|
-| Content Check | GPT-4 | 0.3 | 1,000 |
-| Generation | GPT-4 | 0.7 | 2,000 |
-| Tone Analysis | GPT-4 | 0.2 | 500 |
-| Taste Translation | GPT-4 | 0.5 | 800 |
-| Design Intent | GPT-4 | 0.6 | 1,000 |
+| Use Case          | Model | Temperature | Max Tokens |
+| ----------------- | ----- | ----------- | ---------- |
+| Content Check     | GPT-4 | 0.3         | 1,000      |
+| Generation        | GPT-4 | 0.7         | 2,000      |
+| Tone Analysis     | GPT-4 | 0.2         | 500        |
+| Taste Translation | GPT-4 | 0.5         | 800        |
+| Design Intent     | GPT-4 | 0.6         | 1,000      |
 
 ---
 
@@ -287,22 +287,22 @@ interface BrandStore {
   // Brand Data
   brands: BrandDNA[];
   currentBrandId: string | null;
-  
+
   // Actions
   createBrand: (name: string) => void;
   deleteBrand: (id: string) => void;
   switchBrand: (id: string) => void;
   setBrandDNA: (updates: Partial<BrandDNA>) => void;
-  
+
   // History
   history: HistoryItem[];
   addHistoryItem: (item: Omit<HistoryItem, 'id' | 'timestamp'>) => void;
   clearHistory: () => void;
-  
+
   // UI State
   theme: 'light' | 'dark';
   toggleTheme: () => void;
-  
+
   // Design Features
   designIntents: DesignIntentBlock[];
   addDesignIntent: (intent: DesignIntentBlock) => void;
@@ -364,14 +364,14 @@ Web Page                    Extension                    BrandOS Server
 // Stored in extension local storage
 chrome.storage.local.set({
   serverUrl: 'https://brandos.app',
-  apiKey: 'brandos_key_xxx'
+  apiKey: 'brandos_key_xxx',
 });
 
 // Used in requests
 fetch(`${serverUrl}/api/webhook/check`, {
   headers: {
-    'Authorization': `Bearer ${apiKey}`
-  }
+    Authorization: `Bearer ${apiKey}`,
+  },
 });
 ```
 
@@ -381,11 +381,11 @@ fetch(`${serverUrl}/api/webhook/check`, {
 
 ### Authentication
 
-| Method | Use Case | Implementation |
-|--------|----------|----------------|
-| Session-based | Web app | Next-auth with database sessions |
-| API Key | Chrome extension | Custom key generation and validation |
-| Share Token | Public brand access | UUID tokens with read-only access |
+| Method        | Use Case            | Implementation                       |
+| ------------- | ------------------- | ------------------------------------ |
+| Session-based | Web app             | Next-auth with database sessions     |
+| API Key       | Chrome extension    | Custom key generation and validation |
+| Share Token   | Public brand access | UUID tokens with read-only access    |
 
 ### Data Protection
 
@@ -441,12 +441,12 @@ PINTEREST_ACCESS_TOKEN=...
 
 ### Scaling Strategies
 
-| Component | Strategy |
-|-----------|----------|
-| Database | Migrate to managed Postgres, add read replicas |
-| AI Calls | Queue with rate limiting, response caching |
-| Static Assets | CDN distribution |
-| API | Horizontal scaling with load balancer |
+| Component     | Strategy                                       |
+| ------------- | ---------------------------------------------- |
+| Database      | Migrate to managed Postgres, add read replicas |
+| AI Calls      | Queue with rate limiting, response caching     |
+| Static Assets | CDN distribution                               |
+| API           | Horizontal scaling with load balancer          |
 
 ---
 
@@ -474,12 +474,12 @@ npm run dev
 
 ### Testing Strategy
 
-| Type | Tool | Coverage Target |
-|------|------|-----------------|
-| Unit | Jest | Core functions |
-| Integration | Playwright | API endpoints |
-| E2E | Cypress | Critical paths |
-| AI Output | Custom harness | Prompt regression |
+| Type        | Tool           | Coverage Target   |
+| ----------- | -------------- | ----------------- |
+| Unit        | Jest           | Core functions    |
+| Integration | Playwright     | API endpoints     |
+| E2E         | Cypress        | Critical paths    |
+| AI Output   | Custom harness | Prompt regression |
 
 ---
 
@@ -487,30 +487,13 @@ npm run dev
 
 ### Planned Instrumentation
 
-| Metric | Tool | Alert Threshold |
-|--------|------|-----------------|
-| API latency | Vercel Analytics | p95 > 2s |
-| Error rate | Sentry | > 1% |
-| AI cost | Custom tracking | > $X/day |
-| Usage patterns | PostHog | Anomaly detection |
+| Metric         | Tool             | Alert Threshold   |
+| -------------- | ---------------- | ----------------- |
+| API latency    | Vercel Analytics | p95 > 2s          |
+| Error rate     | Sentry           | > 1%              |
+| AI cost        | Custom tracking  | > $X/day          |
+| Usage patterns | PostHog          | Anomaly detection |
 
 ---
 
-*Next: [User Journeys →](07-user-journeys.md)*
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+_Next: [User Journeys →](07-user-journeys.md)_

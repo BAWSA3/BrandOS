@@ -22,9 +22,7 @@ function ToneContextNode(_props: NodeProps) {
         {TONE_OPTIONS.map((option) => (
           <button
             key={option.value}
-            onClick={() =>
-              setTone(tone === option.value ? null : (option.value as TonePill))
-            }
+            onClick={() => setTone(tone === option.value ? null : (option.value as TonePill))}
             className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[11px] font-medium transition-all border ${
               tone === option.value
                 ? 'bg-[#FFD700]/15 border-[#FFD700]/40 text-[#FFD700]'

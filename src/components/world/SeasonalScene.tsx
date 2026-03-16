@@ -47,7 +47,7 @@ export default function SeasonalScene({
   const groundElements = useMemo<GroundElement[]>(() => {
     const all = generateSeasonElements(season, 60, 25, 0.5);
     const visibleCount = Math.ceil(all.length * growth);
-    return all.slice(0, visibleCount).map(el => ({
+    return all.slice(0, visibleCount).map((el) => ({
       ...el,
       growth: Math.min(1, growth * 1.5),
     }));

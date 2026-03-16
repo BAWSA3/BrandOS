@@ -135,9 +135,7 @@ Return as JSON:
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 2000,
-      messages: [
-        { role: 'user', content: userPrompt },
-      ],
+      messages: [{ role: 'user', content: userPrompt }],
       system: systemPrompt,
     });
 
@@ -426,12 +424,7 @@ export async function generateCompetitiveContent(
   const startTime = Date.now();
 
   try {
-    const {
-      competitor,
-      audience = 'trader',
-      format = 'comparison',
-      platform,
-    } = request;
+    const { competitor, audience = 'trader', format = 'comparison', platform } = request;
 
     const competitorData = getCompetitorPosition(competitor);
     const audienceProfile = getAudienceProfile(audience);
@@ -544,12 +537,7 @@ export async function generateEducationalContent(
   const startTime = Date.now();
 
   try {
-    const {
-      topic,
-      audience = 'collector',
-      depth = 'beginner',
-      format = 'explainer',
-    } = request;
+    const { topic, audience = 'collector', depth = 'beginner', format = 'explainer' } = request;
 
     const topicConfig = EDUCATIONAL_TOPICS[topic];
     const audienceProfile = getAudienceProfile(audience);
@@ -650,12 +638,7 @@ export async function generateTrustContent(
   const startTime = Date.now();
 
   try {
-    const {
-      format,
-      audience = 'collector',
-      platform,
-      focusPillar = 'security',
-    } = request;
+    const { format, audience = 'collector', platform, focusPillar = 'security' } = request;
 
     const pillarContent = getPillarContent(focusPillar);
     const audienceProfile = getAudienceProfile(audience);
@@ -756,7 +739,10 @@ Return as JSON:
 /**
  * Get all available objection types and their short responses
  */
-export function getObjectionTypes(): Record<ObjectionType, { objection: string; shortResponse: string }> {
+export function getObjectionTypes(): Record<
+  ObjectionType,
+  { objection: string; shortResponse: string }
+> {
   const result: Record<string, { objection: string; shortResponse: string }> = {};
 
   for (const [key, value] of Object.entries(RELIQUE_MESSAGING_FRAMEWORK.objections)) {
@@ -772,7 +758,10 @@ export function getObjectionTypes(): Record<ObjectionType, { objection: string; 
 /**
  * Get all competitor positions
  */
-export function getCompetitorPositions(): Record<CompetitorType, { name: string; positioningStatement: string }> {
+export function getCompetitorPositions(): Record<
+  CompetitorType,
+  { name: string; positioningStatement: string }
+> {
   const result: Record<string, { name: string; positioningStatement: string }> = {};
 
   for (const [key, value] of Object.entries(RELIQUE_MESSAGING_FRAMEWORK.competitors)) {
@@ -788,7 +777,11 @@ export function getCompetitorPositions(): Record<CompetitorType, { name: string;
 /**
  * Get educational topics list
  */
-export function getEducationalTopicsList(): { topic: EducationalTopic; title: string; summary: string }[] {
+export function getEducationalTopicsList(): {
+  topic: EducationalTopic;
+  title: string;
+  summary: string;
+}[] {
   return Object.entries(EDUCATIONAL_TOPICS).map(([topic, config]) => ({
     topic: topic as EducationalTopic,
     title: config.title,

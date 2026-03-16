@@ -2,7 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
 import { getUser } from '@/lib/auth';
 import prisma from '@/lib/db';
-import { PLAN_CONFIGS, SELF_SERVE_TIERS, ONE_TIME_PRODUCTS, type SubscriptionTier } from '@/lib/plans';
+import {
+  PLAN_CONFIGS,
+  SELF_SERVE_TIERS,
+  ONE_TIME_PRODUCTS,
+  type SubscriptionTier,
+} from '@/lib/plans';
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,7 +16,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { tier, interval, productType } = await request.json() as {
+    const { tier, interval, productType } = (await request.json()) as {
       tier?: SubscriptionTier;
       interval?: 'monthly' | 'annual';
       productType?: string;
@@ -45,10 +50,12 @@ export async function POST(request: NextRequest) {
       const session = await stripe.checkout.sessions.create({
         customer: customerId,
         mode: 'payment',
-        line_items: [{
-          price: product.stripePriceId,
-          quantity: 1,
-        }],
+        line_items: [
+          {
+            price: product.stripePriceId,
+            quantity: 1,
+          },
+        ],
         metadata: {
           userId: user.id,
           productType,
@@ -67,9 +74,8 @@ export async function POST(request: NextRequest) {
 
     const plan = PLAN_CONFIGS[tier];
     const billingInterval = interval || 'monthly';
-    const priceId = billingInterval === 'annual'
-      ? plan.stripePriceIdAnnual
-      : plan.stripePriceIdMonthly;
+    const priceId =
+      billingInterval === 'annual' ? plan.stripePriceIdAnnual : plan.stripePriceIdMonthly;
 
     if (!priceId) {
       return NextResponse.json({ error: 'Price not configured' }, { status: 400 });
@@ -78,10 +84,12 @@ export async function POST(request: NextRequest) {
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       mode: 'subscription',
-      line_items: [{
-        price: priceId,
-        quantity: 1,
-      }],
+      line_items: [
+        {
+          price: priceId,
+          quantity: 1,
+        },
+      ],
       metadata: {
         userId: user.id,
         tier,

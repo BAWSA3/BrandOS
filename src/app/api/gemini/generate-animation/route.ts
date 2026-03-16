@@ -12,7 +12,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const { brandName, tone, context, description } = await request.json() as {
+    const { brandName, tone, context, description } = (await request.json()) as {
       brandName: string;
       tone: { minimal: number; playful: number; bold: number; experimental: number };
       context: AnimationContext;
@@ -59,16 +59,12 @@ export async function POST(request: Request) {
       success: true,
       animation: animationConcept,
     });
-
   } catch (error) {
     console.error('Gemini animation generation error:', error);
 
     if (error instanceof Error) {
       if (error.message.includes('API key')) {
-        return NextResponse.json(
-          { error: 'Invalid Gemini API key' },
-          { status: 401 }
-        );
+        return NextResponse.json({ error: 'Invalid Gemini API key' }, { status: 401 });
       }
       if (error.message.includes('quota')) {
         return NextResponse.json(
@@ -84,17 +80,3 @@ export async function POST(request: Request) {
     );
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-

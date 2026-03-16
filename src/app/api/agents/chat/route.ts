@@ -3,8 +3,8 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
-import { 
-  createAgents, 
+import {
+  createAgents,
   validateBrandDNA,
   CampaignBrief,
   ContentBrief,
@@ -23,7 +23,10 @@ interface ChatRequest {
 }
 
 // Detect intent from user message
-function detectIntent(message: string, agentName: AgentName): {
+function detectIntent(
+  message: string,
+  agentName: AgentName
+): {
   action: string;
   params: Record<string, unknown>;
 } {
@@ -116,7 +119,7 @@ function buildChatPrompt(
   history: ChatMessage[]
 ): string {
   const persona = agentPersonas[agentName];
-  
+
   const historyText = history
     .slice(-6) // Last 6 messages
     .map((m) => `${m.role === 'user' ? 'User' : persona.displayName}: ${m.content}`)
@@ -167,28 +170,19 @@ export async function POST(request: NextRequest) {
 
     // Validate agent
     if (!agentName || !(agentName in agentPersonas)) {
-      return NextResponse.json(
-        { error: 'Invalid agent name' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid agent name' }, { status: 400 });
     }
 
     // Get brand DNA (from request or would normally fetch from DB)
-    let brand = brandDNA;
+    const brand = brandDNA;
     if (!brand) {
       // In production, fetch from database using brandId
       // For now, return error
-      return NextResponse.json(
-        { error: 'Brand DNA is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Brand DNA is required' }, { status: 400 });
     }
 
     if (!validateBrandDNA(brand)) {
-      return NextResponse.json(
-        { error: 'Invalid brand DNA' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid brand DNA' }, { status: 400 });
     }
 
     // Detect intent
@@ -230,7 +224,7 @@ export async function POST(request: NextRequest) {
           expandable: true,
         });
         responseContent = `Here's your content for ${result.data.platform}:\n\n---\n${result.data.content}\n---\n\n**Brand alignment: ${result.data.brandAlignmentScore}/100**\n${result.data.brandAlignmentNotes}`;
-        
+
         if (result.data.postingNotes.bestTime) {
           responseContent += `\n\n📅 Best time to post: ${result.data.postingNotes.bestTime}`;
         }
@@ -251,12 +245,14 @@ export async function POST(request: NextRequest) {
           data: result.data.ideas,
           expandable: true,
         });
-        
+
         const ideasList = result.data.ideas
           .slice(0, 5)
-          .map((idea, i) => `${i + 1}. **${idea.platform}**: "${idea.hook}"\n   _Angle: ${idea.angle}_`)
+          .map(
+            (idea, i) => `${i + 1}. **${idea.platform}**: "${idea.hook}"\n   _Angle: ${idea.angle}_`
+          )
           .join('\n\n');
-        
+
         responseContent = `Here are some content ideas:\n\n${ideasList}\n\nWant me to develop any of these into full content?`;
       } else {
         responseContent = `I had trouble generating ideas. ${result.error || 'What topic would you like ideas for?'}`;
@@ -265,10 +261,7 @@ export async function POST(request: NextRequest) {
       // Default: conversational response via Claude
       const apiKey = process.env.ANTHROPIC_API_KEY;
       if (!apiKey) {
-        return NextResponse.json(
-          { error: 'API key not configured' },
-          { status: 500 }
-        );
+        return NextResponse.json({ error: 'API key not configured' }, { status: 500 });
       }
 
       const anthropic = new Anthropic({ apiKey });
@@ -284,9 +277,10 @@ export async function POST(request: NextRequest) {
         ],
       });
 
-      responseContent = chatResponse.content[0].type === 'text'
-        ? chatResponse.content[0].text
-        : 'I apologize, but I had trouble processing that request.';
+      responseContent =
+        chatResponse.content[0].type === 'text'
+          ? chatResponse.content[0].text
+          : 'I apologize, but I had trouble processing that request.';
     }
 
     return NextResponse.json({
@@ -296,10 +290,9 @@ export async function POST(request: NextRequest) {
       confidence: artifacts.length > 0 ? 0.85 : 0.75,
       processingTime: Date.now() - startTime,
     });
-
   } catch (error) {
     console.error('Agent chat error:', error);
-    
+
     return NextResponse.json(
       {
         error: error instanceof Error ? error.message : 'Chat failed',
@@ -332,9 +325,3 @@ export async function GET() {
     },
   });
 }
-
-
-
-
-
-

@@ -1,7 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { importSources, ImportSource, ExtractedBrand, ReviewMode, reviewModes } from '@/lib/importTypes';
+import {
+  importSources,
+  ImportSource,
+  ExtractedBrand,
+  ReviewMode,
+  reviewModes,
+} from '@/lib/importTypes';
 import ImportFromPDF from './ImportFromPDF';
 import ImportFromImages from './ImportFromImages';
 import ImportFromURL from './ImportFromURL';
@@ -85,11 +91,23 @@ export default function BrandImportHub({ onStartFresh, onImportComplete }: Brand
                 className="group p-8 bg-white/50 rounded-sm border border-brand-black-swiss/10 hover:shadow-[0_0_0_2px_rgba(47,84,235,0.4)] transition-all text-left"
               >
                 <div className="w-16 h-16 mb-6 rounded-sm bg-white/60 flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <svg className="w-8 h-8 text-brand-black-swiss" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" />
+                  <svg
+                    className="w-8 h-8 text-brand-black-swiss"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M12 4v16m8-8H4"
+                    />
                   </svg>
                 </div>
-                <h2 className="font-sans text-xl font-medium text-brand-black-swiss mb-2">Start Fresh</h2>
+                <h2 className="font-sans text-xl font-medium text-brand-black-swiss mb-2">
+                  Start Fresh
+                </h2>
                 <p className="font-mono text-xs text-brand-black-swiss/40">
                   Build your brand identity from the ground up with our guided setup wizard
                 </p>
@@ -101,11 +119,23 @@ export default function BrandImportHub({ onStartFresh, onImportComplete }: Brand
                 className="group p-8 bg-white/50 rounded-sm border border-brand-black-swiss/10 hover:shadow-[0_0_0_2px_rgba(47,84,235,0.4)] transition-all text-left"
               >
                 <div className="w-16 h-16 mb-6 rounded-sm bg-white/60 flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <svg className="w-8 h-8 text-brand-black-swiss" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                  <svg
+                    className="w-8 h-8 text-brand-black-swiss"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
+                    />
                   </svg>
                 </div>
-                <h2 className="font-sans text-xl font-medium text-brand-black-swiss mb-2">Import Existing Brand</h2>
+                <h2 className="font-sans text-xl font-medium text-brand-black-swiss mb-2">
+                  Import Existing Brand
+                </h2>
                 <p className="font-mono text-xs text-brand-black-swiss/40">
                   Upload your brand guidelines, assets, or website to auto-populate your brand DNA
                 </p>
@@ -149,8 +179,12 @@ export default function BrandImportHub({ onStartFresh, onImportComplete }: Brand
                   <div className="w-12 h-12 mb-4 rounded-sm bg-white/60 flex items-center justify-center group-hover:scale-110 transition-transform text-brand-black-swiss">
                     <ImportSourceIcon icon={source.icon} />
                   </div>
-                  <h3 className="font-sans text-xl font-medium text-brand-black-swiss mb-1">{source.label}</h3>
-                  <p className="font-mono text-xs text-brand-black-swiss/40">{source.description}</p>
+                  <h3 className="font-sans text-xl font-medium text-brand-black-swiss mb-1">
+                    {source.label}
+                  </h3>
+                  <p className="font-mono text-xs text-brand-black-swiss/40">
+                    {source.description}
+                  </p>
                 </button>
               ))}
             </div>
@@ -204,7 +238,12 @@ export default function BrandImportHub({ onStartFresh, onImportComplete }: Brand
             <div className="text-center mb-12">
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-brand-blue-swiss/10 text-brand-blue-swiss rounded-full font-mono text-[10px] tracking-wider mb-6">
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
                 </svg>
                 ANALYSIS COMPLETE
               </div>
@@ -212,7 +251,8 @@ export default function BrandImportHub({ onStartFresh, onImportComplete }: Brand
                 Review extracted brand elements
               </h1>
               <p className="font-sans text-lg text-brand-black-swiss/50">
-                We found {countExtractedElements(extractedBrand)} brand elements with {extractedBrand.overallConfidence}% confidence
+                We found {countExtractedElements(extractedBrand)} brand elements with{' '}
+                {extractedBrand.overallConfidence}% confidence
               </p>
             </div>
 
@@ -228,7 +268,9 @@ export default function BrandImportHub({ onStartFresh, onImportComplete }: Brand
                   }`}
                 >
                   <ReviewModeIcon icon={mode.icon} active={selectedReviewMode === mode.id} />
-                  <h3 className="font-sans text-xl font-medium text-brand-black-swiss mt-4 mb-1">{mode.label}</h3>
+                  <h3 className="font-sans text-xl font-medium text-brand-black-swiss mt-4 mb-1">
+                    {mode.label}
+                  </h3>
                   <p className="font-mono text-xs text-brand-black-swiss/40">{mode.description}</p>
                 </button>
               ))}
@@ -272,37 +314,62 @@ export default function BrandImportHub({ onStartFresh, onImportComplete }: Brand
 }
 
 function ImportSourceIcon({ icon }: { icon: string }) {
-  const className = "w-6 h-6";
+  const className = 'w-6 h-6';
 
   switch (icon) {
     case 'document':
       return (
         <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={1.5}
+            d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+          />
         </svg>
       );
     case 'image':
       return (
         <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={1.5}
+            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+          />
         </svg>
       );
     case 'globe':
       return (
         <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={1.5}
+            d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"
+          />
         </svg>
       );
     case 'users':
       return (
         <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={1.5}
+            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+          />
         </svg>
       );
     case 'code':
       return (
         <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={1.5}
+            d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
+          />
         </svg>
       );
     default:
@@ -317,19 +384,34 @@ function ReviewModeIcon({ icon, active }: { icon: string; active: boolean }) {
     case 'list':
       return (
         <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={1.5}
+            d="M4 6h16M4 10h16M4 14h16M4 18h16"
+          />
         </svg>
       );
     case 'grid':
       return (
         <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={1.5}
+            d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
+          />
         </svg>
       );
     case 'columns':
       return (
         <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={1.5}
+            d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"
+          />
         </svg>
       );
     default:

@@ -23,9 +23,9 @@ export default function BrandCohesion() {
 
   const loadFromHistory = () => {
     const historyAssets = history
-      .filter(h => h.type === 'generate' && typeof h.output === 'string')
+      .filter((h) => h.type === 'generate' && typeof h.output === 'string')
       .slice(0, 10)
-      .map(h => ({
+      .map((h) => ({
         type: h.contentType || 'general',
         content: h.output as string,
       }));
@@ -34,7 +34,7 @@ export default function BrandCohesion() {
 
   const analyzeCohesion = async () => {
     if (assets.length < 2 || !brandDNA) return;
-    
+
     setIsAnalyzing(true);
     setError('');
     setAnalysis(null);
@@ -47,9 +47,9 @@ export default function BrandCohesion() {
       });
 
       const data = await response.json();
-      
+
       if (!response.ok) throw new Error(data.error);
-      
+
       setAnalysis(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to analyze cohesion');
@@ -87,8 +87,10 @@ export default function BrandCohesion() {
             onChange={(e) => setNewAsset({ ...newAsset, type: e.target.value })}
             className="bg-surface border border-border rounded-lg px-4 py-3 outline-none"
           >
-            {assetTypes.map(t => (
-              <option key={t} value={t}>{t}</option>
+            {assetTypes.map((t) => (
+              <option key={t} value={t}>
+                {t}
+              </option>
             ))}
           </select>
           <input
@@ -134,7 +136,9 @@ export default function BrandCohesion() {
           {isAnalyzing ? 'Analyzing...' : `Analyze ${assets.length} Assets as System`}
         </button>
         {assets.length < 2 && (
-          <p className="text-xs text-muted mt-2 text-center">Add at least 2 assets to analyze cohesion</p>
+          <p className="text-xs text-muted mt-2 text-center">
+            Add at least 2 assets to analyze cohesion
+          </p>
         )}
       </div>
 
@@ -169,7 +173,9 @@ export default function BrandCohesion() {
           {/* Repetition Issues */}
           {analysis.repetitionIssues.length > 0 && (
             <div className="border border-border rounded-lg p-6">
-              <h3 className="text-xs uppercase tracking-widest text-muted mb-4">Repetition Issues</h3>
+              <h3 className="text-xs uppercase tracking-widest text-muted mb-4">
+                Repetition Issues
+              </h3>
               <ul className="space-y-2">
                 {analysis.repetitionIssues.map((issue, i) => (
                   <li key={i} className="text-sm flex items-start gap-2">
@@ -183,7 +189,9 @@ export default function BrandCohesion() {
           {/* Missing Anchors */}
           {analysis.missingAnchors.length > 0 && (
             <div className="border border-border rounded-lg p-6">
-              <h3 className="text-xs uppercase tracking-widest text-muted mb-4">Missing Brand Anchors</h3>
+              <h3 className="text-xs uppercase tracking-widest text-muted mb-4">
+                Missing Brand Anchors
+              </h3>
               <ul className="space-y-2">
                 {analysis.missingAnchors.map((anchor, i) => (
                   <li key={i} className="text-sm flex items-start gap-2">
@@ -212,4 +220,3 @@ export default function BrandCohesion() {
     </div>
   );
 }
-

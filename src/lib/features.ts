@@ -1,6 +1,6 @@
 /**
  * Feature Flags for BrandOS
- * 
+ *
  * These flags control access to features that require different X API tiers.
  * Set via environment variables for easy configuration.
  */
@@ -94,9 +94,3 @@ export function isFeatureEnabled(feature: keyof typeof features): boolean {
   const value = features[feature];
   return typeof value === 'boolean' ? value : false;
 }
-
-
-
-
-
-

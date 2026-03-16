@@ -35,13 +35,15 @@ export default function ExecutionSection({ plan, onComplete }: ExecutionSectionP
             style={{ padding: '60px 24px', maxWidth: '700px', margin: '0 auto' }}
           >
             {/* Terminal header */}
-            <div style={{
-              fontFamily: "'VCR OSD Mono', monospace",
-              fontSize: '10px',
-              letterSpacing: '0.1em',
-              color: 'rgba(0,0,0,0.4)',
-              marginBottom: '32px',
-            }}>
+            <div
+              style={{
+                fontFamily: "'VCR OSD Mono', monospace",
+                fontSize: '10px',
+                letterSpacing: '0.1em',
+                color: 'rgba(0,0,0,0.4)',
+                marginBottom: '32px',
+              }}
+            >
               /* ═══════════════════════════════════ */
               <br />
               /*{'  '}WEEKLY EXECUTION CADENCE{'          '}*/
@@ -50,27 +52,36 @@ export default function ExecutionSection({ plan, onComplete }: ExecutionSectionP
             </div>
 
             {/* Weekly plan table */}
-            <div style={{
-              border: '1px solid rgba(0,0,0,0.08)',
-              borderRadius: '8px',
-              overflow: 'hidden',
-              marginBottom: '24px',
-            }}>
+            <div
+              style={{
+                border: '1px solid rgba(0,0,0,0.08)',
+                borderRadius: '8px',
+                overflow: 'hidden',
+                marginBottom: '24px',
+              }}
+            >
               {/* Header */}
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: '70px 1fr 120px 120px',
-                padding: '12px 16px',
-                background: 'rgba(0,0,0,0.03)',
-                borderBottom: '1px solid rgba(0,0,0,0.08)',
-              }}>
-                {['DAY', 'CONTENT', 'FORMAT', 'CTA'].map(h => (
-                  <span key={h} style={{
-                    fontFamily: "'VCR OSD Mono', monospace",
-                    fontSize: '9px',
-                    letterSpacing: '0.1em',
-                    color: 'rgba(0,0,0,0.4)',
-                  }}>{h}</span>
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '70px 1fr 120px 120px',
+                  padding: '12px 16px',
+                  background: 'rgba(0,0,0,0.03)',
+                  borderBottom: '1px solid rgba(0,0,0,0.08)',
+                }}
+              >
+                {['DAY', 'CONTENT', 'FORMAT', 'CTA'].map((h) => (
+                  <span
+                    key={h}
+                    style={{
+                      fontFamily: "'VCR OSD Mono', monospace",
+                      fontSize: '9px',
+                      letterSpacing: '0.1em',
+                      color: 'rgba(0,0,0,0.4)',
+                    }}
+                  >
+                    {h}
+                  </span>
                 ))}
               </div>
               {/* Rows */}
@@ -84,31 +95,48 @@ export default function ExecutionSection({ plan, onComplete }: ExecutionSectionP
                     display: 'grid',
                     gridTemplateColumns: '70px 1fr 120px 120px',
                     padding: '14px 16px',
-                    borderBottom: i < plan.weeklyPlan.length - 1 ? '1px solid rgba(0,0,0,0.05)' : 'none',
+                    borderBottom:
+                      i < plan.weeklyPlan.length - 1 ? '1px solid rgba(0,0,0,0.05)' : 'none',
                     alignItems: 'center',
                   }}
                 >
-                  <span style={{
-                    fontFamily: "'VCR OSD Mono', monospace",
-                    fontSize: '11px',
-                    fontWeight: 600,
-                    color: '#0047FF',
-                  }}>{day.day}</span>
-                  <span style={{
-                    fontFamily: "'Helvetica Neue', sans-serif",
-                    fontSize: '13px',
-                    color: 'rgba(0,0,0,0.7)',
-                  }}>{day.content}</span>
-                  <span style={{
-                    fontFamily: "'VCR OSD Mono', monospace",
-                    fontSize: '10px',
-                    color: 'rgba(0,0,0,0.5)',
-                  }}>{day.format}</span>
-                  <span style={{
-                    fontFamily: "'VCR OSD Mono', monospace",
-                    fontSize: '10px',
-                    color: 'rgba(0,0,0,0.5)',
-                  }}>{day.ctaType}</span>
+                  <span
+                    style={{
+                      fontFamily: "'VCR OSD Mono', monospace",
+                      fontSize: '11px',
+                      fontWeight: 600,
+                      color: '#0047FF',
+                    }}
+                  >
+                    {day.day}
+                  </span>
+                  <span
+                    style={{
+                      fontFamily: "'Helvetica Neue', sans-serif",
+                      fontSize: '13px',
+                      color: 'rgba(0,0,0,0.7)',
+                    }}
+                  >
+                    {day.content}
+                  </span>
+                  <span
+                    style={{
+                      fontFamily: "'VCR OSD Mono', monospace",
+                      fontSize: '10px',
+                      color: 'rgba(0,0,0,0.5)',
+                    }}
+                  >
+                    {day.format}
+                  </span>
+                  <span
+                    style={{
+                      fontFamily: "'VCR OSD Mono', monospace",
+                      fontSize: '10px',
+                      color: 'rgba(0,0,0,0.5)',
+                    }}
+                  >
+                    {day.ctaType}
+                  </span>
                 </motion.div>
               ))}
             </div>
@@ -126,24 +154,29 @@ export default function ExecutionSection({ plan, onComplete }: ExecutionSectionP
                 marginBottom: '32px',
               }}
             >
-              <div style={{
-                fontFamily: "'VCR OSD Mono', monospace",
-                fontSize: '10px',
-                letterSpacing: '0.1em',
-                color: '#0047FF',
-                marginBottom: '12px',
-              }}>
+              <div
+                style={{
+                  fontFamily: "'VCR OSD Mono', monospace",
+                  fontSize: '10px',
+                  letterSpacing: '0.1em',
+                  color: '#0047FF',
+                  marginBottom: '12px',
+                }}
+              >
                 DAILY NON-NEGOTIABLES:
               </div>
               {plan.dailyNonNegotiables.map((item, i) => (
-                <div key={i} style={{
-                  display: 'flex',
-                  gap: '8px',
-                  marginBottom: '6px',
-                  fontFamily: "'Helvetica Neue', sans-serif",
-                  fontSize: '13px',
-                  color: 'rgba(0,0,0,0.7)',
-                }}>
+                <div
+                  key={i}
+                  style={{
+                    display: 'flex',
+                    gap: '8px',
+                    marginBottom: '6px',
+                    fontFamily: "'Helvetica Neue', sans-serif",
+                    fontSize: '13px',
+                    color: 'rgba(0,0,0,0.7)',
+                  }}
+                >
                   <span style={{ color: '#0047FF' }}>-</span>
                   {item}
                 </div>
@@ -163,24 +196,29 @@ export default function ExecutionSection({ plan, onComplete }: ExecutionSectionP
                 marginBottom: '32px',
               }}
             >
-              <div style={{
-                fontFamily: "'VCR OSD Mono', monospace",
-                fontSize: '10px',
-                letterSpacing: '0.1em',
-                color: '#EF4444',
-                marginBottom: '12px',
-              }}>
+              <div
+                style={{
+                  fontFamily: "'VCR OSD Mono', monospace",
+                  fontSize: '10px',
+                  letterSpacing: '0.1em',
+                  color: '#EF4444',
+                  marginBottom: '12px',
+                }}
+              >
                 STOP DOING:
               </div>
               {plan.stopDoing.map((item, i) => (
-                <div key={i} style={{
-                  display: 'flex',
-                  gap: '8px',
-                  marginBottom: '6px',
-                  fontFamily: "'Helvetica Neue', sans-serif",
-                  fontSize: '13px',
-                  color: 'rgba(0,0,0,0.7)',
-                }}>
+                <div
+                  key={i}
+                  style={{
+                    display: 'flex',
+                    gap: '8px',
+                    marginBottom: '6px',
+                    fontFamily: "'Helvetica Neue', sans-serif",
+                    fontSize: '13px',
+                    color: 'rgba(0,0,0,0.7)',
+                  }}
+                >
                   <span style={{ color: '#EF4444' }}>x</span>
                   {item}
                 </div>
@@ -204,15 +242,19 @@ export default function ExecutionSection({ plan, onComplete }: ExecutionSectionP
                   cursor: 'pointer',
                   transition: 'background 0.2s',
                 }}
-                onMouseEnter={(e) => e.currentTarget.style.background = '#0038CC'}
-                onMouseLeave={(e) => e.currentTarget.style.background = '#0047FF'}
+                onMouseEnter={(e) => (e.currentTarget.style.background = '#0038CC')}
+                onMouseLeave={(e) => (e.currentTarget.style.background = '#0047FF')}
               >
-                <span style={{
-                  fontFamily: "'VCR OSD Mono', monospace",
-                  fontSize: '11px',
-                  letterSpacing: '0.12em',
-                  color: '#fff',
-                }}>SHOW MILESTONES</span>
+                <span
+                  style={{
+                    fontFamily: "'VCR OSD Mono', monospace",
+                    fontSize: '11px',
+                    letterSpacing: '0.12em',
+                    color: '#fff',
+                  }}
+                >
+                  SHOW MILESTONES
+                </span>
               </button>
             </motion.div>
           </motion.div>
@@ -227,13 +269,15 @@ export default function ExecutionSection({ plan, onComplete }: ExecutionSectionP
             style={{ padding: '60px 24px', maxWidth: '700px', margin: '0 auto' }}
           >
             {/* Terminal header */}
-            <div style={{
-              fontFamily: "'VCR OSD Mono', monospace",
-              fontSize: '10px',
-              letterSpacing: '0.1em',
-              color: 'rgba(0,0,0,0.4)',
-              marginBottom: '32px',
-            }}>
+            <div
+              style={{
+                fontFamily: "'VCR OSD Mono', monospace",
+                fontSize: '10px',
+                letterSpacing: '0.1em',
+                color: 'rgba(0,0,0,0.4)',
+                marginBottom: '32px',
+              }}
+            >
               /* ═══════════════════════════════════ */
               <br />
               /*{'  '}MONTHLY MILESTONES{'                '}*/
@@ -242,7 +286,14 @@ export default function ExecutionSection({ plan, onComplete }: ExecutionSectionP
             </div>
 
             {/* Milestone cards */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '32px' }}>
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '16px',
+                marginBottom: '32px',
+              }}
+            >
               {plan.milestones.map((milestone, i) => (
                 <motion.div
                   key={i}
@@ -256,54 +307,73 @@ export default function ExecutionSection({ plan, onComplete }: ExecutionSectionP
                     borderRadius: '8px',
                   }}
                 >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                    <span style={{
-                      fontFamily: "'VCR OSD Mono', monospace",
-                      fontSize: '12px',
-                      fontWeight: 600,
-                      color: '#0047FF',
-                      letterSpacing: '0.05em',
-                    }}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      marginBottom: '12px',
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontFamily: "'VCR OSD Mono', monospace",
+                        fontSize: '12px',
+                        fontWeight: 600,
+                        color: '#0047FF',
+                        letterSpacing: '0.05em',
+                      }}
+                    >
                       {milestone.month.toUpperCase()}
                     </span>
-                    <span style={{
-                      fontFamily: "'Helvetica Neue', sans-serif",
-                      fontSize: '20px',
-                      fontWeight: 600,
-                      color: '#000',
-                    }}>
+                    <span
+                      style={{
+                        fontFamily: "'Helvetica Neue', sans-serif",
+                        fontSize: '20px',
+                        fontWeight: 600,
+                        color: '#000',
+                      }}
+                    >
                       {milestone.targetFollowers.toLocaleString()}
                     </span>
                   </div>
-                  <div style={{
-                    display: 'flex',
-                    gap: '12px',
-                    alignItems: 'center',
-                    marginBottom: '8px',
-                  }}>
-                    <span style={{
-                      fontFamily: "'VCR OSD Mono', monospace",
-                      fontSize: '10px',
-                      padding: '3px 8px',
-                      borderRadius: '4px',
-                      background: 'rgba(16, 185, 129, 0.08)',
-                      color: '#10B981',
-                    }}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      gap: '12px',
+                      alignItems: 'center',
+                      marginBottom: '8px',
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontFamily: "'VCR OSD Mono', monospace",
+                        fontSize: '10px',
+                        padding: '3px 8px',
+                        borderRadius: '4px',
+                        background: 'rgba(16, 185, 129, 0.08)',
+                        color: '#10B981',
+                      }}
+                    >
                       +{milestone.growth.toLocaleString()}
                     </span>
-                    <span style={{
-                      fontFamily: "'Helvetica Neue', sans-serif",
-                      fontSize: '13px',
-                      color: 'rgba(0,0,0,0.5)',
-                    }}>
+                    <span
+                      style={{
+                        fontFamily: "'Helvetica Neue', sans-serif",
+                        fontSize: '13px',
+                        color: 'rgba(0,0,0,0.5)',
+                      }}
+                    >
                       {milestone.focus}
                     </span>
                   </div>
-                  <div style={{
-                    fontFamily: "'VCR OSD Mono', monospace",
-                    fontSize: '10px',
-                    color: 'rgba(0,0,0,0.4)',
-                  }}>
+                  <div
+                    style={{
+                      fontFamily: "'VCR OSD Mono', monospace",
+                      fontSize: '10px',
+                      color: 'rgba(0,0,0,0.4)',
+                    }}
+                  >
                     success: {milestone.metric}
                   </div>
                 </motion.div>
@@ -322,31 +392,43 @@ export default function ExecutionSection({ plan, onComplete }: ExecutionSectionP
                 marginBottom: '32px',
               }}
             >
-              <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: '12px',
-              }}>
-                <span style={{
-                  fontFamily: "'VCR OSD Mono', monospace",
-                  fontSize: '11px',
-                  color: 'rgba(0,0,0,0.5)',
-                }}>{plan.currentFollowers.toLocaleString()}</span>
-                <span style={{
-                  fontFamily: "'VCR OSD Mono', monospace",
-                  fontSize: '11px',
-                  color: '#0047FF',
-                  fontWeight: 600,
-                }}>{plan.targetFollowers.toLocaleString()}</span>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: '12px',
+                }}
+              >
+                <span
+                  style={{
+                    fontFamily: "'VCR OSD Mono', monospace",
+                    fontSize: '11px',
+                    color: 'rgba(0,0,0,0.5)',
+                  }}
+                >
+                  {plan.currentFollowers.toLocaleString()}
+                </span>
+                <span
+                  style={{
+                    fontFamily: "'VCR OSD Mono', monospace",
+                    fontSize: '11px',
+                    color: '#0047FF',
+                    fontWeight: 600,
+                  }}
+                >
+                  {plan.targetFollowers.toLocaleString()}
+                </span>
               </div>
-              <div style={{
-                height: '12px',
-                background: 'rgba(0,0,0,0.04)',
-                borderRadius: '6px',
-                overflow: 'hidden',
-                position: 'relative',
-              }}>
+              <div
+                style={{
+                  height: '12px',
+                  background: 'rgba(0,0,0,0.04)',
+                  borderRadius: '6px',
+                  overflow: 'hidden',
+                  position: 'relative',
+                }}
+              >
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: '100%' }}
@@ -359,7 +441,10 @@ export default function ExecutionSection({ plan, onComplete }: ExecutionSectionP
                 />
                 {/* Milestone markers */}
                 {plan.milestones.map((m, i) => {
-                  const pct = ((m.targetFollowers - plan.currentFollowers) / (plan.targetFollowers - plan.currentFollowers)) * 100;
+                  const pct =
+                    ((m.targetFollowers - plan.currentFollowers) /
+                      (plan.targetFollowers - plan.currentFollowers)) *
+                    100;
                   return (
                     <div
                       key={i}
@@ -394,15 +479,19 @@ export default function ExecutionSection({ plan, onComplete }: ExecutionSectionP
                   cursor: 'pointer',
                   transition: 'background 0.2s',
                 }}
-                onMouseEnter={(e) => e.currentTarget.style.background = '#0038CC'}
-                onMouseLeave={(e) => e.currentTarget.style.background = '#0047FF'}
+                onMouseEnter={(e) => (e.currentTarget.style.background = '#0038CC')}
+                onMouseLeave={(e) => (e.currentTarget.style.background = '#0047FF')}
               >
-                <span style={{
-                  fontFamily: "'VCR OSD Mono', monospace",
-                  fontSize: '11px',
-                  letterSpacing: '0.12em',
-                  color: '#fff',
-                }}>THE ONE THING</span>
+                <span
+                  style={{
+                    fontFamily: "'VCR OSD Mono', monospace",
+                    fontSize: '11px',
+                    letterSpacing: '0.12em',
+                    color: '#fff',
+                  }}
+                >
+                  THE ONE THING
+                </span>
               </button>
             </motion.div>
           </motion.div>
@@ -437,23 +526,27 @@ export default function ExecutionSection({ plan, onComplete }: ExecutionSectionP
                 marginBottom: '32px',
               }}
             >
-              <div style={{
-                fontFamily: "'VCR OSD Mono', monospace",
-                fontSize: '10px',
-                letterSpacing: '0.12em',
-                color: '#0047FF',
-                marginBottom: '20px',
-              }}>
+              <div
+                style={{
+                  fontFamily: "'VCR OSD Mono', monospace",
+                  fontSize: '10px',
+                  letterSpacing: '0.12em',
+                  color: '#0047FF',
+                  marginBottom: '20px',
+                }}
+              >
                 THE ONE THING THAT WILL MAKE OR BREAK THIS
               </div>
-              <p style={{
-                fontFamily: "'Helvetica Neue', sans-serif",
-                fontSize: '18px',
-                fontWeight: 500,
-                color: '#000',
-                lineHeight: 1.6,
-                margin: 0,
-              }}>
+              <p
+                style={{
+                  fontFamily: "'Helvetica Neue', sans-serif",
+                  fontSize: '18px',
+                  fontWeight: 500,
+                  color: '#000',
+                  lineHeight: 1.6,
+                  margin: 0,
+                }}
+              >
                 {plan.oneThingThatMatters}
               </p>
             </motion.div>
@@ -469,7 +562,8 @@ export default function ExecutionSection({ plan, onComplete }: ExecutionSectionP
                 marginBottom: '32px',
               }}
             >
-              {plan.currentFollowers.toLocaleString()} → {plan.targetFollowers.toLocaleString()}. let&apos;s go.
+              {plan.currentFollowers.toLocaleString()} → {plan.targetFollowers.toLocaleString()}.
+              let&apos;s go.
             </motion.div>
 
             <motion.div
@@ -496,12 +590,16 @@ export default function ExecutionSection({ plan, onComplete }: ExecutionSectionP
                   e.currentTarget.style.transform = 'scale(1)';
                 }}
               >
-                <span style={{
-                  fontFamily: "'VCR OSD Mono', monospace",
-                  fontSize: '11px',
-                  letterSpacing: '0.12em',
-                  color: '#fff',
-                }}>VIEW MY DASHBOARD</span>
+                <span
+                  style={{
+                    fontFamily: "'VCR OSD Mono', monospace",
+                    fontSize: '11px',
+                    letterSpacing: '0.12em',
+                    color: '#fff',
+                  }}
+                >
+                  VIEW MY DASHBOARD
+                </span>
               </button>
             </motion.div>
           </motion.div>

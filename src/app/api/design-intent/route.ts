@@ -9,7 +9,7 @@ const anthropic = new Anthropic({
 
 export async function POST(request: NextRequest) {
   try {
-    const { brandDNA, directive } = await request.json() as {
+    const { brandDNA, directive } = (await request.json()) as {
       brandDNA: BrandDNA;
       directive: string;
     };
@@ -51,13 +51,13 @@ Return ONLY valid JSON with this exact structure:
 
     const responseText = message.content[0].type === 'text' ? message.content[0].text : '';
     const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-    
+
     if (!jsonMatch) {
       throw new Error('Invalid response format');
     }
 
     const parsed = JSON.parse(jsonMatch[0]);
-    
+
     const intentBlock: DesignIntentBlock = {
       id: uuidv4(),
       input: directive,
@@ -70,7 +70,6 @@ Return ONLY valid JSON with this exact structure:
     };
 
     return NextResponse.json(intentBlock);
-
   } catch (error: any) {
     console.error('Design Intent API error:', error);
     return NextResponse.json(
@@ -79,4 +78,3 @@ Return ONLY valid JSON with this exact structure:
     );
   }
 }
-

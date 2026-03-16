@@ -6,7 +6,12 @@ import { Platform, PlatformAdaptation } from '@/lib/types';
 
 const PLATFORMS: { id: Platform; name: string; icon: string; color: string }[] = [
   { id: 'twitter', name: 'X / Twitter', icon: '𝕏', color: 'bg-zinc-800' },
-  { id: 'instagram', name: 'Instagram', icon: '📷', color: 'bg-gradient-to-r from-purple-500 to-pink-500' },
+  {
+    id: 'instagram',
+    name: 'Instagram',
+    icon: '📷',
+    color: 'bg-gradient-to-r from-purple-500 to-pink-500',
+  },
   { id: 'linkedin', name: 'LinkedIn', icon: 'in', color: 'bg-blue-600' },
   { id: 'website', name: 'Website', icon: '🌐', color: 'bg-zinc-700' },
   { id: 'email', name: 'Email', icon: '✉️', color: 'bg-zinc-600' },
@@ -16,13 +21,15 @@ const PLATFORMS: { id: Platform; name: string; icon: string; color: string }[] =
 export default function PlatformAdapter() {
   const brandDNA = useCurrentBrand();
   const [content, setContent] = useState('');
-  const [selectedPlatforms, setSelectedPlatforms] = useState<Set<Platform>>(new Set(['twitter', 'instagram', 'linkedin']));
+  const [selectedPlatforms, setSelectedPlatforms] = useState<Set<Platform>>(
+    new Set(['twitter', 'instagram', 'linkedin'])
+  );
   const [isAdapting, setIsAdapting] = useState(false);
   const [adaptation, setAdaptation] = useState<PlatformAdaptation | null>(null);
   const [error, setError] = useState('');
 
   const togglePlatform = (platform: Platform) => {
-    setSelectedPlatforms(prev => {
+    setSelectedPlatforms((prev) => {
       const next = new Set(prev);
       if (next.has(platform)) {
         next.delete(platform);
@@ -35,7 +42,7 @@ export default function PlatformAdapter() {
 
   const adaptContent = async () => {
     if (!content.trim() || !brandDNA || selectedPlatforms.size === 0) return;
-    
+
     setIsAdapting(true);
     setError('');
     setAdaptation(null);
@@ -52,9 +59,9 @@ export default function PlatformAdapter() {
       });
 
       const data = await response.json();
-      
+
       if (!response.ok) throw new Error(data.error);
-      
+
       setAdaptation(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to adapt content');
@@ -98,7 +105,9 @@ export default function PlatformAdapter() {
                   : 'border-border hover:border-muted'
               }`}
             >
-              <span className={`w-10 h-10 ${platform.color} rounded-lg flex items-center justify-center text-white text-lg`}>
+              <span
+                className={`w-10 h-10 ${platform.color} rounded-lg flex items-center justify-center text-white text-lg`}
+              >
                 {platform.icon}
               </span>
               <span className="text-xs">{platform.name}</span>
@@ -112,7 +121,9 @@ export default function PlatformAdapter() {
         disabled={!content.trim() || selectedPlatforms.size === 0 || isAdapting}
         className="w-full py-3 bg-foreground text-background rounded-full text-sm font-medium disabled:opacity-30 transition-opacity hover:opacity-80"
       >
-        {isAdapting ? 'Adapting...' : `Adapt for ${selectedPlatforms.size} Platform${selectedPlatforms.size !== 1 ? 's' : ''}`}
+        {isAdapting
+          ? 'Adapting...'
+          : `Adapt for ${selectedPlatforms.size} Platform${selectedPlatforms.size !== 1 ? 's' : ''}`}
       </button>
 
       {error && (
@@ -125,12 +136,14 @@ export default function PlatformAdapter() {
       {adaptation && (
         <div className="space-y-4 animate-fade-in">
           {Object.entries(adaptation.adaptations).map(([platform, data]) => {
-            const platformInfo = PLATFORMS.find(p => p.id === platform);
+            const platformInfo = PLATFORMS.find((p) => p.id === platform);
             return (
               <div key={platform} className="border border-border rounded-lg p-6">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
-                    <span className={`w-8 h-8 ${platformInfo?.color} rounded-lg flex items-center justify-center text-white text-sm`}>
+                    <span
+                      className={`w-8 h-8 ${platformInfo?.color} rounded-lg flex items-center justify-center text-white text-sm`}
+                    >
                       {platformInfo?.icon}
                     </span>
                     <span className="font-medium">{platformInfo?.name}</span>
@@ -142,7 +155,7 @@ export default function PlatformAdapter() {
                     Copy
                   </button>
                 </div>
-                
+
                 <div className="p-4 bg-surface rounded-lg mb-4">
                   <p className="text-sm whitespace-pre-wrap">{data.content}</p>
                 </div>
@@ -167,4 +180,3 @@ export default function PlatformAdapter() {
     </div>
   );
 }
-

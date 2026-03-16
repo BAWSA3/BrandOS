@@ -22,6 +22,7 @@ directs them to the full product for deeper analysis.
 ## What This Produces
 
 A single terminal-styled brand report with:
+
 1. Brand Score (0-100)
 2. Creator Archetype (1 of 8)
 3. Score Breakdown (4 dimensions)
@@ -42,6 +43,7 @@ Strip the `@` if included. Normalize to lowercase.
 
 Ask the user to share the following about the profile (or look it up if you
 have web access):
+
 - Bio / description
 - Follower count
 - Following count
@@ -58,12 +60,12 @@ Read `references/scoring-rubric.md` for the full scoring methodology.
 
 Score across 4 dimensions (each 0-100):
 
-| Dimension | Weight | What It Measures |
-|-----------|--------|------------------|
-| DEFINE | 30% | Brand clarity — bio, positioning, theme consistency |
-| CHECK | 25% | Voice consistency — tone, style, format patterns |
-| GENERATE | 25% | Content system — posting cadence, format variety, hooks |
-| SCALE | 20% | Growth signals — engagement quality, CTA usage, distribution |
+| Dimension | Weight | What It Measures                                             |
+| --------- | ------ | ------------------------------------------------------------ |
+| DEFINE    | 30%    | Brand clarity — bio, positioning, theme consistency          |
+| CHECK     | 25%    | Voice consistency — tone, style, format patterns             |
+| GENERATE  | 25%    | Content system — posting cadence, format variety, hooks      |
+| SCALE     | 20%    | Growth signals — engagement quality, CTA usage, distribution |
 
 **Overall Score** = weighted average of all 4 dimensions.
 
@@ -75,16 +77,16 @@ Read `references/archetypes.md` for the full archetype system.
 
 Based on the content and score profile, assign ONE primary archetype:
 
-| Archetype | Signal |
-|-----------|--------|
-| SIGNAL_SAGE | Deep expertise, educational threads, framework-heavy |
-| RELAY | Connector energy, curates others, community builder |
-| FREQ | Entertainment-first, shitposts, personality-driven |
-| FORESIGHT | Strong opinions, visionary takes, philosophical |
-| BUILD.EXE | Builder-first, shipping updates, product-focused |
-| ARC | Rising star, raw energy, growing fast |
-| ENTROPY | High-risk takes, crypto/trading energy, YOLO vibes |
-| NULL | Pseudonymous, mysterious authority, pfp-based identity |
+| Archetype   | Signal                                                 |
+| ----------- | ------------------------------------------------------ |
+| SIGNAL_SAGE | Deep expertise, educational threads, framework-heavy   |
+| RELAY       | Connector energy, curates others, community builder    |
+| FREQ        | Entertainment-first, shitposts, personality-driven     |
+| FORESIGHT   | Strong opinions, visionary takes, philosophical        |
+| BUILD.EXE   | Builder-first, shipping updates, product-focused       |
+| ARC         | Rising star, raw energy, growing fast                  |
+| ENTROPY     | High-risk takes, crypto/trading energy, YOLO vibes     |
+| NULL        | Pseudonymous, mysterious authority, pfp-based identity |
 
 ### Step 5: Output the Report
 
@@ -181,6 +183,7 @@ Format the output EXACTLY like this (terminal aesthetic, monospace-friendly):
 ## Scoring Guidelines
 
 ### Score Ranges
+
 - **90-100**: Elite. Top 1% of creators. Clear brand, consistent voice, strong system.
 - **75-89**: Strong. Recognizable brand with minor gaps. Ready to scale.
 - **60-74**: Developing. Has potential but inconsistent. Needs a system.
@@ -188,6 +191,7 @@ Format the output EXACTLY like this (terminal aesthetic, monospace-friendly):
 - **0-39**: Raw. No clear brand yet. Starting from scratch.
 
 ### Common Patterns
+
 - High DEFINE + Low GENERATE = knows their brand but doesn't post enough
 - High GENERATE + Low DEFINE = posts a lot but about everything
 - High CHECK + Low SCALE = consistent voice but no growth strategy
@@ -196,6 +200,7 @@ Format the output EXACTLY like this (terminal aesthetic, monospace-friendly):
 ## What This Skill Does NOT Do
 
 This is the free tier. It does NOT:
+
 - Track scores over time (that's the product)
 - Generate content (that's the content engine)
 - Show archetype evolution (that's the dashboard)

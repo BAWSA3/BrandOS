@@ -15,9 +15,7 @@ function isAuthorized(request: NextRequest): boolean {
 function generateCode(): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   const bytes = randomBytes(6);
-  return Array.from(bytes, (byte) =>
-    chars[byte % chars.length]
-  ).join('');
+  return Array.from(bytes, (byte) => chars[byte % chars.length]).join('');
 }
 
 // GET /api/admin/invites - List all invite codes with stats
@@ -36,12 +34,12 @@ export async function GET(request: NextRequest) {
     const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
     const totalCodes = inviteCodes.length;
-    const activeCodes = inviteCodes.filter(c => c.isActive && c.usedCount < c.maxUses).length;
+    const activeCodes = inviteCodes.filter((c) => c.isActive && c.usedCount < c.maxUses).length;
     const totalRedemptions = inviteCodes.reduce((sum, c) => sum + c.usedCount, 0);
-    const codesCreatedToday = inviteCodes.filter(c => c.createdAt >= todayStart).length;
+    const codesCreatedToday = inviteCodes.filter((c) => c.createdAt >= todayStart).length;
 
     // Format codes for response
-    const codes = inviteCodes.map(c => ({
+    const codes = inviteCodes.map((c) => ({
       id: c.id,
       code: c.code,
       createdBy: c.createdBy,
@@ -64,10 +62,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error('[Admin/Invites] GET error:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch invite codes' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch invite codes' }, { status: 500 });
   }
 }
 
@@ -82,10 +77,7 @@ export async function POST(request: NextRequest) {
     const { username, count = 3, maxUses = 3, expiresAt } = body;
 
     if (!username || typeof username !== 'string') {
-      return NextResponse.json(
-        { error: 'Username is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Username is required' }, { status: 400 });
     }
 
     // Validate count (1-10)
@@ -99,10 +91,7 @@ export async function POST(request: NextRequest) {
     if (expiresAt) {
       expiryDate = new Date(expiresAt);
       if (isNaN(expiryDate.getTime())) {
-        return NextResponse.json(
-          { error: 'Invalid expiry date' },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'Invalid expiry date' }, { status: 400 });
       }
     }
 
@@ -117,10 +106,7 @@ export async function POST(request: NextRequest) {
         code = generateCode();
         attempts++;
         if (attempts > 10) {
-          return NextResponse.json(
-            { error: 'Failed to generate unique codes' },
-            { status: 500 }
-          );
+          return NextResponse.json({ error: 'Failed to generate unique codes' }, { status: 500 });
         }
       } while (await prisma.inviteCode.findUnique({ where: { code } }));
 
@@ -150,16 +136,16 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    return NextResponse.json({
-      success: true,
-      codes,
-    }, { status: 201 });
+    return NextResponse.json(
+      {
+        success: true,
+        codes,
+      },
+      { status: 201 }
+    );
   } catch (error) {
     console.error('[Admin/Invites] POST error:', error);
-    return NextResponse.json(
-      { error: 'Failed to generate codes' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to generate codes' }, { status: 500 });
   }
 }
 
@@ -174,10 +160,7 @@ export async function PATCH(request: NextRequest) {
     const { id, isActive, maxUses } = body;
 
     if (!id || typeof id !== 'string') {
-      return NextResponse.json(
-        { error: 'Code ID is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Code ID is required' }, { status: 400 });
     }
 
     // Build update data
@@ -192,10 +175,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     if (Object.keys(updateData).length === 0) {
-      return NextResponse.json(
-        { error: 'No valid update fields provided' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'No valid update fields provided' }, { status: 400 });
     }
 
     const updatedCode = await prisma.inviteCode.update({
@@ -219,9 +199,6 @@ export async function PATCH(request: NextRequest) {
     });
   } catch (error) {
     console.error('[Admin/Invites] PATCH error:', error);
-    return NextResponse.json(
-      { error: 'Failed to update code' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to update code' }, { status: 500 });
   }
 }

@@ -30,7 +30,7 @@ export default function ColorSection({ brandId }: ColorSectionProps) {
 
   const handleAddColor = () => {
     if (!newColor.name.trim()) return;
-    
+
     addColor(brandId, {
       name: newColor.name,
       hex: newColor.hex,
@@ -38,7 +38,7 @@ export default function ColorSection({ brandId }: ColorSectionProps) {
       usage: newColor.usage,
       contrastRatio: calculateContrastRatio(newColor.hex, '#ffffff'),
     });
-    
+
     setNewColor({ name: '', hex: '#6366f1', category: 'primary', usage: '' });
     setIsAddingColor(false);
   };
@@ -53,11 +53,14 @@ export default function ColorSection({ brandId }: ColorSectionProps) {
   };
 
   // Group colors by category
-  const colorsByCategory = brandKit.extendedColors.reduce((acc, color) => {
-    if (!acc[color.category]) acc[color.category] = [];
-    acc[color.category].push(color);
-    return acc;
-  }, {} as Record<string, ExtendedColor[]>);
+  const colorsByCategory = brandKit.extendedColors.reduce(
+    (acc, color) => {
+      if (!acc[color.category]) acc[color.category] = [];
+      acc[color.category].push(color);
+      return acc;
+    },
+    {} as Record<string, ExtendedColor[]>
+  );
 
   return (
     <div className="space-y-6">
@@ -68,7 +71,12 @@ export default function ColorSection({ brandId }: ColorSectionProps) {
           className="flex items-center gap-2 px-4 py-2 text-sm border border-dashed border-border rounded-lg hover:border-foreground transition-colors w-full justify-center"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={1.5}
+              d="M12 4v16m8-8H4"
+            />
           </svg>
           Add Color
         </button>
@@ -79,7 +87,10 @@ export default function ColorSection({ brandId }: ColorSectionProps) {
         <div className="p-4 bg-surface rounded-lg space-y-4">
           <div className="flex gap-4">
             <div className="flex-shrink-0">
-              <HexColorPicker color={newColor.hex} onChange={(hex) => setNewColor({ ...newColor, hex })} />
+              <HexColorPicker
+                color={newColor.hex}
+                onChange={(hex) => setNewColor({ ...newColor, hex })}
+              />
             </div>
             <div className="flex-1 space-y-3">
               <div>
@@ -105,11 +116,18 @@ export default function ColorSection({ brandId }: ColorSectionProps) {
                 <label className="block text-xs text-muted mb-1">Category</label>
                 <select
                   value={newColor.category}
-                  onChange={(e) => setNewColor({ ...newColor, category: e.target.value as ExtendedColor['category'] })}
+                  onChange={(e) =>
+                    setNewColor({
+                      ...newColor,
+                      category: e.target.value as ExtendedColor['category'],
+                    })
+                  }
                   className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm outline-none focus:border-foreground"
                 >
                   {colorCategories.map((cat) => (
-                    <option key={cat.id} value={cat.id}>{cat.label}</option>
+                    <option key={cat.id} value={cat.id}>
+                      {cat.label}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -146,8 +164,18 @@ export default function ColorSection({ brandId }: ColorSectionProps) {
       {/* Color Palette Display */}
       {brandKit.extendedColors.length === 0 && !isAddingColor ? (
         <div className="text-center py-8 text-muted">
-          <svg className="w-12 h-12 mx-auto mb-3 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+          <svg
+            className="w-12 h-12 mx-auto mb-3 opacity-50"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={1}
+              d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"
+            />
           </svg>
           <p className="text-sm">No colors added yet</p>
           <p className="text-xs mt-1">Add colors to build your brand palette</p>
@@ -157,17 +185,21 @@ export default function ColorSection({ brandId }: ColorSectionProps) {
           {colorCategories.map((category) => {
             const colors = colorsByCategory[category.id] || [];
             if (colors.length === 0) return null;
-            
+
             return (
               <div key={category.id}>
-                <h4 className="text-xs uppercase tracking-widest text-muted mb-3">{category.label}</h4>
+                <h4 className="text-xs uppercase tracking-widest text-muted mb-3">
+                  {category.label}
+                </h4>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
                   {colors.map((color) => (
                     <ColorSwatch
                       key={color.id}
                       color={color}
                       isEditing={editingColorId === color.id}
-                      onEdit={() => setEditingColorId(editingColorId === color.id ? null : color.id)}
+                      onEdit={() =>
+                        setEditingColorId(editingColorId === color.id ? null : color.id)
+                      }
                       onUpdate={(updates) => handleUpdateColor(color.id, updates)}
                       onDelete={() => handleDeleteColor(color.id)}
                     />
@@ -257,16 +289,10 @@ function ColorSwatch({ color, isEditing, onEdit, onUpdate, onDelete }: ColorSwat
             className="w-full px-2 py-1 text-xs bg-surface border border-border rounded outline-none focus:border-foreground"
           />
           <div className="flex justify-between">
-            <button
-              onClick={onDelete}
-              className="text-xs text-red-500 hover:text-red-400"
-            >
+            <button onClick={onDelete} className="text-xs text-red-500 hover:text-red-400">
               Delete
             </button>
-            <button
-              onClick={onEdit}
-              className="text-xs text-muted hover:text-foreground"
-            >
+            <button onClick={onEdit} className="text-xs text-muted hover:text-foreground">
               Done
             </button>
           </div>
@@ -279,8 +305,13 @@ function ColorSwatch({ color, isEditing, onEdit, onUpdate, onDelete }: ColorSwat
 // Helper function to calculate contrast ratio
 function calculateContrastRatio(hex1: string, hex2: string): number {
   const getLuminance = (hex: string) => {
-    const rgb = hex.replace('#', '').match(/.{2}/g)?.map((x) => parseInt(x, 16) / 255) || [0, 0, 0];
-    const [r, g, b] = rgb.map((c) => (c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4)));
+    const rgb = hex
+      .replace('#', '')
+      .match(/.{2}/g)
+      ?.map((x) => parseInt(x, 16) / 255) || [0, 0, 0];
+    const [r, g, b] = rgb.map((c) =>
+      c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4)
+    );
     return 0.2126 * r + 0.7152 * g + 0.0722 * b;
   };
 
@@ -290,19 +321,3 @@ function calculateContrastRatio(hex1: string, hex2: string): number {
   const darker = Math.min(l1, l2);
   return (lighter + 0.05) / (darker + 0.05);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

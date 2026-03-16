@@ -4,12 +4,12 @@ import { useRef } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 
 interface AutoOrbitCameraProps {
-  radius?: number;        // Distance from center (default: 40)
-  speed?: number;         // Rotation speed (default: 0.15)
-  height?: number;        // Camera Y position (default: 5)
-  topDown?: boolean;      // Start from top-down view (default: false)
-  tiltAngle?: number;     // Angle from horizontal in radians (default: 0.3)
-  initialAngle?: number;  // Starting orbit angle in radians (default: 0.8)
+  radius?: number; // Distance from center (default: 40)
+  speed?: number; // Rotation speed (default: 0.15)
+  height?: number; // Camera Y position (default: 5)
+  topDown?: boolean; // Start from top-down view (default: false)
+  tiltAngle?: number; // Angle from horizontal in radians (default: 0.3)
+  initialAngle?: number; // Starting orbit angle in radians (default: 0.8)
 }
 
 export default function AutoOrbitCamera({
@@ -18,7 +18,7 @@ export default function AutoOrbitCamera({
   height = 5,
   topDown = false,
   tiltAngle = 0.3,
-  initialAngle = 0.8     // ~46 degrees - nice diagonal starting view
+  initialAngle = 0.8, // ~46 degrees - nice diagonal starting view
 }: AutoOrbitCameraProps) {
   const { camera } = useThree();
   const angleRef = useRef(initialAngle);

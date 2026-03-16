@@ -119,69 +119,78 @@ export function useCalendarDrafts(): CalendarDraftsState {
     }
   }, [brandId, user, weekStart]);
 
-  const createDraft = useCallback(async (input: CreateDraftInput): Promise<CalendarDraft | null> => {
-    if (!brandId) return null;
+  const createDraft = useCallback(
+    async (input: CreateDraftInput): Promise<CalendarDraft | null> => {
+      if (!brandId) return null;
 
-    try {
-      const res = await fetch('/api/calendar/drafts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ brandId, ...input }),
-      });
+      try {
+        const res = await fetch('/api/calendar/drafts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ brandId, ...input }),
+        });
 
-      if (!res.ok) throw new Error('Failed to create draft');
+        if (!res.ok) throw new Error('Failed to create draft');
 
-      const data = await res.json();
-      // Refresh to get updated lists
-      await fetchDrafts();
-      return data.draft;
-    } catch (err) {
-      console.error('Failed to create draft:', err);
-      setError('Failed to create draft');
-      return null;
-    }
-  }, [brandId, fetchDrafts]);
+        const data = await res.json();
+        // Refresh to get updated lists
+        await fetchDrafts();
+        return data.draft;
+      } catch (err) {
+        console.error('Failed to create draft:', err);
+        setError('Failed to create draft');
+        return null;
+      }
+    },
+    [brandId, fetchDrafts]
+  );
 
-  const updateDraft = useCallback(async (id: string, input: UpdateDraftInput): Promise<CalendarDraft | null> => {
-    try {
-      const res = await fetch(`/api/calendar/drafts/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(input),
-      });
+  const updateDraft = useCallback(
+    async (id: string, input: UpdateDraftInput): Promise<CalendarDraft | null> => {
+      try {
+        const res = await fetch(`/api/calendar/drafts/${id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(input),
+        });
 
-      if (!res.ok) throw new Error('Failed to update draft');
+        if (!res.ok) throw new Error('Failed to update draft');
 
-      const data = await res.json();
-      // Refresh to get updated lists
-      await fetchDrafts();
-      return data.draft;
-    } catch (err) {
-      console.error('Failed to update draft:', err);
-      setError('Failed to update draft');
-      return null;
-    }
-  }, [fetchDrafts]);
+        const data = await res.json();
+        // Refresh to get updated lists
+        await fetchDrafts();
+        return data.draft;
+      } catch (err) {
+        console.error('Failed to update draft:', err);
+        setError('Failed to update draft');
+        return null;
+      }
+    },
+    [fetchDrafts]
+  );
 
-  const deleteDraft = useCallback(async (id: string): Promise<boolean> => {
-    try {
-      const res = await fetch(`/api/calendar/drafts/${id}`, {
-        method: 'DELETE',
-      });
+  const deleteDraft = useCallback(
+    async (id: string): Promise<boolean> => {
+      try {
+        const res = await fetch(`/api/calendar/drafts/${id}`, {
+          method: 'DELETE',
+        });
 
-      if (!res.ok) throw new Error('Failed to delete draft');
+        if (!res.ok) throw new Error('Failed to delete draft');
 
-      await fetchDrafts();
-      return true;
-    } catch (err) {
-      console.error('Failed to delete draft:', err);
-      setError('Failed to delete draft');
-      return false;
-    }
-  }, [fetchDrafts]);
+        await fetchDrafts();
+        return true;
+      } catch (err) {
+        console.error('Failed to delete draft:', err);
+        setError('Failed to delete draft');
+        return false;
+      }
+    },
+    [fetchDrafts]
+  );
 
   const navigateWeek = useCallback((direction: -1 | 1) => {
-    setWeekStart(prev => {
+    setWeekStart((prev) => {
       const next = new Date(prev);
       next.setDate(next.getDate() + direction * 7);
       return next;

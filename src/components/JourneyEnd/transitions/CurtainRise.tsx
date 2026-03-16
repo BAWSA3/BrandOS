@@ -8,10 +8,7 @@ interface CurtainRiseProps {
   theme: string;
 }
 
-export default function CurtainRise({
-  onComplete,
-  theme,
-}: CurtainRiseProps) {
+export default function CurtainRise({ onComplete, theme }: CurtainRiseProps) {
   const [stage, setStage] = useState<'ready' | 'rising' | 'complete'>('ready');
 
   useEffect(() => {
@@ -164,9 +161,7 @@ export default function CurtainRise({
           transition={{ duration: 0.3 }}
           style={{ textAlign: 'center' }}
         >
-          <div style={{ fontSize: '48px', marginBottom: '16px' }}>
-            🧬
-          </div>
+          <div style={{ fontSize: '48px', marginBottom: '16px' }}>🧬</div>
           <div
             style={{
               fontFamily: "'VCR OSD Mono', monospace",

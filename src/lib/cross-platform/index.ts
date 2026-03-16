@@ -74,10 +74,7 @@ export {
   auditVisualConsistency,
   crossPlatformVisualAudit,
 } from './visual-engine';
-export type {
-  VisualConsistencyResult,
-  CrossPlatformVisualAudit,
-} from './visual-engine';
+export type { VisualConsistencyResult, CrossPlatformVisualAudit } from './visual-engine';
 
 // Transcript engine
 export {

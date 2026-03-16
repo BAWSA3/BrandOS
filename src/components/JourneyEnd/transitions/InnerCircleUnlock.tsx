@@ -8,10 +8,7 @@ interface InnerCircleUnlockProps {
   theme: string;
 }
 
-export default function InnerCircleUnlock({
-  onComplete,
-  theme,
-}: InnerCircleUnlockProps) {
+export default function InnerCircleUnlock({ onComplete, theme }: InnerCircleUnlockProps) {
   const [stage, setStage] = useState<'enter' | 'hold' | 'exit'>('enter');
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -171,7 +168,8 @@ export default function InnerCircleUnlock({
           width: '500px',
           height: '500px',
           borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(245,158,11,0.4) 0%, rgba(217,119,6,0.2) 40%, transparent 70%)',
+          background:
+            'radial-gradient(circle, rgba(245,158,11,0.4) 0%, rgba(217,119,6,0.2) 40%, transparent 70%)',
           filter: 'blur(80px)',
         }}
       />
@@ -229,7 +227,7 @@ export default function InnerCircleUnlock({
             delay: 0.5,
             ease: 'easeInOut',
             repeat: Infinity,
-            repeatDelay: 1.5
+            repeatDelay: 1.5,
           }}
           style={{
             position: 'absolute',
@@ -256,7 +254,16 @@ export default function InnerCircleUnlock({
         />
 
         {/* Content */}
-        <div style={{ position: 'relative', zIndex: 1, textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <div
+          style={{
+            position: 'relative',
+            zIndex: 1,
+            textAlign: 'center',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+          }}
+        >
           {/* Exclusive Access label */}
           <motion.div
             initial={{ opacity: 0, y: -10 }}

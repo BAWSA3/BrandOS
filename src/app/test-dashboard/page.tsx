@@ -6,7 +6,8 @@ const mockData: BrandOSDashboardData = {
   profile: {
     username: 'naval',
     displayName: 'Naval',
-    profileImageUrl: 'https://pbs.twimg.com/profile_images/1256841238298292232/ycqwaMI2_400x400.jpg',
+    profileImageUrl:
+      'https://pbs.twimg.com/profile_images/1256841238298292232/ycqwaMI2_400x400.jpg',
     followersCount: '2.1M',
     verified: true,
   },

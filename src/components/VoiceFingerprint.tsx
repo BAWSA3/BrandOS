@@ -65,7 +65,10 @@ function DimensionPanel({
         <div style={{ padding: '0 16px 16px' }}>
           <div style={{ display: 'grid', gap: 8 }}>
             {items.map((item) => (
-              <div key={item.label} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
+              <div
+                key={item.label}
+                style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}
+              >
                 <span style={{ color: 'var(--text-tertiary)' }}>{item.label}</span>
                 <span style={{ color: 'var(--text-primary)', fontWeight: 500 }}>{item.value}</span>
               </div>
@@ -138,7 +141,10 @@ export default function VoiceFingerprint() {
       }
       toast.success('Voice Print created!', `Confidence: ${fp.metadata.confidence}%`);
     } catch (error) {
-      toast.error('Extraction failed', error instanceof Error ? error.message : 'Please try again.');
+      toast.error(
+        'Extraction failed',
+        error instanceof Error ? error.message : 'Please try again.'
+      );
     } finally {
       setIsExtracting(false);
     }
@@ -219,13 +225,43 @@ export default function VoiceFingerprint() {
   // Build radar data from fingerprint
   const radarData = fingerprint
     ? {
-        vocabulary: fingerprint.vocabulary.complexity === 'advanced' ? 85 : fingerprint.vocabulary.complexity === 'moderate' ? 60 : 35,
-        sentenceRhythm: fingerprint.sentencePatterns.lengthVariation === 'dramatic' ? 90 : fingerprint.sentencePatterns.lengthVariation === 'mixed' ? 65 : 40,
-        formatting: fingerprint.formatting.useOfEmphasis === 'heavy' ? 85 : fingerprint.formatting.useOfEmphasis === 'moderate' ? 60 : 30,
-        rhetoric: fingerprint.rhetoric.emotionalRange === 'expressive' ? 85 : fingerprint.rhetoric.emotionalRange === 'moderate' ? 60 : 35,
+        vocabulary:
+          fingerprint.vocabulary.complexity === 'advanced'
+            ? 85
+            : fingerprint.vocabulary.complexity === 'moderate'
+              ? 60
+              : 35,
+        sentenceRhythm:
+          fingerprint.sentencePatterns.lengthVariation === 'dramatic'
+            ? 90
+            : fingerprint.sentencePatterns.lengthVariation === 'mixed'
+              ? 65
+              : 40,
+        formatting:
+          fingerprint.formatting.useOfEmphasis === 'heavy'
+            ? 85
+            : fingerprint.formatting.useOfEmphasis === 'moderate'
+              ? 60
+              : 30,
+        rhetoric:
+          fingerprint.rhetoric.emotionalRange === 'expressive'
+            ? 85
+            : fingerprint.rhetoric.emotionalRange === 'moderate'
+              ? 60
+              : 35,
         signatureElements: Math.min(100, fingerprint.signatureElements.length * 20),
-        opinionStrength: fingerprint.thinkingStyle.certaintyLevel === 'assertive' ? 90 : fingerprint.thinkingStyle.certaintyLevel === 'balanced' ? 60 : 30,
-        storytelling: fingerprint.contentStructure.pacing === 'building' ? 80 : fingerprint.contentStructure.pacing === 'front-loaded' ? 70 : 50,
+        opinionStrength:
+          fingerprint.thinkingStyle.certaintyLevel === 'assertive'
+            ? 90
+            : fingerprint.thinkingStyle.certaintyLevel === 'balanced'
+              ? 60
+              : 30,
+        storytelling:
+          fingerprint.contentStructure.pacing === 'building'
+            ? 80
+            : fingerprint.contentStructure.pacing === 'front-loaded'
+              ? 70
+              : 50,
       }
     : null;
 
@@ -244,9 +280,9 @@ export default function VoiceFingerprint() {
           Voice Print
         </h2>
         <p style={{ fontSize: 15, color: 'var(--text-secondary)', marginBottom: 24 }}>
-          A granular model of how you actually write — sentence rhythms, vocabulary quirks, formatting
-          habits, and rhetorical patterns. Every piece of AI-generated content gets filtered through this
-          so it sounds unmistakably like <em>you</em>.
+          A granular model of how you actually write — sentence rhythms, vocabulary quirks,
+          formatting habits, and rhetorical patterns. Every piece of AI-generated content gets
+          filtered through this so it sounds unmistakably like <em>you</em>.
         </p>
       </section>
 
@@ -351,8 +387,14 @@ export default function VoiceFingerprint() {
               items={[
                 { label: 'Complexity', value: fingerprint.vocabulary.complexity },
                 { label: 'Jargon Level', value: fingerprint.vocabulary.jargonLevel },
-                { label: 'Signature Words', value: fingerprint.vocabulary.signatureWords.join(', ') || '—' },
-                { label: 'Avoided Words', value: fingerprint.vocabulary.avoidedWords.join(', ') || '—' },
+                {
+                  label: 'Signature Words',
+                  value: fingerprint.vocabulary.signatureWords.join(', ') || '—',
+                },
+                {
+                  label: 'Avoided Words',
+                  value: fingerprint.vocabulary.avoidedWords.join(', ') || '—',
+                },
                 { label: 'Contractions', value: fingerprint.vocabulary.contractionUsage },
                 { label: 'Slang', value: fingerprint.vocabulary.slangComfort },
               ]}
@@ -381,7 +423,10 @@ export default function VoiceFingerprint() {
               title="Thinking Style"
               items={[
                 { label: 'Perspective', value: fingerprint.thinkingStyle.perspective },
-                { label: 'Abstract vs Concrete', value: fingerprint.thinkingStyle.abstractVsConcrete },
+                {
+                  label: 'Abstract vs Concrete',
+                  value: fingerprint.thinkingStyle.abstractVsConcrete,
+                },
                 { label: 'Certainty Level', value: fingerprint.thinkingStyle.certaintyLevel },
                 { label: 'Nuance Level', value: fingerprint.thinkingStyle.nuanceLevel },
               ]}
@@ -405,8 +450,22 @@ export default function VoiceFingerprint() {
 
         {/* Sample Collection */}
         <div style={{ marginBottom: 32 }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-            <label style={{ fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-tertiary)' }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: 12,
+            }}
+          >
+            <label
+              style={{
+                fontSize: 12,
+                textTransform: 'uppercase',
+                letterSpacing: '0.1em',
+                color: 'var(--text-tertiary)',
+              }}
+            >
               Writing Samples
             </label>
             {brandDNA?.voiceSamples && brandDNA.voiceSamples.length > 0 && (
@@ -498,7 +557,14 @@ export default function VoiceFingerprint() {
                   </span>
                 </div>
               ))}
-              <div style={{ fontSize: 12, color: 'var(--text-tertiary)', textAlign: 'center', marginTop: 4 }}>
+              <div
+                style={{
+                  fontSize: 12,
+                  color: 'var(--text-tertiary)',
+                  textAlign: 'center',
+                  marginTop: 4,
+                }}
+              >
                 {samples.length} sample{samples.length !== 1 ? 's' : ''} ready
                 {samples.length < 5 && ' — 5+ recommended for best results'}
               </div>
@@ -555,7 +621,9 @@ export default function VoiceFingerprint() {
             </button>
 
             {showBeforeAfter && beforeAfterResult && (
-              <div style={{ marginTop: 20, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+              <div
+                style={{ marginTop: 20, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}
+              >
                 <div
                   style={{
                     padding: 16,
@@ -564,8 +632,22 @@ export default function VoiceFingerprint() {
                     border: '1px solid var(--border)',
                   }}
                 >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                    <span style={{ fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-tertiary)' }}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      marginBottom: 12,
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontSize: 12,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.1em',
+                        color: 'var(--text-tertiary)',
+                      }}
+                    >
                       Without Voice Print
                     </span>
                     {beforeAfterResult.genericScore && (
@@ -573,14 +655,22 @@ export default function VoiceFingerprint() {
                         style={{
                           fontSize: 12,
                           fontWeight: 600,
-                          color: beforeAfterResult.genericScore.overall < 50 ? '#FF453A' : '#FF9F0A',
+                          color:
+                            beforeAfterResult.genericScore.overall < 50 ? '#FF453A' : '#FF9F0A',
                         }}
                       >
                         {beforeAfterResult.genericScore.overall}/100
                       </span>
                     )}
                   </div>
-                  <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
+                  <p
+                    style={{
+                      fontSize: 13,
+                      color: 'var(--text-secondary)',
+                      lineHeight: 1.6,
+                      whiteSpace: 'pre-wrap',
+                    }}
+                  >
                     {beforeAfterResult.generic}
                   </p>
                 </div>
@@ -592,8 +682,22 @@ export default function VoiceFingerprint() {
                     border: '1px solid rgba(10, 132, 255, 0.3)',
                   }}
                 >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                    <span style={{ fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#0A84FF' }}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      marginBottom: 12,
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontSize: 12,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.1em',
+                        color: '#0A84FF',
+                      }}
+                    >
                       With Voice Print
                     </span>
                     {beforeAfterResult.fingerprintedScore && (
@@ -601,14 +705,24 @@ export default function VoiceFingerprint() {
                         style={{
                           fontSize: 12,
                           fontWeight: 600,
-                          color: beforeAfterResult.fingerprintedScore.overall >= 70 ? 'var(--success, #34C759)' : '#FF9F0A',
+                          color:
+                            beforeAfterResult.fingerprintedScore.overall >= 70
+                              ? 'var(--success, #34C759)'
+                              : '#FF9F0A',
                         }}
                       >
                         {beforeAfterResult.fingerprintedScore.overall}/100
                       </span>
                     )}
                   </div>
-                  <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
+                  <p
+                    style={{
+                      fontSize: 13,
+                      color: 'var(--text-secondary)',
+                      lineHeight: 1.6,
+                      whiteSpace: 'pre-wrap',
+                    }}
+                  >
                     {beforeAfterResult.fingerprinted}
                   </p>
                 </div>

@@ -17,10 +17,7 @@ export async function GET(request: NextRequest) {
     // Get brands that have both performance snapshots and viral benchmarks
     const brands = await prisma.brand.findMany({
       where: {
-        AND: [
-          { performanceSnapshots: { some: {} } },
-          { viralBenchmarks: { some: {} } },
-        ],
+        AND: [{ performanceSnapshots: { some: {} } }, { viralBenchmarks: { some: {} } }],
       },
       select: { id: true, name: true },
     });

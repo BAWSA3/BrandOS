@@ -1,6 +1,7 @@
 # BrandOS Launch Content - Ready to Post
 
 ## Quick Reference
+
 - **Product URL:** mybrandos.app
 - **Invite URL Format:** mybrandos.app?invite=[CODE]
 - **8 Archetypes:** ARC → ENTROPY/NULL/FREQ → RELAY/BUILD.EXE → SIGNAL_SAGE → FORESIGHT
@@ -11,6 +12,7 @@
 # DAY 1 (TODAY) - INNER CIRCLE SEEDING
 
 ## DM Template for Close Network (Send to 20-30 people)
+
 ```
 You're one of the first people with access to BrandOS.
 
@@ -22,6 +24,7 @@ Would love your honest feedback.
 ```
 
 ## Morning Post (Mystery Tease)
+
 ```
 Something's coming.
 
@@ -29,6 +32,7 @@ Inner Circle only for now.
 ```
 
 ## Afternoon Post (Your Brand DNA Reveal)
+
 ```
 Just found out I'm FORESIGHT.
 
@@ -42,6 +46,7 @@ What does yours say?
 ```
 
 ## Evening Post (Building in Public)
+
 ```
 The feedback from Inner Circle has been wild.
 
@@ -55,6 +60,7 @@ This is why you build with early users first.
 # DAY 2 - THREAD DAY
 
 ## Morning Thread (Your Main Reveal)
+
 ```
 I built an AI that reads your X profile and reveals your Brand DNA.
 
@@ -133,9 +139,11 @@ I have a few invite codes left.
 ```
 
 ## Afternoon (Engagement)
-*RT and quote-tweet every Inner Circle member who shares their score*
+
+_RT and quote-tweet every Inner Circle member who shares their score_
 
 ## Evening Post (DM Offer)
+
 ```
 DM me if you want an early invite code.
 
@@ -147,6 +155,7 @@ I have 10 left.
 # DAY 3 - SOCIAL PROOF BUILDING
 
 ## Morning Post
+
 ```
 Inner Circle update:
 
@@ -161,7 +170,9 @@ Public launch Monday.
 ```
 
 ## Afternoon (Template for Members to Share)
-*Send this to each Inner Circle member:*
+
+_Send this to each Inner Circle member:_
+
 ```
 Hey! Would you mind sharing your BrandOS score? Here's a template you can customize:
 
@@ -176,6 +187,7 @@ This is eerily accurate.
 ```
 
 ## Evening Post
+
 ```
 The archetypes are hitting different.
 
@@ -195,6 +207,7 @@ Monday.
 # DAY 4 (THURSDAY) - HYPE BUILDING
 
 ## Morning Thread (Problem Awareness)
+
 ```
 95% of AI-generated content sounds the same.
 
@@ -244,6 +257,7 @@ Public access Monday.
 ```
 
 ## Afternoon Post (Engagement Poll)
+
 ```
 What's your biggest struggle with keeping your content on-brand?
 
@@ -254,6 +268,7 @@ What's your biggest struggle with keeping your content on-brand?
 ```
 
 ## Evening Post (Agent Tease)
+
 ```
 Meet your new marketing team:
 
@@ -273,6 +288,7 @@ Monday.
 # DAY 5 (FRIDAY) - ARCHETYPE REVEAL
 
 ## Morning Thread (Archetype Deep Dive)
+
 ```
 I analyzed 1000+ creator profiles.
 
@@ -372,6 +388,7 @@ Or DM me for an early invite code.
 ```
 
 ## Afternoon Post (Social Proof Compilation)
+
 ```
 Here's what Inner Circle testers are saying about BrandOS:
 
@@ -387,6 +404,7 @@ Monday.
 ```
 
 ## Evening Post (Countdown)
+
 ```
 48 hours until you can discover your Brand DNA.
 
@@ -404,6 +422,7 @@ Last few codes.
 # DAY 6 (SATURDAY) - LIGHT ENGAGEMENT
 
 ## Post 1
+
 ```
 Weekend project:
 
@@ -421,6 +440,7 @@ Building the flex.
 # DAY 7 (SUNDAY) - LAUNCH EVE
 
 ## Evening Post (Final Countdown)
+
 ```
 Tomorrow. 9am ET.
 
@@ -432,6 +452,7 @@ Set your alarm.
 ```
 
 ## DM to 10-15 Most Engaged Inner Circle Members
+
 ```
 Hey! Tomorrow at 9am ET, BrandOS goes public.
 
@@ -454,6 +475,7 @@ Let's make some noise 🔥
 # DAY 8 (MONDAY) - LAUNCH DAY
 
 ## 9:00 AM - Main Launch Tweet
+
 ```
 BrandOS is live.
 
@@ -467,6 +489,7 @@ mybrandos.app
 ```
 
 ## 9:15 AM - The "Why" Thread
+
 ```
 Why I built BrandOS:
 
@@ -523,15 +546,18 @@ mybrandos.app
 ```
 
 ## Throughout the Day
-*RT and engage with EVERY person who shares their score*
+
+_RT and engage with EVERY person who shares their score_
 
 Engagement templates:
+
 - "The [Archetype] energy is strong with this one"
 - "[Score]/100 — you're cooking"
 - "Classic [Archetype] move"
 - "The evolution to [Next Archetype] is coming"
 
 ## Evening Post (Day 1 Recap)
+
 ```
 Day 1 stats:
 
@@ -550,6 +576,7 @@ Here are some of the wildest archetype reveals:
 # POST-LAUNCH WEEK
 
 ## Tuesday - Best Score Cards
+
 ```
 The best Brand DNA score cards from launch day:
 
@@ -563,6 +590,7 @@ Find yours: mybrandos.app
 ```
 
 ## Wednesday - Archetype Deep Dive
+
 ```
 Let's talk about the ENTROPY archetype.
 
@@ -583,6 +611,7 @@ Are you ENTROPY? Reply with your score.
 ```
 
 ## Thursday - Improvement Challenge
+
 ```
 The 7-Day Brand DNA Challenge:
 
@@ -601,6 +630,7 @@ I'll feature the biggest improvements next week.
 ```
 
 ## Friday - Week 1 Stats
+
 ```
 Week 1 of BrandOS:
 
@@ -620,6 +650,7 @@ What should we build next?
 # RECURRING CONTENT TEMPLATES
 
 ## Archetype of the Day
+
 ```
 Archetype spotlight: [ARCHETYPE]
 
@@ -638,6 +669,7 @@ Share your score card 👇
 ```
 
 ## Score Flex Template
+
 ```
 New high score alert 🚨
 
@@ -651,6 +683,7 @@ What's your score? mybrandos.app
 ```
 
 ## Comparison Content
+
 ```
 FORESIGHT vs. SIGNAL_SAGE
 
@@ -669,6 +702,7 @@ Which path are you on?
 # INNER CIRCLE MEMBER TEMPLATES
 
 ## Template 1 (Simple)
+
 ```
 Just got early access to @BrandOS.
 
@@ -681,6 +715,7 @@ mybrandos.app
 ```
 
 ## Template 2 (Story)
+
 ```
 @BrandOS just analyzed 6 months of my tweets.
 
@@ -695,6 +730,7 @@ This is scary accurate.
 ```
 
 ## Template 3 (Challenge)
+
 ```
 I got [X]/100 on my Brand DNA score.
 
@@ -708,11 +744,13 @@ Beat my score: mybrandos.app
 ---
 
 # HASHTAGS (Use sparingly)
+
 - #BrandDNA
 - #BrandOS
 - #CreatorArchetype
 
 # LAUNCH METRICS TO TRACK
+
 - [ ] Quiz completions (target: +20% WoW)
 - [ ] Score card shares (target: 30% of completions)
 - [ ] Twitter impressions (target: 100K/week)
@@ -922,4 +960,4 @@ mybrandos.app
 
 ---
 
-*Generated for BrandOS Launch - January 2026*
+_Generated for BrandOS Launch - January 2026_

@@ -38,8 +38,8 @@ export async function generateExportManifest(sessionId: string): Promise<ExportM
 
   // Sort by moment order
   const sortedScreenshots = [...screenshots].sort((a, b) => {
-    const aIndex = JOURNEY_MOMENTS.findIndex(m => m.id === a.momentId);
-    const bIndex = JOURNEY_MOMENTS.findIndex(m => m.id === b.momentId);
+    const aIndex = JOURNEY_MOMENTS.findIndex((m) => m.id === a.momentId);
+    const bIndex = JOURNEY_MOMENTS.findIndex((m) => m.id === b.momentId);
     return aIndex - bIndex;
   });
 
@@ -106,7 +106,7 @@ export async function exportAsZip(sessionId: string): Promise<Blob> {
   });
 
   // Create a simple text file listing all exports (fallback without JSZip)
-  const listing = files.map(f => f.name).join('\n');
+  const listing = files.map((f) => f.name).join('\n');
   return new Blob([listing], { type: 'text/plain' });
 }
 
@@ -181,7 +181,7 @@ export async function downloadAllScreenshots(sessionId: string): Promise<void> {
     document.body.removeChild(link);
 
     // Small delay between downloads
-    await new Promise(resolve => setTimeout(resolve, 200));
+    await new Promise((resolve) => setTimeout(resolve, 200));
   }
 }
 

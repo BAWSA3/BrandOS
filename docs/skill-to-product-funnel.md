@@ -3,10 +3,12 @@
 ## Current State
 
 ### Skill (free, runs in Claude Code)
+
 - Stateless scan → score + archetype + gaps
 - Ends with CTA: `mybrandos.app/@username`
 
 ### Product (web app at mybrandos.app)
+
 - Full dashboard, growth plans, content engine, voice fingerprinting, leaderboard, team collab, cross-platform publishing
 - Auth via X OAuth → Supabase → Prisma DB
 
@@ -66,14 +68,14 @@ Once they sign in, don't dump them in the full dashboard. Instead:
 
 ## What to Build
 
-| Priority | What | Why |
-|----------|------|-----|
-| **P0** | Public score page route (`/scan/[username]`) | Gives the skill CTA somewhere real to land |
-| **P0** | Score data passthrough (URL params or API) | Connects skill output to product input |
-| **P1** | Auto-populate brand DNA from X profile on first login | Kills the cold-start onboarding problem |
-| **P1** | Gated preview (blurred growth plan / content engine) | Creates desire before requiring auth |
-| **P2** | Skill → API persistence (`/api/scan/submit`) | Enables score history even before account creation |
-| **P2** | Shareable score cards (OG image generation) | Users share their score on X → organic acquisition loop |
+| Priority | What                                                  | Why                                                     |
+| -------- | ----------------------------------------------------- | ------------------------------------------------------- |
+| **P0**   | Public score page route (`/scan/[username]`)          | Gives the skill CTA somewhere real to land              |
+| **P0**   | Score data passthrough (URL params or API)            | Connects skill output to product input                  |
+| **P1**   | Auto-populate brand DNA from X profile on first login | Kills the cold-start onboarding problem                 |
+| **P1**   | Gated preview (blurred growth plan / content engine)  | Creates desire before requiring auth                    |
+| **P2**   | Skill → API persistence (`/api/scan/submit`)          | Enables score history even before account creation      |
+| **P2**   | Shareable score cards (OG image generation)           | Users share their score on X → organic acquisition loop |
 
 ---
 
@@ -100,6 +102,7 @@ The skill isn't just a free tier — it's the **acquisition engine**. The produc
 ## Feature Breakdown: Skill vs Product
 
 ### What the Skill Does (Free Tier)
+
 - Quick brand score scan (0-100)
 - Archetype assignment (1 of 8)
 - 4-dimensional breakdown (DEFINE, CHECK, GENERATE, SCALE)
@@ -108,6 +111,7 @@ The skill isn't just a free tier — it's the **acquisition engine**. The produc
 - CTA to dashboard
 
 ### What ONLY the Product Has (Paid Features)
+
 - Brand DNA persistence — save brand profiles to database
 - Score history tracking — monitor score evolution over time
 - Full dashboard — comprehensive brand management UI

@@ -60,18 +60,21 @@ function EarlyAccessContent() {
       <div
         className="fixed inset-0 pointer-events-none"
         style={{
-          backgroundImage: 'linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px)',
+          backgroundImage:
+            'linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px)',
           backgroundSize: '40px 40px',
         }}
       />
 
       <div className="flex items-center justify-center min-h-screen px-6 relative">
         <div className="max-w-[440px] w-full">
-
           {/* Header */}
           <div className="mb-10 text-center">
             <div className="flex items-center justify-center gap-2.5 mb-4">
-              <div className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" style={{ boxShadow: '0 0 6px var(--accent)' }} />
+              <div
+                className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]"
+                style={{ boxShadow: '0 0 6px var(--accent)' }}
+              />
               <span className="label-mono text-[var(--accent)]">early access</span>
             </div>
             <h1
@@ -81,8 +84,11 @@ function EarlyAccessContent() {
               build with BrandOS_
             </h1>
             <p className="font-mono text-[11px] text-[var(--text-quaternary)] leading-relaxed">
-              content engine. brand dna. voice matching.<br />
-              {ref ? 'a friend invited you. sign up to get started.' : 'sign up to get early access.'}
+              content engine. brand dna. voice matching.
+              <br />
+              {ref
+                ? 'a friend invited you. sign up to get started.'
+                : 'sign up to get early access.'}
             </p>
           </div>
 
@@ -94,15 +100,23 @@ function EarlyAccessContent() {
                 <input
                   type="email"
                   value={email}
-                  onChange={e => setEmail(e.target.value)}
+                  onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
                   required
                   className="terminal-input w-full bg-[var(--surface)] border border-[var(--surface-tertiary)] rounded-[var(--radius-sm)] px-3.5 py-2.5 text-sm text-[var(--text-primary)] outline-none focus:border-[var(--accent)] transition-[var(--transition-fast)] mb-4"
                 />
 
                 {error && (
-                  <div className="border rounded-[var(--radius-sm)] px-3 py-2 mb-4" style={{ background: 'rgba(255, 59, 48, 0.06)', borderColor: 'rgba(255, 59, 48, 0.15)' }}>
-                    <span className="label-mono" style={{ color: 'var(--danger)' }}>{error}</span>
+                  <div
+                    className="border rounded-[var(--radius-sm)] px-3 py-2 mb-4"
+                    style={{
+                      background: 'rgba(255, 59, 48, 0.06)',
+                      borderColor: 'rgba(255, 59, 48, 0.15)',
+                    }}
+                  >
+                    <span className="label-mono" style={{ color: 'var(--danger)' }}>
+                      {error}
+                    </span>
                   </div>
                 )}
 
@@ -110,9 +124,14 @@ function EarlyAccessContent() {
                   type="submit"
                   disabled={loading || !email.trim()}
                   className="btn-engine label-mono w-full py-3 rounded-[var(--radius-sm)]"
-                  style={loading || !email.trim()
-                    ? { background: 'var(--surface-tertiary)', color: 'var(--text-quaternary)', cursor: 'default' }
-                    : { background: 'var(--accent)', color: '#fff', cursor: 'pointer' }
+                  style={
+                    loading || !email.trim()
+                      ? {
+                          background: 'var(--surface-tertiary)',
+                          color: 'var(--text-quaternary)',
+                          cursor: 'default',
+                        }
+                      : { background: 'var(--accent)', color: '#fff', cursor: 'pointer' }
                   }
                 >
                   {loading ? 'submitting...' : 'get early access'}
@@ -134,14 +153,16 @@ function EarlyAccessContent() {
               <Link
                 href="/content-engine"
                 className="btn-engine label-mono inline-block px-6 py-3 rounded-[var(--radius-sm)]"
-                style={{ background: 'transparent', color: 'var(--accent)', border: '1px solid var(--accent)' }}
+                style={{
+                  background: 'transparent',
+                  color: 'var(--accent)',
+                  border: '1px solid var(--accent)',
+                }}
               >
                 back to content engine
               </Link>
             </div>
           )}
-
-
         </div>
       </div>
     </div>

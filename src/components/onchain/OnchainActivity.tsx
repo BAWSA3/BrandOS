@@ -36,7 +36,8 @@ export function OnchainActivity() {
 
   if (loading) {
     return (
-      <div className="flex items-center gap-2 px-4 py-3 rounded-xl"
+      <div
+        className="flex items-center gap-2 px-4 py-3 rounded-xl"
         style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}
       >
         <div className="w-4 h-4 rounded-full border-2 border-blue-400/30 border-t-blue-400 animate-spin" />
@@ -47,23 +48,37 @@ export function OnchainActivity() {
 
   if (!data || data.totalAttestations === 0) {
     return (
-      <div className="flex items-center gap-3 px-4 py-3 rounded-xl"
+      <div
+        className="flex items-center gap-3 px-4 py-3 rounded-xl"
         style={{
-          background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(16, 185, 129, 0.05) 100%)',
+          background:
+            'linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(16, 185, 129, 0.05) 100%)',
           border: '1px solid rgba(59, 130, 246, 0.1)',
         }}
       >
-        <div className="flex items-center justify-center w-8 h-8 rounded-lg"
+        <div
+          className="flex items-center justify-center w-8 h-8 rounded-lg"
           style={{ background: 'rgba(59, 130, 246, 0.1)' }}
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(96,165,250,0.6)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="rgba(96,165,250,0.6)"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
             <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
           </svg>
         </div>
         <div className="flex flex-col">
           <span className="text-xs font-medium text-white/60">No onchain activity yet</span>
-          <span className="text-[10px] text-white/30">Mint your Brand DNA or score to get started</span>
+          <span className="text-[10px] text-white/30">
+            Mint your Brand DNA or score to get started
+          </span>
         </div>
       </div>
     );
@@ -75,12 +90,14 @@ export function OnchainActivity() {
         onClick={() => setExpanded(!expanded)}
         className="flex items-center gap-3 px-4 py-3 rounded-xl transition-all w-full text-left"
         style={{
-          background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(16, 185, 129, 0.08) 100%)',
+          background:
+            'linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(16, 185, 129, 0.08) 100%)',
           border: '1px solid rgba(59, 130, 246, 0.15)',
         }}
         whileHover={{ scale: 1.005 }}
       >
-        <div className="flex items-center justify-center w-8 h-8 rounded-lg"
+        <div
+          className="flex items-center justify-center w-8 h-8 rounded-lg"
           style={{ background: 'linear-gradient(135deg, #3b82f6 0%, #10b981 100%)' }}
         >
           <span className="text-white font-bold text-xs">{data.totalAttestations}</span>
@@ -94,8 +111,12 @@ export function OnchainActivity() {
           </span>
         </div>
         <motion.svg
-          width="16" height="16" viewBox="0 0 24 24" fill="none"
-          stroke="rgba(255,255,255,0.3)" strokeWidth="2"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="rgba(255,255,255,0.3)"
+          strokeWidth="2"
           animate={{ rotate: expanded ? 180 : 0 }}
         >
           <polyline points="6 9 12 15 18 9" />
@@ -132,7 +153,8 @@ export function OnchainActivity() {
 function formatAttestationType(metadata: Record<string, unknown> | null): string {
   if (!metadata) return 'Attestation';
   if ('brandName' in metadata && 'version' in metadata) return `Brand DNA v${metadata.version}`;
-  if ('brandAlignmentScore' in metadata) return `Content Check (${metadata.brandAlignmentScore}/100)`;
+  if ('brandAlignmentScore' in metadata)
+    return `Content Check (${metadata.brandAlignmentScore}/100)`;
   if ('overallScore' in metadata) return `Brand Score (${metadata.overallScore}/100)`;
   return 'Attestation';
 }

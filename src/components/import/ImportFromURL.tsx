@@ -45,7 +45,7 @@ export default function ImportFromURL({ onExtract }: ImportFromURLProps) {
       setProgress({ stage: 'analyzing', progress: 60, message: 'Extracting brand elements...' });
 
       const result = await response.json();
-      
+
       if (result.screenshot) {
         setScreenshot(result.screenshot);
       }
@@ -58,30 +58,61 @@ export default function ImportFromURL({ onExtract }: ImportFromURLProps) {
         sourceDetails: fullUrl,
         overallConfidence: result.overallConfidence || 75,
         extractedAt: new Date(),
-        name: result.name ? { value: result.name, confidence: 85, source: 'Page title/meta' } : undefined,
-        colors: result.colors ? {
-          primary: result.colors.primary ? { value: result.colors.primary, confidence: 90, source: 'CSS variables' } : undefined,
-          secondary: result.colors.secondary ? { value: result.colors.secondary, confidence: 85, source: 'CSS analysis' } : undefined,
-          accent: result.colors.accent ? { value: result.colors.accent, confidence: 80, source: 'CSS analysis' } : undefined,
-          additional: result.colors.additional?.map((c: string) => ({ value: c, confidence: 70, source: 'Page colors' })),
-        } : undefined,
-        tone: result.tone ? {
-          formality: { value: result.tone.formality, confidence: 75, source: 'Copy analysis' },
-          energy: { value: result.tone.energy, confidence: 75, source: 'Copy analysis' },
-          confidence: { value: result.tone.confidence, confidence: 75, source: 'Copy analysis' },
-          style: { value: result.tone.style, confidence: 75, source: 'Copy analysis' },
-        } : undefined,
-        keywords: result.keywords?.map((k: string) => ({ value: k, confidence: 80, source: 'Meta tags/content' })),
-        voiceSamples: result.voiceSamples?.map((s: string) => ({ value: s, confidence: 85, source: 'Page copy' })),
-        detectedFonts: result.fonts?.map((f: string) => ({ value: f, confidence: 90, source: 'CSS fonts' })),
+        name: result.name
+          ? { value: result.name, confidence: 85, source: 'Page title/meta' }
+          : undefined,
+        colors: result.colors
+          ? {
+              primary: result.colors.primary
+                ? { value: result.colors.primary, confidence: 90, source: 'CSS variables' }
+                : undefined,
+              secondary: result.colors.secondary
+                ? { value: result.colors.secondary, confidence: 85, source: 'CSS analysis' }
+                : undefined,
+              accent: result.colors.accent
+                ? { value: result.colors.accent, confidence: 80, source: 'CSS analysis' }
+                : undefined,
+              additional: result.colors.additional?.map((c: string) => ({
+                value: c,
+                confidence: 70,
+                source: 'Page colors',
+              })),
+            }
+          : undefined,
+        tone: result.tone
+          ? {
+              formality: { value: result.tone.formality, confidence: 75, source: 'Copy analysis' },
+              energy: { value: result.tone.energy, confidence: 75, source: 'Copy analysis' },
+              confidence: {
+                value: result.tone.confidence,
+                confidence: 75,
+                source: 'Copy analysis',
+              },
+              style: { value: result.tone.style, confidence: 75, source: 'Copy analysis' },
+            }
+          : undefined,
+        keywords: result.keywords?.map((k: string) => ({
+          value: k,
+          confidence: 80,
+          source: 'Meta tags/content',
+        })),
+        voiceSamples: result.voiceSamples?.map((s: string) => ({
+          value: s,
+          confidence: 85,
+          source: 'Page copy',
+        })),
+        detectedFonts: result.fonts?.map((f: string) => ({
+          value: f,
+          confidence: 90,
+          source: 'CSS fonts',
+        })),
       };
 
       setProgress({ stage: 'complete', progress: 100, message: 'Analysis complete!' });
-      
+
       setTimeout(() => {
         onExtract(extractedBrand, screenshot || undefined);
       }, 500);
-
     } catch (error) {
       setProgress({
         stage: 'error',
@@ -96,8 +127,18 @@ export default function ImportFromURL({ onExtract }: ImportFromURLProps) {
     <div className="max-w-2xl mx-auto">
       <div className="text-center mb-8">
         <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-blue-500/10 flex items-center justify-center">
-          <svg className="w-8 h-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+          <svg
+            className="w-8 h-8 text-blue-500"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={1.5}
+              d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"
+            />
           </svg>
         </div>
         <h2 className="text-2xl font-light tracking-tight mb-2">Analyze Your Website</h2>
@@ -110,7 +151,12 @@ export default function ImportFromURL({ onExtract }: ImportFromURLProps) {
       <div className="relative">
         <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted">
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={1.5}
+              d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
+            />
           </svg>
         </div>
         <input
@@ -123,7 +169,12 @@ export default function ImportFromURL({ onExtract }: ImportFromURLProps) {
         {url && !isValidUrl(url) && (
           <div className="absolute right-4 top-1/2 -translate-y-1/2 text-red-500">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={1.5}
+                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
             </svg>
           </div>
         )}
@@ -152,27 +203,29 @@ export default function ImportFromURL({ onExtract }: ImportFromURLProps) {
               style={{ width: `${progress.progress}%` }}
             />
           </div>
-          {progress.error && (
-            <p className="mt-3 text-sm text-red-500">{progress.error}</p>
-          )}
+          {progress.error && <p className="mt-3 text-sm text-red-500">{progress.error}</p>}
         </div>
       )}
 
       {/* Analyze Button */}
       <button
         onClick={handleAnalyze}
-        disabled={!isValidUrl(url) || (progress?.stage !== 'error' && progress?.stage !== 'complete' && progress !== null)}
+        disabled={
+          !isValidUrl(url) ||
+          (progress?.stage !== 'error' && progress?.stage !== 'complete' && progress !== null)
+        }
         className="w-full mt-8 py-4 bg-foreground text-background rounded-xl text-sm font-medium disabled:opacity-30 disabled:cursor-not-allowed hover:opacity-90 transition-opacity"
       >
         {progress && progress.stage !== 'error' && progress.stage !== 'complete'
           ? 'Analyzing...'
-          : 'Analyze Website'
-        }
+          : 'Analyze Website'}
       </button>
 
       {/* What We Extract */}
       <div className="mt-8 p-4 bg-surface rounded-lg">
-        <h4 className="text-xs uppercase tracking-widest text-muted mb-3">What we&apos;ll extract</h4>
+        <h4 className="text-xs uppercase tracking-widest text-muted mb-3">
+          What we&apos;ll extract
+        </h4>
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div className="flex items-center gap-2">
             <span className="w-3 h-3 rounded-full bg-blue-500"></span>
@@ -195,19 +248,3 @@ export default function ImportFromURL({ onExtract }: ImportFromURLProps) {
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

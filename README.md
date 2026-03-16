@@ -6,21 +6,21 @@ AI-powered brand operating system that turns static brand guidelines into a livi
 
 ## Tech Stack
 
-| Layer | Technology |
-|-------|-----------|
-| Framework | Next.js 16 (App Router), React 19, TypeScript |
-| Styling | Tailwind CSS v4, shadcn/ui, Radix UI |
-| State | Zustand v5 (client), Server Components (server) |
-| Database | Prisma v6, PostgreSQL (Supabase) |
-| Auth | Supabase Auth (X/Twitter OAuth, SSR) |
-| AI | Anthropic Claude, Google Gemini |
-| File Storage | Cloudinary |
-| Analytics | Vercel Analytics, PostHog |
-| Error Tracking | Sentry v10 |
-| Email | Resend |
-| Deployment | Vercel (push-to-deploy, preview URLs) |
-| Validation | Zod, React Hook Form |
-| Onchain | EAS Attestations (Avalanche) |
+| Layer          | Technology                                      |
+| -------------- | ----------------------------------------------- |
+| Framework      | Next.js 16 (App Router), React 19, TypeScript   |
+| Styling        | Tailwind CSS v4, shadcn/ui, Radix UI            |
+| State          | Zustand v5 (client), Server Components (server) |
+| Database       | Prisma v6, PostgreSQL (Supabase)                |
+| Auth           | Supabase Auth (X/Twitter OAuth, SSR)            |
+| AI             | Anthropic Claude, Google Gemini                 |
+| File Storage   | Cloudinary                                      |
+| Analytics      | Vercel Analytics, PostHog                       |
+| Error Tracking | Sentry v10                                      |
+| Email          | Resend                                          |
+| Deployment     | Vercel (push-to-deploy, preview URLs)           |
+| Validation     | Zod, React Hook Form                            |
+| Onchain        | EAS Attestations (Avalanche)                    |
 
 ## Getting Started
 
@@ -66,22 +66,22 @@ Open [http://localhost:3000](http://localhost:3000).
 
 Copy `.env.example` to `.env.local`. Required variables are marked with `*`.
 
-| Variable | Purpose |
-|----------|---------|
-| `NEXT_PUBLIC_SUPABASE_URL` * | Supabase project URL |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` * | Supabase public anon key |
-| `DATABASE_URL` * | Pooled Postgres connection (pgbouncer) |
-| `DIRECT_URL` * | Direct Postgres connection (for migrations) |
-| `ANTHROPIC_API_KEY` * | Claude AI for content analysis + generation |
-| `GOOGLE_GEMINI_API_KEY` | Gemini for visual analysis |
-| `X_BEARER_TOKEN` | X/Twitter API for brand score |
-| `RESEND_API_KEY` | Email sending |
-| `NEXT_PUBLIC_POSTHOG_KEY` | PostHog product analytics |
-| `CLOUDINARY_CLOUD_NAME` | File upload cloud storage |
-| `CLOUDINARY_API_KEY` | Cloudinary API key |
-| `CLOUDINARY_API_SECRET` | Cloudinary API secret |
-| `NEXT_PUBLIC_ONCHAIN_CHAIN` | EAS attestation chain target |
-| `ONCHAIN_PLATFORM_PRIVATE_KEY` | Wallet key for signing attestations |
+| Variable                           | Purpose                                     |
+| ---------------------------------- | ------------------------------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL` \*      | Supabase project URL                        |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` \* | Supabase public anon key                    |
+| `DATABASE_URL` \*                  | Pooled Postgres connection (pgbouncer)      |
+| `DIRECT_URL` \*                    | Direct Postgres connection (for migrations) |
+| `ANTHROPIC_API_KEY` \*             | Claude AI for content analysis + generation |
+| `GOOGLE_GEMINI_API_KEY`            | Gemini for visual analysis                  |
+| `X_BEARER_TOKEN`                   | X/Twitter API for brand score               |
+| `RESEND_API_KEY`                   | Email sending                               |
+| `NEXT_PUBLIC_POSTHOG_KEY`          | PostHog product analytics                   |
+| `CLOUDINARY_CLOUD_NAME`            | File upload cloud storage                   |
+| `CLOUDINARY_API_KEY`               | Cloudinary API key                          |
+| `CLOUDINARY_API_SECRET`            | Cloudinary API secret                       |
+| `NEXT_PUBLIC_ONCHAIN_CHAIN`        | EAS attestation chain target                |
+| `ONCHAIN_PLATFORM_PRIVATE_KEY`     | Wallet key for signing attestations         |
 
 ## Project Structure
 
@@ -122,13 +122,13 @@ docs/               Product documentation (21 files)
 
 ## Available Scripts
 
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start dev server |
-| `npm run build` | Production build (generates Prisma client first) |
-| `npm run lint` | Run ESLint |
-| `npm run format` | Format code with Prettier |
-| `npm run format:check` | Check formatting without writing |
+| Command                | Description                                      |
+| ---------------------- | ------------------------------------------------ |
+| `npm run dev`          | Start dev server                                 |
+| `npm run build`        | Production build (generates Prisma client first) |
+| `npm run lint`         | Run ESLint                                       |
+| `npm run format`       | Format code with Prettier                        |
+| `npm run format:check` | Check formatting without writing                 |
 
 ## Key Architecture Decisions
 

@@ -1,20 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateScheduledContent } from '@/lib/agents/content.agent';
-import { ContentEngineConfig, TryEngineRequestSchema, DEFAULT_CONTENT_ENGINE_CONFIG } from '@/lib/agents/content-engine.types';
+import {
+  ContentEngineConfig,
+  TryEngineRequestSchema,
+  DEFAULT_CONTENT_ENGINE_CONFIG,
+} from '@/lib/agents/content-engine.types';
 import { BrandDNA } from '@/lib/types';
 import { checkRateLimit, getClientIdentifier } from '@/lib/rate-limit';
 import type { QuickVoiceScan } from './scan/route';
 
-function buildTrialBrandDNA(
-  name?: string,
-  tone?: string,
-  voiceScan?: QuickVoiceScan
-): BrandDNA {
+function buildTrialBrandDNA(name?: string, tone?: string, voiceScan?: QuickVoiceScan): BrandDNA {
   const tonePresets: Record<string, BrandDNA['tone']> = {
-    bold:    { minimal: 70, playful: 40, bold: 85, experimental: 60 },
-    chill:   { minimal: 60, playful: 70, bold: 30, experimental: 40 },
-    pro:     { minimal: 50, playful: 20, bold: 50, experimental: 20 },
-    edgy:    { minimal: 80, playful: 30, bold: 90, experimental: 80 },
+    bold: { minimal: 70, playful: 40, bold: 85, experimental: 60 },
+    chill: { minimal: 60, playful: 70, bold: 30, experimental: 40 },
+    pro: { minimal: 50, playful: 20, bold: 50, experimental: 20 },
+    edgy: { minimal: 80, playful: 30, bold: 90, experimental: 80 },
     default: { minimal: 50, playful: 50, bold: 50, experimental: 50 },
   };
 
@@ -90,11 +90,7 @@ export async function POST(request: NextRequest) {
       };
     }
 
-    const result = await generateScheduledContent(
-      { brandDNA },
-      engineConfig,
-      { day, slot, topic }
-    );
+    const result = await generateScheduledContent({ brandDNA }, engineConfig, { day, slot, topic });
 
     if (!result.success) {
       return NextResponse.json({ error: result.error || 'Generation failed' }, { status: 500 });

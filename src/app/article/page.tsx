@@ -109,9 +109,7 @@ export default function ArticlePage() {
           You read about building
           <br />a brand with AI.
           <br />
-          <span style={{ color: '#0047FF', fontWeight: 500 }}>
-            Now see yours.
-          </span>
+          <span style={{ color: '#0047FF', fontWeight: 500 }}>Now see yours.</span>
         </h1>
       </div>
 

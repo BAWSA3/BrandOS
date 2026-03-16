@@ -8,12 +8,14 @@
 ## Tier 1: High-Impact, Large TAM Opportunities
 
 ### 1. AI Grading & Authentication Platform
+
 **Pain points solved:** Grading inconsistency, PSA monopoly, counterfeit slabs, trust crisis
 **TAM:** $4.25B grading services market by 2032 (16.2% CAGR)
 
 **The idea:** An AI-powered grading service that uses computer vision to grade cards with transparent, reproducible criteria. Every card gets a detailed score breakdown (centering %, surface score, edge score, corner score) instead of a single opaque number. The AI never "has a bad day" — same card, same grade, every time.
 
 **Why now:**
+
 - PSA grade-swap scandal destroyed trust in 2025
 - Collectors Holdings monopoly (79-83% market share) inviting FTC scrutiny
 - CGC grew 631% in H1 2025 proving demand for alternatives
@@ -26,12 +28,14 @@
 ---
 
 ### 2. Collectibles Insurance-as-a-Service
+
 **Pain points solved:** Insurance gap, documentation burden, underinsured collections
 **TAM:** $321B collectibles market, <1% currently insured properly
 
 **The idea:** A digital-first insurance product specifically for collectibles. Snap photos of your collection, AI estimates value using real-time market data, get instant coverage. No appraisals needed under $25K. Claims processed digitally with photo documentation already on file. Covers flood, fire, theft, damage — everything homeowners policies exclude.
 
 **Why now:**
+
 - Most homeowners insurance pays $1 for a $2,000 card
 - Standard policies exclude floods/earthquakes entirely
 - Climate events increasing (floods, fires)
@@ -44,12 +48,14 @@
 ---
 
 ### 3. Transparent Marketplace with Built-in Authentication
+
 **Pain points solved:** eBay fees (13%+), marketplace fraud, AI refund scams, no buyer/seller protection
 **TAM:** $10.4B sports cards + $14.7B TCG = $25B+ addressable market
 
 **The idea:** A collectibles-specific marketplace with 5-6% fees (vs. eBay's 13%+), mandatory authentication for listings above $100, escrow-based payments, and blockchain provenance tracking. Every card gets a digital passport showing ownership history, grade, and verification status. Anti-fraud AI detects shill bidding and manipulated images.
 
 **Why now:**
+
 - eBay's fees are extractive (13.25% + per-order + promoted listings)
 - AI refund scams emerging (buyers submit altered photos)
 - No marketplace offers both low fees AND strong protection
@@ -62,12 +68,14 @@
 ---
 
 ### 4. All-in-One Collector Platform (The "Robinhood for Cards")
+
 **Pain points solved:** Fragmented tools, no portfolio tracking, spreadsheet management, scanning inaccuracies
 **TAM:** 26M+ cards graded in 2025 alone; millions of active collectors worldwide
 
 **The idea:** A single app that combines: card scanning with AI identification, real-time portfolio valuation, market alerts, insurance integration, grading submission management, shipping tools, and tax reporting. Think of it as the Bloomberg Terminal for card collectors — from casual hobbyist to serious investor.
 
 **Why now:**
+
 - Existing apps (Cardstock, CollX, LUDEX) all have major gaps
 - No single app does scanning + pricing + portfolio + insurance + tax
 - Collector base growing rapidly (58% make repeat purchases)
@@ -82,6 +90,7 @@
 ## Tier 2: Strong Opportunities with Clear Demand
 
 ### 5. Pre-Grading AI Service
+
 **Pain points solved:** Grading lottery, wasted submissions, turnaround time anxiety
 **TAM:** 26M+ cards graded annually; each submission costs $15-50+
 
@@ -92,6 +101,7 @@
 ---
 
 ### 6. Collectibles-Backed Lending
+
 **Pain points solved:** Liquidity, selling at a loss, need for cash without losing collection
 **TAM:** Collectibles as alternative asset class; lending against $321B in assets
 
@@ -102,6 +112,7 @@
 ---
 
 ### 7. Regulated Box Break Platform
+
 **Pain points solved:** Box break fraud, unregulated gambling, stolen hits, shill bidding
 **TAM:** Box breaks are a multi-billion dollar segment growing rapidly
 
@@ -112,6 +123,7 @@
 ---
 
 ### 8. Collectibles Estate Planning & Liquidation Service
+
 **Pain points solved:** Estate valuation difficulty, heirs don't know what things are worth, liquidation complexity
 **TAM:** Baby Boomer collections entering estate planning now; $321B market aging
 
@@ -122,6 +134,7 @@
 ---
 
 ### 9. Climate-Controlled Micro-Vaulting Network
+
 **Pain points solved:** Home storage risk, insurance requirements, lack of professional storage access
 **TAM:** Millions of collections stored improperly at home
 
@@ -132,6 +145,7 @@
 ---
 
 ### 10. Collector Education & Community Platform
+
 **Pain points solved:** New collector barriers, information asymmetry, gatekeeping, intimidation
 **TAM:** Market growing 8-11% CAGR; new entrants are the growth engine
 
@@ -144,6 +158,7 @@
 ## Tier 3: Niche but Defensible Opportunities
 
 ### 11. Anti-Counterfeit Hardware Device
+
 **Pain points solved:** Fake slabs, counterfeit detection requires expertise
 **TAM:** $1.85B authentication market
 
@@ -154,6 +169,7 @@
 ---
 
 ### 12. Collectibles Tax Software
+
 **Pain points solved:** 28% capital gains rate confusion, reporting complexity, cost basis tracking
 **TAM:** Millions of collectors technically required to report; almost none do
 
@@ -164,6 +180,7 @@
 ---
 
 ### 13. Shipping Protection & Logistics Service
+
 **Pain points solved:** USPS $50 cap, shipping damage, packing complexity
 **TAM:** Millions of cards shipped daily; $50 PIP cap creates huge gap
 
@@ -174,6 +191,7 @@
 ---
 
 ### 14. Price Manipulation Detection & Fair Market Data
+
 **Pain points solved:** TCGPlayer manipulation, shill bidding, fake sales, opacity
 **TAM:** Pricing data is foundational to a $25B+ market
 
@@ -218,4 +236,4 @@ Given Relique's existing position (vault storage, blockchain provenance, PSA/BGS
 
 ---
 
-*Generated March 2026 based on deep collectibles market research.*
+_Generated March 2026 based on deep collectibles market research._

@@ -11,9 +11,9 @@ interface ParallaxCardProps {
   direction?: 'up' | 'down';
   rotateOnScroll?: boolean;
   // Enhanced parallax options
-  scale?: [number, number];      // [start, end] scale values
-  xMovement?: number;            // Horizontal parallax pixels
-  fadeIn?: boolean;              // Fade in as element enters viewport
+  scale?: [number, number]; // [start, end] scale values
+  xMovement?: number; // Horizontal parallax pixels
+  fadeIn?: boolean; // Fade in as element enters viewport
   opacityRange?: [number, number]; // Custom opacity range [start, end]
 }
 
@@ -63,18 +63,14 @@ export function ParallaxCard({
   );
 
   // X movement transform
-  const xMove = prefersReducedMotion ? 0 : (xMovement || 0);
+  const xMove = prefersReducedMotion ? 0 : xMovement || 0;
   const x = useTransform(scrollYProgress, [0, 1], [xMove, -xMove]);
 
   // Opacity transform (for fade in or custom range)
   const opacity = useTransform(
     scrollYProgress,
     [0, 0.2, 0.8, 1],
-    fadeIn
-      ? [0, 1, 1, 0.8]
-      : opacityRange
-        ? [opacityRange[0], 1, 1, opacityRange[1]]
-        : [1, 1, 1, 1]
+    fadeIn ? [0, 1, 1, 0.8] : opacityRange ? [opacityRange[0], 1, 1, opacityRange[1]] : [1, 1, 1, 1]
   );
 
   if (prefersReducedMotion) {
@@ -95,7 +91,7 @@ export function ParallaxCard({
         x: xMovement ? x : undefined,
         rotate: rotateOnScroll ? rotate : 0,
         scale: scale ? scaleValue : undefined,
-        opacity: (fadeIn || opacityRange) ? opacity : undefined,
+        opacity: fadeIn || opacityRange ? opacity : undefined,
         willChange: 'transform, opacity',
       }}
     >

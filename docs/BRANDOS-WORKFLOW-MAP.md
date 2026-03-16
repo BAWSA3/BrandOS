@@ -42,6 +42,7 @@ API CHAIN:  /api/x-profile → /api/x-brand-identity → /api/x-brand-dna/genera
 ## 2. Component Architecture
 
 ### Main Entry Point
+
 ```
 src/app/page.tsx (Landing)
     └── src/components/XBrandScoreHero.tsx (Main Orchestrator)
@@ -70,6 +71,7 @@ src/app/page.tsx (Landing)
 ```
 
 ### DNAWalkthrough Structure
+
 ```
 src/components/DNAWalkthrough/
 ├── index.tsx                    Main orchestrator (scroll tracking, section refs)
@@ -93,6 +95,7 @@ src/components/DNAWalkthrough/
 ```
 
 ### JourneyEnd Structure
+
 ```
 src/components/JourneyEnd/
 ├── index.tsx                    Stage manager (transition → highlight → complete)
@@ -108,6 +111,7 @@ src/components/JourneyEnd/
 ## 3. API Flow
 
 ### Analysis Pipeline
+
 ```
 User submits @username
         │
@@ -151,25 +155,26 @@ User submits @username
 
 ### All API Endpoints
 
-| Endpoint | Method | Purpose |
-|----------|--------|---------|
-| `/api/x-profile` | POST | Fetch X/Twitter profile |
-| `/api/x-tweets` | POST | Fetch user tweets |
-| `/api/x-brand-identity` | POST | Full brand analysis |
-| `/api/x-brand-score` | POST | Generate brand score |
-| `/api/x-brand-dna/generate` | POST | Generate Brand DNA |
-| `/api/x-brand-dna/recommendations` | POST | Get improvement tips |
-| `/api/signup` | POST | Email waitlist signup |
-| `/api/leaderboard` | GET | Brand score leaderboard |
-| `/api/brands/share` | POST | Create shareable link |
-| `/api/agents/chat` | POST | AI agent chat |
-| `/api/brand-advisor/chat` | POST | Brand advisor chat |
+| Endpoint                           | Method | Purpose                 |
+| ---------------------------------- | ------ | ----------------------- |
+| `/api/x-profile`                   | POST   | Fetch X/Twitter profile |
+| `/api/x-tweets`                    | POST   | Fetch user tweets       |
+| `/api/x-brand-identity`            | POST   | Full brand analysis     |
+| `/api/x-brand-score`               | POST   | Generate brand score    |
+| `/api/x-brand-dna/generate`        | POST   | Generate Brand DNA      |
+| `/api/x-brand-dna/recommendations` | POST   | Get improvement tips    |
+| `/api/signup`                      | POST   | Email waitlist signup   |
+| `/api/leaderboard`                 | GET    | Brand score leaderboard |
+| `/api/brands/share`                | POST   | Create shareable link   |
+| `/api/agents/chat`                 | POST   | AI agent chat           |
+| `/api/brand-advisor/chat`          | POST   | Brand advisor chat      |
 
 ---
 
 ## 4. Data Structures
 
 ### XProfileData
+
 ```typescript
 interface XProfileData {
   name: string;
@@ -186,9 +191,10 @@ interface XProfileData {
 ```
 
 ### BrandScoreResult
+
 ```typescript
 interface BrandScoreResult {
-  overallScore: number;          // 0-100
+  overallScore: number; // 0-100
   phases: {
     define: { score: number; insights: string[] };
     check: { score: number; insights: string[] };
@@ -202,14 +208,15 @@ interface BrandScoreResult {
 ```
 
 ### GeneratedBrandDNA
+
 ```typescript
 interface GeneratedBrandDNA {
-  archetype: string;             // "FORESIGHT", "The Builder", etc.
+  archetype: string; // "FORESIGHT", "The Builder", etc.
   archetypeEmoji: string;
-  personalityType: string;       // MBTI code
+  personalityType: string; // MBTI code
   personalitySummary: string;
   tone: {
-    formality: number;           // 0-100
+    formality: number; // 0-100
     energy: number;
     confidence: number;
     experimental: number;
@@ -234,6 +241,7 @@ interface GeneratedBrandDNA {
 ## 5. State Management
 
 ### XBrandScoreHero State
+
 ```typescript
 // Flow state
 const [flowState, setFlowState] = useState<FlowState>('input');
@@ -261,6 +269,7 @@ const [compareUsername, setCompareUsername] = useState('');
 ```
 
 ### Global Store (Zustand)
+
 ```
 src/lib/store.ts - useBrandStore
 ├── currentBrand: BrandDNA | null
@@ -316,40 +325,41 @@ src/lib/store.ts - useBrandStore
 
 ## 7. Pages & Routes
 
-| Route | Page | Purpose |
-|-------|------|---------|
-| `/` | Landing | Main entry, username input |
-| `/score/[username]` | Dynamic Score | Shareable URL for results |
-| `/dna` | DNA Visualization | 3D DNA scene |
-| `/shared/[token]` | Shared Brand | Public brand view |
-| `/agents` | Agents Hub | AI assistants |
-| `/conductor` | Conductor | AI orchestration |
-| `/app` | Main App | Authenticated experience |
-| `/thanks` | Thank You | Post-signup |
-| `/test-dashboard` | Test Dashboard | Development testing |
-| `/test-journey-end` | Test Journey | Development testing |
+| Route               | Page              | Purpose                    |
+| ------------------- | ----------------- | -------------------------- |
+| `/`                 | Landing           | Main entry, username input |
+| `/score/[username]` | Dynamic Score     | Shareable URL for results  |
+| `/dna`              | DNA Visualization | 3D DNA scene               |
+| `/shared/[token]`   | Shared Brand      | Public brand view          |
+| `/agents`           | Agents Hub        | AI assistants              |
+| `/conductor`        | Conductor         | AI orchestration           |
+| `/app`              | Main App          | Authenticated experience   |
+| `/thanks`           | Thank You         | Post-signup                |
+| `/test-dashboard`   | Test Dashboard    | Development testing        |
+| `/test-journey-end` | Test Journey      | Development testing        |
 
 ---
 
 ## 8. Personality Types
 
-| Type | MBTI | Emoji | Traits |
-|------|------|-------|--------|
-| FORESIGHT | ENTP | Alien | Bold predictions, thought leader |
-| The Alpha | ENTJ | Lightning | Confident, commanding |
-| The Builder | ISTP | Rocket | Ships products, technical |
-| The Educator | ENFJ | Book | Explains, thread master |
-| ENTROPY | ESTP | Dice | High risk, meme-friendly |
-| The Analyst | INTP | Eyes | Data-driven, charts |
-| The Philosopher | INFJ | Brain | Big picture, visionary |
-| The Networker | ESFJ | Handshake | Community, connector |
-| The Contrarian | ENTP | Fire | Against crowd, independent |
+| Type            | MBTI | Emoji     | Traits                           |
+| --------------- | ---- | --------- | -------------------------------- |
+| FORESIGHT       | ENTP | Alien     | Bold predictions, thought leader |
+| The Alpha       | ENTJ | Lightning | Confident, commanding            |
+| The Builder     | ISTP | Rocket    | Ships products, technical        |
+| The Educator    | ENFJ | Book      | Explains, thread master          |
+| ENTROPY         | ESTP | Dice      | High risk, meme-friendly         |
+| The Analyst     | INTP | Eyes      | Data-driven, charts              |
+| The Philosopher | INFJ | Brain     | Big picture, visionary           |
+| The Networker   | ESFJ | Handshake | Community, connector             |
+| The Contrarian  | ENTP | Fire      | Against crowd, independent       |
 
 ---
 
 ## 9. Key Files Reference
 
 ### Core Flow
+
 ```
 src/app/page.tsx                           Landing page
 src/components/XBrandScoreHero.tsx         Main orchestrator
@@ -359,6 +369,7 @@ src/components/JourneyEnd/index.tsx        Journey completion
 ```
 
 ### API Routes
+
 ```
 src/app/api/x-profile/route.ts             Fetch X profile
 src/app/api/x-brand-identity/route.ts      Brand analysis
@@ -368,6 +379,7 @@ src/app/api/signup/route.ts                Email waitlist
 ```
 
 ### State & Utils
+
 ```
 src/lib/store.ts                           Zustand store
 src/lib/types.ts                           TypeScript interfaces
@@ -379,30 +391,35 @@ src/lib/db.ts                              Prisma client
 
 ## 10. Change Log
 
-| Date | Change | Files Modified |
-|------|--------|----------------|
-| Jan 2025 | Removed ISSUES DETECTED section | XBrandScoreHero.tsx |
-| Jan 2025 | Removed YOUR BRAND DNA CAPTURED panel | XBrandScoreHero.tsx |
-| Jan 2025 | Added Waitlist + Compare CTAs | XBrandScoreHero.tsx |
-| Jan 2025 | Created workflow map | docs/BRANDOS-WORKFLOW-MAP.md |
+| Date     | Change                                | Files Modified               |
+| -------- | ------------------------------------- | ---------------------------- |
+| Jan 2025 | Removed ISSUES DETECTED section       | XBrandScoreHero.tsx          |
+| Jan 2025 | Removed YOUR BRAND DNA CAPTURED panel | XBrandScoreHero.tsx          |
+| Jan 2025 | Added Waitlist + Compare CTAs         | XBrandScoreHero.tsx          |
+| Jan 2025 | Created workflow map                  | docs/BRANDOS-WORKFLOW-MAP.md |
 
 ---
 
 ## Quick Edits Cheatsheet
 
 ### To modify the dashboard CTAs:
+
 → `src/components/XBrandScoreHero.tsx` lines ~1967-2080
 
 ### To add a new walkthrough section:
+
 1. Create `src/components/DNAWalkthrough/sections/NewSection.tsx`
 2. Import in `src/components/DNAWalkthrough/index.tsx`
 3. Add to sections array and SECTION_NAMES
 
 ### To modify brand score calculation:
+
 → `src/app/api/x-brand-score/route.ts`
 
 ### To add new API endpoint:
+
 → Create `src/app/api/your-endpoint/route.ts`
 
 ### To add new personality type:
+
 → `src/lib/gemini.ts` (PERSONALITY_TYPES map)

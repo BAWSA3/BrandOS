@@ -30,7 +30,7 @@ export default function LogoSection({ brandId }: LogoSectionProps) {
 
     // For now, create object URL (in production, upload to server)
     const url = URL.createObjectURL(file);
-    
+
     addLogo(brandId, {
       name: file.name.replace(/\.[^/.]+$/, ''),
       type: 'primary',
@@ -55,11 +55,14 @@ export default function LogoSection({ brandId }: LogoSectionProps) {
   };
 
   // Group logos by type
-  const logosByType = brandKit.logos.reduce((acc, logo) => {
-    if (!acc[logo.type]) acc[logo.type] = [];
-    acc[logo.type].push(logo);
-    return acc;
-  }, {} as Record<string, LogoAsset[]>);
+  const logosByType = brandKit.logos.reduce(
+    (acc, logo) => {
+      if (!acc[logo.type]) acc[logo.type] = [];
+      acc[logo.type].push(logo);
+      return acc;
+    },
+    {} as Record<string, LogoAsset[]>
+  );
 
   return (
     <div className="space-y-6">
@@ -79,24 +82,52 @@ export default function LogoSection({ brandId }: LogoSectionProps) {
         >
           {isUploading ? (
             <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              />
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              />
             </svg>
           ) : (
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={1.5}
+                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
+              />
             </svg>
           )}
           Upload Logo
         </button>
-        <span className="text-xs text-muted">PNG, SVG, or JPG (recommended: SVG for scalability)</span>
+        <span className="text-xs text-muted">
+          PNG, SVG, or JPG (recommended: SVG for scalability)
+        </span>
       </div>
 
       {/* Logo Display */}
       {brandKit.logos.length === 0 ? (
         <div className="text-center py-12 border-2 border-dashed border-border rounded-xl">
-          <svg className="w-16 h-16 mx-auto mb-4 text-muted opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          <svg
+            className="w-16 h-16 mx-auto mb-4 text-muted opacity-50"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={1}
+              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+            />
           </svg>
           <p className="text-muted mb-2">No logos uploaded yet</p>
           <p className="text-xs text-muted">Upload your brand logos to organize and manage them</p>
@@ -197,11 +228,7 @@ function LogoCard({ logo, isSelected, onSelect, onUpdate, onDelete }: LogoCardPr
       >
         <div className="w-full h-full p-4 flex items-center justify-center">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={logo.url}
-            alt={logo.name}
-            className="max-w-full max-h-full object-contain"
-          />
+          <img src={logo.url} alt={logo.name} className="max-w-full max-h-full object-contain" />
         </div>
       </div>
 
@@ -231,7 +258,9 @@ function LogoCard({ logo, isSelected, onSelect, onUpdate, onDelete }: LogoCardPr
               className="w-full px-2 py-1 text-sm bg-surface border border-border rounded outline-none focus:border-foreground"
             >
               {logoTypes.map((type) => (
-                <option key={type.id} value={type.id}>{type.label}</option>
+                <option key={type.id} value={type.id}>
+                  {type.label}
+                </option>
               ))}
             </select>
           </div>
@@ -266,16 +295,10 @@ function LogoCard({ logo, isSelected, onSelect, onUpdate, onDelete }: LogoCardPr
             />
           </div>
           <div className="flex justify-between pt-2">
-            <button
-              onClick={onDelete}
-              className="text-xs text-red-500 hover:text-red-400"
-            >
+            <button onClick={onDelete} className="text-xs text-red-500 hover:text-red-400">
               Delete Logo
             </button>
-            <button
-              onClick={onSelect}
-              className="text-xs text-muted hover:text-foreground"
-            >
+            <button onClick={onSelect} className="text-xs text-muted hover:text-foreground">
               Done
             </button>
           </div>
@@ -284,19 +307,3 @@ function LogoCard({ logo, isSelected, onSelect, onUpdate, onDelete }: LogoCardPr
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

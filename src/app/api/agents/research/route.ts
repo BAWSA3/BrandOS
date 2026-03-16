@@ -95,16 +95,10 @@ export async function POST(request: NextRequest) {
       // ===== GET TOPICS FOR VERTICAL =====
       case 'get-topics': {
         if (!params.vertical) {
-          return NextResponse.json(
-            { error: 'Missing vertical parameter' },
-            { status: 400 }
-          );
+          return NextResponse.json({ error: 'Missing vertical parameter' }, { status: 400 });
         }
 
-        const result = await agents.getVerticalTopics(
-          params.vertical,
-          params.limit || 10
-        );
+        const result = await agents.getVerticalTopics(params.vertical, params.limit || 10);
 
         if (!result.success) {
           return NextResponse.json({ error: result.error }, { status: 500 });
@@ -194,8 +188,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Research API error:', error);
 
-    const errorMessage =
-      error instanceof Error ? error.message : 'Research operation failed';
+    const errorMessage = error instanceof Error ? error.message : 'Research operation failed';
 
     return NextResponse.json(
       {
@@ -236,8 +229,7 @@ export async function GET() {
         description: 'Execute research operations',
         body: {
           brandDNA: 'BrandDNA object (required)',
-          action:
-            'aggregate | get-topics | get-summary | generate-brief | research-to-content',
+          action: 'aggregate | get-topics | get-summary | generate-brief | research-to-content',
           params: {
             verticals: 'TCGVertical[] (optional)',
             sources: 'ResearchSource[] (optional)',

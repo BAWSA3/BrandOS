@@ -4,18 +4,9 @@ import { Platform, ContentType } from '@/lib/types';
 
 // ===== VERTICALS & SOURCES =====
 
-export type TCGVertical =
-  | 'pokemon'
-  | 'mtg'
-  | 'yugioh'
-  | 'sports-cards'
-  | 'collectibles';
+export type TCGVertical = 'pokemon' | 'mtg' | 'yugioh' | 'sports-cards' | 'collectibles';
 
-export type ResearchSource =
-  | 'twitter'
-  | 'reddit'
-  | 'youtube'
-  | 'serper';
+export type ResearchSource = 'twitter' | 'reddit' | 'youtube' | 'serper';
 
 export type TopicCategory =
   | 'news'
@@ -55,7 +46,15 @@ export const VERTICAL_CONFIGS: Record<TCGVertical, VerticalConfig> = {
     hashtags: ['#MTG', '#MagicTheGathering', '#MTGFinance', '#MTGCommunity'],
     subreddits: ['mtgfinance', 'magicTCG', 'ModernMagic', 'EDH', 'mtg'],
     youtubeChannels: ['tolarian community college', 'mtggoldfish', 'the command zone'],
-    keywords: ['reserved list', 'Modern', 'Standard', 'Commander', 'fetch lands', 'proxy', 'reprint'],
+    keywords: [
+      'reserved list',
+      'Modern',
+      'Standard',
+      'Commander',
+      'fetch lands',
+      'proxy',
+      'reprint',
+    ],
     influencers: ['mtggoldfish', 'loadingreadyrun', 'commanderin'],
   },
   yugioh: {

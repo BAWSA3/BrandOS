@@ -8,14 +8,14 @@
 
 ### Quick Facts
 
-| Attribute | Details |
-|-----------|---------|
-| **Company** | Brand.ai |
-| **Founded** | ~2020 |
-| **Headquarters** | San Francisco, CA |
-| **Category** | AI-Powered Brand Management |
-| **Stage** | Early/Growth |
-| **Website** | brand.ai |
+| Attribute        | Details                     |
+| ---------------- | --------------------------- |
+| **Company**      | Brand.ai                    |
+| **Founded**      | ~2020                       |
+| **Headquarters** | San Francisco, CA           |
+| **Category**     | AI-Powered Brand Management |
+| **Stage**        | Early/Growth                |
+| **Website**      | brand.ai                    |
 
 ### Mission & Vision
 
@@ -24,6 +24,7 @@ Brand.ai positions itself as an AI-powered brand management platform that helps 
 ### Founding Story
 
 Brand.ai emerged from the observation that:
+
 - Brand guidelines are increasingly complex
 - Content velocity has outpaced brand teams' capacity
 - AI can automate brand compliance checking
@@ -35,13 +36,13 @@ Brand.ai emerged from the observation that:
 
 ### Core Features
 
-| Feature | Description | Maturity |
-|---------|-------------|----------|
-| **Brand Guidelines Hub** | Centralized brand documentation | Core |
-| **AI Brand Checking** | Automated design compliance | Core |
-| **Asset Management** | Brand asset organization | Core |
-| **Design Integration** | Figma/design tool connections | Developing |
-| **Team Collaboration** | Multi-user workflows | Core |
+| Feature                  | Description                     | Maturity   |
+| ------------------------ | ------------------------------- | ---------- |
+| **Brand Guidelines Hub** | Centralized brand documentation | Core       |
+| **AI Brand Checking**    | Automated design compliance     | Core       |
+| **Asset Management**     | Brand asset organization        | Core       |
+| **Design Integration**   | Figma/design tool connections   | Developing |
+| **Team Collaboration**   | Multi-user workflows            | Core       |
 
 ### Feature Deep Dive
 
@@ -67,17 +68,20 @@ Brand.ai emerged from the observation that:
 ```
 
 **Approach:**
+
 - Structured brand guideline input
 - AI extracts checkable rules
 - Design files analyzed against rules
 - Violations flagged automatically
 
 **Strengths:**
+
 - Visual/design-focused checking
 - Integration with design workflows
 - Reduces manual review burden
 
 **Limitations:**
+
 - Primarily visual, less focus on copy/voice
 - Requires structured guideline input
 - May miss nuanced brand violations
@@ -85,6 +89,7 @@ Brand.ai emerged from the observation that:
 #### AI Brand Checking
 
 Brand.ai's checking focuses on visual elements:
+
 - Logo placement and sizing
 - Color palette compliance
 - Typography usage
@@ -92,32 +97,34 @@ Brand.ai's checking focuses on visual elements:
 
 **Comparison to BrandOS:**
 
-| Aspect | Brand.ai | BrandOS |
-|--------|----------|---------|
-| Visual checking | ✅ Strong | ⚠️ Basic |
+| Aspect              | Brand.ai   | BrandOS   |
+| ------------------- | ---------- | --------- |
+| Visual checking     | ✅ Strong  | ⚠️ Basic  |
 | Copy/voice checking | ⚠️ Limited | ✅ Strong |
-| Tone analysis | ❌ | ✅ |
-| Content generation | ❌ | ✅ |
-| Real-time checking | ✅ | ✅ |
+| Tone analysis       | ❌         | ✅        |
+| Content generation  | ❌         | ✅        |
+| Real-time checking  | ✅         | ✅        |
 
 ### Target Users
 
 **Primary:**
+
 - Brand managers at mid-market companies
 - Design teams needing compliance automation
 - Marketing ops managing multiple creators
 
 **Secondary:**
+
 - Agencies managing client brands
 - Enterprise brand compliance teams
 
 ### Pricing
 
-| Tier | Price | Features |
-|------|-------|----------|
-| Starter | Contact | Basic guidelines, limited checks |
-| Professional | Contact | Full features, team access |
-| Enterprise | Custom | API, SSO, custom integrations |
+| Tier         | Price   | Features                         |
+| ------------ | ------- | -------------------------------- |
+| Starter      | Contact | Basic guidelines, limited checks |
+| Professional | Contact | Full features, team access       |
+| Enterprise   | Custom  | API, SSO, custom integrations    |
 
 **Analysis:** Enterprise-focused pricing limits SMB adoption. No self-serve option visible, which creates friction for product-led growth.
 
@@ -130,6 +137,7 @@ Brand.ai's checking focuses on visual elements:
 > "AI-powered brand management platform for design teams"
 
 Brand.ai positions at the intersection of:
+
 - Brand management (Frontify, Bynder)
 - Design tools (Figma, Adobe)
 - AI automation (emerging category)
@@ -137,24 +145,26 @@ Brand.ai positions at the intersection of:
 ### Go-to-Market Strategy
 
 **Primary channels:**
+
 - Direct sales to mid-market/enterprise
 - Design community engagement
 - Content marketing on brand consistency
 - Integration partnerships
 
 **Sales motion:**
+
 - Demo-driven sales process
 - Pilot programs with design teams
 - Expand to broader marketing org
 
 ### Competitive Differentiation
 
-| vs. Competitor | Brand.ai Advantage |
-|----------------|-------------------|
-| vs. Frontify | More AI-native, design-focused |
-| vs. Bynder | Modern UX, AI capabilities |
-| vs. Manual review | Speed and consistency |
-| vs. BrandOS | Visual focus (but weakness in copy) |
+| vs. Competitor    | Brand.ai Advantage                  |
+| ----------------- | ----------------------------------- |
+| vs. Frontify      | More AI-native, design-focused      |
+| vs. Bynder        | Modern UX, AI capabilities          |
+| vs. Manual review | Speed and consistency               |
+| vs. BrandOS       | Visual focus (but weakness in copy) |
 
 ---
 
@@ -162,16 +172,17 @@ Brand.ai positions at the intersection of:
 
 ### Growth Signals
 
-| Signal | Status | Implication |
-|--------|--------|-------------|
-| Funding raised | Yes (amount TBD) | Investor validation |
-| Enterprise customers | Yes (names TBD) | Market fit signal |
-| Team size growth | Growing | Scaling indicator |
-| Product development | Active | Continued investment |
+| Signal               | Status           | Implication          |
+| -------------------- | ---------------- | -------------------- |
+| Funding raised       | Yes (amount TBD) | Investor validation  |
+| Enterprise customers | Yes (names TBD)  | Market fit signal    |
+| Team size growth     | Growing          | Scaling indicator    |
+| Product development  | Active           | Continued investment |
 
 ### Customer Segments
 
 Based on positioning and messaging:
+
 - Technology companies with strong design cultures
 - Retail/CPG with extensive visual brand needs
 - Financial services with compliance requirements
@@ -190,21 +201,21 @@ Based on positioning and messaging:
 
 ### What to Emulate
 
-| Lesson | Application |
-|--------|-------------|
+| Lesson                   | Application                                  |
+| ------------------------ | -------------------------------------------- |
 | **AI-first positioning** | Lead with AI capabilities, not just features |
-| **Design integration** | Prioritize Figma integration in roadmap |
-| **Visual checking** | Consider adding design compliance features |
-| **Enterprise readiness** | Build SSO, audit logs early |
+| **Design integration**   | Prioritize Figma integration in roadmap      |
+| **Visual checking**      | Consider adding design compliance features   |
+| **Enterprise readiness** | Build SSO, audit logs early                  |
 
 ### What to Avoid
 
-| Anti-pattern | BrandOS Approach |
-|--------------|------------------|
-| **Enterprise-only** | Multi-tier with self-serve |
-| **Visual-only focus** | Copy/voice as primary strength |
-| **Complex onboarding** | Templates and quick setup |
-| **Limited accessibility** | Chrome extension for ubiquity |
+| Anti-pattern              | BrandOS Approach               |
+| ------------------------- | ------------------------------ |
+| **Enterprise-only**       | Multi-tier with self-serve     |
+| **Visual-only focus**     | Copy/voice as primary strength |
+| **Complex onboarding**    | Templates and quick setup      |
+| **Limited accessibility** | Chrome extension for ubiquity  |
 
 ### Differentiation Opportunities
 
@@ -242,6 +253,7 @@ BrandOS can differentiate by focusing on areas Brand.ai underserves:
 **Likelihood:** High (natural product expansion)
 
 **BrandOS Response:**
+
 - Double down on taste translation (unique IP)
 - Emphasize generation, not just checking
 - Build stronger PLG flywheel
@@ -252,6 +264,7 @@ BrandOS can differentiate by focusing on areas Brand.ai underserves:
 **Likelihood:** Medium (enterprise focus may persist)
 
 **BrandOS Response:**
+
 - Compete on value, not just price
 - Emphasize ease of use and time-to-value
 - Build community and content moat
@@ -262,6 +275,7 @@ BrandOS can differentiate by focusing on areas Brand.ai underserves:
 **Likelihood:** Medium (attractive to larger players)
 
 **BrandOS Response:**
+
 - Potential partner opportunity
 - May create market confusion to exploit
 - Watch for integration deprecation
@@ -297,21 +311,4 @@ Brand.ai validates the market for AI-powered brand management, but leaves signif
 
 ---
 
-*Next: [Case Study: Omneky →](15-case-study-omneky.md)*
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+_Next: [Case Study: Omneky →](15-case-study-omneky.md)_

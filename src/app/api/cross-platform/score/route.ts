@@ -48,9 +48,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ score });
   } catch (error) {
     console.error('Cross-platform score error:', error);
-    return NextResponse.json(
-      { error: 'Failed to compute cross-platform score' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to compute cross-platform score' }, { status: 500 });
   }
 }

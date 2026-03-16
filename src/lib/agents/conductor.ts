@@ -13,15 +13,32 @@ export interface RoutingDecision {
 }
 
 // Keywords and patterns for quick routing (no AI needed)
-const routingPatterns: Record<AgentName, {
-  keywords: string[];
-  patterns: RegExp[];
-}> = {
+const routingPatterns: Record<
+  AgentName,
+  {
+    keywords: string[];
+    patterns: RegExp[];
+  }
+> = {
   campaign: {
     keywords: [
-      'campaign', 'launch', 'strategy', 'calendar', 'plan', 'marketing',
-      'promote', 'promotion', 'roadmap', 'timeline', 'phases', 'objectives',
-      'target audience', 'messaging', 'go-to-market', 'gtm', 'awareness',
+      'campaign',
+      'launch',
+      'strategy',
+      'calendar',
+      'plan',
+      'marketing',
+      'promote',
+      'promotion',
+      'roadmap',
+      'timeline',
+      'phases',
+      'objectives',
+      'target audience',
+      'messaging',
+      'go-to-market',
+      'gtm',
+      'awareness',
     ],
     patterns: [
       /create\s+(a\s+)?campaign/i,
@@ -33,9 +50,24 @@ const routingPatterns: Record<AgentName, {
   },
   content: {
     keywords: [
-      'write', 'draft', 'post', 'tweet', 'thread', 'caption', 'copy',
-      'email', 'subject line', 'headline', 'tagline', 'blog', 'article',
-      'linkedin', 'instagram', 'tiktok', 'twitter', 'social',
+      'write',
+      'draft',
+      'post',
+      'tweet',
+      'thread',
+      'caption',
+      'copy',
+      'email',
+      'subject line',
+      'headline',
+      'tagline',
+      'blog',
+      'article',
+      'linkedin',
+      'instagram',
+      'tiktok',
+      'twitter',
+      'social',
     ],
     patterns: [
       /write\s+(a\s+|me\s+)?/i,
@@ -47,10 +79,26 @@ const routingPatterns: Record<AgentName, {
   },
   analytics: {
     keywords: [
-      'analyze', 'analysis', 'performance', 'metrics', 'data', 'report',
-      'engagement', 'impressions', 'clicks', 'conversion', 'roi',
-      'working', 'improve', 'optimize', 'benchmark', 'compare',
-      'insight', 'why', 'dropping', 'increasing',
+      'analyze',
+      'analysis',
+      'performance',
+      'metrics',
+      'data',
+      'report',
+      'engagement',
+      'impressions',
+      'clicks',
+      'conversion',
+      'roi',
+      'working',
+      'improve',
+      'optimize',
+      'benchmark',
+      'compare',
+      'insight',
+      'why',
+      'dropping',
+      'increasing',
     ],
     patterns: [
       /analy[sz]e\s+(my|our|the)/i,
@@ -63,11 +111,36 @@ const routingPatterns: Record<AgentName, {
   },
   research: {
     keywords: [
-      'research', 'trends', 'trending', 'news', 'latest', 'hot', 'buzz',
-      'tcg', 'pokemon', 'magic', 'mtg', 'yugioh', 'sports cards', 'collectibles',
-      'community', 'reddit', 'twitter', 'youtube', 'market', 'prices',
-      'drops', 'releases', 'set', 'grading', 'psa', 'bgs', 'what\'s new',
-      'find topics', 'content ideas', 'based on trends',
+      'research',
+      'trends',
+      'trending',
+      'news',
+      'latest',
+      'hot',
+      'buzz',
+      'tcg',
+      'pokemon',
+      'magic',
+      'mtg',
+      'yugioh',
+      'sports cards',
+      'collectibles',
+      'community',
+      'reddit',
+      'twitter',
+      'youtube',
+      'market',
+      'prices',
+      'drops',
+      'releases',
+      'set',
+      'grading',
+      'psa',
+      'bgs',
+      "what's new",
+      'find topics',
+      'content ideas',
+      'based on trends',
     ],
     patterns: [
       /what('s|\s+is)\s+(trending|hot|new)/i,
@@ -82,10 +155,24 @@ const routingPatterns: Record<AgentName, {
   },
   intelligence: {
     keywords: [
-      'viral', 'benchmark', 'gap', 'scanner', 'market scan', 'what\'s working',
-      'competitors', 'content intelligence', 'niche', 'viral patterns',
-      'gap analysis', 'performance tracker', 'intelligence feed', 'scan my niche',
-      'viral score', 'content ideas', 'what should i post', 'what\'s trending',
+      'viral',
+      'benchmark',
+      'gap',
+      'scanner',
+      'market scan',
+      "what's working",
+      'competitors',
+      'content intelligence',
+      'niche',
+      'viral patterns',
+      'gap analysis',
+      'performance tracker',
+      'intelligence feed',
+      'scan my niche',
+      'viral score',
+      'content ideas',
+      'what should i post',
+      "what's trending",
     ],
     patterns: [
       /scan\s+(my\s+)?niche/i,
@@ -100,13 +187,41 @@ const routingPatterns: Record<AgentName, {
   },
   authority: {
     keywords: [
-      'authority', 'positioning', 'thought leadership', 'expert', 'position',
-      'objection', 'competitor', 'vs', 'versus', 'compare', 'comparison',
-      'why relique', 'trust', 'security', 'vault', 'vaulting', 'tokenization',
-      'nft', 'how does relique', 'better than', 'educational', 'explain',
-      'ebay', 'tcgplayer', 'courtyard', 'alt', 'dibbs',
-      'collector', 'trader', 'seller', 'audience',
-      'proof', 'differentiate', 'advantage', 'benefit',
+      'authority',
+      'positioning',
+      'thought leadership',
+      'expert',
+      'position',
+      'objection',
+      'competitor',
+      'vs',
+      'versus',
+      'compare',
+      'comparison',
+      'why relique',
+      'trust',
+      'security',
+      'vault',
+      'vaulting',
+      'tokenization',
+      'nft',
+      'how does relique',
+      'better than',
+      'educational',
+      'explain',
+      'ebay',
+      'tcgplayer',
+      'courtyard',
+      'alt',
+      'dibbs',
+      'collector',
+      'trader',
+      'seller',
+      'audience',
+      'proof',
+      'differentiate',
+      'advantage',
+      'benefit',
     ],
     patterns: [
       /why\s+(should|would)\s+(i|we|they)\s+(use|choose|trust)\s+relique/i,
@@ -164,7 +279,7 @@ export function quickRoute(message: string): RoutingDecision | null {
   if (topScore >= 3 && topScore > secondScore * 1.5) {
     return {
       agent: topAgent,
-      confidence: Math.min(0.9, 0.5 + (topScore * 0.1)),
+      confidence: Math.min(0.9, 0.5 + topScore * 0.1),
       reasoning: `Detected ${topAgent}-related keywords and patterns`,
       suggestedAction: getSuggestedAction(topAgent, message),
     };
@@ -178,7 +293,7 @@ export function quickRoute(message: string): RoutingDecision | null {
  */
 export async function smartRoute(message: string): Promise<RoutingDecision> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
-  
+
   if (!apiKey) {
     // Fallback to content as default
     return {
@@ -222,15 +337,17 @@ Which agent is best suited? Return ONLY valid JSON:
       ],
     });
 
-    const responseText = response.content[0].type === 'text'
-      ? response.content[0].text
-      : '';
+    const responseText = response.content[0].type === 'text' ? response.content[0].text : '';
 
     const jsonMatch = responseText.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
       const decision = JSON.parse(jsonMatch[0]) as RoutingDecision;
       // Validate agent name
-      if (['campaign', 'content', 'analytics', 'research', 'authority', 'intelligence'].includes(decision.agent)) {
+      if (
+        ['campaign', 'content', 'analytics', 'research', 'authority', 'intelligence'].includes(
+          decision.agent
+        )
+      ) {
         return decision;
       }
     }
@@ -292,7 +409,8 @@ function getSuggestedAction(agent: AgentName, message: string): string {
     if (lowerMessage.includes('mtg') || lowerMessage.includes('magic')) return 'research_mtg';
     if (lowerMessage.includes('yugioh')) return 'research_yugioh';
     if (lowerMessage.includes('sports')) return 'research_sports_cards';
-    if (lowerMessage.includes('content') && lowerMessage.includes('trend')) return 'research_to_content';
+    if (lowerMessage.includes('content') && lowerMessage.includes('trend'))
+      return 'research_to_content';
     if (lowerMessage.includes('summary')) return 'quick_summary';
     return 'aggregate_trends';
   }
@@ -300,15 +418,23 @@ function getSuggestedAction(agent: AgentName, message: string): string {
   if (agent === 'intelligence') {
     if (lowerMessage.includes('scan')) return 'market_scan';
     if (lowerMessage.includes('gap')) return 'gap_analysis';
-    if (lowerMessage.includes('performance') || lowerMessage.includes('track')) return 'performance_sync';
-    if (lowerMessage.includes('viral') || lowerMessage.includes('benchmark')) return 'view_benchmarks';
+    if (lowerMessage.includes('performance') || lowerMessage.includes('track'))
+      return 'performance_sync';
+    if (lowerMessage.includes('viral') || lowerMessage.includes('benchmark'))
+      return 'view_benchmarks';
     return 'run_intelligence';
   }
 
   if (agent === 'authority') {
     if (lowerMessage.includes('objection')) return 'handle_objection';
-    if (lowerMessage.includes('vs') || lowerMessage.includes('versus') || lowerMessage.includes('compare')) return 'competitive_content';
-    if (lowerMessage.includes('educational') || lowerMessage.includes('explain')) return 'educational_content';
+    if (
+      lowerMessage.includes('vs') ||
+      lowerMessage.includes('versus') ||
+      lowerMessage.includes('compare')
+    )
+      return 'competitive_content';
+    if (lowerMessage.includes('educational') || lowerMessage.includes('explain'))
+      return 'educational_content';
     if (lowerMessage.includes('trust') || lowerMessage.includes('vault')) return 'trust_content';
     if (lowerMessage.includes('thought leadership')) return 'thought_leadership';
     if (lowerMessage.includes('ebay')) return 'compare_ebay';
@@ -325,7 +451,7 @@ function getSuggestedAction(agent: AgentName, message: string): string {
  */
 export function getRoutingExplanation(decision: RoutingDecision): string {
   const persona = agentPersonas[decision.agent];
-  
+
   if (decision.confidence >= 0.8) {
     return `Routing to ${persona.displayName} (${persona.title})`;
   } else if (decision.confidence >= 0.6) {
@@ -334,9 +460,3 @@ export function getRoutingExplanation(decision: RoutingDecision): string {
     return `Trying ${persona.displayName} for this request`;
   }
 }
-
-
-
-
-
-

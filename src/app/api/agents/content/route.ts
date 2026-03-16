@@ -7,16 +7,10 @@ import { BrandDNA, Platform } from '@/lib/types';
 
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
-  
+
   try {
     const body = await request.json();
-    const { 
-      brandDNA, 
-      brief, 
-      batch,
-      adapt,
-      ideas,
-    } = body as {
+    const { brandDNA, brief, batch, adapt, ideas } = body as {
       brandDNA: BrandDNA;
       brief?: ContentBrief;
       batch?: ContentBrief[];
@@ -35,7 +29,7 @@ export async function POST(request: NextRequest) {
     // Validate brand DNA
     if (!validateBrandDNA(brandDNA)) {
       return NextResponse.json(
-        { 
+        {
           error: 'Invalid or missing brand DNA',
           details: 'Brand DNA must include at least a name and tone profile',
         },
@@ -56,11 +50,7 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      const result = await agents.getContentIdeas(
-        ideas.topic, 
-        ideas.platforms, 
-        ideas.count
-      );
+      const result = await agents.getContentIdeas(ideas.topic, ideas.platforms, ideas.count);
 
       if (!result.success) {
         return NextResponse.json({ error: result.error }, { status: 500 });
@@ -82,11 +72,7 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      const result = await agents.adaptContent(
-        adapt.content,
-        adapt.fromPlatform,
-        adapt.toPlatform
-      );
+      const result = await agents.adaptContent(adapt.content, adapt.fromPlatform, adapt.toPlatform);
 
       if (!result.success) {
         return NextResponse.json({ error: result.error }, { status: 500 });
@@ -103,7 +89,7 @@ export async function POST(request: NextRequest) {
     if (batch && batch.length > 0) {
       // Limit batch size to prevent abuse
       const limitedBatch = batch.slice(0, 10);
-      
+
       const result = await agents.createContentBatch(limitedBatch);
 
       if (!result.success) {
@@ -141,22 +127,20 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(
-      { 
+      {
         error: 'No valid action specified',
-        details: 'Provide one of: brief (single), batch (multiple), adapt (cross-platform), or ideas (brainstorm)',
+        details:
+          'Provide one of: brief (single), batch (multiple), adapt (cross-platform), or ideas (brainstorm)',
       },
       { status: 400 }
     );
-
   } catch (error) {
     console.error('Content API error:', error);
-    
-    const errorMessage = error instanceof Error 
-      ? error.message 
-      : 'Content generation failed';
-    
+
+    const errorMessage = error instanceof Error ? error.message : 'Content generation failed';
+
     return NextResponse.json(
-      { 
+      {
         error: errorMessage,
         processingTime: Date.now() - startTime,
       },
@@ -229,9 +213,3 @@ export async function GET() {
     },
   });
 }
-
-
-
-
-
-

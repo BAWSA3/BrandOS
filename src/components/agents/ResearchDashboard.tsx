@@ -61,9 +61,10 @@ export default function ResearchDashboard({
           brandDNA,
           action: 'aggregate',
           params: {
-            verticals: selectedVertical === 'all'
-              ? ['pokemon', 'mtg', 'yugioh', 'sports-cards', 'collectibles']
-              : [selectedVertical],
+            verticals:
+              selectedVertical === 'all'
+                ? ['pokemon', 'mtg', 'yugioh', 'sports-cards', 'collectibles']
+                : [selectedVertical],
             timeRange,
           },
         }),
@@ -84,15 +85,16 @@ export default function ResearchDashboard({
     }
   }, [brandDNA, selectedVertical, timeRange]);
 
-  const filteredTopics = researchData?.topics.filter((topic) => {
-    if (selectedVertical !== 'all' && topic.vertical !== selectedVertical) {
-      return false;
-    }
-    if (selectedCategory !== 'all' && topic.category !== selectedCategory) {
-      return false;
-    }
-    return true;
-  }) || [];
+  const filteredTopics =
+    researchData?.topics.filter((topic) => {
+      if (selectedVertical !== 'all' && topic.vertical !== selectedVertical) {
+        return false;
+      }
+      if (selectedCategory !== 'all' && topic.category !== selectedCategory) {
+        return false;
+      }
+      return true;
+    }) || [];
 
   const handleTopicSelect = (topicId: string) => {
     setSelectedTopics((prev) => {
@@ -125,9 +127,7 @@ export default function ResearchDashboard({
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-white">Research Dashboard</h2>
-          <p className="text-neutral-400">
-            Discover trending topics in TCG and collectibles
-          </p>
+          <p className="text-neutral-400">Discover trending topics in TCG and collectibles</p>
         </div>
         <div className="flex items-center gap-3">
           <select
@@ -243,10 +243,7 @@ export default function ResearchDashboard({
 
         {filteredTopics.length > 0 && (
           <div className="flex items-center gap-3">
-            <button
-              onClick={handleSelectAll}
-              className="text-sm text-neutral-400 hover:text-white"
-            >
+            <button onClick={handleSelectAll} className="text-sm text-neutral-400 hover:text-white">
               {selectedTopics.size === filteredTopics.length ? 'Deselect all' : 'Select all'}
             </button>
             {selectedTopics.size > 0 && onGenerateContent && (

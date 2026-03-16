@@ -101,12 +101,8 @@ export default function HoverHighlight({
           pointerEvents: 'none',
         }}
         animate={{
-          borderColor: isNear
-            ? `rgba(0, 71, 255, ${proximity * 0.3})`
-            : 'transparent',
-          boxShadow: isNear
-            ? `0 0 ${20 * proximity}px ${glowColor}`
-            : 'none',
+          borderColor: isNear ? `rgba(0, 71, 255, ${proximity * 0.3})` : 'transparent',
+          boxShadow: isNear ? `0 0 ${20 * proximity}px ${glowColor}` : 'none',
         }}
         transition={{ duration: 0.2 }}
       />

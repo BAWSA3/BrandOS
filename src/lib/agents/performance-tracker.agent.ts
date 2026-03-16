@@ -39,7 +39,11 @@ async function syncTweets(brandId: string, xUserId: string): Promise<number> {
 
     for (const tweet of tweets) {
       const metrics = tweet.public_metrics || {
-        like_count: 0, retweet_count: 0, reply_count: 0, impression_count: 0, quote_count: 0,
+        like_count: 0,
+        retweet_count: 0,
+        reply_count: 0,
+        impression_count: 0,
+        quote_count: 0,
       };
 
       const likes = metrics.like_count || 0;
@@ -49,7 +53,9 @@ async function syncTweets(brandId: string, xUserId: string): Promise<number> {
       const engagementRate = ((likes + retweets + replies) / impressions) * 100;
 
       const metricsJson = JSON.stringify({
-        likes, retweets, replies,
+        likes,
+        retweets,
+        replies,
         impressions: metrics.impression_count || 0,
         quotes: metrics.quote_count || 0,
       });
@@ -140,7 +146,7 @@ async function computeSnapshot(brandId: string, windowDays: number): Promise<voi
   }
 
   // Parse metrics from each tweet
-  const parsed = tweets.map(t => {
+  const parsed = tweets.map((t) => {
     const m: TweetMetrics = JSON.parse(t.metrics);
     return {
       id: t.tweetId,
@@ -175,9 +181,13 @@ async function computeSnapshot(brandId: string, windowDays: number): Promise<voi
     if (!hourCounts[hour]) hourCounts[hour] = [];
     hourCounts[hour].push(t.engagementRate);
   }
-  const bestHour = Object.entries(hourCounts)
-    .map(([h, rates]) => ({ hour: parseInt(h), avgRate: rates.reduce((s, r) => s + r, 0) / rates.length }))
-    .sort((a, b) => b.avgRate - a.avgRate)[0]?.hour ?? null;
+  const bestHour =
+    Object.entries(hourCounts)
+      .map(([h, rates]) => ({
+        hour: parseInt(h),
+        avgRate: rates.reduce((s, r) => s + r, 0) / rates.length,
+      }))
+      .sort((a, b) => b.avgRate - a.avgRate)[0]?.hour ?? null;
 
   // Best posting day
   const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
@@ -187,9 +197,10 @@ async function computeSnapshot(brandId: string, windowDays: number): Promise<voi
     if (!dayCounts[day]) dayCounts[day] = [];
     dayCounts[day].push(t.engagementRate);
   }
-  const bestDay = Object.entries(dayCounts)
-    .map(([d, rates]) => ({ day: d, avgRate: rates.reduce((s, r) => s + r, 0) / rates.length }))
-    .sort((a, b) => b.avgRate - a.avgRate)[0]?.day ?? null;
+  const bestDay =
+    Object.entries(dayCounts)
+      .map(([d, rates]) => ({ day: d, avgRate: rates.reduce((s, r) => s + r, 0) / rates.length }))
+      .sort((a, b) => b.avgRate - a.avgRate)[0]?.day ?? null;
 
   // Posting pattern
   const postingPattern = JSON.stringify({

@@ -64,7 +64,12 @@ const phaseConfig = [
     title: 'DEFINE',
     subtitle: 'Understanding your brand identity',
     description: "We're analyzing your bio for clarity and value proposition...",
-    analyzing: ['Display name alignment', 'Bio clarity', 'Value proposition', 'Target audience signals'],
+    analyzing: [
+      'Display name alignment',
+      'Bio clarity',
+      'Value proposition',
+      'Target audience signals',
+    ],
   },
   {
     id: 'check',
@@ -72,7 +77,12 @@ const phaseConfig = [
     title: 'CHECK',
     subtitle: 'Checking consistency',
     description: "We're checking if your brand elements align...",
-    analyzing: ['Username/name consistency', 'Tone alignment', 'Professional presentation', 'Message coherence'],
+    analyzing: [
+      'Username/name consistency',
+      'Tone alignment',
+      'Professional presentation',
+      'Message coherence',
+    ],
   },
   {
     id: 'generate',
@@ -80,7 +90,12 @@ const phaseConfig = [
     title: 'GENERATE',
     subtitle: 'Evaluating completeness',
     description: "We're assessing your profile's content quality...",
-    analyzing: ['Profile completeness', 'Bio formatting', 'Link presence', 'Call-to-action clarity'],
+    analyzing: [
+      'Profile completeness',
+      'Bio formatting',
+      'Link presence',
+      'Call-to-action clarity',
+    ],
   },
   {
     id: 'scale',
@@ -88,7 +103,12 @@ const phaseConfig = [
     title: 'SCALE',
     subtitle: 'Measuring growth readiness',
     description: "We're evaluating your brand's scaling potential...",
-    analyzing: ['Follower ratio health', 'Engagement signals', 'Discovery optimization', 'Platform best practices'],
+    analyzing: [
+      'Follower ratio health',
+      'Engagement signals',
+      'Discovery optimization',
+      'Platform best practices',
+    ],
   },
 ];
 
@@ -100,17 +120,17 @@ export default function BrandScoreJourney({ theme, onComplete }: BrandScoreJourn
   const [brandScore, setBrandScore] = useState<BrandScoreResult | null>(null);
   const [currentPhase, setCurrentPhase] = useState(0);
   const [phaseProgress, setPhaseProgress] = useState(0);
-  
+
   const containerRef = useRef<HTMLDivElement>(null);
   const inputSectionRef = useRef<HTMLElement>(null);
   const phaseSectionsRef = useRef<HTMLElement[]>([]);
   const revealSectionRef = useRef<HTMLElement>(null);
   const ctaSectionRef = useRef<HTMLElement>(null);
-  
+
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!username.trim()) {
       setError('Please enter your X username');
       return;
@@ -198,25 +218,27 @@ export default function BrandScoreJourney({ theme, onComplete }: BrandScoreJourn
       case 'define':
         return {
           'Display Name': profile.name,
-          'Bio': profile.description || '(No bio set)',
+          Bio: profile.description || '(No bio set)',
         };
       case 'check':
         return {
-          'Username': `@${profile.username}`,
+          Username: `@${profile.username}`,
           'Display Name': profile.name,
-          'Alignment': profile.name.toLowerCase().includes(profile.username.toLowerCase()) ? '✓ Aligned' : '⚠ Different',
+          Alignment: profile.name.toLowerCase().includes(profile.username.toLowerCase())
+            ? '✓ Aligned'
+            : '⚠ Different',
         };
       case 'generate':
         return {
           'Profile Image': profile.profile_image_url ? '✓ Set' : '✗ Missing',
-          'Website': profile.url || '(No link)',
+          Website: profile.url || '(No link)',
           'Bio Length': profile.description ? `${profile.description.length} chars` : '0 chars',
         };
       case 'scale':
         return {
-          'Followers': profile.followers_count.toLocaleString(),
-          'Following': profile.following_count.toLocaleString(),
-          'Ratio': (profile.followers_count / Math.max(profile.following_count, 1)).toFixed(2),
+          Followers: profile.followers_count.toLocaleString(),
+          Following: profile.following_count.toLocaleString(),
+          Ratio: (profile.followers_count / Math.max(profile.following_count, 1)).toFixed(2),
         };
       default:
         return {};
@@ -227,9 +249,9 @@ export default function BrandScoreJourney({ theme, onComplete }: BrandScoreJourn
     <div ref={containerRef} className="brand-score-journey">
       {/* Progress Indicator - Fixed position */}
       {journeyState === 'journey' && (
-        <JourneyProgress 
-          currentPhase={currentPhase} 
-          totalPhases={4} 
+        <JourneyProgress
+          currentPhase={currentPhase}
+          totalPhases={4}
           phaseProgress={phaseProgress}
           theme={theme}
         />
@@ -365,7 +387,8 @@ export default function BrandScoreJourney({ theme, onComplete }: BrandScoreJourn
                         padding: '20px 20px 20px 44px',
                         borderRadius: '16px',
                         border: `2px solid ${error ? '#EF4444' : theme === 'dark' ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)'}`,
-                        background: theme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
+                        background:
+                          theme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
                         color: theme === 'dark' ? '#FFFFFF' : '#000000',
                         outline: 'none',
                         transition: 'all 0.3s ease',
@@ -375,7 +398,8 @@ export default function BrandScoreJourney({ theme, onComplete }: BrandScoreJourn
                         e.currentTarget.style.boxShadow = '0 0 0 4px rgba(0, 71, 255, 0.15)';
                       }}
                       onBlur={(e) => {
-                        e.currentTarget.style.borderColor = theme === 'dark' ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)';
+                        e.currentTarget.style.borderColor =
+                          theme === 'dark' ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)';
                         e.currentTarget.style.boxShadow = 'none';
                       }}
                     />
@@ -405,7 +429,14 @@ export default function BrandScoreJourney({ theme, onComplete }: BrandScoreJourn
                   }}
                 >
                   {journeyState === 'loading' ? (
-                    <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
+                    <span
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '12px',
+                      }}
+                    >
                       <motion.span
                         animate={{ rotate: 360 }}
                         transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
@@ -506,12 +537,16 @@ export default function BrandScoreJourney({ theme, onComplete }: BrandScoreJourn
           {phaseConfig.map((phase, index) => (
             <PhaseSection
               key={phase.id}
-              ref={(el) => { phaseSectionsRef.current[index] = el!; }}
+              ref={(el) => {
+                phaseSectionsRef.current[index] = el!;
+              }}
               phase={phase}
               profileData={getPhaseProfileData(phase.id)}
               profileImage={phase.id === 'generate' ? profile?.profile_image_url : undefined}
               isActive={currentPhase === index + 1}
-              progress={currentPhase === index + 1 ? phaseProgress : currentPhase > index + 1 ? 1 : 0}
+              progress={
+                currentPhase === index + 1 ? phaseProgress : currentPhase > index + 1 ? 1 : 0
+              }
               theme={theme}
             />
           ))}
@@ -576,7 +611,7 @@ export default function BrandScoreJourney({ theme, onComplete }: BrandScoreJourn
               >
                 Ready to eliminate brand drift?
               </h2>
-              
+
               <p
                 style={{
                   fontFamily: "'Helvetica Neue', sans-serif",
@@ -586,7 +621,8 @@ export default function BrandScoreJourney({ theme, onComplete }: BrandScoreJourn
                   lineHeight: 1.6,
                 }}
               >
-                BrandOS keeps your brand consistent across every channel, every team member, every piece of content.
+                BrandOS keeps your brand consistent across every channel, every team member, every
+                piece of content.
               </p>
 
               <motion.button
@@ -628,6 +664,3 @@ export default function BrandScoreJourney({ theme, onComplete }: BrandScoreJourn
     </div>
   );
 }
-
-
-

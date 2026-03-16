@@ -29,7 +29,7 @@ export interface CheckResult {
   revisedVersion: string;
 }
 
-export type ContentType = 
+export type ContentType =
   | 'general'
   | 'social-twitter'
   | 'social-linkedin'
@@ -152,7 +152,15 @@ export interface CohesionAnalysis {
 }
 
 // Platform Adaptation
-export type Platform = 'twitter' | 'instagram' | 'linkedin' | 'website' | 'email' | 'tiktok' | 'youtube' | 'threads';
+export type Platform =
+  | 'twitter'
+  | 'instagram'
+  | 'linkedin'
+  | 'website'
+  | 'email'
+  | 'tiktok'
+  | 'youtube'
+  | 'threads';
 
 export interface PlatformRules {
   platform: Platform;
@@ -165,10 +173,13 @@ export interface PlatformRules {
 
 export interface PlatformAdaptation {
   originalContent: string;
-  adaptations: Record<Platform, {
-    content: string;
-    adjustments: string[];
-  }>;
+  adaptations: Record<
+    Platform,
+    {
+      content: string;
+      adjustments: string[];
+    }
+  >;
 }
 
 // Creator Guardrails
@@ -248,7 +259,14 @@ export interface TasteProtectionResult {
 }
 
 // Context-Aware Tone
-export type ToneContext = 'launch' | 'tease' | 'apology' | 'crisis' | 'celebration' | 'update' | 'educational';
+export type ToneContext =
+  | 'launch'
+  | 'tease'
+  | 'apology'
+  | 'crisis'
+  | 'celebration'
+  | 'update'
+  | 'educational';
 
 export interface ContextToneRules {
   context: ToneContext;
@@ -274,7 +292,14 @@ export interface ContextAdaptedContent {
 // ===== GEMINI VISUAL ENGINE TYPES =====
 
 // Animation Concepts
-export type AnimationContext = 'page-load' | 'hover' | 'click' | 'transition' | 'scroll' | 'micro-interaction' | 'loading';
+export type AnimationContext =
+  | 'page-load'
+  | 'hover'
+  | 'click'
+  | 'transition'
+  | 'scroll'
+  | 'micro-interaction'
+  | 'loading';
 
 export interface AnimationConcept {
   id: string;
@@ -298,7 +323,15 @@ export interface AnimationConcept {
 }
 
 // UI Component Styles
-export type UIComponentType = 'button' | 'card' | 'input' | 'modal' | 'tooltip' | 'badge' | 'avatar' | 'nav-item';
+export type UIComponentType =
+  | 'button'
+  | 'card'
+  | 'input'
+  | 'modal'
+  | 'tooltip'
+  | 'badge'
+  | 'avatar'
+  | 'nav-item';
 
 export interface UIStyle {
   id: string;
@@ -331,7 +364,14 @@ export interface UIStyle {
 }
 
 // Background Patterns
-export type PatternType = 'geometric' | 'organic' | 'noise' | 'gradient' | 'dots' | 'lines' | 'waves';
+export type PatternType =
+  | 'geometric'
+  | 'organic'
+  | 'noise'
+  | 'gradient'
+  | 'dots'
+  | 'lines'
+  | 'waves';
 
 export interface Pattern {
   id: string;

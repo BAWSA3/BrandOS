@@ -7,12 +7,12 @@ import Anthropic from '@anthropic-ai/sdk';
 // Returns a lightweight voice profile, not a full VoiceFingerprint
 
 export interface QuickVoiceScan {
-  toneWords: string[];        // e.g. ["direct", "lowercase", "punchy"]
-  doPatterns: string[];       // e.g. ["uses short sentences", "code metaphors"]
-  dontPatterns: string[];     // e.g. ["never uses emojis", "avoids corporate speak"]
-  sampleTopics: string[];     // topics they post about
-  suggestedVibe: string;      // maps to our tone presets
-  confidence: number;         // 0-100
+  toneWords: string[]; // e.g. ["direct", "lowercase", "punchy"]
+  doPatterns: string[]; // e.g. ["uses short sentences", "code metaphors"]
+  dontPatterns: string[]; // e.g. ["never uses emojis", "avoids corporate speak"]
+  sampleTopics: string[]; // topics they post about
+  suggestedVibe: string; // maps to our tone presets
+  confidence: number; // 0-100
 }
 
 async function fetchTweets(username: string): Promise<string[]> {
@@ -50,9 +50,10 @@ async function analyzeVoice(tweets: string[]): Promise<QuickVoiceScan> {
   const message = await anthropic.messages.create({
     model: 'claude-sonnet-4-20250514',
     max_tokens: 600,
-    messages: [{
-      role: 'user',
-      content: `Analyze these ${tweets.length} tweets and extract the creator's voice/tone profile.
+    messages: [
+      {
+        role: 'user',
+        content: `Analyze these ${tweets.length} tweets and extract the creator's voice/tone profile.
 
 TWEETS:
 ${tweets.map((t, i) => `${i + 1}. ${t}`).join('\n')}
@@ -66,7 +67,8 @@ Return ONLY valid JSON:
   "suggestedVibe": "one of: bold, chill, pro, edgy, default",
   "confidence": 0-100
 }`,
-    }],
+      },
+    ],
   });
 
   const text = message.content[0].type === 'text' ? message.content[0].text : '';

@@ -22,9 +22,10 @@ export default function ParallaxBackground({ theme = 'dark' }: ParallaxBackgroun
       <div
         className="absolute inset-0"
         style={{
-          background: theme === 'dark'
-            ? 'linear-gradient(180deg, #050510 0%, #0A0A1A 30%, #0D1020 60%, #101428 100%)'
-            : 'linear-gradient(180deg, #0A0A1A 0%, #101428 100%)',
+          background:
+            theme === 'dark'
+              ? 'linear-gradient(180deg, #050510 0%, #0A0A1A 30%, #0D1020 60%, #101428 100%)'
+              : 'linear-gradient(180deg, #0A0A1A 0%, #101428 100%)',
         }}
       />
 
@@ -114,7 +115,8 @@ export default function ParallaxBackground({ theme = 'dark' }: ParallaxBackgroun
       <div
         className="absolute inset-0"
         style={{
-          background: 'repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.02) 3px, rgba(0,0,0,0.02) 4px)',
+          background:
+            'repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.02) 3px, rgba(0,0,0,0.02) 4px)',
         }}
       />
     </div>

@@ -187,8 +187,7 @@ export async function auditVisualConsistency(
   const avgScore = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
 
   // Cross-image consistency (low variance = consistent)
-  const variance =
-    scores.reduce((sum, s) => sum + Math.pow(s - avgScore, 2), 0) / scores.length;
+  const variance = scores.reduce((sum, s) => sum + Math.pow(s - avgScore, 2), 0) / scores.length;
   const stdDev = Math.sqrt(variance);
   const consistencyAcrossImages = Math.round(Math.max(0, 100 - stdDev * 2));
 
@@ -204,9 +203,15 @@ export async function auditVisualConsistency(
       score: r.result?.overallScore ?? 0,
       issues: r.result
         ? [
-            ...(r.result.colorAdherence.score < 60 ? [`Color: ${r.result.colorAdherence.feedback}`] : []),
-            ...(r.result.styleCoherence.score < 60 ? [`Style: ${r.result.styleCoherence.feedback}`] : []),
-            ...(r.result.moodAlignment.score < 60 ? [`Mood: ${r.result.moodAlignment.feedback}`] : []),
+            ...(r.result.colorAdherence.score < 60
+              ? [`Color: ${r.result.colorAdherence.feedback}`]
+              : []),
+            ...(r.result.styleCoherence.score < 60
+              ? [`Style: ${r.result.styleCoherence.feedback}`]
+              : []),
+            ...(r.result.moodAlignment.score < 60
+              ? [`Mood: ${r.result.moodAlignment.feedback}`]
+              : []),
           ]
         : ['Analysis failed'],
     })),
@@ -246,13 +251,10 @@ export async function crossPlatformVisualAudit(
   }
 
   const platformScores = platformResults.map((r) => r.audit.overallScore);
-  const avgScore = Math.round(
-    platformScores.reduce((a, b) => a + b, 0) / platformScores.length
-  );
+  const avgScore = Math.round(platformScores.reduce((a, b) => a + b, 0) / platformScores.length);
 
   const variance =
-    platformScores.reduce((sum, s) => sum + Math.pow(s - avgScore, 2), 0) /
-    platformScores.length;
+    platformScores.reduce((sum, s) => sum + Math.pow(s - avgScore, 2), 0) / platformScores.length;
   const crossPlatformConsistency = Math.round(Math.max(0, 100 - Math.sqrt(variance) * 2));
 
   return {

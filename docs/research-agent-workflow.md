@@ -82,12 +82,12 @@ The Research Agent is part of the BrandOS agent system, specifically designed fo
 
 ### 1. Data Sources
 
-| Source | What It Provides | API |
-|--------|------------------|-----|
-| **Twitter/X** | Trending hashtags, influencer posts, community discussions | X API (Basic tier) |
-| **Reddit** | Subreddit posts, community sentiment, deal alerts | Public JSON API |
-| **YouTube** | Video content from TCG channels | YouTube Data API v3 |
-| **Serper** | News articles, blog posts, announcements | Serper (Google Search) |
+| Source        | What It Provides                                           | API                    |
+| ------------- | ---------------------------------------------------------- | ---------------------- |
+| **Twitter/X** | Trending hashtags, influencer posts, community discussions | X API (Basic tier)     |
+| **Reddit**    | Subreddit posts, community sentiment, deal alerts          | Public JSON API        |
+| **YouTube**   | Video content from TCG channels                            | YouTube Data API v3    |
+| **Serper**    | News articles, blog posts, announcements                   | Serper (Google Search) |
 
 ### 2. Verticals Tracked
 
@@ -188,10 +188,12 @@ const research = await agents.researchTrends({
 });
 
 // Step 2: Select top topics
-const topTopics = agents.rankTopicsByRelevance(research.data.topics, {
-  minRelevance: 60,
-  sortBy: 'engagement',
-}).slice(0, 5);
+const topTopics = agents
+  .rankTopicsByRelevance(research.data.topics, {
+    minRelevance: 60,
+    sortBy: 'engagement',
+  })
+  .slice(0, 5);
 
 // Step 3: Generate content
 const result = await agents.researchToContent({
@@ -207,9 +209,11 @@ console.log(result.content.data.pieces);
 ### Example 3: End-State Prompt
 
 The system supports the prompt:
+
 > "Create a few pieces of content for me this week based on the latest news and trends in the past month"
 
 This triggers:
+
 1. Research Agent aggregates last month's trends
 2. AI selects top relevant topics
 3. User reviews and picks topics (via UI)
@@ -248,14 +252,15 @@ DATABASE_URL=...           # PostgreSQL connection
 
 ## Rate Limits
 
-| Source | Limit | Cost |
-|--------|-------|------|
+| Source  | Limit            | Cost       |
+| ------- | ---------------- | ---------- |
 | Twitter | 10K tweets/month | $100/month |
-| Reddit | 60 req/min | Free |
-| YouTube | 10K units/day | Free tier |
-| Serper | 2,500/month | Free tier |
+| Reddit  | 60 req/min       | Free       |
+| YouTube | 10K units/day    | Free tier  |
+| Serper  | 2,500/month      | Free tier  |
 
 **Mitigation Strategies:**
+
 - Cache results for 1-6 hours
 - Reddit as primary source (free, no key needed)
 - Graceful degradation when sources unavailable
@@ -292,11 +297,11 @@ model TopicSelection {
 
 ## Key Files
 
-| File | Purpose |
-|------|---------|
-| `src/lib/agents/research.agent.ts` | Core research logic |
-| `src/lib/agents/research.types.ts` | TypeScript interfaces |
-| `src/lib/agents/sources/*.ts` | Data source integrations |
-| `src/app/api/agents/research/route.ts` | API endpoint |
-| `src/components/agents/ResearchDashboard.tsx` | UI dashboard |
-| `src/app/research/page.tsx` | Research page |
+| File                                          | Purpose                  |
+| --------------------------------------------- | ------------------------ |
+| `src/lib/agents/research.agent.ts`            | Core research logic      |
+| `src/lib/agents/research.types.ts`            | TypeScript interfaces    |
+| `src/lib/agents/sources/*.ts`                 | Data source integrations |
+| `src/app/api/agents/research/route.ts`        | API endpoint             |
+| `src/components/agents/ResearchDashboard.tsx` | UI dashboard             |
+| `src/app/research/page.tsx`                   | Research page            |

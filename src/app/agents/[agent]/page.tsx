@@ -70,12 +70,14 @@ export default function AgentChatPage() {
       <header className="border-b border-neutral-800 px-6 py-4 flex-shrink-0">
         <div className="max-w-5xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link 
-              href="/agents" 
-              className="text-neutral-400 hover:text-white transition-colors"
-            >
+            <Link href="/agents" className="text-neutral-400 hover:text-white transition-colors">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
               </svg>
             </Link>
             <div className="flex items-center gap-3">
@@ -111,18 +113,9 @@ export default function AgentChatPage() {
           animate={{ opacity: 1, y: 0 }}
           className="max-w-5xl mx-auto h-full"
         >
-          <AgentChat
-            persona={persona}
-            brandId={brand.id}
-          />
+          <AgentChat persona={persona} brandId={brand.id} />
         </motion.div>
       </main>
     </div>
   );
 }
-
-
-
-
-
-

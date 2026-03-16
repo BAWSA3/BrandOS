@@ -16,10 +16,7 @@ export async function GET(request: NextRequest) {
     const authHeader = request.headers.get('authorization');
 
     if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Get pending count before processing
@@ -48,10 +45,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error('[Cron] Error processing emails:', error);
-    return NextResponse.json(
-      { error: 'Failed to process emails' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to process emails' }, { status: 500 });
   }
 }
 

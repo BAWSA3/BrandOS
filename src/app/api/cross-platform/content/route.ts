@@ -22,13 +22,11 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       item: contentItem,
-      message: 'Content normalized successfully. Use /api/cross-platform/analyze to run voice analysis.',
+      message:
+        'Content normalized successfully. Use /api/cross-platform/analyze to run voice analysis.',
     });
   } catch (error) {
     console.error('Content normalization error:', error);
-    return NextResponse.json(
-      { error: 'Failed to process content' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to process content' }, { status: 500 });
   }
 }

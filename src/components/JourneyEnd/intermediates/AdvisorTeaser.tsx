@@ -26,12 +26,7 @@ function generateInsight(data: JourneyEndData): string {
   return insights[index];
 }
 
-export default function AdvisorTeaser({
-  data,
-  onContinue,
-  onAskMore,
-  theme,
-}: AdvisorTeaserProps) {
+export default function AdvisorTeaser({ data, onContinue, onAskMore, theme }: AdvisorTeaserProps) {
   const [displayText, setDisplayText] = useState('');
   const [isTyping, setIsTyping] = useState(true);
   const [cursorVisible, setCursorVisible] = useState(true);
@@ -235,7 +230,14 @@ export default function AdvisorTeaser({
               gap: '8px',
             }}
           >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
               <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
             </svg>
             ASK MORE
@@ -297,8 +299,13 @@ export default function AdvisorTeaser({
 
       <style jsx global>{`
         @keyframes pulse {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.5; }
+          0%,
+          100% {
+            opacity: 1;
+          }
+          50% {
+            opacity: 0.5;
+          }
         }
       `}</style>
     </div>

@@ -1,4 +1,7 @@
-import type { VoiceConsistencyReport, PostVoiceScore } from '@/lib/schemas/voice-consistency.schema';
+import type {
+  VoiceConsistencyReport,
+  PostVoiceScore,
+} from '@/lib/schemas/voice-consistency.schema';
 import type { VoiceFingerprint } from '@/lib/voice-fingerprint';
 import { summarizeFingerprint, formatSummaryForPrompt } from '@/lib/voice-fingerprint';
 import {
@@ -17,7 +20,10 @@ interface TweetInput {
  * Build a prompt-injectable fingerprint string from either a stored
  * VoiceFingerprint or a lightweight description of voice patterns.
  */
-function buildFingerprintContext(fingerprint?: VoiceFingerprint | null, fallbackDescription?: string): string {
+function buildFingerprintContext(
+  fingerprint?: VoiceFingerprint | null,
+  fallbackDescription?: string
+): string {
   if (fingerprint) {
     const summary = summarizeFingerprint(fingerprint);
     return formatSummaryForPrompt(summary);
@@ -125,10 +131,7 @@ function computeOverallScore(
 
   const sorted = [...postScores].map((p) => p.score).sort((a, b) => a - b);
   const mid = Math.floor(sorted.length / 2);
-  const median =
-    sorted.length % 2 === 0
-      ? (sorted[mid - 1] + sorted[mid]) / 2
-      : sorted[mid];
+  const median = sorted.length % 2 === 0 ? (sorted[mid - 1] + sorted[mid]) / 2 : sorted[mid];
 
   return Math.round(dimAvg * 0.6 + median * 0.4);
 }

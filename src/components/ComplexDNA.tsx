@@ -78,7 +78,15 @@ function Particles({ count = 150 }) {
 }
 
 // Small orbiting spheres along the helix
-function HelixOrbs({ curve, count = 20, color = '#ffffff' }: { curve: THREE.CatmullRomCurve3; count?: number; color?: string }) {
+function HelixOrbs({
+  curve,
+  count = 20,
+  color = '#ffffff',
+}: {
+  curve: THREE.CatmullRomCurve3;
+  count?: number;
+  color?: string;
+}) {
   const groupRef = useRef<THREE.Group>(null);
 
   useFrame((state) => {
@@ -86,14 +94,10 @@ function HelixOrbs({ curve, count = 20, color = '#ffffff' }: { curve: THREE.Catm
     const time = state.clock.elapsedTime;
 
     groupRef.current.children.forEach((child, i) => {
-      const t = ((i / count) + time * 0.02) % 1;
+      const t = (i / count + time * 0.02) % 1;
       const point = curve.getPoint(t);
       const offset = Math.sin(time * 2 + i) * 0.3;
-      child.position.set(
-        point.x + offset,
-        point.y,
-        point.z + offset
-      );
+      child.position.set(point.x + offset, point.y, point.z + offset);
     });
   });
 
@@ -156,7 +160,7 @@ export default function ComplexDNA({ onPhaseChange }: ComplexDNAProps) {
 
       let phaseId = 0;
       if (t > 0.25) phaseId = 1;
-      if (t > 0.50) phaseId = 2;
+      if (t > 0.5) phaseId = 2;
       if (t > 0.75) phaseId = 3;
 
       r.push({
@@ -216,13 +220,7 @@ export default function ComplexDNA({ onPhaseChange }: ComplexDNAProps) {
       <pointLight position={[15, 15, 15]} intensity={1.5} color="#ffffff" />
       <pointLight position={[-15, -15, -15]} intensity={0.8} color="#6366f1" />
       <pointLight position={[0, 25, 0]} intensity={0.6} color="#a855f7" />
-      <spotLight
-        position={[0, 30, 10]}
-        angle={0.25}
-        penumbra={1}
-        intensity={0.8}
-        color="#ffffff"
-      />
+      <spotLight position={[0, 30, 10]} angle={0.25} penumbra={1} intensity={0.8} color="#ffffff" />
 
       {/* --- FLOATING PARTICLES --- */}
       <Particles count={120} />
@@ -297,7 +295,13 @@ export default function ComplexDNA({ onPhaseChange }: ComplexDNAProps) {
             </mesh>
 
             {/* Small spheres at rung endpoints for detail */}
-            <mesh position={[rung.pos.x + Math.cos(rung.rotation - Math.PI/2) * RADIUS, rung.pos.y, rung.pos.z + Math.sin(rung.rotation - Math.PI/2) * RADIUS]}>
+            <mesh
+              position={[
+                rung.pos.x + Math.cos(rung.rotation - Math.PI / 2) * RADIUS,
+                rung.pos.y,
+                rung.pos.z + Math.sin(rung.rotation - Math.PI / 2) * RADIUS,
+              ]}
+            >
               <sphereGeometry args={[0.12, 8, 8]} />
               <meshStandardMaterial
                 color={getPhaseColor(rung.phase)}
@@ -307,7 +311,13 @@ export default function ComplexDNA({ onPhaseChange }: ComplexDNAProps) {
                 roughness={0.2}
               />
             </mesh>
-            <mesh position={[rung.pos.x - Math.cos(rung.rotation - Math.PI/2) * RADIUS, rung.pos.y, rung.pos.z - Math.sin(rung.rotation - Math.PI/2) * RADIUS]}>
+            <mesh
+              position={[
+                rung.pos.x - Math.cos(rung.rotation - Math.PI / 2) * RADIUS,
+                rung.pos.y,
+                rung.pos.z - Math.sin(rung.rotation - Math.PI / 2) * RADIUS,
+              ]}
+            >
               <sphereGeometry args={[0.12, 8, 8]} />
               <meshStandardMaterial
                 color={getPhaseColor(rung.phase)}

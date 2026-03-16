@@ -26,7 +26,7 @@ export default function ContextTone() {
 
   const loadRules = async (context: ToneContext) => {
     if (!brandDNA) return;
-    
+
     setSelectedContext(context);
     setIsLoading(true);
     setError('');
@@ -40,9 +40,9 @@ export default function ContextTone() {
       });
 
       const data = await response.json();
-      
+
       if (!response.ok) throw new Error(data.error);
-      
+
       setRules(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load rules');
@@ -53,7 +53,7 @@ export default function ContextTone() {
 
   const adaptContent = async () => {
     if (!content.trim() || !brandDNA) return;
-    
+
     setIsLoading(true);
     setError('');
     setAdaptation(null);
@@ -71,9 +71,9 @@ export default function ContextTone() {
       });
 
       const data = await response.json();
-      
+
       if (!response.ok) throw new Error(data.error);
-      
+
       setAdaptation(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to adapt content');
@@ -113,7 +113,7 @@ export default function ContextTone() {
           {CONTEXTS.map((ctx) => (
             <button
               key={ctx.id}
-              onClick={() => mode === 'rules' ? loadRules(ctx.id) : setSelectedContext(ctx.id)}
+              onClick={() => (mode === 'rules' ? loadRules(ctx.id) : setSelectedContext(ctx.id))}
               className={`p-4 rounded-lg border-2 transition-all text-left ${
                 selectedContext === ctx.id
                   ? 'border-foreground bg-surface'
@@ -139,7 +139,8 @@ export default function ContextTone() {
         <div className="animate-fade-in space-y-6">
           <div className="border border-border rounded-lg p-6">
             <h3 className="text-lg font-medium mb-2">
-              {CONTEXTS.find(c => c.id === rules.context)?.icon} {rules.context.charAt(0).toUpperCase() + rules.context.slice(1)} Context
+              {CONTEXTS.find((c) => c.id === rules.context)?.icon}{' '}
+              {rules.context.charAt(0).toUpperCase() + rules.context.slice(1)} Context
             </h3>
             <p className="text-sm text-muted">{rules.description}</p>
           </div>
@@ -150,8 +151,11 @@ export default function ContextTone() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {Object.entries(rules.toneAdjustments).map(([key, value]) => (
                 <div key={key} className="text-center">
-                  <div className={`text-2xl font-light ${value > 0 ? 'text-green-500' : value < 0 ? 'text-red-500' : 'text-muted'}`}>
-                    {value > 0 ? '+' : ''}{value}
+                  <div
+                    className={`text-2xl font-light ${value > 0 ? 'text-green-500' : value < 0 ? 'text-red-500' : 'text-muted'}`}
+                  >
+                    {value > 0 ? '+' : ''}
+                    {value}
                   </div>
                   <div className="text-xs text-muted capitalize">{key}</div>
                 </div>
@@ -217,7 +221,9 @@ export default function ContextTone() {
               disabled={!content.trim() || isLoading}
               className="mt-4 w-full py-3 bg-foreground text-background rounded-full text-sm font-medium disabled:opacity-30 transition-opacity hover:opacity-80"
             >
-              {isLoading ? 'Adapting...' : `Adapt for ${selectedContext.charAt(0).toUpperCase() + selectedContext.slice(1)} Context`}
+              {isLoading
+                ? 'Adapting...'
+                : `Adapt for ${selectedContext.charAt(0).toUpperCase() + selectedContext.slice(1)} Context`}
             </button>
           </div>
 
@@ -226,7 +232,8 @@ export default function ContextTone() {
               <div className="border border-border rounded-lg p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h4 className="text-xs uppercase tracking-widest text-muted">
-                    {CONTEXTS.find(c => c.id === adaptation.context)?.icon} Adapted for {adaptation.context}
+                    {CONTEXTS.find((c) => c.id === adaptation.context)?.icon} Adapted for{' '}
+                    {adaptation.context}
                   </h4>
                   <button
                     onClick={() => navigator.clipboard.writeText(adaptation.adaptedContent)}
@@ -238,7 +245,7 @@ export default function ContextTone() {
                 <div className="p-4 bg-surface rounded-lg mb-4">
                   <p className="text-sm whitespace-pre-wrap">{adaptation.adaptedContent}</p>
                 </div>
-                
+
                 {adaptation.adjustmentsApplied.length > 0 && (
                   <div>
                     <p className="text-xs text-muted mb-2">Adjustments applied:</p>
@@ -266,4 +273,3 @@ export default function ContextTone() {
     </div>
   );
 }
-

@@ -41,7 +41,9 @@ function PixelAutumnTree({ x, variant, delay }: { x: number; variant: number; de
 
 export default function AutumnBiome({ progress, isActive }: BiomeProps) {
   const harvestStage = Math.min(progress / 4, 1);
-  const [leaves, setLeaves] = useState<Array<{ id: number; x: number; delay: number; color: string }>>([]);
+  const [leaves, setLeaves] = useState<
+    Array<{ id: number; x: number; delay: number; color: string }>
+  >([]);
 
   useEffect(() => {
     if (!isActive) return;
@@ -62,7 +64,8 @@ export default function AutumnBiome({ progress, isActive }: BiomeProps) {
       <div
         className="absolute inset-0"
         style={{
-          background: 'linear-gradient(180deg, #5A7098 0%, #8A7A6A 30%, #C89858 55%, #E8B060 75%, #F0C878 100%)',
+          background:
+            'linear-gradient(180deg, #5A7098 0%, #8A7A6A 30%, #C89858 55%, #E8B060 75%, #F0C878 100%)',
         }}
       />
 
@@ -83,8 +86,16 @@ export default function AutumnBiome({ progress, isActive }: BiomeProps) {
       />
 
       {/* Distant tree line */}
-      <svg viewBox="0 0 320 40" preserveAspectRatio="none" className="absolute w-full" style={{ bottom: '30%', height: '12%', opacity: 0.4 }}>
-        <polygon points="0,40 0,20 15,12 30,18 45,8 60,16 75,10 90,18 105,6 120,14 135,10 150,20 165,8 180,16 195,12 210,18 225,6 240,14 255,10 270,20 285,8 300,14 315,10 320,16 320,40" fill="#8A5A30" />
+      <svg
+        viewBox="0 0 320 40"
+        preserveAspectRatio="none"
+        className="absolute w-full"
+        style={{ bottom: '30%', height: '12%', opacity: 0.4 }}
+      >
+        <polygon
+          points="0,40 0,20 15,12 30,18 45,8 60,16 75,10 90,18 105,6 120,14 135,10 150,20 165,8 180,16 195,12 210,18 225,6 240,14 255,10 270,20 285,8 300,14 315,10 320,16 320,40"
+          fill="#8A5A30"
+        />
       </svg>
 
       {/* Ground */}
@@ -97,11 +108,24 @@ export default function AutumnBiome({ progress, isActive }: BiomeProps) {
       />
 
       {/* Leaf litter on ground */}
-      <svg viewBox="0 0 320 20" preserveAspectRatio="none" className="absolute w-full" style={{ bottom: '25%', height: '5%' }}>
+      <svg
+        viewBox="0 0 320 20"
+        preserveAspectRatio="none"
+        className="absolute w-full"
+        style={{ bottom: '25%', height: '5%' }}
+      >
         {Array.from({ length: 30 }, (_, i) => {
           const colors = ['#C76B3A', '#E8A838', '#D46B3E', '#B84C2F'];
           return (
-            <rect key={i} x={i * 10 + Math.random() * 6} y={Math.random() * 12} width={4} height={3} fill={colors[i % 4]} opacity={0.6} />
+            <rect
+              key={i}
+              x={i * 10 + Math.random() * 6}
+              y={Math.random() * 12}
+              width={4}
+              height={3}
+              fill={colors[i % 4]}
+              opacity={0.6}
+            />
           );
         })}
       </svg>
@@ -120,29 +144,30 @@ export default function AutumnBiome({ progress, isActive }: BiomeProps) {
       ))}
 
       {/* Fruit on trees (harvest) */}
-      {harvestStage > 0.4 && [
-        { x: 20, y: 58 },
-        { x: 34, y: 60 },
-        { x: 52, y: 59 },
-        { x: 67, y: 58 },
-        { x: 82, y: 60 },
-      ].map((fruit, i) => (
-        <motion.div
-          key={`fruit-${i}`}
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ delay: i * 0.15, ease: 'linear' }}
-          style={{
-            position: 'absolute',
-            bottom: `${fruit.y}%`,
-            left: `${fruit.x}%`,
-            width: 5,
-            height: 5,
-            background: '#E84040',
-            borderRadius: '50%',
-          }}
-        />
-      ))}
+      {harvestStage > 0.4 &&
+        [
+          { x: 20, y: 58 },
+          { x: 34, y: 60 },
+          { x: 52, y: 59 },
+          { x: 67, y: 58 },
+          { x: 82, y: 60 },
+        ].map((fruit, i) => (
+          <motion.div
+            key={`fruit-${i}`}
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: i * 0.15, ease: 'linear' }}
+            style={{
+              position: 'absolute',
+              bottom: `${fruit.y}%`,
+              left: `${fruit.x}%`,
+              width: 5,
+              height: 5,
+              background: '#E84040',
+              borderRadius: '50%',
+            }}
+          />
+        ))}
 
       {/* Falling leaves */}
       {leaves.map((leaf) => (
@@ -179,7 +204,8 @@ export default function AutumnBiome({ progress, isActive }: BiomeProps) {
           transition={{ duration: 2 }}
           className="absolute inset-0"
           style={{
-            background: 'radial-gradient(ellipse at 50% 80%, rgba(232,168,56,0.3) 0%, transparent 60%)',
+            background:
+              'radial-gradient(ellipse at 50% 80%, rgba(232,168,56,0.3) 0%, transparent 60%)',
             pointerEvents: 'none',
           }}
         />

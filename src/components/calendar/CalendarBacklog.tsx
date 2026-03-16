@@ -76,13 +76,15 @@ export default function CalendarBacklog({
         maxHeight: 500,
       }}
     >
-      <h4 style={{
-        fontSize: 12,
-        fontWeight: 600,
-        color: 'var(--text-secondary)',
-        marginBottom: 8,
-        letterSpacing: '-0.01em',
-      }}>
+      <h4
+        style={{
+          fontSize: 12,
+          fontWeight: 600,
+          color: 'var(--text-secondary)',
+          marginBottom: 8,
+          letterSpacing: '-0.01em',
+        }}
+      >
         Backlog
         {drafts.length > 0 && (
           <span style={{ fontWeight: 400, color: 'var(--text-tertiary)', marginLeft: 4 }}>
@@ -92,12 +94,14 @@ export default function CalendarBacklog({
       </h4>
 
       {drafts.length === 0 ? (
-        <p style={{
-          fontSize: 11,
-          color: 'var(--text-tertiary)',
-          textAlign: 'center',
-          padding: '16px 0',
-        }}>
+        <p
+          style={{
+            fontSize: 11,
+            color: 'var(--text-tertiary)',
+            textAlign: 'center',
+            padding: '16px 0',
+          }}
+        >
           Drag drafts here to unschedule
         </p>
       ) : (

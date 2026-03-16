@@ -1,11 +1,6 @@
 // ===== SERPER WEB SEARCH DATA SOURCE =====
 
-import {
-  SerperResult,
-  TCGVertical,
-  VERTICAL_CONFIGS,
-  SourceStatus,
-} from '../research.types';
+import { SerperResult, TCGVertical, VERTICAL_CONFIGS, SourceStatus } from '../research.types';
 
 interface SerperSearchResponse {
   organic?: {

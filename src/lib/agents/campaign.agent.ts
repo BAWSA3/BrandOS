@@ -3,12 +3,7 @@
 
 import Anthropic from '@anthropic-ai/sdk';
 import { BrandDNA } from '@/lib/types';
-import { 
-  AgentContext, 
-  AgentResponse, 
-  CampaignBrief, 
-  CampaignPlan 
-} from './types';
+import { AgentContext, AgentResponse, CampaignBrief, CampaignPlan } from './types';
 
 // Build the campaign planning prompt
 function buildCampaignPrompt(brand: BrandDNA, brief: CampaignBrief): string {
@@ -119,14 +114,14 @@ function parseCampaignPlan(responseText: string): CampaignPlan | null {
     if (!jsonMatch) {
       return null;
     }
-    
+
     const parsed = JSON.parse(jsonMatch[0]);
-    
+
     // Validate required fields
     if (!parsed.name || !parsed.summary || !parsed.phases) {
       return null;
     }
-    
+
     return parsed as CampaignPlan;
   } catch {
     return null;
@@ -141,7 +136,7 @@ export async function createCampaignPlan(
   brief: CampaignBrief
 ): Promise<AgentResponse<CampaignPlan>> {
   const startTime = Date.now();
-  
+
   try {
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) {
@@ -185,12 +180,10 @@ export async function createCampaignPlan(
       ],
     });
 
-    const responseText = message.content[0].type === 'text' 
-      ? message.content[0].text 
-      : '';
+    const responseText = message.content[0].type === 'text' ? message.content[0].text : '';
 
     const campaignPlan = parseCampaignPlan(responseText);
-    
+
     if (!campaignPlan) {
       return {
         success: false,
@@ -214,7 +207,7 @@ export async function createCampaignPlan(
     };
   } catch (error) {
     console.error('Campaign agent error:', error);
-    
+
     let errorMessage = 'Campaign planning failed';
     if (error instanceof Error) {
       if (error.message.includes('credit balance is too low')) {
@@ -223,7 +216,7 @@ export async function createCampaignPlan(
         errorMessage = error.message;
       }
     }
-    
+
     return {
       success: false,
       error: errorMessage,
@@ -241,7 +234,7 @@ export async function getCampaignSummary(
   idea: string
 ): Promise<AgentResponse<{ name: string; summary: string; suggestedChannels: string[] }>> {
   const startTime = Date.now();
-  
+
   try {
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) {
@@ -275,9 +268,7 @@ Return ONLY valid JSON:
       ],
     });
 
-    const responseText = message.content[0].type === 'text' 
-      ? message.content[0].text 
-      : '';
+    const responseText = message.content[0].type === 'text' ? message.content[0].text : '';
 
     const jsonMatch = responseText.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
@@ -306,9 +297,3 @@ Return ONLY valid JSON:
     };
   }
 }
-
-
-
-
-
-

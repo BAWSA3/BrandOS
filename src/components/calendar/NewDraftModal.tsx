@@ -18,7 +18,12 @@ interface NewDraftModalProps {
 const contentTypes = ['tweet', 'thread', 'poll', 'hot-take', 'educational', 'story'];
 const tones = ['casual', 'hot-take', 'educational', 'launch', 'behind-the-scenes', 'announcement'];
 
-export default function NewDraftModal({ isOpen, onClose, onSubmit, defaultDate }: NewDraftModalProps) {
+export default function NewDraftModal({
+  isOpen,
+  onClose,
+  onSubmit,
+  defaultDate,
+}: NewDraftModalProps) {
   const [content, setContent] = useState('');
   const [contentType, setContentType] = useState('tweet');
   const [tone, setTone] = useState('casual');
@@ -72,14 +77,24 @@ export default function NewDraftModal({ isOpen, onClose, onSubmit, defaultDate }
           boxShadow: '0 24px 48px rgba(0,0,0,0.2)',
         }}
       >
-        <h3 style={{ fontSize: 18, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 20 }}>
+        <h3
+          style={{ fontSize: 18, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 20 }}
+        >
           New Draft
         </h3>
 
         <form onSubmit={handleSubmit}>
           {/* Content */}
           <div style={{ marginBottom: 16 }}>
-            <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-secondary)', display: 'block', marginBottom: 6 }}>
+            <label
+              style={{
+                fontSize: 13,
+                fontWeight: 500,
+                color: 'var(--text-secondary)',
+                display: 'block',
+                marginBottom: 6,
+              }}
+            >
               Content
             </label>
             <textarea
@@ -99,7 +114,14 @@ export default function NewDraftModal({ isOpen, onClose, onSubmit, defaultDate }
                 outline: 'none',
               }}
             />
-            <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 4, textAlign: 'right' }}>
+            <div
+              style={{
+                fontSize: 11,
+                color: 'var(--text-tertiary)',
+                marginTop: 4,
+                textAlign: 'right',
+              }}
+            >
               {content.length} characters
             </div>
           </div>
@@ -107,7 +129,15 @@ export default function NewDraftModal({ isOpen, onClose, onSubmit, defaultDate }
           {/* Type + Tone row */}
           <div className="grid grid-cols-2 gap-3" style={{ marginBottom: 16 }}>
             <div>
-              <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-secondary)', display: 'block', marginBottom: 6 }}>
+              <label
+                style={{
+                  fontSize: 13,
+                  fontWeight: 500,
+                  color: 'var(--text-secondary)',
+                  display: 'block',
+                  marginBottom: 6,
+                }}
+              >
                 Type
               </label>
               <select
@@ -132,7 +162,15 @@ export default function NewDraftModal({ isOpen, onClose, onSubmit, defaultDate }
               </select>
             </div>
             <div>
-              <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-secondary)', display: 'block', marginBottom: 6 }}>
+              <label
+                style={{
+                  fontSize: 13,
+                  fontWeight: 500,
+                  color: 'var(--text-secondary)',
+                  display: 'block',
+                  marginBottom: 6,
+                }}
+              >
                 Tone
               </label>
               <select
@@ -160,7 +198,15 @@ export default function NewDraftModal({ isOpen, onClose, onSubmit, defaultDate }
 
           {/* Date */}
           <div style={{ marginBottom: 20 }}>
-            <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-secondary)', display: 'block', marginBottom: 6 }}>
+            <label
+              style={{
+                fontSize: 13,
+                fontWeight: 500,
+                color: 'var(--text-secondary)',
+                display: 'block',
+                marginBottom: 6,
+              }}
+            >
               Schedule for (optional)
             </label>
             <input

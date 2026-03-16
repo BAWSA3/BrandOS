@@ -86,7 +86,8 @@ export function InviteCodeDisplay({ username, onGenerate }: InviteCodeDisplayPro
       style={{
         padding: '20px',
         borderRadius: '16px',
-        background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(217, 119, 6, 0.05) 100%)',
+        background:
+          'linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(217, 119, 6, 0.05) 100%)',
         border: '1px solid rgba(245, 158, 11, 0.2)',
       }}
     >
@@ -196,8 +197,7 @@ export function InviteCodeDisplay({ username, onGenerate }: InviteCodeDisplayPro
                 fontSize: '10px',
                 fontWeight: 600,
                 letterSpacing: '0.08em',
-                cursor:
-                  inviteCode.usedCount >= inviteCode.maxUses ? 'not-allowed' : 'pointer',
+                cursor: inviteCode.usedCount >= inviteCode.maxUses ? 'not-allowed' : 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '6px',

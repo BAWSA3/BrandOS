@@ -3,7 +3,12 @@ export type { CursorMode } from './CustomCursor';
 
 export { default as MagneticButton } from './MagneticButton';
 
-export { default as ScrollReveal, ScrollStagger, ScrollStaggerItem, ParallaxElement } from './ScrollReveal';
+export {
+  default as ScrollReveal,
+  ScrollStagger,
+  ScrollStaggerItem,
+  ParallaxElement,
+} from './ScrollReveal';
 
 export { default as ScrollProgress, SectionProgress } from './ScrollProgress';
 

@@ -8,17 +8,55 @@ import BrandOSLogo from './BrandOSLogo';
 import SwissBackground from './SwissBackground';
 import { AsciiSky } from './ascii-sky';
 
-type Step = 'welcome' | 'name' | 'template' | 'colors' | 'tone' | 'keywords' | 'samples' | 'complete';
+type Step =
+  | 'welcome'
+  | 'name'
+  | 'template'
+  | 'colors'
+  | 'tone'
+  | 'keywords'
+  | 'samples'
+  | 'complete';
 
 const steps: { id: Step; label: string; title: string; subtitle: string }[] = [
-  { id: 'welcome', label: 'Welcome', title: 'Welcome to BrandOS', subtitle: "Let's set up your brand in minutes" },
-  { id: 'name', label: 'Name', title: 'Name Your Brand', subtitle: 'What should we call your brand?' },
-  { id: 'template', label: 'Template', title: 'Choose a Starting Point', subtitle: 'Pick a template or start fresh' },
+  {
+    id: 'welcome',
+    label: 'Welcome',
+    title: 'Welcome to BrandOS',
+    subtitle: "Let's set up your brand in minutes",
+  },
+  {
+    id: 'name',
+    label: 'Name',
+    title: 'Name Your Brand',
+    subtitle: 'What should we call your brand?',
+  },
+  {
+    id: 'template',
+    label: 'Template',
+    title: 'Choose a Starting Point',
+    subtitle: 'Pick a template or start fresh',
+  },
   { id: 'colors', label: 'Colors', title: 'Brand Colors', subtitle: 'Define your visual identity' },
   { id: 'tone', label: 'Tone', title: 'Brand Tone', subtitle: 'How should your brand sound?' },
-  { id: 'keywords', label: 'Keywords', title: 'Brand Keywords', subtitle: 'Words that define your brand' },
-  { id: 'samples', label: 'Samples', title: 'Voice Samples', subtitle: 'Show us your best writing' },
-  { id: 'complete', label: 'Done', title: 'Your Brand is Ready', subtitle: 'Your dashboard awaits' },
+  {
+    id: 'keywords',
+    label: 'Keywords',
+    title: 'Brand Keywords',
+    subtitle: 'Words that define your brand',
+  },
+  {
+    id: 'samples',
+    label: 'Samples',
+    title: 'Voice Samples',
+    subtitle: 'Show us your best writing',
+  },
+  {
+    id: 'complete',
+    label: 'Done',
+    title: 'Your Brand is Ready',
+    subtitle: 'Your dashboard awaits',
+  },
 ];
 
 const toneSliders = [
@@ -77,7 +115,7 @@ function GradientSlider({
       const pct = Math.round((x / rect.width) * 100);
       onChange(pct);
     },
-    [onChange, thumbX],
+    [onChange, thumbX]
   );
 
   const handlePointerDown = useCallback(
@@ -86,7 +124,7 @@ function GradientSlider({
       (e.target as HTMLElement).setPointerCapture(e.pointerId);
       clampToTrack(e.clientX);
     },
-    [clampToTrack],
+    [clampToTrack]
   );
 
   const handlePointerMove = useCallback(
@@ -94,7 +132,7 @@ function GradientSlider({
       if (!isDragging.current) return;
       clampToTrack(e.clientX);
     },
-    [clampToTrack],
+    [clampToTrack]
   );
 
   const handlePointerUp = useCallback(() => {
@@ -104,7 +142,9 @@ function GradientSlider({
   return (
     <div className="group">
       <div className="flex items-center justify-between mb-2">
-        <span className="font-mono text-[10px] tracking-widest text-brand-black-swiss/50">{label}</span>
+        <span className="font-mono text-[10px] tracking-widest text-brand-black-swiss/50">
+          {label}
+        </span>
         <span className="font-mono text-[10px] tabular-nums text-brand-black-swiss/40 opacity-0 group-hover:opacity-100 transition-opacity">
           {value}
         </span>
@@ -165,11 +205,11 @@ export default function OnboardingWizard({ onComplete, onSkip }: OnboardingWizar
   const [keywordInput, setKeywordInput] = useState('');
   const [sampleInput, setSampleInput] = useState('');
 
-  const currentStepIndex = steps.findIndex(s => s.id === currentStep);
+  const currentStepIndex = steps.findIndex((s) => s.id === currentStep);
   const progress = (currentStepIndex / (steps.length - 1)) * 100;
 
   const goToStep = (step: Step) => {
-    const nextIndex = steps.findIndex(s => s.id === step);
+    const nextIndex = steps.findIndex((s) => s.id === step);
     setDirection(nextIndex > currentStepIndex ? 1 : -1);
     setCurrentStep(step);
   };
@@ -189,7 +229,7 @@ export default function OnboardingWizard({ onComplete, onSkip }: OnboardingWizar
   };
 
   const applyTemplate = (templateId: string) => {
-    const template = brandTemplates.find(t => t.id === templateId);
+    const template = brandTemplates.find((t) => t.id === templateId);
     if (template?.preview) {
       setBrandDNA(template.preview);
       nextStep();
@@ -297,7 +337,13 @@ export default function OnboardingWizard({ onComplete, onSkip }: OnboardingWizar
                   hillColorFar="#265a20"
                 />
                 {/* Subtle overlay to ensure text readability */}
-                <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at center 40%, rgba(245,245,240,0.7) 0%, rgba(245,245,240,0.3) 50%, transparent 80%)' }} />
+                <div
+                  className="absolute inset-0"
+                  style={{
+                    background:
+                      'radial-gradient(ellipse at center 40%, rgba(245,245,240,0.7) 0%, rgba(245,245,240,0.3) 50%, transparent 80%)',
+                  }}
+                />
               </div>
 
               {/* Logo */}
@@ -305,11 +351,18 @@ export default function OnboardingWizard({ onComplete, onSkip }: OnboardingWizar
                 <BrandOSLogo size="hero" variant="landing" />
               </div>
 
-              <h2 className="relative z-10 font-sans text-5xl font-bold tracking-tight text-brand-black-swiss mb-4" style={{ textShadow: '0 1px 8px rgba(245,245,240,0.8)' }}>
+              <h2
+                className="relative z-10 font-sans text-5xl font-bold tracking-tight text-brand-black-swiss mb-4"
+                style={{ textShadow: '0 1px 8px rgba(245,245,240,0.8)' }}
+              >
                 Let&apos;s set up your brand
               </h2>
-              <p className="relative z-10 font-sans text-lg text-brand-black-swiss/60 mb-14 max-w-md mx-auto leading-relaxed" style={{ textShadow: '0 1px 6px rgba(245,245,240,0.9)' }}>
-                Answer a few quick questions to capture your brand identity. This takes about 2 minutes.
+              <p
+                className="relative z-10 font-sans text-lg text-brand-black-swiss/60 mb-14 max-w-md mx-auto leading-relaxed"
+                style={{ textShadow: '0 1px 6px rgba(245,245,240,0.9)' }}
+              >
+                Answer a few quick questions to capture your brand identity. This takes about 2
+                minutes.
               </p>
 
               <button
@@ -365,9 +418,7 @@ export default function OnboardingWizard({ onComplete, onSkip }: OnboardingWizar
                 <h2 className="font-sans text-5xl font-bold tracking-tight text-brand-black-swiss mb-4">
                   {steps[2].title}
                 </h2>
-                <p className="font-sans text-lg text-brand-black-swiss/50">
-                  {steps[2].subtitle}
-                </p>
+                <p className="font-sans text-lg text-brand-black-swiss/50">{steps[2].subtitle}</p>
               </div>
 
               <div className="grid grid-cols-2 gap-4 mb-12">
@@ -386,8 +437,12 @@ export default function OnboardingWizard({ onComplete, onSkip }: OnboardingWizar
                         />
                       ))}
                     </div>
-                    <p className="font-sans text-base font-medium text-brand-black-swiss">{template.name}</p>
-                    <p className="font-mono text-xs text-brand-black-swiss/40 mt-1">{template.description}</p>
+                    <p className="font-sans text-base font-medium text-brand-black-swiss">
+                      {template.name}
+                    </p>
+                    <p className="font-mono text-xs text-brand-black-swiss/40 mt-1">
+                      {template.description}
+                    </p>
                   </button>
                 ))}
               </div>
@@ -416,9 +471,7 @@ export default function OnboardingWizard({ onComplete, onSkip }: OnboardingWizar
                 <h2 className="font-sans text-5xl font-bold tracking-tight text-brand-black-swiss mb-4">
                   {steps[3].title}
                 </h2>
-                <p className="font-sans text-lg text-brand-black-swiss/50">
-                  {steps[3].subtitle}
-                </p>
+                <p className="font-sans text-lg text-brand-black-swiss/50">{steps[3].subtitle}</p>
               </div>
 
               <div className="grid grid-cols-3 gap-8">
@@ -431,18 +484,25 @@ export default function OnboardingWizard({ onComplete, onSkip }: OnboardingWizar
                     <label className="block cursor-pointer">
                       <div
                         className="w-full aspect-square rounded-sm border border-brand-black-swiss/10 transition-all group-hover:scale-105 group-hover:shadow-[0_0_0_2px_rgba(47,84,235,0.4)] mb-4"
-                        style={{ backgroundColor: brandDNA?.colors?.[key as keyof typeof brandDNA.colors] || '#000000' }}
+                        style={{
+                          backgroundColor:
+                            brandDNA?.colors?.[key as keyof typeof brandDNA.colors] || '#000000',
+                        }}
                       />
                       <input
                         type="color"
                         value={brandDNA?.colors?.[key as keyof typeof brandDNA.colors] || '#000000'}
-                        onChange={(e) => setBrandDNA({
-                          colors: { ...brandDNA?.colors!, [key]: e.target.value },
-                        })}
+                        onChange={(e) =>
+                          setBrandDNA({
+                            colors: { ...brandDNA?.colors!, [key]: e.target.value },
+                          })
+                        }
                         className="sr-only"
                       />
                     </label>
-                    <p className="font-mono text-xs tracking-widest text-brand-black-swiss/40">{label}</p>
+                    <p className="font-mono text-xs tracking-widest text-brand-black-swiss/40">
+                      {label}
+                    </p>
                     <p className="font-mono text-xs text-brand-black-swiss/25 mt-1">
                       {brandDNA?.colors?.[key as keyof typeof brandDNA.colors] || '#000000'}
                     </p>
@@ -474,9 +534,7 @@ export default function OnboardingWizard({ onComplete, onSkip }: OnboardingWizar
                 <h2 className="font-sans text-5xl font-bold tracking-tight text-brand-black-swiss mb-4">
                   {steps[4].title}
                 </h2>
-                <p className="font-sans text-lg text-brand-black-swiss/50">
-                  {steps[4].subtitle}
-                </p>
+                <p className="font-sans text-lg text-brand-black-swiss/50">{steps[4].subtitle}</p>
               </div>
 
               <div className="space-y-8">
@@ -516,9 +574,7 @@ export default function OnboardingWizard({ onComplete, onSkip }: OnboardingWizar
                 <h2 className="font-sans text-5xl font-bold tracking-tight text-brand-black-swiss mb-4">
                   {steps[5].title}
                 </h2>
-                <p className="font-sans text-lg text-brand-black-swiss/50">
-                  {steps[5].subtitle}
-                </p>
+                <p className="font-sans text-lg text-brand-black-swiss/50">{steps[5].subtitle}</p>
               </div>
 
               <div className="flex gap-3 mb-6">
@@ -586,9 +642,7 @@ export default function OnboardingWizard({ onComplete, onSkip }: OnboardingWizar
                 <h2 className="font-sans text-5xl font-bold tracking-tight text-brand-black-swiss mb-4">
                   {steps[6].title}
                 </h2>
-                <p className="font-sans text-lg text-brand-black-swiss/50">
-                  {steps[6].subtitle}
-                </p>
+                <p className="font-sans text-lg text-brand-black-swiss/50">{steps[6].subtitle}</p>
               </div>
 
               <textarea
@@ -616,8 +670,12 @@ export default function OnboardingWizard({ onComplete, onSkip }: OnboardingWizar
                     onClick={() => removeSample(i)}
                     className="p-4 bg-white/50 rounded-sm text-base cursor-pointer hover:bg-white transition-colors group border border-brand-black-swiss/10"
                   >
-                    <p className="italic text-brand-black-swiss/60 line-clamp-2">&ldquo;{sample}&rdquo;</p>
-                    <p className="font-mono text-xs text-brand-black-swiss/20 group-hover:text-brand-black-swiss/50 mt-1">Click to remove</p>
+                    <p className="italic text-brand-black-swiss/60 line-clamp-2">
+                      &ldquo;{sample}&rdquo;
+                    </p>
+                    <p className="font-mono text-xs text-brand-black-swiss/20 group-hover:text-brand-black-swiss/50 mt-1">
+                      Click to remove
+                    </p>
                   </motion.div>
                 ))}
               </div>
@@ -649,8 +707,18 @@ export default function OnboardingWizard({ onComplete, onSkip }: OnboardingWizar
                 transition={{ type: 'spring', stiffness: 200, damping: 15, delay: 0.1 }}
                 className="w-20 h-20 mx-auto mb-8 rounded-full bg-brand-blue-swiss/10 flex items-center justify-center"
               >
-                <svg className="w-10 h-10 text-brand-blue-swiss" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                <svg
+                  className="w-10 h-10 text-brand-blue-swiss"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
                 </svg>
               </motion.div>
 
@@ -674,7 +742,9 @@ export default function OnboardingWizard({ onComplete, onSkip }: OnboardingWizar
                     ))}
                   </div>
                   <div>
-                    <p className="font-sans text-lg font-medium text-brand-black-swiss">{brandDNA?.name}</p>
+                    <p className="font-sans text-lg font-medium text-brand-black-swiss">
+                      {brandDNA?.name}
+                    </p>
                     <p className="font-mono text-xs text-brand-black-swiss/30">
                       {brandDNA?.keywords?.slice(0, 3).join(' / ') || 'No keywords'}
                     </p>
@@ -685,7 +755,9 @@ export default function OnboardingWizard({ onComplete, onSkip }: OnboardingWizar
                   {toneSliders.map((slider) => (
                     <div key={slider.key}>
                       <p className="font-mono text-xs text-brand-black-swiss/30">{slider.label}</p>
-                      <p className="font-sans text-base font-medium text-brand-black-swiss">{brandDNA?.tone?.[slider.key] ?? 50}%</p>
+                      <p className="font-sans text-base font-medium text-brand-black-swiss">
+                        {brandDNA?.tone?.[slider.key] ?? 50}%
+                      </p>
                     </div>
                   ))}
                 </div>

@@ -95,10 +95,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ attestation, simulated: !platformKey });
   } catch (error) {
     console.error('[Onchain Relay] Error:', error);
-    return NextResponse.json(
-      { error: 'Relay failed' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Relay failed' }, { status: 500 });
   }
 }
 

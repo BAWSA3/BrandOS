@@ -2,7 +2,12 @@
 // PLATFORM CONNECTORS — Registry and initialization
 // =============================================================================
 
-export type { PlatformConnector, OAuthTokens, PlatformProfile, PlatformConnectorConfig } from './base';
+export type {
+  PlatformConnector,
+  OAuthTokens,
+  PlatformProfile,
+  PlatformConnectorConfig,
+} from './base';
 export { registerConnector, getConnector, getAvailableConnectors } from './base';
 
 export { YouTubeConnector } from './youtube';

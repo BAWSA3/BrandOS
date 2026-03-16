@@ -52,23 +52,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { username } = await request.json() as { username: string };
+    const { username } = (await request.json()) as { username: string };
 
     if (!username) {
-      return NextResponse.json(
-        { error: 'Username is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Username is required' }, { status: 400 });
     }
 
     // Clean the username (remove @ if present)
     const cleanUsername = username.replace(/^@/, '').trim();
 
     if (!cleanUsername) {
-      return NextResponse.json(
-        { error: 'Invalid username format' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid username format' }, { status: 400 });
     }
 
     // Check cache first
@@ -98,7 +92,7 @@ export async function POST(request: NextRequest) {
     const response = await fetch(xApiUrl, {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${bearerToken}`,
+        Authorization: `Bearer ${bearerToken}`,
         'Content-Type': 'application/json',
       },
     });
@@ -128,10 +122,7 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      return NextResponse.json(
-        { error: 'Failed to fetch X profile' },
-        { status: response.status }
-      );
+      return NextResponse.json({ error: 'Failed to fetch X profile' }, { status: response.status });
     }
 
     const data = await response.json();
@@ -146,10 +137,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (!data.data) {
-      return NextResponse.json(
-        { error: `User @${cleanUsername} not found` },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: `User @${cleanUsername} not found` }, { status: 404 });
     }
 
     const profile: XProfile = {
@@ -186,15 +174,8 @@ export async function POST(request: NextRequest) {
     console.log(`[CACHE SET] Cached profile for @${cleanUsername}`);
 
     return NextResponse.json({ profile, cached: false });
-
   } catch (error) {
     console.error('X Profile API error:', error);
-    return NextResponse.json(
-      { error: 'An unexpected error occurred' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }
-
-
-

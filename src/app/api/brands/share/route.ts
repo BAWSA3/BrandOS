@@ -21,7 +21,10 @@ async function getAuthUser() {
   }
 
   const supabase = createClient(supabaseUrl, supabaseAnonKey);
-  const { data: { user }, error } = await supabase.auth.getUser(accessToken);
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser(accessToken);
 
   if (error || !user) {
     return null;
@@ -48,10 +51,7 @@ export async function POST(request: NextRequest) {
       });
 
       if (!existingBrand) {
-        return NextResponse.json(
-          { error: 'Brand not found' },
-          { status: 404 }
-        );
+        return NextResponse.json({ error: 'Brand not found' }, { status: 404 });
       }
 
       // Generate share token if not already set
@@ -79,10 +79,7 @@ export async function POST(request: NextRequest) {
     // For unauthenticated users or when brandData is provided (guest sharing)
     // Create a temporary brand for sharing
     if (!brandData?.name) {
-      return NextResponse.json(
-        { error: 'Invalid brand data' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid brand data' }, { status: 400 });
     }
 
     const shareToken = uuidv4();
@@ -101,13 +98,9 @@ export async function POST(request: NextRequest) {
       { error: 'Authentication required to create shareable links. Sign in to share your brand.' },
       { status: 401 }
     );
-
   } catch (error) {
     console.error('[Share API] POST error:', error);
-    return NextResponse.json(
-      { error: 'Failed to create share link' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to create share link' }, { status: 500 });
   }
 }
 
@@ -118,10 +111,7 @@ export async function GET(request: NextRequest) {
     const token = searchParams.get('token');
 
     if (!token) {
-      return NextResponse.json(
-        { error: 'Token required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Token required' }, { status: 400 });
     }
 
     // Look up brand by share token
@@ -130,18 +120,12 @@ export async function GET(request: NextRequest) {
     });
 
     if (!brand) {
-      return NextResponse.json(
-        { error: 'Share link not found or expired' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Share link not found or expired' }, { status: 404 });
     }
 
     // Check if brand is public
     if (!brand.isPublic) {
-      return NextResponse.json(
-        { error: 'This brand is no longer shared' },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: 'This brand is no longer shared' }, { status: 403 });
     }
 
     // Parse JSON fields and return brand data
@@ -163,13 +147,9 @@ export async function GET(request: NextRequest) {
       brand: brandData,
       createdAt: brand.createdAt.toISOString(),
     });
-
   } catch (error) {
     console.error('[Share API] GET error:', error);
-    return NextResponse.json(
-      { error: 'Failed to retrieve shared brand' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to retrieve shared brand' }, { status: 500 });
   }
 }
 
@@ -210,9 +190,6 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('[Share API] DELETE error:', error);
-    return NextResponse.json(
-      { error: 'Failed to revoke share link' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to revoke share link' }, { status: 500 });
   }
 }

@@ -22,7 +22,10 @@ async function getAuthUser() {
   if (!accessToken) return null;
 
   const supabase = createClient(supabaseUrl, supabaseAnonKey);
-  const { data: { user }, error } = await supabase.auth.getUser(accessToken);
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser(accessToken);
   if (error || !user) return null;
 
   return prisma.user.findUnique({ where: { supabaseId: user.id } });
@@ -56,7 +59,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Brand not found' }, { status: 404 });
     }
 
-    const newAlerts: { type: string; severity: string; metric: string; previousScore: number; currentScore: number; delta: number; message: string }[] = [];
+    const newAlerts: {
+      type: string;
+      severity: string;
+      metric: string;
+      previousScore: number;
+      currentScore: number;
+      delta: number;
+      message: string;
+    }[] = [];
 
     // ─── 1. Compare latest 2 snapshots ───
     const snapshots = await prisma.brandHealthSnapshot.findMany({
@@ -131,7 +142,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (recentTweets.length >= LOW_ALIGNMENT_STREAK) {
-      const allLow = recentTweets.every(t => (t.alignmentScore ?? 100) < LOW_ALIGNMENT_THRESHOLD);
+      const allLow = recentTweets.every((t) => (t.alignmentScore ?? 100) < LOW_ALIGNMENT_THRESHOLD);
       if (allLow) {
         const avgScore = Math.round(
           recentTweets.reduce((sum, t) => sum + (t.alignmentScore ?? 0), 0) / recentTweets.length
@@ -158,8 +169,8 @@ export async function POST(request: NextRequest) {
       select: { type: true, metric: true },
     });
 
-    const existingKeys = new Set(recentAlerts.map(a => `${a.type}:${a.metric}`));
-    const dedupedAlerts = newAlerts.filter(a => !existingKeys.has(`${a.type}:${a.metric}`));
+    const existingKeys = new Set(recentAlerts.map((a) => `${a.type}:${a.metric}`));
+    const dedupedAlerts = newAlerts.filter((a) => !existingKeys.has(`${a.type}:${a.metric}`));
 
     // ─── 4. Create alerts ───
     const created = [];

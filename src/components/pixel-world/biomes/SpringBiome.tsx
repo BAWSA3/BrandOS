@@ -36,7 +36,12 @@ export default function SpringBiome({ progress, isActive }: BiomeProps) {
             top: `${cloud.y}%`,
           }}
         >
-          <svg width={cloud.w} height="20" viewBox={`0 0 ${cloud.w} 20`} style={{ imageRendering: 'pixelated' }}>
+          <svg
+            width={cloud.w}
+            height="20"
+            viewBox={`0 0 ${cloud.w} 20`}
+            style={{ imageRendering: 'pixelated' }}
+          >
             <rect x="8" y="8" width={cloud.w - 16} height="8" fill="rgba(255,255,255,0.8)" />
             <rect x="4" y="12" width={cloud.w - 8} height="4" fill="rgba(255,255,255,0.7)" />
             <rect x="12" y="4" width={cloud.w - 24} height="4" fill="rgba(255,255,255,0.6)" />
@@ -61,13 +66,29 @@ export default function SpringBiome({ progress, isActive }: BiomeProps) {
       />
 
       {/* Far hills */}
-      <svg viewBox="0 0 320 60" preserveAspectRatio="none" className="absolute w-full" style={{ bottom: '28%', height: '15%', opacity: 0.4 }}>
-        <polygon points="0,60 0,30 40,20 80,28 120,12 160,24 200,16 240,22 280,10 320,25 320,60" fill="#6B8E5A" />
+      <svg
+        viewBox="0 0 320 60"
+        preserveAspectRatio="none"
+        className="absolute w-full"
+        style={{ bottom: '28%', height: '15%', opacity: 0.4 }}
+      >
+        <polygon
+          points="0,60 0,30 40,20 80,28 120,12 160,24 200,16 240,22 280,10 320,25 320,60"
+          fill="#6B8E5A"
+        />
       </svg>
 
       {/* Mid hills */}
-      <svg viewBox="0 0 320 60" preserveAspectRatio="none" className="absolute w-full" style={{ bottom: '22%', height: '18%', opacity: 0.6 }}>
-        <polygon points="0,60 0,35 30,25 70,32 100,18 140,30 180,20 220,28 260,14 300,26 320,30 320,60" fill="#7DA96A" />
+      <svg
+        viewBox="0 0 320 60"
+        preserveAspectRatio="none"
+        className="absolute w-full"
+        style={{ bottom: '22%', height: '18%', opacity: 0.6 }}
+      >
+        <polygon
+          points="0,60 0,35 30,25 70,32 100,18 140,30 180,20 220,28 260,14 300,26 320,30 320,60"
+          fill="#7DA96A"
+        />
       </svg>
 
       {/* Ground */}
@@ -80,9 +101,23 @@ export default function SpringBiome({ progress, isActive }: BiomeProps) {
       />
 
       {/* Soil patches */}
-      <svg viewBox="0 0 320 30" preserveAspectRatio="none" className="absolute w-full bottom-0" style={{ height: '8%' }}>
+      <svg
+        viewBox="0 0 320 30"
+        preserveAspectRatio="none"
+        className="absolute w-full bottom-0"
+        style={{ height: '8%' }}
+      >
         {Array.from({ length: 12 }, (_, i) => (
-          <rect key={i} x={10 + i * 26} y={Math.random() * 10} width={8 + Math.random() * 12} height="4" fill="#5C4A2A" opacity={0.3 + Math.random() * 0.3} rx="0" />
+          <rect
+            key={i}
+            x={10 + i * 26}
+            y={Math.random() * 10}
+            width={8 + Math.random() * 12}
+            height="4"
+            fill="#5C4A2A"
+            opacity={0.3 + Math.random() * 0.3}
+            rx="0"
+          />
         ))}
       </svg>
 
@@ -104,37 +139,54 @@ export default function SpringBiome({ progress, isActive }: BiomeProps) {
             }}
           >
             {/* Stem */}
-            <div style={{ width: 2, height: Math.max(4, height), background: '#4A7A2A', margin: '0 auto' }} />
+            <div
+              style={{
+                width: 2,
+                height: Math.max(4, height),
+                background: '#4A7A2A',
+                margin: '0 auto',
+              }}
+            />
             {/* Leaf */}
             {sproutProgress > 0.3 && (
-              <div style={{ width: 6, height: 4, background: '#6BBF4A', marginTop: -2, marginLeft: i % 2 === 0 ? -4 : 2, borderRadius: '0 50% 50% 0' }} />
+              <div
+                style={{
+                  width: 6,
+                  height: 4,
+                  background: '#6BBF4A',
+                  marginTop: -2,
+                  marginLeft: i % 2 === 0 ? -4 : 2,
+                  borderRadius: '0 50% 50% 0',
+                }}
+              />
             )}
           </motion.div>
         );
       })}
 
       {/* Small flowers appearing */}
-      {growthStage > 0.5 && [
-        { x: 20, color: '#FFB6C1' },
-        { x: 45, color: '#FFFACD' },
-        { x: 72, color: '#E6E6FA' },
-        { x: 88, color: '#FFB6C1' },
-      ].map((flower, i) => (
-        <motion.div
-          key={`flower-${i}`}
-          initial={{ scale: 0, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: i * 0.2, duration: 0.3, ease: 'linear' }}
-          style={{
-            position: 'absolute',
-            bottom: `${26 + Math.random() * 3}%`,
-            left: `${flower.x}%`,
-            width: 6,
-            height: 6,
-            background: flower.color,
-          }}
-        />
-      ))}
+      {growthStage > 0.5 &&
+        [
+          { x: 20, color: '#FFB6C1' },
+          { x: 45, color: '#FFFACD' },
+          { x: 72, color: '#E6E6FA' },
+          { x: 88, color: '#FFB6C1' },
+        ].map((flower, i) => (
+          <motion.div
+            key={`flower-${i}`}
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: i * 0.2, duration: 0.3, ease: 'linear' }}
+            style={{
+              position: 'absolute',
+              bottom: `${26 + Math.random() * 3}%`,
+              left: `${flower.x}%`,
+              width: 6,
+              height: 6,
+              background: flower.color,
+            }}
+          />
+        ))}
 
       {/* Butterflies */}
       {isActive && growthStage > 0.6 && (

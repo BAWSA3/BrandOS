@@ -2,10 +2,10 @@
 // Central hub for all product-facing AI agents
 
 import { BrandDNA, Platform } from '@/lib/types';
-import { 
-  AgentContext, 
+import {
+  AgentContext,
   AgentName,
-  AgentResponse, 
+  AgentResponse,
   AgentCapability,
   CampaignBrief,
   CampaignPlan,
@@ -20,10 +20,7 @@ import {
 } from './types';
 
 // Import agent functions
-import {
-  createCampaignPlan,
-  getCampaignSummary
-} from './campaign.agent';
+import { createCampaignPlan, getCampaignSummary } from './campaign.agent';
 
 import {
   generateContent,
@@ -148,10 +145,11 @@ export {
 export const agentRegistry: Record<AgentName, AgentCapability> = {
   campaign: {
     name: 'campaign',
-    description: 'Creates marketing campaign plans from ideas. Turns concepts into phased strategies with content calendars and success metrics.',
+    description:
+      'Creates marketing campaign plans from ideas. Turns concepts into phased strategies with content calendars and success metrics.',
     capabilities: [
       'campaign-planning',
-      'content-calendar-generation', 
+      'content-calendar-generation',
       'strategy-development',
       'objective-setting',
       'audience-targeting',
@@ -159,7 +157,8 @@ export const agentRegistry: Record<AgentName, AgentCapability> = {
   },
   content: {
     name: 'content',
-    description: 'Generates platform-specific, on-brand content. Creates posts, emails, and copy optimized for each channel.',
+    description:
+      'Generates platform-specific, on-brand content. Creates posts, emails, and copy optimized for each channel.',
     capabilities: [
       'content-creation',
       'copywriting',
@@ -171,7 +170,8 @@ export const agentRegistry: Record<AgentName, AgentCapability> = {
   },
   analytics: {
     name: 'analytics',
-    description: 'Analyzes content performance and provides actionable recommendations. Identifies patterns and suggests optimizations.',
+    description:
+      'Analyzes content performance and provides actionable recommendations. Identifies patterns and suggests optimizations.',
     capabilities: [
       'performance-analysis',
       'recommendation-generation',
@@ -183,7 +183,8 @@ export const agentRegistry: Record<AgentName, AgentCapability> = {
   },
   research: {
     name: 'research',
-    description: 'Aggregates TCG/collectibles news and trends from social platforms, Reddit, YouTube, and news sources. Synthesizes findings into actionable content topics.',
+    description:
+      'Aggregates TCG/collectibles news and trends from social platforms, Reddit, YouTube, and news sources. Synthesizes findings into actionable content topics.',
     capabilities: [
       'trend-aggregation',
       'news-monitoring',
@@ -195,7 +196,8 @@ export const agentRegistry: Record<AgentName, AgentCapability> = {
   },
   authority: {
     name: 'authority',
-    description: 'Positions Relique as the trusted authority in RWA collectibles. Generates thought leadership, educational, competitive, and trust-building content.',
+    description:
+      'Positions Relique as the trusted authority in RWA collectibles. Generates thought leadership, educational, competitive, and trust-building content.',
     capabilities: [
       'thought-leadership',
       'educational-content',
@@ -208,7 +210,8 @@ export const agentRegistry: Record<AgentName, AgentCapability> = {
   },
   intelligence: {
     name: 'intelligence',
-    description: 'Content intelligence system. Scans niches for viral patterns, tracks performance, runs gap analysis, and generates content ideas matched to viral patterns in the user\'s voice.',
+    description:
+      "Content intelligence system. Scans niches for viral patterns, tracks performance, runs gap analysis, and generates content ideas matched to viral patterns in the user's voice.",
     capabilities: [
       'market-scanning',
       'performance-tracking',
@@ -238,21 +241,21 @@ export function isValidAgent(name: string): name is AgentName {
 
 /**
  * Unified interface for interacting with all BrandOS agents
- * 
+ *
  * @example
  * ```typescript
  * const agents = new BrandAgents(myBrandDNA);
- * 
+ *
  * // Plan a campaign
  * const campaign = await agents.planCampaign({ idea: 'Launch our new feature' });
- * 
+ *
  * // Generate content
  * const content = await agents.createContent({
  *   type: 'social-twitter',
  *   platform: 'twitter',
  *   topic: 'Announcing our new feature',
  * });
- * 
+ *
  * // Analyze performance
  * const report = await agents.analyzeContent({
  *   performanceData: myMetrics,
@@ -293,11 +296,13 @@ export class BrandAgents {
   /**
    * Get a quick campaign summary (lighter weight)
    */
-  async getCampaignPreview(idea: string): Promise<AgentResponse<{ 
-    name: string; 
-    summary: string; 
-    suggestedChannels: string[] 
-  }>> {
+  async getCampaignPreview(idea: string): Promise<
+    AgentResponse<{
+      name: string;
+      summary: string;
+      suggestedChannels: string[];
+    }>
+  > {
     return getCampaignSummary(this.context, idea);
   }
 
@@ -321,8 +326,8 @@ export class BrandAgents {
    * Adapt content from one platform to another
    */
   async adaptContent(
-    content: string, 
-    fromPlatform: Platform, 
+    content: string,
+    fromPlatform: Platform,
     toPlatform: Platform
   ): Promise<AgentResponse<GeneratedContent>> {
     return adaptContentForPlatform(this.context, content, fromPlatform, toPlatform);
@@ -332,8 +337,8 @@ export class BrandAgents {
    * Generate content ideas for a topic
    */
   async getContentIdeas(
-    topic: string, 
-    platforms: Platform[], 
+    topic: string,
+    platforms: Platform[],
     count?: number
   ): Promise<AgentResponse<{ ideas: { platform: Platform; hook: string; angle: string }[] }>> {
     return generateContentIdeas(this.context, topic, platforms, count);
@@ -363,11 +368,13 @@ export class BrandAgents {
   /**
    * Quick performance health check
    */
-  async quickCheck(data: ContentPerformanceData[]): Promise<AgentResponse<{
-    status: 'winning' | 'neutral' | 'losing';
-    keyMetric: string;
-    oneAction: string;
-  }>> {
+  async quickCheck(data: ContentPerformanceData[]): Promise<
+    AgentResponse<{
+      status: 'winning' | 'neutral' | 'losing';
+      keyMetric: string;
+      oneAction: string;
+    }>
+  > {
     return quickPerformanceCheck(this.context, data);
   }
 
@@ -377,13 +384,15 @@ export class BrandAgents {
   async comparePeriods(
     periodA: { name: string; data: ContentPerformanceData[] },
     periodB: { name: string; data: ContentPerformanceData[] }
-  ): Promise<AgentResponse<{
-    comparison: string;
-    periodAStats: { impressions: number; engagements: number; rate: number };
-    periodBStats: { impressions: number; engagements: number; rate: number };
-    change: { direction: 'up' | 'down' | 'flat'; percentage: number };
-    insights: string[];
-  }>> {
+  ): Promise<
+    AgentResponse<{
+      comparison: string;
+      periodAStats: { impressions: number; engagements: number; rate: number };
+      periodBStats: { impressions: number; engagements: number; rate: number };
+      change: { direction: 'up' | 'down' | 'flat'; percentage: number };
+      insights: string[];
+    }>
+  > {
     return comparePerformancePeriods(this.context, periodA, periodB);
   }
 
@@ -420,13 +429,13 @@ export class BrandAgents {
   /**
    * Get a quick summary of trending topics
    */
-  async getResearchSummary(
-    verticals?: TCGVertical[]
-  ): Promise<AgentResponse<{
-    summary: string;
-    topTopics: { title: string; vertical: string }[];
-    trendingKeywords: string[];
-  }>> {
+  async getResearchSummary(verticals?: TCGVertical[]): Promise<
+    AgentResponse<{
+      summary: string;
+      topTopics: { title: string; vertical: string }[];
+      trendingKeywords: string[];
+    }>
+  > {
     return getQuickSummary(this.context, verticals);
   }
 
@@ -494,9 +503,7 @@ export class BrandAgents {
   /**
    * Generate trust-building content
    */
-  async createTrustContent(
-    request: TrustContentRequest
-  ): Promise<AgentResponse<TrustContent>> {
+  async createTrustContent(request: TrustContentRequest): Promise<AgentResponse<TrustContent>> {
     return generateTrustContent(this.context.brandDNA, request);
   }
 
@@ -532,7 +539,7 @@ export class BrandAgents {
 
   /**
    * Complete workflow: Idea → Campaign Plan → Content
-   * 
+   *
    * Takes an idea and optionally generates the first batch of content
    * based on the campaign calendar.
    */
@@ -542,7 +549,7 @@ export class BrandAgents {
   ): Promise<IdeaToCampaignResult> {
     // Step 1: Create campaign plan
     const campaignResult = await this.planCampaign({ idea });
-    
+
     if (!campaignResult.success || !campaignResult.data) {
       return { campaign: campaignResult };
     }
@@ -561,7 +568,7 @@ export class BrandAgents {
     for (const week of campaign.contentCalendar) {
       for (const item of week.items) {
         if (contentBriefs.length >= limit) break;
-        
+
         contentBriefs.push({
           type: this.mapContentType(item.contentType),
           platform: item.platform,
@@ -583,7 +590,7 @@ export class BrandAgents {
 
   /**
    * Workflow: Analyze → Recommend → Generate Improved Content
-   * 
+   *
    * Analyzes performance, then generates new content based on learnings.
    */
   async analyzeAndImprove(
@@ -612,7 +619,7 @@ export class BrandAgents {
     }
 
     // Create content briefs based on successful patterns
-    const contentBriefs: ContentBrief[] = platforms.slice(0, 3).map(platform => ({
+    const contentBriefs: ContentBrief[] = platforms.slice(0, 3).map((platform) => ({
       type: 'general' as const,
       platform,
       topic: `Content applying learnings: ${whatWorked[0]?.pattern || recommendations[0]?.action || 'optimization'}`,
@@ -633,12 +640,14 @@ export class BrandAgents {
    * Researches trends, lets user select topics, then generates content.
    * This is the main workflow for "create content based on latest trends".
    */
-  async researchToContent(options: {
-    verticals?: TCGVertical[];
-    selectedTopics?: ResearchTopic[];
-    platforms?: Platform[];
-    contentPerTopic?: number;
-  } = {}): Promise<{
+  async researchToContent(
+    options: {
+      verticals?: TCGVertical[];
+      selectedTopics?: ResearchTopic[];
+      platforms?: Platform[];
+      contentPerTopic?: number;
+    } = {}
+  ): Promise<{
     research: AgentResponse<ResearchBrief>;
     content?: AgentResponse<ContentBatch>;
   }> {
@@ -718,13 +727,15 @@ export class BrandAgents {
    * Researches trends, creates authority positioning angles, then generates
    * authoritative content that positions Relique as the expert.
    */
-  async researchToAuthorityContent(options: {
-    verticals?: TCGVertical[];
-    audiences?: TargetAudience[];
-    platforms?: Platform[];
-    contentTypes?: AuthorityContentType[];
-    maxAnglesPerTopic?: number;
-  } = {}): Promise<{
+  async researchToAuthorityContent(
+    options: {
+      verticals?: TCGVertical[];
+      audiences?: TargetAudience[];
+      platforms?: Platform[];
+      contentTypes?: AuthorityContentType[];
+      maxAnglesPerTopic?: number;
+    } = {}
+  ): Promise<{
     research: AgentResponse<ResearchBrief>;
     authorityContent: AuthorityContent[];
     workflow: { stage: string; status: 'completed' | 'pending' | 'failed'; message?: string }[];
@@ -737,7 +748,11 @@ export class BrandAgents {
       maxAnglesPerTopic = 2,
     } = options;
 
-    const workflow: { stage: string; status: 'completed' | 'pending' | 'failed'; message?: string }[] = [];
+    const workflow: {
+      stage: string;
+      status: 'completed' | 'pending' | 'failed';
+      message?: string;
+    }[] = [];
     const authorityContent: AuthorityContent[] = [];
 
     // Step 1: Research trends
@@ -758,10 +773,18 @@ export class BrandAgents {
     }).slice(0, 3);
 
     if (topTopics.length === 0) {
-      workflow.push({ stage: 'Select topics', status: 'failed', message: 'No relevant topics found' });
+      workflow.push({
+        stage: 'Select topics',
+        status: 'failed',
+        message: 'No relevant topics found',
+      });
       return { research: researchResult, authorityContent, workflow };
     }
-    workflow.push({ stage: 'Select topics', status: 'completed', message: `Selected ${topTopics.length} topics` });
+    workflow.push({
+      stage: 'Select topics',
+      status: 'completed',
+      message: `Selected ${topTopics.length} topics`,
+    });
 
     // Step 3: Create authority positioning for each topic
     workflow.push({ stage: 'Create authority angles', status: 'pending' });
@@ -798,15 +821,15 @@ export class BrandAgents {
    */
   private mapContentType(type: string): ContentBrief['type'] {
     const typeMap: Record<string, ContentBrief['type']> = {
-      'thread': 'social-twitter',
-      'tweet': 'social-twitter',
-      'twitter': 'social-twitter',
-      'post': 'general',
-      'linkedin': 'social-linkedin',
-      'instagram': 'social-instagram',
-      'email': 'email-body',
-      'blog': 'blog-intro',
-      'article': 'blog-intro',
+      thread: 'social-twitter',
+      tweet: 'social-twitter',
+      twitter: 'social-twitter',
+      post: 'general',
+      linkedin: 'social-linkedin',
+      instagram: 'social-instagram',
+      email: 'email-body',
+      blog: 'blog-intro',
+      article: 'blog-intro',
     };
 
     const normalizedType = type.toLowerCase();
@@ -818,7 +841,7 @@ export class BrandAgents {
 
 /**
  * Create a BrandAgents instance
- * 
+ *
  * @example
  * ```typescript
  * // In an API route
@@ -826,11 +849,7 @@ export class BrandAgents {
  * const result = await agents.planCampaign({ idea: 'New product launch' });
  * ```
  */
-export function createAgents(
-  brandDNA: BrandDNA, 
-  userId?: string,
-  sessionId?: string
-): BrandAgents {
+export function createAgents(brandDNA: BrandDNA, userId?: string, sessionId?: string): BrandAgents {
   return new BrandAgents(brandDNA, userId, sessionId);
 }
 
@@ -841,9 +860,9 @@ export function createAgents(
  */
 export function validateBrandDNA(brandDNA: unknown): brandDNA is BrandDNA {
   if (!brandDNA || typeof brandDNA !== 'object') return false;
-  
+
   const brand = brandDNA as Record<string, unknown>;
-  
+
   return (
     typeof brand.name === 'string' &&
     brand.name.length > 0 &&
@@ -878,4 +897,3 @@ export function createMinimalBrandDNA(name: string): BrandDNA {
     updatedAt: new Date(),
   };
 }
-

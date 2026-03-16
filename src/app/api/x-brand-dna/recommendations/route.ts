@@ -78,14 +78,16 @@ function identifyTopIssues(input: BrandDNAInput): Issue[] {
     if (!bio || bio.length < 50) {
       issues.push({
         title: 'Your bio lacks clarity',
-        description: "Your bio doesn't clearly communicate what you do or who you help. Visitors can't quickly understand your value.",
+        description:
+          "Your bio doesn't clearly communicate what you do or who you help. Visitors can't quickly understand your value.",
         impact: 'high',
         category: 'define',
       });
     } else {
       issues.push({
         title: 'Brand identity needs sharpening',
-        description: 'Your profile signals are scattered. People struggle to pin down what makes you unique.',
+        description:
+          'Your profile signals are scattered. People struggle to pin down what makes you unique.',
         impact: 'high',
         category: 'define',
       });
@@ -96,7 +98,8 @@ function identifyTopIssues(input: BrandDNAInput): Issue[] {
   if (voiceConsistency < 70) {
     issues.push({
       title: `Voice consistency at ${voiceConsistency}%`,
-      description: 'You shift between different tones and topics. This makes your brand harder to remember and follow.',
+      description:
+        'You shift between different tones and topics. This makes your brand harder to remember and follow.',
       impact: 'high',
       category: 'check',
     });
@@ -113,7 +116,8 @@ function identifyTopIssues(input: BrandDNAInput): Issue[] {
   if (phases.generate.score < 70) {
     issues.push({
       title: 'Content strategy needs structure',
-      description: 'Your posts lack a clear content pillar strategy. This makes it hard to build expertise perception.',
+      description:
+        'Your posts lack a clear content pillar strategy. This makes it hard to build expertise perception.',
       impact: 'medium',
       category: 'generate',
     });
@@ -123,7 +127,8 @@ function identifyTopIssues(input: BrandDNAInput): Issue[] {
   if (phases.scale.score < 70) {
     issues.push({
       title: 'Growth signals are weak',
-      description: 'Your profile isn\'t optimized for discovery. You\'re missing opportunities to expand your reach.',
+      description:
+        "Your profile isn't optimized for discovery. You're missing opportunities to expand your reach.",
       impact: 'medium',
       category: 'scale',
     });
@@ -133,7 +138,8 @@ function identifyTopIssues(input: BrandDNAInput): Issue[] {
   if (followersCount && followersCount < 1000 && brandScore > 60) {
     issues.push({
       title: 'Quality without reach',
-      description: 'Your brand is solid but your audience is small. Time to focus on strategic growth.',
+      description:
+        'Your brand is solid but your audience is small. Time to focus on strategic growth.',
       impact: 'medium',
       category: 'scale',
     });
@@ -141,9 +147,7 @@ function identifyTopIssues(input: BrandDNAInput): Issue[] {
 
   // Sort by impact and return top 3
   const impactOrder = { high: 0, medium: 1, low: 2 };
-  return issues
-    .sort((a, b) => impactOrder[a.impact] - impactOrder[b.impact])
-    .slice(0, 3);
+  return issues.sort((a, b) => impactOrder[a.impact] - impactOrder[b.impact]).slice(0, 3);
 }
 
 function generateQuickWins(input: BrandDNAInput, issues: Issue[]): QuickWin[] {
@@ -151,7 +155,7 @@ function generateQuickWins(input: BrandDNAInput, issues: Issue[]): QuickWin[] {
   const { archetype, keywords, contentPillars } = input;
 
   // Always start with bio optimization if it's an issue
-  const hasBioIssue = issues.some(i => i.title.includes('bio'));
+  const hasBioIssue = issues.some((i) => i.title.includes('bio'));
   if (hasBioIssue) {
     quickWins.push({
       action: 'Rewrite your bio with this structure',
@@ -164,7 +168,8 @@ function generateQuickWins(input: BrandDNAInput, issues: Issue[]): QuickWin[] {
   quickWins.push({
     action: 'Pin your highest-performing thread to your profile',
     timeEstimate: '2 min',
-    template: 'Go to your best thread > Click "..." > Pin to your profile. This becomes your brand\'s first impression.',
+    template:
+      'Go to your best thread > Click "..." > Pin to your profile. This becomes your brand\'s first impression.',
   });
 
   // Content pillar focus
@@ -210,7 +215,7 @@ function generateWeeklyFocus(input: BrandDNAInput, issues: Issue[]): WeeklyFocus
         metric: 'Update bio + pin + banner to tell a cohesive story',
         tips: [
           'Write down 3 words you want people to associate with you',
-          'Remove anything from your bio that doesn\'t support those words',
+          "Remove anything from your bio that doesn't support those words",
           'Your profile picture, banner, and bio should all reinforce the same message',
         ],
       };
@@ -241,7 +246,7 @@ function generateWeeklyFocus(input: BrandDNAInput, issues: Issue[]): WeeklyFocus
         metric: 'Reply thoughtfully to 5 accounts larger than yours daily',
         tips: [
           'Find 10 accounts in your niche with 10x your followers',
-          'Add value in their replies, don\'t just agree',
+          "Add value in their replies, don't just agree",
           'Your best content often starts as a reply that deserves its own post',
         ],
       };
@@ -252,7 +257,9 @@ function generateWeeklyFocus(input: BrandDNAInput, issues: Issue[]): WeeklyFocus
 // AI-Enhanced Recommendations
 // =============================================================================
 
-async function generateAIRecommendations(input: BrandDNAInput): Promise<RecommendationsResponse['recommendations']> {
+async function generateAIRecommendations(
+  input: BrandDNAInput
+): Promise<RecommendationsResponse['recommendations']> {
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -364,7 +371,6 @@ export async function POST(request: NextRequest) {
       success: true,
       recommendations,
     } as RecommendationsResponse);
-
   } catch (error) {
     console.error('Recommendations API Error:', error);
     return NextResponse.json(

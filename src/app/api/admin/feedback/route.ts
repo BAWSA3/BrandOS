@@ -87,41 +87,38 @@ export async function GET(request: NextRequest) {
 
     const stats: FeedbackStats = {
       total: allFeedback.length,
-      new: allFeedback.filter(f => f.status === 'new').length,
-      inProgress: allFeedback.filter(f => f.status === 'in_progress').length,
-      resolved: allFeedback.filter(f => f.status === 'resolved').length,
-      bugs: allFeedback.filter(f => f.type === 'bug').length,
-      ideas: allFeedback.filter(f => f.type === 'idea').length,
+      new: allFeedback.filter((f) => f.status === 'new').length,
+      inProgress: allFeedback.filter((f) => f.status === 'in_progress').length,
+      resolved: allFeedback.filter((f) => f.status === 'resolved').length,
+      bugs: allFeedback.filter((f) => f.type === 'bug').length,
+      ideas: allFeedback.filter((f) => f.type === 'idea').length,
       avgRating: null,
       npsScore: null,
     };
 
     // Calculate average rating (for non-NPS ratings)
     const ratingsNonNps = allFeedback
-      .filter(f => f.rating !== null && f.type !== 'nps')
-      .map(f => f.rating as number);
+      .filter((f) => f.rating !== null && f.type !== 'nps')
+      .map((f) => f.rating as number);
 
     if (ratingsNonNps.length > 0) {
-      stats.avgRating = Math.round(
-        (ratingsNonNps.reduce((a, b) => a + b, 0) / ratingsNonNps.length) * 10
-      ) / 10;
+      stats.avgRating =
+        Math.round((ratingsNonNps.reduce((a, b) => a + b, 0) / ratingsNonNps.length) * 10) / 10;
     }
 
     // Calculate NPS score
     const npsRatings = allFeedback
-      .filter(f => f.type === 'nps' && f.rating !== null)
-      .map(f => f.rating as number);
+      .filter((f) => f.type === 'nps' && f.rating !== null)
+      .map((f) => f.rating as number);
 
     if (npsRatings.length > 0) {
-      const promoters = npsRatings.filter(r => r >= 9).length;
-      const detractors = npsRatings.filter(r => r <= 6).length;
-      stats.npsScore = Math.round(
-        ((promoters - detractors) / npsRatings.length) * 100
-      );
+      const promoters = npsRatings.filter((r) => r >= 9).length;
+      const detractors = npsRatings.filter((r) => r <= 6).length;
+      stats.npsScore = Math.round(((promoters - detractors) / npsRatings.length) * 100);
     }
 
     // Format feedback items
-    const feedback: FeedbackItem[] = feedbackItems.map(f => ({
+    const feedback: FeedbackItem[] = feedbackItems.map((f) => ({
       id: f.id,
       userId: f.userId,
       userName: f.user?.name || null,
@@ -150,10 +147,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error('[Admin/Feedback] GET error:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch feedback' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch feedback' }, { status: 500 });
   }
 }
 
@@ -168,28 +162,19 @@ export async function PATCH(request: NextRequest) {
     const { id, status, priority, adminNotes } = body;
 
     if (!id || typeof id !== 'string') {
-      return NextResponse.json(
-        { error: 'Feedback ID is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Feedback ID is required' }, { status: 400 });
     }
 
     // Validate status
     const validStatuses = ['new', 'reviewed', 'in_progress', 'resolved', 'wont_fix'];
     if (status && !validStatuses.includes(status)) {
-      return NextResponse.json(
-        { error: 'Invalid status' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid status' }, { status: 400 });
     }
 
     // Validate priority
     const validPriorities = ['low', 'medium', 'high', 'critical'];
     if (priority && !validPriorities.includes(priority)) {
-      return NextResponse.json(
-        { error: 'Invalid priority' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid priority' }, { status: 400 });
     }
 
     // Build update data
@@ -204,10 +189,7 @@ export async function PATCH(request: NextRequest) {
     if (adminNotes !== undefined) updateData.adminNotes = adminNotes;
 
     if (Object.keys(updateData).length === 0) {
-      return NextResponse.json(
-        { error: 'No valid update fields provided' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'No valid update fields provided' }, { status: 400 });
     }
 
     const updatedFeedback = await prisma.feedback.update({
@@ -245,10 +227,7 @@ export async function PATCH(request: NextRequest) {
     });
   } catch (error) {
     console.error('[Admin/Feedback] PATCH error:', error);
-    return NextResponse.json(
-      { error: 'Failed to update feedback' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to update feedback' }, { status: 500 });
   }
 }
 
@@ -263,10 +242,7 @@ export async function DELETE(request: NextRequest) {
     const id = searchParams.get('id');
 
     if (!id) {
-      return NextResponse.json(
-        { error: 'Feedback ID is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Feedback ID is required' }, { status: 400 });
     }
 
     await prisma.feedback.delete({
@@ -279,9 +255,6 @@ export async function DELETE(request: NextRequest) {
     });
   } catch (error) {
     console.error('[Admin/Feedback] DELETE error:', error);
-    return NextResponse.json(
-      { error: 'Failed to delete feedback' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to delete feedback' }, { status: 500 });
   }
 }

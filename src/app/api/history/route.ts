@@ -20,7 +20,10 @@ async function getAuthUser() {
   }
 
   const supabase = createClient(supabaseUrl, supabaseAnonKey);
-  const { data: { user }, error } = await supabase.auth.getUser(accessToken);
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser(accessToken);
 
   if (error || !user) {
     return null;
@@ -53,8 +56,8 @@ export async function GET(request: NextRequest) {
       select: { id: true, name: true },
     });
 
-    const brandIds = userBrands.map(b => b.id);
-    const brandNameMap = Object.fromEntries(userBrands.map(b => [b.id, b.name]));
+    const brandIds = userBrands.map((b) => b.id);
+    const brandNameMap = Object.fromEntries(userBrands.map((b) => [b.id, b.name]));
 
     if (brandIds.length === 0) {
       return NextResponse.json({ history: [] });
@@ -72,7 +75,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Transform to match HistoryItem interface
-    const history = historyEntries.map(entry => ({
+    const history = historyEntries.map((entry) => ({
       id: entry.id,
       type: entry.type as 'check' | 'generate',
       brandId: entry.brandId,
@@ -135,18 +138,21 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return NextResponse.json({
-      entry: {
-        id: entry.id,
-        type: entry.type,
-        brandId: entry.brandId,
-        brandName: brand.name,
-        input: entry.input,
-        contentType: entry.contentType || undefined,
-        output: JSON.parse(entry.output),
-        timestamp: entry.createdAt,
+    return NextResponse.json(
+      {
+        entry: {
+          id: entry.id,
+          type: entry.type,
+          brandId: entry.brandId,
+          brandName: brand.name,
+          input: entry.input,
+          contentType: entry.contentType || undefined,
+          output: JSON.parse(entry.output),
+          timestamp: entry.createdAt,
+        },
       },
-    }, { status: 201 });
+      { status: 201 }
+    );
   } catch (error) {
     console.error('[History API] POST error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

@@ -7,7 +7,7 @@ import { BrandDNA } from '@/lib/types';
 
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
-  
+
   try {
     const body = await request.json();
     const { brandDNA, brief, preview } = body as {
@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
     // Validate brand DNA
     if (!validateBrandDNA(brandDNA)) {
       return NextResponse.json(
-        { 
+        {
           error: 'Invalid or missing brand DNA',
           details: 'Brand DNA must include at least a name and tone profile',
         },
@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
     // Validate brief
     if (!brief?.idea && !preview) {
       return NextResponse.json(
-        { 
+        {
           error: 'Missing campaign idea',
           details: 'Provide a brief.idea string describing your campaign concept',
         },
@@ -43,12 +43,9 @@ export async function POST(request: NextRequest) {
     // If preview mode, return lightweight summary
     if (preview && brief?.idea) {
       const result = await agents.getCampaignPreview(brief.idea);
-      
+
       if (!result.success) {
-        return NextResponse.json(
-          { error: result.error },
-          { status: 500 }
-        );
+        return NextResponse.json({ error: result.error }, { status: 500 });
       }
 
       return NextResponse.json({
@@ -62,10 +59,7 @@ export async function POST(request: NextRequest) {
     const result = await agents.planCampaign(brief!);
 
     if (!result.success) {
-      return NextResponse.json(
-        { error: result.error },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: result.error }, { status: 500 });
     }
 
     return NextResponse.json({
@@ -73,16 +67,13 @@ export async function POST(request: NextRequest) {
       confidence: result.confidence,
       processingTime: result.processingTime,
     });
-
   } catch (error) {
     console.error('Campaign API error:', error);
-    
-    const errorMessage = error instanceof Error 
-      ? error.message 
-      : 'Campaign planning failed';
-    
+
+    const errorMessage = error instanceof Error ? error.message : 'Campaign planning failed';
+
     return NextResponse.json(
-      { 
+      {
         error: errorMessage,
         processingTime: Date.now() - startTime,
       },
@@ -127,9 +118,3 @@ export async function GET() {
     },
   });
 }
-
-
-
-
-
-

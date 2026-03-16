@@ -15,7 +15,7 @@ export default function DesignIntentBlocks() {
 
   const processDirective = async () => {
     if (!directive.trim() || !brandDNA) return;
-    
+
     setIsProcessing(true);
     setError('');
 
@@ -27,9 +27,9 @@ export default function DesignIntentBlocks() {
       });
 
       const data = await response.json();
-      
+
       if (!response.ok) throw new Error(data.error);
-      
+
       addDesignIntent(data);
       setDirective('');
     } catch (err) {
@@ -56,7 +56,8 @@ export default function DesignIntentBlocks() {
           Design Intent Directive
         </label>
         <p className="text-sm text-muted mb-4">
-          Describe your brand design rule in natural language. We&apos;ll convert it to enforceable rules.
+          Describe your brand design rule in natural language. We&apos;ll convert it to enforceable
+          rules.
         </p>
         <textarea
           value={directive}
@@ -89,7 +90,9 @@ export default function DesignIntentBlocks() {
             {currentIntents.map((intent) => (
               <div key={intent.id} className="border border-border rounded-lg p-6 animate-fade-in">
                 <div className="flex items-start justify-between mb-4">
-                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${intentTypeColors[intent.intentType] || 'bg-muted/20'}`}>
+                  <span
+                    className={`px-3 py-1 rounded-full text-xs font-medium ${intentTypeColors[intent.intentType] || 'bg-muted/20'}`}
+                  >
                     {intent.intentType.replace('_', ' ')}
                   </span>
                   <button
@@ -99,44 +102,54 @@ export default function DesignIntentBlocks() {
                     ×
                   </button>
                 </div>
-                
+
                 <p className="text-sm italic text-muted mb-4">&ldquo;{intent.input}&rdquo;</p>
-                
+
                 {intent.colors && intent.colors.length > 0 && (
                   <div className="mb-4">
                     <p className="text-xs uppercase tracking-widest text-muted mb-2">Colors</p>
                     <div className="flex flex-wrap gap-2">
                       {intent.colors.map((c, i) => (
-                        <span key={i} className="px-2 py-1 bg-surface rounded text-sm">{c}</span>
+                        <span key={i} className="px-2 py-1 bg-surface rounded text-sm">
+                          {c}
+                        </span>
                       ))}
                     </div>
                   </div>
                 )}
-                
+
                 {intent.effects && intent.effects.length > 0 && (
                   <div className="mb-4">
                     <p className="text-xs uppercase tracking-widest text-muted mb-2">Effects</p>
                     <div className="flex flex-wrap gap-2">
                       {intent.effects.map((e, i) => (
-                        <span key={i} className="px-2 py-1 bg-surface rounded text-sm">{e}</span>
+                        <span key={i} className="px-2 py-1 bg-surface rounded text-sm">
+                          {e}
+                        </span>
                       ))}
                     </div>
                   </div>
                 )}
-                
+
                 {intent.emotionalSignals && intent.emotionalSignals.length > 0 && (
                   <div className="mb-4">
-                    <p className="text-xs uppercase tracking-widest text-muted mb-2">Emotional Signals</p>
+                    <p className="text-xs uppercase tracking-widest text-muted mb-2">
+                      Emotional Signals
+                    </p>
                     <div className="flex flex-wrap gap-2">
                       {intent.emotionalSignals.map((s, i) => (
-                        <span key={i} className="px-2 py-1 bg-surface rounded text-sm">{s}</span>
+                        <span key={i} className="px-2 py-1 bg-surface rounded text-sm">
+                          {s}
+                        </span>
                       ))}
                     </div>
                   </div>
                 )}
-                
+
                 <div>
-                  <p className="text-xs uppercase tracking-widest text-muted mb-2">Enforceable Rules</p>
+                  <p className="text-xs uppercase tracking-widest text-muted mb-2">
+                    Enforceable Rules
+                  </p>
                   <ul className="space-y-1">
                     {intent.rules.map((rule, i) => (
                       <li key={i} className="text-sm flex items-start gap-2">
@@ -153,4 +166,3 @@ export default function DesignIntentBlocks() {
     </div>
   );
 }
-

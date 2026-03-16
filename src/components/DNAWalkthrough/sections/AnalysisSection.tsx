@@ -101,10 +101,13 @@ function getVoiceStyle(tone: ToneData): { style: string; description: string } {
   const formality = (100 - tone.playful + tone.minimal) / 2;
   const energy = (tone.bold + tone.experimental) / 2;
 
-  if (formality > 65 && energy > 55) return { style: 'Authority', description: 'You lead with confidence and substance.' };
-  if (formality > 65) return { style: 'Expert', description: 'Your voice carries weight through depth.' };
+  if (formality > 65 && energy > 55)
+    return { style: 'Authority', description: 'You lead with confidence and substance.' };
+  if (formality > 65)
+    return { style: 'Expert', description: 'Your voice carries weight through depth.' };
   if (energy > 65) return { style: 'Entertainer', description: 'You blend insight with energy.' };
-  if (formality < 40 && energy < 40) return { style: 'Relatable', description: 'You connect through authenticity.' };
+  if (formality < 40 && energy < 40)
+    return { style: 'Relatable', description: 'You connect through authenticity.' };
   return { style: 'Versatile', description: 'You adapt your voice to the message.' };
 }
 
@@ -133,10 +136,7 @@ export default function AnalysisSection({
   const strongestPhase = sortedPhases[0];
 
   return (
-    <section
-      className="min-h-screen"
-      style={{ background: '#ffffff', position: 'relative' }}
-    >
+    <section className="min-h-screen" style={{ background: '#ffffff', position: 'relative' }}>
       <AnimatePresence mode="wait">
         {/* Stage 1: Intro */}
         {stage === 'intro' && (
@@ -269,8 +269,8 @@ export default function AnalysisSection({
                 cursor: 'pointer',
                 transition: 'background 0.2s ease',
               }}
-              onMouseEnter={(e) => e.currentTarget.style.background = '#0038CC'}
-              onMouseLeave={(e) => e.currentTarget.style.background = '#0047FF'}
+              onMouseEnter={(e) => (e.currentTarget.style.background = '#0038CC')}
+              onMouseLeave={(e) => (e.currentTarget.style.background = '#0047FF')}
             >
               <span
                 style={{
@@ -389,7 +389,7 @@ export default function AnalysisSection({
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.5 }}
-                onClick={() => setRevealedPhases(prev => prev + 1)}
+                onClick={() => setRevealedPhases((prev) => prev + 1)}
                 style={{
                   padding: '14px 28px',
                   background: PHASE_META[phases[revealedPhases][0]].color,
@@ -398,8 +398,8 @@ export default function AnalysisSection({
                   cursor: 'pointer',
                   transition: 'opacity 0.2s ease',
                 }}
-                onMouseEnter={(e) => e.currentTarget.style.opacity = '0.9'}
-                onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+                onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.9')}
+                onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
               >
                 <span
                   style={{
@@ -440,8 +440,8 @@ export default function AnalysisSection({
                     cursor: 'pointer',
                     transition: 'background 0.2s ease',
                   }}
-                  onMouseEnter={(e) => e.currentTarget.style.background = '#0038CC'}
-                  onMouseLeave={(e) => e.currentTarget.style.background = '#0047FF'}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = '#0038CC')}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = '#0047FF')}
                 >
                   <span
                     style={{
@@ -514,7 +514,9 @@ export default function AnalysisSection({
               >
                 YOUR ARCHETYPE
               </div>
-              <div style={{ fontSize: '28px', fontWeight: 600, color: '#000', marginBottom: '8px' }}>
+              <div
+                style={{ fontSize: '28px', fontWeight: 600, color: '#000', marginBottom: '8px' }}
+              >
                 {archetype}
               </div>
               {personalityType && (
@@ -559,10 +561,19 @@ export default function AnalysisSection({
               >
                 YOUR VOICE STYLE
               </div>
-              <div style={{ fontSize: '22px', fontWeight: 600, color: '#000', marginBottom: '8px' }}>
+              <div
+                style={{ fontSize: '22px', fontWeight: 600, color: '#000', marginBottom: '8px' }}
+              >
                 {voice.style}
               </div>
-              <p style={{ fontSize: '14px', color: 'rgba(0, 0, 0, 0.6)', margin: 0, lineHeight: 1.5 }}>
+              <p
+                style={{
+                  fontSize: '14px',
+                  color: 'rgba(0, 0, 0, 0.6)',
+                  margin: 0,
+                  lineHeight: 1.5,
+                }}
+              >
                 {voice.description}
               </p>
             </motion.div>
@@ -580,8 +591,8 @@ export default function AnalysisSection({
                 cursor: 'pointer',
                 transition: 'background 0.2s ease',
               }}
-              onMouseEnter={(e) => e.currentTarget.style.background = '#0038CC'}
-              onMouseLeave={(e) => e.currentTarget.style.background = '#0047FF'}
+              onMouseEnter={(e) => (e.currentTarget.style.background = '#0038CC')}
+              onMouseLeave={(e) => (e.currentTarget.style.background = '#0047FF')}
             >
               <span
                 style={{
@@ -737,7 +748,8 @@ export default function AnalysisSection({
                 marginBottom: '24px',
               }}
             >
-              Next, I'll show you your complete Brand DNA — the patterns and keywords that define your unique voice.
+              Next, I'll show you your complete Brand DNA — the patterns and keywords that define
+              your unique voice.
             </motion.p>
 
             <motion.button
@@ -753,8 +765,8 @@ export default function AnalysisSection({
                 cursor: 'pointer',
                 transition: 'background 0.2s ease',
               }}
-              onMouseEnter={(e) => e.currentTarget.style.background = '#0038CC'}
-              onMouseLeave={(e) => e.currentTarget.style.background = '#0047FF'}
+              onMouseEnter={(e) => (e.currentTarget.style.background = '#0038CC')}
+              onMouseLeave={(e) => (e.currentTarget.style.background = '#0047FF')}
             >
               <span
                 style={{

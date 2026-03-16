@@ -41,7 +41,10 @@ export async function GET(request: NextRequest) {
     });
 
     // Exchange code for session
-    const { data: { session }, error: authError } = await supabase.auth.exchangeCodeForSession(code);
+    const {
+      data: { session },
+      error: authError,
+    } = await supabase.auth.exchangeCodeForSession(code);
 
     if (authError || !session) {
       console.error('[Auth Callback] Exchange error:', authError);
@@ -49,16 +52,14 @@ export async function GET(request: NextRequest) {
     }
 
     // Extract X (Twitter) user data from the session
-    const xUsername = session.user.user_metadata?.user_name ||
-                     session.user.user_metadata?.preferred_username ||
-                     session.user.user_metadata?.screen_name;
-    const xId = session.user.user_metadata?.provider_id ||
-               session.user.user_metadata?.sub ||
-               session.user.id;
-    const name = session.user.user_metadata?.full_name ||
-                session.user.user_metadata?.name;
-    const avatar = session.user.user_metadata?.avatar_url ||
-                  session.user.user_metadata?.picture;
+    const xUsername =
+      session.user.user_metadata?.user_name ||
+      session.user.user_metadata?.preferred_username ||
+      session.user.user_metadata?.screen_name;
+    const xId =
+      session.user.user_metadata?.provider_id || session.user.user_metadata?.sub || session.user.id;
+    const name = session.user.user_metadata?.full_name || session.user.user_metadata?.name;
+    const avatar = session.user.user_metadata?.avatar_url || session.user.user_metadata?.picture;
     const email = session.user.email;
 
     if (!xUsername) {

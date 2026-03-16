@@ -11,7 +11,9 @@ export async function submitFeedback(input: SubmitFeedbackInput) {
   }
 
   const supabase = await createServerSupabaseClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   let dbUserId: string | null = null;
   if (user) {

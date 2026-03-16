@@ -36,11 +36,7 @@ interface JourneyEndProps {
 
 type Stage = 'transition' | 'innerCircle' | 'highlight' | 'complete';
 
-export default function JourneyEnd({
-  data,
-  theme,
-  onComplete,
-}: JourneyEndProps) {
+export default function JourneyEnd({ data, theme, onComplete }: JourneyEndProps) {
   const [stage, setStage] = useState<Stage>('transition');
 
   // Handle transition complete → show Inner Circle or highlight reel
@@ -52,9 +48,10 @@ export default function JourneyEnd({
     const earlyAccessMode = process.env.NEXT_PUBLIC_EARLY_ACCESS_MODE === 'true';
 
     // More robust check - handle string 'true' or truthy values
-    const isInnerCircle = earlyAccessMode ||
-                          String(urlValue).toLowerCase() === 'true' ||
-                          String(localValue).toLowerCase() === 'true';
+    const isInnerCircle =
+      earlyAccessMode ||
+      String(urlValue).toLowerCase() === 'true' ||
+      String(localValue).toLowerCase() === 'true';
 
     if (isInnerCircle) {
       setStage('innerCircle');
@@ -156,10 +153,7 @@ export default function JourneyEnd({
               background: '#050505',
             }}
           >
-            <InnerCircleUnlock
-              onComplete={handleInnerCircleComplete}
-              theme={theme}
-            />
+            <InnerCircleUnlock onComplete={handleInnerCircleComplete} theme={theme} />
           </motion.div>
         )}
 
@@ -180,11 +174,7 @@ export default function JourneyEnd({
               background: '#050505',
             }}
           >
-            <HighlightReel
-              data={data}
-              onContinue={handleClaimDNA}
-              theme={theme}
-            />
+            <HighlightReel data={data} onContinue={handleClaimDNA} theme={theme} />
           </motion.div>
         )}
 

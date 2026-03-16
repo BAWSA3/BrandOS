@@ -92,36 +92,36 @@ function formatFollowersDisplay(count: number): string {
 
 function getArchetypePixelEmoji(archetype?: string): string {
   const emojiMap: Record<string, string> = {
-    'ARC': '/archetypes/ARC.svg',
-    'ENTROPY': '/archetypes/ENTROPY.svg',
-    'NULL': '/archetypes/NULL.svg',
-    'FREQ': '/archetypes/FREQ.svg',
-    'RELAY': '/archetypes/RELAY.svg',
+    ARC: '/archetypes/ARC.svg',
+    ENTROPY: '/archetypes/ENTROPY.svg',
+    NULL: '/archetypes/NULL.svg',
+    FREQ: '/archetypes/FREQ.svg',
+    RELAY: '/archetypes/RELAY.svg',
     'BUILD.EXE': '/archetypes/BUILD.EXE.svg',
-    'SIGNAL_SAGE': '/archetypes/SIGNAL_SAGE.svg',
-    'FORESIGHT': '/archetypes/FORESIGHT.svg',
+    SIGNAL_SAGE: '/archetypes/SIGNAL_SAGE.svg',
+    FORESIGHT: '/archetypes/FORESIGHT.svg',
   };
   return emojiMap[archetype || ''] || '/archetypes/SIGNAL_SAGE.svg';
 }
 
 function getPersonalityTypeCode(archetype?: string): string {
   const typeMap: Record<string, string> = {
-    'FORESIGHT': 'INTJ',
+    FORESIGHT: 'INTJ',
     'The Alpha': 'ENTJ',
     'The Builder': 'ISTP',
     'The Educator': 'ENFJ',
-    'ENTROPY': 'ESTP',
+    ENTROPY: 'ESTP',
     'The Analyst': 'INTP',
     'The Philosopher': 'INFJ',
     'The Networker': 'ESFJ',
     'The Contrarian': 'ENTP',
     'The Creator': 'ENFP',
-    'ARC': 'ESTP',
-    'NULL': 'INTJ',
-    'FREQ': 'ESFJ',
-    'RELAY': 'ESFJ',
+    ARC: 'ESTP',
+    NULL: 'INTJ',
+    FREQ: 'ESFJ',
+    RELAY: 'ESFJ',
     'BUILD.EXE': 'ISTP',
-    'SIGNAL_SAGE': 'ENFJ',
+    SIGNAL_SAGE: 'ENFJ',
   };
   return typeMap[archetype || ''] || 'INTJ';
 }
@@ -143,7 +143,13 @@ interface MagneticButtonProps {
   disabled?: boolean;
 }
 
-function MagneticButton({ children, style, onClick, type = 'button', disabled }: MagneticButtonProps) {
+function MagneticButton({
+  children,
+  style,
+  onClick,
+  type = 'button',
+  disabled,
+}: MagneticButtonProps) {
   const buttonRef = useRef<HTMLButtonElement>(null);
   const x = useMotionValue(0);
   const y = useMotionValue(0);
@@ -245,11 +251,7 @@ function AnimatedText({ text, style, delay = 0, staggerDelay = 0.03 }: AnimatedT
       animate="visible"
     >
       {letters.map((letter, index) => (
-        <motion.span
-          key={index}
-          variants={child}
-          style={{ display: 'inline-block' }}
-        >
+        <motion.span key={index} variants={child} style={{ display: 'inline-block' }}>
           {letter === ' ' ? '\u00A0' : letter}
         </motion.span>
       ))}
@@ -278,8 +280,8 @@ function TypewriterText({ text, speed = 25 }: TypewriterTextProps) {
   useEffect(() => {
     if (currentIndex < text.length) {
       const timeout = setTimeout(() => {
-        setDisplayText(prev => prev + text[currentIndex]);
-        setCurrentIndex(prev => prev + 1);
+        setDisplayText((prev) => prev + text[currentIndex]);
+        setCurrentIndex((prev) => prev + 1);
       }, speed);
       return () => clearTimeout(timeout);
     }
@@ -289,7 +291,7 @@ function TypewriterText({ text, speed = 25 }: TypewriterTextProps) {
   useEffect(() => {
     if (currentIndex < text.length) {
       const blinkInterval = setInterval(() => {
-        setCursorVisible(prev => !prev);
+        setCursorVisible((prev) => !prev);
       }, 400);
       return () => clearInterval(blinkInterval);
     }
@@ -298,9 +300,7 @@ function TypewriterText({ text, speed = 25 }: TypewriterTextProps) {
   return (
     <>
       {displayText}
-      {currentIndex < text.length && (
-        <span style={{ opacity: cursorVisible ? 0.7 : 0 }}>|</span>
-      )}
+      {currentIndex < text.length && <span style={{ opacity: cursorVisible ? 0.7 : 0 }}>|</span>}
     </>
   );
 }
@@ -336,25 +336,26 @@ const phaseConfig: PhaseConfigItem[] = [
     number: 1,
     title: 'DEFINE',
     subtitle: 'Extracting your brand DNA',
-    explanation: 'Identifying the patterns, voice, and signals in your profile that make your content recognizably yours.',
+    explanation:
+      'Identifying the patterns, voice, and signals in your profile that make your content recognizably yours.',
     items: [
       {
         label: 'Name Sync',
         description: 'Locking onto identity... confirming brand-name alignment.',
-        dataKey: 'name'
+        dataKey: 'name',
       },
       {
         label: 'Bio Extract',
         description: 'Parsing bio data... isolating core value proposition.',
-        dataKey: 'description'
+        dataKey: 'description',
       },
       {
         label: 'Edge Finder',
-        description: 'Scanning for differentiators... what makes you, you.'
+        description: 'Scanning for differentiators... what makes you, you.',
       },
       {
         label: 'Audience Ping',
-        description: 'Triangulating audience... mapping who\'s listening.'
+        description: "Triangulating audience... mapping who's listening.",
       },
     ],
   },
@@ -363,24 +364,25 @@ const phaseConfig: PhaseConfigItem[] = [
     number: 2,
     title: 'CHECK',
     subtitle: 'Checking brand coherence',
-    explanation: 'Measuring how consistently your profile projects a unified brand—not scattered or contradictory signals.',
+    explanation:
+      'Measuring how consistently your profile projects a unified brand—not scattered or contradictory signals.',
     items: [
       {
         label: 'Handle Lock',
         description: 'Syncing handle to identity... confirming recognition match.',
-        dataKey: 'username'
+        dataKey: 'username',
       },
       {
         label: 'Tone Scan',
-        description: 'Analyzing voice patterns... measuring consistency levels.'
+        description: 'Analyzing voice patterns... measuring consistency levels.',
       },
       {
         label: 'Polish Check',
-        description: 'Scanning presentation metrics... assessing brand polish.'
+        description: 'Scanning presentation metrics... assessing brand polish.',
       },
       {
         label: 'Content Flow',
-        description: 'Reviewing post patterns... detecting consistency signals.'
+        description: 'Reviewing post patterns... detecting consistency signals.',
       },
     ],
   },
@@ -389,26 +391,27 @@ const phaseConfig: PhaseConfigItem[] = [
     number: 3,
     title: 'GENERATE',
     subtitle: 'Priming content engine',
-    explanation: 'Calibrating your profile data to power AI generation that captures your authentic voice—not generic outputs.',
+    explanation:
+      'Calibrating your profile data to power AI generation that captures your authentic voice—not generic outputs.',
     items: [
       {
         label: 'Field Scan',
         description: 'Verifying profile data points... checking completion status.',
-        dataKey: 'location'
+        dataKey: 'location',
       },
       {
         label: 'Bio Parse',
-        description: 'Deconstructing bio structure... analyzing readability index.'
+        description: 'Deconstructing bio structure... analyzing readability index.',
       },
       {
         label: 'Link Trace',
         description: 'Tracing external pathways... confirming traffic routes.',
-        dataKey: 'url'
+        dataKey: 'url',
       },
       {
         label: 'Activity Pulse',
         description: 'Measuring content cadence... evaluating engagement signals.',
-        dataKey: 'tweet_count'
+        dataKey: 'tweet_count',
       },
     ],
   },
@@ -417,27 +420,28 @@ const phaseConfig: PhaseConfigItem[] = [
     number: 4,
     title: 'SCALE',
     subtitle: 'Initializing growth protocols',
-    explanation: 'Your Brand DNA is compiled and ready. Activating the systems that will scale your presence while maintaining brand integrity.',
+    explanation:
+      'Your Brand DNA is compiled and ready. Activating the systems that will scale your presence while maintaining brand integrity.',
     items: [
       {
         label: 'Tier Scan',
         description: 'Classifying influence level... determining account tier.',
-        dataKey: 'influence_tier'
+        dataKey: 'influence_tier',
       },
       {
         label: 'Reach Scan',
         description: 'Mapping audience perimeter... quantifying brand reach.',
-        dataKey: 'followers_count'
+        dataKey: 'followers_count',
       },
       {
         label: 'Network Ping',
         description: 'Pinging connection nodes... measuring interaction density.',
-        dataKey: 'following_count'
+        dataKey: 'following_count',
       },
       {
         label: 'Age Verify',
         description: 'Validating account tenure... confirming establishment level.',
-        dataKey: 'account_age'
+        dataKey: 'account_age',
       },
     ],
   },
@@ -446,7 +450,15 @@ const phaseConfig: PhaseConfigItem[] = [
 // ============================================================================
 // Score Gauge Component
 // ============================================================================
-function ScoreGauge({ score, isVisible, theme }: { score: number; isVisible: boolean; theme: string }) {
+function ScoreGauge({
+  score,
+  isVisible,
+  theme,
+}: {
+  score: number;
+  isVisible: boolean;
+  theme: string;
+}) {
   const motionScore = useMotionValue(0);
   const [currentScore, setCurrentScore] = useState(0);
 
@@ -491,7 +503,13 @@ function ScoreGauge({ score, isVisible, theme }: { score: number; isVisible: boo
   };
 
   return (
-    <div style={{ position: 'relative', width: 'clamp(160px, 50vw, 220px)', height: 'clamp(160px, 50vw, 220px)' }}>
+    <div
+      style={{
+        position: 'relative',
+        width: 'clamp(160px, 50vw, 220px)',
+        height: 'clamp(160px, 50vw, 220px)',
+      }}
+    >
       {/* Glow effect */}
       <motion.div
         initial={{ opacity: 0, scale: 0.8 }}
@@ -587,7 +605,7 @@ function ScoreGauge({ score, isVisible, theme }: { score: number; isVisible: boo
 // Typewriter Placeholder
 // ============================================================================
 const ROTATING_TAGLINES = [
-  'Drop your handle. See what you\'re known for.',
+  "Drop your handle. See what you're known for.",
   'Your reputation, decoded',
   'Content in. Identity out.',
   'Brand = Reputation',
@@ -627,28 +645,38 @@ function RotatingTagline() {
   }, [displayed, phase, currentIndex]);
 
   // Find the longest tagline to reserve fixed space
-  const longest = ROTATING_TAGLINES.reduce((a, b) => a.length > b.length ? a : b);
+  const longest = ROTATING_TAGLINES.reduce((a, b) => (a.length > b.length ? a : b));
 
   return (
-    <div className="hero-tagline" style={{
-      marginTop: '100px',
-      marginBottom: '16px',
-      textAlign: 'center',
-      position: 'relative',
-    }}>
+    <div
+      className="hero-tagline"
+      style={{
+        marginTop: '100px',
+        marginBottom: '16px',
+        textAlign: 'center',
+        position: 'relative',
+      }}
+    >
       {/* Invisible spacer — holds the width of the longest tagline (hidden on mobile) */}
-      <span className="hero-tagline-text hero-tagline-spacer" style={{ visibility: 'hidden' }} aria-hidden="true">
+      <span
+        className="hero-tagline-text hero-tagline-spacer"
+        style={{ visibility: 'hidden' }}
+        aria-hidden="true"
+      >
         {longest}|
       </span>
       {/* Visible typing text — absolutely positioned so width changes don't shift layout */}
-      <span className="hero-tagline-text" style={{
-        color: 'rgba(0,0,0,0.7)',
-        position: 'absolute',
-        left: '50%',
-        top: '50%',
-        transform: 'translate(-50%, -50%)',
-        width: 'max-content',
-      }}>
+      <span
+        className="hero-tagline-text"
+        style={{
+          color: 'rgba(0,0,0,0.7)',
+          position: 'absolute',
+          left: '50%',
+          top: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: 'max-content',
+        }}
+      >
         {displayed}
         <motion.span
           animate={{ opacity: [1, 0] }}
@@ -712,7 +740,11 @@ function TypewriterPlaceholder({ text }: { text: string }) {
 // ============================================================================
 // Main Component
 // ============================================================================
-export default function XBrandScoreHero({ theme, initialUsername, autoStart }: XBrandScoreHeroProps) {
+export default function XBrandScoreHero({
+  theme,
+  initialUsername,
+  autoStart,
+}: XBrandScoreHeroProps) {
   // Auth state
   const { user, isLoading: isAuthLoading } = useAuth();
   const searchParams = useSearchParams();
@@ -727,12 +759,27 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
   const [generatedBrandDNA, setGeneratedBrandDNA] = useState<GeneratedBrandDNA | null>(null);
   const [accountAuthenticity, setAccountAuthenticity] = useState<AuthenticityAnalysis | null>(null);
   const [accountActivity, setAccountActivity] = useState<ActivityAnalysis | null>(null);
-  const [rawTweets, setRawTweets] = useState<{ id: string; text: string; created_at: string; public_metrics?: { like_count: number; retweet_count: number; reply_count: number; quote_count: number; impression_count?: number } }[]>([]);
+  const [rawTweets, setRawTweets] = useState<
+    {
+      id: string;
+      text: string;
+      created_at: string;
+      public_metrics?: {
+        like_count: number;
+        retweet_count: number;
+        reply_count: number;
+        quote_count: number;
+        impression_count?: number;
+      };
+    }[]
+  >([]);
   const [currentPhase, setCurrentPhase] = useState(1);
   const [itemProgress, setItemProgress] = useState(0);
   const [showConfetti, setShowConfetti] = useState(false);
   const [email, setEmail] = useState('');
-  const [signupStatus, setSignupStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [signupStatus, setSignupStatus] = useState<'idle' | 'loading' | 'success' | 'error'>(
+    'idle'
+  );
   const [copyStatus, setCopyStatus] = useState<'idle' | 'copying' | 'copied' | 'failed'>('idle');
   const [scoreCardImage, setScoreCardImage] = useState<string | null>(null);
   const [showAdvisorChat, setShowAdvisorChat] = useState(false);
@@ -840,7 +887,7 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
           }
           apiResultRef.current = data;
           apiCompleteRef.current = true;
-          
+
           // Also fetch brand identity for Brand DNA generation
           if (data.profile) {
             try {
@@ -852,7 +899,7 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
                 }),
               });
               const identityData = await identityResponse.json();
-              
+
               if (identityData.success && identityData.analysis) {
                 // Store authenticity and activity analysis
                 if (identityData.analysis.authenticity) {
@@ -872,7 +919,7 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
                   }),
                 });
                 const dnaData = await dnaResponse.json();
-                
+
                 if (dnaData.success && dnaData.brandDNA) {
                   setGeneratedBrandDNA(dnaData.brandDNA);
                 }
@@ -887,7 +934,6 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
           apiErrorRef.current = err instanceof Error ? err.message : 'Something went wrong';
           apiCompleteRef.current = true;
         });
-
     } catch {
       setError('Could not connect. Please try again.');
       setIsValidating(false);
@@ -921,7 +967,7 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
     const maxItems = currentPhaseData.items.length;
 
     const interval = setInterval(() => {
-      setItemProgress(prev => {
+      setItemProgress((prev) => {
         if (prev < maxItems) {
           return prev + 0.1; // Smooth progress
         }
@@ -937,7 +983,7 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
           clearInterval(interval);
           clearInterval(phaseCheck);
           setTimeout(() => {
-            setCurrentPhase(prev => prev + 1);
+            setCurrentPhase((prev) => prev + 1);
             setItemProgress(0);
           }, PHASE_PAUSE);
         } else {
@@ -952,16 +998,23 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
                 // Flatten the profile to match XProfileData interface
                 // API returns profile with public_metrics nested, we flatten it
                 const apiProfile = apiResultRef.current!.profile as XProfileData & {
-                  public_metrics?: { followers_count?: number; following_count?: number; tweet_count?: number };
+                  public_metrics?: {
+                    followers_count?: number;
+                    following_count?: number;
+                    tweet_count?: number;
+                  };
                 };
                 const flatProfile: XProfileData = {
                   name: apiProfile.name,
                   username: apiProfile.username,
                   description: apiProfile.description,
                   profile_image_url: apiProfile.profile_image_url,
-                  followers_count: apiProfile.public_metrics?.followers_count || apiProfile.followers_count || 0,
-                  following_count: apiProfile.public_metrics?.following_count || apiProfile.following_count || 0,
-                  tweet_count: apiProfile.public_metrics?.tweet_count || apiProfile.tweet_count || 0,
+                  followers_count:
+                    apiProfile.public_metrics?.followers_count || apiProfile.followers_count || 0,
+                  following_count:
+                    apiProfile.public_metrics?.following_count || apiProfile.following_count || 0,
+                  tweet_count:
+                    apiProfile.public_metrics?.tweet_count || apiProfile.tweet_count || 0,
                   verified: apiProfile.verified || false,
                   location: apiProfile.location,
                   url: apiProfile.url,
@@ -1002,33 +1055,39 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
 
     try {
       // Build brand data for email templates
-      const brandData = brandScore && generatedBrandDNA ? {
-        displayName: profile?.name || username,
-        score: brandScore.overallScore,
-        defineScore: brandScore.phases.define.score,
-        checkScore: brandScore.phases.check.score,
-        generateScore: brandScore.phases.generate.score,
-        scaleScore: brandScore.phases.scale.score,
-        archetype: normalizeArchetypeName(generatedBrandDNA.archetype || 'BUILD.EXE'),
-        archetypeEmoji: '✨',
-        archetypeTagline: generatedBrandDNA.personalitySummary?.split('.')[0] || '',
-        archetypeDescription: generatedBrandDNA.personalitySummary || '',
-        archetypeIconUrl: `https://mybrandos.app/archetypes/${encodeURIComponent(normalizeArchetypeName(generatedBrandDNA.archetype || 'BUILD.EXE'))}.png`,
-        archetypeStrengths: brandScore.topStrengths?.slice(0, 3) || [],
-        topImprovement: brandScore.topImprovements?.[0] || '',
-        topStrength: brandScore.topStrengths?.[0] || '',
-        // Data-driven analysis fields
-        defineInsights: brandScore.phases.define.insights || [],
-        checkInsights: brandScore.phases.check.insights || [],
-        generateInsights: brandScore.phases.generate.insights || [],
-        scaleInsights: brandScore.phases.scale.insights || [],
-        summary: brandScore.summary || '',
-        topImprovements: brandScore.topImprovements || [],
-        topStrengths: brandScore.topStrengths || [],
-        voiceConsistency: generatedBrandDNA.performanceInsights?.voiceConsistency,
-        bestContentFormat: generatedBrandDNA.performanceInsights?.bestFormats?.[0],
-        contentPillars: generatedBrandDNA.contentPillars?.map(p => ({ name: p.name, frequency: p.frequency })),
-      } : undefined;
+      const brandData =
+        brandScore && generatedBrandDNA
+          ? {
+              displayName: profile?.name || username,
+              score: brandScore.overallScore,
+              defineScore: brandScore.phases.define.score,
+              checkScore: brandScore.phases.check.score,
+              generateScore: brandScore.phases.generate.score,
+              scaleScore: brandScore.phases.scale.score,
+              archetype: normalizeArchetypeName(generatedBrandDNA.archetype || 'BUILD.EXE'),
+              archetypeEmoji: '✨',
+              archetypeTagline: generatedBrandDNA.personalitySummary?.split('.')[0] || '',
+              archetypeDescription: generatedBrandDNA.personalitySummary || '',
+              archetypeIconUrl: `https://mybrandos.app/archetypes/${encodeURIComponent(normalizeArchetypeName(generatedBrandDNA.archetype || 'BUILD.EXE'))}.png`,
+              archetypeStrengths: brandScore.topStrengths?.slice(0, 3) || [],
+              topImprovement: brandScore.topImprovements?.[0] || '',
+              topStrength: brandScore.topStrengths?.[0] || '',
+              // Data-driven analysis fields
+              defineInsights: brandScore.phases.define.insights || [],
+              checkInsights: brandScore.phases.check.insights || [],
+              generateInsights: brandScore.phases.generate.insights || [],
+              scaleInsights: brandScore.phases.scale.insights || [],
+              summary: brandScore.summary || '',
+              topImprovements: brandScore.topImprovements || [],
+              topStrengths: brandScore.topStrengths || [],
+              voiceConsistency: generatedBrandDNA.performanceInsights?.voiceConsistency,
+              bestContentFormat: generatedBrandDNA.performanceInsights?.bestFormats?.[0],
+              contentPillars: generatedBrandDNA.contentPillars?.map((p) => ({
+                name: p.name,
+                frequency: p.frequency,
+              })),
+            }
+          : undefined;
 
       const response = await fetch('/api/signup', {
         method: 'POST',
@@ -1056,7 +1115,7 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
   const handleCompareProfile = () => {
     if (!compareUsername) return;
     // MVP: Show coming soon message
-    alert('Profile comparison coming soon! We\'ll notify you when it\'s ready.');
+    alert("Profile comparison coming soon! We'll notify you when it's ready.");
   };
 
   return (
@@ -1071,13 +1130,21 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
         alignItems: 'center',
         padding: flowState === 'input' ? '0' : flowState === 'journey' ? '0' : '48px 24px',
         position: 'relative',
-        overflow: flowState === 'input' ? 'hidden' : (flowState === 'walkthrough' || flowState === 'journey') ? 'visible' : 'hidden',
+        overflow:
+          flowState === 'input'
+            ? 'hidden'
+            : flowState === 'walkthrough' || flowState === 'journey'
+              ? 'visible'
+              : 'hidden',
       }}
     >
       {/* Background — visible during input and journey states */}
       <motion.div
         initial={{ opacity: 1 }}
-        animate={{ opacity: (flowState === 'input' || flowState === 'journey' || flowState === 'reveal') ? 1 : 0 }}
+        animate={{
+          opacity:
+            flowState === 'input' || flowState === 'journey' || flowState === 'reveal' ? 1 : 0,
+        }}
         transition={{ duration: 0.8 }}
         style={{
           position: 'absolute',
@@ -1137,10 +1204,15 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
               exit={{ opacity: 0 }}
               transition={{ delay: 1.2, duration: 0.5 }}
               style={{
-                position: 'fixed', top: 16, left: 16, width: 30, height: 30,
+                position: 'fixed',
+                top: 16,
+                left: 16,
+                width: 30,
+                height: 30,
                 borderTop: '1px solid rgba(0,0,0,0.15)',
                 borderLeft: '1px solid rgba(0,0,0,0.15)',
-                pointerEvents: 'none', zIndex: 20,
+                pointerEvents: 'none',
+                zIndex: 20,
               }}
             />
             {/* Top-right */}
@@ -1150,10 +1222,15 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
               exit={{ opacity: 0 }}
               transition={{ delay: 1.2, duration: 0.5 }}
               style={{
-                position: 'fixed', top: 16, right: 16, width: 30, height: 30,
+                position: 'fixed',
+                top: 16,
+                right: 16,
+                width: 30,
+                height: 30,
                 borderTop: '1px solid rgba(0,0,0,0.15)',
                 borderRight: '1px solid rgba(0,0,0,0.15)',
-                pointerEvents: 'none', zIndex: 20,
+                pointerEvents: 'none',
+                zIndex: 20,
               }}
             />
             {/* Bottom-left */}
@@ -1163,10 +1240,15 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
               exit={{ opacity: 0 }}
               transition={{ delay: 1.2, duration: 0.5 }}
               style={{
-                position: 'fixed', bottom: 16, left: 16, width: 30, height: 30,
+                position: 'fixed',
+                bottom: 16,
+                left: 16,
+                width: 30,
+                height: 30,
                 borderBottom: '1px solid rgba(0,0,0,0.15)',
                 borderLeft: '1px solid rgba(0,0,0,0.15)',
-                pointerEvents: 'none', zIndex: 20,
+                pointerEvents: 'none',
+                zIndex: 20,
               }}
             />
             {/* Bottom-right */}
@@ -1176,10 +1258,15 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
               exit={{ opacity: 0 }}
               transition={{ delay: 1.2, duration: 0.5 }}
               style={{
-                position: 'fixed', bottom: 16, right: 16, width: 30, height: 30,
+                position: 'fixed',
+                bottom: 16,
+                right: 16,
+                width: 30,
+                height: 30,
                 borderBottom: '1px solid rgba(0,0,0,0.15)',
                 borderRight: '1px solid rgba(0,0,0,0.15)',
-                pointerEvents: 'none', zIndex: 20,
+                pointerEvents: 'none',
+                zIndex: 20,
               }}
             />
 
@@ -1190,10 +1277,15 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
               exit={{ opacity: 0 }}
               transition={{ delay: 1.2, duration: 0.5 }}
               style={{
-                position: 'fixed', top: 22, right: 54,
-                fontFamily: "'PP NeueBit', monospace", fontSize: '11px',
-                letterSpacing: '0.15em', color: 'rgba(0,0,0,0.25)',
-                pointerEvents: 'none', zIndex: 20,
+                position: 'fixed',
+                top: 22,
+                right: 54,
+                fontFamily: "'PP NeueBit', monospace",
+                fontSize: '11px',
+                letterSpacing: '0.15em',
+                color: 'rgba(0,0,0,0.25)',
+                pointerEvents: 'none',
+                zIndex: 20,
               }}
             >
               v2.0
@@ -1206,10 +1298,17 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
               exit={{ opacity: 0 }}
               transition={{ delay: 1.4, duration: 0.5 }}
               style={{
-                position: 'fixed', bottom: 22, left: '50%', transform: 'translateX(-50%)',
-                fontFamily: "'PP NeueBit', monospace", fontSize: '11px',
-                letterSpacing: '0.2em', color: 'rgba(0,0,0,0.2)',
-                whiteSpace: 'nowrap', pointerEvents: 'none', zIndex: 20,
+                position: 'fixed',
+                bottom: 22,
+                left: '50%',
+                transform: 'translateX(-50%)',
+                fontFamily: "'PP NeueBit', monospace",
+                fontSize: '11px',
+                letterSpacing: '0.2em',
+                color: 'rgba(0,0,0,0.2)',
+                whiteSpace: 'nowrap',
+                pointerEvents: 'none',
+                zIndex: 20,
               }}
             >
               ── POWERED BY AI ──
@@ -1308,17 +1407,23 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
                   style={{ position: 'relative', width: '100%' }}
                 >
                   {/* > prompt character */}
-                  <span style={{
-                    position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)',
-                    fontFamily: "'VCR OSD Mono', monospace", fontSize: '1.125rem',
-                    color: 'rgba(0,0,0,0.3)', pointerEvents: 'none', zIndex: 1,
-                  }}>
+                  <span
+                    style={{
+                      position: 'absolute',
+                      left: '14px',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      fontFamily: "'VCR OSD Mono', monospace",
+                      fontSize: '1.125rem',
+                      color: 'rgba(0,0,0,0.3)',
+                      pointerEvents: 'none',
+                      zIndex: 1,
+                    }}
+                  >
                     &gt;
                   </span>
                   {/* Typewriter placeholder overlay */}
-                  {!username && (
-                    <TypewriterPlaceholder text="enter @username" />
-                  )}
+                  {!username && <TypewriterPlaceholder text="enter @username" />}
                   <input
                     type="text"
                     value={username}
@@ -1512,18 +1617,23 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
                   alt="BrandOS"
                   style={{ height: '40px', width: 'auto' }}
                 />
-                <span style={{
-                  fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace",
-                  fontSize: '12px',
-                  letterSpacing: '0.12em',
-                  color: 'rgba(0,0,0,0.4)',
-                }}>
+                <span
+                  style={{
+                    fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace",
+                    fontSize: '12px',
+                    letterSpacing: '0.12em',
+                    color: 'rgba(0,0,0,0.4)',
+                  }}
+                >
                   mybrandos.app
                 </span>
               </div>
               <BrandScoreCard
                 score={brandScore.overallScore}
-                voiceConsistency={generatedBrandDNA.performanceInsights?.voiceConsistency || brandScore.phases.check.score}
+                voiceConsistency={
+                  generatedBrandDNA.performanceInsights?.voiceConsistency ||
+                  brandScore.phases.check.score
+                }
                 engagementScore={brandScore.phases.scale.score}
                 profileImageUrl={profile.profile_image_url?.replace('_normal', '_200x200') || ''}
                 username={profile.username}
@@ -1547,29 +1657,42 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
                       if (!scoreCard) return;
                       setCopyStatus('copying');
                       try {
-                        const pfpImg = scoreCard.querySelector(`img[alt="${profile.name}"]`) as HTMLImageElement | null;
+                        const pfpImg = scoreCard.querySelector(
+                          `img[alt="${profile.name}"]`
+                        ) as HTMLImageElement | null;
                         const originalSrc = pfpImg?.src || '';
                         try {
-                          const pfpRes = await fetch(`/api/image-proxy?url=${encodeURIComponent(profile.profile_image_url?.replace('_normal', '_200x200') || '')}`);
+                          const pfpRes = await fetch(
+                            `/api/image-proxy?url=${encodeURIComponent(profile.profile_image_url?.replace('_normal', '_200x200') || '')}`
+                          );
                           if (pfpRes.ok && pfpImg) {
                             const blob = await pfpRes.blob();
-                            const dataUrl = await new Promise<string>((r) => { const fr = new FileReader(); fr.onloadend = () => r(fr.result as string); fr.readAsDataURL(blob); });
+                            const dataUrl = await new Promise<string>((r) => {
+                              const fr = new FileReader();
+                              fr.onloadend = () => r(fr.result as string);
+                              fr.readAsDataURL(blob);
+                            });
                             pfpImg.src = dataUrl;
-                            await new Promise(r => setTimeout(r, 50));
+                            await new Promise((r) => setTimeout(r, 50));
                           }
                         } catch {}
-                        const dataUrl = await domToPng(scoreCard, { scale: 2, quality: 1, timeout: 30000 });
+                        const dataUrl = await domToPng(scoreCard, {
+                          scale: 2,
+                          quality: 1,
+                          timeout: 30000,
+                        });
                         if (pfpImg) pfpImg.src = originalSrc;
                         // Convert data URL to blob directly (fetch can fail on large data URLs)
                         const byteString = atob(dataUrl.split(',')[1]);
                         const mimeString = dataUrl.split(',')[0].split(':')[1].split(';')[0];
                         const ab = new ArrayBuffer(byteString.length);
                         const ia = new Uint8Array(ab);
-                        for (let i = 0; i < byteString.length; i++) ia[i] = byteString.charCodeAt(i);
+                        for (let i = 0; i < byteString.length; i++)
+                          ia[i] = byteString.charCodeAt(i);
                         const blob = new Blob([ab], { type: mimeString });
                         try {
                           await navigator.clipboard.write([
-                            new ClipboardItem({ 'image/png': blob })
+                            new ClipboardItem({ 'image/png': blob }),
                           ]);
                           setCopyStatus('copied');
                         } catch {
@@ -1591,30 +1714,55 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
                     disabled={copyStatus === 'copying'}
                     className="flex items-center gap-2 px-4 py-2.5 bg-[#1A1A1A] hover:bg-[#2E6AFF] border border-[#333] hover:border-[#2E6AFF] rounded-[4px] text-white font-os text-[11px] tracking-wider transition-all duration-300 disabled:opacity-50"
                   >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
-                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
                     </svg>
-                    {copyStatus === 'copying' ? 'COPYING...' : copyStatus === 'copied' ? 'COPIED ✓' : copyStatus === 'failed' ? 'FAILED' : 'COPY'}
+                    {copyStatus === 'copying'
+                      ? 'COPYING...'
+                      : copyStatus === 'copied'
+                        ? 'COPIED ✓'
+                        : copyStatus === 'failed'
+                          ? 'FAILED'
+                          : 'COPY'}
                   </button>
                   <button
                     onClick={async () => {
                       const scoreCard = document.getElementById('brandos-score-card');
                       if (!scoreCard) return;
                       // Swap PFP to base64 on the LIVE element to bypass CORS
-                      const pfpImg = scoreCard.querySelector(`img[alt="${profile.name}"]`) as HTMLImageElement | null;
+                      const pfpImg = scoreCard.querySelector(
+                        `img[alt="${profile.name}"]`
+                      ) as HTMLImageElement | null;
                       const originalSrc = pfpImg?.src || '';
                       try {
-                        const pfpRes = await fetch(`/api/image-proxy?url=${encodeURIComponent(profile.profile_image_url?.replace('_normal', '_200x200') || '')}`);
+                        const pfpRes = await fetch(
+                          `/api/image-proxy?url=${encodeURIComponent(profile.profile_image_url?.replace('_normal', '_200x200') || '')}`
+                        );
                         if (pfpRes.ok && pfpImg) {
                           const blob = await pfpRes.blob();
-                          const dataUrl = await new Promise<string>((r) => { const fr = new FileReader(); fr.onloadend = () => r(fr.result as string); fr.readAsDataURL(blob); });
+                          const dataUrl = await new Promise<string>((r) => {
+                            const fr = new FileReader();
+                            fr.onloadend = () => r(fr.result as string);
+                            fr.readAsDataURL(blob);
+                          });
                           pfpImg.src = dataUrl;
-                          await new Promise(r => setTimeout(r, 50));
+                          await new Promise((r) => setTimeout(r, 50));
                         }
                       } catch {}
                       // Capture the actual on-screen element directly
-                      const dataUrl = await domToPng(scoreCard, { scale: 2, quality: 1, timeout: 30000 });
+                      const dataUrl = await domToPng(scoreCard, {
+                        scale: 2,
+                        quality: 1,
+                        timeout: 30000,
+                      });
                       // Restore original PFP src
                       if (pfpImg) pfpImg.src = originalSrc;
                       const a = document.createElement('a');
@@ -1624,10 +1772,17 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
                     }}
                     className="flex items-center gap-2 px-4 py-2.5 bg-[#1A1A1A] hover:bg-[#2E6AFF] border border-[#333] hover:border-[#2E6AFF] rounded-[4px] text-white font-os text-[11px] tracking-wider transition-all duration-300"
                   >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                      <polyline points="7 10 12 15 17 10"/>
-                      <line x1="12" y1="15" x2="12" y2="3"/>
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                      <polyline points="7 10 12 15 17 10" />
+                      <line x1="12" y1="15" x2="12" y2="3" />
                     </svg>
                     DOWNLOAD
                   </button>
@@ -1639,18 +1794,30 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
                   const scoreCard = document.getElementById('brandos-score-card');
                   if (scoreCard) {
                     try {
-                      const pfpImg = scoreCard.querySelector(`img[alt="${profile.name}"]`) as HTMLImageElement | null;
+                      const pfpImg = scoreCard.querySelector(
+                        `img[alt="${profile.name}"]`
+                      ) as HTMLImageElement | null;
                       const originalSrc = pfpImg?.src || '';
                       try {
-                        const pfpRes = await fetch(`/api/image-proxy?url=${encodeURIComponent(profile.profile_image_url?.replace('_normal', '_200x200') || '')}`);
+                        const pfpRes = await fetch(
+                          `/api/image-proxy?url=${encodeURIComponent(profile.profile_image_url?.replace('_normal', '_200x200') || '')}`
+                        );
                         if (pfpRes.ok && pfpImg) {
                           const blob = await pfpRes.blob();
-                          const dataUrl = await new Promise<string>((r) => { const fr = new FileReader(); fr.onloadend = () => r(fr.result as string); fr.readAsDataURL(blob); });
+                          const dataUrl = await new Promise<string>((r) => {
+                            const fr = new FileReader();
+                            fr.onloadend = () => r(fr.result as string);
+                            fr.readAsDataURL(blob);
+                          });
                           pfpImg.src = dataUrl;
-                          await new Promise(r => setTimeout(r, 50));
+                          await new Promise((r) => setTimeout(r, 50));
                         }
                       } catch {}
-                      const dataUrl = await domToPng(scoreCard, { scale: 2, quality: 1, timeout: 30000 });
+                      const dataUrl = await domToPng(scoreCard, {
+                        scale: 2,
+                        quality: 1,
+                        timeout: 30000,
+                      });
                       if (pfpImg) pfpImg.src = originalSrc;
                       setScoreCardImage(dataUrl);
                     } catch (err) {
@@ -1668,7 +1835,6 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
                 WHY IS MY BRAND SCORE {brandScore.overallScore}?
               </motion.button>
             </div>
-
           </motion.div>
         )}
 
@@ -1693,14 +1859,16 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
           >
             <ScoreGauge score={brandScore.overallScore} isVisible={true} theme={theme} />
             <ShareableScoreCard
-              data={{
-                score: brandScore.overallScore,
-                username: profile.username,
-                displayName: profile.name,
-                profileImageUrl: profile.profile_image_url,
-                topStrength: brandScore.topStrengths[0] || '',
-                summary: brandScore.summary,
-              } as ShareCardData}
+              data={
+                {
+                  score: brandScore.overallScore,
+                  username: profile.username,
+                  displayName: profile.name,
+                  profileImageUrl: profile.profile_image_url,
+                  topStrength: brandScore.topStrengths[0] || '',
+                  summary: brandScore.summary,
+                } as ShareCardData
+              }
               theme={theme}
             />
             <div className="flex gap-3">
@@ -1736,7 +1904,16 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
                   gap: '8px',
                 }}
               >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
                   <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
                 </svg>
@@ -1793,7 +1970,14 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
             }}
           >
             {/* Profile Preview */}
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '16px',
+              }}
+            >
               {profile.profile_image_url && (
                 <img
                   src={profile.profile_image_url.replace('_normal', '_200x200')}
@@ -1860,7 +2044,8 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
                   lineHeight: 1.6,
                 }}
               >
-                We need some posts to analyze your brand DNA. Come back after you've shared some content!
+                We need some posts to analyze your brand DNA. Come back after you've shared some
+                content!
               </p>
             </div>
 
@@ -1874,12 +2059,34 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
               }}
             >
               <div style={{ textAlign: 'center' }}>
-                <div style={{ color: theme === 'dark' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)', marginBottom: '4px' }}>POSTS</div>
+                <div
+                  style={{
+                    color: theme === 'dark' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)',
+                    marginBottom: '4px',
+                  }}
+                >
+                  POSTS
+                </div>
                 <div style={{ color: '#D4A574', fontSize: '20px', fontWeight: 700 }}>0</div>
               </div>
               <div style={{ textAlign: 'center' }}>
-                <div style={{ color: theme === 'dark' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)', marginBottom: '4px' }}>FOLLOWERS</div>
-                <div style={{ color: theme === 'dark' ? '#FFFFFF' : '#000000', fontSize: '20px', fontWeight: 700 }}>{formatFollowersDisplay(profile.followers_count)}</div>
+                <div
+                  style={{
+                    color: theme === 'dark' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)',
+                    marginBottom: '4px',
+                  }}
+                >
+                  FOLLOWERS
+                </div>
+                <div
+                  style={{
+                    color: theme === 'dark' ? '#FFFFFF' : '#000000',
+                    fontSize: '20px',
+                    fontWeight: 700,
+                  }}
+                >
+                  {formatFollowersDisplay(profile.followers_count)}
+                </div>
               </div>
             </div>
 
@@ -1931,13 +2138,16 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
             }}
           >
             {/* Subtle grid lines */}
-            <div style={{
-              position: 'absolute',
-              inset: 0,
-              backgroundImage: 'linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)',
-              backgroundSize: '40px 40px',
-              pointerEvents: 'none',
-            }} />
+            <div
+              style={{
+                position: 'absolute',
+                inset: 0,
+                backgroundImage:
+                  'linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)',
+                backgroundSize: '40px 40px',
+                pointerEvents: 'none',
+              }}
+            />
 
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -1956,287 +2166,306 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
                 zIndex: 10,
               }}
             >
-            {/* Terminal-style comment header */}
-            <div style={{
-              fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace",
-              fontSize: '10px',
-              letterSpacing: '0.2em',
-              color: 'rgba(255,255,255,0.25)',
-              textAlign: 'center',
-              width: '100%',
-            }}>
-              {'// BRAND_BREAKDOWN > EMAIL_ACCESS'}
-            </div>
-
-            <motion.h2
-              style={{
-                fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace",
-                fontSize: 'clamp(16px, 4vw, 22px)',
-                fontWeight: 400,
-                letterSpacing: '0.08em',
-                color: '#F2F0EF',
-                margin: 0,
-                lineHeight: 1.4,
-                textTransform: 'uppercase',
-              }}
-            >
-              GET YOUR FULL BRAND BREAKDOWN, @{profile.username}
-            </motion.h2>
-
-            <motion.p
-              style={{
-                fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace",
-                fontSize: '11px',
-                letterSpacing: '0.05em',
-                color: 'rgba(255,255,255,0.4)',
-                margin: 0,
-                lineHeight: 1.7,
-              }}
-            >
-              Sign up for early access and we&apos;ll email you your brand breakdown.
-            </motion.p>
-
-            {signupStatus === 'success' ? (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.6 }}
+              {/* Terminal-style comment header */}
+              <div
                 style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  gap: '28px',
+                  fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace",
+                  fontSize: '10px',
+                  letterSpacing: '0.2em',
+                  color: 'rgba(255,255,255,0.25)',
+                  textAlign: 'center',
                   width: '100%',
-                  paddingTop: '8px',
                 }}
               >
-                {/* Animated checkmark circle */}
-                <motion.div
-                  initial={{ scale: 0, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ type: 'spring', stiffness: 200, damping: 15, delay: 0.2 }}
-                  style={{
-                    width: '80px',
-                    height: '80px',
-                    borderRadius: '50%',
-                    border: '2px solid #10B981',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    background: 'rgba(16, 185, 129, 0.06)',
-                    boxShadow: '0 0 30px rgba(16, 185, 129, 0.15), 0 0 60px rgba(16, 185, 129, 0.05)',
-                  }}
-                >
-                  <motion.svg
-                    width="36"
-                    height="36"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="#10B981"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    initial={{ pathLength: 0, opacity: 0 }}
-                    animate={{ pathLength: 1, opacity: 1 }}
-                    transition={{ delay: 0.5, duration: 0.4 }}
-                  >
-                    <motion.polyline
-                      points="20 6 9 17 4 12"
-                      initial={{ pathLength: 0 }}
-                      animate={{ pathLength: 1 }}
-                      transition={{ delay: 0.5, duration: 0.4, ease: 'easeOut' }}
-                    />
-                  </motion.svg>
-                </motion.div>
+                {'// BRAND_BREAKDOWN > EMAIL_ACCESS'}
+              </div>
 
-                {/* Status label */}
+              <motion.h2
+                style={{
+                  fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace",
+                  fontSize: 'clamp(16px, 4vw, 22px)',
+                  fontWeight: 400,
+                  letterSpacing: '0.08em',
+                  color: '#F2F0EF',
+                  margin: 0,
+                  lineHeight: 1.4,
+                  textTransform: 'uppercase',
+                }}
+              >
+                GET YOUR FULL BRAND BREAKDOWN, @{profile.username}
+              </motion.h2>
+
+              <motion.p
+                style={{
+                  fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace",
+                  fontSize: '11px',
+                  letterSpacing: '0.05em',
+                  color: 'rgba(255,255,255,0.4)',
+                  margin: 0,
+                  lineHeight: 1.7,
+                }}
+              >
+                Sign up for early access and we&apos;ll email you your brand breakdown.
+              </motion.p>
+
+              {signupStatus === 'success' ? (
                 <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.7 }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.6 }}
                   style={{
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
-                    gap: '16px',
+                    gap: '28px',
+                    width: '100%',
+                    paddingTop: '8px',
                   }}
                 >
-                  <span
+                  {/* Animated checkmark circle */}
+                  <motion.div
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ type: 'spring', stiffness: 200, damping: 15, delay: 0.2 }}
                     style={{
-                      fontFamily: "'VCR OSD Mono', monospace",
-                      fontSize: '14px',
-                      letterSpacing: '0.2em',
-                      color: '#10B981',
+                      width: '80px',
+                      height: '80px',
+                      borderRadius: '50%',
+                      border: '2px solid #10B981',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      background: 'rgba(16, 185, 129, 0.06)',
+                      boxShadow:
+                        '0 0 30px rgba(16, 185, 129, 0.15), 0 0 60px rgba(16, 185, 129, 0.05)',
                     }}
                   >
-                    EMAIL_SENT
-                  </span>
+                    <motion.svg
+                      width="36"
+                      height="36"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="#10B981"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      initial={{ pathLength: 0, opacity: 0 }}
+                      animate={{ pathLength: 1, opacity: 1 }}
+                      transition={{ delay: 0.5, duration: 0.4 }}
+                    >
+                      <motion.polyline
+                        points="20 6 9 17 4 12"
+                        initial={{ pathLength: 0 }}
+                        animate={{ pathLength: 1 }}
+                        transition={{ delay: 0.5, duration: 0.4, ease: 'easeOut' }}
+                      />
+                    </motion.svg>
+                  </motion.div>
 
-                  <div style={{
-                    width: '40px',
-                    height: '1px',
-                    background: 'rgba(255,255,255,0.1)',
-                  }} />
-
-                  <p
+                  {/* Status label */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.7 }}
                     style={{
-                      fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace",
-                      fontSize: '12px',
-                      letterSpacing: '0.05em',
-                      color: 'rgba(255,255,255,0.45)',
-                      margin: 0,
-                      lineHeight: 1.7,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      gap: '16px',
                     }}
                   >
-                    Your brand breakdown is on the way.
-                  </p>
+                    <span
+                      style={{
+                        fontFamily: "'VCR OSD Mono', monospace",
+                        fontSize: '14px',
+                        letterSpacing: '0.2em',
+                        color: '#10B981',
+                      }}
+                    >
+                      EMAIL_SENT
+                    </span>
 
-                  <span
-                    style={{
-                      fontFamily: "'VCR OSD Mono', monospace",
-                      fontSize: '10px',
-                      letterSpacing: '0.15em',
-                      color: 'rgba(255,255,255,0.2)',
-                      marginTop: '4px',
-                    }}
-                  >
-                    {'// CHECK YOUR INBOX'}
-                  </span>
+                    <div
+                      style={{
+                        width: '40px',
+                        height: '1px',
+                        background: 'rgba(255,255,255,0.1)',
+                      }}
+                    />
+
+                    <p
+                      style={{
+                        fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace",
+                        fontSize: '12px',
+                        letterSpacing: '0.05em',
+                        color: 'rgba(255,255,255,0.45)',
+                        margin: 0,
+                        lineHeight: 1.7,
+                      }}
+                    >
+                      Your brand breakdown is on the way.
+                    </p>
+
+                    <span
+                      style={{
+                        fontFamily: "'VCR OSD Mono', monospace",
+                        fontSize: '10px',
+                        letterSpacing: '0.15em',
+                        color: 'rgba(255,255,255,0.2)',
+                        marginTop: '4px',
+                      }}
+                    >
+                      {'// CHECK YOUR INBOX'}
+                    </span>
+                  </motion.div>
                 </motion.div>
-              </motion.div>
-            ) : (
-              <motion.form
-                onSubmit={handleSignup}
+              ) : (
+                <motion.form
+                  onSubmit={handleSignup}
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '12px',
+                    width: '100%',
+                  }}
+                >
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="enter your email"
+                    required
+                    style={{
+                      width: '100%',
+                      fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace",
+                      fontSize: '13px',
+                      letterSpacing: '0.05em',
+                      padding: '14px 16px',
+                      borderRadius: '4px',
+                      border: '1px solid rgba(255,255,255,0.12)',
+                      background: 'rgba(255,255,255,0.04)',
+                      color: '#F2F0EF',
+                      outline: 'none',
+                      transition: 'all 0.3s ease',
+                    }}
+                    onFocus={(e) => {
+                      e.currentTarget.style.borderColor = '#0047FF';
+                      e.currentTarget.style.boxShadow = '0 0 0 3px rgba(0, 71, 255, 0.15)';
+                    }}
+                    onBlur={(e) => {
+                      e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)';
+                      e.currentTarget.style.boxShadow = 'none';
+                    }}
+                  />
+
+                  <motion.button
+                    type="submit"
+                    disabled={signupStatus === 'loading'}
+                    whileHover={{ scale: 1.01 }}
+                    whileTap={{ scale: 0.98 }}
+                    style={{
+                      width: '100%',
+                      fontFamily: "'VCR OSD Mono', monospace",
+                      fontSize: '12px',
+                      letterSpacing: '0.15em',
+                      color: '#FFFFFF',
+                      background: '#0047FF',
+                      border: '1px solid #0047FF',
+                      padding: '14px 32px',
+                      borderRadius: '4px',
+                      cursor: signupStatus === 'loading' ? 'wait' : 'pointer',
+                      opacity: signupStatus === 'loading' ? 0.7 : 1,
+                      transition: 'all 0.3s ease',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = '#003AD6';
+                      e.currentTarget.style.boxShadow = '0 0 20px rgba(0, 71, 255, 0.3)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = '#0047FF';
+                      e.currentTarget.style.boxShadow = 'none';
+                    }}
+                  >
+                    {signupStatus === 'loading'
+                      ? 'SENDING...'
+                      : signupStatus === 'error'
+                        ? 'RETRY'
+                        : 'SEND MY BREAKDOWN'}
+                  </motion.button>
+
+                  {signupStatus === 'error' && (
+                    <p
+                      style={{
+                        fontFamily: "'VCR OSD Mono', monospace",
+                        fontSize: '11px',
+                        letterSpacing: '0.05em',
+                        color: '#EF4444',
+                        margin: 0,
+                        textAlign: 'center',
+                      }}
+                    >
+                      [ERROR: SIGNUP FAILED — TRY AGAIN]
+                    </p>
+                  )}
+                </motion.form>
+              )}
+
+              {/* Back button */}
+              <motion.button
+                onClick={() => setFlowState('reveal')}
                 style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '12px',
-                  width: '100%',
+                  fontFamily: "'VCR OSD Mono', monospace",
+                  fontSize: '11px',
+                  letterSpacing: '0.1em',
+                  color: 'rgba(255,255,255,0.3)',
+                  background: 'transparent',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: '8px 16px',
+                  marginTop: '8px',
+                  transition: 'color 0.3s ease',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = 'rgba(255,255,255,0.6)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = 'rgba(255,255,255,0.3)';
                 }}
               >
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="enter your email"
-                  required
-                  style={{
-                    width: '100%',
-                    fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace",
-                    fontSize: '13px',
-                    letterSpacing: '0.05em',
-                    padding: '14px 16px',
-                    borderRadius: '4px',
-                    border: '1px solid rgba(255,255,255,0.12)',
-                    background: 'rgba(255,255,255,0.04)',
-                    color: '#F2F0EF',
-                    outline: 'none',
-                    transition: 'all 0.3s ease',
-                  }}
-                  onFocus={(e) => {
-                    e.currentTarget.style.borderColor = '#0047FF';
-                    e.currentTarget.style.boxShadow = '0 0 0 3px rgba(0, 71, 255, 0.15)';
-                  }}
-                  onBlur={(e) => {
-                    e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)';
-                    e.currentTarget.style.boxShadow = 'none';
-                  }}
-                />
-
-                <motion.button
-                  type="submit"
-                  disabled={signupStatus === 'loading'}
-                  whileHover={{ scale: 1.01 }}
-                  whileTap={{ scale: 0.98 }}
-                  style={{
-                    width: '100%',
-                    fontFamily: "'VCR OSD Mono', monospace",
-                    fontSize: '12px',
-                    letterSpacing: '0.15em',
-                    color: '#FFFFFF',
-                    background: '#0047FF',
-                    border: '1px solid #0047FF',
-                    padding: '14px 32px',
-                    borderRadius: '4px',
-                    cursor: signupStatus === 'loading' ? 'wait' : 'pointer',
-                    opacity: signupStatus === 'loading' ? 0.7 : 1,
-                    transition: 'all 0.3s ease',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = '#003AD6';
-                    e.currentTarget.style.boxShadow = '0 0 20px rgba(0, 71, 255, 0.3)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = '#0047FF';
-                    e.currentTarget.style.boxShadow = 'none';
-                  }}
-                >
-                  {signupStatus === 'loading' ? 'SENDING...' : signupStatus === 'error' ? 'RETRY' : 'SEND MY BREAKDOWN'}
-                </motion.button>
-
-                {signupStatus === 'error' && (
-                  <p style={{
-                    fontFamily: "'VCR OSD Mono', monospace",
-                    fontSize: '11px',
-                    letterSpacing: '0.05em',
-                    color: '#EF4444',
-                    margin: 0,
-                    textAlign: 'center',
-                  }}>
-                    [ERROR: SIGNUP FAILED — TRY AGAIN]
-                  </p>
-                )}
-              </motion.form>
-            )}
-
-            {/* Back button */}
-            <motion.button
-              onClick={() => setFlowState('reveal')}
-              style={{
-                fontFamily: "'VCR OSD Mono', monospace",
-                fontSize: '11px',
-                letterSpacing: '0.1em',
-                color: 'rgba(255,255,255,0.3)',
-                background: 'transparent',
-                border: 'none',
-                cursor: 'pointer',
-                padding: '8px 16px',
-                marginTop: '8px',
-                transition: 'color 0.3s ease',
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.color = 'rgba(255,255,255,0.6)'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.color = 'rgba(255,255,255,0.3)'; }}
-            >
-              ← BACK TO RESULTS
-            </motion.button>
-            <motion.button
-              onClick={() => {
-                setFlowState('input');
-                setUsername('');
-                setProfile(null);
-                setBrandScore(null);
-                setGeneratedBrandDNA(null);
-                setShowConfetti(false);
-                setSignupStatus('idle');
-                setEmail('');
-              }}
-              style={{
-                fontFamily: "'VCR OSD Mono', monospace",
-                fontSize: '11px',
-                letterSpacing: '0.1em',
-                color: 'rgba(255,255,255,0.3)',
-                background: 'transparent',
-                border: 'none',
-                cursor: 'pointer',
-                padding: '8px 16px',
-                marginTop: '0px',
-                transition: 'color 0.3s ease',
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.color = 'rgba(255,255,255,0.6)'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.color = 'rgba(255,255,255,0.3)'; }}
-            >
-              ← TRY ANOTHER USERNAME
-            </motion.button>
+                ← BACK TO RESULTS
+              </motion.button>
+              <motion.button
+                onClick={() => {
+                  setFlowState('input');
+                  setUsername('');
+                  setProfile(null);
+                  setBrandScore(null);
+                  setGeneratedBrandDNA(null);
+                  setShowConfetti(false);
+                  setSignupStatus('idle');
+                  setEmail('');
+                }}
+                style={{
+                  fontFamily: "'VCR OSD Mono', monospace",
+                  fontSize: '11px',
+                  letterSpacing: '0.1em',
+                  color: 'rgba(255,255,255,0.3)',
+                  background: 'transparent',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: '8px 16px',
+                  marginTop: '0px',
+                  transition: 'color 0.3s ease',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = 'rgba(255,255,255,0.6)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = 'rgba(255,255,255,0.3)';
+                }}
+              >
+                ← TRY ANOTHER USERNAME
+              </motion.button>
             </motion.div>
           </motion.div>
         )}
@@ -2245,8 +2474,14 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
       {/* Cursor blink animation */}
       <style jsx global>{`
         @keyframes cursorBlink {
-          0%, 50% { opacity: 1; }
-          51%, 100% { opacity: 0; }
+          0%,
+          50% {
+            opacity: 1;
+          }
+          51%,
+          100% {
+            opacity: 0;
+          }
         }
         .typing-cursor {
           animation: cursorBlink 0.8s ease-in-out infinite;

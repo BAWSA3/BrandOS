@@ -4,144 +4,144 @@
    CUSTOM FONT FACES (kept for landing page)
    ============================================ */
 @font-face {
-  font-family: 'Helvetica Custom';
-  src: url('/fonts/Helvetica.ttf') format('truetype');
+  font-family: "Helvetica Custom";
+  src: url("/fonts/Helvetica.ttf") format("truetype");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'Helvetica Custom';
-  src: url('/fonts/Helvetica-BoldOblique.ttf') format('truetype');
+  font-family: "Helvetica Custom";
+  src: url("/fonts/Helvetica-BoldOblique.ttf") format("truetype");
   font-weight: 700;
   font-style: italic;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'PP Mondwest';
-  src: url('/fonts/PPMondwest-Regular.otf') format('opentype');
+  font-family: "PP Mondwest";
+  src: url("/fonts/PPMondwest-Regular.otf") format("opentype");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'VCR OSD Mono';
-  src: url('/fonts/VCR_OSD_MONO_1.001.ttf') format('truetype');
+  font-family: "VCR OSD Mono";
+  src: url("/fonts/VCR_OSD_MONO_1.001.ttf") format("truetype");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'PP NeueBit';
-  src: url('/fonts/PPNeueBit-Bold.otf') format('opentype');
+  font-family: "PP NeueBit";
+  src: url("/fonts/PPNeueBit-Bold.otf") format("opentype");
   font-weight: 700;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'Russo One';
-  src: url('/fonts/RussoOne-Regular.ttf') format('truetype');
+  font-family: "Russo One";
+  src: url("/fonts/RussoOne-Regular.ttf") format("truetype");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'Blauer Nue';
-  src: url('/fonts/Blauer-Nue-Extrabold.otf') format('opentype');
+  font-family: "Blauer Nue";
+  src: url("/fonts/Blauer-Nue-Extrabold.otf") format("opentype");
   font-weight: 800;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'Blauer Nue';
-  src: url('/fonts/Blauer-Nue-Extrabold-Italic.otf') format('opentype');
+  font-family: "Blauer Nue";
+  src: url("/fonts/Blauer-Nue-Extrabold-Italic.otf") format("opentype");
   font-weight: 800;
   font-style: italic;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'Blauer Nue';
-  src: url('/fonts/Blauer-Nue-Bold-Italic.otf') format('opentype');
+  font-family: "Blauer Nue";
+  src: url("/fonts/Blauer-Nue-Bold-Italic.otf") format("opentype");
   font-weight: 700;
   font-style: italic;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'Blauer Nue';
-  src: url('/fonts/Blauer-Nue-Semibold-Italic.otf') format('opentype');
+  font-family: "Blauer Nue";
+  src: url("/fonts/Blauer-Nue-Semibold-Italic.otf") format("opentype");
   font-weight: 600;
   font-style: italic;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'Mac Minecraft';
-  src: url('/fonts/MacMinecraft-BoldItalic.ttf') format('truetype');
+  font-family: "Mac Minecraft";
+  src: url("/fonts/MacMinecraft-BoldItalic.ttf") format("truetype");
   font-weight: 700;
   font-style: italic;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'Coolvetica';
-  src: url('/fonts/Coolvetica-RgIt.otf') format('opentype');
+  font-family: "Coolvetica";
+  src: url("/fonts/Coolvetica-RgIt.otf") format("opentype");
   font-weight: 400;
   font-style: italic;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'LEDLIGHT';
-  src: url('/fonts/LEDLIGHT.otf') format('opentype');
+  font-family: "LEDLIGHT";
+  src: url("/fonts/LEDLIGHT.otf") format("opentype");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'Moderniz';
-  src: url('/fonts/Moderniz.otf') format('opentype');
+  font-family: "Moderniz";
+  src: url("/fonts/Moderniz.otf") format("opentype");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'Upheaval';
-  src: url('/fonts/upheavtt.ttf') format('truetype');
+  font-family: "Upheaval";
+  src: url("/fonts/upheavtt.ttf") format("truetype");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'Ari W9500';
-  src: url('/fonts/ari-w9500.ttf') format('truetype');
+  font-family: "Ari W9500";
+  src: url("/fonts/ari-w9500.ttf") format("truetype");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'Ari W9500';
-  src: url('/fonts/ari-w9500-bold.ttf') format('truetype');
+  font-family: "Ari W9500";
+  src: url("/fonts/ari-w9500-bold.ttf") format("truetype");
   font-weight: 700;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'Ari W9500';
-  src: url('/fonts/ari-w9500-condensed-bold.ttf') format('truetype');
+  font-family: "Ari W9500";
+  src: url("/fonts/ari-w9500-condensed-bold.ttf") format("truetype");
   font-weight: 700;
   font-style: normal;
   font-stretch: condensed;
@@ -149,8 +149,8 @@
 }
 
 @font-face {
-  font-family: 'M42 Flight 721';
-  src: url('/fonts/m42.TTF') format('truetype');
+  font-family: "M42 Flight 721";
+  src: url("/fonts/m42.TTF") format("truetype");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -162,12 +162,12 @@
 
 :root {
   /* Core Surfaces */
-  --background: #E8E8ED;
-  --foreground: #1D1D1F;
-  --surface: #F2F0EF;
-  --surface-hover: #F5F5F7;
-  --surface-tertiary: #E8E8ED;
-  --muted: #86868B;
+  --background: #e8e8ed;
+  --foreground: #1d1d1f;
+  --surface: #f2f0ef;
+  --surface-hover: #f5f5f7;
+  --surface-tertiary: #e8e8ed;
+  --muted: #86868b;
 
   /* Borders */
   --border: rgba(0, 0, 0, 0.08);
@@ -175,32 +175,32 @@
   --separator: rgba(0, 0, 0, 0.06);
 
   /* Text Hierarchy */
-  --text-primary: #1D1D1F;
-  --text-secondary: #6E6E73;
-  --text-tertiary: #86868B;
-  --text-quaternary: #AEAEB2;
+  --text-primary: #1d1d1f;
+  --text-secondary: #6e6e73;
+  --text-tertiary: #86868b;
+  --text-quaternary: #aeaeb2;
 
   /* Accent Colors — Apple System Palette */
-  --accent: #0A84FF;
-  --accent-hover: #0070E0;
-  --success: #34C759;
-  --warning: #FF9F0A;
-  --danger: #FF3B30;
+  --accent: #0a84ff;
+  --accent-hover: #0070e0;
+  --success: #34c759;
+  --warning: #ff9f0a;
+  --danger: #ff3b30;
 
   /* Legacy aliases (keep landing page working) */
-  --blue-klein: #002FA7;
-  --blue-electric: #0A84FF;
+  --blue-klein: #002fa7;
+  --blue-electric: #0a84ff;
   --blue-deep: #001847;
   --blue-glow: rgba(10, 132, 255, 0.3);
   --blue-subtle: rgba(10, 132, 255, 0.1);
-  --blue-hover: #0070E0;
+  --blue-hover: #0070e0;
 
   /* Legacy dashboard palette (landing page) */
   --brand-black: #050505;
-  --brand-blue: #0A84FF;
-  --brand-green: #30D158;
-  --brand-yellow: #FFD60A;
-  --brand-gray: #1C1C1E;
+  --brand-blue: #0a84ff;
+  --brand-green: #30d158;
+  --brand-yellow: #ffd60a;
+  --brand-gray: #1c1c1e;
 
   /* Legacy glass (landing page backward compat) */
   --glass-bg: rgba(255, 255, 255, 0.7);
@@ -208,10 +208,10 @@
   --glass-hover: rgba(0, 0, 0, 0.04);
 
   /* Legacy gradients (landing page) */
-  --gradient-hero: linear-gradient(135deg, #E8E8ED 0%, rgba(10, 132, 255, 0.1) 50%, #E8E8ED 100%);
-  --gradient-card: linear-gradient(180deg, rgba(0,0,0,0.02) 0%, rgba(0,0,0,0.01) 100%);
+  --gradient-hero: linear-gradient(135deg, #e8e8ed 0%, rgba(10, 132, 255, 0.1) 50%, #e8e8ed 100%);
+  --gradient-card: linear-gradient(180deg, rgba(0, 0, 0, 0.02) 0%, rgba(0, 0, 0, 0.01) 100%);
   --gradient-orb: radial-gradient(circle, var(--accent) 0%, transparent 70%);
-  --gradient-text: linear-gradient(135deg, #1D1D1F 0%, #0A84FF 50%, #1D1D1F 100%);
+  --gradient-text: linear-gradient(135deg, #1d1d1f 0%, #0a84ff 50%, #1d1d1f 100%);
 
   /* Radii */
   --radius-sm: 8px;
@@ -237,11 +237,176 @@
   --glow-lg: 0 0 80px rgba(10, 132, 255, 0.25);
 
   /* Spring Animations (kept — purposeful motion) */
-  --spring-snappy: 300ms linear(0, 0.3601, 0.7689, 0.9599, 1.0117, 1.0133, 1.0062, 1.0017, 1.0001, 1);
-  --spring-default: 550ms linear(0, 0.1654, 0.4677, 0.7368, 0.9162, 1.0096, 1.043, 1.0437, 1.0315, 1.0177, 1.0074, 1.0012, 0.9985, 1, 0.9982, 0.9989, 0.9995, 1);
-  --spring-gentle: 650ms linear(0, 0.1162, 0.3622, 0.6245, 0.8404, 0.9868, 1.0661, 1.0937, 1.0885, 1.0672, 1.042, 1.02, 1.0043, 0.9952, 0.9914, 0.9913, 0.993, 0.9954, 0.9976, 0.9993, 1.0003, 1);
-  --spring-bouncy: 1100ms linear(0, 0.0694, 0.237, 0.4486, 0.6622, 0.8494, 0.9944, 1.0924, 1.146, 1.163, 1.1531, 1.1266, 1.0924, 1.0574, 1.0265, 1.0023, 0.9858, 0.9766, 0.9735, 0.9748, 0.979, 0.9845, 0.9903, 0.9954, 0.9994, 1.0022, 1.0037, 1, 1.0041, 1.0035, 1.0026, 1.0017, 1.0008, 1.0001, 0.9997, 1, 1);
-  --ease-bounce: linear(0, 0.0012, 0.0048, 0.0109, 0.0194, 0.0303, 0.0436, 0.0594, 0.0776, 0.0982, 0.1212, 0.1466, 0.1745, 0.2048, 0.2375, 0.2726, 0.3102, 0.3502, 0.3926, 0.4374, 0.4847, 0.5344, 0.5865, 0.641, 0.698, 0.7573, 0.8191, 0.8834, 0.95, 0.9906, 0.9577, 0.9271, 0.8991, 0.8734, 0.8501, 0.8293, 0.8109, 0.795, 0.7814, 0.7703, 0.7616, 0.7553, 0.7514, 0.75, 0.751, 0.7544, 0.7603, 0.7685, 0.7792, 0.7923, 0.8078, 0.8258, 0.8462, 0.869, 0.8942, 0.9219, 0.9519, 0.9844, 0.9909, 0.976, 0.9635, 0.9535, 0.9459, 0.9407, 0.938, 0.9377, 0.9398, 0.9443, 0.9512, 0.9606, 0.9724, 0.9866, 0.9985, 0.9914, 0.9868, 0.9846, 0.9848, 0.9874, 0.9925, 1);
+  --spring-snappy: 300ms
+    linear(0, 0.3601, 0.7689, 0.9599, 1.0117, 1.0133, 1.0062, 1.0017, 1.0001, 1);
+  --spring-default: 550ms
+    linear(
+      0,
+      0.1654,
+      0.4677,
+      0.7368,
+      0.9162,
+      1.0096,
+      1.043,
+      1.0437,
+      1.0315,
+      1.0177,
+      1.0074,
+      1.0012,
+      0.9985,
+      1,
+      0.9982,
+      0.9989,
+      0.9995,
+      1
+    );
+  --spring-gentle: 650ms
+    linear(
+      0,
+      0.1162,
+      0.3622,
+      0.6245,
+      0.8404,
+      0.9868,
+      1.0661,
+      1.0937,
+      1.0885,
+      1.0672,
+      1.042,
+      1.02,
+      1.0043,
+      0.9952,
+      0.9914,
+      0.9913,
+      0.993,
+      0.9954,
+      0.9976,
+      0.9993,
+      1.0003,
+      1
+    );
+  --spring-bouncy: 1100ms
+    linear(
+      0,
+      0.0694,
+      0.237,
+      0.4486,
+      0.6622,
+      0.8494,
+      0.9944,
+      1.0924,
+      1.146,
+      1.163,
+      1.1531,
+      1.1266,
+      1.0924,
+      1.0574,
+      1.0265,
+      1.0023,
+      0.9858,
+      0.9766,
+      0.9735,
+      0.9748,
+      0.979,
+      0.9845,
+      0.9903,
+      0.9954,
+      0.9994,
+      1.0022,
+      1.0037,
+      1,
+      1.0041,
+      1.0035,
+      1.0026,
+      1.0017,
+      1.0008,
+      1.0001,
+      0.9997,
+      1,
+      1
+    );
+  --ease-bounce: linear(
+    0,
+    0.0012,
+    0.0048,
+    0.0109,
+    0.0194,
+    0.0303,
+    0.0436,
+    0.0594,
+    0.0776,
+    0.0982,
+    0.1212,
+    0.1466,
+    0.1745,
+    0.2048,
+    0.2375,
+    0.2726,
+    0.3102,
+    0.3502,
+    0.3926,
+    0.4374,
+    0.4847,
+    0.5344,
+    0.5865,
+    0.641,
+    0.698,
+    0.7573,
+    0.8191,
+    0.8834,
+    0.95,
+    0.9906,
+    0.9577,
+    0.9271,
+    0.8991,
+    0.8734,
+    0.8501,
+    0.8293,
+    0.8109,
+    0.795,
+    0.7814,
+    0.7703,
+    0.7616,
+    0.7553,
+    0.7514,
+    0.75,
+    0.751,
+    0.7544,
+    0.7603,
+    0.7685,
+    0.7792,
+    0.7923,
+    0.8078,
+    0.8258,
+    0.8462,
+    0.869,
+    0.8942,
+    0.9219,
+    0.9519,
+    0.9844,
+    0.9909,
+    0.976,
+    0.9635,
+    0.9535,
+    0.9459,
+    0.9407,
+    0.938,
+    0.9377,
+    0.9398,
+    0.9443,
+    0.9512,
+    0.9606,
+    0.9724,
+    0.9866,
+    0.9985,
+    0.9914,
+    0.9868,
+    0.9846,
+    0.9848,
+    0.9874,
+    0.9925,
+    1
+  );
 }
 
 @theme inline {
@@ -255,7 +420,7 @@
   --color-popover: var(--surface);
   --color-popover-foreground: var(--foreground);
   --color-primary: var(--accent);
-  --color-primary-foreground: #FFFFFF;
+  --color-primary-foreground: #ffffff;
   --color-secondary: var(--surface-tertiary);
   --color-secondary-foreground: var(--foreground);
   --color-muted: var(--surface-tertiary);
@@ -263,16 +428,16 @@
   --color-accent: var(--surface-hover);
   --color-accent-foreground: var(--foreground);
   --color-destructive: var(--danger);
-  --color-destructive-foreground: #FFFFFF;
+  --color-destructive-foreground: #ffffff;
   --color-border: var(--border);
   --color-input: var(--border);
   --color-ring: var(--accent);
   --color-surface: var(--surface);
-  --color-chart-1: #0A84FF;
-  --color-chart-2: #34C759;
-  --color-chart-3: #FF9F0A;
-  --color-chart-4: #AF52DE;
-  --color-chart-5: #FF3B30;
+  --color-chart-1: #0a84ff;
+  --color-chart-2: #34c759;
+  --color-chart-3: #ff9f0a;
+  --color-chart-4: #af52de;
+  --color-chart-5: #ff3b30;
 
   /* Legacy dashboard colors */
   --color-brand-black: var(--brand-black);
@@ -282,20 +447,22 @@
   --color-brand-gray: var(--brand-gray);
 
   /* Swiss Design Palette */
-  --color-brand-cream: #F5F5F0;
-  --color-brand-black-swiss: #0F0F0F;
-  --color-brand-gray-swiss: #E5E5E5;
-  --color-brand-blue-swiss: #2F54EB;
-  --color-brand-orange: #FA8C16;
+  --color-brand-cream: #f5f5f0;
+  --color-brand-black-swiss: #0f0f0f;
+  --color-brand-gray-swiss: #e5e5e5;
+  --color-brand-blue-swiss: #2f54eb;
+  --color-brand-orange: #fa8c16;
 
   /* Typography */
   --font-sans: var(--font-inter), "Helvetica Neue", sans-serif;
   --font-mono: var(--font-jetbrains), "Courier New", monospace;
 
   /* Background Images */
-  --background-image-noise-pattern: url('/assets/noise.png');
-  --background-image-grid-pattern: linear-gradient(to right, #E5E5E5 1px, transparent 1px), linear-gradient(to bottom, #E5E5E5 1px, transparent 1px);
-  --background-image-gradient-brand: linear-gradient(135deg, #2F54EB 0%, #FA8C16 100%);
+  --background-image-noise-pattern: url("/assets/noise.png");
+  --background-image-grid-pattern:
+    linear-gradient(to right, #e5e5e5 1px, transparent 1px),
+    linear-gradient(to bottom, #e5e5e5 1px, transparent 1px);
+  --background-image-gradient-brand: linear-gradient(135deg, #2f54eb 0%, #fa8c16 100%);
 
   /* Glow Shadows */
   --shadow-glow-blue: 0 0 20px rgba(47, 84, 235, 0.5);
@@ -337,7 +504,9 @@ body,
 
 body {
   color: var(--text-primary);
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
   font-weight: 400;
   line-height: 1.5;
   letter-spacing: -0.01em;
@@ -409,31 +578,61 @@ body {
    ============================================ */
 
 @keyframes orbPulse {
-  0%, 100% { transform: scale(1); opacity: 0.6; }
-  50% { transform: scale(1.05); opacity: 0.8; }
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.8;
+  }
 }
 
 @keyframes orbDrift {
-  0% { transform: translate(0, 0) rotate(0deg); }
-  25% { transform: translate(10px, -10px) rotate(2deg); }
-  50% { transform: translate(0, -20px) rotate(0deg); }
-  75% { transform: translate(-10px, -10px) rotate(-2deg); }
-  100% { transform: translate(0, 0) rotate(0deg); }
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  25% {
+    transform: translate(10px, -10px) rotate(2deg);
+  }
+  50% {
+    transform: translate(0, -20px) rotate(0deg);
+  }
+  75% {
+    transform: translate(-10px, -10px) rotate(-2deg);
+  }
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
 }
 
 .blue-orb {
   position: absolute;
   width: 500px;
   height: 500px;
-  background: radial-gradient(circle, var(--accent) 0%, rgba(10, 132, 255, 0.5) 30%, transparent 70%);
+  background: radial-gradient(
+    circle,
+    var(--accent) 0%,
+    rgba(10, 132, 255, 0.5) 30%,
+    transparent 70%
+  );
   border-radius: 50%;
   filter: blur(80px);
-  animation: orbPulse 4s ease-in-out infinite, orbDrift 20s ease-in-out infinite;
+  animation:
+    orbPulse 4s ease-in-out infinite,
+    orbDrift 20s ease-in-out infinite;
   pointer-events: none;
 }
 
-.blue-orb-sm { width: 200px; height: 200px; }
-.blue-orb-lg { width: 800px; height: 800px; }
+.blue-orb-sm {
+  width: 200px;
+  height: 200px;
+}
+.blue-orb-lg {
+  width: 800px;
+  height: 800px;
+}
 .blue-orb-secondary {
   background: radial-gradient(circle, rgba(10, 132, 255, 0.3) 0%, transparent 60%);
   animation-delay: -2s;
@@ -446,19 +645,19 @@ body {
 
 /* Landing page fonts */
 .font-helvetica {
-  font-family: 'Helvetica Custom', "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: "Helvetica Custom", "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
 .font-pixel {
-  font-family: 'PP Mondwest', monospace;
+  font-family: "PP Mondwest", monospace;
 }
 
 .font-mono {
-  font-family: 'SF Mono', 'Menlo', 'Consolas', monospace;
+  font-family: "SF Mono", "Menlo", "Consolas", monospace;
 }
 
 .font-russo {
-  font-family: 'Russo One', sans-serif;
+  font-family: "Russo One", sans-serif;
 }
 
 /* Headlines */
@@ -490,7 +689,7 @@ body {
 
 /* Legacy label classes (landing page) */
 .label-mono {
-  font-family: 'VCR OSD Mono', monospace;
+  font-family: "VCR OSD Mono", monospace;
   font-size: 10px;
   letter-spacing: 0.15em;
   text-transform: uppercase;
@@ -507,9 +706,15 @@ body {
 }
 
 @keyframes gradientShift {
-  0% { background-position: 0% center; }
-  50% { background-position: 100% center; }
-  100% { background-position: 0% center; }
+  0% {
+    background-position: 0% center;
+  }
+  50% {
+    background-position: 100% center;
+  }
+  100% {
+    background-position: 0% center;
+  }
 }
 
 /* ============================================
@@ -522,9 +727,16 @@ body {
 }
 
 @keyframes snapGlow {
-  0% { opacity: 0; }
-  50% { opacity: 0.4; filter: blur(0); }
-  100% { opacity: 0; }
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.4;
+    filter: blur(0);
+  }
+  100% {
+    opacity: 0;
+  }
 }
 
 .snap-glow-active {
@@ -540,34 +752,70 @@ body {
 }
 
 @keyframes breathe {
-  0%, 100% { opacity: 0.6; transform: translateX(-50%) scale(1); }
-  50% { opacity: 0.8; transform: translateX(-50%) scale(1.1); }
+  0%,
+  100% {
+    opacity: 0.6;
+    transform: translateX(-50%) scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: translateX(-50%) scale(1.1);
+  }
 }
 
 @keyframes dnaFloat {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-15px); }
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-15px);
+  }
 }
 
 @keyframes gridPulse {
-  0%, 100% { opacity: 0.4; }
-  50% { opacity: 0.5; }
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
 @keyframes slideInFromRight {
-  from { opacity: 0; transform: translateX(100%); }
-  to { opacity: 1; transform: translateX(0); }
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 @keyframes pulse-slow {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
-.animate-breathe { animation: breathe 6s infinite ease-in-out; }
-.animate-dna-float { animation: dnaFloat 8s infinite ease-in-out; }
-.animate-grid-pulse { animation: gridPulse 8s infinite ease-in-out; }
-.animate-slide-in-right { animation: slideInFromRight 0.6s ease-out forwards; }
+.animate-breathe {
+  animation: breathe 6s infinite ease-in-out;
+}
+.animate-dna-float {
+  animation: dnaFloat 8s infinite ease-in-out;
+}
+.animate-grid-pulse {
+  animation: gridPulse 8s infinite ease-in-out;
+}
+.animate-slide-in-right {
+  animation: slideInFromRight 0.6s ease-out forwards;
+}
 
 /* ============================================
    BUTTONS — APPLE STYLE
@@ -610,7 +858,9 @@ body {
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   cursor: pointer;
-  transition: background var(--transition-fast), border-color var(--transition-fast);
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast);
 }
 
 .btn-glass:hover {
@@ -629,11 +879,11 @@ body {
 
 /* Legacy button styles (landing page) */
 .btn-brand {
-  font-family: 'VCR OSD Mono', monospace;
+  font-family: "VCR OSD Mono", monospace;
   font-size: 12px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #FFFFFF;
+  color: #ffffff;
   background: var(--accent);
   border: none;
   padding: 16px 48px;
@@ -659,41 +909,97 @@ body {
    ============================================ */
 
 @keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes slideInRight {
-  from { opacity: 0; transform: translateX(-12px); }
-  to { opacity: 1; transform: translateX(0); }
+  from {
+    opacity: 0;
+    transform: translateX(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 @keyframes scaleIn {
-  from { opacity: 0; transform: scale(0.97); }
-  to { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
-.animate-fade-in-up { animation: fadeInUp 0.4s ease-out forwards; }
-.animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
-.animate-slide-in { animation: slideInRight 0.3s ease-out forwards; }
-.animate-scale-in { animation: scaleIn 0.25s ease-out forwards; }
+.animate-fade-in-up {
+  animation: fadeInUp 0.4s ease-out forwards;
+}
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+.animate-slide-in {
+  animation: slideInRight 0.3s ease-out forwards;
+}
+.animate-scale-in {
+  animation: scaleIn 0.25s ease-out forwards;
+}
 
-.delay-100 { animation-delay: 100ms; }
-.delay-200 { animation-delay: 200ms; }
-.delay-300 { animation-delay: 300ms; }
-.delay-400 { animation-delay: 400ms; }
-.delay-500 { animation-delay: 500ms; }
+.delay-100 {
+  animation-delay: 100ms;
+}
+.delay-200 {
+  animation-delay: 200ms;
+}
+.delay-300 {
+  animation-delay: 300ms;
+}
+.delay-400 {
+  animation-delay: 400ms;
+}
+.delay-500 {
+  animation-delay: 500ms;
+}
 
 /* Spring utilities (kept for micro-interactions) */
-.spring-snappy { transition: transform var(--spring-snappy), opacity var(--spring-snappy); }
-.spring-default { transition: transform var(--spring-default), opacity var(--spring-default); }
-.spring-bouncy { transition: transform var(--spring-bouncy), opacity var(--spring-bouncy); }
-.spring-gentle { transition: transform var(--spring-gentle), opacity var(--spring-gentle); }
+.spring-snappy {
+  transition:
+    transform var(--spring-snappy),
+    opacity var(--spring-snappy);
+}
+.spring-default {
+  transition:
+    transform var(--spring-default),
+    opacity var(--spring-default);
+}
+.spring-bouncy {
+  transition:
+    transform var(--spring-bouncy),
+    opacity var(--spring-bouncy);
+}
+.spring-gentle {
+  transition:
+    transform var(--spring-gentle),
+    opacity var(--spring-gentle);
+}
 
 .animate-spring-scale-in {
   animation: scaleIn 400ms var(--spring-default) forwards;
@@ -734,16 +1040,27 @@ body {
   display: none;
 }
 
-.custom-scrollbar::-webkit-scrollbar { width: 4px; }
-.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-.custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.08); border-radius: 4px; }
-.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.15); }
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
 
 /* ============================================
    FORM ELEMENTS
    ============================================ */
 
-input, textarea, select {
+input,
+textarea,
+select {
   background: var(--surface-tertiary);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
@@ -753,13 +1070,16 @@ input, textarea, select {
   transition: border-color var(--transition-fast);
 }
 
-input:focus, textarea:focus, select:focus {
+input:focus,
+textarea:focus,
+select:focus {
   outline: none;
   border-color: var(--accent);
   box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.15);
 }
 
-input::placeholder, textarea::placeholder {
+input::placeholder,
+textarea::placeholder {
   color: var(--text-tertiary);
 }
 
@@ -826,14 +1146,30 @@ input[type="range"]::-webkit-slider-thumb:hover {
    LEGACY — LANDING PAGE SUPPORT
    ============================================ */
 
-.bg-background { background-color: var(--background); }
-.bg-surface { background-color: var(--surface); }
-.bg-foreground { background-color: var(--foreground); }
-.text-foreground { color: var(--foreground); }
-.text-muted { color: var(--muted); }
-.text-background { color: var(--background); }
-.border-border { border-color: var(--border); }
-.border-foreground { border-color: var(--foreground); }
+.bg-background {
+  background-color: var(--background);
+}
+.bg-surface {
+  background-color: var(--surface);
+}
+.bg-foreground {
+  background-color: var(--foreground);
+}
+.text-foreground {
+  color: var(--foreground);
+}
+.text-muted {
+  color: var(--muted);
+}
+.text-background {
+  color: var(--background);
+}
+.border-border {
+  border-color: var(--border);
+}
+.border-foreground {
+  border-color: var(--foreground);
+}
 
 .glass {
   background: var(--glass-bg);
@@ -843,19 +1179,30 @@ input[type="range"]::-webkit-slider-thumb:hover {
 }
 
 /* BrandOS Logo (landing page) */
-.brandos-logo { display: flex; align-items: baseline; gap: 2px; }
+.brandos-logo {
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+}
 .brandos-logo .brand {
-  font-family: 'Helvetica Custom', sans-serif;
+  font-family: "Helvetica Custom", sans-serif;
   font-weight: 400;
   letter-spacing: -0.02em;
 }
 .brandos-logo .os {
-  font-family: 'PP Mondwest', monospace;
+  font-family: "PP Mondwest", monospace;
   color: var(--accent);
 }
 
 .os-shimmer {
-  background: linear-gradient(90deg, #0A84FF 0%, #4499FF 25%, #0A84FF 50%, #4499FF 75%, #0A84FF 100%);
+  background: linear-gradient(
+    90deg,
+    #0a84ff 0%,
+    #4499ff 25%,
+    #0a84ff 50%,
+    #4499ff 75%,
+    #0a84ff 100%
+  );
   background-size: 200% 100%;
   -webkit-background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
@@ -864,120 +1211,302 @@ input[type="range"]::-webkit-slider-thumb:hover {
 }
 
 @keyframes shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 /* Landing page pill nav */
-.pill-nav { display: flex; gap: 8px; }
-.pill-item {
-  display: flex; flex-direction: column; align-items: center; gap: 4px;
-  padding: 12px 20px; background: var(--glass-bg);
-  border: 1px solid var(--glass-border); border-radius: var(--radius-pill);
-  cursor: pointer; transition: all var(--transition-fast);
+.pill-nav {
+  display: flex;
+  gap: 8px;
 }
-.pill-item:hover { background: var(--glass-hover); border-color: rgba(255, 255, 255, 0.2); }
-.pill-item.active { background: var(--accent); border-color: var(--accent); }
-.pill-number { font-family: 'VCR OSD Mono', monospace; font-size: 10px; letter-spacing: 0.1em; opacity: 0.6; }
-.pill-item.active .pill-number { opacity: 1; }
-.pill-label { font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; }
+.pill-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 20px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+.pill-item:hover {
+  background: var(--glass-hover);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+.pill-item.active {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.pill-number {
+  font-family: "VCR OSD Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  opacity: 0.6;
+}
+.pill-item.active .pill-number {
+  opacity: 1;
+}
+.pill-label {
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
 
 /* Landing page section headers */
-.section-header-line { display: flex; align-items: center; gap: 16px; margin-bottom: 32px; }
-.section-title {
-  font-family: 'PP Mondwest', sans-serif;
-  font-size: 14px; text-transform: uppercase; letter-spacing: 0.2em; color: var(--text-secondary);
+.section-header-line {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 32px;
 }
-.section-arrow { flex: 1; height: 1px; background: linear-gradient(90deg, var(--border) 0%, transparent 100%); }
-.section-arrow::after { content: '→'; position: relative; left: calc(100% - 20px); color: var(--text-secondary); }
+.section-title {
+  font-family: "PP Mondwest", sans-serif;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--text-secondary);
+}
+.section-arrow {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--border) 0%, transparent 100%);
+}
+.section-arrow::after {
+  content: "→";
+  position: relative;
+  left: calc(100% - 20px);
+  color: var(--text-secondary);
+}
 
-.section-header { text-align: center; padding: 64px 24px; border-bottom: 1px solid var(--border); }
-.section-header h2 { font-size: clamp(2rem, 5vw, 3rem); font-weight: 300; letter-spacing: -0.02em; margin-bottom: 16px; }
-.section-header p { color: var(--text-secondary); font-size: 1.125rem; max-width: 28rem; margin: 0 auto; }
+.section-header {
+  text-align: center;
+  padding: 64px 24px;
+  border-bottom: 1px solid var(--border);
+}
+.section-header h2 {
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 300;
+  letter-spacing: -0.02em;
+  margin-bottom: 16px;
+}
+.section-header p {
+  color: var(--text-secondary);
+  font-size: 1.125rem;
+  max-width: 28rem;
+  margin: 0 auto;
+}
 
 .vcr-label {
-  font-family: 'VCR OSD Mono', monospace;
-  font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+  font-family: "VCR OSD Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
 }
 
 .phase-badge {
-  font-family: 'VCR OSD Mono', monospace;
-  font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
-  color: var(--accent); background: var(--blue-subtle); padding: 4px 8px; border-radius: 4px;
+  font-family: "VCR OSD Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: var(--blue-subtle);
+  padding: 4px 8px;
+  border-radius: 4px;
 }
 
 /* Legacy tags */
 .tag {
-  display: inline-flex; align-items: center; padding: 4px 10px;
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius-pill); font-size: 11px; font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  font-weight: 500;
 }
-.tag-blue { background: var(--blue-subtle); border-color: rgba(10, 132, 255, 0.2); color: var(--accent); }
+.tag-blue {
+  background: var(--blue-subtle);
+  border-color: rgba(10, 132, 255, 0.2);
+  color: var(--accent);
+}
 
-.divider { height: 1px; background: var(--separator); }
+.divider {
+  height: 1px;
+  background: var(--separator);
+}
 
 /* Progress ring */
-.progress-ring { transform: rotate(-90deg); }
-.progress-ring-bg { stroke: var(--surface-tertiary); }
-.progress-ring-fill { stroke: var(--accent); stroke-linecap: round; transition: stroke-dashoffset 0.5s ease-out; }
+.progress-ring {
+  transform: rotate(-90deg);
+}
+.progress-ring-bg {
+  stroke: var(--surface-tertiary);
+}
+.progress-ring-fill {
+  stroke: var(--accent);
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.5s ease-out;
+}
 
-.status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+}
 
-pre, code {
-  font-family: 'SF Mono', 'Menlo', Consolas, monospace;
+pre,
+code {
+  font-family: "SF Mono", "Menlo", Consolas, monospace;
   font-size: 12px;
   background: var(--surface);
   border-radius: var(--radius-sm);
 }
-pre { padding: 16px; overflow-x: auto; }
-code { padding: 2px 6px; }
+pre {
+  padding: 16px;
+  overflow-x: auto;
+}
+code {
+  padding: 2px 6px;
+}
 
-.tab-content { animation: fadeIn 0.25s ease-out; }
-.asset-card { transition: background var(--transition-fast); }
-.asset-card:hover { background: var(--surface-hover); }
-.dropzone { border: 2px dashed var(--border); transition: border-color 0.2s ease; }
-.dropzone:hover, .dropzone.dragover { border-color: var(--accent); background-color: rgba(10, 132, 255, 0.05); }
+.tab-content {
+  animation: fadeIn 0.25s ease-out;
+}
+.asset-card {
+  transition: background var(--transition-fast);
+}
+.asset-card:hover {
+  background: var(--surface-hover);
+}
+.dropzone {
+  border: 2px dashed var(--border);
+  transition: border-color 0.2s ease;
+}
+.dropzone:hover,
+.dropzone.dragover {
+  border-color: var(--accent);
+  background-color: rgba(10, 132, 255, 0.05);
+}
 
 /* Card spring — simplified for app shell */
-.card-spring { transition: background var(--transition-fast); }
-.card-spring:hover { background: var(--surface-hover); }
+.card-spring {
+  transition: background var(--transition-fast);
+}
+.card-spring:hover {
+  background: var(--surface-hover);
+}
 
 /* Bento grid (kept for legacy, simplified) */
-.bento-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 16px; padding: 16px; }
-.bento-item { background: var(--surface); border-radius: var(--radius-lg); overflow: hidden; transition: background var(--transition-medium); }
-.bento-item:hover { background: var(--surface-hover); }
-.bento-sm { grid-column: span 3; }
-.bento-md { grid-column: span 4; }
-.bento-lg { grid-column: span 6; }
-.bento-xl { grid-column: span 8; }
-.bento-full { grid-column: span 12; }
-.bento-tall { grid-row: span 2; }
+.bento-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 16px;
+  padding: 16px;
+}
+.bento-item {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: background var(--transition-medium);
+}
+.bento-item:hover {
+  background: var(--surface-hover);
+}
+.bento-sm {
+  grid-column: span 3;
+}
+.bento-md {
+  grid-column: span 4;
+}
+.bento-lg {
+  grid-column: span 6;
+}
+.bento-xl {
+  grid-column: span 8;
+}
+.bento-full {
+  grid-column: span 12;
+}
+.bento-tall {
+  grid-row: span 2;
+}
 @media (max-width: 1024px) {
-  .bento-sm { grid-column: span 6; }
-  .bento-md { grid-column: span 6; }
-  .bento-lg, .bento-xl { grid-column: span 12; }
+  .bento-sm {
+    grid-column: span 6;
+  }
+  .bento-md {
+    grid-column: span 6;
+  }
+  .bento-lg,
+  .bento-xl {
+    grid-column: span 12;
+  }
 }
 @media (max-width: 640px) {
-  .bento-grid { grid-template-columns: 1fr; }
-  .bento-sm, .bento-md, .bento-lg, .bento-xl, .bento-full { grid-column: span 1; }
+  .bento-grid {
+    grid-template-columns: 1fr;
+  }
+  .bento-sm,
+  .bento-md,
+  .bento-lg,
+  .bento-xl,
+  .bento-full {
+    grid-column: span 1;
+  }
 }
 
 /* Landing page typography */
-.font-inter { font-family: 'Inter', sans-serif; }
-.logo-brand-text { font-family: 'Blauer Nue', 'Inter', sans-serif; font-weight: 800; font-style: italic; letter-spacing: -2px; }
-.logo-os-text { font-family: 'Mac Minecraft', 'Press Start 2P', cursive; font-weight: 700; font-style: italic; color: #0047FF; letter-spacing: -0.05em; }
-.landing-input::placeholder { color: #f5f0e8 !important; opacity: 0.7; }
-.landing-input-light::placeholder { color: #666666 !important; opacity: 0.8; }
-.capturing .grayscale, .capturing img.grayscale { filter: none !important; }
-.capturing .capture-logo { display: flex !important; }
-.capturing .capture-hide { display: none !important; }
+.font-inter {
+  font-family: "Inter", sans-serif;
+}
+.logo-brand-text {
+  font-family: "Blauer Nue", "Inter", sans-serif;
+  font-weight: 800;
+  font-style: italic;
+  letter-spacing: -2px;
+}
+.logo-os-text {
+  font-family: "Mac Minecraft", "Press Start 2P", cursive;
+  font-weight: 700;
+  font-style: italic;
+  color: #0047ff;
+  letter-spacing: -0.05em;
+}
+.landing-input::placeholder {
+  color: #f5f0e8 !important;
+  opacity: 0.7;
+}
+.landing-input-light::placeholder {
+  color: #666666 !important;
+  opacity: 0.8;
+}
+.capturing .grayscale,
+.capturing img.grayscale {
+  filter: none !important;
+}
+.capturing .capture-logo {
+  display: flex !important;
+}
+.capturing .capture-hide {
+  display: none !important;
+}
 
 /* ============================================
    RETRO OS — CRT SCANLINES & TERMINAL INPUT
    ============================================ */
 
 .crt-scanlines::after {
-  content: '';
+  content: "";
   position: fixed;
   inset: 0;
   background: repeating-linear-gradient(
@@ -992,19 +1521,30 @@ code { padding: 2px 6px; }
 }
 
 .terminal-input {
-  font-family: 'VCR OSD Mono', monospace;
-  caret-color: #0047FF;
+  font-family: "VCR OSD Mono", monospace;
+  caret-color: #0047ff;
 }
 
 /* Content engine slide-in animation */
 @keyframes slideIn {
-  from { opacity: 0; transform: scaleX(0.3); }
-  to { opacity: 1; transform: scaleX(1); }
+  from {
+    opacity: 0;
+    transform: scaleX(0.3);
+  }
+  to {
+    opacity: 1;
+    transform: scaleX(1);
+  }
 }
 
 /* Subtle motion for content engine toggle buttons — 25% effect */
 .btn-engine {
-  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    background 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease;
 }
 .btn-engine:hover {
   transform: translateY(-1px);
@@ -1018,11 +1558,14 @@ code { padding: 2px 6px; }
 .terminal-input::placeholder {
   color: var(--text-quaternary);
   opacity: 0.5;
-  font-family: 'VCR OSD Mono', monospace;
+  font-family: "VCR OSD Mono", monospace;
 }
 
 @media print {
-  body { background: white !important; color: black !important; }
+  body {
+    background: white !important;
+    color: black !important;
+  }
 }
 
 /* ============================================
@@ -1034,10 +1577,22 @@ code { padding: 2px 6px; }
   box-shadow: none !important;
   background: transparent !important;
 }
-.workflow-canvas .react-flow__edge-path { stroke-linecap: round; }
-.workflow-canvas .react-flow__handle { transition: transform 0.2s ease, box-shadow 0.2s ease; }
-.workflow-canvas .react-flow__handle:hover { transform: scale(1.4); box-shadow: 0 0 8px currentColor; }
-.workflow-canvas .react-flow__selection { background: rgba(10, 132, 255, 0.05); border: 1px solid rgba(10, 132, 255, 0.3); }
+.workflow-canvas .react-flow__edge-path {
+  stroke-linecap: round;
+}
+.workflow-canvas .react-flow__handle {
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+.workflow-canvas .react-flow__handle:hover {
+  transform: scale(1.4);
+  box-shadow: 0 0 8px currentColor;
+}
+.workflow-canvas .react-flow__selection {
+  background: rgba(10, 132, 255, 0.05);
+  border: 1px solid rgba(10, 132, 255, 0.3);
+}
 .workflow-controls {
   background: var(--surface) !important;
   border: 1px solid var(--border) !important;
@@ -1048,16 +1603,23 @@ code { padding: 2px 6px; }
   border-bottom: 1px solid var(--border) !important;
   color: var(--text-tertiary) !important;
   fill: var(--text-tertiary) !important;
-  width: 28px !important; height: 28px !important;
+  width: 28px !important;
+  height: 28px !important;
 }
 .workflow-controls button:hover {
   background: var(--surface-hover) !important;
   color: var(--text-primary) !important;
   fill: var(--text-primary) !important;
 }
-.workflow-controls button:last-child { border-bottom: none !important; }
-.workflow-controls button svg { fill: currentColor !important; }
-.react-flow__minimap { background: var(--surface) !important; }
+.workflow-controls button:last-child {
+  border-bottom: none !important;
+}
+.workflow-controls button svg {
+  fill: currentColor !important;
+}
+.react-flow__minimap {
+  background: var(--surface) !important;
+}
 
 /* ============================================
    MOBILE RESPONSIVE — HERO & HOMEPAGE
@@ -1075,7 +1637,7 @@ code { padding: 2px 6px; }
 
 /* Hero tagline text — desktop */
 .hero-tagline-text {
-  font-family: 'M42 Flight 721', sans-serif;
+  font-family: "M42 Flight 721", sans-serif;
   font-size: clamp(0.75rem, 1.8vw, 1.1rem);
   letter-spacing: 0.15em;
   white-space: nowrap;

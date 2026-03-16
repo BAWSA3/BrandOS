@@ -6,16 +6,16 @@ import { Platform, BrandDNA } from '@/lib/types';
 
 // ===== INTENT CLASSIFICATION =====
 
-export type IntentType = 
-  | 'idea'        // New feature or capability
-  | 'bug'         // Something isn't working
-  | 'question'    // Need information
-  | 'task'        // Specific action to take
+export type IntentType =
+  | 'idea' // New feature or capability
+  | 'bug' // Something isn't working
+  | 'question' // Need information
+  | 'task' // Specific action to take
   | 'exploration' // Research/discovery
-  | 'audit'       // System health check
-  | 'campaign'    // Marketing campaign
-  | 'content'     // Content creation
-  | 'analytics';  // Performance analysis
+  | 'audit' // System health check
+  | 'campaign' // Marketing campaign
+  | 'content' // Content creation
+  | 'analytics'; // Performance analysis
 
 export interface IntentClassification {
   type: IntentType;
@@ -26,7 +26,7 @@ export interface IntentClassification {
 
 // ===== WORKFLOW TYPES =====
 
-export type WorkflowType = 
+export type WorkflowType =
   | 'idea-to-impl'
   | 'idea-to-campaign'
   | 'content-creation'
@@ -81,7 +81,13 @@ export interface ConductorMessage {
 }
 
 export interface ConductorArtifact {
-  type: 'workflow-plan' | 'campaign-plan' | 'content' | 'analytics-report' | 'checkpoint' | 'summary';
+  type:
+    | 'workflow-plan'
+    | 'campaign-plan'
+    | 'content'
+    | 'analytics-report'
+    | 'checkpoint'
+    | 'summary';
   title: string;
   data: unknown;
   expandable?: boolean;
@@ -105,7 +111,8 @@ export const conductorPersona = {
   displayName: 'Conductor',
   title: 'The Orchestrator',
   avatar: '🎼',
-  description: 'I orchestrate your AI agent team, routing tasks to the right specialists and managing complex workflows.',
+  description:
+    'I orchestrate your AI agent team, routing tasks to the right specialists and managing complex workflows.',
   accentColor: '#6366F1', // Indigo
   capabilities: [
     'Understand your intent and classify requests',
@@ -171,7 +178,7 @@ export function createWorkflowPlan(
     type,
     name,
     description,
-    steps: steps.map(s => ({ ...s, status: 'pending' as const })),
+    steps: steps.map((s) => ({ ...s, status: 'pending' as const })),
     currentStepIndex: 0,
     status: 'planning',
     createdAt: new Date(),
@@ -181,25 +188,32 @@ export function createWorkflowPlan(
 
 export function getWorkflowStatusEmoji(status: WorkflowStep['status']): string {
   switch (status) {
-    case 'pending': return '○';
-    case 'in_progress': return '◉';
-    case 'completed': return '✓';
-    case 'failed': return '✗';
-    case 'skipped': return '−';
-    default: return '○';
+    case 'pending':
+      return '○';
+    case 'in_progress':
+      return '◉';
+    case 'completed':
+      return '✓';
+    case 'failed':
+      return '✗';
+    case 'skipped':
+      return '−';
+    default:
+      return '○';
   }
 }
 
 export function getAgentEmoji(agentName: AgentName | 'conductor'): string {
   switch (agentName) {
-    case 'conductor': return '🎼';
-    case 'campaign': return '🎯';
-    case 'content': return '✍️';
-    case 'analytics': return '📊';
-    default: return '🤖';
+    case 'conductor':
+      return '🎼';
+    case 'campaign':
+      return '🎯';
+    case 'content':
+      return '✍️';
+    case 'analytics':
+      return '📊';
+    default:
+      return '🤖';
   }
 }
-
-
-
-

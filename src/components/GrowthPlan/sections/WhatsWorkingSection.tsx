@@ -46,13 +46,15 @@ export default function WhatsWorkingSection({ plan, onComplete }: WhatsWorkingSe
             style={{ padding: '60px 24px', maxWidth: '640px', margin: '0 auto' }}
           >
             {/* Terminal header */}
-            <div style={{
-              fontFamily: "'VCR OSD Mono', monospace",
-              fontSize: '10px',
-              letterSpacing: '0.1em',
-              color: 'rgba(0,0,0,0.4)',
-              marginBottom: '32px',
-            }}>
+            <div
+              style={{
+                fontFamily: "'VCR OSD Mono', monospace",
+                fontSize: '10px',
+                letterSpacing: '0.1em',
+                color: 'rgba(0,0,0,0.4)',
+                marginBottom: '32px',
+              }}
+            >
               /* ═══════════════════════════════════ */
               <br />
               /*{'  '}WHAT&apos;S WORKING (DON&apos;T TOUCH){'     '}*/
@@ -86,22 +88,26 @@ export default function WhatsWorkingSection({ plan, onComplete }: WhatsWorkingSe
                     }}
                   >
                     <div>
-                      <div style={{
-                        fontFamily: "'Helvetica Neue', sans-serif",
-                        fontSize: '14px',
-                        fontWeight: 500,
-                        color: isRevealed ? '#000' : 'rgba(0,0,0,0.3)',
-                        marginBottom: '4px',
-                      }}>
+                      <div
+                        style={{
+                          fontFamily: "'Helvetica Neue', sans-serif",
+                          fontSize: '14px',
+                          fontWeight: 500,
+                          color: isRevealed ? '#000' : 'rgba(0,0,0,0.3)',
+                          marginBottom: '4px',
+                        }}
+                      >
                         {isRevealed ? strength.metric : '???'}
                       </div>
-                      <div style={{
-                        display: 'flex',
-                        gap: '16px',
-                        fontFamily: "'VCR OSD Mono', monospace",
-                        fontSize: '10px',
-                        letterSpacing: '0.05em',
-                      }}>
+                      <div
+                        style={{
+                          display: 'flex',
+                          gap: '16px',
+                          fontFamily: "'VCR OSD Mono', monospace",
+                          fontSize: '10px',
+                          letterSpacing: '0.05em',
+                        }}
+                      >
                         <span style={{ color: isRevealed ? '#0047FF' : 'rgba(0,0,0,0.2)' }}>
                           {isRevealed ? `yours: ${strength.value}` : '---'}
                         </span>
@@ -110,16 +116,20 @@ export default function WhatsWorkingSection({ plan, onComplete }: WhatsWorkingSe
                         </span>
                       </div>
                     </div>
-                    <div style={{
-                      fontFamily: "'VCR OSD Mono', monospace",
-                      fontSize: '10px',
-                      letterSpacing: '0.1em',
-                      padding: '4px 10px',
-                      borderRadius: '4px',
-                      background: isRevealed ? `${getVerdictColor(strength.verdict)}15` : 'rgba(0,0,0,0.03)',
-                      color: isRevealed ? getVerdictColor(strength.verdict) : 'rgba(0,0,0,0.2)',
-                      fontWeight: 600,
-                    }}>
+                    <div
+                      style={{
+                        fontFamily: "'VCR OSD Mono', monospace",
+                        fontSize: '10px',
+                        letterSpacing: '0.1em',
+                        padding: '4px 10px',
+                        borderRadius: '4px',
+                        background: isRevealed
+                          ? `${getVerdictColor(strength.verdict)}15`
+                          : 'rgba(0,0,0,0.03)',
+                        color: isRevealed ? getVerdictColor(strength.verdict) : 'rgba(0,0,0,0.2)',
+                        fontWeight: 600,
+                      }}
+                    >
                       {isRevealed ? strength.verdict.toUpperCase() : '?'}
                     </div>
                   </motion.div>
@@ -137,7 +147,7 @@ export default function WhatsWorkingSection({ plan, onComplete }: WhatsWorkingSe
               <button
                 onClick={() => {
                   if (!allRevealed) {
-                    setRevealedCount(prev => prev + 1);
+                    setRevealedCount((prev) => prev + 1);
                   } else {
                     onComplete();
                   }
@@ -150,18 +160,18 @@ export default function WhatsWorkingSection({ plan, onComplete }: WhatsWorkingSe
                   cursor: 'pointer',
                   transition: 'all 0.2s',
                 }}
-                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
-                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.02)')}
+                onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}
               >
-                <span style={{
-                  fontFamily: "'VCR OSD Mono', monospace",
-                  fontSize: '11px',
-                  letterSpacing: '0.12em',
-                  color: '#fff',
-                }}>
-                  {allRevealed
-                    ? 'NOW SHOW ME THE PROBLEM'
-                    : `REVEAL STRENGTH ${revealedCount + 1}`}
+                <span
+                  style={{
+                    fontFamily: "'VCR OSD Mono', monospace",
+                    fontSize: '11px',
+                    letterSpacing: '0.12em',
+                    color: '#fff',
+                  }}
+                >
+                  {allRevealed ? 'NOW SHOW ME THE PROBLEM' : `REVEAL STRENGTH ${revealedCount + 1}`}
                 </span>
               </button>
             </motion.div>

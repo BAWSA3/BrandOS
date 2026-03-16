@@ -10,21 +10,36 @@ interface BreakdownTeaserProps {
   improvements: string[];
 }
 
-type TeaserPhase = 'idle' | 'erasing' | 'typing-email' | 'email-input' | 'submitting' | 'erasing-confirm' | 'typing-confirm' | 'done';
+type TeaserPhase =
+  | 'idle'
+  | 'erasing'
+  | 'typing-email'
+  | 'email-input'
+  | 'submitting'
+  | 'erasing-confirm'
+  | 'typing-confirm'
+  | 'done';
 
 function useTypewriter(text: string, speed: number = 40, active: boolean = false) {
   const [displayed, setDisplayed] = useState('');
   const [done, setDone] = useState(false);
 
   useEffect(() => {
-    if (!active) { setDisplayed(''); setDone(false); return; }
+    if (!active) {
+      setDisplayed('');
+      setDone(false);
+      return;
+    }
     let i = 0;
     setDisplayed('');
     setDone(false);
     const interval = setInterval(() => {
       i++;
       setDisplayed(text.slice(0, i));
-      if (i >= text.length) { clearInterval(interval); setDone(true); }
+      if (i >= text.length) {
+        clearInterval(interval);
+        setDone(true);
+      }
     }, speed);
     return () => clearInterval(interval);
   }, [text, speed, active]);
@@ -37,14 +52,21 @@ function useBackspace(text: string, speed: number = 25, active: boolean = false)
   const [done, setDone] = useState(false);
 
   useEffect(() => {
-    if (!active) { setDisplayed(text); setDone(false); return; }
+    if (!active) {
+      setDisplayed(text);
+      setDone(false);
+      return;
+    }
     let len = text.length;
     setDisplayed(text);
     setDone(false);
     const interval = setInterval(() => {
       len--;
       setDisplayed(text.slice(0, len));
-      if (len <= 0) { clearInterval(interval); setDone(true); }
+      if (len <= 0) {
+        clearInterval(interval);
+        setDone(true);
+      }
     }, speed);
     return () => clearInterval(interval);
   }, [text, speed, active]);
@@ -52,7 +74,12 @@ function useBackspace(text: string, speed: number = 25, active: boolean = false)
   return { displayed, done };
 }
 
-export default function BreakdownTeaser({ brandScore, archetype, strengths, improvements }: BreakdownTeaserProps) {
+export default function BreakdownTeaser({
+  brandScore,
+  archetype,
+  strengths,
+  improvements,
+}: BreakdownTeaserProps) {
   const [phase, setPhase] = useState<TeaserPhase>('idle');
   const [email, setEmail] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -62,7 +89,9 @@ export default function BreakdownTeaser({ brandScore, archetype, strengths, impr
 
   // Phase: erasing the button text
   const erase1 = useBackspace(buttonText, 20, phase === 'erasing');
-  useEffect(() => { if (erase1.done && phase === 'erasing') setPhase('typing-email'); }, [erase1.done, phase]);
+  useEffect(() => {
+    if (erase1.done && phase === 'erasing') setPhase('typing-email');
+  }, [erase1.done, phase]);
 
   // Phase: typing "enter your email"
   const typeEmail = useTypewriter('enter your email', 40, phase === 'typing-email');
@@ -75,11 +104,15 @@ export default function BreakdownTeaser({ brandScore, archetype, strengths, impr
 
   // Phase: erasing before confirm
   const erase2 = useBackspace('enter your email', 20, phase === 'erasing-confirm');
-  useEffect(() => { if (erase2.done && phase === 'erasing-confirm') setPhase('typing-confirm'); }, [erase2.done, phase]);
+  useEffect(() => {
+    if (erase2.done && phase === 'erasing-confirm') setPhase('typing-confirm');
+  }, [erase2.done, phase]);
 
   // Phase: typing confirm message
   const typeConfirm = useTypewriter('got it. check your inbox', 40, phase === 'typing-confirm');
-  useEffect(() => { if (typeConfirm.done && phase === 'typing-confirm') setPhase('done'); }, [typeConfirm.done, phase]);
+  useEffect(() => {
+    if (typeConfirm.done && phase === 'typing-confirm') setPhase('done');
+  }, [typeConfirm.done, phase]);
 
   const handleClick = () => {
     if (phase === 'idle') setPhase('erasing');
@@ -157,66 +190,146 @@ export default function BreakdownTeaser({ brandScore, archetype, strengths, impr
       }}
     >
       {/* Blurred preview of breakdown data */}
-      <div style={{
-        position: 'relative',
-        borderRadius: '16px',
-        overflow: 'hidden',
-        border: '1px solid rgba(255,255,255,0.08)',
-        marginBottom: '24px',
-      }}>
-        <div style={{
-          padding: '32px 24px',
-          background: 'rgba(255,255,255,0.03)',
-          filter: 'blur(6px)',
-          pointerEvents: 'none',
-          userSelect: 'none',
-        }}>
+      <div
+        style={{
+          position: 'relative',
+          borderRadius: '16px',
+          overflow: 'hidden',
+          border: '1px solid rgba(255,255,255,0.08)',
+          marginBottom: '24px',
+        }}
+      >
+        <div
+          style={{
+            padding: '32px 24px',
+            background: 'rgba(255,255,255,0.03)',
+            filter: 'blur(6px)',
+            pointerEvents: 'none',
+            userSelect: 'none',
+          }}
+        >
           {/* Fake breakdown preview content */}
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
             <div>
-              <div style={{ fontFamily: "'VCR OSD Mono', monospace", fontSize: '10px', color: 'rgba(255,255,255,0.4)', letterSpacing: '0.1em', marginBottom: '4px' }}>ARCHETYPE</div>
-              <div style={{ fontFamily: "'VCR OSD Mono', monospace", fontSize: '16px', color: '#fff' }}>{archetype}</div>
+              <div
+                style={{
+                  fontFamily: "'VCR OSD Mono', monospace",
+                  fontSize: '10px',
+                  color: 'rgba(255,255,255,0.4)',
+                  letterSpacing: '0.1em',
+                  marginBottom: '4px',
+                }}
+              >
+                ARCHETYPE
+              </div>
+              <div
+                style={{ fontFamily: "'VCR OSD Mono', monospace", fontSize: '16px', color: '#fff' }}
+              >
+                {archetype}
+              </div>
             </div>
             <div>
-              <div style={{ fontFamily: "'VCR OSD Mono', monospace", fontSize: '10px', color: 'rgba(255,255,255,0.4)', letterSpacing: '0.1em', marginBottom: '4px' }}>BRAND SCORE</div>
-              <div style={{ fontFamily: "'VCR OSD Mono', monospace", fontSize: '16px', color: '#0047FF' }}>{brandScore}/100</div>
+              <div
+                style={{
+                  fontFamily: "'VCR OSD Mono', monospace",
+                  fontSize: '10px',
+                  color: 'rgba(255,255,255,0.4)',
+                  letterSpacing: '0.1em',
+                  marginBottom: '4px',
+                }}
+              >
+                BRAND SCORE
+              </div>
+              <div
+                style={{
+                  fontFamily: "'VCR OSD Mono', monospace",
+                  fontSize: '16px',
+                  color: '#0047FF',
+                }}
+              >
+                {brandScore}/100
+              </div>
             </div>
           </div>
           <div style={{ marginBottom: '16px' }}>
-            <div style={{ fontFamily: "'VCR OSD Mono', monospace", fontSize: '10px', color: 'rgba(255,255,255,0.4)', letterSpacing: '0.1em', marginBottom: '8px' }}>STRENGTHS</div>
+            <div
+              style={{
+                fontFamily: "'VCR OSD Mono', monospace",
+                fontSize: '10px',
+                color: 'rgba(255,255,255,0.4)',
+                letterSpacing: '0.1em',
+                marginBottom: '8px',
+              }}
+            >
+              STRENGTHS
+            </div>
             {strengths.slice(0, 3).map((s, i) => (
-              <div key={i} style={{ fontFamily: "'VCR OSD Mono', monospace", fontSize: '12px', color: 'rgba(255,255,255,0.7)', marginBottom: '4px' }}>{s}</div>
+              <div
+                key={i}
+                style={{
+                  fontFamily: "'VCR OSD Mono', monospace",
+                  fontSize: '12px',
+                  color: 'rgba(255,255,255,0.7)',
+                  marginBottom: '4px',
+                }}
+              >
+                {s}
+              </div>
             ))}
           </div>
           <div>
-            <div style={{ fontFamily: "'VCR OSD Mono', monospace", fontSize: '10px', color: 'rgba(255,255,255,0.4)', letterSpacing: '0.1em', marginBottom: '8px' }}>AREAS TO IMPROVE</div>
+            <div
+              style={{
+                fontFamily: "'VCR OSD Mono', monospace",
+                fontSize: '10px',
+                color: 'rgba(255,255,255,0.4)',
+                letterSpacing: '0.1em',
+                marginBottom: '8px',
+              }}
+            >
+              AREAS TO IMPROVE
+            </div>
             {improvements.slice(0, 3).map((s, i) => (
-              <div key={i} style={{ fontFamily: "'VCR OSD Mono', monospace", fontSize: '12px', color: 'rgba(255,255,255,0.7)', marginBottom: '4px' }}>{s}</div>
+              <div
+                key={i}
+                style={{
+                  fontFamily: "'VCR OSD Mono', monospace",
+                  fontSize: '12px',
+                  color: 'rgba(255,255,255,0.7)',
+                  marginBottom: '4px',
+                }}
+              >
+                {s}
+              </div>
             ))}
           </div>
         </div>
 
         {/* Overlay gradient */}
-        <div style={{
-          position: 'absolute',
-          inset: 0,
-          background: 'linear-gradient(transparent 0%, rgba(5,5,5,0.8) 100%)',
-          pointerEvents: 'none',
-        }} />
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            background: 'linear-gradient(transparent 0%, rgba(5,5,5,0.8) 100%)',
+            pointerEvents: 'none',
+          }}
+        />
       </div>
 
       {/* Typewriter CTA area */}
       <div style={{ minHeight: '100px' }}>
         {/* The animated text line */}
-        <div style={{
-          fontFamily: "'VCR OSD Mono', monospace",
-          fontSize: '14px',
-          letterSpacing: '0.1em',
-          color: phase === 'idle' ? '#0047FF' : phase === 'done' ? '#10B981' : 'rgba(255,255,255,0.7)',
-          cursor: phase === 'idle' ? 'pointer' : 'default',
-          marginBottom: '16px',
-          transition: 'color 0.3s ease',
-        }}
+        <div
+          style={{
+            fontFamily: "'VCR OSD Mono', monospace",
+            fontSize: '14px',
+            letterSpacing: '0.1em',
+            color:
+              phase === 'idle' ? '#0047FF' : phase === 'done' ? '#10B981' : 'rgba(255,255,255,0.7)',
+            cursor: phase === 'idle' ? 'pointer' : 'default',
+            marginBottom: '16px',
+            transition: 'color 0.3s ease',
+          }}
           onClick={handleClick}
         >
           {displayText}
@@ -238,13 +351,19 @@ export default function BreakdownTeaser({ brandScore, archetype, strengths, impr
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
             onSubmit={handleSubmit}
-            style={{ display: 'flex', gap: '8px', justifyContent: 'center', maxWidth: '360px', margin: '0 auto' }}
+            style={{
+              display: 'flex',
+              gap: '8px',
+              justifyContent: 'center',
+              maxWidth: '360px',
+              margin: '0 auto',
+            }}
           >
             <input
               ref={inputRef}
               type="email"
               value={email}
-              onChange={e => setEmail(e.target.value)}
+              onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
               required
               disabled={phase === 'submitting'}
@@ -282,12 +401,14 @@ export default function BreakdownTeaser({ brandScore, archetype, strengths, impr
         )}
 
         {error && (
-          <div style={{
-            marginTop: '8px',
-            fontFamily: "'VCR OSD Mono', monospace",
-            fontSize: '11px',
-            color: '#EF4444',
-          }}>
+          <div
+            style={{
+              marginTop: '8px',
+              fontFamily: "'VCR OSD Mono', monospace",
+              fontSize: '11px',
+              color: '#EF4444',
+            }}
+          >
             {error}
           </div>
         )}

@@ -3,13 +3,10 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
-import { 
-  createAgents, 
-  validateBrandDNA,
-} from '@/lib/agents';
+import { createAgents, validateBrandDNA } from '@/lib/agents';
 import { AgentName } from '@/lib/agents/types';
 import { agentPersonas, ChatMessage } from '@/lib/agents/chat.types';
-import { 
+import {
   ConductorMessage,
   IntentClassification,
   IntentType,
@@ -35,12 +32,15 @@ interface ConductorChatRequest {
 
 // ===== INTENT CLASSIFICATION =====
 
-const intentPatterns: Record<IntentType, {
-  keywords: string[];
-  patterns: RegExp[];
-}> = {
+const intentPatterns: Record<
+  IntentType,
+  {
+    keywords: string[];
+    patterns: RegExp[];
+  }
+> = {
   idea: {
-    keywords: ['want to add', 'what if', 'let\'s build', 'new feature', 'could we', 'idea'],
+    keywords: ['want to add', 'what if', "let's build", 'new feature', 'could we', 'idea'],
     patterns: [/i\s+want\s+to/i, /what\s+if\s+we/i, /let'?s\s+(build|create|add)/i],
   },
   bug: {
@@ -103,11 +103,10 @@ function classifyIntent(message: string): IntentClassification {
   }
 
   // Find best match
-  const sorted = Object.entries(scores)
-    .sort((a, b) => b[1].score - a[1].score);
-  
+  const sorted = Object.entries(scores).sort((a, b) => b[1].score - a[1].score);
+
   const [topIntent, topData] = sorted[0];
-  const confidence = Math.min(0.95, 0.3 + (topData.score * 0.15));
+  const confidence = Math.min(0.95, 0.3 + topData.score * 0.15);
 
   // Map intent to workflow
   const workflowMap: Partial<Record<IntentType, WorkflowType>> = {
@@ -149,9 +148,7 @@ function planWorkflow(intent: IntentClassification, message: string): WorkflowPl
         'content-creation',
         'Content Creation',
         'Create on-brand content for your channels',
-        [
-          { agentName: 'content', action: 'Create content based on your request' },
-        ]
+        [{ agentName: 'content', action: 'Create content based on your request' }]
       );
 
     case 'campaign-analytics':
@@ -161,7 +158,11 @@ function planWorkflow(intent: IntentClassification, message: string): WorkflowPl
         'Analyze performance and optimize content',
         [
           { agentName: 'analytics', action: 'Analyze current performance' },
-          { agentName: 'content', action: 'Generate improved content based on insights', checkpoint: true },
+          {
+            agentName: 'content',
+            action: 'Generate improved content based on insights',
+            checkpoint: true,
+          },
         ]
       );
 
@@ -194,12 +195,14 @@ async function executeAgent(
         return {
           success: true,
           content: `**${result.data.name}**\n\n${result.data.summary}\n\nThis campaign has ${result.data.phases.length} phases over ${result.data.contentCalendar.length} weeks.`,
-          artifacts: [{
-            type: 'campaign-plan',
-            title: result.data.name,
-            data: result.data,
-            expandable: true,
-          }],
+          artifacts: [
+            {
+              type: 'campaign-plan',
+              title: result.data.name,
+              data: result.data,
+              expandable: true,
+            },
+          ],
         };
       }
       return { success: false, content: '', error: result.error || 'Campaign planning failed' };
@@ -219,17 +222,19 @@ async function executeAgent(
         platform,
         topic: userMessage,
       });
-      
+
       if (result.success && result.data) {
         return {
           success: true,
           content: `**Content for ${result.data.platform}:**\n\n${result.data.content}\n\n*Brand alignment: ${result.data.brandAlignmentScore}/100*`,
-          artifacts: [{
-            type: 'content',
-            title: `${result.data.platform} Content`,
-            data: result.data,
-            expandable: true,
-          }],
+          artifacts: [
+            {
+              type: 'content',
+              title: `${result.data.platform} Content`,
+              data: result.data,
+              expandable: true,
+            },
+          ],
         };
       }
       return { success: false, content: '', error: result.error || 'Content creation failed' };
@@ -240,21 +245,23 @@ async function executeAgent(
       return {
         success: true,
         content: `📊 **Analytics Insight**\n\nTo provide detailed analytics, I'd need your performance data. However, here are some general recommendations based on your brand:\n\n1. **Engagement timing**: Post during peak hours for your audience\n2. **Content mix**: Balance promotional (20%) with value-driven content (80%)\n3. **A/B testing**: Test different hooks and CTAs\n4. **Consistency**: Maintain your brand voice across all platforms`,
-        artifacts: [{
-          type: 'analytics-report',
-          title: 'Analytics Recommendations',
-          data: { type: 'general_recommendations' },
-          expandable: true,
-        }],
+        artifacts: [
+          {
+            type: 'analytics-report',
+            title: 'Analytics Recommendations',
+            data: { type: 'general_recommendations' },
+            expandable: true,
+          },
+        ],
       };
     }
 
     return { success: false, content: '', error: 'Unknown agent' };
   } catch (error) {
-    return { 
-      success: false, 
-      content: '', 
-      error: error instanceof Error ? error.message : 'Agent execution failed' 
+    return {
+      success: false,
+      content: '',
+      error: error instanceof Error ? error.message : 'Agent execution failed',
     };
   }
 }
@@ -276,7 +283,7 @@ async function generateConductorResponse(
 }> {
   // Classify intent
   const intent = classifyIntent(message);
-  
+
   // Plan workflow if needed
   let workflow = currentWorkflow;
   if (!workflow && intent.suggestedWorkflow && intent.suggestedWorkflow !== 'direct-response') {
@@ -285,7 +292,7 @@ async function generateConductorResponse(
 
   // Route to appropriate agent
   const routingDecision = await routeToAgent(message);
-  
+
   // Execute agent
   const agentResult = await executeAgent(
     routingDecision.agent,
@@ -297,10 +304,10 @@ async function generateConductorResponse(
 
   if (agentResult.success) {
     const persona = agentPersonas[routingDecision.agent];
-    const intro = workflow 
+    const intro = workflow
       ? `**Workflow: ${workflow.name}**\n\nI've routed this to ${persona.avatar} **${persona.displayName}** (${persona.title}).\n\n---\n\n`
       : `${persona.avatar} **${persona.displayName}** says:\n\n`;
-    
+
     return {
       content: intro + agentResult.content,
       intent,
@@ -324,15 +331,16 @@ async function generateConductorResponse(
   const anthropic = new Anthropic({ apiKey });
   const historyContext = history
     .slice(-6)
-    .map(m => `${m.role === 'user' ? 'User' : 'Conductor'}: ${m.content}`)
+    .map((m) => `${m.role === 'user' ? 'User' : 'Conductor'}: ${m.content}`)
     .join('\n\n');
 
   const response = await anthropic.messages.create({
     model: 'claude-sonnet-4-20250514',
     max_tokens: 1500,
-    messages: [{
-      role: 'user',
-      content: `${conductorPersona.systemPrompt}
+    messages: [
+      {
+        role: 'user',
+        content: `${conductorPersona.systemPrompt}
 
 BRAND CONTEXT:
 - Brand: ${brandDNA.name}
@@ -345,12 +353,14 @@ ${historyContext ? `RECENT CONVERSATION:\n${historyContext}\n\n` : ''}USER MESSA
 ${message}
 
 Respond as the Conductor. Be helpful and clear. If you can't fully help, explain which agent would be best and why.`,
-    }],
+      },
+    ],
   });
 
-  const responseText = response.content[0].type === 'text' 
-    ? response.content[0].text 
-    : 'I apologize, but I had trouble processing that request.';
+  const responseText =
+    response.content[0].type === 'text'
+      ? response.content[0].text
+      : 'I apologize, but I had trouble processing that request.';
 
   return {
     content: responseText,
@@ -367,10 +377,10 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { 
-      brandId, 
-      brandDNA, 
-      message, 
+    const {
+      brandId,
+      brandDNA,
+      message,
       history = [],
       currentWorkflow = null,
       pendingApproval = false,
@@ -378,17 +388,11 @@ export async function POST(request: NextRequest) {
 
     // Validate brand DNA
     if (!brandDNA || !validateBrandDNA(brandDNA)) {
-      return NextResponse.json(
-        { error: 'Valid Brand DNA is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Valid Brand DNA is required' }, { status: 400 });
     }
 
     if (!message?.trim()) {
-      return NextResponse.json(
-        { error: 'Message is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Message is required' }, { status: 400 });
     }
 
     // Handle approval responses
@@ -402,7 +406,8 @@ export async function POST(request: NextRequest) {
         });
       } else if (['no', 'cancel', 'stop', 'wait'].includes(lowerMessage)) {
         return NextResponse.json({
-          content: '⏸️ Workflow paused. Let me know when you\'d like to continue or if you\'d like to make changes.',
+          content:
+            "⏸️ Workflow paused. Let me know when you'd like to continue or if you'd like to make changes.",
           approved: false,
           processingTime: Date.now() - startTime,
         });
@@ -426,11 +431,10 @@ export async function POST(request: NextRequest) {
       confidence: result.confidence,
       processingTime: Date.now() - startTime,
     });
-
   } catch (error) {
     console.error('Conductor chat error:', error);
     return NextResponse.json(
-      { 
+      {
         error: error instanceof Error ? error.message : 'Conductor processing failed',
         processingTime: Date.now() - startTime,
       },
@@ -452,7 +456,7 @@ export async function GET() {
     intents: Object.keys(intentPatterns),
     workflows: [
       'idea-to-impl',
-      'idea-to-campaign', 
+      'idea-to-campaign',
       'content-creation',
       'campaign-analytics',
       'bug-to-fix',
@@ -473,7 +477,3 @@ export async function GET() {
     },
   });
 }
-
-
-
-

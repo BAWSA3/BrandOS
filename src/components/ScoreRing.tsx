@@ -9,24 +9,24 @@ interface ScoreRingProps {
 
 export default function ScoreRing({ score, size = 120 }: ScoreRingProps) {
   const [animatedScore, setAnimatedScore] = useState(0);
-  
+
   useEffect(() => {
     const duration = 800;
     const startTime = Date.now();
     const startScore = animatedScore;
-    
+
     const animate = () => {
       const elapsed = Date.now() - startTime;
       const progress = Math.min(elapsed / duration, 1);
       const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
-      
+
       setAnimatedScore(Math.round(startScore + (score - startScore) * eased));
-      
+
       if (progress < 1) {
         requestAnimationFrame(animate);
       }
     };
-    
+
     requestAnimationFrame(animate);
   }, [score]);
 
@@ -45,9 +45,9 @@ export default function ScoreRing({ score, size = 120 }: ScoreRingProps) {
   return (
     <div className="flex flex-col items-center gap-3">
       <div className="relative" style={{ width: size, height: size }}>
-        <svg 
-          width={size} 
-          height={size} 
+        <svg
+          width={size}
+          height={size}
           className="-rotate-90"
           style={{ filter: 'drop-shadow(0 0 20px rgba(0,0,0,0.03))' }}
         >
@@ -73,14 +73,10 @@ export default function ScoreRing({ score, size = 120 }: ScoreRingProps) {
           />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-4xl font-light tracking-tight">
-            {animatedScore}
-          </span>
+          <span className="text-4xl font-light tracking-tight">{animatedScore}</span>
         </div>
       </div>
-      <span className="text-xs uppercase tracking-widest text-muted">
-        {getLabel()}
-      </span>
+      <span className="text-xs uppercase tracking-widest text-muted">{getLabel()}</span>
     </div>
   );
 }

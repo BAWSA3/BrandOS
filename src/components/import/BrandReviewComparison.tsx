@@ -27,15 +27,15 @@ export default function BrandReviewComparison({
     if (brand.tone?.energy) initial['tone.energy'] = true;
     if (brand.tone?.confidence) initial['tone.confidence'] = true;
     if (brand.tone?.style) initial['tone.style'] = true;
-    brand.keywords?.forEach((_, i) => initial[`keywords.${i}`] = true);
-    brand.doPatterns?.forEach((_, i) => initial[`doPatterns.${i}`] = true);
-    brand.dontPatterns?.forEach((_, i) => initial[`dontPatterns.${i}`] = true);
-    brand.voiceSamples?.forEach((_, i) => initial[`voiceSamples.${i}`] = true);
+    brand.keywords?.forEach((_, i) => (initial[`keywords.${i}`] = true));
+    brand.doPatterns?.forEach((_, i) => (initial[`doPatterns.${i}`] = true));
+    brand.dontPatterns?.forEach((_, i) => (initial[`dontPatterns.${i}`] = true));
+    brand.voiceSamples?.forEach((_, i) => (initial[`voiceSamples.${i}`] = true));
     return initial;
   });
 
   const toggleElement = (key: string) => {
-    setIncludedElements(prev => ({ ...prev, [key]: !prev[key] }));
+    setIncludedElements((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
   const handleComplete = () => {
@@ -73,13 +73,18 @@ export default function BrandReviewComparison({
             className="flex items-center gap-2 text-muted hover:text-foreground transition-colors"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
             </svg>
             Back
           </button>
-          
+
           <h1 className="text-xl font-light">Side-by-Side Review</h1>
-          
+
           <button
             onClick={handleComplete}
             className="px-6 py-2 bg-foreground text-background rounded-full text-sm font-medium hover:opacity-90 transition-opacity"
@@ -93,7 +98,9 @@ export default function BrandReviewComparison({
           {/* Source Column */}
           <div>
             <div className="sticky top-6">
-              <h2 className="text-sm font-medium uppercase tracking-widest text-muted mb-4">Source</h2>
+              <h2 className="text-sm font-medium uppercase tracking-widest text-muted mb-4">
+                Source
+              </h2>
               <div className="bg-surface rounded-xl p-4">
                 {sourcePreview ? (
                   <div className="space-y-4">
@@ -113,8 +120,18 @@ export default function BrandReviewComparison({
                 ) : (
                   <div className="aspect-video bg-border rounded-lg flex items-center justify-center">
                     <div className="text-center">
-                      <svg className="w-12 h-12 mx-auto mb-2 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      <svg
+                        className="w-12 h-12 mx-auto mb-2 text-muted"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={1}
+                          d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                        />
                       </svg>
                       <p className="text-sm text-muted">No preview available</p>
                       <p className="text-xs text-muted mt-1">{brand.sourceDetails}</p>
@@ -122,7 +139,7 @@ export default function BrandReviewComparison({
                   </div>
                 )}
               </div>
-              
+
               {/* Confidence Score */}
               <div className="mt-4 p-4 bg-surface rounded-xl">
                 <div className="flex items-center justify-between mb-2">
@@ -130,10 +147,13 @@ export default function BrandReviewComparison({
                   <span className="text-2xl font-light">{brand.overallConfidence}%</span>
                 </div>
                 <div className="h-2 bg-border rounded-full overflow-hidden">
-                  <div 
+                  <div
                     className={`h-full rounded-full ${
-                      brand.overallConfidence >= 80 ? 'bg-green-500' :
-                      brand.overallConfidence >= 60 ? 'bg-yellow-500' : 'bg-orange-500'
+                      brand.overallConfidence >= 80
+                        ? 'bg-green-500'
+                        : brand.overallConfidence >= 60
+                          ? 'bg-yellow-500'
+                          : 'bg-orange-500'
                     }`}
                     style={{ width: `${brand.overallConfidence}%` }}
                   />
@@ -144,8 +164,10 @@ export default function BrandReviewComparison({
 
           {/* Extracted Column */}
           <div>
-            <h2 className="text-sm font-medium uppercase tracking-widest text-muted mb-4">Extracted Elements</h2>
-            
+            <h2 className="text-sm font-medium uppercase tracking-widest text-muted mb-4">
+              Extracted Elements
+            </h2>
+
             <div className="space-y-4">
               {/* Name */}
               {brand.name && (
@@ -200,61 +222,65 @@ export default function BrandReviewComparison({
               )}
 
               {/* Tone */}
-              {brand.tone && (brand.tone.formality || brand.tone.energy || brand.tone.confidence || brand.tone.style) && (
-                <ComparisonCard
-                  title="Tone Profile"
-                  included={true}
-                  onToggle={() => {}}
-                  showToggle={false}
-                >
-                  <div className="space-y-4">
-                    {brand.tone.formality && (
-                      <ToneItem
-                        label="Formality"
-                        value={brand.tone.formality.value}
-                        confidence={brand.tone.formality.confidence}
-                        included={includedElements['tone.formality']}
-                        onToggle={() => toggleElement('tone.formality')}
-                        leftLabel="Casual"
-                        rightLabel="Formal"
-                      />
-                    )}
-                    {brand.tone.energy && (
-                      <ToneItem
-                        label="Energy"
-                        value={brand.tone.energy.value}
-                        confidence={brand.tone.energy.confidence}
-                        included={includedElements['tone.energy']}
-                        onToggle={() => toggleElement('tone.energy')}
-                        leftLabel="Reserved"
-                        rightLabel="Energetic"
-                      />
-                    )}
-                    {brand.tone.confidence && (
-                      <ToneItem
-                        label="Confidence"
-                        value={brand.tone.confidence.value}
-                        confidence={brand.tone.confidence.confidence}
-                        included={includedElements['tone.confidence']}
-                        onToggle={() => toggleElement('tone.confidence')}
-                        leftLabel="Humble"
-                        rightLabel="Bold"
-                      />
-                    )}
-                    {brand.tone.style && (
-                      <ToneItem
-                        label="Style"
-                        value={brand.tone.style.value}
-                        confidence={brand.tone.style.confidence}
-                        included={includedElements['tone.style']}
-                        onToggle={() => toggleElement('tone.style')}
-                        leftLabel="Classic"
-                        rightLabel="Experimental"
-                      />
-                    )}
-                  </div>
-                </ComparisonCard>
-              )}
+              {brand.tone &&
+                (brand.tone.formality ||
+                  brand.tone.energy ||
+                  brand.tone.confidence ||
+                  brand.tone.style) && (
+                  <ComparisonCard
+                    title="Tone Profile"
+                    included={true}
+                    onToggle={() => {}}
+                    showToggle={false}
+                  >
+                    <div className="space-y-4">
+                      {brand.tone.formality && (
+                        <ToneItem
+                          label="Formality"
+                          value={brand.tone.formality.value}
+                          confidence={brand.tone.formality.confidence}
+                          included={includedElements['tone.formality']}
+                          onToggle={() => toggleElement('tone.formality')}
+                          leftLabel="Casual"
+                          rightLabel="Formal"
+                        />
+                      )}
+                      {brand.tone.energy && (
+                        <ToneItem
+                          label="Energy"
+                          value={brand.tone.energy.value}
+                          confidence={brand.tone.energy.confidence}
+                          included={includedElements['tone.energy']}
+                          onToggle={() => toggleElement('tone.energy')}
+                          leftLabel="Reserved"
+                          rightLabel="Energetic"
+                        />
+                      )}
+                      {brand.tone.confidence && (
+                        <ToneItem
+                          label="Confidence"
+                          value={brand.tone.confidence.value}
+                          confidence={brand.tone.confidence.confidence}
+                          included={includedElements['tone.confidence']}
+                          onToggle={() => toggleElement('tone.confidence')}
+                          leftLabel="Humble"
+                          rightLabel="Bold"
+                        />
+                      )}
+                      {brand.tone.style && (
+                        <ToneItem
+                          label="Style"
+                          value={brand.tone.style.value}
+                          confidence={brand.tone.style.confidence}
+                          included={includedElements['tone.style']}
+                          onToggle={() => toggleElement('tone.style')}
+                          leftLabel="Classic"
+                          rightLabel="Experimental"
+                        />
+                      )}
+                    </div>
+                  </ComparisonCard>
+                )}
 
               {/* Keywords */}
               {brand.keywords && brand.keywords.length > 0 && (
@@ -324,7 +350,14 @@ interface ComparisonCardProps {
   children: React.ReactNode;
 }
 
-function ComparisonCard({ title, included, onToggle, showToggle = true, confidence, children }: ComparisonCardProps) {
+function ComparisonCard({
+  title,
+  included,
+  onToggle,
+  showToggle = true,
+  confidence,
+  children,
+}: ComparisonCardProps) {
   return (
     <div className={`p-4 bg-surface rounded-xl transition-all ${included ? '' : 'opacity-50'}`}>
       <div className="flex items-center justify-between mb-3">
@@ -337,8 +370,18 @@ function ComparisonCard({ title, included, onToggle, showToggle = true, confiden
               }`}
             >
               {included && (
-                <svg className="w-2.5 h-2.5 text-background" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                <svg
+                  className="w-2.5 h-2.5 text-background"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={3}
+                    d="M5 13l4 4L19 7"
+                  />
                 </svg>
               )}
             </button>
@@ -346,7 +389,9 @@ function ComparisonCard({ title, included, onToggle, showToggle = true, confiden
           <span className="text-sm font-medium">{title}</span>
         </div>
         {confidence !== undefined && (
-          <span className={`text-xs ${confidence >= 80 ? 'text-green-500' : confidence >= 60 ? 'text-yellow-500' : 'text-orange-500'}`}>
+          <span
+            className={`text-xs ${confidence >= 80 ? 'text-green-500' : confidence >= 60 ? 'text-yellow-500' : 'text-orange-500'}`}
+          >
             {confidence}% confidence
           </span>
         )}
@@ -375,7 +420,9 @@ function ColorItem({ label, color, confidence, included, onToggle }: ColorItemPr
       <div className="w-full h-12 rounded-lg mb-2" style={{ backgroundColor: color }} />
       <p className="text-xs font-medium">{label}</p>
       <p className="text-xs font-mono text-muted">{color}</p>
-      <p className={`text-xs mt-1 ${confidence >= 80 ? 'text-green-500' : 'text-yellow-500'}`}>{confidence}%</p>
+      <p className={`text-xs mt-1 ${confidence >= 80 ? 'text-green-500' : 'text-yellow-500'}`}>
+        {confidence}%
+      </p>
     </button>
   );
 }
@@ -390,7 +437,15 @@ interface ToneItemProps {
   rightLabel: string;
 }
 
-function ToneItem({ label, value, confidence, included, onToggle, leftLabel, rightLabel }: ToneItemProps) {
+function ToneItem({
+  label,
+  value,
+  confidence,
+  included,
+  onToggle,
+  leftLabel,
+  rightLabel,
+}: ToneItemProps) {
   return (
     <div className={`flex items-center gap-3 transition-all ${included ? '' : 'opacity-40'}`}>
       <button
@@ -400,7 +455,12 @@ function ToneItem({ label, value, confidence, included, onToggle, leftLabel, rig
         }`}
       >
         {included && (
-          <svg className="w-2.5 h-2.5 text-background" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg
+            className="w-2.5 h-2.5 text-background"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
           </svg>
         )}
@@ -421,19 +481,3 @@ function ToneItem({ label, value, confidence, included, onToggle, leftLabel, rig
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

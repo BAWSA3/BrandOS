@@ -2,7 +2,12 @@
 // INSTAGRAM CONNECTOR — Meta Graph API (Instagram Business / Creator)
 // =============================================================================
 
-import type { PlatformConnector, OAuthTokens, PlatformProfile, PlatformConnectorConfig } from './base';
+import type {
+  PlatformConnector,
+  OAuthTokens,
+  PlatformProfile,
+  PlatformConnectorConfig,
+} from './base';
 import type { ContentItem } from '../types';
 import { normalizeInstagramPost } from '../normalizers';
 

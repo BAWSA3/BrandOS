@@ -12,7 +12,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const { brandName, colors, patternType, density } = await request.json() as {
+    const { brandName, colors, patternType, density } = (await request.json()) as {
       brandName: string;
       colors: { primary: string; secondary: string; accent: string };
       patternType: PatternType;
@@ -60,16 +60,12 @@ export async function POST(request: Request) {
       success: true,
       pattern,
     });
-
   } catch (error) {
     console.error('Gemini pattern generation error:', error);
 
     if (error instanceof Error) {
       if (error.message.includes('API key')) {
-        return NextResponse.json(
-          { error: 'Invalid Gemini API key' },
-          { status: 401 }
-        );
+        return NextResponse.json({ error: 'Invalid Gemini API key' }, { status: 401 });
       }
       if (error.message.includes('quota')) {
         return NextResponse.json(
@@ -85,17 +81,3 @@ export async function POST(request: Request) {
     );
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-

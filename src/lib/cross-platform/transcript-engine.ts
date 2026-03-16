@@ -29,9 +29,7 @@ export function extractYouTubeVideoId(url: string): string | null {
  * Fetch YouTube captions using the YouTube Data API v3.
  * Requires YOUTUBE_API_KEY env var.
  */
-export async function fetchYouTubeCaptions(
-  videoId: string
-): Promise<TranscriptResult | null> {
+export async function fetchYouTubeCaptions(videoId: string): Promise<TranscriptResult | null> {
   const apiKey = process.env.YOUTUBE_API_KEY;
 
   if (!apiKey) {
@@ -58,7 +56,9 @@ export async function fetchYouTubeCaptions(
 
     // Prefer English auto-generated or manual captions
     const englishTrack =
-      tracks.find((t: any) => t.snippet?.language === 'en' && t.snippet?.trackKind === 'standard') ??
+      tracks.find(
+        (t: any) => t.snippet?.language === 'en' && t.snippet?.trackKind === 'standard'
+      ) ??
       tracks.find((t: any) => t.snippet?.language === 'en') ??
       tracks[0];
 
@@ -100,10 +100,7 @@ async function fetchYouTubeTimedText(
   }
 }
 
-function parseTimedTextResponse(
-  data: any,
-  language: string
-): TranscriptResult | null {
+function parseTimedTextResponse(data: any, language: string): TranscriptResult | null {
   const events = data?.events;
   if (!events || !Array.isArray(events)) return null;
 
@@ -171,9 +168,7 @@ export function detectVideoSource(url: string): {
 /**
  * Fetch transcript for a video URL. Routes to the correct provider.
  */
-export async function fetchTranscript(
-  videoUrl: string
-): Promise<TranscriptResult | null> {
+export async function fetchTranscript(videoUrl: string): Promise<TranscriptResult | null> {
   const source = detectVideoSource(videoUrl);
 
   if (!source) {

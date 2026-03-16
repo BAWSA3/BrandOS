@@ -10,43 +10,35 @@ export async function POST(request: NextRequest) {
 
     // Validate required fields
     if (!type || !message) {
-      return NextResponse.json(
-        { error: 'Type and message are required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Type and message are required' }, { status: 400 });
     }
 
     // Validate type
     const validTypes = ['bug', 'idea', 'other', 'nps', 'feature_request'];
     if (!validTypes.includes(type)) {
-      return NextResponse.json(
-        { error: 'Invalid feedback type' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid feedback type' }, { status: 400 });
     }
 
     // Validate category if provided
-    const validCategories = ['score_journey', 'brand_dna', 'agents', 'ui', 'performance', 'general'];
+    const validCategories = [
+      'score_journey',
+      'brand_dna',
+      'agents',
+      'ui',
+      'performance',
+      'general',
+    ];
     if (category && !validCategories.includes(category)) {
-      return NextResponse.json(
-        { error: 'Invalid category' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid category' }, { status: 400 });
     }
 
     // Validate rating if provided (1-5 for stars, 0-10 for NPS)
     if (rating !== undefined) {
       if (type === 'nps' && (rating < 0 || rating > 10)) {
-        return NextResponse.json(
-          { error: 'NPS rating must be between 0 and 10' },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'NPS rating must be between 0 and 10' }, { status: 400 });
       }
       if (type !== 'nps' && (rating < 1 || rating > 5)) {
-        return NextResponse.json(
-          { error: 'Rating must be between 1 and 5' },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'Rating must be between 1 and 5' }, { status: 400 });
       }
     }
 
@@ -80,18 +72,17 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return NextResponse.json({
-      success: true,
-      id: feedback.id,
-      message: 'Feedback submitted successfully',
-    }, { status: 201 });
-
+    return NextResponse.json(
+      {
+        success: true,
+        id: feedback.id,
+        message: 'Feedback submitted successfully',
+      },
+      { status: 201 }
+    );
   } catch (error) {
     console.error('[Feedback] POST error:', error);
-    return NextResponse.json(
-      { error: 'Failed to submit feedback' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to submit feedback' }, { status: 500 });
   }
 }
 
@@ -102,10 +93,7 @@ export async function GET() {
     const totalFeedback = await prisma.feedback.count();
     const positiveCount = await prisma.feedback.count({
       where: {
-        OR: [
-          { type: 'idea' },
-          { rating: { gte: 4 } },
-        ],
+        OR: [{ type: 'idea' }, { rating: { gte: 4 } }],
       },
     });
 
@@ -115,9 +103,6 @@ export async function GET() {
     });
   } catch (error) {
     console.error('[Feedback] GET error:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch feedback stats' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch feedback stats' }, { status: 500 });
   }
 }

@@ -1,28 +1,28 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 
 // International Klein Blue and brand colors
-const KLEIN_BLUE = "#002FA7";
-const ELECTRIC_BLUE = "#0047FF";
-const DEEP_BLUE = "#001847";
+const KLEIN_BLUE = '#002FA7';
+const ELECTRIC_BLUE = '#0047FF';
+const DEEP_BLUE = '#001847';
 
 interface Orb {
   id: number;
-  size: "sm" | "md" | "lg" | "xl";
+  size: 'sm' | 'md' | 'lg' | 'xl';
   x: number;
   y: number;
   delay: number;
 }
 
 interface AnimatedBackgroundProps {
-  variant?: "default" | "hero" | "minimal";
+  variant?: 'default' | 'hero' | 'minimal';
   orbCount?: number;
 }
 
 export default function AnimatedBackground({
-  variant = "default",
-  orbCount = 3
+  variant = 'default',
+  orbCount = 3,
 }: AnimatedBackgroundProps) {
   const [orbs, setOrbs] = useState<Orb[]>([]);
   const [mounted, setMounted] = useState(false);
@@ -31,15 +31,15 @@ export default function AnimatedBackground({
     setMounted(true);
 
     // Generate orb positions - spread across hero area
-    const sizes: Array<"sm" | "md" | "lg" | "xl"> = ["lg", "xl", "md", "lg"];
+    const sizes: Array<'sm' | 'md' | 'lg' | 'xl'> = ['lg', 'xl', 'md', 'lg'];
     const generatedOrbs: Orb[] = [];
 
     // Position orbs strategically for visual impact
     const positions = [
-      { x: 15, y: 25 },   // Top left
-      { x: 50, y: 15 },   // Top center (main hero orb)
-      { x: 80, y: 35 },   // Right side
-      { x: 30, y: 60 },   // Bottom left area
+      { x: 15, y: 25 }, // Top left
+      { x: 50, y: 15 }, // Top center (main hero orb)
+      { x: 80, y: 35 }, // Right side
+      { x: 30, y: 60 }, // Bottom left area
     ];
 
     for (let i = 0; i < Math.min(orbCount, positions.length); i++) {
@@ -73,9 +73,10 @@ export default function AnimatedBackground({
       <div
         className="absolute inset-0"
         style={{
-          background: variant === "hero"
-            ? `radial-gradient(ellipse 120% 80% at 50% 20%, ${KLEIN_BLUE}40 0%, ${DEEP_BLUE}20 40%, transparent 70%)`
-            : "transparent"
+          background:
+            variant === 'hero'
+              ? `radial-gradient(ellipse 120% 80% at 50% 20%, ${KLEIN_BLUE}40 0%, ${DEEP_BLUE}20 40%, transparent 70%)`
+              : 'transparent',
         }}
       />
 
@@ -87,7 +88,7 @@ export default function AnimatedBackground({
           style={{
             left: `${orb.x}%`,
             top: `${orb.y}%`,
-            transform: "translate(-50%, -50%)",
+            transform: 'translate(-50%, -50%)',
             width: orbSizes[orb.size].width,
             height: orbSizes[orb.size].height,
           }}
@@ -102,7 +103,7 @@ export default function AnimatedBackground({
                 ${KLEIN_BLUE}28 40%,
                 ${KLEIN_BLUE}12 60%,
                 transparent 80%)`,
-              filter: `blur(${orb.size === "xl" ? 70 : orb.size === "lg" ? 60 : orb.size === "md" ? 50 : 40}px)`,
+              filter: `blur(${orb.size === 'xl' ? 70 : orb.size === 'lg' ? 60 : orb.size === 'md' ? 50 : 40}px)`,
               animation: `orbPulse 6s ease-in-out infinite, orbDrift 25s ease-in-out infinite`,
               animationDelay: `${orb.delay}s, ${orb.delay}s`,
             }}
@@ -112,16 +113,16 @@ export default function AnimatedBackground({
           <div
             className="absolute rounded-full"
             style={{
-              left: "10%",
-              top: "10%",
-              width: "80%",
-              height: "80%",
+              left: '10%',
+              top: '10%',
+              width: '80%',
+              height: '80%',
               background: `radial-gradient(circle,
                 ${DEEP_BLUE} 0%,
                 ${KLEIN_BLUE}50 25%,
                 ${ELECTRIC_BLUE}30 50%,
                 transparent 80%)`,
-              filter: `blur(${orb.size === "xl" ? 50 : orb.size === "lg" ? 45 : 35}px)`,
+              filter: `blur(${orb.size === 'xl' ? 50 : orb.size === 'lg' ? 45 : 35}px)`,
               animation: `orbPulse 5s ease-in-out infinite`,
               animationDelay: `${orb.delay + 0.5}s`,
             }}
@@ -131,16 +132,16 @@ export default function AnimatedBackground({
           <div
             className="absolute rounded-full"
             style={{
-              left: "25%",
-              top: "25%",
-              width: "50%",
-              height: "50%",
+              left: '25%',
+              top: '25%',
+              width: '50%',
+              height: '50%',
               background: `radial-gradient(circle,
                 ${DEEP_BLUE} 0%,
                 ${KLEIN_BLUE}80 40%,
                 ${ELECTRIC_BLUE}20 70%,
                 transparent 100%)`,
-              filter: `blur(${orb.size === "xl" ? 35 : orb.size === "lg" ? 30 : 20}px)`,
+              filter: `blur(${orb.size === 'xl' ? 35 : orb.size === 'lg' ? 30 : 20}px)`,
               animation: `orbPulse 4s ease-in-out infinite`,
               animationDelay: `${orb.delay + 1}s`,
             }}
@@ -149,7 +150,7 @@ export default function AnimatedBackground({
       ))}
 
       {/* Subtle noise overlay for texture */}
-      {variant !== "minimal" && (
+      {variant !== 'minimal' && (
         <div
           className="absolute inset-0 opacity-[0.02]"
           style={{
@@ -159,11 +160,12 @@ export default function AnimatedBackground({
       )}
 
       {/* Vignette effect for hero */}
-      {variant === "hero" && (
+      {variant === 'hero' && (
         <div
           className="absolute inset-0"
           style={{
-            background: "radial-gradient(ellipse at center, transparent 0%, transparent 40%, rgba(10, 10, 10, 0.4) 100%)"
+            background:
+              'radial-gradient(ellipse at center, transparent 0%, transparent 40%, rgba(10, 10, 10, 0.4) 100%)',
           }}
         />
       )}
@@ -173,11 +175,11 @@ export default function AnimatedBackground({
 
 // Enhanced Orb component for custom positioning - Klein Blue style
 export function BlueOrb({
-  size = "md",
-  className = "",
-  style = {}
+  size = 'md',
+  className = '',
+  style = {},
 }: {
-  size?: "sm" | "md" | "lg" | "xl";
+  size?: 'sm' | 'md' | 'lg' | 'xl';
   className?: string;
   style?: React.CSSProperties;
 }) {
@@ -197,7 +199,7 @@ export function BlueOrb({
         width: config.width,
         height: config.width,
         background: 'transparent',
-        ...style
+        ...style,
       }}
     >
       {/* Outer glow - SOFTENED */}
@@ -211,7 +213,7 @@ export function BlueOrb({
             ${KLEIN_BLUE}14 65%,
             transparent 85%)`,
           filter: `blur(${config.blur}px)`,
-          animation: "orbPulse 6s ease-in-out infinite",
+          animation: 'orbPulse 6s ease-in-out infinite',
         }}
       />
 
@@ -219,18 +221,18 @@ export function BlueOrb({
       <div
         className="absolute rounded-full"
         style={{
-          left: "10%",
-          top: "10%",
-          width: "80%",
-          height: "80%",
+          left: '10%',
+          top: '10%',
+          width: '80%',
+          height: '80%',
           background: `radial-gradient(circle,
             ${DEEP_BLUE} 0%,
             ${KLEIN_BLUE}80 30%,
             ${ELECTRIC_BLUE}25 60%,
             transparent 90%)`,
           filter: `blur(${config.blur * 0.6}px)`,
-          animation: "orbPulse 5s ease-in-out infinite",
-          animationDelay: "0.5s",
+          animation: 'orbPulse 5s ease-in-out infinite',
+          animationDelay: '0.5s',
         }}
       />
 
@@ -238,18 +240,18 @@ export function BlueOrb({
       <div
         className="absolute rounded-full"
         style={{
-          left: "25%",
-          top: "25%",
-          width: "50%",
-          height: "50%",
+          left: '25%',
+          top: '25%',
+          width: '50%',
+          height: '50%',
           background: `radial-gradient(circle,
             ${DEEP_BLUE} 0%,
             ${KLEIN_BLUE}70 50%,
             ${ELECTRIC_BLUE}15 80%,
             transparent 100%)`,
           filter: `blur(${config.blur * 0.45}px)`,
-          animation: "orbPulse 4s ease-in-out infinite",
-          animationDelay: "1s",
+          animation: 'orbPulse 4s ease-in-out infinite',
+          animationDelay: '1s',
         }}
       />
     </div>
@@ -258,8 +260,8 @@ export function BlueOrb({
 
 // New: Elongated orb like in design ref 2b9c0f362786dbeb6088202ddba74b21.jpg
 export function ElongatedOrb({
-  className = "",
-  style = {}
+  className = '',
+  style = {},
 }: {
   className?: string;
   style?: React.CSSProperties;
@@ -271,7 +273,7 @@ export function ElongatedOrb({
         width: 400,
         height: 700,
         background: 'transparent',
-        ...style
+        ...style,
       }}
     >
       {/* Outer glow - elongated - SOFTENED */}
@@ -286,7 +288,7 @@ export function ElongatedOrb({
             ${KLEIN_BLUE}10 70%,
             transparent 90%)`,
           filter: 'blur(70px)',
-          animation: "orbPulse 7s ease-in-out infinite",
+          animation: 'orbPulse 7s ease-in-out infinite',
         }}
       />
 
@@ -294,10 +296,10 @@ export function ElongatedOrb({
       <div
         className="absolute"
         style={{
-          left: "20%",
-          top: "15%",
-          width: "60%",
-          height: "70%",
+          left: '20%',
+          top: '15%',
+          width: '60%',
+          height: '70%',
           borderRadius: '150px',
           background: `radial-gradient(ellipse 100% 100% at 50% 50%,
             ${DEEP_BLUE} 0%,
@@ -305,8 +307,8 @@ export function ElongatedOrb({
             ${ELECTRIC_BLUE}20 70%,
             transparent 100%)`,
           filter: 'blur(50px)',
-          animation: "orbPulse 5s ease-in-out infinite",
-          animationDelay: "1s",
+          animation: 'orbPulse 5s ease-in-out infinite',
+          animationDelay: '1s',
         }}
       />
     </div>

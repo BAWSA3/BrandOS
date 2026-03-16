@@ -16,11 +16,8 @@ interface PixelProgressBarProps {
   theme?: string;
 }
 
-export default function PixelProgressBar({
-  currentPhase,
-  phaseProgress,
-}: PixelProgressBarProps) {
-  const overallProgress = ((currentPhase - 1) + phaseProgress) / 4;
+export default function PixelProgressBar({ currentPhase, phaseProgress }: PixelProgressBarProps) {
+  const overallProgress = (currentPhase - 1 + phaseProgress) / 4;
 
   return (
     <motion.div

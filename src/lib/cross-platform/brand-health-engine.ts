@@ -36,10 +36,7 @@ export function computeEngagementFromContent(items: ContentItem[]): number {
 /**
  * Compute activity score from ContentItems within a given window (default 14 days).
  */
-export function computeActivityFromContent(
-  items: ContentItem[],
-  windowDays = 14
-): number {
+export function computeActivityFromContent(items: ContentItem[], windowDays = 14): number {
   const cutoff = Date.now() - windowDays * 24 * 60 * 60 * 1000;
   const recentCount = items.filter(
     (item) => new Date(item.metadata.postedAt).getTime() >= cutoff
@@ -75,7 +72,10 @@ export function computePerPlatformHealth(
     };
   }
 
-  return result as Record<SocialPlatform, { engagement: number; activity: number; contentCount: number }>;
+  return result as Record<
+    SocialPlatform,
+    { engagement: number; activity: number; contentCount: number }
+  >;
 }
 
 /**

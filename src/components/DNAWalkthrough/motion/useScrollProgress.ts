@@ -17,9 +17,7 @@ interface ScrollProgressReturn {
   parallaxY: MotionValue<number>;
 }
 
-export function useScrollProgress(
-  options: UseScrollProgressOptions = {}
-): ScrollProgressReturn {
+export function useScrollProgress(options: UseScrollProgressOptions = {}): ScrollProgressReturn {
   const { target, offset } = options;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -7,15 +7,28 @@ import { InnerCircleBadge, useInnerCircle } from '@/components/InnerCircleBadge'
 import { AnimateNumber, Typewriter, ScrambleText } from '@/lib/motion-plus';
 import MetalArchetypeIcon from '@/components/MetalArchetypeIcon';
 
-const ARCHETYPE_META: Record<string, { tier: number; tierLabel: string; tagline: string; color: string }> = {
-  'ARC': { tier: 1, tierLabel: 'ENTRY', tagline: 'Rising star. Growth story.', color: '#10B981' },
-  'ENTROPY': { tier: 2, tierLabel: 'RISING', tagline: 'Risk-taker. Cult builder.', color: '#F59E0B' },
-  'NULL': { tier: 2, tierLabel: 'RISING', tagline: 'Ideas over identity.', color: '#8B5CF6' },
-  'FREQ': { tier: 2, tierLabel: 'RISING', tagline: 'Entertainer. Community builder.', color: '#EC4899' },
-  'RELAY': { tier: 3, tierLabel: 'ADVANCED', tagline: 'Super connector.', color: '#06B6D4' },
-  'BUILD.EXE': { tier: 3, tierLabel: 'ADVANCED', tagline: 'Builder. Shipper. Doer.', color: '#EF4444' },
-  'SIGNAL_SAGE': { tier: 4, tierLabel: 'EXPERT', tagline: 'Knowledge authority.', color: '#3B82F6' },
-  'FORESIGHT': { tier: 5, tierLabel: 'PEAK', tagline: 'Shapes the narrative.', color: '#9D4EDD' },
+const ARCHETYPE_META: Record<
+  string,
+  { tier: number; tierLabel: string; tagline: string; color: string }
+> = {
+  ARC: { tier: 1, tierLabel: 'ENTRY', tagline: 'Rising star. Growth story.', color: '#10B981' },
+  ENTROPY: { tier: 2, tierLabel: 'RISING', tagline: 'Risk-taker. Cult builder.', color: '#F59E0B' },
+  NULL: { tier: 2, tierLabel: 'RISING', tagline: 'Ideas over identity.', color: '#8B5CF6' },
+  FREQ: {
+    tier: 2,
+    tierLabel: 'RISING',
+    tagline: 'Entertainer. Community builder.',
+    color: '#EC4899',
+  },
+  RELAY: { tier: 3, tierLabel: 'ADVANCED', tagline: 'Super connector.', color: '#06B6D4' },
+  'BUILD.EXE': {
+    tier: 3,
+    tierLabel: 'ADVANCED',
+    tagline: 'Builder. Shipper. Doer.',
+    color: '#EF4444',
+  },
+  SIGNAL_SAGE: { tier: 4, tierLabel: 'EXPERT', tagline: 'Knowledge authority.', color: '#3B82F6' },
+  FORESIGHT: { tier: 5, tierLabel: 'PEAK', tagline: 'Shapes the narrative.', color: '#9D4EDD' },
 };
 
 /* DATA STRUCTURE TYPES */
@@ -87,8 +100,8 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({
 
   // Format DNA voice text with > prefix per sentence for terminal look
   const formattedVoice = useMemo(() => {
-    const sentences = data.dna.voice.split(/(?<=[.!?])\s+/).filter(s => s.trim());
-    return sentences.map(s => `> ${s}`).join('\n');
+    const sentences = data.dna.voice.split(/(?<=[.!?])\s+/).filter((s) => s.trim());
+    return sentences.map((s) => `> ${s}`).join('\n');
   }, [data.dna.voice]);
 
   const handleCopy = async () => {
@@ -111,7 +124,6 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({
         background: bgPrimary,
       }}
     >
-
       {/* GLOBAL STYLES FOR FONTS */}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,600;0,900;1,900&family=JetBrains+Mono:wght@400;700&display=swap');
@@ -129,9 +141,11 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({
 
       {/* BENTO GRID LAYOUT */}
       <div className="w-full max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-3 md:gap-4 auto-rows-[minmax(140px,auto)] md:auto-rows-[minmax(180px,auto)]">
-
         {/* --- CARD 1: HERO SCORE --- */}
-        <div id="brandos-score-card" className="md:col-span-2 md:row-span-2 bg-[#2E6AFF] rounded-[4px] relative p-6 md:p-10 flex flex-col justify-between overflow-visible group hover:brightness-110 transition-all duration-500">
+        <div
+          id="brandos-score-card"
+          className="md:col-span-2 md:row-span-2 bg-[#2E6AFF] rounded-[4px] relative p-6 md:p-10 flex flex-col justify-between overflow-visible group hover:brightness-110 transition-all duration-500"
+        >
           <div className="absolute inset-0 bg-grid-pattern opacity-30 pointer-events-none" />
           <div className="flex justify-between items-start z-10">
             <span className="font-os text-xs md:text-sm text-white/90 tracking-widest border border-white/40 px-2 py-1 rounded-[2px] bg-[#2E6AFF] relative group/info inline-flex items-center gap-1.5">
@@ -147,8 +161,8 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({
             <h1 className="font-brand font-black italic text-[120px] md:text-[180px] leading-none tracking-tighter text-white drop-shadow-xl">
               <AnimateNumber
                 transition={{
-                  y: { type: "spring", duration: 0.8, bounce: 0 },
-                  width: { type: "spring", duration: 0.5, bounce: 0 },
+                  y: { type: 'spring', duration: 0.8, bounce: 0 },
+                  width: { type: 'spring', duration: 0.5, bounce: 0 },
                   opacity: { duration: 0.4 },
                 }}
                 trend={1}
@@ -158,41 +172,48 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({
             </h1>
           </div>
           <div className="z-10 grid grid-cols-3 gap-4 md:gap-6 border-t border-white/20 pt-6 items-end">
-             <div>
-                <span className="font-os text-[10px] md:text-xs text-white/70 block mb-1 uppercase tracking-wider">Voice Consistency</span>
-                <div className="flex items-center gap-2">
-                  <span className="text-2xl font-brand font-bold italic text-white">
-                    <AnimateNumber suffix="%" trend={1}>
-                      {data.scores.voiceConsistency}
-                    </AnimateNumber>
-                  </span>
-                  <div className="h-1.5 w-12 bg-white/30 rounded-full overflow-hidden">
-                    <div style={{width: `${data.scores.voiceConsistency}%`}} className="h-full bg-white transition-all duration-700" />
-                  </div>
-                </div>
-             </div>
-             {/* Archetype badge — center bottom */}
-             <div className="flex flex-col items-center gap-1.5">
-                <MetalArchetypeIcon
-                  src={data.personality.emoji}
-                  alt={data.personality.archetype}
-                  size={48}
-                />
-                <span className="font-os text-[10px] md:text-xs text-white font-bold tracking-widest">
-                  {data.personality.archetype}
-                </span>
-                <span className="font-os text-[8px] md:text-[9px] text-white/60 tracking-wide text-center leading-tight">
-                  {ARCHETYPE_META[data.personality.archetype]?.tagline || ''}
-                </span>
-             </div>
-             <div className="text-right">
-                <span className="font-os text-[10px] md:text-xs text-white/70 block mb-1 uppercase tracking-wider">Engagement</span>
+            <div>
+              <span className="font-os text-[10px] md:text-xs text-white/70 block mb-1 uppercase tracking-wider">
+                Voice Consistency
+              </span>
+              <div className="flex items-center gap-2">
                 <span className="text-2xl font-brand font-bold italic text-white">
-                  <AnimateNumber suffix="/100" trend={1}>
-                    {data.scores.engagementScore}
+                  <AnimateNumber suffix="%" trend={1}>
+                    {data.scores.voiceConsistency}
                   </AnimateNumber>
                 </span>
-             </div>
+                <div className="h-1.5 w-12 bg-white/30 rounded-full overflow-hidden">
+                  <div
+                    style={{ width: `${data.scores.voiceConsistency}%` }}
+                    className="h-full bg-white transition-all duration-700"
+                  />
+                </div>
+              </div>
+            </div>
+            {/* Archetype badge — center bottom */}
+            <div className="flex flex-col items-center gap-1.5">
+              <MetalArchetypeIcon
+                src={data.personality.emoji}
+                alt={data.personality.archetype}
+                size={48}
+              />
+              <span className="font-os text-[10px] md:text-xs text-white font-bold tracking-widest">
+                {data.personality.archetype}
+              </span>
+              <span className="font-os text-[8px] md:text-[9px] text-white/60 tracking-wide text-center leading-tight">
+                {ARCHETYPE_META[data.personality.archetype]?.tagline || ''}
+              </span>
+            </div>
+            <div className="text-right">
+              <span className="font-os text-[10px] md:text-xs text-white/70 block mb-1 uppercase tracking-wider">
+                Engagement
+              </span>
+              <span className="text-2xl font-brand font-bold italic text-white">
+                <AnimateNumber suffix="/100" trend={1}>
+                  {data.scores.engagementScore}
+                </AnimateNumber>
+              </span>
+            </div>
           </div>
         </div>
 
@@ -203,11 +224,15 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({
             <div className="absolute top-0 left-0 right-0 bg-amber-500 text-black px-3 py-1.5 rounded-t-[4px] flex items-center gap-2 z-20">
               <AlertTriangle size={14} strokeWidth={2.5} />
               <span className="font-os text-[10px] font-bold tracking-wider">
-                {authenticity.tier === 'likely_botted' ? 'SUSPICIOUS ACCOUNT SIGNALS DETECTED' : 'SOME UNUSUAL ACCOUNT PATTERNS'}
+                {authenticity.tier === 'likely_botted'
+                  ? 'SUSPICIOUS ACCOUNT SIGNALS DETECTED'
+                  : 'SOME UNUSUAL ACCOUNT PATTERNS'}
               </span>
             </div>
           )}
-          <div className={`flex items-center gap-5 z-10 w-full sm:w-auto ${authenticity?.isWarning ? 'mt-6' : ''}`}>
+          <div
+            className={`flex items-center gap-5 z-10 w-full sm:w-auto ${authenticity?.isWarning ? 'mt-6' : ''}`}
+          >
             <div className="relative shrink-0">
               <div className="w-20 h-20 rounded-full bg-gray-100 border-[3px] border-black p-0.5">
                 <img
@@ -229,13 +254,19 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({
               <div className="flex items-center gap-2 mt-1 flex-wrap">
                 <p className="font-os text-sm text-gray-500 font-bold">@{data.profile.username}</p>
                 {activity && (
-                  <span className={`font-os text-[9px] px-1.5 py-0.5 rounded-[2px] font-bold tracking-wider ${
-                    activity.level === 'very_active' ? 'bg-emerald-100 text-emerald-700' :
-                    activity.level === 'active' ? 'bg-blue-100 text-blue-700' :
-                    activity.level === 'moderate' ? 'bg-amber-100 text-amber-700' :
-                    activity.level === 'inactive' ? 'bg-gray-200 text-gray-600' :
-                    'bg-red-100 text-red-600'
-                  }`}>
+                  <span
+                    className={`font-os text-[9px] px-1.5 py-0.5 rounded-[2px] font-bold tracking-wider ${
+                      activity.level === 'very_active'
+                        ? 'bg-emerald-100 text-emerald-700'
+                        : activity.level === 'active'
+                          ? 'bg-blue-100 text-blue-700'
+                          : activity.level === 'moderate'
+                            ? 'bg-amber-100 text-amber-700'
+                            : activity.level === 'inactive'
+                              ? 'bg-gray-200 text-gray-600'
+                              : 'bg-red-100 text-red-600'
+                    }`}
+                  >
                     {activity.levelLabel.toUpperCase()}
                   </span>
                 )}
@@ -243,12 +274,14 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({
               </div>
             </div>
           </div>
-          <div className={`mt-4 sm:mt-0 text-center sm:text-right border-t sm:border-t-0 sm:border-l border-gray-200 pt-4 sm:pt-0 sm:pl-6 w-full sm:w-auto ${authenticity?.isWarning ? 'mt-6 sm:mt-0' : ''}`}>
-            <span className="font-os text-[10px] text-gray-400 block uppercase tracking-widest mb-1">Audience</span>
+          <div
+            className={`mt-4 sm:mt-0 text-center sm:text-right border-t sm:border-t-0 sm:border-l border-gray-200 pt-4 sm:pt-0 sm:pl-6 w-full sm:w-auto ${authenticity?.isWarning ? 'mt-6 sm:mt-0' : ''}`}
+          >
+            <span className="font-os text-[10px] text-gray-400 block uppercase tracking-widest mb-1">
+              Audience
+            </span>
             <span className="text-4xl md:text-5xl font-brand font-black italic text-black tracking-tighter">
-              <AnimateNumber trend={1}>
-                {data.profile.followersCount}
-              </AnimateNumber>
+              <AnimateNumber trend={1}>{data.profile.followersCount}</AnimateNumber>
             </span>
           </div>
         </div>
@@ -256,15 +289,18 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({
         {/* --- CARD 3: TONE ANALYZER --- */}
         <div className="md:col-span-1 bg-[#1A1A1A] rounded-[4px] p-4 md:p-5 flex flex-col relative overflow-visible border border-white/5">
           <span className="font-os text-[10px] text-[#666] mb-3 md:mb-4 border-b border-[#333] pb-2 tracking-widest relative group/info inline-flex items-center gap-1.5">
-              TONE_MIXER
-              <Info className="w-3 h-3 text-[#666] hover:text-white cursor-help" />
-              <span className="absolute bottom-full left-0 mb-2 px-2 py-1 bg-white text-black text-[10px] font-normal rounded whitespace-nowrap opacity-0 group-hover/info:opacity-100 transition-opacity pointer-events-none z-50 shadow-lg">
-                Your voice balance
-              </span>
+            TONE_MIXER
+            <Info className="w-3 h-3 text-[#666] hover:text-white cursor-help" />
+            <span className="absolute bottom-full left-0 mb-2 px-2 py-1 bg-white text-black text-[10px] font-normal rounded whitespace-nowrap opacity-0 group-hover/info:opacity-100 transition-opacity pointer-events-none z-50 shadow-lg">
+              Your voice balance
             </span>
+          </span>
           <div className="flex-1 flex justify-between items-end gap-2 md:gap-3 px-1">
             <div className="w-full h-full flex flex-col justify-end group">
-              <div style={{height: `${data.tone.formality}%`}} className="w-full bg-gray-600 rounded-[2px] mb-2 transition-all duration-700 group-hover:bg-white" />
+              <div
+                style={{ height: `${data.tone.formality}%` }}
+                className="w-full bg-gray-600 rounded-[2px] mb-2 transition-all duration-700 group-hover:bg-white"
+              />
               <span className="font-os text-[9px] text-gray-500 text-center cursor-help relative group/tooltip">
                 FRM
                 <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-white text-black text-[10px] rounded whitespace-nowrap opacity-0 group-hover/tooltip:opacity-100 transition-opacity pointer-events-none">
@@ -272,9 +308,9 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({
                 </span>
               </span>
             </div>
-             <div className="w-full h-full flex flex-col justify-end group">
+            <div className="w-full h-full flex flex-col justify-end group">
               <div
-                style={{height: `${data.tone.energy}%`}}
+                style={{ height: `${data.tone.energy}%` }}
                 className="w-full bg-[#00FF41] rounded-[2px] mb-2 transition-all duration-700 shadow-[0_0_15px_rgba(0,255,65,0.4)] group-hover:shadow-[0_0_20px_rgba(0,255,65,0.8)]"
               />
               <span className="font-os text-[9px] text-[#00FF41] text-center font-bold cursor-help relative group/tooltip">
@@ -284,8 +320,11 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({
                 </span>
               </span>
             </div>
-             <div className="w-full h-full flex flex-col justify-end group">
-              <div style={{height: `${data.tone.confidence}%`}} className="w-full bg-[#2E6AFF] rounded-[2px] mb-2 transition-all duration-700 group-hover:brightness-125" />
+            <div className="w-full h-full flex flex-col justify-end group">
+              <div
+                style={{ height: `${data.tone.confidence}%` }}
+                className="w-full bg-[#2E6AFF] rounded-[2px] mb-2 transition-all duration-700 group-hover:brightness-125"
+              />
               <span className="font-os text-[9px] text-[#2E6AFF] text-center font-bold cursor-help relative group/tooltip">
                 CNF
                 <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-white text-black text-[10px] rounded whitespace-nowrap opacity-0 group-hover/tooltip:opacity-100 transition-opacity pointer-events-none">
@@ -326,112 +365,123 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({
 
         {/* --- CARD 5: DNA TERMINAL --- */}
         <div className="md:col-span-2 bg-[#F0F0F0] rounded-[4px] p-4 md:p-5 flex flex-col justify-between border-l-[4px] md:border-l-[6px] border-[#2E6AFF]">
-           <div className="flex items-center gap-2 mb-2 md:mb-3">
-             <Terminal size={12} className="text-black md:w-[14px] md:h-[14px]" strokeWidth={3} />
-             <span className="font-os text-[10px] md:text-xs text-black font-bold tracking-wider relative group/info inline-flex items-center gap-1">
-               &gt; EXECUTE_DNA_SEQUENCE
-               <Info className="w-3 h-3 text-black/50 hover:text-black cursor-help" />
-               <span className="absolute bottom-full left-0 mb-2 px-2 py-1 bg-black text-white text-[10px] font-normal rounded whitespace-nowrap opacity-0 group-hover/info:opacity-100 transition-opacity pointer-events-none z-50 shadow-lg">
-                 Your brand DNA keywords
-               </span>
-             </span>
-           </div>
-           <div className="flex flex-wrap gap-1.5 md:gap-2 mb-3 md:mb-4">
-             {data.dna.keywords.map((word, i) => (
-               <span key={i} className="bg-black text-white px-1.5 md:px-2 py-0.5 md:py-1 text-[9px] md:text-xs font-os rounded-[2px] hover:bg-[#2E6AFF] hover:translate-y-[-2px] transition-all cursor-crosshair">
-                 [<ScrambleText
-                   duration={0.8}
-                   delay={i * 0.1}
-                   interval={0.04}
-                   chars="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_-./\\"
-                 >
-                   {word.toLowerCase()}
-                 </ScrambleText>]
-               </span>
-             ))}
-           </div>
-           <div className="bg-white border border-black/20 p-3 md:p-4 rounded-[2px] h-[140px] md:h-[160px] overflow-y-auto">
-             <Typewriter
-               as="pre"
-               className="font-os text-xs md:text-sm leading-relaxed whitespace-pre-wrap"
-               speed="fast"
-               variance="natural"
-               style={{ color: '#000000' }}
-               cursorStyle={{
-                 width: '6px',
-                 height: '14px',
-                 backgroundColor: '#000',
-                 top: '0.05em',
-               }}
-             >
-               {formattedVoice}
-             </Typewriter>
-           </div>
+          <div className="flex items-center gap-2 mb-2 md:mb-3">
+            <Terminal size={12} className="text-black md:w-[14px] md:h-[14px]" strokeWidth={3} />
+            <span className="font-os text-[10px] md:text-xs text-black font-bold tracking-wider relative group/info inline-flex items-center gap-1">
+              &gt; EXECUTE_DNA_SEQUENCE
+              <Info className="w-3 h-3 text-black/50 hover:text-black cursor-help" />
+              <span className="absolute bottom-full left-0 mb-2 px-2 py-1 bg-black text-white text-[10px] font-normal rounded whitespace-nowrap opacity-0 group-hover/info:opacity-100 transition-opacity pointer-events-none z-50 shadow-lg">
+                Your brand DNA keywords
+              </span>
+            </span>
+          </div>
+          <div className="flex flex-wrap gap-1.5 md:gap-2 mb-3 md:mb-4">
+            {data.dna.keywords.map((word, i) => (
+              <span
+                key={i}
+                className="bg-black text-white px-1.5 md:px-2 py-0.5 md:py-1 text-[9px] md:text-xs font-os rounded-[2px] hover:bg-[#2E6AFF] hover:translate-y-[-2px] transition-all cursor-crosshair"
+              >
+                [
+                <ScrambleText
+                  duration={0.8}
+                  delay={i * 0.1}
+                  interval={0.04}
+                  chars="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_-./\\"
+                >
+                  {word.toLowerCase()}
+                </ScrambleText>
+                ]
+              </span>
+            ))}
+          </div>
+          <div className="bg-white border border-black/20 p-3 md:p-4 rounded-[2px] h-[140px] md:h-[160px] overflow-y-auto">
+            <Typewriter
+              as="pre"
+              className="font-os text-xs md:text-sm leading-relaxed whitespace-pre-wrap"
+              speed="fast"
+              variance="natural"
+              style={{ color: '#000000' }}
+              cursorStyle={{
+                width: '6px',
+                height: '14px',
+                backgroundColor: '#000',
+                top: '0.05em',
+              }}
+            >
+              {formattedVoice}
+            </Typewriter>
+          </div>
         </div>
 
         {/* --- CARD 6: CONTENT PILLARS --- */}
         <div className="md:col-span-2 bg-black border border-[#333] rounded-[4px] p-4 md:p-6 flex flex-col justify-center relative overflow-visible">
-           <div className="absolute inset-0 opacity-20 pointer-events-none"
-               style={{backgroundImage: 'linear-gradient(#222 1px, transparent 1px), linear-gradient(90deg, #222 1px, transparent 1px)', backgroundSize: '20px 20px'}}></div>
-           <div className="flex justify-between items-center mb-4 md:mb-6 z-10">
-              <span className="font-os text-[10px] md:text-xs text-gray-500 tracking-widest relative group/info inline-flex items-center gap-1.5">
-                CONTENT_DISTRIBUTION
-                <Info className="w-3 h-3 text-gray-500 hover:text-white cursor-help" />
-                <span className="absolute bottom-full left-0 mb-2 px-2 py-1 bg-white text-black text-[10px] font-normal rounded whitespace-nowrap opacity-0 group-hover/info:opacity-100 transition-opacity pointer-events-none z-50 shadow-lg">
-                  Your top content themes
-                </span>
+          <div
+            className="absolute inset-0 opacity-20 pointer-events-none"
+            style={{
+              backgroundImage:
+                'linear-gradient(#222 1px, transparent 1px), linear-gradient(90deg, #222 1px, transparent 1px)',
+              backgroundSize: '20px 20px',
+            }}
+          ></div>
+          <div className="flex justify-between items-center mb-4 md:mb-6 z-10">
+            <span className="font-os text-[10px] md:text-xs text-gray-500 tracking-widest relative group/info inline-flex items-center gap-1.5">
+              CONTENT_DISTRIBUTION
+              <Info className="w-3 h-3 text-gray-500 hover:text-white cursor-help" />
+              <span className="absolute bottom-full left-0 mb-2 px-2 py-1 bg-white text-black text-[10px] font-normal rounded whitespace-nowrap opacity-0 group-hover/info:opacity-100 transition-opacity pointer-events-none z-50 shadow-lg">
+                Your top content themes
               </span>
-              <BarChart3 size={16} className="text-gray-600" />
-           </div>
-           {data.pillars.length > 0 ? (
-             <div className="grid grid-cols-3 gap-2 md:gap-4 z-10">
-               {data.pillars.slice(0, 3).map((pillar, i) => (
-                 <div key={i} className="flex flex-col h-full group">
-                   {/* Fixed height for percentage */}
-                   <div className="h-5 flex items-center justify-center text-[10px] md:text-xs text-gray-400 font-os opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-                     <AnimateNumber suffix="%" trend={1}>
-                       {pillar.value}
-                     </AnimateNumber>
-                   </div>
-                   {/* Bar container with fixed height */}
-                   <div className="h-[60px] md:h-[80px] relative">
-                     <div className="absolute inset-0 bg-[#111] rounded-[2px] border border-[#333] overflow-hidden">
-                       <div
-                        style={{height: `${pillar.value}%`}}
+            </span>
+            <BarChart3 size={16} className="text-gray-600" />
+          </div>
+          {data.pillars.length > 0 ? (
+            <div className="grid grid-cols-3 gap-2 md:gap-4 z-10">
+              {data.pillars.slice(0, 3).map((pillar, i) => (
+                <div key={i} className="flex flex-col h-full group">
+                  {/* Fixed height for percentage */}
+                  <div className="h-5 flex items-center justify-center text-[10px] md:text-xs text-gray-400 font-os opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                    <AnimateNumber suffix="%" trend={1}>
+                      {pillar.value}
+                    </AnimateNumber>
+                  </div>
+                  {/* Bar container with fixed height */}
+                  <div className="h-[60px] md:h-[80px] relative">
+                    <div className="absolute inset-0 bg-[#111] rounded-[2px] border border-[#333] overflow-hidden">
+                      <div
+                        style={{ height: `${pillar.value}%` }}
                         className={`absolute bottom-0 w-full transition-all duration-1000 ease-out
                           ${i === 0 ? 'bg-white' : i === 1 ? 'bg-[#2E6AFF]' : 'bg-[#FF6B00] shadow-[0_0_15px_rgba(255,107,0,0.4)]'}
                         `}
-                       ></div>
-                     </div>
-                   </div>
-                   {/* Fixed height for 2-line labels */}
-                   <div className="h-8 md:h-10 flex items-start justify-center pt-1">
-                     <span
-                       className={`text-center text-[8px] md:text-[10px] font-brand font-bold italic tracking-wider leading-tight line-clamp-2 ${i === 0 ? 'text-white' : i === 1 ? 'text-[#2E6AFF]' : 'text-[#FF6B00]'}`}
-                       title={pillar.label}
-                     >
-                       {pillar.label}
-                     </span>
-                   </div>
-                 </div>
-               ))}
-             </div>
-           ) : (
-             <div className="flex flex-col items-center justify-center h-full z-10 py-4">
-               <p
-                 className="text-[9px] md:text-[11px] text-gray-500 text-center leading-relaxed"
-                 style={{ fontFamily: "'VCR OSD Mono', monospace", letterSpacing: '0.1em' }}
-               >
-                 NOT ENOUGH DATA TO IDENTIFY YOUR CONTENT PILLARS.
-               </p>
-               <p
-                 className="text-[9px] md:text-[11px] text-[#D4A574] text-center mt-2"
-                 style={{ fontFamily: "'VCR OSD Mono', monospace", letterSpacing: '0.1em' }}
-               >
-                 POST MORE TO UNLOCK THIS INSIGHT.
-               </p>
-             </div>
-           )}
+                      ></div>
+                    </div>
+                  </div>
+                  {/* Fixed height for 2-line labels */}
+                  <div className="h-8 md:h-10 flex items-start justify-center pt-1">
+                    <span
+                      className={`text-center text-[8px] md:text-[10px] font-brand font-bold italic tracking-wider leading-tight line-clamp-2 ${i === 0 ? 'text-white' : i === 1 ? 'text-[#2E6AFF]' : 'text-[#FF6B00]'}`}
+                      title={pillar.label}
+                    >
+                      {pillar.label}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center h-full z-10 py-4">
+              <p
+                className="text-[9px] md:text-[11px] text-gray-500 text-center leading-relaxed"
+                style={{ fontFamily: "'VCR OSD Mono', monospace", letterSpacing: '0.1em' }}
+              >
+                NOT ENOUGH DATA TO IDENTIFY YOUR CONTENT PILLARS.
+              </p>
+              <p
+                className="text-[9px] md:text-[11px] text-[#D4A574] text-center mt-2"
+                style={{ fontFamily: "'VCR OSD Mono', monospace", letterSpacing: '0.1em' }}
+              >
+                POST MORE TO UNLOCK THIS INSIGHT.
+              </p>
+            </div>
+          )}
         </div>
 
         {/* --- CARD 7: ARCHETYPE SHOWCASE --- */}
@@ -501,14 +551,24 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({
 
               {/* Tier bar */}
               <div className="relative z-10 hidden md:flex flex-col items-center gap-1 shrink-0">
-                <span className="font-os text-[8px] tracking-widest" style={{ color: textSecondary }}>TIER</span>
+                <span
+                  className="font-os text-[8px] tracking-widest"
+                  style={{ color: textSecondary }}
+                >
+                  TIER
+                </span>
                 <div className="flex flex-col-reverse gap-[3px]">
                   {[1, 2, 3, 4, 5].map((t) => (
                     <div
                       key={t}
                       className="w-6 h-2 rounded-[1px] transition-all"
                       style={{
-                        background: t <= meta.tier ? meta.color : (isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)'),
+                        background:
+                          t <= meta.tier
+                            ? meta.color
+                            : isLight
+                              ? 'rgba(0,0,0,0.08)'
+                              : 'rgba(255,255,255,0.08)',
                         boxShadow: t <= meta.tier ? `0 0 6px ${meta.color}40` : 'none',
                       }}
                     />
@@ -535,16 +595,34 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({
                   {copyStatus === 'copying' ? (
                     <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                   ) : copyStatus === 'copied' ? (
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                    >
                       <polyline points="20 6 9 17 4 12" />
                     </svg>
                   ) : (
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
-                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
                     </svg>
                   )}
-                  {copyStatus === 'copied' ? 'COPIED!' : copyStatus === 'copying' ? 'COPYING...' : 'COPY'}
+                  {copyStatus === 'copied'
+                    ? 'COPIED!'
+                    : copyStatus === 'copying'
+                      ? 'COPYING...'
+                      : 'COPY'}
                 </button>
               )}
               {onDownload && (
@@ -552,10 +630,17 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({
                   onClick={onDownload}
                   className="flex items-center gap-2 px-4 py-2.5 bg-[#1A1A1A] hover:bg-[#2E6AFF] border border-[#333] hover:border-[#2E6AFF] rounded-[4px] text-white font-os text-[11px] tracking-wider transition-all duration-300"
                 >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                    <polyline points="7 10 12 15 17 10"/>
-                    <line x1="12" y1="15" x2="12" y2="3"/>
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="7 10 12 15 17 10" />
+                    <line x1="12" y1="15" x2="12" y2="3" />
                   </svg>
                   DOWNLOAD
                 </button>
@@ -566,7 +651,7 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({
                   className="flex items-center gap-2 px-4 py-2.5 bg-[#2E6AFF] hover:bg-[#1E4BC8] border border-[#2E6AFF] rounded-[4px] text-white font-os text-[11px] tracking-wider transition-all duration-300"
                 >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
                   </svg>
                   SHARE TO X
                 </button>
@@ -574,7 +659,6 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({
             </div>
           </div>
         )}
-
       </div>
     </div>
   );

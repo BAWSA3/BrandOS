@@ -11,9 +11,24 @@ interface ImportFromSocialProps {
 type SocialPlatform = 'twitter' | 'instagram' | 'linkedin';
 
 const platforms: { id: SocialPlatform; label: string; icon: string; placeholder: string }[] = [
-  { id: 'twitter', label: 'Twitter / X', icon: 'twitter', placeholder: '@yourbrand or twitter.com/yourbrand' },
-  { id: 'instagram', label: 'Instagram', icon: 'instagram', placeholder: '@yourbrand or instagram.com/yourbrand' },
-  { id: 'linkedin', label: 'LinkedIn', icon: 'linkedin', placeholder: 'linkedin.com/company/yourbrand' },
+  {
+    id: 'twitter',
+    label: 'Twitter / X',
+    icon: 'twitter',
+    placeholder: '@yourbrand or twitter.com/yourbrand',
+  },
+  {
+    id: 'instagram',
+    label: 'Instagram',
+    icon: 'instagram',
+    placeholder: '@yourbrand or instagram.com/yourbrand',
+  },
+  {
+    id: 'linkedin',
+    label: 'LinkedIn',
+    icon: 'linkedin',
+    placeholder: 'linkedin.com/company/yourbrand',
+  },
 ];
 
 export default function ImportFromSocial({ onExtract }: ImportFromSocialProps) {
@@ -52,27 +67,48 @@ export default function ImportFromSocial({ onExtract }: ImportFromSocialProps) {
         sourceDetails: `${selectedPlatform}: ${handle}`,
         overallConfidence: result.overallConfidence || 70,
         extractedAt: new Date(),
-        name: result.name ? { value: result.name, confidence: 90, source: 'Profile name' } : undefined,
-        colors: result.colors ? {
-          primary: result.colors.primary ? { value: result.colors.primary, confidence: 75, source: 'Profile/banner image' } : undefined,
-          secondary: result.colors.secondary ? { value: result.colors.secondary, confidence: 70, source: 'Profile colors' } : undefined,
-        } : undefined,
-        tone: result.tone ? {
-          formality: { value: result.tone.formality, confidence: 80, source: 'Post analysis' },
-          energy: { value: result.tone.energy, confidence: 80, source: 'Post analysis' },
-          confidence: { value: result.tone.confidence, confidence: 80, source: 'Post analysis' },
-          style: { value: result.tone.style, confidence: 80, source: 'Post analysis' },
-        } : undefined,
-        keywords: result.keywords?.map((k: string) => ({ value: k, confidence: 85, source: 'Bio and posts' })),
-        voiceSamples: result.voiceSamples?.map((s: string) => ({ value: s, confidence: 90, source: 'Recent posts' })),
+        name: result.name
+          ? { value: result.name, confidence: 90, source: 'Profile name' }
+          : undefined,
+        colors: result.colors
+          ? {
+              primary: result.colors.primary
+                ? { value: result.colors.primary, confidence: 75, source: 'Profile/banner image' }
+                : undefined,
+              secondary: result.colors.secondary
+                ? { value: result.colors.secondary, confidence: 70, source: 'Profile colors' }
+                : undefined,
+            }
+          : undefined,
+        tone: result.tone
+          ? {
+              formality: { value: result.tone.formality, confidence: 80, source: 'Post analysis' },
+              energy: { value: result.tone.energy, confidence: 80, source: 'Post analysis' },
+              confidence: {
+                value: result.tone.confidence,
+                confidence: 80,
+                source: 'Post analysis',
+              },
+              style: { value: result.tone.style, confidence: 80, source: 'Post analysis' },
+            }
+          : undefined,
+        keywords: result.keywords?.map((k: string) => ({
+          value: k,
+          confidence: 85,
+          source: 'Bio and posts',
+        })),
+        voiceSamples: result.voiceSamples?.map((s: string) => ({
+          value: s,
+          confidence: 90,
+          source: 'Recent posts',
+        })),
       };
 
       setProgress({ stage: 'complete', progress: 100, message: 'Analysis complete!' });
-      
+
       setTimeout(() => {
         onExtract(extractedBrand, result.profileImage);
       }, 500);
-
     } catch (error) {
       setProgress({
         stage: 'error',
@@ -87,8 +123,18 @@ export default function ImportFromSocial({ onExtract }: ImportFromSocialProps) {
     <div className="max-w-2xl mx-auto">
       <div className="text-center mb-8">
         <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-pink-500/10 flex items-center justify-center">
-          <svg className="w-8 h-8 text-pink-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+          <svg
+            className="w-8 h-8 text-pink-500"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={1.5}
+              d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+            />
           </svg>
         </div>
         <h2 className="text-2xl font-light tracking-tight mb-2">Import from Social Media</h2>
@@ -122,14 +168,19 @@ export default function ImportFromSocial({ onExtract }: ImportFromSocialProps) {
       <div className="relative">
         <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted">
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={1.5}
+              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+            />
           </svg>
         </div>
         <input
           type="text"
           value={handle}
           onChange={(e) => setHandle(e.target.value)}
-          placeholder={platforms.find(p => p.id === selectedPlatform)?.placeholder}
+          placeholder={platforms.find((p) => p.id === selectedPlatform)?.placeholder}
           className="w-full pl-12 pr-4 py-4 bg-surface border border-border rounded-xl text-lg outline-none focus:border-foreground transition-colors"
         />
       </div>
@@ -149,27 +200,29 @@ export default function ImportFromSocial({ onExtract }: ImportFromSocialProps) {
               style={{ width: `${progress.progress}%` }}
             />
           </div>
-          {progress.error && (
-            <p className="mt-3 text-sm text-red-500">{progress.error}</p>
-          )}
+          {progress.error && <p className="mt-3 text-sm text-red-500">{progress.error}</p>}
         </div>
       )}
 
       {/* Analyze Button */}
       <button
         onClick={handleAnalyze}
-        disabled={!handle.trim() || (progress?.stage !== 'error' && progress?.stage !== 'complete' && progress !== null)}
+        disabled={
+          !handle.trim() ||
+          (progress?.stage !== 'error' && progress?.stage !== 'complete' && progress !== null)
+        }
         className="w-full mt-8 py-4 bg-foreground text-background rounded-xl text-sm font-medium disabled:opacity-30 disabled:cursor-not-allowed hover:opacity-90 transition-opacity"
       >
         {progress && progress.stage !== 'error' && progress.stage !== 'complete'
           ? 'Analyzing...'
-          : 'Analyze Profile'
-        }
+          : 'Analyze Profile'}
       </button>
 
       {/* What We Analyze */}
       <div className="mt-8 p-4 bg-surface rounded-lg">
-        <h4 className="text-xs uppercase tracking-widest text-muted mb-3">What we&apos;ll analyze</h4>
+        <h4 className="text-xs uppercase tracking-widest text-muted mb-3">
+          What we&apos;ll analyze
+        </h4>
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div className="flex items-center gap-2">
             <span className="w-3 h-3 rounded-full bg-blue-500"></span>
@@ -226,19 +279,3 @@ function SocialIcon({ platform, active }: { platform: string; active: boolean })
       return null;
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

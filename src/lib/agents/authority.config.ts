@@ -1,11 +1,7 @@
 // ===== RELIQUE MESSAGING FRAMEWORK =====
 // Brand Authority Configuration for Relique RWA Platform
 
-import {
-  MessagingFramework,
-  EducationalTopic,
-  AuthorityPillar,
-} from './authority.types';
+import { MessagingFramework, EducationalTopic, AuthorityPillar } from './authority.types';
 
 // ===== MAIN MESSAGING FRAMEWORK =====
 
@@ -91,15 +87,7 @@ export const RELIQUE_MESSAGING_FRAMEWORK: MessagingFramework = {
         'Full provenance tracking',
       ],
       emotionalHook: 'Confidence in every trade',
-      keywords: [
-        'real',
-        'authentic',
-        'backed',
-        'graded',
-        'ownership',
-        'physical',
-        'redeem',
-      ],
+      keywords: ['real', 'authentic', 'backed', 'graded', 'ownership', 'physical', 'redeem'],
     },
   },
 
@@ -149,8 +137,7 @@ export const RELIQUE_MESSAGING_FRAMEWORK: MessagingFramework = {
     },
     seller: {
       name: 'Sellers & Store Owners',
-      description:
-        'Card shop owners and high-volume sellers looking to expand their reach',
+      description: 'Card shop owners and high-volume sellers looking to expand their reach',
       primaryValue: 'Turn inventory into 24/7 revenue',
       painPoints: [
         'Unsold inventory tying up capital',
@@ -173,9 +160,9 @@ export const RELIQUE_MESSAGING_FRAMEWORK: MessagingFramework = {
   // ===== OBJECTION HANDLING =====
   objections: {
     trust: {
-      objection: "How do I know my cards are actually safe? What if you go out of business?",
+      objection: 'How do I know my cards are actually safe? What if you go out of business?',
       shortResponse:
-        "Your cards are fully insured and legally yours. If anything happens to us, you still own them and can redeem them.",
+        'Your cards are fully insured and legally yours. If anything happens to us, you still own them and can redeem them.',
       fullResponse:
         "We understand the concern - you're trusting us with valuable assets. Here's how we've addressed this: Every card is fully insured against damage, theft, or loss. Your ownership is recorded on the blockchain, meaning it's legally binding and independent of our company. We use institutional-grade vault facilities that meet museum and bank standards. And if Relique ever ceased operations, you'd have full rights to redeem your physical cards. We've built this system specifically because we're collectors too, and we'd never trust our own cards to anything less.",
       proofPoints: [
@@ -201,8 +188,7 @@ export const RELIQUE_MESSAGING_FRAMEWORK: MessagingFramework = {
         'Phone and email support for any questions',
         'Physical redemption is straightforward',
       ],
-      followUpQuestion:
-        'Would you like a quick walkthrough of how trading works on our platform?',
+      followUpQuestion: 'Would you like a quick walkthrough of how trading works on our platform?',
     },
     value: {
       objection: "Why wouldn't I just sell on eBay? Or keep my cards at home?",
@@ -233,8 +219,7 @@ export const RELIQUE_MESSAGING_FRAMEWORK: MessagingFramework = {
         'Partial vaulting - keep some cards at home',
         'Full ownership rights always maintained',
       ],
-      followUpQuestion:
-        'Would you like to know more about our redemption process?',
+      followUpQuestion: 'Would you like to know more about our redemption process?',
     },
   },
 
@@ -285,7 +270,7 @@ export const RELIQUE_MESSAGING_FRAMEWORK: MessagingFramework = {
         'No authentication guarantee',
       ],
       positioningStatement:
-        "TCGPlayer is great for raw cards and game pieces. Relique is purpose-built for collectors and traders of graded, high-value cards who need professional infrastructure.",
+        'TCGPlayer is great for raw cards and game pieces. Relique is purpose-built for collectors and traders of graded, high-value cards who need professional infrastructure.',
       comparisonPoints: [
         { feature: 'Focus', us: 'Graded collectibles', them: 'Game pieces & raw' },
         { feature: 'Verification', us: 'Blockchain + PSA/BGS', them: 'Seller reputation' },
@@ -366,7 +351,7 @@ export const RELIQUE_MESSAGING_FRAMEWORK: MessagingFramework = {
         'Limited card selection',
       ],
       positioningStatement:
-        "Alt treats cards like stocks. Relique treats them like what they are - collectibles that happen to be great investments too.",
+        'Alt treats cards like stocks. Relique treats them like what they are - collectibles that happen to be great investments too.',
       comparisonPoints: [
         { feature: 'Philosophy', us: 'Collectors first', them: 'Investors first' },
         { feature: 'Minimums', us: 'Accessible', them: 'High value only' },
@@ -393,7 +378,7 @@ export const RELIQUE_MESSAGING_FRAMEWORK: MessagingFramework = {
         'Limited to their picks',
       ],
       positioningStatement:
-        "Dibbs is great for fractional card investing, but you never actually own a card. Relique lets you own the whole thing - and trade it or redeem it whenever you want.",
+        'Dibbs is great for fractional card investing, but you never actually own a card. Relique lets you own the whole thing - and trade it or redeem it whenever you want.',
       comparisonPoints: [
         { feature: 'Ownership', us: 'Full card', them: 'Fractional only' },
         { feature: 'Redemption', us: 'Anytime', them: 'Not available' },
@@ -434,7 +419,7 @@ export const EDUCATIONAL_TOPICS: Record<
   'nft-basics': {
     title: 'NFTs for Card Collectors',
     summary:
-      "What NFTs actually are and why they matter for collectibles - explained without the hype",
+      'What NFTs actually are and why they matter for collectibles - explained without the hype',
     targetAudience: ['collector'],
     relatedPillars: ['transparency', 'authenticity'],
     keyPoints: [

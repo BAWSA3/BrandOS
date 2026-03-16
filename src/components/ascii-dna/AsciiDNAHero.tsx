@@ -51,7 +51,12 @@ export default function AsciiDNAHero({
   const lastTimeRef = useRef(0);
   const fontReadyRef = useRef(false);
 
-  const [dimensions, setDimensions] = useState<{ cols: number; rows: number; width: number; height: number }>({
+  const [dimensions, setDimensions] = useState<{
+    cols: number;
+    rows: number;
+    width: number;
+    height: number;
+  }>({
     cols: 120,
     rows: 50,
     width: 1440,
@@ -149,7 +154,16 @@ export default function AsciiDNAHero({
       if (!grid) return;
       config.textOffset = 0;
       computeDNAGrid(grid, config);
-      renderToCanvas(ctx, grid, CHAR_W, CHAR_H, backgroundColor, textColor, dimensions.width, dimensions.height);
+      renderToCanvas(
+        ctx,
+        grid,
+        CHAR_W,
+        CHAR_H,
+        backgroundColor,
+        textColor,
+        dimensions.width,
+        dimensions.height
+      );
       return;
     }
 
@@ -193,11 +207,20 @@ export default function AsciiDNAHero({
         DISPLACEMENT_RADIUS,
         DISPLACEMENT_FORCE,
         SPRING_K,
-        DAMPING,
+        DAMPING
       );
 
       // Render
-      renderToCanvas(ctx, grid, CHAR_W, CHAR_H, backgroundColor, textColor, dimensions.width, dimensions.height);
+      renderToCanvas(
+        ctx,
+        grid,
+        CHAR_W,
+        CHAR_H,
+        backgroundColor,
+        textColor,
+        dimensions.width,
+        dimensions.height
+      );
     };
 
     rafRef.current = requestAnimationFrame(loop);
@@ -244,9 +267,7 @@ export default function AsciiDNAHero({
             justifyContent: 'center',
           }}
         >
-          <div style={{ pointerEvents: 'auto' }}>
-            {children}
-          </div>
+          <div style={{ pointerEvents: 'auto' }}>{children}</div>
         </div>
       )}
     </div>

@@ -1,6 +1,7 @@
 # Backlog: Creator Dashboard
 
 ## Status: BACKLOGGED
+
 Not building now. Documented for future sprint.
 
 ---
@@ -14,11 +15,13 @@ A centralized dashboard for creators to manage the **business side** of their br
 ## 1. Income Tracker
 
 ### Core UX
+
 - **Big, centered income number** — the hero of the dashboard. When a creator opens it, the first thing they see is their total income, large and prominent
 - The number should feel alive — subtle animation on load, color shifts (green when trending up)
 - Think: a scoreboard for your creator business
 
 ### Features
+
 - Track income by source: brand deals, sponsorships, affiliate, digital products, services, etc.
 - Add income entries manually (amount, source, date, notes)
 - Monthly / quarterly / yearly views
@@ -26,19 +29,26 @@ A centralized dashboard for creators to manage the **business side** of their br
 - Goal setting: "I want to hit $X by [date]" with progress indicator
 
 ### Data Model (draft)
+
 ```typescript
 interface IncomeEntry {
   id: string;
   amount: number;
-  source: string;        // e.g., "Brand Deal", "Affiliate", "Consulting"
-  client?: string;       // e.g., "Nike", "Notion"
-  date: string;          // ISO date
+  source: string; // e.g., "Brand Deal", "Affiliate", "Consulting"
+  client?: string; // e.g., "Nike", "Notion"
+  date: string; // ISO date
   notes?: string;
   category: IncomeCategory;
-  invoiceId?: string;    // Link to invoice if applicable
+  invoiceId?: string; // Link to invoice if applicable
 }
 
-type IncomeCategory = 'brand-deal' | 'sponsorship' | 'affiliate' | 'digital-product' | 'service' | 'other';
+type IncomeCategory =
+  | 'brand-deal'
+  | 'sponsorship'
+  | 'affiliate'
+  | 'digital-product'
+  | 'service'
+  | 'other';
 
 interface IncomeGoal {
   targetAmount: number;
@@ -52,17 +62,20 @@ interface IncomeGoal {
 ## 2. Brand Kit Storage
 
 ### Core UX
+
 - Organized file/folder structure for all brand assets
 - Easy drag-and-drop upload
 - Quick preview for images, PDFs
 - One-click copy/download for sharing with partners
 
 ### Structure
+
 - **Folders**: Logos, Fonts, Colors, Templates, Guidelines, Media Kit, Photos, Videos
 - User can create custom folders
 - Each file has metadata: name, type, upload date, tags
 
 ### Features
+
 - File upload with preview thumbnails
 - Folder navigation (breadcrumb style)
 - Search across all files
@@ -70,11 +83,12 @@ interface IncomeGoal {
 - Version history for key assets (e.g., logo v1, v2, v3)
 
 ### Data Model (draft)
+
 ```typescript
 interface BrandKitFolder {
   id: string;
   name: string;
-  parentId: string | null;  // null = root
+  parentId: string | null; // null = root
   createdAt: string;
 }
 
@@ -82,10 +96,10 @@ interface BrandKitFile {
   id: string;
   name: string;
   folderId: string;
-  fileUrl: string;          // Storage URL
+  fileUrl: string; // Storage URL
   thumbnailUrl?: string;
-  fileType: string;         // MIME type
-  fileSize: number;         // bytes
+  fileType: string; // MIME type
+  fileSize: number; // bytes
   tags: string[];
   uploadedAt: string;
   updatedAt: string;
@@ -97,12 +111,14 @@ interface BrandKitFile {
 ## 3. Invoice Tracker
 
 ### Core UX
+
 - All invoices in one place, organized and searchable
 - Quick-add for new invoices (received or sent)
 - Status tracking: pending, paid, overdue
 - Tax season ready: filter by date range, export
 
 ### Features
+
 - Upload invoice PDFs/images
 - Manual entry: amount, client, date, status, category
 - Filter by: date range, status, client, category
@@ -112,18 +128,19 @@ interface BrandKitFile {
 - Overdue alerts
 
 ### Data Model (draft)
+
 ```typescript
 interface Invoice {
   id: string;
-  type: 'sent' | 'received';   // Did you send it or receive it
+  type: 'sent' | 'received'; // Did you send it or receive it
   client: string;
   amount: number;
-  date: string;                 // Invoice date
+  date: string; // Invoice date
   dueDate?: string;
   paidDate?: string;
   status: 'draft' | 'pending' | 'paid' | 'overdue';
-  category: string;             // e.g., "Brand Deal", "Software", "Equipment"
-  fileUrl?: string;             // Uploaded PDF/image
+  category: string; // e.g., "Brand Deal", "Software", "Equipment"
+  fileUrl?: string; // Uploaded PDF/image
   notes?: string;
   taxDeductible: boolean;
 }
@@ -132,6 +149,7 @@ interface Invoice {
 ---
 
 ## Key Files to Create
+
 - `src/app/dashboard/page.tsx` — Main dashboard page with income hero
 - `src/app/dashboard/brand-kit/page.tsx` — Brand kit file manager
 - `src/app/dashboard/invoices/page.tsx` — Invoice tracker
@@ -144,17 +162,20 @@ interface Invoice {
 - API routes for file upload (brand kit assets, invoice PDFs)
 
 ## Storage Considerations
+
 - Brand kit files need cloud storage (S3/Cloudflare R2/Supabase Storage)
 - Invoice PDFs same
 - Income data and metadata can live in Zustand persist (localStorage) initially, then migrate to a DB
 
 ## Premium Consideration
+
 - Free tier: limited storage (e.g., 100MB brand kit, 50 invoices)
 - Pro tier: unlimited storage, export features, tax reports, income goals
 
 ---
 
 ## Design Notes
+
 - Terminal/monospace aesthetic consistent with BrandOS
 - Income number should use VCR OSD Mono at a large size
 - Green accent for positive income trends, red for negative

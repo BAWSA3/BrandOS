@@ -116,13 +116,13 @@ export default function TryEnginePage() {
 
   useEffect(() => {
     if (!loading) return;
-    const id = setInterval(() => setTick(p => (p >= 3 ? 1 : p + 1)), 380);
+    const id = setInterval(() => setTick((p) => (p >= 3 ? 1 : p + 1)), 380);
     return () => clearInterval(id);
   }, [loading]);
 
   useEffect(() => {
     if (!scanning) return;
-    const id = setInterval(() => setScanTick(p => (p >= 3 ? 1 : p + 1)), 380);
+    const id = setInterval(() => setScanTick((p) => (p >= 3 ? 1 : p + 1)), 380);
     return () => clearInterval(id);
   }, [scanning]);
 
@@ -143,7 +143,7 @@ export default function TryEnginePage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Scan failed');
       setVoiceScan(data);
-      if (data.suggestedVibe && TONE_PRESETS.some(t => t.id === data.suggestedVibe)) {
+      if (data.suggestedVibe && TONE_PRESETS.some((t) => t.id === data.suggestedVibe)) {
         setTone(data.suggestedVibe);
       }
     } catch (err) {
@@ -225,24 +225,31 @@ export default function TryEnginePage() {
       <div
         className="fixed inset-0 pointer-events-none"
         style={{
-          backgroundImage: 'linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px)',
+          backgroundImage:
+            'linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px)',
           backgroundSize: '40px 40px',
         }}
       />
 
       <div className="max-w-[680px] mx-auto px-6 py-12 relative">
-
         {/* Header */}
         <div className="mb-10">
           <div className="flex items-center gap-2.5 mb-2.5">
-            <div className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" style={{ boxShadow: '0 0 6px var(--accent)' }} />
+            <div
+              className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]"
+              style={{ boxShadow: '0 0 6px var(--accent)' }}
+            />
             <span className="label-mono text-[var(--accent)]">7-day free trial</span>
           </div>
-          <h1 className="text-2xl font-bold text-[var(--text-primary)] tracking-tight mb-1" style={{ fontFamily: 'var(--font-vcr, "VCR OSD Mono", monospace)' }}>
+          <h1
+            className="text-2xl font-bold text-[var(--text-primary)] tracking-tight mb-1"
+            style={{ fontFamily: 'var(--font-vcr, "VCR OSD Mono", monospace)' }}
+          >
             content engine_
           </h1>
           <p className="font-mono text-xs text-[var(--text-tertiary)] leading-relaxed mt-2 max-w-md">
-            7 days. A different content format each day. Generate on-brand posts in your voice — no sign-up needed.
+            7 days. A different content format each day. Generate on-brand posts in your voice — no
+            sign-up needed.
           </p>
         </div>
 
@@ -260,24 +267,39 @@ export default function TryEnginePage() {
               const isToday = i === trialDay && !trialExpired;
               const isUsed = i < trialDay;
               const startDate = state.startDate;
-              const dayDate = startDate ? new Date(new Date(startDate).getTime() + i * 86400000) : new Date(Date.now() + i * 86400000);
+              const dayDate = startDate
+                ? new Date(new Date(startDate).getTime() + i * 86400000)
+                : new Date(Date.now() + i * 86400000);
               const dayIndex = dayDate.getDay();
               const dayName = dayIndex === 0 ? 'Sunday' : DAYS_OF_WEEK[dayIndex - 1];
-              const dayFormat = DEFAULT_CONTENT_ENGINE_CONFIG.schedule[dayName as DayOfWeek].post1.format;
+              const dayFormat =
+                DEFAULT_CONTENT_ENGINE_CONFIG.schedule[dayName as DayOfWeek].post1.format;
 
               return (
                 <div
                   key={i}
                   className="flex-1 rounded-[var(--radius-sm)] p-2 text-center"
                   style={{
-                    background: isToday ? 'var(--accent)' : isUsed ? 'rgba(10, 132, 255, 0.08)' : 'var(--surface)',
+                    background: isToday
+                      ? 'var(--accent)'
+                      : isUsed
+                        ? 'rgba(10, 132, 255, 0.08)'
+                        : 'var(--surface)',
                     border: `1px solid ${isToday ? 'var(--accent)' : 'var(--surface-tertiary)'}`,
                   }}
                 >
-                  <div className="font-mono text-[8px] mb-0.5" style={{ color: isToday ? '#fff' : 'var(--text-quaternary)' }}>
+                  <div
+                    className="font-mono text-[8px] mb-0.5"
+                    style={{ color: isToday ? '#fff' : 'var(--text-quaternary)' }}
+                  >
                     {dayName.slice(0, 3)}
                   </div>
-                  <div className="font-mono text-[8px] font-bold" style={{ color: isToday ? '#fff' : isUsed ? 'var(--accent)' : 'var(--text-tertiary)' }}>
+                  <div
+                    className="font-mono text-[8px] font-bold"
+                    style={{
+                      color: isToday ? '#fff' : isUsed ? 'var(--accent)' : 'var(--text-tertiary)',
+                    }}
+                  >
                     {dayFormat}
                   </div>
                 </div>
@@ -288,9 +310,11 @@ export default function TryEnginePage() {
 
         {/* Main Panel */}
         <div className="glass-card border border-[var(--surface-tertiary)] rounded-[var(--radius-md)] p-6 mb-4">
-
           {/* Today's Format */}
-          <div className="mb-6 p-3 rounded-[var(--radius-sm)] border border-[var(--surface-tertiary)]" style={{ background: 'rgba(10, 132, 255, 0.04)' }}>
+          <div
+            className="mb-6 p-3 rounded-[var(--radius-sm)] border border-[var(--surface-tertiary)]"
+            style={{ background: 'rgba(10, 132, 255, 0.04)' }}
+          >
             <span className="label-mono text-[var(--text-quaternary)]">Today's format: </span>
             <span className="label-mono font-bold text-[var(--accent)]">{todayFormat}</span>
             <span className="label-mono text-[var(--text-quaternary)]"> · {today}</span>
@@ -302,7 +326,7 @@ export default function TryEnginePage() {
             <div className="flex gap-2">
               <input
                 value={name}
-                onChange={e => setName(e.target.value)}
+                onChange={(e) => setName(e.target.value)}
                 placeholder="@yourhandle"
                 className="terminal-input flex-1 bg-[var(--surface)] border border-[var(--surface-tertiary)] rounded-[var(--radius-sm)] px-3.5 py-2.5 text-sm text-[var(--text-primary)] outline-none focus:border-[var(--accent)] transition-[var(--transition-fast)]"
               />
@@ -310,9 +334,10 @@ export default function TryEnginePage() {
                 onClick={() => scanVoice(name)}
                 disabled={scanning || !name.replace(/^@/, '').trim()}
                 className="label-mono px-4 py-2.5 rounded-[var(--radius-sm)] transition-[var(--transition-fast)] shrink-0"
-                style={scanning
-                  ? { background: 'var(--surface-tertiary)', color: 'var(--text-quaternary)' }
-                  : { background: 'var(--accent)', color: '#fff' }
+                style={
+                  scanning
+                    ? { background: 'var(--surface-tertiary)', color: 'var(--text-quaternary)' }
+                    : { background: 'var(--accent)', color: '#fff' }
                 }
               >
                 {scanning ? `scanning${scanDots}` : 'scan voice'}
@@ -320,16 +345,27 @@ export default function TryEnginePage() {
             </div>
 
             {voiceScan && (
-              <div className="mt-3 p-3 rounded-[var(--radius-sm)] border border-[var(--surface-tertiary)]" style={{ background: 'rgba(10, 132, 255, 0.04)' }}>
+              <div
+                className="mt-3 p-3 rounded-[var(--radius-sm)] border border-[var(--surface-tertiary)]"
+                style={{ background: 'rgba(10, 132, 255, 0.04)' }}
+              >
                 <div className="flex items-center gap-2 mb-2">
-                  <div className="w-1.5 h-1.5 rounded-full" style={{ background: 'var(--success)' }} />
+                  <div
+                    className="w-1.5 h-1.5 rounded-full"
+                    style={{ background: 'var(--success)' }}
+                  />
                   <span className="label-mono" style={{ color: 'var(--success)' }}>
                     voice detected — {voiceScan.confidence}% confidence
                   </span>
                 </div>
                 <div className="flex flex-wrap gap-1.5 mb-2">
-                  {voiceScan.toneWords.map(w => (
-                    <span key={w} className="label-mono px-2 py-0.5 rounded-[var(--radius-sm)] border border-[var(--accent)]/20 text-[var(--accent)]">{w}</span>
+                  {voiceScan.toneWords.map((w) => (
+                    <span
+                      key={w}
+                      className="label-mono px-2 py-0.5 rounded-[var(--radius-sm)] border border-[var(--accent)]/20 text-[var(--accent)]"
+                    >
+                      {w}
+                    </span>
                   ))}
                 </div>
                 {voiceScan.doPatterns.length > 0 && (
@@ -353,7 +389,7 @@ export default function TryEnginePage() {
               Vibe {voiceScan && <span className="text-[var(--success)]">(auto-detected)</span>}
             </div>
             <div className="flex gap-1.5 flex-wrap">
-              {TONE_PRESETS.map(t => (
+              {TONE_PRESETS.map((t) => (
                 <button
                   key={t.id}
                   onClick={() => setTone(t.id)}
@@ -376,12 +412,12 @@ export default function TryEnginePage() {
             </div>
             <input
               value={topic}
-              onChange={e => setTopic(e.target.value)}
+              onChange={(e) => setTopic(e.target.value)}
               placeholder="e.g. shipped a new feature this week"
               className="terminal-input w-full bg-[var(--surface)] border border-[var(--surface-tertiary)] rounded-[var(--radius-sm)] px-3.5 py-2.5 text-sm text-[var(--text-primary)] outline-none focus:border-[var(--accent)] transition-[var(--transition-fast)]"
             />
             <div className="flex gap-1.5 mt-2 flex-wrap">
-              {QUICK_TOPICS.map(t => (
+              {QUICK_TOPICS.map((t) => (
                 <button
                   key={t}
                   onClick={() => setTopic(t)}
@@ -400,7 +436,8 @@ export default function TryEnginePage() {
                 Your 7-day trial has ended.
               </p>
               <p className="font-mono text-xs text-[var(--text-tertiary)] mb-5">
-                You've experienced the full weekly content system. Sign up free to keep generating with unlimited access, deep voice fingerprinting, and the full BrandOS suite.
+                You've experienced the full weekly content system. Sign up free to keep generating
+                with unlimited access, deep voice fingerprinting, and the full BrandOS suite.
               </p>
               <Link
                 href="/app"
@@ -416,12 +453,17 @@ export default function TryEnginePage() {
                 You've used today's {GENS_PER_DAY} generations.
               </p>
               <p className="font-mono text-xs text-[var(--text-tertiary)] mb-4">
-                Come back tomorrow for a new format. {daysRemaining - 1} day{daysRemaining - 1 !== 1 ? 's' : ''} left in your trial.
+                Come back tomorrow for a new format. {daysRemaining - 1} day
+                {daysRemaining - 1 !== 1 ? 's' : ''} left in your trial.
               </p>
               <Link
                 href="/app"
                 className="label-mono inline-block px-5 py-2.5 rounded-[var(--radius-sm)]"
-                style={{ background: 'transparent', color: 'var(--accent)', border: '1px solid var(--accent)' }}
+                style={{
+                  background: 'transparent',
+                  color: 'var(--accent)',
+                  border: '1px solid var(--accent)',
+                }}
               >
                 or sign up now for unlimited →
               </Link>
@@ -432,16 +474,22 @@ export default function TryEnginePage() {
                 onClick={generate}
                 disabled={loading}
                 className="label-mono w-full py-3.5 rounded-[var(--radius-sm)] transition-[var(--transition-fast)]"
-                style={loading
-                  ? { background: 'var(--surface-tertiary)', color: 'var(--text-quaternary)', cursor: 'default' }
-                  : { background: 'var(--accent)', color: '#fff', cursor: 'pointer' }
+                style={
+                  loading
+                    ? {
+                        background: 'var(--surface-tertiary)',
+                        color: 'var(--text-quaternary)',
+                        cursor: 'default',
+                      }
+                    : { background: 'var(--accent)', color: '#fff', cursor: 'pointer' }
                 }
               >
                 {loading ? `generating${dots}` : '\u2192 generate post'}
               </button>
               <div className="text-center mt-3">
                 <span className="label-mono text-[var(--text-quaternary)]">
-                  {todayRemaining} generation{todayRemaining !== 1 ? 's' : ''} left today · {daysRemaining} day{daysRemaining !== 1 ? 's' : ''} remaining
+                  {todayRemaining} generation{todayRemaining !== 1 ? 's' : ''} left today ·{' '}
+                  {daysRemaining} day{daysRemaining !== 1 ? 's' : ''} remaining
                 </span>
               </div>
             </>
@@ -450,8 +498,16 @@ export default function TryEnginePage() {
 
         {/* Error */}
         {error && (
-          <div className="border rounded-[var(--radius-md)] px-4 py-3 mb-4" style={{ background: 'rgba(255, 59, 48, 0.06)', borderColor: 'rgba(255, 59, 48, 0.15)' }}>
-            <span className="label-mono" style={{ color: 'var(--danger)' }}>[ERROR] {error}</span>
+          <div
+            className="border rounded-[var(--radius-md)] px-4 py-3 mb-4"
+            style={{
+              background: 'rgba(255, 59, 48, 0.06)',
+              borderColor: 'rgba(255, 59, 48, 0.15)',
+            }}
+          >
+            <span className="label-mono" style={{ color: 'var(--danger)' }}>
+              [ERROR] {error}
+            </span>
             {rateLimited && (
               <div className="mt-2">
                 <Link href="/app" className="label-mono text-[var(--accent)] underline">
@@ -466,9 +522,14 @@ export default function TryEnginePage() {
         {output && (
           <div className="glass-card border border-[var(--surface-tertiary)] rounded-[var(--radius-md)] overflow-hidden">
             {output.meta.format && (
-              <div className="border-b border-[var(--surface-tertiary)] px-5 py-3" style={{ background: 'var(--surface-hover)' }}>
+              <div
+                className="border-b border-[var(--surface-tertiary)] px-5 py-3"
+                style={{ background: 'var(--surface-hover)' }}
+              >
                 <span className="label-mono text-[var(--text-quaternary)]">Format: </span>
-                <span className="label-mono font-bold text-[var(--accent)]">{output.meta.format}</span>
+                <span className="label-mono font-bold text-[var(--accent)]">
+                  {output.meta.format}
+                </span>
               </div>
             )}
 
@@ -479,33 +540,47 @@ export default function TryEnginePage() {
             </div>
 
             {/* Voice Match Nudge */}
-            <div className="border-t border-[var(--surface-tertiary)] px-5 py-3" style={{ background: 'rgba(10, 132, 255, 0.04)' }}>
+            <div
+              className="border-t border-[var(--surface-tertiary)] px-5 py-3"
+              style={{ background: 'rgba(10, 132, 255, 0.04)' }}
+            >
               <div className="flex items-center" style={{ gap: '12px' }}>
-                <div className="label-mono" style={{ color: voiceScan ? 'var(--accent)' : 'var(--warning)' }}>
+                <div
+                  className="label-mono"
+                  style={{ color: voiceScan ? 'var(--accent)' : 'var(--warning)' }}
+                >
                   voice match: ~{voiceScan ? '60' : '40'}%
                 </div>
                 <span className="font-mono text-[10px] text-[var(--text-tertiary)]">
                   {voiceScan
                     ? 'Quick scan. Full Brand DNA gets you to 85%+. '
-                    : 'Users with Brand DNA average 85%+. '
-                  }
-                  <Link href="/app" className="text-[var(--accent)] underline">Set up yours free →</Link>
+                    : 'Users with Brand DNA average 85%+. '}
+                  <Link href="/app" className="text-[var(--accent)] underline">
+                    Set up yours free →
+                  </Link>
                 </span>
               </div>
             </div>
 
             {(output.footer?.postingWindow || output.footer?.hashtags) && (
-              <div className="border-t border-[var(--surface-tertiary)] px-5 py-2.5 flex flex-wrap" style={{ gap: '8px 24px' }}>
+              <div
+                className="border-t border-[var(--surface-tertiary)] px-5 py-2.5 flex flex-wrap"
+                style={{ gap: '8px 24px' }}
+              >
                 {output.footer.postingWindow && (
                   <div>
                     <span className="label-mono text-[var(--text-quaternary)]">Window: </span>
-                    <span className="label-mono text-[var(--text-secondary)]">{output.footer.postingWindow}</span>
+                    <span className="label-mono text-[var(--text-secondary)]">
+                      {output.footer.postingWindow}
+                    </span>
                   </div>
                 )}
                 {output.footer.hashtags && (
                   <div>
                     <span className="label-mono text-[var(--text-quaternary)]">Hashtags: </span>
-                    <span className="label-mono text-[var(--text-secondary)]">{output.footer.hashtags}</span>
+                    <span className="label-mono text-[var(--text-secondary)]">
+                      {output.footer.hashtags}
+                    </span>
                   </div>
                 )}
               </div>
@@ -515,9 +590,14 @@ export default function TryEnginePage() {
               <button
                 onClick={copyPost}
                 className="label-mono px-4 py-2 rounded-[var(--radius-sm)] transition-[var(--transition-fast)]"
-                style={copied
-                  ? { background: 'var(--success)', color: '#fff' }
-                  : { background: 'transparent', color: 'var(--accent)', border: '1px solid var(--accent)' }
+                style={
+                  copied
+                    ? { background: 'var(--success)', color: '#fff' }
+                    : {
+                        background: 'transparent',
+                        color: 'var(--accent)',
+                        border: '1px solid var(--accent)',
+                      }
                 }
               >
                 {copied ? '[OK] copied' : 'copy post'}
@@ -526,7 +606,11 @@ export default function TryEnginePage() {
                 <button
                   onClick={generate}
                   className="label-mono px-4 py-2 rounded-[var(--radius-sm)] transition-[var(--transition-fast)]"
-                  style={{ background: 'transparent', color: 'var(--text-tertiary)', border: '1px solid var(--surface-tertiary)' }}
+                  style={{
+                    background: 'transparent',
+                    color: 'var(--text-tertiary)',
+                    border: '1px solid var(--surface-tertiary)',
+                  }}
                 >
                   regenerate ({todayRemaining})
                 </button>
@@ -537,9 +621,12 @@ export default function TryEnginePage() {
 
         {/* Bottom CTA */}
         <div className="mt-10 glass-card border border-[var(--surface-tertiary)] rounded-[var(--radius-md)] p-6 text-center">
-          <h2 className="font-mono text-sm font-bold text-[var(--text-primary)] mb-2">Want posts that actually sound like you?</h2>
+          <h2 className="font-mono text-sm font-bold text-[var(--text-primary)] mb-2">
+            Want posts that actually sound like you?
+          </h2>
           <p className="font-mono text-xs text-[var(--text-tertiary)] mb-5 max-w-sm mx-auto">
-            BrandOS maps your voice from real content, then generates posts with your exact tone, patterns, and vocabulary. Free to start.
+            BrandOS maps your voice from real content, then generates posts with your exact tone,
+            patterns, and vocabulary. Free to start.
           </p>
           <div className="flex gap-3 justify-center">
             <Link
@@ -552,7 +639,11 @@ export default function TryEnginePage() {
             <Link
               href="/score"
               className="label-mono inline-block px-5 py-2.5 rounded-[var(--radius-sm)]"
-              style={{ background: 'transparent', color: 'var(--text-tertiary)', border: '1px solid var(--surface-tertiary)' }}
+              style={{
+                background: 'transparent',
+                color: 'var(--text-tertiary)',
+                border: '1px solid var(--surface-tertiary)',
+              }}
             >
               check your brand score
             </Link>

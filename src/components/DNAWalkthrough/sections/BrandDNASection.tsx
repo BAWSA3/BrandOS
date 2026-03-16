@@ -63,17 +63,13 @@ export default function BrandDNASection({
       })
     : [];
   const sortedPillars = [...normalizedPillars].sort((a, b) => b.frequency - a.frequency);
-  const maxFreq = sortedPillars.length ? Math.max(...sortedPillars.map(p => p.frequency)) : 1;
+  const maxFreq = sortedPillars.length ? Math.max(...sortedPillars.map((p) => p.frequency)) : 1;
 
-  const consistencyScore = voiceConsistencyReport?.overallScore
-    ?? performanceInsights?.voiceConsistency
-    ?? null;
+  const consistencyScore =
+    voiceConsistencyReport?.overallScore ?? performanceInsights?.voiceConsistency ?? null;
 
   return (
-    <section
-      className="min-h-screen"
-      style={{ background: '#ffffff', position: 'relative' }}
-    >
+    <section className="min-h-screen" style={{ background: '#ffffff', position: 'relative' }}>
       <AnimatePresence mode="wait">
         {/* Stage 1: Intro */}
         {stage === 'intro' && (
@@ -175,7 +171,7 @@ export default function BrandDNASection({
               <motion.button
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                onClick={() => setRevealedKeywords(prev => prev + 2)}
+                onClick={() => setRevealedKeywords((prev) => prev + 2)}
                 style={{
                   padding: '14px 28px',
                   background: accentColor,
@@ -184,8 +180,8 @@ export default function BrandDNASection({
                   cursor: 'pointer',
                   transition: 'background 0.2s ease',
                 }}
-                onMouseEnter={(e) => e.currentTarget.style.background = '#0038CC'}
-                onMouseLeave={(e) => e.currentTarget.style.background = accentColor}
+                onMouseEnter={(e) => (e.currentTarget.style.background = '#0038CC')}
+                onMouseLeave={(e) => (e.currentTarget.style.background = accentColor)}
               >
                 <span
                   style={{
@@ -211,8 +207,8 @@ export default function BrandDNASection({
                   cursor: 'pointer',
                   transition: 'background 0.2s ease',
                 }}
-                onMouseEnter={(e) => e.currentTarget.style.background = '#0038CC'}
-                onMouseLeave={(e) => e.currentTarget.style.background = accentColor}
+                onMouseEnter={(e) => (e.currentTarget.style.background = '#0038CC')}
+                onMouseLeave={(e) => (e.currentTarget.style.background = accentColor)}
               >
                 <span
                   style={{
@@ -412,7 +408,9 @@ export default function BrandDNASection({
                     VOICE CONSISTENCY
                   </div>
                   <div style={{ fontSize: '14px', color: 'rgba(0,0,0,0.7)' }}>
-                    {consistencyScore >= 70 ? 'Your voice is consistent' : 'Room to improve consistency'}
+                    {consistencyScore >= 70
+                      ? 'Your voice is consistent'
+                      : 'Room to improve consistency'}
                   </div>
                 </div>
               </motion.div>
@@ -431,8 +429,8 @@ export default function BrandDNASection({
                 cursor: 'pointer',
                 transition: 'background 0.2s ease',
               }}
-              onMouseEnter={(e) => e.currentTarget.style.background = '#0038CC'}
-              onMouseLeave={(e) => e.currentTarget.style.background = accentColor}
+              onMouseEnter={(e) => (e.currentTarget.style.background = '#0038CC')}
+              onMouseLeave={(e) => (e.currentTarget.style.background = accentColor)}
             >
               <span
                 style={{
@@ -660,8 +658,8 @@ export default function BrandDNASection({
                 cursor: 'pointer',
                 transition: 'background 0.2s ease',
               }}
-              onMouseEnter={(e) => e.currentTarget.style.background = '#0038CC'}
-              onMouseLeave={(e) => e.currentTarget.style.background = accentColor}
+              onMouseEnter={(e) => (e.currentTarget.style.background = '#0038CC')}
+              onMouseLeave={(e) => (e.currentTarget.style.background = accentColor)}
             >
               <span
                 style={{

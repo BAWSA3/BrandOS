@@ -8,14 +8,14 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { username } = await params;
   const cleanUsername = username.replace(/^@/, '');
-  
+
   const title = `@${cleanUsername}'s Brand Score | BrandOS`;
   const description = `See @${cleanUsername}'s Brand DNA analysis. Get your own Brand Score and discover your unique brand identity.`;
-  
+
   // Dynamic OG image URL - points to a route that generates the image
   // For now, we'll use a static OG image with the branding
   const ogImageUrl = `https://mybrandos.app/og-image.png`;
-  
+
   return {
     title,
     description,

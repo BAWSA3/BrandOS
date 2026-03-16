@@ -29,25 +29,19 @@ export async function POST(request: NextRequest) {
 
     if (!apiKey) {
       console.error('ANTHROPIC_API_KEY is not set. Value:', apiKey);
-      return NextResponse.json(
-        { error: 'API key not configured' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'API key not configured' }, { status: 500 });
     }
 
     const anthropic = new Anthropic({ apiKey });
 
-    const { brandDNA, content, voiceFingerprint } = await request.json() as {
+    const { brandDNA, content, voiceFingerprint } = (await request.json()) as {
       brandDNA: BrandDNA;
       content: string;
       voiceFingerprint?: VoiceFingerprint;
     };
 
     if (!brandDNA?.name || !content) {
-      return NextResponse.json(
-        { error: 'Missing brand DNA or content' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Missing brand DNA or content' }, { status: 400 });
     }
 
     // Brand alignment check
@@ -62,9 +56,7 @@ export async function POST(request: NextRequest) {
       ],
     });
 
-    const responseText = message.content[0].type === 'text'
-      ? message.content[0].text
-      : '';
+    const responseText = message.content[0].type === 'text' ? message.content[0].text : '';
 
     const jsonMatch = responseText.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
@@ -88,10 +80,7 @@ export async function POST(request: NextRequest) {
           ],
         });
 
-        const authText =
-          authMessage.content[0].type === 'text'
-            ? authMessage.content[0].text
-            : '';
+        const authText = authMessage.content[0].type === 'text' ? authMessage.content[0].text : '';
         const authJson = authText.match(/\{[\s\S]*\}/);
         if (authJson) {
           authenticityScore = JSON.parse(authJson[0]);
@@ -102,10 +91,9 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ ...result, authenticityScore });
-    
   } catch (error: unknown) {
     console.error('Check API error:', error);
-    
+
     // Extract error message
     let message = 'Analysis failed';
     if (error instanceof Error) {
@@ -115,12 +103,7 @@ export async function POST(request: NextRequest) {
         message = error.message;
       }
     }
-    
-    return NextResponse.json(
-      { error: message },
-      { status: 500 }
-    );
+
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
-
-

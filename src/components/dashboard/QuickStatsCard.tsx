@@ -42,7 +42,14 @@ function MiniSparkline({ values, color }: { values: number[]; color: string }) {
 function TrendArrow({ direction }: { direction: 'up' | 'down' | 'stable' }) {
   if (direction === 'stable') {
     return (
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" strokeWidth="2.5">
+      <svg
+        width="12"
+        height="12"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="var(--text-secondary)"
+        strokeWidth="2.5"
+      >
         <path d="M5 12h14" strokeLinecap="round" />
       </svg>
     );
@@ -100,14 +107,25 @@ export default function QuickStatsCard({
     {
       label: 'Avg. engagement',
       value: `${avgEngagementRate.toFixed(1)}%`,
-      trend: avgEngagementRate > 1 ? ('up' as const) : avgEngagementRate > 0 ? ('stable' as const) : ('down' as const),
+      trend:
+        avgEngagementRate > 1
+          ? ('up' as const)
+          : avgEngagementRate > 0
+            ? ('stable' as const)
+            : ('down' as const),
       sparkline: engagementSparkline,
       color: '#30D158',
     },
     {
       label: 'Brand health',
       value: `${brandConsistency}%`,
-      trend: brandTrend?.direction ?? (brandConsistency > 50 ? ('up' as const) : brandConsistency > 0 ? ('stable' as const) : ('down' as const)),
+      trend:
+        brandTrend?.direction ??
+        (brandConsistency > 50
+          ? ('up' as const)
+          : brandConsistency > 0
+            ? ('stable' as const)
+            : ('down' as const)),
       sparkline: consistencySparkline,
       color: '#BF5AF2',
     },
@@ -115,7 +133,13 @@ export default function QuickStatsCard({
 
   return (
     <div
-      style={{ background: 'var(--surface)', borderRadius: 16, padding: 24, border: '1px solid var(--border)', boxShadow: 'var(--shadow-card)' }}
+      style={{
+        background: 'var(--surface)',
+        borderRadius: 16,
+        padding: 24,
+        border: '1px solid var(--border)',
+        boxShadow: 'var(--shadow-card)',
+      }}
       className="h-full flex flex-col justify-between"
     >
       <h3

@@ -13,7 +13,10 @@ async function getAuthenticatedUser() {
   if (!accessToken) return null;
 
   const supabase = createClient(supabaseUrl, supabaseAnonKey);
-  const { data: { user: authUser }, error } = await supabase.auth.getUser(accessToken);
+  const {
+    data: { user: authUser },
+    error,
+  } = await supabase.auth.getUser(accessToken);
   if (error || !authUser) return null;
 
   return prisma.user.findUnique({ where: { supabaseId: authUser.id } });
@@ -64,15 +67,21 @@ export async function GET(request: NextRequest) {
     ]);
 
     // Compute this-week stats
-    const thisWeekScheduled = weekDrafts.filter(d =>
-      d.status === 'scheduled' && d.scheduledFor &&
-      d.scheduledFor >= monday && d.scheduledFor <= sunday
+    const thisWeekScheduled = weekDrafts.filter(
+      (d) =>
+        d.status === 'scheduled' &&
+        d.scheduledFor &&
+        d.scheduledFor >= monday &&
+        d.scheduledFor <= sunday
     );
-    const thisWeekDrafts = weekDrafts.filter(d =>
-      d.status === 'draft' && d.scheduledFor &&
-      d.scheduledFor >= monday && d.scheduledFor <= sunday
+    const thisWeekDrafts = weekDrafts.filter(
+      (d) =>
+        d.status === 'draft' &&
+        d.scheduledFor &&
+        d.scheduledFor >= monday &&
+        d.scheduledFor <= sunday
     );
-    const thisWeekIdeas = weekDrafts.filter(d => d.status === 'idea');
+    const thisWeekIdeas = weekDrafts.filter((d) => d.status === 'idea');
 
     // Compute cadence from tweet history
     let postsPerWeek = 0;
@@ -84,21 +93,34 @@ export async function GET(request: NextRequest) {
       // Time range of tweets
       const oldest = recentTweets[recentTweets.length - 1].postedAt;
       const newest = recentTweets[0].postedAt;
-      const weeksSpan = Math.max(1, (newest.getTime() - oldest.getTime()) / (7 * 24 * 60 * 60 * 1000));
+      const weeksSpan = Math.max(
+        1,
+        (newest.getTime() - oldest.getTime()) / (7 * 24 * 60 * 60 * 1000)
+      );
       postsPerWeek = Math.round((recentTweets.length / weeksSpan) * 10) / 10;
 
       // Average gap between tweets
       const gaps: number[] = [];
       for (let i = 0; i < recentTweets.length - 1; i++) {
-        const gap = (recentTweets[i].postedAt.getTime() - recentTweets[i + 1].postedAt.getTime()) / (24 * 60 * 60 * 1000);
+        const gap =
+          (recentTweets[i].postedAt.getTime() - recentTweets[i + 1].postedAt.getTime()) /
+          (24 * 60 * 60 * 1000);
         gaps.push(gap);
       }
       avgGapDays = Math.round((gaps.reduce((a, b) => a + b, 0) / gaps.length) * 10) / 10;
 
       // Day distribution
-      const dayCount: Record<string, number> = { Sun: 0, Mon: 0, Tue: 0, Wed: 0, Thu: 0, Fri: 0, Sat: 0 };
+      const dayCount: Record<string, number> = {
+        Sun: 0,
+        Mon: 0,
+        Tue: 0,
+        Wed: 0,
+        Thu: 0,
+        Fri: 0,
+        Sat: 0,
+      };
       const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-      recentTweets.forEach(t => {
+      recentTweets.forEach((t) => {
         dayCount[dayNames[t.postedAt.getDay()]]++;
       });
       const sorted = Object.entries(dayCount).sort((a, b) => b[1] - a[1]);
@@ -111,7 +133,7 @@ export async function GET(request: NextRequest) {
 
     // Check for gaps in this week's schedule
     const scheduledDays = new Set(
-      thisWeekScheduled.map(d => d.scheduledFor!.toISOString().split('T')[0])
+      thisWeekScheduled.map((d) => d.scheduledFor!.toISOString().split('T')[0])
     );
     const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const consecutiveEmpty: string[] = [];
@@ -134,7 +156,7 @@ export async function GET(request: NextRequest) {
 
     // Check for overloaded days
     const dayPostCounts: Record<string, number> = {};
-    thisWeekScheduled.forEach(d => {
+    thisWeekScheduled.forEach((d) => {
       const key = d.scheduledFor!.toISOString().split('T')[0];
       dayPostCounts[key] = (dayPostCounts[key] || 0) + 1;
     });
@@ -147,14 +169,16 @@ export async function GET(request: NextRequest) {
 
     // Consistency tip
     if (postsPerWeek > 0 && thisWeekScheduled.length < Math.floor(postsPerWeek)) {
-      recommendations.push(`You typically post ${postsPerWeek}/week. Consider scheduling ${Math.ceil(postsPerWeek) - thisWeekScheduled.length} more.`);
+      recommendations.push(
+        `You typically post ${postsPerWeek}/week. Consider scheduling ${Math.ceil(postsPerWeek) - thisWeekScheduled.length} more.`
+      );
     }
 
     // Upcoming scheduled posts
     const upcoming = thisWeekScheduled
-      .filter(d => d.scheduledFor && d.scheduledFor >= now)
+      .filter((d) => d.scheduledFor && d.scheduledFor >= now)
       .slice(0, 2)
-      .map(d => ({
+      .map((d) => ({
         id: d.id,
         content: d.content.slice(0, 100),
         scheduledFor: d.scheduledFor!.toISOString(),

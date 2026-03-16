@@ -45,32 +45,35 @@ export function useHistorySync(): UseHistorySyncReturn {
   }, []);
 
   // Save history item to server
-  const saveToServer = useCallback(async (item: {
-    type: 'check' | 'generate';
-    brandId: string;
-    input: string;
-    contentType?: ContentType;
-    output: CheckResult | string;
-  }): Promise<HistoryItem | null> => {
-    try {
-      const res = await fetch('/api/history', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(item),
-      });
+  const saveToServer = useCallback(
+    async (item: {
+      type: 'check' | 'generate';
+      brandId: string;
+      input: string;
+      contentType?: ContentType;
+      output: CheckResult | string;
+    }): Promise<HistoryItem | null> => {
+      try {
+        const res = await fetch('/api/history', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(item),
+        });
 
-      if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.error || 'Failed to save history');
+        if (!res.ok) {
+          const error = await res.json();
+          throw new Error(error.error || 'Failed to save history');
+        }
+
+        const data = await res.json();
+        return data.entry as HistoryItem;
+      } catch (error) {
+        console.error('[useHistorySync] Save error:', error);
+        throw error;
       }
-
-      const data = await res.json();
-      return data.entry as HistoryItem;
-    } catch (error) {
-      console.error('[useHistorySync] Save error:', error);
-      throw error;
-    }
-  }, []);
+    },
+    []
+  );
 
   // Initial sync: load server history on auth
   const performInitialSync = useCallback(async () => {
@@ -85,8 +88,8 @@ export function useHistorySync(): UseHistorySyncReturn {
       // If server has history, merge with local
       if (serverHistory.length > 0) {
         // Get local history IDs that aren't from server
-        const serverIds = new Set(serverHistory.map(h => h.id));
-        const localOnlyItems = history.filter(h => !serverIds.has(h.id));
+        const serverIds = new Set(serverHistory.map((h) => h.id));
+        const localOnlyItems = history.filter((h) => !serverIds.has(h.id));
 
         // Replace store history with server history + local-only items
         // Server items take priority for the same IDs
@@ -109,36 +112,39 @@ export function useHistorySync(): UseHistorySyncReturn {
   }, [user, history, fetchServerHistory]);
 
   // Save history item - saves to both server and local store
-  const saveHistoryItem = useCallback(async (item: {
-    type: 'check' | 'generate';
-    brandId: string;
-    brandName: string;
-    input: string;
-    contentType?: ContentType;
-    output: CheckResult | string;
-  }) => {
-    // Always save to local store immediately
-    addHistoryItem(item);
+  const saveHistoryItem = useCallback(
+    async (item: {
+      type: 'check' | 'generate';
+      brandId: string;
+      brandName: string;
+      input: string;
+      contentType?: ContentType;
+      output: CheckResult | string;
+    }) => {
+      // Always save to local store immediately
+      addHistoryItem(item);
 
-    // If authenticated, also save to server
-    if (user) {
-      setSyncError(null);
+      // If authenticated, also save to server
+      if (user) {
+        setSyncError(null);
 
-      try {
-        await saveToServer({
-          type: item.type,
-          brandId: item.brandId,
-          input: item.input,
-          contentType: item.contentType,
-          output: item.output,
-        });
-        setLastSyncedAt(new Date());
-      } catch (error) {
-        console.error('[useHistorySync] Save error:', error);
-        setSyncError('Failed to save to server. Data saved locally.');
+        try {
+          await saveToServer({
+            type: item.type,
+            brandId: item.brandId,
+            input: item.input,
+            contentType: item.contentType,
+            output: item.output,
+          });
+          setLastSyncedAt(new Date());
+        } catch (error) {
+          console.error('[useHistorySync] Save error:', error);
+          setSyncError('Failed to save to server. Data saved locally.');
+        }
       }
-    }
-  }, [user, addHistoryItem, saveToServer]);
+    },
+    [user, addHistoryItem, saveToServer]
+  );
 
   // Force sync - re-fetch from server
   const forceSync = useCallback(async () => {

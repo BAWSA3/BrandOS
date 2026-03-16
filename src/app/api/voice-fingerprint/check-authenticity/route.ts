@@ -8,10 +8,7 @@ export async function POST(request: NextRequest) {
     const apiKey = process.env.ANTHROPIC_API_KEY;
 
     if (!apiKey) {
-      return NextResponse.json(
-        { error: 'API key not configured' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'API key not configured' }, { status: 500 });
     }
 
     const { content, fingerprint } = (await request.json()) as {
@@ -20,17 +17,11 @@ export async function POST(request: NextRequest) {
     };
 
     if (!content?.trim()) {
-      return NextResponse.json(
-        { error: 'Content is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Content is required' }, { status: 400 });
     }
 
     if (!fingerprint?.metadata) {
-      return NextResponse.json(
-        { error: 'Voice fingerprint is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Voice fingerprint is required' }, { status: 400 });
     }
 
     const anthropic = new Anthropic({ apiKey });
@@ -46,8 +37,7 @@ export async function POST(request: NextRequest) {
       ],
     });
 
-    const responseText =
-      message.content[0].type === 'text' ? message.content[0].text : '';
+    const responseText = message.content[0].type === 'text' ? message.content[0].text : '';
 
     const jsonMatch = responseText.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
@@ -62,8 +52,7 @@ export async function POST(request: NextRequest) {
     let message = 'Authenticity check failed';
     if (error instanceof Error) {
       if (error.message.includes('credit balance is too low')) {
-        message =
-          'API credits depleted. Please add credits at console.anthropic.com';
+        message = 'API credits depleted. Please add credits at console.anthropic.com';
       } else {
         message = error.message;
       }

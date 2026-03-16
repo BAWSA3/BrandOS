@@ -119,7 +119,10 @@ function PhaseBar({ name, score }: { name: string; score: number }) {
           style={{ background: meta.color }}
         />
       </div>
-      <span className="font-mono text-sm font-bold w-[32px] text-right" style={{ color: meta.color }}>
+      <span
+        className="font-mono text-sm font-bold w-[32px] text-right"
+        style={{ color: meta.color }}
+      >
         {score}
       </span>
     </motion.div>
@@ -157,9 +160,7 @@ function TopPost({ tweet, rank }: { tweet: RawTweet; rank: number }) {
           <span>{formatCount(rts)} RTs</span>
         </div>
       </div>
-      <p className="text-[13px] leading-relaxed text-black/70 line-clamp-3">
-        {tweet.text}
-      </p>
+      <p className="text-[13px] leading-relaxed text-black/70 line-clamp-3">{tweet.text}</p>
     </div>
   );
 }
@@ -195,9 +196,18 @@ export default function BrandBreakdown({
   );
 
   // Find strongest and weakest phase
-  const phaseEntries = Object.entries(brandScore.phases) as [string, { score: number; insights: string[] }][];
-  const strongest = phaseEntries.reduce((best, [name, p]) => (p.score > best.score ? { name, score: p.score } : best), { name: '', score: 0 });
-  const weakest = phaseEntries.reduce((worst, [name, p]) => (p.score < worst.score ? { name, score: p.score } : worst), { name: '', score: 100 });
+  const phaseEntries = Object.entries(brandScore.phases) as [
+    string,
+    { score: number; insights: string[] },
+  ][];
+  const strongest = phaseEntries.reduce(
+    (best, [name, p]) => (p.score > best.score ? { name, score: p.score } : best),
+    { name: '', score: 0 }
+  );
+  const weakest = phaseEntries.reduce(
+    (worst, [name, p]) => (p.score < worst.score ? { name, score: p.score } : worst),
+    { name: '', score: 100 }
+  );
 
   return (
     <div className="relative min-h-screen bg-white">
@@ -205,13 +215,13 @@ export default function BrandBreakdown({
       <div
         className="fixed inset-0 pointer-events-none"
         style={{
-          backgroundImage: 'linear-gradient(rgba(0,0,0,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.02) 1px, transparent 1px)',
+          backgroundImage:
+            'linear-gradient(rgba(0,0,0,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.02) 1px, transparent 1px)',
           backgroundSize: '40px 40px',
         }}
       />
 
       <div className="relative z-10 max-w-[640px] mx-auto px-6 py-16">
-
         {/* ═══════ HEADER: Profile + Score ═══════ */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -232,7 +242,9 @@ export default function BrandBreakdown({
               <div className="flex items-center gap-2">
                 <span className="text-lg font-bold text-black">{profile.name}</span>
                 {profile.verified && (
-                  <span className="text-[10px] font-mono bg-[#0047FF] text-white px-1.5 py-0.5 rounded">verified</span>
+                  <span className="text-[10px] font-mono bg-[#0047FF] text-white px-1.5 py-0.5 rounded">
+                    verified
+                  </span>
                 )}
               </div>
               <span className="font-mono text-sm text-black/40">@{profile.username}</span>
@@ -317,10 +329,16 @@ export default function BrandBreakdown({
           </div>
           <div className="flex gap-4 mt-4 font-mono text-[10px]">
             <span className="text-black/30">
-              Strongest: <span style={{ color: PHASE_META[strongest.name]?.color }}>{PHASE_META[strongest.name]?.label}</span>
+              Strongest:{' '}
+              <span style={{ color: PHASE_META[strongest.name]?.color }}>
+                {PHASE_META[strongest.name]?.label}
+              </span>
             </span>
             <span className="text-black/30">
-              Growth area: <span style={{ color: PHASE_META[weakest.name]?.color }}>{PHASE_META[weakest.name]?.label}</span>
+              Growth area:{' '}
+              <span style={{ color: PHASE_META[weakest.name]?.color }}>
+                {PHASE_META[weakest.name]?.label}
+              </span>
             </span>
           </div>
         </motion.div>
@@ -337,8 +355,13 @@ export default function BrandBreakdown({
 
             {/* Identity Signature */}
             <div className="border-l-2 border-[#0047FF] pl-4 mb-6">
-              <div className="font-mono text-[9px] tracking-[0.15em] text-black/30 mb-1">// IDENTITY_SIGNATURE</div>
-              <p className="text-[15px] leading-relaxed text-black/70" style={{ fontFamily: 'var(--font-vcr, "VCR OSD Mono", monospace)' }}>
+              <div className="font-mono text-[9px] tracking-[0.15em] text-black/30 mb-1">
+                // IDENTITY_SIGNATURE
+              </div>
+              <p
+                className="text-[15px] leading-relaxed text-black/70"
+                style={{ fontFamily: 'var(--font-vcr, "VCR OSD Mono", monospace)' }}
+              >
                 {brandScore.phases.define.contentIdentity.identitySignature}
               </p>
             </div>
@@ -346,12 +369,16 @@ export default function BrandBreakdown({
             {/* Content Pillars */}
             {brandScore.phases.define.contentIdentity.contentPillars.length > 0 && (
               <div className="mb-6">
-                <div className="font-mono text-[10px] tracking-[0.15em] text-black/30 mb-3 uppercase">Content Pillars</div>
+                <div className="font-mono text-[10px] tracking-[0.15em] text-black/30 mb-3 uppercase">
+                  Content Pillars
+                </div>
                 <div className="space-y-3">
                   {brandScore.phases.define.contentIdentity.contentPillars.map((pillar, i) => (
                     <div key={i}>
                       <div className="flex items-center gap-3 mb-1">
-                        <span className="font-mono text-[11px] text-black/60 w-[140px] shrink-0 truncate">{pillar.topic}</span>
+                        <span className="font-mono text-[11px] text-black/60 w-[140px] shrink-0 truncate">
+                          {pillar.topic}
+                        </span>
                         <div className="flex-1 h-[4px] bg-black/5 rounded-full overflow-hidden">
                           <motion.div
                             initial={{ width: 0 }}
@@ -360,8 +387,12 @@ export default function BrandBreakdown({
                             className="h-full rounded-full bg-[#0047FF]/60"
                           />
                         </div>
-                        <span className="font-mono text-[10px] text-black/35 w-[28px] text-right">{pillar.confidence}</span>
-                        <span className="font-mono text-[9px] bg-black/5 text-black/40 px-1.5 py-0.5 rounded">{pillar.tweetCount} tweets</span>
+                        <span className="font-mono text-[10px] text-black/35 w-[28px] text-right">
+                          {pillar.confidence}
+                        </span>
+                        <span className="font-mono text-[9px] bg-black/5 text-black/40 px-1.5 py-0.5 rounded">
+                          {pillar.tweetCount} tweets
+                        </span>
                       </div>
                       <div className="font-mono text-[10px] text-black/35 italic pl-[140px] ml-3 truncate">
                         &ldquo;{pillar.sampleEvidence}&rdquo;
@@ -375,15 +406,21 @@ export default function BrandBreakdown({
             {/* Topic Concentration */}
             <div className="mb-6 p-3 rounded-lg bg-black/[0.02] border border-black/5">
               <div className="flex items-center justify-between mb-2">
-                <span className="font-mono text-[10px] tracking-[0.1em] text-black/40 uppercase">Topic Concentration</span>
-                <span className="font-mono text-sm font-bold text-black/60">{brandScore.phases.define.contentIdentity.topicConcentration}</span>
+                <span className="font-mono text-[10px] tracking-[0.1em] text-black/40 uppercase">
+                  Topic Concentration
+                </span>
+                <span className="font-mono text-sm font-bold text-black/60">
+                  {brandScore.phases.define.contentIdentity.topicConcentration}
+                </span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="font-mono text-[9px] text-black/30">SCATTERED</span>
                 <div className="flex-1 h-[6px] bg-black/5 rounded-full overflow-hidden">
                   <motion.div
                     initial={{ width: 0 }}
-                    animate={{ width: `${brandScore.phases.define.contentIdentity.topicConcentration}%` }}
+                    animate={{
+                      width: `${brandScore.phases.define.contentIdentity.topicConcentration}%`,
+                    }}
                     transition={{ duration: 1, delay: 0.4 }}
                     className="h-full rounded-full bg-[#0047FF]"
                   />
@@ -395,7 +432,9 @@ export default function BrandBreakdown({
             {/* Recurring Themes */}
             {brandScore.phases.define.contentIdentity.recurringThemes.length > 0 && (
               <div className="mb-6">
-                <div className="font-mono text-[10px] tracking-[0.15em] text-black/30 mb-3 uppercase">Recurring Themes</div>
+                <div className="font-mono text-[10px] tracking-[0.15em] text-black/30 mb-3 uppercase">
+                  Recurring Themes
+                </div>
                 <div className="space-y-2">
                   {brandScore.phases.define.contentIdentity.recurringThemes.map((t, i) => (
                     <div key={i} className="flex items-start gap-2">
@@ -403,14 +442,20 @@ export default function BrandBreakdown({
                       <span className="font-mono text-[11px] text-black/60 leading-relaxed">
                         &ldquo;{t.theme}&rdquo;
                       </span>
-                      <span className={`font-mono text-[9px] px-1.5 py-0.5 rounded shrink-0 ${
-                        t.frequency === 'high' ? 'bg-[#00C853]/10 text-[#00C853]' :
-                        t.frequency === 'medium' ? 'bg-[#E8A838]/10 text-[#E8A838]' :
-                        'bg-black/5 text-black/40'
-                      }`}>
+                      <span
+                        className={`font-mono text-[9px] px-1.5 py-0.5 rounded shrink-0 ${
+                          t.frequency === 'high'
+                            ? 'bg-[#00C853]/10 text-[#00C853]'
+                            : t.frequency === 'medium'
+                              ? 'bg-[#E8A838]/10 text-[#E8A838]'
+                              : 'bg-black/5 text-black/40'
+                        }`}
+                      >
                         {t.frequency.toUpperCase()}
                       </span>
-                      <span className="font-mono text-[10px] text-black/35 italic truncate">{t.evidence}</span>
+                      <span className="font-mono text-[10px] text-black/35 italic truncate">
+                        {t.evidence}
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -420,7 +465,9 @@ export default function BrandBreakdown({
             {/* Natural Audience */}
             {brandScore.phases.define.contentIdentity.audienceSignal && (
               <div className="p-3 rounded-lg bg-black/[0.02] border border-black/5">
-                <div className="font-mono text-[9px] tracking-[0.15em] text-black/30 mb-1 uppercase">TARGET_AUDIENCE</div>
+                <div className="font-mono text-[9px] tracking-[0.15em] text-black/30 mb-1 uppercase">
+                  TARGET_AUDIENCE
+                </div>
                 <p className="font-mono text-[12px] text-black/60 leading-relaxed">
                   {brandScore.phases.define.contentIdentity.audienceSignal}
                 </p>
@@ -456,7 +503,9 @@ export default function BrandBreakdown({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Strengths */}
             <div>
-              <div className="font-mono text-[10px] tracking-[0.15em] text-[#00C853] mb-3 uppercase">Strengths</div>
+              <div className="font-mono text-[10px] tracking-[0.15em] text-[#00C853] mb-3 uppercase">
+                Strengths
+              </div>
               <div className="space-y-2">
                 {brandScore.topStrengths.slice(0, 4).map((s, i) => (
                   <div key={i} className="flex items-start gap-2">
@@ -468,7 +517,9 @@ export default function BrandBreakdown({
             </div>
             {/* Growth areas */}
             <div>
-              <div className="font-mono text-[10px] tracking-[0.15em] text-[#E8A838] mb-3 uppercase">Growth Areas</div>
+              <div className="font-mono text-[10px] tracking-[0.15em] text-[#E8A838] mb-3 uppercase">
+                Growth Areas
+              </div>
               <div className="space-y-2">
                 {brandScore.topImprovements.slice(0, 4).map((s, i) => (
                   <div key={i} className="flex items-start gap-2">
@@ -492,7 +543,9 @@ export default function BrandBreakdown({
 
           {/* Keywords */}
           <div className="mb-6">
-            <div className="font-mono text-[10px] tracking-[0.15em] text-black/30 mb-3 uppercase">Keywords</div>
+            <div className="font-mono text-[10px] tracking-[0.15em] text-black/30 mb-3 uppercase">
+              Keywords
+            </div>
             <div className="flex flex-wrap gap-2">
               {generatedBrandDNA.keywords.slice(0, 8).map((kw, i) => (
                 <motion.span
@@ -511,11 +564,15 @@ export default function BrandBreakdown({
           {/* Content Pillars */}
           {generatedBrandDNA.contentPillars && generatedBrandDNA.contentPillars.length > 0 && (
             <div className="mb-6">
-              <div className="font-mono text-[10px] tracking-[0.15em] text-black/30 mb-3 uppercase">Content Pillars</div>
+              <div className="font-mono text-[10px] tracking-[0.15em] text-black/30 mb-3 uppercase">
+                Content Pillars
+              </div>
               <div className="space-y-2">
                 {generatedBrandDNA.contentPillars.slice(0, 4).map((pillar, i) => (
                   <div key={i} className="flex items-center gap-3">
-                    <span className="font-mono text-[11px] text-black/50 w-[140px] shrink-0 truncate">{pillar.name}</span>
+                    <span className="font-mono text-[11px] text-black/50 w-[140px] shrink-0 truncate">
+                      {pillar.name}
+                    </span>
                     <div className="flex-1 h-[4px] bg-black/5 rounded-full overflow-hidden">
                       <motion.div
                         initial={{ width: 0 }}
@@ -524,7 +581,9 @@ export default function BrandBreakdown({
                         className="h-full rounded-full bg-[#0047FF]/60"
                       />
                     </div>
-                    <span className="font-mono text-[10px] text-black/35 w-[28px] text-right">{pillar.frequency}%</span>
+                    <span className="font-mono text-[10px] text-black/35 w-[28px] text-right">
+                      {pillar.frequency}%
+                    </span>
                   </div>
                 ))}
               </div>
@@ -534,14 +593,23 @@ export default function BrandBreakdown({
           {/* Voice Consistency */}
           {voiceConsistency !== null && (
             <div className="flex items-center gap-3 p-3 rounded-lg bg-black/[0.02] border border-black/5">
-              <span className="font-mono text-[10px] tracking-[0.1em] text-black/40 uppercase">Voice Consistency</span>
+              <span className="font-mono text-[10px] tracking-[0.1em] text-black/40 uppercase">
+                Voice Consistency
+              </span>
               <div className="flex-1 h-[4px] bg-black/5 rounded-full overflow-hidden">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${voiceConsistency}%` }}
                   transition={{ duration: 1, delay: 0.6 }}
                   className="h-full rounded-full"
-                  style={{ background: voiceConsistency >= 70 ? '#00C853' : voiceConsistency >= 50 ? '#E8A838' : '#FF3B30' }}
+                  style={{
+                    background:
+                      voiceConsistency >= 70
+                        ? '#00C853'
+                        : voiceConsistency >= 50
+                          ? '#E8A838'
+                          : '#FF3B30',
+                  }}
                 />
               </div>
               <span className="font-mono text-sm font-bold text-black/60">{voiceConsistency}%</span>
@@ -559,7 +627,9 @@ export default function BrandBreakdown({
           <SectionLabel>Voice Patterns</SectionLabel>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <div className="font-mono text-[10px] tracking-[0.15em] text-[#00C853] mb-3 uppercase">Do This</div>
+              <div className="font-mono text-[10px] tracking-[0.15em] text-[#00C853] mb-3 uppercase">
+                Do This
+              </div>
               <div className="space-y-2">
                 {generatedBrandDNA.doPatterns.slice(0, 4).map((p, i) => (
                   <div key={i} className="flex items-start gap-2">
@@ -570,7 +640,9 @@ export default function BrandBreakdown({
               </div>
             </div>
             <div>
-              <div className="font-mono text-[10px] tracking-[0.15em] text-[#FF3B30] mb-3 uppercase">Avoid This</div>
+              <div className="font-mono text-[10px] tracking-[0.15em] text-[#FF3B30] mb-3 uppercase">
+                Avoid This
+              </div>
               <div className="space-y-2">
                 {generatedBrandDNA.dontPatterns.slice(0, 4).map((p, i) => (
                   <div key={i} className="flex items-start gap-2">

@@ -38,9 +38,7 @@ export default function BaseNode({
       } max-w-[420px] ${className}`}
       style={{
         background: 'rgba(15, 15, 15, 0.85)',
-        borderColor: isActive
-          ? accentColor
-          : 'rgba(255, 255, 255, 0.08)',
+        borderColor: isActive ? accentColor : 'rgba(255, 255, 255, 0.08)',
         boxShadow: isActive
           ? `0 0 20px ${accentColor}30, 0 0 60px ${accentColor}10`
           : '0 4px 24px rgba(0,0,0,0.4)',
@@ -61,16 +59,9 @@ export default function BaseNode({
         className="flex items-center gap-2 px-4 py-3 border-b"
         style={{ borderColor: 'rgba(255, 255, 255, 0.06)' }}
       >
-        <div
-          className="w-2 h-2 rounded-full"
-          style={{ backgroundColor: accentColor }}
-        />
-        <span className="text-xs font-medium tracking-wide text-white/80 uppercase">
-          {title}
-        </span>
-        {subtitle && (
-          <span className="text-[10px] text-white/30 ml-auto">{subtitle}</span>
-        )}
+        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: accentColor }} />
+        <span className="text-xs font-medium tracking-wide text-white/80 uppercase">{title}</span>
+        {subtitle && <span className="text-[10px] text-white/30 ml-auto">{subtitle}</span>}
       </div>
 
       {/* Content */}

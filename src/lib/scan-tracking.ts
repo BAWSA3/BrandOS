@@ -26,15 +26,13 @@ export async function recordScan(scan: {
   enhanced: boolean;
 }): Promise<{ success: boolean; error?: string }> {
   try {
-    const { error } = await supabase
-      .from('BrandScans')
-      .insert({
-        username: scan.username.toLowerCase(),
-        score: scan.score,
-        archetype: scan.archetype || 'unknown',
-        enhanced: scan.enhanced,
-        created_at: new Date().toISOString(),
-      });
+    const { error } = await supabase.from('BrandScans').insert({
+      username: scan.username.toLowerCase(),
+      score: scan.score,
+      archetype: scan.archetype || 'unknown',
+      enhanced: scan.enhanced,
+      created_at: new Date().toISOString(),
+    });
 
     if (error) {
       console.error('[ScanTracking] Supabase error:', error);
@@ -73,16 +71,14 @@ export async function getScanCount(): Promise<number> {
  */
 export async function getUniqueScanCount(): Promise<number> {
   try {
-    const { data, error } = await supabase
-      .from('BrandScans')
-      .select('username');
+    const { data, error } = await supabase.from('BrandScans').select('username');
 
     if (error) {
       console.error('[ScanTracking] Error getting unique count:', error);
       return 0;
     }
 
-    const unique = new Set(data?.map(d => d.username) || []);
+    const unique = new Set(data?.map((d) => d.username) || []);
     return unique.size;
   } catch {
     return 0;

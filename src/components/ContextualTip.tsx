@@ -11,13 +11,13 @@ interface ContextualTipProps {
   children: React.ReactNode;
 }
 
-export default function ContextualTip({ 
-  tip, 
-  position = 'top', 
+export default function ContextualTip({
+  tip,
+  position = 'top',
   showOnce = false,
   storageKey,
   delay = 0,
-  children 
+  children,
 }: ContextualTipProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [hasBeenDismissed, setHasBeenDismissed] = useState(false);
@@ -48,9 +48,11 @@ export default function ContextualTip({
 
   const arrowClasses = {
     top: 'top-full left-1/2 -translate-x-1/2 border-l-transparent border-r-transparent border-b-transparent border-t-foreground',
-    bottom: 'bottom-full left-1/2 -translate-x-1/2 border-l-transparent border-r-transparent border-t-transparent border-b-foreground',
+    bottom:
+      'bottom-full left-1/2 -translate-x-1/2 border-l-transparent border-r-transparent border-t-transparent border-b-foreground',
     left: 'left-full top-1/2 -translate-y-1/2 border-t-transparent border-b-transparent border-r-transparent border-l-foreground',
-    right: 'right-full top-1/2 -translate-y-1/2 border-t-transparent border-b-transparent border-l-transparent border-r-foreground',
+    right:
+      'right-full top-1/2 -translate-y-1/2 border-t-transparent border-b-transparent border-l-transparent border-r-foreground',
   };
 
   if (hasBeenDismissed) {
@@ -58,7 +60,7 @@ export default function ContextualTip({
   }
 
   return (
-    <div 
+    <div
       className="relative inline-block"
       onMouseEnter={() => {
         if (delay > 0) {
@@ -70,9 +72,9 @@ export default function ContextualTip({
       onMouseLeave={() => setIsVisible(false)}
     >
       {children}
-      
+
       {isVisible && (
-        <div 
+        <div
           className={`absolute z-50 ${positionClasses[position]} animate-fade-in`}
           onClick={(e) => e.stopPropagation()}
         >
@@ -81,7 +83,7 @@ export default function ContextualTip({
               <span className="text-yellow-400 flex-shrink-0">💡</span>
               <span>{tip}</span>
               {showOnce && (
-                <button 
+                <button
                   onClick={handleDismiss}
                   className="text-background/60 hover:text-background ml-1 flex-shrink-0"
                 >
@@ -144,28 +146,38 @@ export function ProgressMilestone({ milestones }: ProgressMilestoneProps) {
     <div className="flex items-center justify-center gap-2">
       {milestones.map((milestone, index) => (
         <div key={index} className="flex items-center">
-          <div className={`
+          <div
+            className={`
             w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium
             transition-all duration-300
-            ${milestone.isComplete 
-              ? 'bg-green-500 text-white' 
-              : milestone.isActive 
-                ? 'bg-foreground text-background' 
-                : 'bg-surface text-muted'
+            ${
+              milestone.isComplete
+                ? 'bg-green-500 text-white'
+                : milestone.isActive
+                  ? 'bg-foreground text-background'
+                  : 'bg-surface text-muted'
             }
-          `}>
+          `}
+          >
             {milestone.isComplete ? (
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M5 13l4 4L19 7"
+                />
               </svg>
             ) : (
               index + 1
             )}
           </div>
           {index < milestones.length - 1 && (
-            <div className={`w-8 h-0.5 mx-1 transition-colors duration-300 ${
-              milestone.isComplete ? 'bg-green-500' : 'bg-border'
-            }`} />
+            <div
+              className={`w-8 h-0.5 mx-1 transition-colors duration-300 ${
+                milestone.isComplete ? 'bg-green-500' : 'bg-border'
+              }`}
+            />
           )}
         </div>
       ))}
@@ -187,7 +199,9 @@ export function FeatureBadge({ label, variant = 'new' }: FeatureBadgeProps) {
   };
 
   return (
-    <span className={`inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full border ${variantClasses[variant]}`}>
+    <span
+      className={`inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full border ${variantClasses[variant]}`}
+    >
       {label}
     </span>
   );
@@ -212,20 +226,3 @@ export function KeyboardShortcut({ keys }: KeyboardShortcutProps) {
     </span>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

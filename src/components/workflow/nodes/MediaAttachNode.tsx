@@ -7,8 +7,7 @@ import BaseNode from './BaseNode';
 import { useWorkflowStore } from '../useWorkflowStore';
 
 function MediaAttachNode(_props: NodeProps) {
-  const { mediaUrls, linkUrl, addMediaUrl, removeMediaUrl, setLinkUrl } =
-    useWorkflowStore();
+  const { mediaUrls, linkUrl, addMediaUrl, removeMediaUrl, setLinkUrl } = useWorkflowStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileSelect = useCallback(
@@ -49,11 +48,7 @@ function MediaAttachNode(_props: NodeProps) {
                 className="relative aspect-square rounded-md overflow-hidden border border-white/[0.06] group"
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={url}
-                  alt={`Media ${i + 1}`}
-                  className="w-full h-full object-cover"
-                />
+                <img src={url} alt={`Media ${i + 1}`} className="w-full h-full object-cover" />
                 <button
                   onClick={() => removeMediaUrl(i)}
                   className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"

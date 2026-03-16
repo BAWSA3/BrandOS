@@ -145,7 +145,9 @@ export function summarizeFingerprint(fp: VoiceFingerprint): VoiceFingerprintSumm
     keyRules.push(`Open with ${fp.sentencePatterns.openingStyle}`);
   }
   if (fp.vocabulary.signatureWords.length > 0) {
-    keyRules.push(`Naturally incorporate words like: ${fp.vocabulary.signatureWords.slice(0, 5).join(', ')}`);
+    keyRules.push(
+      `Naturally incorporate words like: ${fp.vocabulary.signatureWords.slice(0, 5).join(', ')}`
+    );
   }
   if (fp.formatting.emojiUsage !== 'never') {
     keyRules.push(`Use emojis ${fp.formatting.emojiUsage}ly`);
@@ -190,13 +192,13 @@ export function formatSummaryForPrompt(summary: VoiceFingerprintSummary): string
 ${summary.voiceDescription}
 
 VOICE RULES (match these):
-${summary.keyRules.map(r => `- ${r}`).join('\n')}
+${summary.keyRules.map((r) => `- ${r}`).join('\n')}
 
 VOICE ANTI-RULES (never do these):
-${summary.antiRules.map(r => `- ${r}`).join('\n')}
+${summary.antiRules.map((r) => `- ${r}`).join('\n')}
 
 SIGNATURE MARKERS (include naturally):
-${summary.signatureMarkers.map(m => `- ${m}`).join('\n')}`;
+${summary.signatureMarkers.map((m) => `- ${m}`).join('\n')}`;
 }
 
 /**

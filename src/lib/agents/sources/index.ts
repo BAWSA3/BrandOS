@@ -12,17 +12,9 @@ import {
   SerperResult,
 } from '../research.types';
 
-import {
-  fetchTwitterForVerticals,
-  fetchInfluencerPosts,
-  getTwitterStatus,
-} from './twitter.source';
+import { fetchTwitterForVerticals, fetchInfluencerPosts, getTwitterStatus } from './twitter.source';
 
-import {
-  fetchRedditForVerticals,
-  searchRedditForKeywords,
-  getRedditStatus,
-} from './reddit.source';
+import { fetchRedditForVerticals, searchRedditForKeywords, getRedditStatus } from './reddit.source';
 
 import {
   fetchYouTubeForVerticals,
@@ -30,20 +22,19 @@ import {
   getYouTubeStatus,
 } from './youtube.source';
 
-import {
-  fetchSerperForVerticals,
-  searchTCGNews,
-  getSerperStatus,
-} from './serper.source';
+import { fetchSerperForVerticals, searchTCGNews, getSerperStatus } from './serper.source';
 
 // ===== SOURCE REGISTRY =====
 
-export const SOURCE_REGISTRY: Record<ResearchSource, {
-  name: string;
-  description: string;
-  rateLimit: string;
-  requiredEnvVar: string;
-}> = {
+export const SOURCE_REGISTRY: Record<
+  ResearchSource,
+  {
+    name: string;
+    description: string;
+    rateLimit: string;
+    requiredEnvVar: string;
+  }
+> = {
   twitter: {
     name: 'X/Twitter',
     description: 'Trending posts, hashtags, and influencer content',
@@ -89,9 +80,7 @@ export async function getAllSourceStatuses(): Promise<SourceStatus[]> {
 /**
  * Get status of specific sources
  */
-export async function getSourceStatuses(
-  sources: ResearchSource[]
-): Promise<SourceStatus[]> {
+export async function getSourceStatuses(sources: ResearchSource[]): Promise<SourceStatus[]> {
   const statusPromises = sources.map((source) => {
     switch (source) {
       case 'twitter':
@@ -148,9 +137,7 @@ function periodToRedditTimeframe(period: TrendingPeriod): 'day' | 'week' | 'mont
 /**
  * Aggregate data from all specified sources for given verticals
  */
-export async function aggregateFromSources(
-  options: AggregationOptions
-): Promise<RawSourceData> {
+export async function aggregateFromSources(options: AggregationOptions): Promise<RawSourceData> {
   const { verticals, sources, timeRange, postsPerSource = 25 } = options;
   const errors: { source: ResearchSource; error: string }[] = [];
 
@@ -221,11 +208,7 @@ export async function aggregateFromSources(
       (async () => {
         try {
           const daysBack = periodToDays(timeRange);
-          const youtubeData = await fetchYouTubeForVerticals(
-            verticals,
-            postsPerSource,
-            daysBack
-          );
+          const youtubeData = await fetchYouTubeForVerticals(verticals, postsPerSource, daysBack);
           const allVideos: YouTubeVideo[] = [];
           for (const { videos } of youtubeData) {
             allVideos.push(...videos);
@@ -246,11 +229,7 @@ export async function aggregateFromSources(
     fetchPromises.push(
       (async () => {
         try {
-          const serperData = await fetchSerperForVerticals(
-            verticals,
-            postsPerSource,
-            'news'
-          );
+          const serperData = await fetchSerperForVerticals(verticals, postsPerSource, 'news');
           const allResults: SerperResult[] = [];
           for (const { results } of serperData) {
             allResults.push(...results);
@@ -281,24 +260,14 @@ export async function aggregateFromSources(
  */
 export async function getAvailableSources(): Promise<ResearchSource[]> {
   const statuses = await getAllSourceStatuses();
-  return statuses
-    .filter((s) => s.enabled && s.apiStatus !== 'down')
-    .map((s) => s.source);
+  return statuses.filter((s) => s.enabled && s.apiStatus !== 'down').map((s) => s.source);
 }
 
 // ===== EXPORTS =====
 
-export {
-  fetchTwitterForVerticals,
-  fetchInfluencerPosts,
-  getTwitterStatus,
-} from './twitter.source';
+export { fetchTwitterForVerticals, fetchInfluencerPosts, getTwitterStatus } from './twitter.source';
 
-export {
-  fetchRedditForVerticals,
-  searchRedditForKeywords,
-  getRedditStatus,
-} from './reddit.source';
+export { fetchRedditForVerticals, searchRedditForKeywords, getRedditStatus } from './reddit.source';
 
 export {
   fetchYouTubeForVerticals,
@@ -306,8 +275,4 @@ export {
   getYouTubeStatus,
 } from './youtube.source';
 
-export {
-  fetchSerperForVerticals,
-  searchTCGNews,
-  getSerperStatus,
-} from './serper.source';
+export { fetchSerperForVerticals, searchTCGNews, getSerperStatus } from './serper.source';

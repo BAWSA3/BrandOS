@@ -167,10 +167,7 @@ export default function TopicCard({
       {topic.keywords.length > 0 && (
         <div className="flex flex-wrap gap-1 mb-3">
           {topic.keywords.slice(0, 5).map((keyword, idx) => (
-            <span
-              key={idx}
-              className="text-xs px-2 py-0.5 rounded bg-neutral-800 text-neutral-400"
-            >
+            <span key={idx} className="text-xs px-2 py-0.5 rounded bg-neutral-800 text-neutral-400">
               {keyword}
             </span>
           ))}
@@ -198,10 +195,7 @@ export default function TopicCard({
         <div className="flex items-center gap-2 text-xs text-neutral-500">
           <span>Sources:</span>
           {[...new Set(topic.sources.map((s) => s.source))].map((source) => (
-            <span
-              key={source}
-              className="px-2 py-0.5 rounded bg-neutral-800 capitalize"
-            >
+            <span key={source} className="px-2 py-0.5 rounded bg-neutral-800 capitalize">
               {source}
             </span>
           ))}
@@ -233,10 +227,7 @@ export function TopicCardMini({ topic }: { topic: ResearchTopic }) {
       <span>{categoryIcon}</span>
       <div className="flex-1 min-w-0">
         <div className="text-sm font-medium text-white truncate">{topic.title}</div>
-        <div
-          className="text-xs"
-          style={{ color: verticalColor }}
-        >
+        <div className="text-xs" style={{ color: verticalColor }}>
           {VERTICAL_CONFIGS[topic.vertical]?.name}
         </div>
       </div>

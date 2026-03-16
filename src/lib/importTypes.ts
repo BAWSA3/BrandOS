@@ -12,7 +12,7 @@ export interface ExtractedBrand {
   sourceDetails: string;
   overallConfidence: number;
   extractedAt: Date;
-  
+
   name?: ExtractedValue<string>;
   colors?: {
     primary?: ExtractedValue<string>;
@@ -30,7 +30,7 @@ export interface ExtractedBrand {
   doPatterns?: ExtractedValue<string>[];
   dontPatterns?: ExtractedValue<string>[];
   voiceSamples?: ExtractedValue<string>[];
-  
+
   // Additional metadata
   detectedFonts?: ExtractedValue<string>[];
   logoDescriptions?: ExtractedValue<string>[];
@@ -122,19 +122,3 @@ export const reviewModes: ReviewModeConfig[] = [
     icon: 'columns',
   },
 ];
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

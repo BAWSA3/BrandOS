@@ -59,7 +59,8 @@ export const useWorkflowStore = create<WorkflowState>()((set) => ({
   setTopic: (topic) => set({ topic }),
   setTone: (tone) => set({ tone }),
   setContext: (context) => set({ context }),
-  setVariations: (variations) => set({ variations, selectedVariationIndex: null, editedContent: '' }),
+  setVariations: (variations) =>
+    set({ variations, selectedVariationIndex: null, editedContent: '' }),
   selectVariation: (index) =>
     set((state) => ({
       selectedVariationIndex: index,

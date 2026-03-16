@@ -17,7 +17,17 @@ export const brandTemplates: BrandTemplate[] = [
         bold: 55,
         experimental: 45,
       },
-      keywords: ['premium', 'nostalgic', 'frosted', 'translucent', 'matte', 'collectible', 'artifact', 'Y2K', 'retro-futuristic'],
+      keywords: [
+        'premium',
+        'nostalgic',
+        'frosted',
+        'translucent',
+        'matte',
+        'collectible',
+        'artifact',
+        'Y2K',
+        'retro-futuristic',
+      ],
       doPatterns: [
         'Use clean, confident language',
         'Evoke 90s gaming nostalgia without being kitschy',
@@ -38,7 +48,7 @@ export const brandTemplates: BrandTemplate[] = [
         'The kind of device that feels substantial in hand.',
         'A quiet statement piece that rewards close inspection.',
         'Premium but not sterile. Confident but not aggressive.',
-        'The console you\'d see in an architecture magazine.',
+        "The console you'd see in an architecture magazine.",
         'Museum quality. Elevates the object, respects the design.',
       ],
     },
@@ -74,8 +84,8 @@ export const brandTemplates: BrandTemplate[] = [
       ],
       voiceSamples: [
         'Think different.',
-        'The best experiences are the ones you don\'t notice.',
-        'Privacy. That\'s iPhone.',
+        "The best experiences are the ones you don't notice.",
+        "Privacy. That's iPhone.",
       ],
     },
   },
@@ -108,11 +118,7 @@ export const brandTemplates: BrandTemplate[] = [
         'Avoid lengthy explanations',
         'No negative framing',
       ],
-      voiceSamples: [
-        'Just do it.',
-        'There is no finish line.',
-        'Yesterday you said tomorrow.',
-      ],
+      voiceSamples: ['Just do it.', 'There is no finish line.', 'Yesterday you said tomorrow.'],
     },
   },
   {
@@ -218,8 +224,8 @@ export const brandTemplates: BrandTemplate[] = [
       ],
       voiceSamples: [
         'High fives! Your campaign is on its way.',
-        'We\'re here to help you grow. Seriously.',
-        'Email marketing that doesn\'t suck.',
+        "We're here to help you grow. Seriously.",
+        "Email marketing that doesn't suck.",
       ],
     },
   },
@@ -261,8 +267,11 @@ export const brandTemplates: BrandTemplate[] = [
   },
 ];
 
-export const contentTypeLabels: Record<string, { label: string; description: string; placeholder: string }> = {
-  'general': {
+export const contentTypeLabels: Record<
+  string,
+  { label: string; description: string; placeholder: string }
+> = {
+  general: {
     label: 'General',
     description: 'Any type of content',
     placeholder: 'Describe what you need...',
@@ -282,12 +291,12 @@ export const contentTypeLabels: Record<string, { label: string; description: str
     description: 'Visual, engaging, hashtag-friendly',
     placeholder: 'Describe the image or topic...',
   },
-  'headline': {
+  headline: {
     label: 'Headline',
     description: 'Attention-grabbing title',
     placeholder: 'What is the headline for?',
   },
-  'tagline': {
+  tagline: {
     label: 'Tagline/Slogan',
     description: 'Memorable brand phrase',
     placeholder: 'What product or campaign?',
@@ -318,4 +327,3 @@ export const contentTypeLabels: Record<string, { label: string; description: str
     placeholder: 'What is the blog post about?',
   },
 };
-

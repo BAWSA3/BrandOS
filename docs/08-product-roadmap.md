@@ -21,28 +21,28 @@ BrandOS follows a progressive enhancement model:
 
 ### Shipped Features (v1.0)
 
-| Category | Feature | Status | Notes |
-|----------|---------|--------|-------|
-| **Core** | Brand DNA System | ✅ Complete | Full tone, color, pattern support |
-| **Core** | Content Check | ✅ Complete | Real-time scoring with suggestions |
-| **Core** | AI Generation | ✅ Complete | Multi-content type support |
-| **Core** | Tone Analysis | ✅ Complete | 4-dimension analysis |
-| **Design** | Design Intent Blocks | ✅ Complete | Natural language to rules |
-| **Design** | Taste Translation | ✅ Complete | Subjective feedback parsing |
-| **Protection** | Brand Cohesion | ✅ Complete | Cross-content consistency |
-| **Protection** | Creator Guardrails | ✅ Complete | Approval workflows |
-| **Protection** | Safe Zones | ✅ Complete | Locked/flexible elements |
-| **Protection** | Taste Protection | ✅ Complete | Over-design prevention |
-| **Learning** | Brand Memory | ✅ Complete | Success/failure tracking |
-| **Adaptation** | Platform Adapter | ✅ Complete | 6 platform presets |
-| **Adaptation** | Context Tone | ✅ Complete | 7 context types |
-| **Access** | Chrome Extension | ✅ Complete | Ubiquitous checking |
-| **Access** | Brand Sharing | ✅ Complete | Token-based sharing |
-| **Data** | History Tracking | ✅ Complete | All checks/generates logged |
-| **UX** | Brand Templates | ✅ Complete | 6 starter templates |
-| **UX** | Dark/Light Mode | ✅ Complete | Theme toggle |
-| **Inspiration** | Pinterest Search | ✅ Complete | Visual inspiration |
-| **Competitor** | Competitor Analysis | ✅ Complete | Voice comparison |
+| Category        | Feature              | Status      | Notes                              |
+| --------------- | -------------------- | ----------- | ---------------------------------- |
+| **Core**        | Brand DNA System     | ✅ Complete | Full tone, color, pattern support  |
+| **Core**        | Content Check        | ✅ Complete | Real-time scoring with suggestions |
+| **Core**        | AI Generation        | ✅ Complete | Multi-content type support         |
+| **Core**        | Tone Analysis        | ✅ Complete | 4-dimension analysis               |
+| **Design**      | Design Intent Blocks | ✅ Complete | Natural language to rules          |
+| **Design**      | Taste Translation    | ✅ Complete | Subjective feedback parsing        |
+| **Protection**  | Brand Cohesion       | ✅ Complete | Cross-content consistency          |
+| **Protection**  | Creator Guardrails   | ✅ Complete | Approval workflows                 |
+| **Protection**  | Safe Zones           | ✅ Complete | Locked/flexible elements           |
+| **Protection**  | Taste Protection     | ✅ Complete | Over-design prevention             |
+| **Learning**    | Brand Memory         | ✅ Complete | Success/failure tracking           |
+| **Adaptation**  | Platform Adapter     | ✅ Complete | 6 platform presets                 |
+| **Adaptation**  | Context Tone         | ✅ Complete | 7 context types                    |
+| **Access**      | Chrome Extension     | ✅ Complete | Ubiquitous checking                |
+| **Access**      | Brand Sharing        | ✅ Complete | Token-based sharing                |
+| **Data**        | History Tracking     | ✅ Complete | All checks/generates logged        |
+| **UX**          | Brand Templates      | ✅ Complete | 6 starter templates                |
+| **UX**          | Dark/Light Mode      | ✅ Complete | Theme toggle                       |
+| **Inspiration** | Pinterest Search     | ✅ Complete | Visual inspiration                 |
+| **Competitor**  | Competitor Analysis  | ✅ Complete | Voice comparison                   |
 
 ---
 
@@ -70,15 +70,16 @@ BrandOS follows a progressive enhancement model:
 
 **Goal:** Enable multiple users to work with shared brands
 
-| Feature | Description | Priority |
-|---------|-------------|----------|
-| Team Workspaces | Shared environment for team brands | P0 |
-| Role-Based Access | Viewer, Editor, Admin permissions | P0 |
-| Activity Feed | Who changed what, when | P1 |
-| Comments | Feedback on checks/generations | P1 |
-| Notifications | Email alerts for reviews | P2 |
+| Feature           | Description                        | Priority |
+| ----------------- | ---------------------------------- | -------- |
+| Team Workspaces   | Shared environment for team brands | P0       |
+| Role-Based Access | Viewer, Editor, Admin permissions  | P0       |
+| Activity Feed     | Who changed what, when             | P1       |
+| Comments          | Feedback on checks/generations     | P1       |
+| Notifications     | Email alerts for reviews           | P2       |
 
 **User Stories:**
+
 - "As a brand manager, I want to invite my team so they can check content without asking me"
 - "As an admin, I want to control who can edit brand settings vs. just use them"
 - "As a team lead, I want to see what content my team has checked"
@@ -100,18 +101,19 @@ GET    /v1/history             Get check/generate history
 ```
 
 **Rate Limits:**
+
 - Starter: 100 requests/day
 - Professional: 1,000 requests/day
 - Enterprise: Custom
 
 ### Export Capabilities
 
-| Format | Use Case | Priority |
-|--------|----------|----------|
-| Brand Kit PDF | Share with external partners | P0 |
-| JSON Export | Backup/migration | P1 |
-| Style Guide Generator | Auto-generate from Brand DNA | P1 |
-| Pitch Deck Export | Investor-ready brand overview | P2 |
+| Format                | Use Case                      | Priority |
+| --------------------- | ----------------------------- | -------- |
+| Brand Kit PDF         | Share with external partners  | P0       |
+| JSON Export           | Backup/migration              | P1       |
+| Style Guide Generator | Auto-generate from Brand DNA  | P1       |
+| Pitch Deck Export     | Investor-ready brand overview | P2       |
 
 ---
 
@@ -141,6 +143,7 @@ GET    /v1/history             Get check/generate history
 ```
 
 **Capabilities:**
+
 - Color palette validation
 - Typography checking
 - Layout alignment suggestions
@@ -151,6 +154,7 @@ GET    /v1/history             Get check/generate history
 **Goal:** Brand checking and generation in workflow tools
 
 **Commands:**
+
 ```
 /brandos check [paste content]     → Returns score and issues
 /brandos generate [prompt]         → Returns on-brand content
@@ -159,20 +163,22 @@ GET    /v1/history             Get check/generate history
 ```
 
 **Bot Features:**
+
 - Auto-check content in specified channels
 - Alert on low-scoring content
 - Weekly brand health summary
 
 ### CMS Integrations
 
-| Platform | Integration Type | Priority |
-|----------|------------------|----------|
-| WordPress | Plugin | P1 |
-| Webflow | App | P1 |
-| Contentful | Extension | P2 |
-| Sanity | Plugin | P2 |
+| Platform   | Integration Type | Priority |
+| ---------- | ---------------- | -------- |
+| WordPress  | Plugin           | P1       |
+| Webflow    | App              | P1       |
+| Contentful | Extension        | P2       |
+| Sanity     | Plugin           | P2       |
 
 **Functionality:**
+
 - Pre-publish brand check
 - Score display in editor
 - Block publish if score below threshold (optional)
@@ -180,11 +186,13 @@ GET    /v1/history             Get check/generate history
 ### Zapier/Make Connector
 
 **Triggers:**
+
 - New content checked
 - Content below threshold
 - New content generated
 
 **Actions:**
+
 - Check content
 - Generate content
 - Get brand info
@@ -222,6 +230,7 @@ GET    /v1/history             Get check/generate history
 ```
 
 **Metrics:**
+
 - Score trends over time
 - Issue frequency analysis
 - Team member performance
@@ -232,12 +241,12 @@ GET    /v1/history             Get check/generate history
 
 **Goal:** Proactive recommendations based on usage patterns
 
-| Insight Type | Example | Action |
-|--------------|---------|--------|
-| Guideline Gap | "Content about [topic] consistently scores low" | Suggest new do/don't pattern |
-| Voice Evolution | "Your tone has shifted 15% more formal" | Alert and confirm if intentional |
-| High Performers | "Content with [pattern] gets 20% higher scores" | Suggest codifying pattern |
-| Risk Alert | "Creator X trending below threshold" | Flag for review |
+| Insight Type    | Example                                         | Action                           |
+| --------------- | ----------------------------------------------- | -------------------------------- |
+| Guideline Gap   | "Content about [topic] consistently scores low" | Suggest new do/don't pattern     |
+| Voice Evolution | "Your tone has shifted 15% more formal"         | Alert and confirm if intentional |
+| High Performers | "Content with [pattern] gets 20% higher scores" | Suggest codifying pattern        |
+| Risk Alert      | "Creator X trending below threshold"            | Flag for review                  |
 
 ### Automatic Rule Suggestions
 
@@ -257,6 +266,7 @@ a question to increase engagement"
 ### Industry Benchmarks
 
 Compare brand performance against:
+
 - Industry averages (SaaS, DTC, Finance, etc.)
 - Company size cohorts
 - Top performers (anonymized)
@@ -295,6 +305,7 @@ Audit Log Entry:
 ### Custom AI Models
 
 For enterprise customers:
+
 - Fine-tuned models on brand corpus
 - Private model deployment
 - Custom evaluation criteria
@@ -303,6 +314,7 @@ For enterprise customers:
 ### On-Premise Deployment
 
 For regulated industries:
+
 - Docker/Kubernetes deployment
 - Air-gapped installation option
 - Data never leaves customer infrastructure
@@ -340,23 +352,23 @@ For regulated industries:
 
 ## Release Cadence
 
-| Release Type | Frequency | Examples |
-|--------------|-----------|----------|
-| Bug Fixes | Weekly | Critical fixes, performance |
-| Minor Features | Bi-weekly | UI improvements, tweaks |
-| Major Features | Monthly | New capabilities |
-| Platform Updates | Quarterly | Architecture, integrations |
+| Release Type     | Frequency | Examples                    |
+| ---------------- | --------- | --------------------------- |
+| Bug Fixes        | Weekly    | Critical fixes, performance |
+| Minor Features   | Bi-weekly | UI improvements, tweaks     |
+| Major Features   | Monthly   | New capabilities            |
+| Platform Updates | Quarterly | Architecture, integrations  |
 
 ---
 
 ## Success Metrics by Phase
 
-| Phase | Primary Metric | Target |
-|-------|----------------|--------|
-| Scale | Monthly Active Teams | 500 |
-| Integrate | Integration Installs | 2,000 |
-| Intelligence | Dashboard DAU | 40% of MAU |
-| Enterprise | Enterprise Accounts | 25 |
+| Phase        | Primary Metric       | Target     |
+| ------------ | -------------------- | ---------- |
+| Scale        | Monthly Active Teams | 500        |
+| Integrate    | Integration Installs | 2,000      |
+| Intelligence | Dashboard DAU        | 40% of MAU |
+| Enterprise   | Enterprise Accounts  | 25         |
 
 ---
 
@@ -380,6 +392,7 @@ EFFORT   │                  │                  │      EFFORT
 ```
 
 **Decision Framework:**
+
 1. Does it directly improve brand consistency? → Prioritize
 2. Is it blocking customer adoption? → Urgent
 3. Is it a competitive necessity? → Plan for next quarter
@@ -387,21 +400,4 @@ EFFORT   │                  │                  │      EFFORT
 
 ---
 
-*Next: [Business Model →](09-business-model.md)*
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+_Next: [Business Model →](09-business-model.md)_

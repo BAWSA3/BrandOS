@@ -151,11 +151,7 @@ export function useXBrandScoreDemoCapture({
 /**
  * Integration hook for DNA Walkthrough capture triggers
  */
-export function useDNAWalkthroughDemoCapture({
-  activeSection,
-}: {
-  activeSection: number;
-}) {
+export function useDNAWalkthroughDemoCapture({ activeSection }: { activeSection: number }) {
   const { isActive, capture, setMoment, sessionId } = useDemoCapture();
   const capturedSections = useRef<Set<number>>(new Set());
 

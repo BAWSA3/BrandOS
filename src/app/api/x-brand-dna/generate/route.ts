@@ -79,13 +79,50 @@ function mapArchetypeToPersonalityType(archetype: string | undefined): Personali
 
   const lower = archetype.toLowerCase();
 
-  if (lower.includes('foresight') || lower.includes('philosopher') || lower.includes('visionary') || lower.includes('alpha') || lower.includes('analyst') || lower.includes('oracle')) return 'foresight';
-  if (lower.includes('build') || lower.includes('ship') || lower.includes('maker') || lower.includes('creator')) return 'buildexe';
-  if (lower.includes('signal_sage') || lower.includes('educator') || lower.includes('teacher') || lower.includes('mentor') || lower.includes('professor')) return 'signal_sage';
-  if (lower.includes('entropy') || lower.includes('degen') || lower.includes('ape') || lower.includes('gambler') || lower.includes('contrarian')) return 'entropy';
-  if (lower.includes('null') || lower.includes('anon') || lower.includes('pseudonym')) return 'null_type';
-  if (lower.includes('freq') || lower.includes('vibe') || lower.includes('entertainer')) return 'freq';
-  if (lower.includes('relay') || lower.includes('networker') || lower.includes('connector') || lower.includes('plug') || lower.includes('community')) return 'relay';
+  if (
+    lower.includes('foresight') ||
+    lower.includes('philosopher') ||
+    lower.includes('visionary') ||
+    lower.includes('alpha') ||
+    lower.includes('analyst') ||
+    lower.includes('oracle')
+  )
+    return 'foresight';
+  if (
+    lower.includes('build') ||
+    lower.includes('ship') ||
+    lower.includes('maker') ||
+    lower.includes('creator')
+  )
+    return 'buildexe';
+  if (
+    lower.includes('signal_sage') ||
+    lower.includes('educator') ||
+    lower.includes('teacher') ||
+    lower.includes('mentor') ||
+    lower.includes('professor')
+  )
+    return 'signal_sage';
+  if (
+    lower.includes('entropy') ||
+    lower.includes('degen') ||
+    lower.includes('ape') ||
+    lower.includes('gambler') ||
+    lower.includes('contrarian')
+  )
+    return 'entropy';
+  if (lower.includes('null') || lower.includes('anon') || lower.includes('pseudonym'))
+    return 'null_type';
+  if (lower.includes('freq') || lower.includes('vibe') || lower.includes('entertainer'))
+    return 'freq';
+  if (
+    lower.includes('relay') ||
+    lower.includes('networker') ||
+    lower.includes('connector') ||
+    lower.includes('plug') ||
+    lower.includes('community')
+  )
+    return 'relay';
   if (lower.includes('arc') || lower.includes('underdog') || lower.includes('rising')) return 'arc';
 
   return 'buildexe';
@@ -199,48 +236,46 @@ function detectPersonalityType(
   };
 
   // FORESIGHT: Big picture, visionary, strategic, authoritative content
-  scores.foresight = (tv.authoritative * 0.45) +
-    (tv.educational * 0.25) +
-    (geminiBrandDNA?.differentiationScore || 50) * 0.30;
+  scores.foresight =
+    tv.authoritative * 0.45 +
+    tv.educational * 0.25 +
+    (geminiBrandDNA?.differentiationScore || 50) * 0.3;
 
   // BUILD.EXE: Technical, professional, practical content
-  scores.buildexe = (tv.professional * 0.50) +
-    ((100 - tv.casual) * 0.30) +
-    (geminiBrandDNA?.differentiationScore || 50) * 0.20;
+  scores.buildexe =
+    tv.professional * 0.5 +
+    (100 - tv.casual) * 0.3 +
+    (geminiBrandDNA?.differentiationScore || 50) * 0.2;
 
   // SIGNAL_SAGE: Educational content, helpful, clear explanations
-  scores.signal_sage = (tv.educational * 0.60) +
-    (tv.approachable * 0.25) +
-    ((100 - tv.promotional) * 0.15);
+  scores.signal_sage =
+    tv.educational * 0.6 + tv.approachable * 0.25 + (100 - tv.promotional) * 0.15;
 
   // ENTROPY: Playful, casual, high energy, risk-taking content
-  scores.entropy = (tv.casual * 0.35) +
-    ((100 - tv.professional) * 0.25) +
-    (tv.opinionated * 0.20) +
-    (vibeBonus.playful * 0.10) +
-    (bioVibe.emojiCount * 5);
+  scores.entropy =
+    tv.casual * 0.35 +
+    (100 - tv.professional) * 0.25 +
+    tv.opinionated * 0.2 +
+    vibeBonus.playful * 0.1 +
+    bioVibe.emojiCount * 5;
 
   // NULL: Mysterious, ideas-focused, less personal content
-  scores.null_type = ((100 - tv.personal) * 0.40) +
-    (tv.authoritative * 0.30) +
-    ((100 - tv.approachable) * 0.30);
+  scores.null_type =
+    (100 - tv.personal) * 0.4 + tv.authoritative * 0.3 + (100 - tv.approachable) * 0.3;
 
   // FREQ: Entertaining, personality-driven, community builder
-  scores.freq = (tv.casual * 0.35) +
-    (tv.approachable * 0.30) +
-    (tv.personal * 0.20) +
-    (vibeBonus.playful * 0.15);
+  scores.freq =
+    tv.casual * 0.35 + tv.approachable * 0.3 + tv.personal * 0.2 + vibeBonus.playful * 0.15;
 
   // RELAY: Community-focused, approachable, collaborative content
-  scores.relay = (tv.approachable * 0.50) +
-    (tv.personal * 0.30) +
-    ((100 - tv.authoritative) * 0.20);
+  scores.relay = tv.approachable * 0.5 + tv.personal * 0.3 + (100 - tv.authoritative) * 0.2;
 
   // ARC: Rising star, opinionated, growing presence
-  scores.arc = (tv.opinionated * 0.40) +
-    (tv.casual * 0.25) +
-    ((100 - tv.authoritative) * 0.15) +
-    (vibeBonus.casual * 0.20);
+  scores.arc =
+    tv.opinionated * 0.4 +
+    tv.casual * 0.25 +
+    (100 - tv.authoritative) * 0.15 +
+    vibeBonus.casual * 0.2;
 
   // Find highest scoring personality
   let maxScore = 0;
@@ -270,21 +305,24 @@ async function generatePersonalitySummary(
 
   // CONTENT-PRIMARY: Derive voice context from tweets, not bio
   const tv = tweetVoice?.voiceSpectrum;
-  const voiceContext = tv ? {
-    formality: tv.professional > 60 ? 'formal' : 'casual',
-    energy: tv.authoritative > 60 ? 'high-energy' : 'measured',
-    style: tv.casual > 50 ? 'conversational' : 'polished',
-  } : {
-    // Fallback to neutral if no tweets (don't use bio)
-    formality: 'balanced',
-    energy: 'measured',
-    style: 'varied',
-  };
+  const voiceContext = tv
+    ? {
+        formality: tv.professional > 60 ? 'formal' : 'casual',
+        energy: tv.authoritative > 60 ? 'high-energy' : 'measured',
+        style: tv.casual > 50 ? 'conversational' : 'polished',
+      }
+    : {
+        // Fallback to neutral if no tweets (don't use bio)
+        formality: 'balanced',
+        energy: 'measured',
+        style: 'varied',
+      };
 
   // Extract content-specific signals
-  const contentPillars = tweetVoice?.contentThemes?.map(t => t.pillar).slice(0, 3) || [];
+  const contentPillars = tweetVoice?.contentThemes?.map((t) => t.pillar).slice(0, 3) || [];
   const signaturePhrases = tweetVoice?.writingStyle?.signaturePhrases?.slice(0, 3) || [];
-  const highEngagementTopics = tweetVoice?.performancePatterns?.highEngagementTopics?.slice(0, 3) || [];
+  const highEngagementTopics =
+    tweetVoice?.performancePatterns?.highEngagementTopics?.slice(0, 3) || [];
 
   // Build context for AI - CONTENT-PRIMARY
   const context = {
@@ -339,7 +377,9 @@ Write in second person ("You..."). Be direct and specific—no fluff. Reference 
 
     if (response.ok) {
       const data = await response.json();
-      return data.content?.[0]?.text || generateFallbackSummary(personalityType, archetypeName, context);
+      return (
+        data.content?.[0]?.text || generateFallbackSummary(personalityType, archetypeName, context)
+      );
     }
   } catch (error) {
     console.error('Claude API error:', error);
@@ -353,14 +393,22 @@ Write in second person ("You..."). Be direct and specific—no fluff. Reference 
 function generateFallbackSummary(
   personalityType: PersonalityType,
   archetypeName: string, // Use actual archetype name in the summary
-  context: { name: string; followers: number; voiceConsistency: number; contentPillars?: string[]; signaturePhrases?: string[]; highEngagementTopics?: string[] }
+  context: {
+    name: string;
+    followers: number;
+    voiceConsistency: number;
+    contentPillars?: string[];
+    signaturePhrases?: string[];
+    highEngagementTopics?: string[];
+  }
 ): string {
   // Determine the weakness based on voice consistency
-  const consistencyIssue = context.voiceConsistency < 70
-    ? `your ${context.voiceConsistency}% voice consistency signals scattered messaging—people can't pin down what you're about`
-    : context.voiceConsistency < 85
-    ? `at ${context.voiceConsistency}% voice consistency, there's room to sharpen your message for stronger recall`
-    : `even with ${context.voiceConsistency}% consistency, your growth has plateaued—time to expand your reach`;
+  const consistencyIssue =
+    context.voiceConsistency < 70
+      ? `your ${context.voiceConsistency}% voice consistency signals scattered messaging—people can't pin down what you're about`
+      : context.voiceConsistency < 85
+        ? `at ${context.voiceConsistency}% voice consistency, there's room to sharpen your message for stronger recall`
+        : `even with ${context.voiceConsistency}% consistency, your growth has plateaued—time to expand your reach`;
 
   // Templates use the actual archetype name for consistency with displayed card
   const templates: Record<PersonalityType, string> = {
@@ -458,32 +506,23 @@ function mapToToneSliders(
   const memorability = geminiBrandDNA?.memorabilityScore || 50;
 
   return {
-    minimal: Math.round(
-      (coherence * 0.4 +
-        (imageStyle?.minimal || 50) * 0.6)
-    ),
+    minimal: Math.round(coherence * 0.4 + (imageStyle?.minimal || 50) * 0.6),
     playful: Math.round(
-      ((100 - coherence) * 0.3 +
+      (100 - coherence) * 0.3 +
         (imageStyle?.playful || 50) * 0.4 +
-        (memorability > 70 ? 60 : 40) * 0.3)
+        (memorability > 70 ? 60 : 40) * 0.3
     ),
-    bold: Math.round(
-      (differentiation * 0.4 +
-        (imageStyle?.bold || 50) * 0.6)
-    ),
+    bold: Math.round(differentiation * 0.4 + (imageStyle?.bold || 50) * 0.6),
     experimental: Math.round(
-      (differentiation * 0.5 +
-        (imageStyle?.minimal ? (100 - imageStyle.minimal) : 50) * 0.2 +
-        (memorability * 0.3))
+      differentiation * 0.5 +
+        (imageStyle?.minimal ? 100 - imageStyle.minimal : 50) * 0.2 +
+        memorability * 0.3
     ),
   };
 }
 
 // Helper: Extract keywords from analysis
-function extractKeywords(
-  geminiBrandDNA: GeminiBrandDNA | null,
-  profile: XProfileData
-): string[] {
+function extractKeywords(geminiBrandDNA: GeminiBrandDNA | null, profile: XProfileData): string[] {
   const keywords: string[] = [];
 
   // From Gemini brand DNA
@@ -573,34 +612,25 @@ function mapTweetVoiceToTone(
   const voice = tweetVoice.voiceSpectrum;
 
   return {
-    minimal: Math.round(
-      voice.professional * 0.6 +
-      (100 - voice.casual) * 0.4
-    ),
+    minimal: Math.round(voice.professional * 0.6 + (100 - voice.casual) * 0.4),
     playful: Math.round(
-      voice.casual * 0.5 +
-      voice.approachable * 0.3 +
-      (100 - voice.professional) * 0.2
+      voice.casual * 0.5 + voice.approachable * 0.3 + (100 - voice.professional) * 0.2
     ),
-    bold: Math.round(
-      voice.authoritative * 0.5 +
-      voice.opinionated * 0.5
-    ),
-    experimental: Math.round(
-      (100 - voice.professional) * 0.4 +
-      baseTone.experimental * 0.6
-    ),
+    bold: Math.round(voice.authoritative * 0.5 + voice.opinionated * 0.5),
+    experimental: Math.round((100 - voice.professional) * 0.4 + baseTone.experimental * 0.6),
   };
 }
 
 // Helper: Extract content pillars from tweet voice analysis
-function extractContentPillars(tweetVoice: TweetVoiceAnalysis | null): GeneratedBrandDNA['contentPillars'] {
+function extractContentPillars(
+  tweetVoice: TweetVoiceAnalysis | null
+): GeneratedBrandDNA['contentPillars'] {
   if (!tweetVoice?.contentThemes?.length) return undefined;
 
   return tweetVoice.contentThemes
     .sort((a, b) => b.avgEngagement - a.avgEngagement)
     .slice(0, 5)
-    .map(theme => ({
+    .map((theme) => ({
       name: theme.pillar,
       frequency: theme.frequency,
       avgEngagement: theme.avgEngagement,
@@ -608,7 +638,9 @@ function extractContentPillars(tweetVoice: TweetVoiceAnalysis | null): Generated
 }
 
 // Helper: Extract performance insights from tweet voice analysis
-function extractPerformanceInsights(tweetVoice: TweetVoiceAnalysis | null): GeneratedBrandDNA['performanceInsights'] {
+function extractPerformanceInsights(
+  tweetVoice: TweetVoiceAnalysis | null
+): GeneratedBrandDNA['performanceInsights'] {
   if (!tweetVoice) return undefined;
 
   return {
@@ -665,13 +697,15 @@ async function handlePost(request: NextRequest) {
     // Extract tweet-enhanced data
     const contentPillars = extractContentPillars(tweetVoice || null);
     const performanceInsights = extractPerformanceInsights(tweetVoice || null);
-    const tweetDerivedVoice = tweetVoice ? {
-      professional: tweetVoice.voiceSpectrum.professional,
-      casual: tweetVoice.voiceSpectrum.casual,
-      authoritative: tweetVoice.voiceSpectrum.authoritative,
-      educational: tweetVoice.voiceSpectrum.educational,
-      personal: tweetVoice.voiceSpectrum.personal,
-    } : undefined;
+    const tweetDerivedVoice = tweetVoice
+      ? {
+          professional: tweetVoice.voiceSpectrum.professional,
+          casual: tweetVoice.voiceSpectrum.casual,
+          authoritative: tweetVoice.voiceSpectrum.authoritative,
+          educational: tweetVoice.voiceSpectrum.educational,
+          personal: tweetVoice.voiceSpectrum.personal,
+        }
+      : undefined;
 
     // Brand = Reputation: Bio is not a brand signal. Pass empty for neutral defaults.
     const bioVibe = analyzeBioVibe('');
@@ -717,10 +751,14 @@ async function handlePost(request: NextRequest) {
       analysisMode = 'limited-tweets';
       analysisConfidence = 'medium';
       if (contentThemesCount < 3) {
-        dataLimitations.push('Limited content themes detected - consider posting more diverse content');
+        dataLimitations.push(
+          'Limited content themes detected - consider posting more diverse content'
+        );
       }
       if (voiceConsistency < 50) {
-        dataLimitations.push('Voice inconsistency detected across tweets - consider establishing consistent topics');
+        dataLimitations.push(
+          'Voice inconsistency detected across tweets - consider establishing consistent topics'
+        );
       }
     } else {
       // No tweet data

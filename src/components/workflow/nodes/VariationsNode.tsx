@@ -7,8 +7,7 @@ import BaseNode from './BaseNode';
 import { useWorkflowStore } from '../useWorkflowStore';
 
 function VariationsNode(_props: NodeProps) {
-  const { variations, selectedVariationIndex, selectVariation } =
-    useWorkflowStore();
+  const { variations, selectedVariationIndex, selectVariation } = useWorkflowStore();
 
   const hasVariations = variations.length > 0;
 
@@ -50,9 +49,7 @@ function VariationsNode(_props: NodeProps) {
                   </span>
                   <div className="flex items-center gap-2">
                     <span
-                      className={`text-[10px] ${
-                        isOverLimit ? 'text-red-400' : 'text-white/30'
-                      }`}
+                      className={`text-[10px] ${isOverLimit ? 'text-red-400' : 'text-white/30'}`}
                     >
                       {variation.characterCount}/280
                     </span>
@@ -77,8 +74,8 @@ function VariationsNode(_props: NodeProps) {
                             variation.brandAlignmentScore >= 80
                               ? '#00FF41'
                               : variation.brandAlignmentScore >= 60
-                              ? '#FFD700'
-                              : '#EF4444',
+                                ? '#FFD700'
+                                : '#EF4444',
                         }}
                       />
                     </div>
@@ -96,9 +93,7 @@ function VariationsNode(_props: NodeProps) {
           <div className="w-8 h-8 rounded-full bg-white/[0.03] border border-white/[0.06] flex items-center justify-center mx-auto mb-2">
             <span className="text-white/20 text-sm">1</span>
           </div>
-          <p className="text-[11px] text-white/25">
-            Generate content to see variations
-          </p>
+          <p className="text-[11px] text-white/25">Generate content to see variations</p>
         </div>
       )}
     </BaseNode>

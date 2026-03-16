@@ -2,7 +2,12 @@
 // YOUTUBE CONNECTOR — YouTube Data API v3
 // =============================================================================
 
-import type { PlatformConnector, OAuthTokens, PlatformProfile, PlatformConnectorConfig } from './base';
+import type {
+  PlatformConnector,
+  OAuthTokens,
+  PlatformProfile,
+  PlatformConnectorConfig,
+} from './base';
 import type { ContentItem } from '../types';
 import { normalizeYouTubeVideo } from '../normalizers';
 import { fetchYouTubeCaptions } from '../transcript-engine';
@@ -118,8 +123,7 @@ export class YouTubeConnector implements PlatformConnector {
 
     if (!channelRes.ok) throw new Error(`YouTube channel fetch failed: ${channelRes.status}`);
     const channelData = await channelRes.json();
-    const uploadsPlaylistId =
-      channelData.items?.[0]?.contentDetails?.relatedPlaylists?.uploads;
+    const uploadsPlaylistId = channelData.items?.[0]?.contentDetails?.relatedPlaylists?.uploads;
 
     if (!uploadsPlaylistId) return [];
 

@@ -21,7 +21,9 @@ async function handlePost(request: NextRequest) {
     if (!accessToken) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
 
     const supabase = createClient(supabaseUrl, supabaseAnonKey);
-    const { data: { user } } = await supabase.auth.getUser(accessToken);
+    const {
+      data: { user },
+    } = await supabase.auth.getUser(accessToken);
     if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
 
     const dbUser = await prisma.user.findUnique({ where: { supabaseId: user.id } });
@@ -36,34 +38,35 @@ async function handlePost(request: NextRequest) {
     if (!brand) return NextResponse.json({ error: 'Brand not found' }, { status: 404 });
 
     // Gather all intelligence data
-    const [gapAnalysis, snapshot7d, snapshot3d, snapshot30d, recentTweets, benchmarks] = await Promise.all([
-      prisma.gapAnalysis.findFirst({
-        where: { brandId },
-        orderBy: { computedAt: 'desc' },
-      }),
-      prisma.performanceSnapshot.findFirst({
-        where: { brandId, windowDays: 7 },
-        orderBy: { computedAt: 'desc' },
-      }),
-      prisma.performanceSnapshot.findFirst({
-        where: { brandId, windowDays: 3 },
-        orderBy: { computedAt: 'desc' },
-      }),
-      prisma.performanceSnapshot.findFirst({
-        where: { brandId, windowDays: 30 },
-        orderBy: { computedAt: 'desc' },
-      }),
-      prisma.brandTweet.findMany({
-        where: { brandId },
-        orderBy: { postedAt: 'desc' },
-        take: 20,
-      }),
-      prisma.viralBenchmark.findMany({
-        where: { brandId },
-        orderBy: { viralScore: 'desc' },
-        take: 10,
-      }),
-    ]);
+    const [gapAnalysis, snapshot7d, snapshot3d, snapshot30d, recentTweets, benchmarks] =
+      await Promise.all([
+        prisma.gapAnalysis.findFirst({
+          where: { brandId },
+          orderBy: { computedAt: 'desc' },
+        }),
+        prisma.performanceSnapshot.findFirst({
+          where: { brandId, windowDays: 7 },
+          orderBy: { computedAt: 'desc' },
+        }),
+        prisma.performanceSnapshot.findFirst({
+          where: { brandId, windowDays: 3 },
+          orderBy: { computedAt: 'desc' },
+        }),
+        prisma.performanceSnapshot.findFirst({
+          where: { brandId, windowDays: 30 },
+          orderBy: { computedAt: 'desc' },
+        }),
+        prisma.brandTweet.findMany({
+          where: { brandId },
+          orderBy: { postedAt: 'desc' },
+          take: 20,
+        }),
+        prisma.viralBenchmark.findMany({
+          where: { brandId },
+          orderBy: { viralScore: 'desc' },
+          take: 10,
+        }),
+      ]);
 
     // Get follower count from request or default
     const currentFollowers = inputFollowers ?? 1000;
@@ -71,7 +74,8 @@ async function handlePost(request: NextRequest) {
     const months = deadlineMonths || 4;
 
     // Build performance context
-    const perfContext = snapshot7d ? `
+    const perfContext = snapshot7d
+      ? `
 7-DAY PERFORMANCE:
 - Posts: ${snapshot7d.totalPosts}
 - Avg engagement rate: ${snapshot7d.avgEngagementRate}%
@@ -81,23 +85,33 @@ async function handlePost(request: NextRequest) {
 - Total replies: ${snapshot7d.totalReplies}
 - Best hour: ${snapshot7d.bestPostingHour ?? 'unknown'}
 - Best day: ${snapshot7d.bestPostingDay ?? 'unknown'}
-- Avg post length: ${snapshot7d.avgPostLength ?? 'unknown'}` : '';
+- Avg post length: ${snapshot7d.avgPostLength ?? 'unknown'}`
+      : '';
 
-    const perf3d = snapshot3d ? `
+    const perf3d = snapshot3d
+      ? `
 3-DAY PERFORMANCE:
 - Avg engagement rate: ${snapshot3d.avgEngagementRate}%
-- Total impressions: ${snapshot3d.totalImpressions}` : '';
+- Total impressions: ${snapshot3d.totalImpressions}`
+      : '';
 
     // Build tweet context
-    const tweetContext = recentTweets.map((t, i) => {
-      let m: Record<string, number> = {};
-      try { m = JSON.parse(t.metrics); } catch { /* use default */ }
-      const truncatedText = t.text.length > 200 ? t.text.substring(0, 200) + '...' : t.text;
-      return `[${i + 1}] ${truncatedText}\n    ${m.likes || 0}L / ${m.retweets || 0}RT / ${m.replies || 0}R / ${m.impressions || 0} imp`;
-    }).join('\n\n');
+    const tweetContext = recentTweets
+      .map((t, i) => {
+        let m: Record<string, number> = {};
+        try {
+          m = JSON.parse(t.metrics);
+        } catch {
+          /* use default */
+        }
+        const truncatedText = t.text.length > 200 ? t.text.substring(0, 200) + '...' : t.text;
+        return `[${i + 1}] ${truncatedText}\n    ${m.likes || 0}L / ${m.retweets || 0}RT / ${m.replies || 0}R / ${m.impressions || 0} imp`;
+      })
+      .join('\n\n');
 
     // Build gap context
-    const gapContext = gapAnalysis ? `
+    const gapContext = gapAnalysis
+      ? `
 GAP ANALYSIS (latest):
 - Overall: ${gapAnalysis.overallGapScore}/100
 - Hook Strength: ${gapAnalysis.hookStrength}/100
@@ -108,27 +122,40 @@ GAP ANALYSIS (latest):
 - Posting Consistency: ${gapAnalysis.postingConsistency}/100
 - Strengths: ${gapAnalysis.strengths}
 - Gaps: ${gapAnalysis.gaps}
-- Action Items: ${gapAnalysis.actionItems}` : '';
+- Action Items: ${gapAnalysis.actionItems}`
+      : '';
 
     // Build benchmark context
-    const benchmarkContext = benchmarks.length > 0
-      ? benchmarks.map((b, i) => {
-          let p: Record<string, string> = {};
-          let m: Record<string, number> = {};
-          try { p = JSON.parse(b.patterns); } catch { /* use default */ }
-          try { m = JSON.parse(b.metrics); } catch { /* use default */ }
-          return `[${i + 1}] score:${b.viralScore} | hook:${p.hookType} format:${p.format} cta:${p.cta} | ${m.like_count || 0}L ${m.retweet_count || 0}RT`;
-        }).join('\n')
-      : '';
+    const benchmarkContext =
+      benchmarks.length > 0
+        ? benchmarks
+            .map((b, i) => {
+              let p: Record<string, string> = {};
+              let m: Record<string, number> = {};
+              try {
+                p = JSON.parse(b.patterns);
+              } catch {
+                /* use default */
+              }
+              try {
+                m = JSON.parse(b.metrics);
+              } catch {
+                /* use default */
+              }
+              return `[${i + 1}] score:${b.viralScore} | hook:${p.hookType} format:${p.format} cta:${p.cta} | ${m.like_count || 0}L ${m.retweet_count || 0}RT`;
+            })
+            .join('\n')
+        : '';
 
     const anthropic = new Anthropic({ apiKey: anthropicKey });
 
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 4000,
-      messages: [{
-        role: 'user',
-        content: `You are a brand growth strategist. Generate a personalized, data-driven growth plan.
+      messages: [
+        {
+          role: 'user',
+          content: `You are a brand growth strategist. Generate a personalized, data-driven growth plan.
 
 CREATOR: ${brand.name}
 CURRENT FOLLOWERS: ${currentFollowers.toLocaleString()}
@@ -187,7 +214,8 @@ Rules:
 - Milestones should have realistic monthly targets based on compound growth
 - The bottleneck should identify THE key thing holding growth back
 - Be direct. No fluff. Data > feelings.`,
-      }],
+        },
+      ],
     });
 
     const responseText = response.content[0].type === 'text' ? response.content[0].text : '';
@@ -213,15 +241,17 @@ Rules:
     plan.deadlineMonths = months;
     plan.dailyNeeded = Math.round((target - currentFollowers) / (months * 30));
     plan.monthlyNeeded = Math.round((target - currentFollowers) / months);
-    plan.gapScores = gapAnalysis ? {
-      hookStrength: gapAnalysis.hookStrength,
-      formatMatch: gapAnalysis.formatMatch,
-      toneAlignment: gapAnalysis.toneAlignment,
-      ctaEffectiveness: gapAnalysis.ctaEffectiveness,
-      engagementVelocity: gapAnalysis.engagementVelocity,
-      postingConsistency: gapAnalysis.postingConsistency,
-      overall: gapAnalysis.overallGapScore,
-    } : null;
+    plan.gapScores = gapAnalysis
+      ? {
+          hookStrength: gapAnalysis.hookStrength,
+          formatMatch: gapAnalysis.formatMatch,
+          toneAlignment: gapAnalysis.toneAlignment,
+          ctaEffectiveness: gapAnalysis.ctaEffectiveness,
+          engagementVelocity: gapAnalysis.engagementVelocity,
+          postingConsistency: gapAnalysis.postingConsistency,
+          overall: gapAnalysis.overallGapScore,
+        }
+      : null;
     plan.engagementRate7d = snapshot7d?.avgEngagementRate || null;
     plan.engagementRate3d = snapshot3d?.avgEngagementRate || null;
 

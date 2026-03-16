@@ -16,20 +16,25 @@ You build structured content calendars that follow the 2x/day posting system and
 Read `references/weekly-cadence.md` for the posting system rules.
 
 This skill coordinates across:
+
 - **Notion** — creates database entries in the BrandOS Content Calendar
 - **Typefully** — creates drafts ready to schedule for @BawsaXBT (social set ID: 127543)
 
 ## Workflow
 
 ### Step 1: Determine Scope
+
 Ask the user:
+
 - How many days? (default: 7 days / 1 week)
 - Starting from which date?
 - Any specific topics or events to include?
 - Any posts to skip or adjust?
 
 ### Step 2: Generate Calendar
+
 For each day, produce:
+
 - **Post 1** (Anchor) — format, theme, CTA type, gap targeted, full post text
 - **Post 2** (Lighter) — format, theme, CTA type, gap targeted, full post text
 
@@ -45,6 +50,7 @@ Follow the weekly cadence:
 | Sun | Reflection | Week Recap |
 
 ### Step 3: Present for Review
+
 Show the full calendar in a table format:
 
 ```
@@ -57,13 +63,17 @@ Show the full calendar in a table format:
 Then show each post's full content.
 
 ### Step 4: Push to Notion (if requested)
+
 Create entries in the BrandOS Content Calendar database:
+
 - Data source ID: `79c5e486-0e2a-4a39-a0cf-2551b7c01ea3`
 - Properties: Post (title), Date, Day, Format, Theme, CTA Type, Gap Targeted, Week
 - Content: the full post text in a code block
 
 ### Step 5: Push to Typefully (if requested)
+
 Create drafts on @BawsaXBT (social set ID: 127543):
+
 - Platform: X only (enabled)
 - For threads: split into multiple posts array
 - Set draft_title with the P1/P2 prefix and topic
@@ -96,6 +106,7 @@ Week: select [Week 1 (Mar 11-16), Week 2 (Mar 17-23), Week 3 (Mar 24-31)]
 ## Typefully Integration
 
 Social sets available:
+
 - BAWSA: social_set_id = 127543, username = @nftbawsa / @BawsaXBT
 - Relique: social_set_id = 258268, username = @ReliqueGlobal
 - Skillcade: social_set_id = 260664, username = @skllcade

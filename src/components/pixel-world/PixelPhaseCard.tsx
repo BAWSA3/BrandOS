@@ -53,8 +53,8 @@ function PixelTypewriter({ text, speed = 25 }: { text: string; speed?: number })
   useEffect(() => {
     if (currentIndex < text.length) {
       const timeout = setTimeout(() => {
-        setDisplayText(prev => prev + text[currentIndex]);
-        setCurrentIndex(prev => prev + 1);
+        setDisplayText((prev) => prev + text[currentIndex]);
+        setCurrentIndex((prev) => prev + 1);
       }, speed);
       return () => clearTimeout(timeout);
     }
@@ -77,24 +77,32 @@ function formatProfileValue(
   if (!profile || !dataKey) return null;
 
   switch (dataKey) {
-    case 'name': return profile.name;
-    case 'username': return `@${profile.username}`;
+    case 'name':
+      return profile.name;
+    case 'username':
+      return `@${profile.username}`;
     case 'description':
       return profile.description
-        ? (profile.description.length > 100
+        ? profile.description.length > 100
           ? profile.description.substring(0, 100) + '...'
-          : profile.description)
+          : profile.description
         : 'No bio set';
-    case 'location': return profile.location || 'No location set';
-    case 'url': return profile.url || 'No link added';
-    case 'tweet_count': return `${profile.tweet_count.toLocaleString()} posts`;
-    case 'followers_count': return `${profile.followers_count.toLocaleString()} followers`;
-    case 'following_count': return `Following ${profile.following_count.toLocaleString()}`;
+    case 'location':
+      return profile.location || 'No location set';
+    case 'url':
+      return profile.url || 'No link added';
+    case 'tweet_count':
+      return `${profile.tweet_count.toLocaleString()} posts`;
+    case 'followers_count':
+      return `${profile.followers_count.toLocaleString()} followers`;
+    case 'following_count':
+      return `Following ${profile.following_count.toLocaleString()}`;
     case 'ratio': {
       const ratio = profile.followers_count / Math.max(profile.following_count, 1);
       return `${ratio.toFixed(2)}:1`;
     }
-    default: return null;
+    default:
+      return null;
   }
 }
 
@@ -158,7 +166,12 @@ export default function PixelPhaseCard({
             <img
               src={profileImage.replace('_normal', '_200x200')}
               alt="Profile"
-              style={{ width: '100%', height: '100%', objectFit: 'cover', imageRendering: 'pixelated' }}
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                imageRendering: 'pixelated',
+              }}
             />
           </div>
           {/* Pixel scan ring */}
@@ -316,7 +329,11 @@ export default function PixelPhaseCard({
                   {/* Pixel status dot */}
                   <motion.div
                     animate={{
-                      background: isItemComplete ? '#10B981' : isItemActive ? phaseColor : 'rgba(255,255,255,0.25)',
+                      background: isItemComplete
+                        ? '#10B981'
+                        : isItemActive
+                          ? phaseColor
+                          : 'rgba(255,255,255,0.25)',
                       scale: isItemActive ? [1, 1.4, 1] : 1,
                     }}
                     transition={{
@@ -334,7 +351,11 @@ export default function PixelPhaseCard({
                         fontFamily: "'VCR OSD Mono', monospace",
                         fontSize: '13px',
                         letterSpacing: '0.05em',
-                        color: isItemComplete ? '#10B981' : isItemActive ? '#FFFFFF' : 'rgba(255,255,255,0.6)',
+                        color: isItemComplete
+                          ? '#10B981'
+                          : isItemActive
+                            ? '#FFFFFF'
+                            : 'rgba(255,255,255,0.6)',
                       }}
                     >
                       {item.label}

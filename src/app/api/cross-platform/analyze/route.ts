@@ -26,10 +26,7 @@ export async function POST(request: NextRequest) {
       try {
         fingerprint = JSON.parse(fingerprintJson);
       } catch {
-        return NextResponse.json(
-          { error: 'Invalid fingerprint JSON' },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'Invalid fingerprint JSON' }, { status: 400 });
       }
     }
 
@@ -67,9 +64,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('Cross-platform analysis error:', error);
-    return NextResponse.json(
-      { error: 'Analysis failed' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Analysis failed' }, { status: 500 });
   }
 }

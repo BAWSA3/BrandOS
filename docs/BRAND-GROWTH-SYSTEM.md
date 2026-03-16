@@ -24,9 +24,10 @@ each stage feeds the next. no stage works alone. the magic is in the loop.
 
 ### 1. SCAN — know what wins before you post
 
-monitor your niche for high-performing content. not to copy — to understand *why* it works.
+monitor your niche for high-performing content. not to copy — to understand _why_ it works.
 
 **what you're looking for:**
+
 - hook patterns (questions, bold claims, contrarian takes, stories)
 - format patterns (threads vs single tweets, lists vs narratives)
 - tone patterns (what resonates — raw honesty, data-backed, humor)
@@ -34,6 +35,7 @@ monitor your niche for high-performing content. not to copy — to understand *w
 - timing patterns (when viral posts drop)
 
 **how it works:**
+
 - define your niches (keywords, hashtags, reference accounts)
 - system scans X every 6 hours for high-engagement posts matching your niche
 - AI extracts structured patterns from each viral post
@@ -41,6 +43,7 @@ monitor your niche for high-performing content. not to copy — to understand *w
 - benchmarks older than 30 days auto-pruned (stale patterns hurt you)
 
 **the formula — viral score:**
+
 ```
 viralScore = (relativeEngagement × 25) + (reach × 25) + (shares × 25) + (conversation × 25)
 ```
@@ -48,12 +51,13 @@ viralScore = (relativeEngagement × 25) + (reach × 25) + (shares × 25) + (conv
 each component normalized 0-25 based on niche percentiles. a score of 80+ is legitimately viral.
 
 **default niches to start:**
+
 - creator economy
 - personal branding
 - crypto creators
 - your custom niches (add what matters to you)
 
-**anti-pattern:** don't just scan accounts bigger than you. scan accounts your *size* that are growing fast. that's where the playbook is.
+**anti-pattern:** don't just scan accounts bigger than you. scan accounts your _size_ that are growing fast. that's where the playbook is.
 
 ---
 
@@ -63,13 +67,14 @@ you can't improve what you don't measure. but you can drown in data if you measu
 
 **three windows, three purposes:**
 
-| window | purpose | what it tells you |
-|--------|---------|-------------------|
-| 3-day | momentum | is your current approach hitting? |
-| 7-day | trends | what patterns are emerging? |
-| 30-day | trajectory | where are you actually heading? |
+| window | purpose    | what it tells you                 |
+| ------ | ---------- | --------------------------------- |
+| 3-day  | momentum   | is your current approach hitting? |
+| 7-day  | trends     | what patterns are emerging?       |
+| 30-day | trajectory | where are you actually heading?   |
 
 **metrics that matter:**
+
 - **engagement rate** = (likes + retweets + replies) / impressions
   - below 1%: your content isn't resonating
   - 1-3%: solid, room to grow
@@ -81,6 +86,7 @@ you can't improve what you don't measure. but you can drown in data if you measu
 - **bottom performer** — what flopped and why?
 
 **how it works:**
+
 - system syncs your latest tweets every 4 hours
 - computes performance snapshots for each window
 - identifies your best and worst performing content
@@ -88,6 +94,7 @@ you can't improve what you don't measure. but you can drown in data if you measu
 - keeps historical snapshots for trend analysis
 
 **the review cadence:**
+
 - daily: glance at 3-day momentum. are you on track?
 - weekly: deep dive into 7-day trends. what patterns?
 - monthly: trajectory check. are you growing or plateauing?
@@ -100,16 +107,17 @@ this is where most creators are blind. they know their own numbers but have no i
 
 **six dimensions of comparison:**
 
-| dimension | what it measures | why it matters |
-|-----------|-----------------|----------------|
-| **Hook Strength** | opening lines vs viral hooks | first line decides if anyone reads the rest |
-| **Format Match** | your content types vs what goes viral | posting the wrong format is like speaking the wrong language |
-| **Tone Alignment** | your voice vs what resonates | you need to be authentic AND resonant |
-| **CTA Effectiveness** | your calls-to-action vs viral CTAs | engagement is a conversation, not a broadcast |
-| **Engagement Velocity** | your rate vs niche benchmark | how fast you generate engagement relative to peers |
-| **Posting Consistency** | your frequency vs top performers | showing up matters as much as showing out |
+| dimension               | what it measures                      | why it matters                                               |
+| ----------------------- | ------------------------------------- | ------------------------------------------------------------ |
+| **Hook Strength**       | opening lines vs viral hooks          | first line decides if anyone reads the rest                  |
+| **Format Match**        | your content types vs what goes viral | posting the wrong format is like speaking the wrong language |
+| **Tone Alignment**      | your voice vs what resonates          | you need to be authentic AND resonant                        |
+| **CTA Effectiveness**   | your calls-to-action vs viral CTAs    | engagement is a conversation, not a broadcast                |
+| **Engagement Velocity** | your rate vs niche benchmark          | how fast you generate engagement relative to peers           |
+| **Posting Consistency** | your frequency vs top performers      | showing up matters as much as showing out                    |
 
 **each dimension scored 0-100:**
+
 - 0-30: significant gap. prioritize this.
 - 30-60: room to improve. incremental changes.
 - 60-80: competitive. fine-tune.
@@ -118,6 +126,7 @@ this is where most creators are blind. they know their own numbers but have no i
 **overall gap score = average of all 6 dimensions**
 
 **how it works:**
+
 - reads your latest 7-day performance + last 20 posts
 - reads top 20 viral benchmarks from your niches
 - AI compares both through your voice fingerprint lens
@@ -133,10 +142,12 @@ this is where most creators are blind. they know their own numbers but have no i
 this is NOT "AI writes your tweets." this is "AI applies viral patterns to YOUR voice."
 
 **the difference:**
+
 - bad: copy viral tweet → change a few words → post
 - good: extract WHY it went viral → apply that pattern → write in YOUR voice
 
 **how it works:**
+
 - reads your latest gap analysis + top viral patterns
 - builds a prompt combining:
   - your Brand DNA + voice fingerprint (who you are)
@@ -147,6 +158,7 @@ this is NOT "AI writes your tweets." this is "AI applies viral patterns to YOUR 
 - each idea tagged with: viral pattern applied, gap it addresses, confidence score
 
 **content rules:**
+
 1. never sound like someone else. the voice fingerprint is the guardrail.
 2. apply patterns, don't copy content. "bold claim + proof" is a pattern. the specific claim is yours.
 3. lead with your strongest gap. if hooks are weak, every generated idea emphasizes hook quality.
@@ -157,12 +169,12 @@ this is NOT "AI writes your tweets." this is "AI applies viral patterns to YOUR 
 
 ## the weekly cadence
 
-| day | action | time |
-|-----|--------|------|
-| Monday | review 7-day gap analysis. set weekly focus. | 15 min |
-| Tue-Thu | post generated content (modified in your voice) | 10 min/day |
-| Friday | review what hit. what flopped. why. | 15 min |
-| Weekend | let the system SCAN. review viral patterns monday. | 0 min |
+| day     | action                                             | time       |
+| ------- | -------------------------------------------------- | ---------- |
+| Monday  | review 7-day gap analysis. set weekly focus.       | 15 min     |
+| Tue-Thu | post generated content (modified in your voice)    | 10 min/day |
+| Friday  | review what hit. what flopped. why.                | 15 min     |
+| Weekend | let the system SCAN. review viral patterns monday. | 0 min      |
 
 **total time: ~1 hour/week.** the system does the heavy lifting.
 
@@ -173,12 +185,14 @@ this is NOT "AI writes your tweets." this is "AI applies viral patterns to YOUR 
 forget vanity metrics. these are the numbers that compound:
 
 **leading indicators (you control these):**
+
 - posting frequency (aim for 5-7x/week minimum)
 - hook quality (first-line engagement rate)
 - content type variety (don't be one-dimensional)
 - gap score improvement (are you closing gaps week over week?)
 
 **lagging indicators (the market gives you these):**
+
 - follower growth rate (not total followers — rate of change)
 - engagement rate trend (7-day moving average)
 - viral post frequency (posts that break 3x your avg engagement)
@@ -219,4 +233,4 @@ this system is the strategy layer. your voice is the content layer. together, th
 
 ---
 
-*built for BrandOS. the operating system for personal brands.*
+_built for BrandOS. the operating system for personal brands._

@@ -1,76 +1,76 @@
-'use client'
+'use client';
 
-import { useState, useEffect, useCallback } from 'react'
-import { Interview, InterviewMeta } from './types'
-import { storage } from './lib/storage'
-import { exportAllCSV } from './lib/export'
-import Dashboard from './components/Dashboard'
-import NewInterview from './components/NewInterview'
-import InterviewDetail from './components/InterviewDetail'
-import APIKeyModal from './components/APIKeyModal'
+import { useState, useEffect, useCallback } from 'react';
+import { Interview, InterviewMeta } from './types';
+import { storage } from './lib/storage';
+import { exportAllCSV } from './lib/export';
+import Dashboard from './components/Dashboard';
+import NewInterview from './components/NewInterview';
+import InterviewDetail from './components/InterviewDetail';
+import APIKeyModal from './components/APIKeyModal';
 
-type View = 'dashboard' | 'new' | 'detail'
+type View = 'dashboard' | 'new' | 'detail';
 
-const FILM_GRAIN_URL = `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E")`
+const FILM_GRAIN_URL = `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E")`;
 
 export default function ResearchPage() {
-  const [view, setView] = useState<View>('dashboard')
-  const [interviews, setInterviews] = useState<InterviewMeta[]>([])
-  const [activeIV, setActiveIV] = useState<Interview | null>(null)
-  const [draft, setDraft] = useState<Partial<Interview> | null>(null)
-  const [apiKey, setApiKey] = useState('')
-  const [showKeyModal, setShowKeyModal] = useState(false)
+  const [view, setView] = useState<View>('dashboard');
+  const [interviews, setInterviews] = useState<InterviewMeta[]>([]);
+  const [activeIV, setActiveIV] = useState<Interview | null>(null);
+  const [draft, setDraft] = useState<Partial<Interview> | null>(null);
+  const [apiKey, setApiKey] = useState('');
+  const [showKeyModal, setShowKeyModal] = useState(false);
 
   const refresh = useCallback(() => {
-    setInterviews(storage.getIndex())
-  }, [])
+    setInterviews(storage.getIndex());
+  }, []);
 
   useEffect(() => {
-    refresh()
-    const key = storage.getApiKey()
-    setApiKey(key)
-    if (!key) setShowKeyModal(true)
-  }, [refresh])
+    refresh();
+    const key = storage.getApiKey();
+    setApiKey(key);
+    if (!key) setShowKeyModal(true);
+  }, [refresh]);
 
   const handleNewInterview = () => {
-    setDraft({})
-    setView('new')
-  }
+    setDraft({});
+    setView('new');
+  };
 
   const handleOpenInterview = (id: string) => {
-    const iv = storage.getInterview(id)
+    const iv = storage.getInterview(id);
     if (iv) {
-      setActiveIV(iv)
-      setView('detail')
+      setActiveIV(iv);
+      setView('detail');
     }
-  }
+  };
 
   const handleSaveInterview = (iv: Interview) => {
-    storage.saveInterview(iv)
-    setActiveIV(iv)
-    setDraft(null)
-    refresh()
-    setView('detail')
-  }
+    storage.saveInterview(iv);
+    setActiveIV(iv);
+    setDraft(null);
+    refresh();
+    setView('detail');
+  };
 
   const handleUpdateInterview = (iv: Interview) => {
-    storage.saveInterview(iv)
-    setActiveIV(iv)
-    refresh()
-  }
+    storage.saveInterview(iv);
+    setActiveIV(iv);
+    refresh();
+  };
 
   const handleDeleteInterview = (id: string) => {
-    storage.deleteInterview(id)
-    setActiveIV(null)
-    refresh()
-    setView('dashboard')
-  }
+    storage.deleteInterview(id);
+    setActiveIV(null);
+    refresh();
+    setView('dashboard');
+  };
 
   const handleSaveApiKey = (key: string) => {
-    storage.setApiKey(key)
-    setApiKey(key)
-    setShowKeyModal(false)
-  }
+    storage.setApiKey(key);
+    setApiKey(key);
+    setShowKeyModal(false);
+  };
 
   const handleCancelNew = () => {
     // Save draft if exists
@@ -85,16 +85,23 @@ export default function ResearchPage() {
         responses: draft.responses || {},
         summary: null,
         status: 'draft',
-      }
-      storage.saveInterview(iv)
-      refresh()
+      };
+      storage.saveInterview(iv);
+      refresh();
     }
-    setDraft(null)
-    setView('dashboard')
-  }
+    setDraft(null);
+    setView('dashboard');
+  };
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#F2F0EF', color: 'rgba(0,0,0,0.85)' }}>
+    <div
+      style={{
+        display: 'flex',
+        minHeight: '100vh',
+        background: '#F2F0EF',
+        color: 'rgba(0,0,0,0.85)',
+      }}
+    >
       {/* Film grain overlay */}
       <div
         style={{
@@ -151,11 +158,35 @@ export default function ResearchPage() {
         />
 
         {/* Logo */}
-        <div style={{ padding: '24px 20px 16px', borderBottom: '1px solid rgba(0,0,0,0.08)', position: 'relative' }}>
-          <div style={{ fontFamily: "'VCR OSD Mono', monospace", fontWeight: 700, fontSize: 14, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#0047FF' }}>
+        <div
+          style={{
+            padding: '24px 20px 16px',
+            borderBottom: '1px solid rgba(0,0,0,0.08)',
+            position: 'relative',
+          }}
+        >
+          <div
+            style={{
+              fontFamily: "'VCR OSD Mono', monospace",
+              fontWeight: 700,
+              fontSize: 14,
+              letterSpacing: '0.1em',
+              textTransform: 'uppercase',
+              color: '#0047FF',
+            }}
+          >
             BRANDOS
           </div>
-          <div style={{ fontFamily: "'PP NeueBit', monospace", fontSize: 11, color: 'rgba(0,0,0,0.5)', marginTop: 2, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+          <div
+            style={{
+              fontFamily: "'PP NeueBit', monospace",
+              fontSize: 11,
+              color: 'rgba(0,0,0,0.5)',
+              marginTop: 2,
+              letterSpacing: '0.1em',
+              textTransform: 'uppercase',
+            }}
+          >
             RESEARCH HUB
           </div>
           {/* Version label */}
@@ -178,7 +209,10 @@ export default function ResearchPage() {
           <NavItem
             label="Dashboard"
             active={view === 'dashboard'}
-            onClick={() => { setView('dashboard'); setActiveIV(null) }}
+            onClick={() => {
+              setView('dashboard');
+              setActiveIV(null);
+            }}
           />
           <NavItem
             label={activeIV ? `@${activeIV.username}` : 'Active interview'}
@@ -239,7 +273,16 @@ export default function ResearchPage() {
       </aside>
 
       {/* Main content */}
-      <main style={{ flex: 1, overflow: 'auto', position: 'relative', padding: '32px 40px', maxWidth: 960, margin: '0 auto' }}>
+      <main
+        style={{
+          flex: 1,
+          overflow: 'auto',
+          position: 'relative',
+          padding: '32px 40px',
+          maxWidth: 960,
+          margin: '0 auto',
+        }}
+      >
         {view === 'dashboard' && (
           <Dashboard
             interviews={interviews}
@@ -258,7 +301,10 @@ export default function ResearchPage() {
         {view === 'detail' && activeIV && (
           <InterviewDetail
             iv={activeIV}
-            onBack={() => { setView('dashboard'); setActiveIV(null) }}
+            onBack={() => {
+              setView('dashboard');
+              setActiveIV(null);
+            }}
             onUpdate={handleUpdateInterview}
             onDelete={handleDeleteInterview}
             apiKey={apiKey}
@@ -295,7 +341,7 @@ export default function ResearchPage() {
         />
       )}
     </div>
-  )
+  );
 }
 
 function NavItem({
@@ -306,12 +352,12 @@ function NavItem({
   badgeColor,
   onClick,
 }: {
-  label: string
-  active?: boolean
-  disabled?: boolean
-  badge?: string
-  badgeColor?: string
-  onClick?: () => void
+  label: string;
+  active?: boolean;
+  disabled?: boolean;
+  badge?: string;
+  badgeColor?: string;
+  onClick?: () => void;
 }) {
   return (
     <button
@@ -336,7 +382,9 @@ function NavItem({
         marginBottom: 2,
       }}
     >
-      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{label}</span>
+      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        {label}
+      </span>
       {badge && (
         <span
           style={{
@@ -345,7 +393,12 @@ function NavItem({
             letterSpacing: '0.1em',
             padding: '2px 6px',
             borderRadius: 4,
-            background: badgeColor === '#10B981' ? 'rgba(16,185,129,0.12)' : badgeColor === '#F59E0B' ? 'rgba(245,158,11,0.12)' : 'rgba(0,71,255,0.08)',
+            background:
+              badgeColor === '#10B981'
+                ? 'rgba(16,185,129,0.12)'
+                : badgeColor === '#F59E0B'
+                  ? 'rgba(245,158,11,0.12)'
+                  : 'rgba(0,71,255,0.08)',
             color: badgeColor || '#0047FF',
           }}
         >
@@ -353,5 +406,5 @@ function NavItem({
         </span>
       )}
     </button>
-  )
+  );
 }

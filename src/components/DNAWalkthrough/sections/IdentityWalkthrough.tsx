@@ -42,7 +42,10 @@ function getActivityLabel(activity?: ActivityAnalysis | null): string {
   return 'Suspicious';
 }
 
-function getFollowerRatio(followers: number, following: number): { ratio: number; label: string; color: string } {
+function getFollowerRatio(
+  followers: number,
+  following: number
+): { ratio: number; label: string; color: string } {
   if (following === 0) return { ratio: Infinity, label: 'Influencer', color: '#10B981' };
   const ratio = followers / following;
   if (ratio >= 10) return { ratio, label: 'Influencer', color: '#10B981' };
@@ -51,25 +54,65 @@ function getFollowerRatio(followers: number, following: number): { ratio: number
   return { ratio, label: 'Growing', color: '#EF4444' };
 }
 
-function getContentStrength(profile: XProfileData): { score: number; items: { name: string; complete: boolean; weight: number }[] } {
+function getContentStrength(profile: XProfileData): {
+  score: number;
+  items: { name: string; complete: boolean; weight: number }[];
+} {
   const items = [
     { name: 'Has Posted (1+)', complete: profile.tweet_count >= 1, weight: 10 },
     { name: 'Content Foundation (100+)', complete: profile.tweet_count >= 100, weight: 20 },
     { name: 'Active Creator (500+)', complete: profile.tweet_count >= 500, weight: 25 },
     { name: 'Prolific Output (2K+)', complete: profile.tweet_count >= 2000, weight: 20 },
-    { name: 'Audience Response (1K+ followers)', complete: profile.followers_count >= 1000, weight: 15 },
-    { name: 'Curated by Others (100+ lists)', complete: (profile as any).listed_count >= 100 || profile.followers_count >= 10000, weight: 10 },
+    {
+      name: 'Audience Response (1K+ followers)',
+      complete: profile.followers_count >= 1000,
+      weight: 15,
+    },
+    {
+      name: 'Curated by Others (100+ lists)',
+      complete: (profile as any).listed_count >= 100 || profile.followers_count >= 10000,
+      weight: 10,
+    },
   ];
   const score = items.reduce((total, item) => total + (item.complete ? item.weight : 0), 0);
   return { score, items };
 }
 
-function getInfluenceTier(followers: number): { tier: string; color: string; next: string; progress: number } {
-  if (followers >= 1000000) return { tier: 'Mega', color: '#8B5CF6', next: 'Max tier reached', progress: 100 };
-  if (followers >= 100000) return { tier: 'Macro', color: '#10B981', next: `${formatFollowers(1000000 - followers)} to Mega`, progress: (followers / 1000000) * 100 };
-  if (followers >= 10000) return { tier: 'Micro', color: '#3B82F6', next: `${formatFollowers(100000 - followers)} to Macro`, progress: (followers / 100000) * 100 };
-  if (followers >= 1000) return { tier: 'Nano', color: '#F59E0B', next: `${formatFollowers(10000 - followers)} to Micro`, progress: (followers / 10000) * 100 };
-  return { tier: 'Rising', color: '#EF4444', next: `${formatFollowers(1000 - followers)} to Nano`, progress: (followers / 1000) * 100 };
+function getInfluenceTier(followers: number): {
+  tier: string;
+  color: string;
+  next: string;
+  progress: number;
+} {
+  if (followers >= 1000000)
+    return { tier: 'Mega', color: '#8B5CF6', next: 'Max tier reached', progress: 100 };
+  if (followers >= 100000)
+    return {
+      tier: 'Macro',
+      color: '#10B981',
+      next: `${formatFollowers(1000000 - followers)} to Mega`,
+      progress: (followers / 1000000) * 100,
+    };
+  if (followers >= 10000)
+    return {
+      tier: 'Micro',
+      color: '#3B82F6',
+      next: `${formatFollowers(100000 - followers)} to Macro`,
+      progress: (followers / 100000) * 100,
+    };
+  if (followers >= 1000)
+    return {
+      tier: 'Nano',
+      color: '#F59E0B',
+      next: `${formatFollowers(10000 - followers)} to Micro`,
+      progress: (followers / 10000) * 100,
+    };
+  return {
+    tier: 'Rising',
+    color: '#EF4444',
+    next: `${formatFollowers(1000 - followers)} to Nano`,
+    progress: (followers / 1000) * 100,
+  };
 }
 
 export default function IdentityWalkthrough({
@@ -80,7 +123,7 @@ export default function IdentityWalkthrough({
   parallaxLayers,
 }: IdentityWalkthroughProps) {
   const isDark = theme === 'dark';
-  const authScore = authenticity ? (100 - authenticity.score) : 100;
+  const authScore = authenticity ? 100 - authenticity.score : 100;
   const activityLabel = getActivityLabel(activity);
 
   const followerRatio = getFollowerRatio(profile.followers_count, profile.following_count);
@@ -179,7 +222,10 @@ export default function IdentityWalkthrough({
                 className="px-2 py-1 rounded text-[10px]"
                 style={{
                   fontFamily: "'VCR OSD Mono', monospace",
-                  background: activityLabel === 'Very Active' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(0, 0, 0, 0.05)',
+                  background:
+                    activityLabel === 'Very Active'
+                      ? 'rgba(16, 185, 129, 0.15)'
+                      : 'rgba(0, 0, 0, 0.05)',
                   color: activityLabel === 'Very Active' ? '#059669' : 'rgba(0,0,0,0.5)',
                 }}
               >
@@ -224,14 +270,22 @@ export default function IdentityWalkthrough({
             <div className="flex items-center justify-between mb-3">
               <span
                 className="text-[10px] tracking-wider"
-                style={{ fontFamily: "'VCR OSD Mono', monospace", color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)' }}
+                style={{
+                  fontFamily: "'VCR OSD Mono', monospace",
+                  color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)',
+                }}
               >
                 CONTENT STRENGTH
               </span>
               <span
                 className="text-lg font-semibold"
                 style={{
-                  color: contentStrength.score >= 80 ? '#10B981' : contentStrength.score >= 60 ? '#F59E0B' : '#EF4444',
+                  color:
+                    contentStrength.score >= 80
+                      ? '#10B981'
+                      : contentStrength.score >= 60
+                        ? '#F59E0B'
+                        : '#EF4444',
                 }}
               >
                 {contentStrength.score}%
@@ -250,7 +304,12 @@ export default function IdentityWalkthrough({
                 transition={{ duration: 0.8, delay: 0.2 }}
                 className="h-full rounded-full"
                 style={{
-                  background: contentStrength.score >= 80 ? '#10B981' : contentStrength.score >= 60 ? '#F59E0B' : '#EF4444',
+                  background:
+                    contentStrength.score >= 80
+                      ? '#10B981'
+                      : contentStrength.score >= 60
+                        ? '#F59E0B'
+                        : '#EF4444',
                 }}
               />
             </div>
@@ -259,10 +318,28 @@ export default function IdentityWalkthrough({
             <div className="space-y-1.5">
               {contentStrength.items.slice(0, 5).map((item) => (
                 <div key={item.name} className="flex items-center gap-2 text-xs">
-                  <span style={{ color: item.complete ? '#10B981' : isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)' }}>
+                  <span
+                    style={{
+                      color: item.complete
+                        ? '#10B981'
+                        : isDark
+                          ? 'rgba(255,255,255,0.3)'
+                          : 'rgba(0,0,0,0.3)',
+                    }}
+                  >
                     {item.complete ? '✓' : '○'}
                   </span>
-                  <span style={{ color: item.complete ? (isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)') : (isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)') }}>
+                  <span
+                    style={{
+                      color: item.complete
+                        ? isDark
+                          ? 'rgba(255,255,255,0.7)'
+                          : 'rgba(0,0,0,0.7)'
+                        : isDark
+                          ? 'rgba(255,255,255,0.4)'
+                          : 'rgba(0,0,0,0.4)',
+                    }}
+                  >
                     {item.name}
                   </span>
                 </div>
@@ -284,7 +361,10 @@ export default function IdentityWalkthrough({
           >
             <div
               className="text-[10px] tracking-wider mb-3"
-              style={{ fontFamily: "'VCR OSD Mono', monospace", color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)' }}
+              style={{
+                fontFamily: "'VCR OSD Mono', monospace",
+                color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)',
+              }}
             >
               FOLLOWER RATIO
             </div>
@@ -293,7 +373,10 @@ export default function IdentityWalkthrough({
               <span className="text-3xl font-semibold" style={{ color: followerRatio.color }}>
                 {followerRatio.ratio === Infinity ? '∞' : followerRatio.ratio.toFixed(1)}
               </span>
-              <span className="text-sm" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)' }}>
+              <span
+                className="text-sm"
+                style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)' }}
+              >
                 :1
               </span>
             </div>
@@ -309,12 +392,15 @@ export default function IdentityWalkthrough({
               {followerRatio.label.toUpperCase()}
             </span>
 
-            <p className="text-xs" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)' }}>
+            <p
+              className="text-xs"
+              style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)' }}
+            >
               {followerRatio.ratio >= 10
                 ? 'Strong authority signal - people follow you for value'
                 : followerRatio.ratio >= 2
-                ? 'Good creator ratio - content is driving growth'
-                : 'Consider being more selective with follows'}
+                  ? 'Good creator ratio - content is driving growth'
+                  : 'Consider being more selective with follows'}
             </p>
           </motion.div>
         </div>
@@ -335,39 +421,68 @@ export default function IdentityWalkthrough({
           >
             <div
               className="text-[10px] tracking-wider mb-3"
-              style={{ fontFamily: "'VCR OSD Mono', monospace", color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)' }}
+              style={{
+                fontFamily: "'VCR OSD Mono', monospace",
+                color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)',
+              }}
             >
               CONTENT OUTPUT
             </div>
 
             <div className="flex items-center justify-between mb-2">
-              <span className="text-2xl font-semibold" style={{ color: profile.tweet_count >= 1000 ? '#10B981' : profile.tweet_count >= 500 ? '#F59E0B' : '#EF4444' }}>
+              <span
+                className="text-2xl font-semibold"
+                style={{
+                  color:
+                    profile.tweet_count >= 1000
+                      ? '#10B981'
+                      : profile.tweet_count >= 500
+                        ? '#F59E0B'
+                        : '#EF4444',
+                }}
+              >
                 {formatFollowers(profile.tweet_count)}
               </span>
-              <span className="text-sm" style={{ color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)' }}>
+              <span
+                className="text-sm"
+                style={{ color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)' }}
+              >
                 posts
               </span>
             </div>
 
-            <div className="h-2 rounded-full overflow-hidden mb-3" style={{ background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' }}>
+            <div
+              className="h-2 rounded-full overflow-hidden mb-3"
+              style={{ background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' }}
+            >
               <motion.div
                 initial={{ width: 0 }}
                 whileInView={{ width: `${Math.min((profile.tweet_count / 5000) * 100, 100)}%` }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: 0.3 }}
                 className="h-full rounded-full"
-                style={{ background: profile.tweet_count >= 1000 ? '#10B981' : profile.tweet_count >= 500 ? '#F59E0B' : '#EF4444' }}
+                style={{
+                  background:
+                    profile.tweet_count >= 1000
+                      ? '#10B981'
+                      : profile.tweet_count >= 500
+                        ? '#F59E0B'
+                        : '#EF4444',
+                }}
               />
             </div>
 
-            <p className="text-xs" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)' }}>
+            <p
+              className="text-xs"
+              style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)' }}
+            >
               {profile.tweet_count >= 5000
                 ? 'High output creator - strong content foundation'
                 : profile.tweet_count >= 1000
-                ? 'Consistent content history - building brand equity'
-                : profile.tweet_count >= 500
-                ? 'Growing content library - keep posting consistently'
-                : 'Low content output - your brand is built through what you post'}
+                  ? 'Consistent content history - building brand equity'
+                  : profile.tweet_count >= 500
+                    ? 'Growing content library - keep posting consistently'
+                    : 'Low content output - your brand is built through what you post'}
             </p>
           </motion.div>
 
@@ -380,12 +495,20 @@ export default function IdentityWalkthrough({
             className="rounded-[4px] p-4"
             style={{
               background: isDark ? '#1A1A1A' : '#F5F5F5',
-              border: authScore < 70 ? '1px solid rgba(239, 68, 68, 0.3)' : isDark ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(0,0,0,0.05)',
+              border:
+                authScore < 70
+                  ? '1px solid rgba(239, 68, 68, 0.3)'
+                  : isDark
+                    ? '1px solid rgba(255,255,255,0.05)'
+                    : '1px solid rgba(0,0,0,0.05)',
             }}
           >
             <div
               className="text-[10px] tracking-wider mb-3"
-              style={{ fontFamily: "'VCR OSD Mono', monospace", color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)' }}
+              style={{
+                fontFamily: "'VCR OSD Mono', monospace",
+                color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)',
+              }}
             >
               AUTHENTICITY SCORE
             </div>
@@ -393,7 +516,9 @@ export default function IdentityWalkthrough({
             <div className="flex items-baseline gap-2 mb-2">
               <span
                 className="text-3xl font-semibold"
-                style={{ color: authScore >= 80 ? '#10B981' : authScore >= 50 ? '#F59E0B' : '#EF4444' }}
+                style={{
+                  color: authScore >= 80 ? '#10B981' : authScore >= 50 ? '#F59E0B' : '#EF4444',
+                }}
               >
                 {authScore}%
               </span>
@@ -404,24 +529,33 @@ export default function IdentityWalkthrough({
               )}
             </div>
 
-            <p className="text-xs mb-2" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)' }}>
+            <p
+              className="text-xs mb-2"
+              style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)' }}
+            >
               {authScore >= 90
                 ? 'Excellent - genuine organic engagement'
                 : authScore >= 70
-                ? 'Good - mostly organic growth signals'
-                : authScore >= 50
-                ? 'Suspicious patterns detected'
-                : 'Multiple red flags for bot-like behavior'}
+                  ? 'Good - mostly organic growth signals'
+                  : authScore >= 50
+                    ? 'Suspicious patterns detected'
+                    : 'Multiple red flags for bot-like behavior'}
             </p>
 
             {authenticity?.signals && (
               <div className="text-[10px] space-y-1">
-                {Object.entries(authenticity.signals).slice(0, 2).map(([key, signal]) => (
-                  <div key={key} className="flex items-start gap-1.5" style={{ color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)' }}>
-                    <span>•</span>
-                    <span>{signal.detail}</span>
-                  </div>
-                ))}
+                {Object.entries(authenticity.signals)
+                  .slice(0, 2)
+                  .map(([key, signal]) => (
+                    <div
+                      key={key}
+                      className="flex items-start gap-1.5"
+                      style={{ color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)' }}
+                    >
+                      <span>•</span>
+                      <span>{signal.detail}</span>
+                    </div>
+                  ))}
               </div>
             )}
           </motion.div>
@@ -440,7 +574,10 @@ export default function IdentityWalkthrough({
           >
             <div
               className="text-[10px] tracking-wider mb-3"
-              style={{ fontFamily: "'VCR OSD Mono', monospace", color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)' }}
+              style={{
+                fontFamily: "'VCR OSD Mono', monospace",
+                color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)',
+              }}
             >
               GROWTH POTENTIAL
             </div>
@@ -449,14 +586,20 @@ export default function IdentityWalkthrough({
               <span className="text-2xl font-semibold" style={{ color: influenceTier.color }}>
                 {influenceTier.tier}
               </span>
-              <span className="text-xs" style={{ color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)' }}>
+              <span
+                className="text-xs"
+                style={{ color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)' }}
+              >
                 tier
               </span>
             </div>
 
             {influenceTier.tier !== 'Mega' && (
               <>
-                <div className="h-1.5 rounded-full overflow-hidden mb-2" style={{ background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' }}>
+                <div
+                  className="h-1.5 rounded-full overflow-hidden mb-2"
+                  style={{ background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' }}
+                >
                   <motion.div
                     initial={{ width: 0 }}
                     whileInView={{ width: `${Math.min(influenceTier.progress, 100)}%` }}
@@ -466,7 +609,10 @@ export default function IdentityWalkthrough({
                     style={{ background: influenceTier.color }}
                   />
                 </div>
-                <p className="text-xs" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)' }}>
+                <p
+                  className="text-xs"
+                  style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)' }}
+                >
                   {influenceTier.next}
                 </p>
               </>

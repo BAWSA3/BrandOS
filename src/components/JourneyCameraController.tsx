@@ -35,7 +35,7 @@ const PHASE_CAMERA_POSITIONS: Record<string, CameraTarget> = {
     lookAt: new THREE.Vector3(16, -7, 0),
   },
   // Reveal - Full DNA view (zoomed out)
-  'reveal': {
+  reveal: {
     position: new THREE.Vector3(0, 0, 45),
     lookAt: new THREE.Vector3(0, 0, 0),
   },

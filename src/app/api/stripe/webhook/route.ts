@@ -75,9 +75,10 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
           type: productType,
           amount: session.amount_total || 0,
           currency: session.currency || 'usd',
-          stripePaymentId: typeof session.payment_intent === 'string'
-            ? session.payment_intent
-            : session.payment_intent.id,
+          stripePaymentId:
+            typeof session.payment_intent === 'string'
+              ? session.payment_intent
+              : session.payment_intent.id,
           stripeSessionId: session.id,
           status: 'completed',
         },
@@ -125,9 +126,7 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
 }
 
 async function handlePaymentFailed(invoice: Stripe.Invoice) {
-  const customerId = typeof invoice.customer === 'string'
-    ? invoice.customer
-    : invoice.customer?.id;
+  const customerId = typeof invoice.customer === 'string' ? invoice.customer : invoice.customer?.id;
   if (!customerId) return;
 
   await prisma.user.updateMany({
@@ -137,9 +136,7 @@ async function handlePaymentFailed(invoice: Stripe.Invoice) {
 }
 
 async function handleInvoicePaid(invoice: Stripe.Invoice) {
-  const customerId = typeof invoice.customer === 'string'
-    ? invoice.customer
-    : invoice.customer?.id;
+  const customerId = typeof invoice.customer === 'string' ? invoice.customer : invoice.customer?.id;
   if (!customerId) return;
 
   // Reset usage counters on successful payment (new billing period)
@@ -156,12 +153,18 @@ async function handleInvoicePaid(invoice: Stripe.Invoice) {
 
 function mapStripeStatus(status: Stripe.Subscription.Status): SubscriptionStatus {
   switch (status) {
-    case 'active': return 'ACTIVE';
-    case 'past_due': return 'PAST_DUE';
-    case 'canceled': return 'CANCELED';
-    case 'trialing': return 'TRIALING';
+    case 'active':
+      return 'ACTIVE';
+    case 'past_due':
+      return 'PAST_DUE';
+    case 'canceled':
+      return 'CANCELED';
+    case 'trialing':
+      return 'TRIALING';
     case 'incomplete':
-    case 'incomplete_expired': return 'INCOMPLETE';
-    default: return 'ACTIVE';
+    case 'incomplete_expired':
+      return 'INCOMPLETE';
+    default:
+      return 'ACTIVE';
   }
 }

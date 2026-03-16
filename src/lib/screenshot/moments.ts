@@ -127,14 +127,14 @@ export const JOURNEY_MOMENTS: JourneyMoment[] = [
   },
 ];
 
-export const MOMENT_IDS = JOURNEY_MOMENTS.map(m => m.id);
+export const MOMENT_IDS = JOURNEY_MOMENTS.map((m) => m.id);
 
 export function getMomentById(id: string): JourneyMoment | undefined {
-  return JOURNEY_MOMENTS.find(m => m.id === id);
+  return JOURNEY_MOMENTS.find((m) => m.id === id);
 }
 
 export function getMomentIndex(id: string): number {
-  return JOURNEY_MOMENTS.findIndex(m => m.id === id);
+  return JOURNEY_MOMENTS.findIndex((m) => m.id === id);
 }
 
 export function getNextMoment(currentId: string): JourneyMoment | undefined {

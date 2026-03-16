@@ -5,39 +5,41 @@
  * @license Copyright 2008-2025, GreenSock. All rights reserved.
  * Subject to the terms at https://gsap.com/standard-license
  * @author: Jack Doyle, jack@greensock.com
-*/
+ */
 
 /* eslint-disable */
 var gsap,
-    _coreInitted,
-    _getUnit,
-    _getStyleSaver,
-    _reverting,
-    _DEG2RAD = Math.PI / 180,
-    _getGSAP = function _getGSAP() {
-  return gsap || typeof window !== "undefined" && (gsap = window.gsap) && gsap.registerPlugin && gsap;
-},
-    _round = function _round(value) {
-  return Math.round(value * 10000) / 10000;
-},
-    _bonusValidated = 1,
-    //<name>Physics2DPlugin</name>
-_initCore = function _initCore(core) {
-  gsap = core || _getGSAP();
+  _coreInitted,
+  _getUnit,
+  _getStyleSaver,
+  _reverting,
+  _DEG2RAD = Math.PI / 180,
+  _getGSAP = function _getGSAP() {
+    return (
+      gsap || (typeof window !== 'undefined' && (gsap = window.gsap) && gsap.registerPlugin && gsap)
+    );
+  },
+  _round = function _round(value) {
+    return Math.round(value * 10000) / 10000;
+  },
+  _bonusValidated = 1,
+  //<name>Physics2DPlugin</name>
+  _initCore = function _initCore(core) {
+    gsap = core || _getGSAP();
 
-  if (!_coreInitted) {
-    _getUnit = gsap.utils.getUnit;
-    _getStyleSaver = gsap.core.getStyleSaver;
+    if (!_coreInitted) {
+      _getUnit = gsap.utils.getUnit;
+      _getStyleSaver = gsap.core.getStyleSaver;
 
-    _reverting = gsap.core.reverting || function () {};
+      _reverting = gsap.core.reverting || function () {};
 
-    _coreInitted = 1;
-  }
-};
+      _coreInitted = 1;
+    }
+  };
 
 var PhysicsProp = function PhysicsProp(target, p, velocity, acceleration, stepsPerTimeUnit) {
   var cache = target._gsap,
-      curVal = cache.get(target, p);
+    curVal = cache.get(target, p);
   this.p = p;
   this.set = cache.set(target, p); //setter
 
@@ -55,19 +57,25 @@ var PhysicsProp = function PhysicsProp(target, p, velocity, acceleration, stepsP
 };
 
 export var Physics2DPlugin = {
-  version: "3.14.2",
-  name: "physics2D",
+  version: '3.14.2',
+  name: 'physics2D',
   register: _initCore,
   init: function init(target, value, tween) {
     _coreInitted || _initCore();
     var data = this,
-        angle = +value.angle || 0,
-        velocity = +value.velocity || 0,
-        acceleration = +value.acceleration || 0,
-        xProp = value.xProp || "x",
-        yProp = value.yProp || "y",
-        aAngle = value.accelerationAngle || value.accelerationAngle === 0 ? +value.accelerationAngle : angle;
-    data.styles = _getStyleSaver && _getStyleSaver(target, value.xProp && value.xProp !== "x" ? value.xProp + "," + value.yProp : "transform");
+      angle = +value.angle || 0,
+      velocity = +value.velocity || 0,
+      acceleration = +value.acceleration || 0,
+      xProp = value.xProp || 'x',
+      yProp = value.yProp || 'y',
+      aAngle =
+        value.accelerationAngle || value.accelerationAngle === 0 ? +value.accelerationAngle : angle;
+    data.styles =
+      _getStyleSaver &&
+      _getStyleSaver(
+        target,
+        value.xProp && value.xProp !== 'x' ? value.xProp + ',' + value.yProp : 'transform'
+      );
     data.target = target;
     data.tween = tween;
     data.step = 0;
@@ -84,27 +92,39 @@ export var Physics2DPlugin = {
 
     data._props.push(xProp, yProp);
 
-    data.xp = new PhysicsProp(target, xProp, Math.cos(angle) * velocity, Math.cos(aAngle) * acceleration, data.sps);
-    data.yp = new PhysicsProp(target, yProp, Math.sin(angle) * velocity, Math.sin(aAngle) * acceleration, data.sps);
+    data.xp = new PhysicsProp(
+      target,
+      xProp,
+      Math.cos(angle) * velocity,
+      Math.cos(aAngle) * acceleration,
+      data.sps
+    );
+    data.yp = new PhysicsProp(
+      target,
+      yProp,
+      Math.sin(angle) * velocity,
+      Math.sin(aAngle) * acceleration,
+      data.sps
+    );
     data.skipX = data.skipY = 0;
   },
   render: function render(ratio, data) {
     var xp = data.xp,
-        yp = data.yp,
-        tween = data.tween,
-        target = data.target,
-        step = data.step,
-        sps = data.sps,
-        fr = data.fr,
-        skipX = data.skipX,
-        skipY = data.skipY,
-        time = tween._from ? tween._dur - tween._time : tween._time,
-        x,
-        y,
-        tt,
-        steps,
-        remainder,
-        i;
+      yp = data.yp,
+      tween = data.tween,
+      target = data.target,
+      step = data.step,
+      sps = data.sps,
+      fr = data.fr,
+      skipX = data.skipX,
+      skipY = data.skipY,
+      time = tween._from ? tween._dur - tween._time : tween._time,
+      x,
+      y,
+      tt,
+      steps,
+      remainder,
+      i;
 
     if (tween._time || !_reverting()) {
       if (fr === 1) {
@@ -137,7 +157,7 @@ export var Physics2DPlugin = {
           steps = i = time | 0;
         }
 
-        remainder = time % 1 * fr;
+        remainder = (time % 1) * fr;
 
         while (i--) {
           xp.v += xp.a;
@@ -167,7 +187,7 @@ export var Physics2DPlugin = {
     if (this.yp.p === property) {
       this.skipY = 1;
     }
-  }
+  },
 };
 _getGSAP() && gsap.registerPlugin(Physics2DPlugin);
 export { Physics2DPlugin as default };

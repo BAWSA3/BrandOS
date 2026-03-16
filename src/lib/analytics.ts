@@ -1,6 +1,6 @@
 /**
  * BrandOS Beta Analytics
- * 
+ *
  * Dual-tracks to Vercel Analytics (performance) and PostHog (product behavior).
  * Vercel Analytics: page views, web vitals, speed metrics.
  * PostHog: funnels, feature usage, session replays, user identification.
@@ -47,15 +47,15 @@ export interface EventProperties {
   phase?: string;
   feature?: string;
   source?: string;
-  
+
   // Check/Generate specific
   score?: number;
   contentType?: string;
-  
+
   // Error specific
   errorType?: string;
   errorMessage?: string;
-  
+
   // Other
   templateId?: string;
   brandName?: string;
@@ -100,41 +100,36 @@ export const analytics = {
   onboardingStarted: () => trackBetaEvent('beta_onboarding_started'),
   onboardingCompleted: () => trackBetaEvent('beta_onboarding_completed'),
   onboardingSkipped: () => trackBetaEvent('beta_onboarding_skipped'),
-  templateSelected: (templateId: string) => 
+  templateSelected: (templateId: string) =>
     trackBetaEvent('beta_template_selected', { templateId }),
-  brandImported: (source: string) => 
-    trackBetaEvent('beta_brand_imported', { source }),
+  brandImported: (source: string) => trackBetaEvent('beta_brand_imported', { source }),
 
   // Core Features
-  contentChecked: (score: number, contentType?: string) => 
+  contentChecked: (score: number, contentType?: string) =>
     trackBetaEvent('beta_content_checked', { score, contentType }),
-  contentGenerated: (contentType: string) => 
+  contentGenerated: (contentType: string) =>
     trackBetaEvent('beta_content_generated', { contentType }),
   brandExported: () => trackBetaEvent('beta_brand_exported'),
   brandShared: () => trackBetaEvent('beta_brand_shared'),
 
   // Engagement
   feedbackOpened: () => trackBetaEvent('beta_feedback_opened'),
-  feedbackSubmitted: (type: string) => 
+  feedbackSubmitted: (type: string) =>
     trackBetaEvent('beta_feedback_submitted', { feedbackType: type }),
-  phaseVisited: (phase: string) => 
-    trackBetaEvent('beta_phase_visited', { phase }),
-  featureUsed: (feature: string) => 
-    trackBetaEvent('beta_feature_used', { feature }),
+  phaseVisited: (phase: string) => trackBetaEvent('beta_phase_visited', { phase }),
+  featureUsed: (feature: string) => trackBetaEvent('beta_feature_used', { feature }),
 
   // Content Engine Sessions
   contentEngineSessionStart: (feature: string) =>
     trackBetaEvent('beta_content_engine_session_start', { feature }),
   contentEngineSessionEnd: (feature: string) =>
     trackBetaEvent('beta_content_engine_session_end', { feature }),
-  inviteSent: (source?: string) =>
-    trackBetaEvent('beta_invite_sent', { source }),
+  inviteSent: (source?: string) => trackBetaEvent('beta_invite_sent', { source }),
 
   // Errors
   errorEncountered: (errorType: string, errorMessage?: string) =>
     trackBetaEvent('beta_error_encountered', { errorType, errorMessage }),
-  rateLimitHit: (endpoint: string) =>
-    trackBetaEvent('beta_rate_limit_hit', { endpoint }),
+  rateLimitHit: (endpoint: string) => trackBetaEvent('beta_rate_limit_hit', { endpoint }),
 };
 
 export default analytics;

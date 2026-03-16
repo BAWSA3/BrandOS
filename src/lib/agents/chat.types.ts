@@ -22,7 +22,18 @@ export interface ChatMessage {
 }
 
 export interface ChatArtifact {
-  type: 'campaign-plan' | 'content' | 'analytics-report' | 'content-ideas' | 'quick-check' | 'research-brief' | 'research-topics' | 'authority-content' | 'objection-response' | 'competitive-analysis' | 'educational-content';
+  type:
+    | 'campaign-plan'
+    | 'content'
+    | 'analytics-report'
+    | 'content-ideas'
+    | 'quick-check'
+    | 'research-brief'
+    | 'research-topics'
+    | 'authority-content'
+    | 'objection-response'
+    | 'competitive-analysis'
+    | 'educational-content';
   title: string;
   data: unknown;
   expandable?: boolean;
@@ -61,7 +72,8 @@ export const agentPersonas: Record<AgentName, AgentPersona> = {
     displayName: 'Campaign',
     title: 'Marketing Strategist',
     avatar: '🎯',
-    description: 'I transform your ideas into actionable marketing campaigns with content calendars, objectives, and success metrics.',
+    description:
+      'I transform your ideas into actionable marketing campaigns with content calendars, objectives, and success metrics.',
     accentColor: '#8B5CF6', // Purple
     capabilities: [
       'Create full marketing campaign plans',
@@ -102,7 +114,8 @@ Always consider the user's brand DNA when making recommendations. Match suggesti
     displayName: 'Content',
     title: 'Creative Writer',
     avatar: '✍️',
-    description: 'I create platform-optimized, on-brand content for any channel—tweets, LinkedIn posts, emails, and more.',
+    description:
+      'I create platform-optimized, on-brand content for any channel—tweets, LinkedIn posts, emails, and more.',
     accentColor: '#10B981', // Green
     capabilities: [
       'Write social media posts (Twitter, LinkedIn, Instagram)',
@@ -148,7 +161,8 @@ Always ask which platform the content is for if not specified.`,
     displayName: 'Analytics',
     title: 'Performance Analyst',
     avatar: '📊',
-    description: 'I analyze your content performance, identify patterns, and provide data-driven recommendations to improve results.',
+    description:
+      'I analyze your content performance, identify patterns, and provide data-driven recommendations to improve results.',
     accentColor: '#0047FF', // Amber
     capabilities: [
       'Analyze content performance metrics',
@@ -194,7 +208,8 @@ If users don't provide performance data, ask for it or offer to analyze hypothet
     displayName: 'Research',
     title: 'Trends Researcher',
     avatar: '🔍',
-    description: 'I aggregate TCG and collectibles news from social media, Reddit, YouTube, and news sources to find trending topics for your content.',
+    description:
+      'I aggregate TCG and collectibles news from social media, Reddit, YouTube, and news sources to find trending topics for your content.',
     accentColor: '#EC4899', // Pink
     capabilities: [
       'Aggregate trends from social platforms',
@@ -204,7 +219,7 @@ If users don't provide performance data, ask for it or offer to analyze hypothet
       'Track market movements and releases',
     ],
     examplePrompts: [
-      'What\'s trending in Pokemon TCG this week?',
+      "What's trending in Pokemon TCG this week?",
       'Find me the latest MTG news',
       'Create content based on trending topics',
       'What are people talking about in the sports cards community?',
@@ -247,19 +262,20 @@ Help users turn trending topics into engaging content that positions them as tho
     displayName: 'Intelligence',
     title: 'Content Intelligence',
     avatar: '🧠',
-    description: 'I scan your niche for viral patterns, track your performance, identify gaps, and generate content ideas that match what works — in your voice.',
+    description:
+      'I scan your niche for viral patterns, track your performance, identify gaps, and generate content ideas that match what works — in your voice.',
     accentColor: '#06B6D4', // Cyan
     capabilities: [
       'Scan niche for viral content patterns',
       'Track performance across 3/7/30-day windows',
       'Run gap analysis against viral benchmarks',
       'Generate intelligence-driven content ideas',
-      'Identify what\'s working in your niche',
+      "Identify what's working in your niche",
     ],
     examplePrompts: [
       'Scan my niche for viral patterns',
       'Run a full content intelligence pipeline',
-      'What\'s working in the creator economy niche?',
+      "What's working in the creator economy niche?",
       'Show me my gap analysis',
       'Generate content ideas based on viral patterns',
     ],
@@ -294,7 +310,8 @@ When helping users:
     displayName: 'Authority',
     title: 'Brand Authority Expert',
     avatar: '🏆',
-    description: 'I position Relique as the trusted authority in RWA collectibles through thought leadership, educational content, and strategic messaging.',
+    description:
+      'I position Relique as the trusted authority in RWA collectibles through thought leadership, educational content, and strategic messaging.',
     accentColor: '#F59E0B', // Amber/Gold
     capabilities: [
       'Create thought leadership content',
@@ -371,12 +388,9 @@ export function createChatMessage(
   };
 }
 
-export function createChatSession(
-  agentName: AgentName,
-  brandId: string
-): ChatSession {
+export function createChatSession(agentName: AgentName, brandId: string): ChatSession {
   const persona = getAgentPersona(agentName);
-  
+
   return {
     id: `chat_${crypto.randomUUID()}`,
     agentName,
@@ -391,9 +405,3 @@ export function createChatSession(
     updatedAt: new Date(),
   };
 }
-
-
-
-
-
-

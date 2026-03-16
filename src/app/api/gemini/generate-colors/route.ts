@@ -33,31 +33,32 @@ export async function POST(request: Request) {
           palette,
         });
       }
-      
+
       // If no JSON found, return the raw text
-      return NextResponse.json({
-        success: false,
-        error: 'Could not parse color palette',
-        rawResponse: text,
-      }, { status: 400 });
-
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Could not parse color palette',
+          rawResponse: text,
+        },
+        { status: 400 }
+      );
     } catch {
-      return NextResponse.json({
-        success: false,
-        error: 'Failed to parse color palette response',
-        rawResponse: text,
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Failed to parse color palette response',
+          rawResponse: text,
+        },
+        { status: 400 }
+      );
     }
-
   } catch (error) {
     console.error('Gemini color generation error:', error);
-    
+
     if (error instanceof Error) {
       if (error.message.includes('API key')) {
-        return NextResponse.json(
-          { error: 'Invalid Gemini API key' },
-          { status: 401 }
-        );
+        return NextResponse.json({ error: 'Invalid Gemini API key' }, { status: 401 });
       }
     }
 
@@ -67,19 +68,3 @@ export async function POST(request: Request) {
     );
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

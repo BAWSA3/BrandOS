@@ -48,7 +48,7 @@ export default function TypographySection({ brandId }: TypographySectionProps) {
 
   const handleAddFont = () => {
     if (!newFont.name.trim() || !newFont.family.trim()) return;
-    
+
     addFont(brandId, {
       name: newFont.name,
       family: newFont.family,
@@ -56,7 +56,7 @@ export default function TypographySection({ brandId }: TypographySectionProps) {
       weights: newFont.weights,
       styles: newFont.styles,
     });
-    
+
     setNewFont({
       name: '',
       family: '',
@@ -95,7 +95,12 @@ export default function TypographySection({ brandId }: TypographySectionProps) {
               className="text-xs text-muted hover:text-foreground transition-colors flex items-center gap-1"
             >
               <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 4v16m8-8H4"
+                />
               </svg>
               Add Font
             </button>
@@ -120,12 +125,20 @@ export default function TypographySection({ brandId }: TypographySectionProps) {
                 <label className="block text-xs text-muted mb-1">Font Family</label>
                 <select
                   value={newFont.family}
-                  onChange={(e) => setNewFont({ ...newFont, family: e.target.value, name: newFont.name || e.target.value })}
+                  onChange={(e) =>
+                    setNewFont({
+                      ...newFont,
+                      family: e.target.value,
+                      name: newFont.name || e.target.value,
+                    })
+                  }
                   className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm outline-none focus:border-foreground"
                 >
                   <option value="">Select a font...</option>
                   {defaultWebFonts.map((font) => (
-                    <option key={font} value={font}>{font}</option>
+                    <option key={font} value={font}>
+                      {font}
+                    </option>
                   ))}
                   <option value="custom">Custom Font...</option>
                 </select>
@@ -136,11 +149,15 @@ export default function TypographySection({ brandId }: TypographySectionProps) {
                 <label className="block text-xs text-muted mb-1">Category</label>
                 <select
                   value={newFont.category}
-                  onChange={(e) => setNewFont({ ...newFont, category: e.target.value as FontConfig['category'] })}
+                  onChange={(e) =>
+                    setNewFont({ ...newFont, category: e.target.value as FontConfig['category'] })
+                  }
                   className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm outline-none focus:border-foreground"
                 >
                   {fontCategories.map((cat) => (
-                    <option key={cat.id} value={cat.id}>{cat.label}</option>
+                    <option key={cat.id} value={cat.id}>
+                      {cat.label}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -154,9 +171,15 @@ export default function TypographySection({ brandId }: TypographySectionProps) {
                         checked={newFont.weights.includes(weight)}
                         onChange={(e) => {
                           if (e.target.checked) {
-                            setNewFont({ ...newFont, weights: [...newFont.weights, weight].sort() });
+                            setNewFont({
+                              ...newFont,
+                              weights: [...newFont.weights, weight].sort(),
+                            });
                           } else {
-                            setNewFont({ ...newFont, weights: newFont.weights.filter((w) => w !== weight) });
+                            setNewFont({
+                              ...newFont,
+                              weights: newFont.weights.filter((w) => w !== weight),
+                            });
                           }
                         }}
                         className="w-3 h-3"
@@ -188,8 +211,18 @@ export default function TypographySection({ brandId }: TypographySectionProps) {
         {/* Font List */}
         {brandKit.typography.fonts.length === 0 && !isAddingFont ? (
           <div className="text-center py-8 border-2 border-dashed border-border rounded-xl">
-            <svg className="w-12 h-12 mx-auto mb-3 text-muted opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 6h16M4 12h16m-7 6h7" />
+            <svg
+              className="w-12 h-12 mx-auto mb-3 text-muted opacity-50"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={1}
+                d="M4 6h16M4 12h16m-7 6h7"
+              />
             </svg>
             <p className="text-muted text-sm">No fonts added yet</p>
             <p className="text-xs text-muted mt-1">Add fonts to define your typography system</p>
@@ -197,11 +230,7 @@ export default function TypographySection({ brandId }: TypographySectionProps) {
         ) : (
           <div className="grid grid-cols-2 gap-4">
             {brandKit.typography.fonts.map((font) => (
-              <FontCard
-                key={font.id}
-                font={font}
-                onDelete={() => handleDeleteFont(font.id)}
-              />
+              <FontCard key={font.id} font={font} onDelete={() => handleDeleteFont(font.id)} />
             ))}
           </div>
         )}
@@ -220,10 +249,14 @@ export default function TypographySection({ brandId }: TypographySectionProps) {
             >
               <option value="system-ui">System UI</option>
               {brandKit.typography.fonts.map((font) => (
-                <option key={font.id} value={font.family}>{font.name}</option>
+                <option key={font.id} value={font.family}>
+                  {font.name}
+                </option>
               ))}
               {defaultWebFonts.map((font) => (
-                <option key={font} value={font}>{font}</option>
+                <option key={font} value={font}>
+                  {font}
+                </option>
               ))}
             </select>
           </div>
@@ -236,10 +269,14 @@ export default function TypographySection({ brandId }: TypographySectionProps) {
             >
               <option value="system-ui">System UI</option>
               {brandKit.typography.fonts.map((font) => (
-                <option key={font.id} value={font.family}>{font.name}</option>
+                <option key={font.id} value={font.family}>
+                  {font.name}
+                </option>
               ))}
               {defaultWebFonts.map((font) => (
-                <option key={font} value={font}>{font}</option>
+                <option key={font} value={font}>
+                  {font}
+                </option>
               ))}
             </select>
           </div>
@@ -252,10 +289,14 @@ export default function TypographySection({ brandId }: TypographySectionProps) {
             >
               <option value="">None</option>
               {brandKit.typography.fonts.map((font) => (
-                <option key={font.id} value={font.family}>{font.name}</option>
+                <option key={font.id} value={font.family}>
+                  {font.name}
+                </option>
               ))}
               {defaultWebFonts.map((font) => (
-                <option key={font} value={font}>{font}</option>
+                <option key={font} value={font}>
+                  {font}
+                </option>
               ))}
             </select>
           </div>
@@ -282,22 +323,22 @@ export default function TypographySection({ brandId }: TypographySectionProps) {
       <div className="p-6 bg-surface rounded-xl">
         <h4 className="text-xs uppercase tracking-widest text-muted mb-6">Preview</h4>
         <div className="space-y-4" style={{ fontFamily: brandKit.typography.pairing.body }}>
-          <h1 
-            className="text-4xl font-bold" 
+          <h1
+            className="text-4xl font-bold"
             style={{ fontFamily: brandKit.typography.pairing.heading }}
           >
             The quick brown fox
           </h1>
-          <h2 
-            className="text-2xl font-semibold" 
+          <h2
+            className="text-2xl font-semibold"
             style={{ fontFamily: brandKit.typography.pairing.heading }}
           >
             Jumps over the lazy dog
           </h2>
           <p className="text-base leading-relaxed">
-            Typography is the art and technique of arranging type to make written language legible, 
-            readable and appealing when displayed. The arrangement of type involves selecting typefaces, 
-            point sizes, line lengths, line-spacing, and letter-spacing.
+            Typography is the art and technique of arranging type to make written language legible,
+            readable and appealing when displayed. The arrangement of type involves selecting
+            typefaces, point sizes, line lengths, line-spacing, and letter-spacing.
           </p>
           <p className="text-sm text-muted">
             Caption text with smaller size and muted color for supplementary information.
@@ -326,14 +367,16 @@ function FontCard({ font, onDelete }: FontCardProps) {
           className="opacity-0 group-hover:opacity-100 text-muted hover:text-red-500 transition-all"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={1.5}
+              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+            />
           </svg>
         </button>
       </div>
-      <p 
-        className="text-2xl mb-2 truncate" 
-        style={{ fontFamily: font.family }}
-      >
+      <p className="text-2xl mb-2 truncate" style={{ fontFamily: font.family }}>
         Aa Bb Cc 123
       </p>
       <div className="flex flex-wrap gap-1">
@@ -367,8 +410,8 @@ function TypeScaleRow({ scale, headingFont, bodyFont, onChange }: TypeScaleRowPr
         <span className="text-xs font-medium text-muted">{scale.name}</span>
       </div>
       <div className="flex-1">
-        <span 
-          style={{ 
+        <span
+          style={{
             fontFamily: font,
             fontSize: scale.fontSize,
             fontWeight: scale.fontWeight,
@@ -408,19 +451,3 @@ function TypeScaleRow({ scale, headingFont, bodyFont, onChange }: TypeScaleRowPr
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

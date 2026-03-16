@@ -22,7 +22,10 @@ export default function TheMathSection({ plan, onComplete }: TheMathSectionProps
             message="Let's talk about where you are and where you're going."
             subtext="I've crunched your numbers. Here's the math."
             buttonLabel="SHOW ME THE MATH"
-            dataPoint={{ label: 'CURRENT', value: `${plan.currentFollowers.toLocaleString()} followers` }}
+            dataPoint={{
+              label: 'CURRENT',
+              value: `${plan.currentFollowers.toLocaleString()} followers`,
+            }}
             onContinue={() => setStage('reveal')}
           />
         )}
@@ -36,13 +39,15 @@ export default function TheMathSection({ plan, onComplete }: TheMathSectionProps
             style={{ padding: '60px 24px', maxWidth: '640px', margin: '0 auto' }}
           >
             {/* Terminal header */}
-            <div style={{
-              fontFamily: "'VCR OSD Mono', monospace",
-              fontSize: '10px',
-              letterSpacing: '0.1em',
-              color: 'rgba(0,0,0,0.4)',
-              marginBottom: '32px',
-            }}>
+            <div
+              style={{
+                fontFamily: "'VCR OSD Mono', monospace",
+                fontSize: '10px',
+                letterSpacing: '0.1em',
+                color: 'rgba(0,0,0,0.4)',
+                marginBottom: '32px',
+              }}
+            >
               /* ═══════════════════════════════════ */
               <br />
               /*{'  '}GROWTH MATH{'                        '}*/
@@ -69,19 +74,27 @@ export default function TheMathSection({ plan, onComplete }: TheMathSectionProps
                 }}
               >
                 <div style={{ textAlign: 'center' }}>
-                  <div style={{
-                    fontFamily: "'VCR OSD Mono', monospace",
-                    fontSize: '10px',
-                    letterSpacing: '0.1em',
-                    color: 'rgba(0,0,0,0.4)',
-                    marginBottom: '8px',
-                  }}>CURRENT</div>
-                  <div style={{
-                    fontFamily: "'Helvetica Neue', sans-serif",
-                    fontSize: '36px',
-                    fontWeight: 600,
-                    color: '#000',
-                  }}>{plan.currentFollowers.toLocaleString()}</div>
+                  <div
+                    style={{
+                      fontFamily: "'VCR OSD Mono', monospace",
+                      fontSize: '10px',
+                      letterSpacing: '0.1em',
+                      color: 'rgba(0,0,0,0.4)',
+                      marginBottom: '8px',
+                    }}
+                  >
+                    CURRENT
+                  </div>
+                  <div
+                    style={{
+                      fontFamily: "'Helvetica Neue', sans-serif",
+                      fontSize: '36px',
+                      fontWeight: 600,
+                      color: '#000',
+                    }}
+                  >
+                    {plan.currentFollowers.toLocaleString()}
+                  </div>
                 </div>
 
                 <motion.div
@@ -98,27 +111,43 @@ export default function TheMathSection({ plan, onComplete }: TheMathSectionProps
                 </motion.div>
 
                 <div style={{ textAlign: 'center' }}>
-                  <div style={{
-                    fontFamily: "'VCR OSD Mono', monospace",
-                    fontSize: '10px',
-                    letterSpacing: '0.1em',
-                    color: 'rgba(0,0,0,0.4)',
-                    marginBottom: '8px',
-                  }}>TARGET</div>
-                  <div style={{
-                    fontFamily: "'Helvetica Neue', sans-serif",
-                    fontSize: '36px',
-                    fontWeight: 600,
-                    color: '#0047FF',
-                  }}>{plan.targetFollowers.toLocaleString()}</div>
+                  <div
+                    style={{
+                      fontFamily: "'VCR OSD Mono', monospace",
+                      fontSize: '10px',
+                      letterSpacing: '0.1em',
+                      color: 'rgba(0,0,0,0.4)',
+                      marginBottom: '8px',
+                    }}
+                  >
+                    TARGET
+                  </div>
+                  <div
+                    style={{
+                      fontFamily: "'Helvetica Neue', sans-serif",
+                      fontSize: '36px',
+                      fontWeight: 600,
+                      color: '#0047FF',
+                    }}
+                  >
+                    {plan.targetFollowers.toLocaleString()}
+                  </div>
                 </div>
               </motion.div>
 
               {/* Breakdown cards */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
                 {[
-                  { label: 'NEEDED', value: `+${(plan.targetFollowers - plan.currentFollowers).toLocaleString()}`, sub: 'total new followers' },
-                  { label: 'PER MONTH', value: `~${plan.monthlyNeeded.toLocaleString()}`, sub: `over ${plan.deadlineMonths} months` },
+                  {
+                    label: 'NEEDED',
+                    value: `+${(plan.targetFollowers - plan.currentFollowers).toLocaleString()}`,
+                    sub: 'total new followers',
+                  },
+                  {
+                    label: 'PER MONTH',
+                    value: `~${plan.monthlyNeeded.toLocaleString()}`,
+                    sub: `over ${plan.deadlineMonths} months`,
+                  },
                   { label: 'PER DAY', value: `~${plan.dailyNeeded}`, sub: 'net new followers' },
                 ].map((item, i) => (
                   <motion.div
@@ -134,25 +163,37 @@ export default function TheMathSection({ plan, onComplete }: TheMathSectionProps
                       textAlign: 'center',
                     }}
                   >
-                    <div style={{
-                      fontFamily: "'VCR OSD Mono', monospace",
-                      fontSize: '9px',
-                      letterSpacing: '0.1em',
-                      color: 'rgba(0,0,0,0.4)',
-                      marginBottom: '8px',
-                    }}>{item.label}</div>
-                    <div style={{
-                      fontFamily: "'Helvetica Neue', sans-serif",
-                      fontSize: '24px',
-                      fontWeight: 600,
-                      color: '#000',
-                      marginBottom: '4px',
-                    }}>{item.value}</div>
-                    <div style={{
-                      fontFamily: "'Helvetica Neue', sans-serif",
-                      fontSize: '11px',
-                      color: 'rgba(0,0,0,0.4)',
-                    }}>{item.sub}</div>
+                    <div
+                      style={{
+                        fontFamily: "'VCR OSD Mono', monospace",
+                        fontSize: '9px',
+                        letterSpacing: '0.1em',
+                        color: 'rgba(0,0,0,0.4)',
+                        marginBottom: '8px',
+                      }}
+                    >
+                      {item.label}
+                    </div>
+                    <div
+                      style={{
+                        fontFamily: "'Helvetica Neue', sans-serif",
+                        fontSize: '24px',
+                        fontWeight: 600,
+                        color: '#000',
+                        marginBottom: '4px',
+                      }}
+                    >
+                      {item.value}
+                    </div>
+                    <div
+                      style={{
+                        fontFamily: "'Helvetica Neue', sans-serif",
+                        fontSize: '11px',
+                        color: 'rgba(0,0,0,0.4)',
+                      }}
+                    >
+                      {item.sub}
+                    </div>
                   </motion.div>
                 ))}
               </div>
@@ -173,7 +214,10 @@ export default function TheMathSection({ plan, onComplete }: TheMathSectionProps
                   lineHeight: 1.6,
                 }}
               >
-                <span style={{ color: '#10B981', fontWeight: 600 }}>~{plan.dailyNeeded}/day is realistic</span> — but only if you fix what your data is screaming about. Let me show you.
+                <span style={{ color: '#10B981', fontWeight: 600 }}>
+                  ~{plan.dailyNeeded}/day is realistic
+                </span>{' '}
+                — but only if you fix what your data is screaming about. Let me show you.
               </motion.div>
 
               {/* Continue */}
@@ -193,15 +237,19 @@ export default function TheMathSection({ plan, onComplete }: TheMathSectionProps
                     cursor: 'pointer',
                     transition: 'background 0.2s',
                   }}
-                  onMouseEnter={(e) => e.currentTarget.style.background = '#0038CC'}
-                  onMouseLeave={(e) => e.currentTarget.style.background = '#0047FF'}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = '#0038CC')}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = '#0047FF')}
                 >
-                  <span style={{
-                    fontFamily: "'VCR OSD Mono', monospace",
-                    fontSize: '11px',
-                    letterSpacing: '0.12em',
-                    color: '#fff',
-                  }}>WHAT&apos;S WORKING?</span>
+                  <span
+                    style={{
+                      fontFamily: "'VCR OSD Mono', monospace",
+                      fontSize: '11px',
+                      letterSpacing: '0.12em',
+                      color: '#fff',
+                    }}
+                  >
+                    WHAT&apos;S WORKING?
+                  </span>
                 </button>
               </motion.div>
             </div>

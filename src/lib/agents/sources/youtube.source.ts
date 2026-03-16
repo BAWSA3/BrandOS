@@ -1,11 +1,6 @@
 // ===== YOUTUBE DATA SOURCE =====
 
-import {
-  YouTubeVideo,
-  TCGVertical,
-  VERTICAL_CONFIGS,
-  SourceStatus,
-} from '../research.types';
+import { YouTubeVideo, TCGVertical, VERTICAL_CONFIGS, SourceStatus } from '../research.types';
 
 interface YouTubeSearchResponse {
   items?: {
@@ -208,14 +203,17 @@ async function fetchVideoStats(
 
     const data: YouTubeVideoStatsResponse = await response.json();
 
-    const stats: Record<string, { viewCount?: number; likeCount?: number; commentCount?: number }> = {};
+    const stats: Record<string, { viewCount?: number; likeCount?: number; commentCount?: number }> =
+      {};
 
     if (data.items) {
       for (const item of data.items) {
         stats[item.id] = {
           viewCount: item.statistics.viewCount ? parseInt(item.statistics.viewCount) : undefined,
           likeCount: item.statistics.likeCount ? parseInt(item.statistics.likeCount) : undefined,
-          commentCount: item.statistics.commentCount ? parseInt(item.statistics.commentCount) : undefined,
+          commentCount: item.statistics.commentCount
+            ? parseInt(item.statistics.commentCount)
+            : undefined,
         };
       }
     }
@@ -272,11 +270,7 @@ export async function searchYouTubeTrending(
   const publishedAfter = new Date();
   publishedAfter.setDate(publishedAfter.getDate() - daysBack);
 
-  const keywords = [
-    config.name,
-    ...config.keywords.slice(0, 2),
-    ...(additionalKeywords || []),
-  ];
+  const keywords = [config.name, ...config.keywords.slice(0, 2), ...(additionalKeywords || [])];
   const query = keywords.join(' ');
 
   return searchYouTube(query, maxResults, publishedAfter);

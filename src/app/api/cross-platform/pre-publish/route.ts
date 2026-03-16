@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrePublishCheckRequestSchema } from '@/lib/cross-platform/schemas';
-import {
-  runPrePublishCheck,
-  quickPrePublishCheck,
-} from '@/lib/cross-platform/pre-publish-engine';
+import { runPrePublishCheck, quickPrePublishCheck } from '@/lib/cross-platform/pre-publish-engine';
 import type { BrandDNA } from '@/lib/types';
 import type { VoiceFingerprint } from '@/lib/voice-fingerprint';
 
@@ -29,10 +26,7 @@ export async function POST(request: NextRequest) {
     try {
       brandDNA = JSON.parse(brandDnaJson);
     } catch {
-      return NextResponse.json(
-        { error: 'Invalid Brand DNA JSON' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid Brand DNA JSON' }, { status: 400 });
     }
 
     let fingerprint: VoiceFingerprint | null = null;
@@ -85,9 +79,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('Pre-publish check error:', error);
-    return NextResponse.json(
-      { error: 'Pre-publish check failed' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Pre-publish check failed' }, { status: 500 });
   }
 }

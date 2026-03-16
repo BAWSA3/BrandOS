@@ -62,7 +62,7 @@ export function useDriftAlerts(): DriftAlertsState {
         body: JSON.stringify({ alertId: id }),
       });
       if (res.ok) {
-        setAlerts(prev => prev.filter(a => a.id !== id));
+        setAlerts((prev) => prev.filter((a) => a.id !== id));
       }
     } catch (err) {
       console.error('Failed to dismiss alert:', err);

@@ -47,12 +47,18 @@ const BOTTOM_LOGS = [
 
 function getLogColor(type: string): string {
   switch (type) {
-    case 'success': return 'rgba(0, 200, 100, 0.7)';
-    case 'system': return 'rgba(0, 71, 255, 0.8)';
-    case 'command': return 'rgba(180, 140, 255, 0.7)';
-    case 'comment': return 'rgba(0, 0, 0, 0.35)';
-    case 'divider': return 'rgba(0, 0, 0, 0.25)';
-    default: return 'rgba(0, 0, 0, 0.5)';
+    case 'success':
+      return 'rgba(0, 200, 100, 0.7)';
+    case 'system':
+      return 'rgba(0, 71, 255, 0.8)';
+    case 'command':
+      return 'rgba(180, 140, 255, 0.7)';
+    case 'comment':
+      return 'rgba(0, 0, 0, 0.35)';
+    case 'divider':
+      return 'rgba(0, 0, 0, 0.25)';
+    default:
+      return 'rgba(0, 0, 0, 0.5)';
   }
 }
 
@@ -64,7 +70,7 @@ export default function SystemLogsBg() {
   useEffect(() => {
     if (visibleLines < LOG_LINES.length) {
       const timer = setTimeout(() => {
-        setVisibleLines(v => v + 1);
+        setVisibleLines((v) => v + 1);
       }, 150);
       return () => clearTimeout(timer);
     }
@@ -73,7 +79,7 @@ export default function SystemLogsBg() {
   // Animate progress bar
   useEffect(() => {
     const interval = setInterval(() => {
-      setProgressIndex(i => (i + 1) % BOTTOM_LOGS.length);
+      setProgressIndex((i) => (i + 1) % BOTTOM_LOGS.length);
     }, 800);
     return () => clearInterval(interval);
   }, []);
@@ -187,8 +193,8 @@ export default function SystemLogsBg() {
         }}
       >
         <div>┌──────────────────┐</div>
-        <div>│  BRAND ANALYSIS  │</div>
-        <div>│  MODULE: ACTIVE  │</div>
+        <div>│ BRAND ANALYSIS │</div>
+        <div>│ MODULE: ACTIVE │</div>
         <div>└──────────────────┘</div>
       </motion.div>
 
@@ -207,8 +213,8 @@ export default function SystemLogsBg() {
         }}
       >
         <div>┌──────────────────┐</div>
-        <div>│  DNA SEQUENCER   │</div>
-        <div>│  STATUS: READY   │</div>
+        <div>│ DNA SEQUENCER │</div>
+        <div>│ STATUS: READY │</div>
         <div>└──────────────────┘</div>
       </motion.div>
     </div>

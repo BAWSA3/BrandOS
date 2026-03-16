@@ -38,7 +38,7 @@ export default function VisualConcepts() {
     setError('');
 
     try {
-      const body = isDataUrl 
+      const body = isDataUrl
         ? { imageBase64: url, brandDNA, action: 'analyze' }
         : { imageUrl: url, brandDNA, action: 'analyze' };
 
@@ -55,9 +55,7 @@ export default function VisualConcepts() {
       }
 
       setInspirations((prev) =>
-        prev.map((i) =>
-          i.id === newInspiration.id ? { ...i, analysis: data } : i
-        )
+        prev.map((i) => (i.id === newInspiration.id ? { ...i, analysis: data } : i))
       );
     } catch (err) {
       console.error('Analysis failed:', err);
@@ -84,7 +82,7 @@ export default function VisualConcepts() {
       addInspiration(dataUrl, true);
     };
     reader.readAsDataURL(file);
-    
+
     // Reset file input
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
@@ -135,7 +133,7 @@ export default function VisualConcepts() {
 
   const copyBrief = () => {
     if (!concept) return;
-    
+
     const text = `# ${concept.title}
 
 ${concept.description}
@@ -218,7 +216,7 @@ ${concept.doNotUse?.map((d) => `- ${d}`).join('\n')}`.trim();
                 <p className="text-sm text-muted mb-4">
                   Paste a Pinterest image URL or upload an image file.
                 </p>
-                
+
                 <div className="flex gap-2 mb-4">
                   <input
                     type="text"
@@ -359,9 +357,7 @@ ${concept.doNotUse?.map((d) => `- ${d}`).join('\n')}`.trim();
                           className="w-16 h-16 rounded-lg border border-border"
                           style={{ backgroundColor: color }}
                         />
-                        <span className="text-xs text-muted mt-2 block font-mono">
-                          {color}
-                        </span>
+                        <span className="text-xs text-muted mt-2 block font-mono">{color}</span>
                       </div>
                     ))}
                   </div>
@@ -372,10 +368,7 @@ ${concept.doNotUse?.map((d) => `- ${d}`).join('\n')}`.trim();
                   <h3 className="text-xs uppercase tracking-widest text-muted mb-4">Mood</h3>
                   <div className="flex flex-wrap gap-2">
                     {concept.moodKeywords.map((kw, i) => (
-                      <span
-                        key={i}
-                        className="px-3 py-1.5 bg-surface rounded-full text-sm"
-                      >
+                      <span key={i} className="px-3 py-1.5 bg-surface rounded-full text-sm">
                         {kw}
                       </span>
                     ))}
@@ -399,9 +392,7 @@ ${concept.doNotUse?.map((d) => `- ${d}`).join('\n')}`.trim();
                     <p className="text-sm">{concept.typography}</p>
                   </div>
                   <div>
-                    <h3 className="text-xs uppercase tracking-widest text-muted mb-4">
-                      Imagery
-                    </h3>
+                    <h3 className="text-xs uppercase tracking-widest text-muted mb-4">Imagery</h3>
                     <p className="text-sm">{concept.imagery}</p>
                   </div>
                 </div>
@@ -409,9 +400,7 @@ ${concept.doNotUse?.map((d) => `- ${d}`).join('\n')}`.trim();
                 {/* Do Not Use */}
                 {concept.doNotUse && concept.doNotUse.length > 0 && (
                   <div className="mb-8">
-                    <h3 className="text-xs uppercase tracking-widest text-red-500 mb-4">
-                      Avoid
-                    </h3>
+                    <h3 className="text-xs uppercase tracking-widest text-red-500 mb-4">Avoid</h3>
                     <div className="space-y-2">
                       {concept.doNotUse.map((item, i) => (
                         <p key={i} className="text-sm flex items-start gap-2">
@@ -437,4 +426,3 @@ ${concept.doNotUse?.map((d) => `- ${d}`).join('\n')}`.trim();
     </div>
   );
 }
-

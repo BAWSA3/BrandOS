@@ -10,7 +10,11 @@ export async function GET(request: NextRequest) {
   const allowed = ['pbs.twimg.com', 'abs.twimg.com', 'avatars.githubusercontent.com'];
   try {
     const parsed = new URL(url);
-    if (!allowed.some(domain => parsed.hostname === domain || parsed.hostname.endsWith('.' + domain))) {
+    if (
+      !allowed.some(
+        (domain) => parsed.hostname === domain || parsed.hostname.endsWith('.' + domain)
+      )
+    ) {
       return NextResponse.json({ error: 'Domain not allowed' }, { status: 403 });
     }
   } catch {

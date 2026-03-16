@@ -35,9 +35,8 @@ export function ParallaxLayer({
     const base: React.CSSProperties = {
       width: size,
       height: size,
-      background: shape === 'ring'
-        ? 'transparent'
-        : `radial-gradient(circle, ${color} 0%, transparent 70%)`,
+      background:
+        shape === 'ring' ? 'transparent' : `radial-gradient(circle, ${color} 0%, transparent 70%)`,
       filter: `blur(${blur}px)`,
     };
 
@@ -93,7 +92,10 @@ export const parallaxPresets = {
   }),
 
   // Medium floating blob
-  floatingBlob: (color: string, position: ParallaxLayerConfig['position']): ParallaxLayerConfig => ({
+  floatingBlob: (
+    color: string,
+    position: ParallaxLayerConfig['position']
+  ): ParallaxLayerConfig => ({
     id: `blob-${Math.random().toString(36).slice(2, 9)}`,
     position,
     size: '150px',

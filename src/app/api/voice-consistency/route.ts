@@ -43,9 +43,7 @@ async function fetchStoredFingerprint(username: string, origin: string) {
 
     if (!response.ok) return null;
     const data = await response.json();
-    return data.profile?.created_at
-      ? `Account created ${data.profile.created_at}.`
-      : null;
+    return data.profile?.created_at ? `Account created ${data.profile.created_at}.` : null;
   } catch {
     return null;
   }
@@ -80,10 +78,7 @@ export async function POST(request: NextRequest) {
     const tweets = await fetchTweets(cleanUsername, origin);
 
     if (!tweets || tweets.length === 0) {
-      return NextResponse.json(
-        { error: 'Could not fetch tweets for this user' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Could not fetch tweets for this user' }, { status: 404 });
     }
 
     const fallbackDescription = await fetchStoredFingerprint(cleanUsername, origin);
@@ -104,10 +99,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (!report) {
-      return NextResponse.json(
-        { error: 'Voice consistency analysis failed' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'Voice consistency analysis failed' }, { status: 500 });
     }
 
     return NextResponse.json({
@@ -120,9 +112,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('Voice consistency API error:', error);
-    return NextResponse.json(
-      { error: 'An unexpected error occurred' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }

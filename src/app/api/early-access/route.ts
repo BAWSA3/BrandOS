@@ -38,7 +38,7 @@ export async function POST(request: Request) {
 
     const entries = readEntries();
 
-    if (entries.some(e => e.email === email.toLowerCase())) {
+    if (entries.some((e) => e.email === email.toLowerCase())) {
       return NextResponse.json({ message: 'Already signed up' });
     }
 
@@ -66,7 +66,7 @@ export async function GET(request: Request) {
     }
 
     const entries = readEntries();
-    const referrals = entries.filter(e => e.ref === ref.toUpperCase());
+    const referrals = entries.filter((e) => e.ref === ref.toUpperCase());
 
     return NextResponse.json({
       code: ref.toUpperCase(),

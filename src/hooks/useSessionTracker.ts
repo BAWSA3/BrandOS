@@ -50,10 +50,7 @@ export function useSessionTracker(feature: string) {
       if (navigator.sendBeacon) {
         navigator.sendBeacon(
           '/api/sessions',
-          new Blob(
-            [JSON.stringify({ sessionId: id })],
-            { type: 'application/json' }
-          )
+          new Blob([JSON.stringify({ sessionId: id })], { type: 'application/json' })
         );
       } else {
         fetch('/api/sessions', {

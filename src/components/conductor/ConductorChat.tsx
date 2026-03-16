@@ -85,7 +85,9 @@ export default function ConductorChat({ brandDNA, brandId }: ConductorChatProps)
       }
 
       // Check for checkpoint
-      if (data.workflow?.steps?.some((s: WorkflowStep) => s.checkpoint && s.status === 'in_progress')) {
+      if (
+        data.workflow?.steps?.some((s: WorkflowStep) => s.checkpoint && s.status === 'in_progress')
+      ) {
         setPendingApproval(true);
       } else {
         setPendingApproval(false);
@@ -137,9 +139,9 @@ export default function ConductorChat({ brandDNA, brandId }: ConductorChatProps)
   };
 
   const quickActions = [
-    { text: "Create a product launch campaign", icon: "🎯" },
-    { text: "Write a Twitter thread about our brand", icon: "✍️" },
-    { text: "Analyze our content performance", icon: "📊" },
+    { text: 'Create a product launch campaign', icon: '🎯' },
+    { text: 'Write a Twitter thread about our brand', icon: '✍️' },
+    { text: 'Analyze our content performance', icon: '📊' },
   ];
 
   return (
@@ -155,9 +157,15 @@ export default function ConductorChat({ brandDNA, brandId }: ConductorChatProps)
                   🎼
                 </div>
                 <div className="absolute -bottom-1 -right-1 flex -space-x-1">
-                  <span className="w-5 h-5 rounded-full bg-neutral-900 flex items-center justify-center text-[10px] border border-neutral-700">🎯</span>
-                  <span className="w-5 h-5 rounded-full bg-neutral-900 flex items-center justify-center text-[10px] border border-neutral-700">✍️</span>
-                  <span className="w-5 h-5 rounded-full bg-neutral-900 flex items-center justify-center text-[10px] border border-neutral-700">📊</span>
+                  <span className="w-5 h-5 rounded-full bg-neutral-900 flex items-center justify-center text-[10px] border border-neutral-700">
+                    🎯
+                  </span>
+                  <span className="w-5 h-5 rounded-full bg-neutral-900 flex items-center justify-center text-[10px] border border-neutral-700">
+                    ✍️
+                  </span>
+                  <span className="w-5 h-5 rounded-full bg-neutral-900 flex items-center justify-center text-[10px] border border-neutral-700">
+                    📊
+                  </span>
                 </div>
               </div>
               <div>
@@ -167,17 +175,15 @@ export default function ConductorChat({ brandDNA, brandId }: ConductorChatProps)
                     Orchestrator
                   </span>
                 </h2>
-                <p className="text-sm text-neutral-400">
-                  Intelligent routing for {brandDNA.name}
-                </p>
+                <p className="text-sm text-neutral-400">Intelligent routing for {brandDNA.name}</p>
               </div>
             </div>
 
             <button
               onClick={() => setShowWorkflowPanel(!showWorkflowPanel)}
               className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${
-                showWorkflowPanel 
-                  ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30' 
+                showWorkflowPanel
+                  ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30'
                   : 'bg-neutral-800 text-neutral-400 hover:text-white'
               }`}
             >
@@ -201,11 +207,7 @@ export default function ConductorChat({ brandDNA, brandId }: ConductorChatProps)
 
           {/* Loading */}
           {isLoading && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="flex gap-3"
-            >
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex gap-3">
               <div className="w-10 h-10 rounded-xl bg-indigo-500/20 flex items-center justify-center text-lg border border-indigo-500/30">
                 <motion.span
                   animate={{ rotate: [0, 10, -10, 0] }}
@@ -258,7 +260,9 @@ export default function ConductorChat({ brandDNA, brandId }: ConductorChatProps)
           {pendingApproval && (
             <div className="mb-3 p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 text-sm flex items-center gap-2">
               <span>⏸️</span>
-              <span>Awaiting your approval to continue. Type "yes" to proceed or "no" to pause.</span>
+              <span>
+                Awaiting your approval to continue. Type "yes" to proceed or "no" to pause.
+              </span>
             </div>
           )}
           <div className="flex gap-3 items-end">
@@ -280,7 +284,12 @@ export default function ConductorChat({ brandDNA, brandId }: ConductorChatProps)
               className="px-4 py-3 rounded-xl font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white hover:from-indigo-500 hover:via-purple-500 hover:to-pink-500 shadow-lg shadow-indigo-500/25"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+                />
               </svg>
             </button>
           </div>
@@ -388,7 +397,7 @@ function MessageBubble({
         {!isUser && (
           <div
             className="w-10 h-10 rounded-xl flex items-center justify-center text-lg flex-shrink-0 border"
-            style={{ 
+            style={{
               backgroundColor: `${getAccentColor()}20`,
               borderColor: `${getAccentColor()}30`,
             }}
@@ -408,9 +417,9 @@ function MessageBubble({
           {/* Intent badge for assistant messages */}
           {!isUser && message.metadata?.intentClassification && (
             <div className="px-4 pt-2">
-              <span 
+              <span
                 className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full"
-                style={{ 
+                style={{
                   backgroundColor: `${getAccentColor()}15`,
                   color: getAccentColor(),
                 }}
@@ -450,9 +459,7 @@ function MessageBubble({
             <div className="px-4 pb-2 flex items-center gap-3 text-xs text-neutral-500">
               <span>{(message.metadata.processingTime / 1000).toFixed(1)}s</span>
               {message.metadata.confidence && (
-                <span>
-                  {Math.round(message.metadata.confidence * 100)}% confidence
-                </span>
+                <span>{Math.round(message.metadata.confidence * 100)}% confidence</span>
               )}
             </div>
           )}
@@ -467,11 +474,16 @@ function MessageBubble({
 function WorkflowPanel({ workflow }: { workflow: WorkflowPlan }) {
   const getStatusColor = (status: WorkflowStep['status']) => {
     switch (status) {
-      case 'completed': return 'text-emerald-400';
-      case 'in_progress': return 'text-amber-400';
-      case 'failed': return 'text-red-400';
-      case 'skipped': return 'text-neutral-500';
-      default: return 'text-neutral-600';
+      case 'completed':
+        return 'text-emerald-400';
+      case 'in_progress':
+        return 'text-amber-400';
+      case 'failed':
+        return 'text-red-400';
+      case 'skipped':
+        return 'text-neutral-500';
+      default:
+        return 'text-neutral-600';
     }
   };
 
@@ -480,16 +492,16 @@ function WorkflowPanel({ workflow }: { workflow: WorkflowPlan }) {
       {/* Workflow header */}
       <div className="p-3 rounded-xl bg-neutral-900 border border-neutral-800">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-xs text-neutral-400 uppercase tracking-wide">
-            {workflow.type}
-          </span>
-          <span className={`text-xs px-2 py-0.5 rounded-full ${
-            workflow.status === 'completed' 
-              ? 'bg-emerald-500/20 text-emerald-400' 
-              : workflow.status === 'executing'
-              ? 'bg-amber-500/20 text-amber-400'
-              : 'bg-neutral-800 text-neutral-400'
-          }`}>
+          <span className="text-xs text-neutral-400 uppercase tracking-wide">{workflow.type}</span>
+          <span
+            className={`text-xs px-2 py-0.5 rounded-full ${
+              workflow.status === 'completed'
+                ? 'bg-emerald-500/20 text-emerald-400'
+                : workflow.status === 'executing'
+                  ? 'bg-amber-500/20 text-amber-400'
+                  : 'bg-neutral-800 text-neutral-400'
+            }`}
+          >
             {workflow.status}
           </span>
         </div>
@@ -510,8 +522,8 @@ function WorkflowPanel({ workflow }: { workflow: WorkflowPlan }) {
               step.status === 'in_progress'
                 ? 'bg-amber-500/10 border-amber-500/30'
                 : step.status === 'completed'
-                ? 'bg-emerald-500/5 border-emerald-500/20'
-                : 'bg-neutral-900/50 border-neutral-800'
+                  ? 'bg-emerald-500/5 border-emerald-500/20'
+                  : 'bg-neutral-900/50 border-neutral-800'
             }`}
           >
             <div className="flex items-start gap-3">
@@ -520,12 +532,8 @@ function WorkflowPanel({ workflow }: { workflow: WorkflowPlan }) {
               </span>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm">
-                    {getAgentEmoji(step.agentName)}
-                  </span>
-                  <span className="text-xs text-neutral-400 capitalize">
-                    {step.agentName}
-                  </span>
+                  <span className="text-sm">{getAgentEmoji(step.agentName)}</span>
+                  <span className="text-xs text-neutral-400 capitalize">{step.agentName}</span>
                   {step.checkpoint && (
                     <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400">
                       checkpoint
@@ -562,21 +570,25 @@ function ArtifactCard({
 }) {
   const getIcon = () => {
     switch (artifact.type) {
-      case 'workflow-plan': return '🎼';
-      case 'campaign-plan': return '🎯';
-      case 'content': return '📝';
-      case 'analytics-report': return '📊';
-      case 'checkpoint': return '⏸️';
-      case 'summary': return '📋';
-      default: return '📄';
+      case 'workflow-plan':
+        return '🎼';
+      case 'campaign-plan':
+        return '🎯';
+      case 'content':
+        return '📝';
+      case 'analytics-report':
+        return '📊';
+      case 'checkpoint':
+        return '⏸️';
+      case 'summary':
+        return '📋';
+      default:
+        return '📄';
     }
   };
 
   return (
-    <div 
-      className="rounded-xl border overflow-hidden" 
-      style={{ borderColor: `${accentColor}30` }}
-    >
+    <div className="rounded-xl border overflow-hidden" style={{ borderColor: `${accentColor}30` }}>
       <button
         onClick={onToggle}
         className="w-full px-3 py-2.5 flex items-center justify-between hover:bg-neutral-800/50 transition-colors"
@@ -588,7 +600,9 @@ function ArtifactCard({
         </span>
         <svg
           className={`w-4 h-4 text-neutral-400 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
-          fill="none" stroke="currentColor" viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
         >
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
         </svg>
@@ -621,11 +635,13 @@ function ArtifactCard({
 function formatMessage(content: string): React.ReactNode {
   // Split by ** for bold and process
   const parts = content.split(/\*\*(.*?)\*\*/g);
-  return parts.map((part, i) => 
-    i % 2 === 1 ? <strong key={i} className="font-semibold text-white">{part}</strong> : part
+  return parts.map((part, i) =>
+    i % 2 === 1 ? (
+      <strong key={i} className="font-semibold text-white">
+        {part}
+      </strong>
+    ) : (
+      part
+    )
   );
 }
-
-
-
-

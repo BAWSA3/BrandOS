@@ -11,11 +11,20 @@ function isUrlSafe(urlString: string): boolean {
 
     const hostname = url.hostname.toLowerCase();
     const blockedPatterns = [
-      /^127\./, /^10\./, /^172\.(1[6-9]|2[0-9]|3[0-1])\./, /^192\.168\./,
-      /^169\.254\./, /^0\./, /^localhost$/i, /^.*\.local$/i, /^.*\.internal$/i,
-      /^\[::1\]$/, /^\[fc00:/i, /^\[fe80:/i,
+      /^127\./,
+      /^10\./,
+      /^172\.(1[6-9]|2[0-9]|3[0-1])\./,
+      /^192\.168\./,
+      /^169\.254\./,
+      /^0\./,
+      /^localhost$/i,
+      /^.*\.local$/i,
+      /^.*\.internal$/i,
+      /^\[::1\]$/,
+      /^\[fc00:/i,
+      /^\[fe80:/i,
     ];
-    return !blockedPatterns.some(p => p.test(hostname));
+    return !blockedPatterns.some((p) => p.test(hostname));
   } catch {
     return false;
   }
@@ -506,8 +515,28 @@ function detectCryptoSignals(profile: XProfileData): {
   }
 
   // Web3 keywords
-  const web3Keywords = ['web3', 'crypto', 'blockchain', 'defi', 'nft', 'dao', 'token', 'degen', 'wagmi', 'gm', 'fren', 'hodl', 'ape', 'moon', 'rekt', 'ser', 'anon', 'based', 'chad'];
-  web3Keywords.forEach(kw => {
+  const web3Keywords = [
+    'web3',
+    'crypto',
+    'blockchain',
+    'defi',
+    'nft',
+    'dao',
+    'token',
+    'degen',
+    'wagmi',
+    'gm',
+    'fren',
+    'hodl',
+    'ape',
+    'moon',
+    'rekt',
+    'ser',
+    'anon',
+    'based',
+    'chad',
+  ];
+  web3Keywords.forEach((kw) => {
     if (bio.includes(kw)) signals.push(`Web3 keyword: ${kw}`);
   });
 
@@ -522,13 +551,26 @@ function detectCryptoSignals(profile: XProfileData): {
   }
 
   // Crypto project indicators
-  if (bio.includes('founder') && (bio.includes('protocol') || bio.includes('labs') || bio.includes('dao'))) {
+  if (
+    bio.includes('founder') &&
+    (bio.includes('protocol') || bio.includes('labs') || bio.includes('dao'))
+  ) {
     signals.push('Crypto project founder');
   }
 
   // Chain mentions
-  const chains = ['ethereum', 'solana', 'bitcoin', 'polygon', 'arbitrum', 'optimism', 'base', 'avalanche', 'cosmos'];
-  chains.forEach(chain => {
+  const chains = [
+    'ethereum',
+    'solana',
+    'bitcoin',
+    'polygon',
+    'arbitrum',
+    'optimism',
+    'base',
+    'avalanche',
+    'cosmos',
+  ];
+  chains.forEach((chain) => {
     if (bio.includes(chain)) signals.push(`Chain mention: ${chain}`);
   });
 
@@ -552,20 +594,22 @@ interface InfluenceAnalysis {
 
 function analyzeInfluence(profile: XProfileData): InfluenceAnalysis {
   // Support both flat and nested metrics properties
-  const followers = (profile as any).followers_count || profile.public_metrics?.followers_count || 0;
-  const following = (profile as any).following_count || profile.public_metrics?.following_count || 0;
+  const followers =
+    (profile as any).followers_count || profile.public_metrics?.followers_count || 0;
+  const following =
+    (profile as any).following_count || profile.public_metrics?.following_count || 0;
   const tweets = (profile as any).tweet_count || profile.public_metrics?.tweet_count || 0;
   const listed = (profile as any).listed_count || profile.public_metrics?.listed_count || 0;
   const bioLength = (profile.description || '').length;
-  
+
   const signals: string[] = [];
   let authorityScore = 0;
-  
+
   // Determine influence tier
   let tier: InfluenceTier;
   let tierLabel: string;
   let followerTierBonus: number;
-  
+
   if (followers >= 1000000) {
     tier = 'elite';
     tierLabel = 'ELITE (1M+ followers)';
@@ -592,7 +636,7 @@ function analyzeInfluence(profile: XProfileData): InfluenceAnalysis {
     followerTierBonus = 0;
     signals.push('Emerging tier: Building audience');
   }
-  
+
   // Authority signals from follower/following ratio
   const ratio = followers / Math.max(following, 1);
   if (ratio >= 100) {
@@ -608,11 +652,13 @@ function analyzeInfluence(profile: XProfileData): InfluenceAnalysis {
     authorityScore += 5;
     signals.push(`Growing authority ratio: ${ratio.toFixed(1)}:1`);
   }
-  
+
   // Listed count authority bonus (being on lists = others curate you)
   if (listed >= 50000) {
     authorityScore += 25;
-    signals.push(`Exceptional curation: ${listed.toLocaleString()} lists (top-tier thought leader)`);
+    signals.push(
+      `Exceptional curation: ${listed.toLocaleString()} lists (top-tier thought leader)`
+    );
   } else if (listed >= 10000) {
     authorityScore += 20;
     signals.push(`High curation: ${listed.toLocaleString()} lists (recognized authority)`);
@@ -623,19 +669,17 @@ function analyzeInfluence(profile: XProfileData): InfluenceAnalysis {
     authorityScore += 5;
     signals.push(`Growing curation: ${listed.toLocaleString()} lists`);
   }
-  
+
   // Content velocity (tweets per follower suggests engagement style)
   const tweetsPerFollower = tweets / Math.max(followers, 1);
   if (tweetsPerFollower < 0.01 && followers >= 100000) {
     signals.push('Low tweet volume relative to audience = high-impact, selective posting');
     authorityScore += 5;
   }
-  
+
   // Detect intentional minimalism (large accounts)
-  const isIntentionallyMinimal = (
-    tier === 'elite' || tier === 'influential' || tier === 'notable'
-  );
-  
+  const isIntentionallyMinimal = tier === 'elite' || tier === 'influential' || tier === 'notable';
+
   return {
     tier,
     tierLabel,
@@ -668,8 +712,10 @@ export function analyzeAccountAuthenticity(
   profile: XProfileData,
   engagementRate?: number // Optional: avg engagement rate from tweets
 ): AuthenticityAnalysis {
-  const followers = (profile as any).followers_count || profile.public_metrics?.followers_count || 0;
-  const following = (profile as any).following_count || profile.public_metrics?.following_count || 0;
+  const followers =
+    (profile as any).followers_count || profile.public_metrics?.followers_count || 0;
+  const following =
+    (profile as any).following_count || profile.public_metrics?.following_count || 0;
   const tweets = (profile as any).tweet_count || profile.public_metrics?.tweet_count || 0;
   const createdAt = (profile as any).created_at || profile.created_at;
 
@@ -793,7 +839,7 @@ export interface ActivityAnalysis {
 export function analyzeActivityLevel(profile: XProfileData): ActivityAnalysis {
   const tweets = (profile as any).tweet_count || profile.public_metrics?.tweet_count || 0;
   const createdAtRaw = (profile as any).created_at || profile.created_at;
-  
+
   // Validate created_at date
   const createdAtDate = createdAtRaw ? new Date(createdAtRaw) : null;
   const isValidDate = createdAtDate && !isNaN(createdAtDate.getTime());
@@ -902,7 +948,7 @@ export function analyzeActivityLevel(profile: XProfileData): ActivityAnalysis {
 export const xBrandScorePrompt = (profile: XProfileData) => {
   const cryptoAnalysis = detectCryptoSignals(profile);
   const influenceAnalysis = analyzeInfluence(profile);
-  
+
   // Base prompt with influence tier context
   let prompt = `You are an expert brand strategist analyzing an X (Twitter) creator. A brand is a REPUTATION — what someone is known for, how they demonstrate it through content, and why they should be remembered. Your goal is to evaluate brand effectiveness based entirely on CONTENT and its impact on reputation.
 
@@ -922,7 +968,7 @@ INFLUENCE TIER: ${influenceAnalysis.tierLabel}
 ═══════════════════════════════════════════════════════════════════════
 
 REPUTATION SIGNALS:
-${influenceAnalysis.signals.map(s => `✦ ${s}`).join('\n')}
+${influenceAnalysis.signals.map((s) => `✦ ${s}`).join('\n')}
 
 SCORING ADJUSTMENT: +${influenceAnalysis.followerTierBonus + influenceAnalysis.authorityScore} bonus points available
 - Tier Bonus: +${influenceAnalysis.followerTierBonus} (for ${influenceAnalysis.tier} tier)
@@ -933,7 +979,7 @@ SCORING ADJUSTMENT: +${influenceAnalysis.followerTierBonus + influenceAnalysis.a
     prompt += `
 
 CRYPTO/WEB3 SIGNALS DETECTED:
-${cryptoAnalysis.signals.map(s => `- ${s}`).join('\n')}
+${cryptoAnalysis.signals.map((s) => `- ${s}`).join('\n')}
 
 CRYPTO-SPECIFIC STANDARDS:
 - ENS domains (.eth) = STRONG positive for brand consistency
@@ -1023,8 +1069,12 @@ Return ONLY valid JSON:
     "strengths": ["strength 1", "strength 2"],
     "growthTip": "Specific tip appropriate for their tier and archetype"
   },
-  "influenceTier": "${influenceAnalysis.tier}"${cryptoAnalysis.isCrypto ? `,
-  "cryptoContext": true` : ''}
+  "influenceTier": "${influenceAnalysis.tier}"${
+    cryptoAnalysis.isCrypto
+      ? `,
+  "cryptoContext": true`
+      : ''
+  }
 }`;
 
   return prompt;
@@ -1061,11 +1111,15 @@ export interface ContentIdentitySignals {
 export const enhancedBrandScorePrompt = (input: TweetAnalysisInput) => {
   const { profile, tweets, stats, contentPatterns } = input;
   const cryptoAnalysis = detectCryptoSignals(profile);
-  
+
   // Get sample tweets for analysis (first 20)
-  const sampleTweets = tweets.slice(0, 20).map((t, i) => 
-    `${i + 1}. "${t.text.substring(0, 200)}${t.text.length > 200 ? '...' : ''}" (❤️${t.likes} 🔁${t.retweets} 💬${t.replies})`
-  ).join('\n');
+  const sampleTweets = tweets
+    .slice(0, 20)
+    .map(
+      (t, i) =>
+        `${i + 1}. "${t.text.substring(0, 200)}${t.text.length > 200 ? '...' : ''}" (❤️${t.likes} 🔁${t.retweets} 💬${t.replies})`
+    )
+    .join('\n');
 
   return `You are an expert brand strategist analyzing an X (Twitter) creator's CONTENT to evaluate their brand (reputation). A brand is what someone is known for, how they demonstrate it through content, and why they should be remembered.
 
@@ -1100,10 +1154,14 @@ CONTENT PATTERNS:
 SAMPLE TWEETS (Most Recent):
 ${sampleTweets}
 
-${cryptoAnalysis.isCrypto ? `
+${
+  cryptoAnalysis.isCrypto
+    ? `
 CRYPTO/WEB3 CONTEXT DETECTED:
-${cryptoAnalysis.signals.map(s => `- ${s}`).join('\n')}
-` : ''}
+${cryptoAnalysis.signals.map((s) => `- ${s}`).join('\n')}
+`
+    : ''
+}
 
 Perform a DEEP ANALYSIS — brand = reputation, built entirely through content:
 
@@ -1190,8 +1248,12 @@ Return ONLY valid JSON:
     "Specific content idea 1 based on what works for them",
     "Specific content idea 2",
     "Specific content idea 3"
-  ]${cryptoAnalysis.isCrypto ? `,
-  "cryptoContext": true` : ''}
+  ]${
+    cryptoAnalysis.isCrypto
+      ? `,
+  "cryptoContext": true`
+      : ''
+  }
 }`;
 };
 
@@ -1245,9 +1307,9 @@ export interface BioVibeAnalysis {
   emojiCount: number;
   emojiPersonality: 'minimal' | 'balanced' | 'expressive' | 'highly expressive';
   vibeSpectrum: {
-    playful: number;  // 0-100
-    casual: number;   // 0-100
-    serious: number;  // 0-100
+    playful: number; // 0-100
+    casual: number; // 0-100
+    serious: number; // 0-100
   };
   toneHint: 'casual' | 'playful' | 'neutral' | 'serious';
   firstPersonUsage: 'I' | 'we' | 'none' | 'mixed';
@@ -1277,26 +1339,26 @@ export interface BrandDNA {
   secondaryColor: { hex: string; name: string };
   archetype: string;
   archetypeEmoji: string;
-  
+
   // Voice Profile
   voiceProfile: {
     primary: string; // e.g., "Authoritative Expert"
     tone: string; // e.g., "Professional with warmth"
     energy: 'high' | 'medium' | 'low' | 'calm';
   };
-  
+
   // Positioning
   inferredMission: string;
   targetAudience: string;
   uniqueDifferentiator: string;
   contentPillars: string[];
-  
+
   // Scores
   coherenceScore: number; // How well elements align
   differentiationScore: number; // How unique is this brand
   memorabilityScore: number; // How sticky is this brand
   trustScore: number; // How credible does it feel
-  
+
   // Keywords
   brandKeywords: string[];
   avoidKeywords: string[];
@@ -1330,12 +1392,15 @@ export interface CompleteBrandIdentity {
 // PROFILE IMAGE VISION ANALYSIS
 // =============================================================================
 
-export const profileImageAnalysisPrompt = (imageDescription: string, profileContext: {
-  name: string;
-  username: string;
-  bio?: string;
-  followers: number;
-}) => `You are a brand identity expert analyzing a profile picture for brand signals.
+export const profileImageAnalysisPrompt = (
+  imageDescription: string,
+  profileContext: {
+    name: string;
+    username: string;
+    bio?: string;
+    followers: number;
+  }
+) => `You are a brand identity expert analyzing a profile picture for brand signals.
 
 PROFILE CONTEXT:
 - Name: ${profileContext.name}
@@ -1401,32 +1466,79 @@ Return ONLY valid JSON:
 
 export function analyzeBioLinguistics(bio: string, name: string): BioLinguistics {
   const trimmedBio = bio?.trim() || '';
-  
+
   // Word and sentence count
-  const words = trimmedBio.split(/\s+/).filter(w => w.length > 0);
+  const words = trimmedBio.split(/\s+/).filter((w) => w.length > 0);
   const wordCount = words.length;
-  const sentences = trimmedBio.split(/[.!?]+/).filter(s => s.trim().length > 0);
+  const sentences = trimmedBio.split(/[.!?]+/).filter((s) => s.trim().length > 0);
   const sentenceCount = sentences.length;
-  
+
   // Structure detection
   let structure: BioLinguistics['structure'] = 'narrative';
   if (wordCount === 0) structure = 'minimal';
   else if (wordCount <= 5) structure = 'tagline';
-  else if (trimmedBio.includes('|') || trimmedBio.includes('•') || trimmedBio.includes('→')) structure = 'bullet';
+  else if (trimmedBio.includes('|') || trimmedBio.includes('•') || trimmedBio.includes('→'))
+    structure = 'bullet';
   else if (trimmedBio.includes('\n')) structure = 'hybrid';
   else if (wordCount <= 15) structure = 'minimal';
-  
+
   // Power words detection
   const powerWordsList = {
-    authority: ['expert', 'leader', 'founder', 'ceo', 'director', 'head', 'chief', 'senior', 'principal', 'award', 'recognized', 'certified', 'official', 'verified'],
-    action: ['building', 'creating', 'helping', 'growing', 'scaling', 'launching', 'shipping', 'making', 'designing', 'developing', 'transforming'],
-    emotion: ['passionate', 'love', 'obsessed', 'excited', 'curious', 'dedicated', 'inspired', 'driven'],
-    trust: ['trusted', 'proven', 'featured', 'backed', 'supported', 'partnered', 'advised', 'mentioned', 'published']
+    authority: [
+      'expert',
+      'leader',
+      'founder',
+      'ceo',
+      'director',
+      'head',
+      'chief',
+      'senior',
+      'principal',
+      'award',
+      'recognized',
+      'certified',
+      'official',
+      'verified',
+    ],
+    action: [
+      'building',
+      'creating',
+      'helping',
+      'growing',
+      'scaling',
+      'launching',
+      'shipping',
+      'making',
+      'designing',
+      'developing',
+      'transforming',
+    ],
+    emotion: [
+      'passionate',
+      'love',
+      'obsessed',
+      'excited',
+      'curious',
+      'dedicated',
+      'inspired',
+      'driven',
+    ],
+    trust: [
+      'trusted',
+      'proven',
+      'featured',
+      'backed',
+      'supported',
+      'partnered',
+      'advised',
+      'mentioned',
+      'published',
+    ],
   };
-  
+
   const bioLower = trimmedBio.toLowerCase();
   const powerWords: BioLinguistics['powerWords'] = [];
-  
+
   for (const [type, wordList] of Object.entries(powerWordsList)) {
     for (const word of wordList) {
       if (bioLower.includes(word)) {
@@ -1434,9 +1546,10 @@ export function analyzeBioLinguistics(bio: string, name: string): BioLinguistics
       }
     }
   }
-  
+
   // Emoji analysis
-  const emojiRegex = /[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{1F600}-\u{1F64F}]|[\u{1F680}-\u{1F6FF}]/gu;
+  const emojiRegex =
+    /[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{1F600}-\u{1F64F}]|[\u{1F680}-\u{1F6FF}]/gu;
   const emojis = trimmedBio.match(emojiRegex) || [];
   const emojiPersonalities: Record<string, string> = {
     '🚀': 'ambitious/growth',
@@ -1454,34 +1567,49 @@ export function analyzeBioLinguistics(bio: string, name: string): BioLinguistics
     '❤️': 'passionate/loving',
     '🧠': 'intellectual/smart',
   };
-  
-  const emojiTypes = emojis.map(e => emojiPersonalities[e] || 'expressive').filter((v, i, a) => a.indexOf(v) === i);
+
+  const emojiTypes = emojis
+    .map((e) => emojiPersonalities[e] || 'expressive')
+    .filter((v, i, a) => a.indexOf(v) === i);
   let emojiPersonality = 'neutral';
   if (emojis.length === 0) emojiPersonality = 'minimal/serious';
   else if (emojis.length <= 2) emojiPersonality = 'balanced';
   else if (emojis.length <= 5) emojiPersonality = 'expressive';
   else emojiPersonality = 'highly expressive/casual';
-  
+
   // Voice spectrum calculation
-  const hasAuthority = powerWords.some(p => p.type === 'authority');
-  const hasAction = powerWords.some(p => p.type === 'action');
-  const hasCasualIndicators = emojis.length > 2 || bioLower.includes('lol') || bioLower.includes('btw') || bioLower.includes('tbh');
-  const hasPlayfulIndicators = emojis.length > 3 || bioLower.includes('!') || bioLower.includes('😂') || bioLower.includes('🤣');
-  
+  const hasAuthority = powerWords.some((p) => p.type === 'authority');
+  const hasAction = powerWords.some((p) => p.type === 'action');
+  const hasCasualIndicators =
+    emojis.length > 2 ||
+    bioLower.includes('lol') ||
+    bioLower.includes('btw') ||
+    bioLower.includes('tbh');
+  const hasPlayfulIndicators =
+    emojis.length > 3 ||
+    bioLower.includes('!') ||
+    bioLower.includes('😂') ||
+    bioLower.includes('🤣');
+
   const voiceSpectrum = {
-    professional: hasAuthority ? 70 : (structure === 'bullet' ? 60 : 40),
+    professional: hasAuthority ? 70 : structure === 'bullet' ? 60 : 40,
     casual: hasCasualIndicators ? 70 : 30,
-    authoritative: hasAuthority ? 80 : (powerWords.length > 2 ? 50 : 30),
-    approachable: bioLower.includes('dm') || bioLower.includes('help') || bioLower.includes('open') ? 80 : 50,
+    authoritative: hasAuthority ? 80 : powerWords.length > 2 ? 50 : 30,
+    approachable:
+      bioLower.includes('dm') || bioLower.includes('help') || bioLower.includes('open') ? 80 : 50,
     serious: !hasPlayfulIndicators && emojis.length === 0 ? 70 : 30,
-    playful: hasPlayfulIndicators ? 70 : (emojis.length > 0 ? 40 : 20),
+    playful: hasPlayfulIndicators ? 70 : emojis.length > 0 ? 40 : 20,
   };
-  
+
   // CTA analysis
   let ctaStrength = 0;
   let ctaType: BioLinguistics['ctaType'] = 'none';
-  
-  if (bioLower.includes('dm') || bioLower.includes('message me') || bioLower.includes('reach out')) {
+
+  if (
+    bioLower.includes('dm') ||
+    bioLower.includes('message me') ||
+    bioLower.includes('reach out')
+  ) {
     ctaStrength = 70;
     ctaType = 'soft';
   }
@@ -1489,23 +1617,43 @@ export function analyzeBioLinguistics(bio: string, name: string): BioLinguistics
     ctaStrength = 80;
     ctaType = 'direct';
   }
-  if (bioLower.includes('join') || bioLower.includes('subscribe') || bioLower.includes('sign up') || bioLower.includes('now')) {
+  if (
+    bioLower.includes('join') ||
+    bioLower.includes('subscribe') ||
+    bioLower.includes('sign up') ||
+    bioLower.includes('now')
+  ) {
     ctaStrength = 90;
     ctaType = 'urgent';
   }
-  
+
   // Unique value prop detection
   let uniqueValueProp: string | null = null;
-  const helpingMatch = bioLower.match(/help(?:ing)?\s+(\w+(?:\s+\w+){0,5})\s+(?:to\s+)?(\w+(?:\s+\w+){0,5})/);
+  const helpingMatch = bioLower.match(
+    /help(?:ing)?\s+(\w+(?:\s+\w+){0,5})\s+(?:to\s+)?(\w+(?:\s+\w+){0,5})/
+  );
   if (helpingMatch) {
     uniqueValueProp = `Helps ${helpingMatch[1]} ${helpingMatch[2]}`;
   }
-  
+
   // Target audience clarity
-  const audienceIndicators = ['for', 'helping', 'serving', 'founders', 'creators', 'developers', 'marketers', 'designers', 'entrepreneurs', 'teams', 'companies', 'startups'];
-  const hasAudienceIndicator = audienceIndicators.some(ind => bioLower.includes(ind));
-  const targetAudienceClarity = hasAudienceIndicator ? 70 : (uniqueValueProp ? 50 : 30);
-  
+  const audienceIndicators = [
+    'for',
+    'helping',
+    'serving',
+    'founders',
+    'creators',
+    'developers',
+    'marketers',
+    'designers',
+    'entrepreneurs',
+    'teams',
+    'companies',
+    'startups',
+  ];
+  const hasAudienceIndicator = audienceIndicators.some((ind) => bioLower.includes(ind));
+  const targetAudienceClarity = hasAudienceIndicator ? 70 : uniqueValueProp ? 50 : 30;
+
   // First person usage
   let firstPersonUsage: BioLinguistics['firstPersonUsage'] = 'none';
   const hasI = /\bi\b/i.test(trimmedBio);
@@ -1513,7 +1661,7 @@ export function analyzeBioLinguistics(bio: string, name: string): BioLinguistics
   if (hasI && hasWe) firstPersonUsage = 'mixed';
   else if (hasI) firstPersonUsage = 'I';
   else if (hasWe) firstPersonUsage = 'we';
-  
+
   return {
     structure,
     wordCount,
@@ -1543,7 +1691,8 @@ export function analyzeBioVibe(bio: string): BioVibeAnalysis {
   const bioLower = trimmedBio.toLowerCase();
 
   // Emoji analysis (personality/vibe indicator)
-  const emojiRegex = /[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{1F600}-\u{1F64F}]|[\u{1F680}-\u{1F6FF}]/gu;
+  const emojiRegex =
+    /[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{1F600}-\u{1F64F}]|[\u{1F680}-\u{1F6FF}]/gu;
   const emojis = trimmedBio.match(emojiRegex) || [];
   const emojiCount = emojis.length;
 
@@ -1556,18 +1705,32 @@ export function analyzeBioVibe(bio: string): BioVibeAnalysis {
 
   // Casual/playful indicators (vibe signals, NOT professional signals)
   const casualIndicators = ['lol', 'btw', 'tbh', 'vibes', 'ngl', 'idk', 'imo', 'fwiw', 'icymi'];
-  const playfulIndicators = ['chaos', 'shitpost', 'degen', 'ape', 'anon', 'fren', 'gm', 'wagmi', 'ngmi', 'probably nothing'];
+  const playfulIndicators = [
+    'chaos',
+    'shitpost',
+    'degen',
+    'ape',
+    'anon',
+    'fren',
+    'gm',
+    'wagmi',
+    'ngmi',
+    'probably nothing',
+  ];
 
-  const hasCasualIndicators = casualIndicators.some(ind => bioLower.includes(ind)) || emojiCount > 2;
-  const hasPlayfulIndicators = playfulIndicators.some(ind => bioLower.includes(ind)) ||
-    bioLower.includes('!') || emojiCount > 3;
+  const hasCasualIndicators =
+    casualIndicators.some((ind) => bioLower.includes(ind)) || emojiCount > 2;
+  const hasPlayfulIndicators =
+    playfulIndicators.some((ind) => bioLower.includes(ind)) ||
+    bioLower.includes('!') ||
+    emojiCount > 3;
   const hasSeriousIndicators = emojiCount === 0 && !hasCasualIndicators && !hasPlayfulIndicators;
 
   // Vibe spectrum (personality only - NOT professional/authority signals)
   const vibeSpectrum = {
-    playful: hasPlayfulIndicators ? 80 : (emojiCount > 0 ? 50 : 20),
-    casual: hasCasualIndicators ? 75 : (emojiCount > 0 ? 40 : 25),
-    serious: hasSeriousIndicators ? 75 : (emojiCount === 0 ? 50 : 25),
+    playful: hasPlayfulIndicators ? 80 : emojiCount > 0 ? 50 : 20,
+    casual: hasCasualIndicators ? 75 : emojiCount > 0 ? 40 : 25,
+    serious: hasSeriousIndicators ? 75 : emojiCount === 0 ? 50 : 25,
   };
 
   // Tone hint - overall vibe classification
@@ -1599,47 +1762,49 @@ export function analyzeBioVibe(bio: string): BioVibeAnalysis {
 
 export function analyzeNameHandle(name: string, handle: string): NameAnalysis {
   const cleanHandle = handle.replace('@', '');
-  
+
   // Display name analysis
   const nameLower = name.toLowerCase();
   const handleLower = cleanHandle.toLowerCase();
-  
+
   // Name type detection
   let nameType: NameAnalysis['displayName']['type'] = 'personal';
   if (/\b(inc|llc|co|labs|studio|agency|hq)\b/i.test(name)) nameType = 'brand';
   else if (/^[a-z]+\.[a-z]+$/i.test(name) || /^\w+\s\w+$/i.test(name)) nameType = 'personal';
   else if (name.length <= 10 && !/\s/.test(name)) nameType = 'pseudonym';
-  
+
   // Memorability (shorter = more memorable, unique = more memorable)
-  const memorability = Math.max(0, 100 - (name.length * 2) + (nameType === 'personal' ? 10 : 0));
-  
+  const memorability = Math.max(0, 100 - name.length * 2 + (nameType === 'personal' ? 10 : 0));
+
   // Pronounceability (no numbers, no special chars, reasonable length)
   const hasNumbers = /\d/.test(name);
   const hasSpecialChars = /[^a-zA-Z\s]/.test(name);
-  const pronounceability = 100 - (hasNumbers ? 30 : 0) - (hasSpecialChars ? 20 : 0) - (name.length > 20 ? 20 : 0);
-  
+  const pronounceability =
+    100 - (hasNumbers ? 30 : 0) - (hasSpecialChars ? 20 : 0) - (name.length > 20 ? 20 : 0);
+
   // Handle analysis
   const handleHasNumbers = /\d/.test(cleanHandle);
   const handleHasUnderscores = /_/.test(cleanHandle);
-  
+
   // Check if handle matches name
   const nameWords = nameLower.split(/\s+/);
-  const matchesName = nameWords.some(word => handleLower.includes(word)) || 
-                      handleLower.includes(nameWords.join('')) ||
-                      nameWords.some(word => word.includes(handleLower));
-  
+  const matchesName =
+    nameWords.some((word) => handleLower.includes(word)) ||
+    handleLower.includes(nameWords.join('')) ||
+    nameWords.some((word) => word.includes(handleLower));
+
   // Alignment score
   let alignmentScore = matchesName ? 80 : 40;
   if (handleLower === nameLower.replace(/\s/g, '')) alignmentScore = 100;
-  
+
   // Searchability (unique, not common words)
   const commonWords = ['the', 'official', 'real', 'its', 'im', 'hey', 'just'];
-  const isGeneric = commonWords.some(w => handleLower.includes(w));
-  const searchability = isGeneric ? 40 : (cleanHandle.length <= 12 ? 80 : 60);
-  
+  const isGeneric = commonWords.some((w) => handleLower.includes(w));
+  const searchability = isGeneric ? 40 : cleanHandle.length <= 12 ? 80 : 60;
+
   // Uniqueness
-  const uniqueness = nameType === 'pseudonym' ? 80 : (matchesName ? 60 : 70);
-  
+  const uniqueness = nameType === 'pseudonym' ? 80 : matchesName ? 60 : 70;
+
   return {
     displayName: {
       length: name.length,
@@ -1672,19 +1837,22 @@ export const brandDNAPrompt = (
 ) => {
   const influenceAnalysis = analyzeInfluence(profile);
   // Support both flat and nested follower count properties
-  const followersCount = (profile as any).followers_count || profile.public_metrics?.followers_count || 0;
+  const followersCount =
+    (profile as any).followers_count || profile.public_metrics?.followers_count || 0;
 
   // Build content analysis section if tweets available (CONTENT-PRIMARY)
-  const contentAnalysisSection = tweetVoice ? `
+  const contentAnalysisSection = tweetVoice
+    ? `
 CONTENT ANALYSIS (PRIMARY - Base your analysis on this):
 - Writing Style: ${tweetVoice.writingStyle?.sentenceStructure || 'varied'}
 - Voice Spectrum: Professional ${tweetVoice.voiceSpectrum.professional}/100, Casual ${tweetVoice.voiceSpectrum.casual}/100, Authoritative ${tweetVoice.voiceSpectrum.authoritative}/100
 - Educational Content: ${tweetVoice.voiceSpectrum.educational}/100
-- Content Themes: ${tweetVoice.contentThemes?.map(t => t.pillar).join(', ') || 'Various topics'}
+- Content Themes: ${tweetVoice.contentThemes?.map((t) => t.pillar).join(', ') || 'Various topics'}
 - High Engagement Topics: ${tweetVoice.performancePatterns?.highEngagementTopics?.join(', ') || 'Various'}
 - Signature Phrases: ${tweetVoice.writingStyle?.signaturePhrases?.join(', ') || 'None detected'}
 - Voice Consistency: ${tweetVoice.consistencyScore}/100
-` : '';
+`
+    : '';
 
   const contentPrimaryNote = `
 IMPORTANT: A brand is a REPUTATION — what someone is known for, demonstrated through their content. Do NOT evaluate bio, username alignment, profile picture, or any visual/profile elements. Only analyze content and reputation.`;
@@ -1821,14 +1989,14 @@ export async function analyzeProfileImageWithVision(
     // Fetch the image and convert to base64
     const imageResponse = await fetch(finalUrl);
     if (!imageResponse.ok) return null;
-    
+
     const arrayBuffer = await imageResponse.arrayBuffer();
     const base64 = Buffer.from(arrayBuffer).toString('base64');
     const mimeType = imageResponse.headers.get('content-type') || 'image/jpeg';
-    
+
     // Use Gemini Flash with vision
     const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-    
+
     const result = await model.generateContent([
       {
         inlineData: {
@@ -1838,14 +2006,14 @@ export async function analyzeProfileImageWithVision(
       },
       profileImageAnalysisPrompt('Analyze this profile image.', profileContext),
     ]);
-    
+
     const response = await result.response;
     const text = response.text();
-    
+
     // Extract JSON
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (!jsonMatch) return null;
-    
+
     return JSON.parse(jsonMatch[0]) as ProfileImageAnalysis;
   } catch (error) {
     console.error('Profile image vision analysis error:', error);
@@ -1868,14 +2036,14 @@ export async function generateBrandDNA(
 
     // CONTENT-PRIMARY: Pass tweet voice to prompt if available
     const prompt = brandDNAPrompt(profile, bioLinguistics, nameAnalysis, imageAnalysis, tweetVoice);
-    
+
     const result = await geminiFlash.generateContent(prompt);
     const response = await result.response;
     const text = response.text();
-    
+
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (!jsonMatch) return null;
-    
+
     return JSON.parse(jsonMatch[0]) as BrandDNA;
   } catch (error) {
     console.error('Brand DNA generation error:', error);
@@ -1956,14 +2124,22 @@ export interface TweetVoiceAnalysis {
   toneVariations: string[];
 }
 
-export const tweetVoiceAnalysisPrompt = (tweets: { text: string; likes: number; retweets: number; replies: number }[], stats: TweetAnalysisStats) => `
+export const tweetVoiceAnalysisPrompt = (
+  tweets: { text: string; likes: number; retweets: number; replies: number }[],
+  stats: TweetAnalysisStats
+) => `
 You are a brand voice analyst examining a creator's tweet history to extract their authentic voice DNA.
 
 TWEET CORPUS (${tweets.length} tweets):
-${tweets.slice(0, 30).map((t, i) => `
+${tweets
+  .slice(0, 30)
+  .map(
+    (t, i) => `
 [${i + 1}] "${t.text.substring(0, 280)}"
     Metrics: ${t.likes} likes | ${t.retweets} RTs | ${t.replies} replies
-`).join('\n')}
+`
+  )
+  .join('\n')}
 
 ENGAGEMENT STATS:
 - Avg Engagement Rate: ${stats.avgEngagementRate.toFixed(2)}%
@@ -2044,12 +2220,15 @@ Return ONLY valid JSON:
  * Requires X API Basic tier for tweet access
  */
 export async function analyzeTweetVoice(
-  tweets: { text: string; public_metrics: { like_count: number; retweet_count: number; reply_count: number } }[],
+  tweets: {
+    text: string;
+    public_metrics: { like_count: number; retweet_count: number; reply_count: number };
+  }[],
   stats: TweetAnalysisStats
 ): Promise<TweetVoiceAnalysis | null> {
   try {
     // Transform tweets to simpler format for prompt
-    const simpleTweets = tweets.map(t => ({
+    const simpleTweets = tweets.map((t) => ({
       text: t.text,
       likes: t.public_metrics.like_count,
       retweets: t.public_metrics.retweet_count,
@@ -2073,7 +2252,7 @@ export async function analyzeTweetVoice(
 
     console.log('=== TWEET VOICE ANALYSIS COMPLETE ===');
     console.log(`Writing Style: ${analysis.writingStyle.sentenceStructure}`);
-    console.log(`Content Themes: ${analysis.contentThemes.map(t => t.pillar).join(', ')}`);
+    console.log(`Content Themes: ${analysis.contentThemes.map((t) => t.pillar).join(', ')}`);
     console.log(`Voice Consistency: ${analysis.consistencyScore}/100`);
     console.log('=====================================');
 
@@ -2119,10 +2298,7 @@ export function voiceConsistencyPrompt(
   tweets: VoiceConsistencyGeminiInput[]
 ): string {
   const tweetBlock = tweets
-    .map(
-      (t, i) =>
-        `[${i + 1}] (id: ${t.id}, date: ${t.postedAt})\n"${t.text.substring(0, 400)}"`
-    )
+    .map((t, i) => `[${i + 1}] (id: ${t.id}, date: ${t.postedAt})\n"${t.text.substring(0, 400)}"`)
     .join('\n\n');
 
   return `You are a voice consistency analyst. You will compare a creator's posts against their established voice fingerprint and score each post on how well it matches.
@@ -2213,7 +2389,9 @@ export async function analyzeVoiceConsistency(
     console.log('=== VOICE CONSISTENCY ANALYSIS COMPLETE ===');
     console.log(`Posts analyzed: ${analysis.postScores.length}`);
     console.log(`Drift: ${analysis.drift.direction}`);
-    console.log(`Dimensions: tone=${analysis.dimensions.toneConsistency}, vocab=${analysis.dimensions.vocabularyConsistency}, struct=${analysis.dimensions.structureConsistency}, topic=${analysis.dimensions.topicConsistency}`);
+    console.log(
+      `Dimensions: tone=${analysis.dimensions.toneConsistency}, vocab=${analysis.dimensions.vocabularyConsistency}, struct=${analysis.dimensions.structureConsistency}, topic=${analysis.dimensions.topicConsistency}`
+    );
     console.log('============================================');
 
     return analysis;
@@ -2222,4 +2400,3 @@ export async function analyzeVoiceConsistency(
     return null;
   }
 }
-

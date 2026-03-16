@@ -29,17 +29,17 @@ export interface WrappedRevealData {
   displayName?: string;
   profileImageUrl?: string;
   followersCount: number;
-  
+
   // Score
   brandScore: number;
   voiceConsistency: number;
-  
+
   // Personality
   archetype: string;
   archetypeEmoji: string;
   personalityType: string;
   personalitySummary: string;
-  
+
   // Tone
   tone: {
     formality: number;
@@ -47,17 +47,17 @@ export interface WrappedRevealData {
     confidence: number;
     style: number;
   };
-  
+
   // Influence
   influenceTier: 'Nano' | 'Micro' | 'Mid' | 'Macro' | 'Mega';
-  
+
   // Brand Colors
   brandColors: {
     primary: string;
     secondary: string;
     accent: string;
   };
-  
+
   // Content
   contentPillars?: ContentPillar[];
 }
@@ -72,39 +72,38 @@ interface WrappedRevealProps {
 // COMPONENT
 // =============================================================================
 
-export default function WrappedReveal({
-  data,
-  onAnalyzeAnother,
-  onClaim,
-}: WrappedRevealProps) {
+export default function WrappedReveal({ data, onAnalyzeAnother, onClaim }: WrappedRevealProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  
+
   // Scroll progress for potential parallax effects
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ['start start', 'end end'],
   });
-  
+
   // Background gradient animation based on scroll
   const backgroundOpacity = useTransform(scrollYProgress, [0, 0.3, 1], [0.3, 0.5, 0.3]);
-  
+
   // Map to ShareCardData format for the share section
-  const shareCardData: ShareCardData = useMemo(() => ({
-    brandScore: data.brandScore,
-    voiceConsistency: data.voiceConsistency,
-    username: data.username,
-    displayName: data.displayName,
-    profileImageUrl: data.profileImageUrl,
-    followersCount: data.followersCount,
-    influenceTier: data.influenceTier,
-    archetype: data.archetype,
-    archetypeEmoji: data.archetypeEmoji,
-    personalityType: data.personalityType,
-    personalitySummary: data.personalitySummary,
-    tone: data.tone,
-    brandColors: data.brandColors,
-  }), [data]);
-  
+  const shareCardData: ShareCardData = useMemo(
+    () => ({
+      brandScore: data.brandScore,
+      voiceConsistency: data.voiceConsistency,
+      username: data.username,
+      displayName: data.displayName,
+      profileImageUrl: data.profileImageUrl,
+      followersCount: data.followersCount,
+      influenceTier: data.influenceTier,
+      archetype: data.archetype,
+      archetypeEmoji: data.archetypeEmoji,
+      personalityType: data.personalityType,
+      personalitySummary: data.personalitySummary,
+      tone: data.tone,
+      brandColors: data.brandColors,
+    }),
+    [data]
+  );
+
   const primaryColor = data.brandColors?.primary || '#0047FF';
   const secondaryColor = data.brandColors?.secondary || '#9d4edd';
 
@@ -169,7 +168,7 @@ export default function WrappedReveal({
           zIndex: 0,
         }}
       />
-      
+
       {/* Main Content */}
       <div
         style={{
@@ -183,62 +182,52 @@ export default function WrappedReveal({
           displayName={data.displayName}
           profileImageUrl={data.profileImageUrl}
         />
-        
+
         {/* Section Divider */}
         <SectionDivider />
-        
+
         {/* Section 2: Brand Score */}
-        <ScoreSection
-          score={data.brandScore}
-          primaryColor={primaryColor}
-        />
-        
+        <ScoreSection score={data.brandScore} primaryColor={primaryColor} />
+
         {/* Section Divider */}
         <SectionDivider />
-        
+
         {/* Section 3: Personality */}
         <PersonalitySection
           archetype={data.archetype}
           archetypeEmoji={data.archetypeEmoji}
           personalitySummary={data.personalitySummary}
         />
-        
+
         {/* Section Divider */}
         <SectionDivider />
-        
+
         {/* Section 4: Tone of Voice */}
-        <ToneSection
-          tone={data.tone}
-          primaryColor={primaryColor}
-        />
-        
+        <ToneSection tone={data.tone} primaryColor={primaryColor} />
+
         {/* Section Divider */}
         <SectionDivider />
-        
+
         {/* Section 5: Content Pillars */}
         <PillarsSection contentPillars={data.contentPillars} />
-        
+
         {/* Section Divider */}
         <SectionDivider />
-        
+
         {/* Section 6: Influence & Colors */}
         <InfluenceSection
           influenceTier={data.influenceTier}
           followersCount={data.followersCount}
           brandColors={data.brandColors}
         />
-        
+
         {/* Section Divider */}
         <SectionDivider />
-        
+
         {/* Section 7: Share Card */}
-        <ShareSection
-          data={shareCardData}
-          onAnalyzeAnother={onAnalyzeAnother}
-          onClaim={onClaim}
-        />
+        <ShareSection data={shareCardData} onAnalyzeAnother={onAnalyzeAnother} onClaim={onClaim} />
       </div>
-      
+
       {/* Progress Indicator (fixed on right) */}
       <ScrollProgressIndicator progress={scrollYProgress} />
     </motion.div>
@@ -281,7 +270,7 @@ function ScrollProgressIndicator({ progress }: ScrollProgressIndicatorProps) {
     [0, 1],
     [0, 1]
   );
-  
+
   return (
     <>
       {/* Desktop progress indicator (hidden on mobile via CSS) */}
@@ -310,7 +299,7 @@ function ScrollProgressIndicator({ progress }: ScrollProgressIndicatorProps) {
           }}
         />
       </div>
-      
+
       {/* Responsive styles */}
       <style>{`
         @media (max-width: 768px) {
@@ -327,4 +316,3 @@ function ScrollProgressIndicator({ progress }: ScrollProgressIndicatorProps) {
     </>
   );
 }
-

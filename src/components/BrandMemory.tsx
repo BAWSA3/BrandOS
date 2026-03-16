@@ -14,7 +14,7 @@ const EVENT_TYPES: { id: MemoryEvent['type']; name: string; icon: string; color:
 export default function BrandMemory() {
   const { brandMemory, currentBrandId, addMemoryEvent, deleteMemoryEvent } = useBrandStore();
   const events = currentBrandId ? brandMemory[currentBrandId] || [] : [];
-  
+
   const [isAdding, setIsAdding] = useState(false);
   const [newEvent, setNewEvent] = useState<{
     type: MemoryEvent['type'];
@@ -37,7 +37,7 @@ export default function BrandMemory() {
 
   const handleAdd = () => {
     if (!newEvent.title.trim()) return;
-    
+
     addMemoryEvent({
       type: newEvent.type,
       title: newEvent.title,
@@ -47,9 +47,12 @@ export default function BrandMemory() {
       metrics: {
         sentiment: newEvent.sentiment,
       },
-      tags: newEvent.tags.split(',').map(t => t.trim()).filter(Boolean),
+      tags: newEvent.tags
+        .split(',')
+        .map((t) => t.trim())
+        .filter(Boolean),
     });
-    
+
     setNewEvent({
       type: 'success',
       title: '',
@@ -62,13 +65,22 @@ export default function BrandMemory() {
     setIsAdding(false);
   };
 
-  const filteredEvents = filter === 'all' ? events : events.filter(e => e.type === filter);
+  const filteredEvents = filter === 'all' ? events : events.filter((e) => e.type === filter);
 
   // Derive patterns from events
   const patterns = {
-    successful: events.filter(e => e.type === 'success').flatMap(e => e.tags).slice(0, 5),
-    failed: events.filter(e => e.type === 'failure').flatMap(e => e.tags).slice(0, 5),
-    trending: events.slice(0, 10).flatMap(e => e.tags).slice(0, 5),
+    successful: events
+      .filter((e) => e.type === 'success')
+      .flatMap((e) => e.tags)
+      .slice(0, 5),
+    failed: events
+      .filter((e) => e.type === 'failure')
+      .flatMap((e) => e.tags)
+      .slice(0, 5),
+    trending: events
+      .slice(0, 10)
+      .flatMap((e) => e.tags)
+      .slice(0, 5),
   };
 
   return (
@@ -76,7 +88,9 @@ export default function BrandMemory() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-xs uppercase tracking-widest text-muted mb-2">Brand Memory Timeline</h3>
+          <h3 className="text-xs uppercase tracking-widest text-muted mb-2">
+            Brand Memory Timeline
+          </h3>
           <p className="text-sm text-muted">Track what worked and what failed.</p>
         </div>
         <button
@@ -91,36 +105,47 @@ export default function BrandMemory() {
       {events.length > 0 && (
         <div className="grid grid-cols-3 gap-4">
           <div className="p-4 bg-green-500/5 border border-green-500/20 rounded-lg">
-            <h4 className="text-xs uppercase tracking-widest text-green-500 mb-2">Successful Patterns</h4>
+            <h4 className="text-xs uppercase tracking-widest text-green-500 mb-2">
+              Successful Patterns
+            </h4>
             <div className="flex flex-wrap gap-1">
-              {patterns.successful.length > 0 
-                ? patterns.successful.map((p, i) => (
-                    <span key={i} className="text-xs px-2 py-0.5 bg-green-500/10 rounded-full">{p}</span>
-                  ))
-                : <span className="text-xs text-muted">No patterns yet</span>
-              }
+              {patterns.successful.length > 0 ? (
+                patterns.successful.map((p, i) => (
+                  <span key={i} className="text-xs px-2 py-0.5 bg-green-500/10 rounded-full">
+                    {p}
+                  </span>
+                ))
+              ) : (
+                <span className="text-xs text-muted">No patterns yet</span>
+              )}
             </div>
           </div>
           <div className="p-4 bg-red-500/5 border border-red-500/20 rounded-lg">
             <h4 className="text-xs uppercase tracking-widest text-red-500 mb-2">Failed Patterns</h4>
             <div className="flex flex-wrap gap-1">
-              {patterns.failed.length > 0 
-                ? patterns.failed.map((p, i) => (
-                    <span key={i} className="text-xs px-2 py-0.5 bg-red-500/10 rounded-full">{p}</span>
-                  ))
-                : <span className="text-xs text-muted">No patterns yet</span>
-              }
+              {patterns.failed.length > 0 ? (
+                patterns.failed.map((p, i) => (
+                  <span key={i} className="text-xs px-2 py-0.5 bg-red-500/10 rounded-full">
+                    {p}
+                  </span>
+                ))
+              ) : (
+                <span className="text-xs text-muted">No patterns yet</span>
+              )}
             </div>
           </div>
           <div className="p-4 bg-blue-500/5 border border-blue-500/20 rounded-lg">
             <h4 className="text-xs uppercase tracking-widest text-blue-500 mb-2">Recent Tags</h4>
             <div className="flex flex-wrap gap-1">
-              {patterns.trending.length > 0 
-                ? patterns.trending.map((p, i) => (
-                    <span key={i} className="text-xs px-2 py-0.5 bg-blue-500/10 rounded-full">{p}</span>
-                  ))
-                : <span className="text-xs text-muted">No patterns yet</span>
-              }
+              {patterns.trending.length > 0 ? (
+                patterns.trending.map((p, i) => (
+                  <span key={i} className="text-xs px-2 py-0.5 bg-blue-500/10 rounded-full">
+                    {p}
+                  </span>
+                ))
+              ) : (
+                <span className="text-xs text-muted">No patterns yet</span>
+              )}
             </div>
           </div>
         </div>
@@ -131,9 +156,11 @@ export default function BrandMemory() {
         <div className="border border-border rounded-lg p-6 animate-fade-in">
           <div className="grid grid-cols-2 gap-4 mb-4">
             <div>
-              <label className="block text-xs uppercase tracking-widest text-muted mb-2">Event Type</label>
+              <label className="block text-xs uppercase tracking-widest text-muted mb-2">
+                Event Type
+              </label>
               <div className="flex gap-2">
-                {EVENT_TYPES.map(et => (
+                {EVENT_TYPES.map((et) => (
                   <button
                     key={et.id}
                     onClick={() => setNewEvent({ ...newEvent, type: et.id })}
@@ -150,7 +177,9 @@ export default function BrandMemory() {
               </div>
             </div>
             <div>
-              <label className="block text-xs uppercase tracking-widest text-muted mb-2">Title</label>
+              <label className="block text-xs uppercase tracking-widest text-muted mb-2">
+                Title
+              </label>
               <input
                 type="text"
                 value={newEvent.title}
@@ -160,9 +189,11 @@ export default function BrandMemory() {
               />
             </div>
           </div>
-          
+
           <div className="mb-4">
-            <label className="block text-xs uppercase tracking-widest text-muted mb-2">Description</label>
+            <label className="block text-xs uppercase tracking-widest text-muted mb-2">
+              Description
+            </label>
             <textarea
               value={newEvent.description}
               onChange={(e) => setNewEvent({ ...newEvent, description: e.target.value })}
@@ -173,7 +204,9 @@ export default function BrandMemory() {
 
           <div className="grid grid-cols-2 gap-4 mb-4">
             <div>
-              <label className="block text-xs uppercase tracking-widest text-muted mb-2">Content (optional)</label>
+              <label className="block text-xs uppercase tracking-widest text-muted mb-2">
+                Content (optional)
+              </label>
               <input
                 type="text"
                 value={newEvent.content}
@@ -183,7 +216,9 @@ export default function BrandMemory() {
               />
             </div>
             <div>
-              <label className="block text-xs uppercase tracking-widest text-muted mb-2">Tags (comma-separated)</label>
+              <label className="block text-xs uppercase tracking-widest text-muted mb-2">
+                Tags (comma-separated)
+              </label>
               <input
                 type="text"
                 value={newEvent.tags}
@@ -215,7 +250,7 @@ export default function BrandMemory() {
           >
             All
           </button>
-          {EVENT_TYPES.map(et => (
+          {EVENT_TYPES.map((et) => (
             <button
               key={et.id}
               onClick={() => setFilter(et.id)}
@@ -233,12 +268,14 @@ export default function BrandMemory() {
       {filteredEvents.length > 0 ? (
         <div className="space-y-4">
           {filteredEvents.map((event) => {
-            const eventType = EVENT_TYPES.find(et => et.id === event.type);
+            const eventType = EVENT_TYPES.find((et) => et.id === event.type);
             return (
               <div key={event.id} className="border border-border rounded-lg p-4 group">
                 <div className="flex items-start justify-between mb-2">
                   <div className="flex items-center gap-3">
-                    <span className={`w-8 h-8 rounded-full flex items-center justify-center ${eventType?.color}`}>
+                    <span
+                      className={`w-8 h-8 rounded-full flex items-center justify-center ${eventType?.color}`}
+                    >
                       {eventType?.icon}
                     </span>
                     <div>
@@ -287,4 +324,3 @@ export default function BrandMemory() {
     </div>
   );
 }
-

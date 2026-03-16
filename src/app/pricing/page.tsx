@@ -43,24 +43,129 @@ interface FeatureRow {
 }
 
 const COMPARISON_FEATURES: FeatureRow[] = [
-  { label: 'brand profiles', free: '1', creator: '1', pro: '3', agency: '15', enterprise: 'unlimited' },
-  { label: 'content checks / month', free: '5', creator: '50', pro: '200', agency: '1,000', enterprise: 'unlimited' },
-  { label: 'ai generations / month', free: '3', creator: '25', pro: '100', agency: '500', enterprise: 'unlimited' },
-  { label: 'history retention', free: '7 days', creator: '30 days', pro: 'unlimited', agency: 'unlimited', enterprise: 'unlimited' },
-  { label: 'team members', free: '1', creator: '1', pro: '3', agency: '10', enterprise: 'unlimited' },
-  { label: 'social platforms', free: '1', creator: '1', pro: '3', agency: '5', enterprise: 'unlimited' },
-  { label: 'brand score tracking', free: true, creator: true, pro: true, agency: true, enterprise: true },
-  { label: 'brand dna report', free: 'basic', creator: 'full + pdf', pro: 'full + pdf', agency: 'full + pdf', enterprise: 'custom' },
-  { label: 'voice fingerprint', free: false, creator: false, pro: true, agency: true, enterprise: true },
-  { label: 'content calendar', free: false, creator: false, pro: true, agency: true, enterprise: true },
+  {
+    label: 'brand profiles',
+    free: '1',
+    creator: '1',
+    pro: '3',
+    agency: '15',
+    enterprise: 'unlimited',
+  },
+  {
+    label: 'content checks / month',
+    free: '5',
+    creator: '50',
+    pro: '200',
+    agency: '1,000',
+    enterprise: 'unlimited',
+  },
+  {
+    label: 'ai generations / month',
+    free: '3',
+    creator: '25',
+    pro: '100',
+    agency: '500',
+    enterprise: 'unlimited',
+  },
+  {
+    label: 'history retention',
+    free: '7 days',
+    creator: '30 days',
+    pro: 'unlimited',
+    agency: 'unlimited',
+    enterprise: 'unlimited',
+  },
+  {
+    label: 'team members',
+    free: '1',
+    creator: '1',
+    pro: '3',
+    agency: '10',
+    enterprise: 'unlimited',
+  },
+  {
+    label: 'social platforms',
+    free: '1',
+    creator: '1',
+    pro: '3',
+    agency: '5',
+    enterprise: 'unlimited',
+  },
+  {
+    label: 'brand score tracking',
+    free: true,
+    creator: true,
+    pro: true,
+    agency: true,
+    enterprise: true,
+  },
+  {
+    label: 'brand dna report',
+    free: 'basic',
+    creator: 'full + pdf',
+    pro: 'full + pdf',
+    agency: 'full + pdf',
+    enterprise: 'custom',
+  },
+  {
+    label: 'voice fingerprint',
+    free: false,
+    creator: false,
+    pro: true,
+    agency: true,
+    enterprise: true,
+  },
+  {
+    label: 'content calendar',
+    free: false,
+    creator: false,
+    pro: true,
+    agency: true,
+    enterprise: true,
+  },
   { label: 'ai agents', free: false, creator: false, pro: true, agency: true, enterprise: true },
-  { label: 'brand sharing', free: false, creator: false, pro: 'read-only', agency: 'full', enterprise: 'full' },
-  { label: 'advanced analytics', free: false, creator: false, pro: false, agency: true, enterprise: true },
+  {
+    label: 'brand sharing',
+    free: false,
+    creator: false,
+    pro: 'read-only',
+    agency: 'full',
+    enterprise: 'full',
+  },
+  {
+    label: 'advanced analytics',
+    free: false,
+    creator: false,
+    pro: false,
+    agency: true,
+    enterprise: true,
+  },
   { label: 'api access', free: false, creator: false, pro: false, agency: true, enterprise: true },
-  { label: 'white-label reports', free: false, creator: false, pro: false, agency: true, enterprise: true },
+  {
+    label: 'white-label reports',
+    free: false,
+    creator: false,
+    pro: false,
+    agency: true,
+    enterprise: true,
+  },
   { label: 'sso / saml', free: false, creator: false, pro: false, agency: false, enterprise: true },
-  { label: 'priority support', free: false, creator: false, pro: false, agency: true, enterprise: true },
-  { label: 'custom ai training', free: false, creator: false, pro: false, agency: false, enterprise: true },
+  {
+    label: 'priority support',
+    free: false,
+    creator: false,
+    pro: false,
+    agency: true,
+    enterprise: true,
+  },
+  {
+    label: 'custom ai training',
+    free: false,
+    creator: false,
+    pro: false,
+    agency: false,
+    enterprise: true,
+  },
 ];
 
 export default function PricingPage() {
@@ -134,8 +239,7 @@ export default function PricingPage() {
           plans that scale with your brand_
         </h1>
         <p className="mx-auto mt-4 max-w-2xl text-lg text-white/50">
-          start free. upgrade when you need more. every plan includes our
-          core brand engine.
+          start free. upgrade when you need more. every plan includes our core brand engine.
         </p>
 
         {/* Interval toggle */}
@@ -192,7 +296,9 @@ export default function PricingPage() {
                   </div>
                 )}
 
-                <div className={`mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br ${TIER_GRADIENTS[tier]} text-white`}>
+                <div
+                  className={`mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br ${TIER_GRADIENTS[tier]} text-white`}
+                >
                   {TIER_ICONS[tier]}
                 </div>
 
@@ -209,19 +315,22 @@ export default function PricingPage() {
                     </div>
                   )}
                   {interval === 'annual' && price > 0 && (
-                    <p className="mt-1 text-xs text-white/30">
-                      ${price * 12}/year billed annually
-                    </p>
+                    <p className="mt-1 text-xs text-white/30">${price * 12}/year billed annually</p>
                   )}
                 </div>
 
                 <div className="mt-6 flex-1">
                   <ul className="space-y-2.5">
-                    <FeatureItem>{plan.limits.brands === 1 ? '1 brand' : `${plan.limits.brands} brands`}</FeatureItem>
+                    <FeatureItem>
+                      {plan.limits.brands === 1 ? '1 brand' : `${plan.limits.brands} brands`}
+                    </FeatureItem>
                     <FeatureItem>{plan.limits.checksPerMonth} checks/month</FeatureItem>
                     <FeatureItem>{plan.limits.generationsPerMonth} generations/month</FeatureItem>
                     <FeatureItem>
-                      {plan.limits.historyDays === -1 ? 'unlimited' : `${plan.limits.historyDays}-day`} history
+                      {plan.limits.historyDays === -1
+                        ? 'unlimited'
+                        : `${plan.limits.historyDays}-day`}{' '}
+                      history
                     </FeatureItem>
                     {plan.limits.voiceFingerprint && <FeatureItem>voice fingerprint</FeatureItem>}
                     {plan.limits.aiAgents && <FeatureItem>all ai agents</FeatureItem>}
@@ -284,15 +393,17 @@ export default function PricingPage() {
               <div>
                 <h3 className="text-xl font-bold text-white">enterprise_</h3>
                 <p className="mt-1 text-sm text-white/50">
-                  unlimited everything. sso, audit logs, custom ai training, dedicated support, and sla.
-                  built for agencies and large teams.
+                  unlimited everything. sso, audit logs, custom ai training, dedicated support, and
+                  sla. built for agencies and large teams.
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-4">
               <div className="text-right">
                 <div className="text-sm text-white/40">Starting at</div>
-                <div className="text-2xl font-bold text-white">$500<span className="text-sm text-white/40">/mo</span></div>
+                <div className="text-2xl font-bold text-white">
+                  $500<span className="text-sm text-white/40">/mo</span>
+                </div>
               </div>
               <button
                 onClick={handleEnterprise}
@@ -321,10 +432,18 @@ export default function PricingPage() {
                 <tr className="border-b border-white/10">
                   <th className="px-6 py-4 text-sm font-medium text-white/50">Feature</th>
                   <th className="px-4 py-4 text-center text-sm font-semibold text-white">Free</th>
-                  <th className="px-4 py-4 text-center text-sm font-semibold text-blue-400">Creator</th>
-                  <th className="px-4 py-4 text-center text-sm font-semibold text-purple-400">Pro</th>
-                  <th className="px-4 py-4 text-center text-sm font-semibold text-pink-400">Agency</th>
-                  <th className="px-4 py-4 text-center text-sm font-semibold text-amber-400">Enterprise</th>
+                  <th className="px-4 py-4 text-center text-sm font-semibold text-blue-400">
+                    Creator
+                  </th>
+                  <th className="px-4 py-4 text-center text-sm font-semibold text-purple-400">
+                    Pro
+                  </th>
+                  <th className="px-4 py-4 text-center text-sm font-semibold text-pink-400">
+                    Agency
+                  </th>
+                  <th className="px-4 py-4 text-center text-sm font-semibold text-amber-400">
+                    Enterprise
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -357,9 +476,7 @@ export default function PricingPage() {
 
       {/* FAQ */}
       <div className="mx-auto max-w-3xl px-6 py-16">
-        <h2 className="mb-10 text-center text-2xl font-bold text-white">
-          questions_
-        </h2>
+        <h2 className="mb-10 text-center text-2xl font-bold text-white">questions_</h2>
         <div className="space-y-4">
           <FaqItem
             q="can i change plans later?"
@@ -431,11 +548,7 @@ function FaqItem({ q, a }: { q: string; a: string }) {
         <span className="text-sm font-medium text-white">{q}</span>
         <span className="ml-4 text-white/30">{open ? '−' : '+'}</span>
       </button>
-      {open && (
-        <div className="border-t border-white/5 px-6 py-4 text-sm text-white/50">
-          {a}
-        </div>
-      )}
+      {open && <div className="border-t border-white/5 px-6 py-4 text-sm text-white/50">{a}</div>}
     </div>
   );
 }

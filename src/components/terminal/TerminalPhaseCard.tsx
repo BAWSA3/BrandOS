@@ -46,8 +46,8 @@ function TerminalTypewriter({ text, speed = 25 }: { text: string; speed?: number
   useEffect(() => {
     if (currentIndex < text.length) {
       const timeout = setTimeout(() => {
-        setDisplayText(prev => prev + text[currentIndex]);
-        setCurrentIndex(prev => prev + 1);
+        setDisplayText((prev) => prev + text[currentIndex]);
+        setCurrentIndex((prev) => prev + 1);
       }, speed);
       return () => clearTimeout(timeout);
     }
@@ -76,24 +76,34 @@ function formatProfileValue(
   if (!profile || !dataKey) return null;
 
   switch (dataKey) {
-    case 'name': return profile.name;
-    case 'username': return `"${profile.username}"`;
+    case 'name':
+      return profile.name;
+    case 'username':
+      return `"${profile.username}"`;
     case 'description':
       return profile.description
-        ? `"${profile.description.length > 60
-          ? profile.description.substring(0, 60) + '...'
-          : profile.description}"`
+        ? `"${
+            profile.description.length > 60
+              ? profile.description.substring(0, 60) + '...'
+              : profile.description
+          }"`
         : '"// No bio set"';
-    case 'location': return profile.location ? `"${profile.location}"` : '"// Not specified"';
-    case 'url': return profile.url ? `"${profile.url}"` : '"// No link"';
-    case 'tweet_count': return `${profile.tweet_count.toLocaleString()}`;
-    case 'followers_count': return `${profile.followers_count.toLocaleString()}`;
-    case 'following_count': return `${profile.following_count.toLocaleString()}`;
+    case 'location':
+      return profile.location ? `"${profile.location}"` : '"// Not specified"';
+    case 'url':
+      return profile.url ? `"${profile.url}"` : '"// No link"';
+    case 'tweet_count':
+      return `${profile.tweet_count.toLocaleString()}`;
+    case 'followers_count':
+      return `${profile.followers_count.toLocaleString()}`;
+    case 'following_count':
+      return `${profile.following_count.toLocaleString()}`;
     case 'ratio': {
       const ratio = profile.followers_count / Math.max(profile.following_count, 1);
       return `${ratio.toFixed(2)}`;
     }
-    default: return null;
+    default:
+      return null;
   }
 }
 
@@ -188,7 +198,9 @@ export default function TerminalPhaseCard({
         }}
       >
         <div>/* ═══════════════════════════════════════ */</div>
-        <div style={{ color: '#0047FF', fontWeight: 500 }}>/*  {phaseName} — PHASE {phase.number} OF 4  */</div>
+        <div style={{ color: '#0047FF', fontWeight: 500 }}>
+          /* {phaseName} — PHASE {phase.number} OF 4 */
+        </div>
         <div>/* ═══════════════════════════════════════ */</div>
       </div>
 
@@ -223,7 +235,16 @@ export default function TerminalPhaseCard({
       </motion.p>
 
       {/* ASCII Progress bar - centered */}
-      <div style={{ width: '100%', maxWidth: 360, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
+      <div
+        style={{
+          width: '100%',
+          maxWidth: 360,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 12,
+        }}
+      >
         <span
           style={{
             fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace",
@@ -231,11 +252,13 @@ export default function TerminalPhaseCard({
             color: 'rgba(0, 0, 0, 0.4)',
           }}
         >
-          [{(() => {
+          [
+          {(() => {
             const filled = Math.round((progress / 100) * 20);
             const empty = 20 - filled;
             return '█'.repeat(filled) + '░'.repeat(empty);
-          })()}]
+          })()}
+          ]
         </span>
         <span
           style={{
@@ -272,9 +295,15 @@ export default function TerminalPhaseCard({
           }}
         >
           <div style={{ display: 'flex', gap: '6px' }}>
-            <div style={{ width: 10, height: 10, borderRadius: '50%', background: 'rgba(0,0,0,0.15)' }} />
-            <div style={{ width: 10, height: 10, borderRadius: '50%', background: 'rgba(0,0,0,0.15)' }} />
-            <div style={{ width: 10, height: 10, borderRadius: '50%', background: 'rgba(0,0,0,0.15)' }} />
+            <div
+              style={{ width: 10, height: 10, borderRadius: '50%', background: 'rgba(0,0,0,0.15)' }}
+            />
+            <div
+              style={{ width: 10, height: 10, borderRadius: '50%', background: 'rgba(0,0,0,0.15)' }}
+            />
+            <div
+              style={{ width: 10, height: 10, borderRadius: '50%', background: 'rgba(0,0,0,0.15)' }}
+            />
           </div>
           <span
             style={{
@@ -316,7 +345,11 @@ export default function TerminalPhaseCard({
                     style={{
                       fontFamily: "'VCR OSD Mono', monospace",
                       fontSize: '11px',
-                      color: isItemComplete ? '#10B981' : isItemActive ? '#0047FF' : 'rgba(0, 0, 0, 0.3)',
+                      color: isItemComplete
+                        ? '#10B981'
+                        : isItemActive
+                          ? '#0047FF'
+                          : 'rgba(0, 0, 0, 0.3)',
                       flexShrink: 0,
                       marginTop: '1px',
                     }}
@@ -330,7 +363,11 @@ export default function TerminalPhaseCard({
                         fontFamily: "'VCR OSD Mono', monospace",
                         fontSize: '12px',
                         letterSpacing: '0.05em',
-                        color: isItemComplete ? '#10B981' : isItemActive ? '#000000' : 'rgba(0, 0, 0, 0.5)',
+                        color: isItemComplete
+                          ? '#10B981'
+                          : isItemActive
+                            ? '#000000'
+                            : 'rgba(0, 0, 0, 0.5)',
                       }}
                     >
                       {item.label}

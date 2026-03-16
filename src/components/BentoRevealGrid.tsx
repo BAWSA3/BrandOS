@@ -5,7 +5,13 @@ import { useState, useEffect } from 'react';
 import MetalArchetypeIcon from '@/components/MetalArchetypeIcon';
 
 // Custom AnimateNumber replacement
-function AnimateNumber({ children, format }: { children: number; format?: Intl.NumberFormatOptions }) {
+function AnimateNumber({
+  children,
+  format,
+}: {
+  children: number;
+  format?: Intl.NumberFormatOptions;
+}) {
   const [displayValue, setDisplayValue] = useState(0);
   const targetValue = typeof children === 'number' ? children : 0;
 
@@ -45,10 +51,10 @@ const COLORS = {
   bgColor: '#0a0a0a',
 
   // Card backgrounds (BrandOS blue gradient)
-  cardHero: 'rgba(0, 71, 255, 0.06)',       // Glassmorphic with blue tint
-  cardTone: '#001847',                       // Deep blue
-  cardFollowers: '#002FA7',                  // Klein blue
-  cardArchetype: '#0047FF',                  // Electric blue (primary)
+  cardHero: 'rgba(0, 71, 255, 0.06)', // Glassmorphic with blue tint
+  cardTone: '#001847', // Deep blue
+  cardFollowers: '#002FA7', // Klein blue
+  cardArchetype: '#0047FF', // Electric blue (primary)
 
   // Text
   textLight: '#FFFFFF',
@@ -271,16 +277,21 @@ function HeroScoreCard({
 // =============================================================================
 // Content Pillars Card Component (Deep Blue - Pillar Tags)
 // =============================================================================
-function ContentPillarsCard({ contentPillars }: { contentPillars?: BentoShareCardData['contentPillars'] }) {
+function ContentPillarsCard({
+  contentPillars,
+}: {
+  contentPillars?: BentoShareCardData['contentPillars'];
+}) {
   // Default pillars if none provided
-  const pillars = contentPillars && contentPillars.length > 0
-    ? contentPillars
-    : [
-        { name: 'Insights', frequency: 40, avgEngagement: 0 },
-        { name: 'Stories', frequency: 30, avgEngagement: 0 },
-        { name: 'Tips', frequency: 20, avgEngagement: 0 },
-        { name: 'News', frequency: 10, avgEngagement: 0 },
-      ];
+  const pillars =
+    contentPillars && contentPillars.length > 0
+      ? contentPillars
+      : [
+          { name: 'Insights', frequency: 40, avgEngagement: 0 },
+          { name: 'Stories', frequency: 30, avgEngagement: 0 },
+          { name: 'Tips', frequency: 20, avgEngagement: 0 },
+          { name: 'News', frequency: 10, avgEngagement: 0 },
+        ];
 
   // DNA rainbow colors for pillars
   const pillarColors = [
@@ -765,9 +776,7 @@ export default function BentoRevealGrid({
     try {
       const blob = await generateBentoShareImage(data);
       if (blob) {
-        await navigator.clipboard.write([
-          new ClipboardItem({ 'image/png': blob }),
-        ]);
+        await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
       }
@@ -928,7 +937,7 @@ export default function BentoRevealGrid({
                 exit={{ opacity: 0, scale: 0.95, y: -20 }}
                 transition={{
                   duration: 0.4,
-                  ease: [0.25, 0.46, 0.45, 0.94]
+                  ease: [0.25, 0.46, 0.45, 0.94],
                 }}
                 style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}
               >
@@ -968,7 +977,7 @@ export default function BentoRevealGrid({
                 exit={{ opacity: 0, scale: 0.9, y: 20 }}
                 transition={{
                   duration: 0.4,
-                  ease: [0.25, 0.46, 0.45, 0.94]
+                  ease: [0.25, 0.46, 0.45, 0.94],
                 }}
                 style={{
                   display: 'flex',

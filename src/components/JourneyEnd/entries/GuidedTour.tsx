@@ -21,14 +21,16 @@ const DEFAULT_TOUR_STEPS: TourStep[] = [
   {
     id: 'score',
     title: 'Brand Score',
-    description: 'Your overall brand strength based on 4 key phases. Higher scores mean stronger brand consistency.',
+    description:
+      'Your overall brand strength based on 4 key phases. Higher scores mean stronger brand consistency.',
     targetSelector: '[data-tour="score"]',
     position: 'right',
   },
   {
     id: 'identity',
     title: 'Identity',
-    description: 'Your profile authenticity and activity metrics. This shows how real and active your brand presence is.',
+    description:
+      'Your profile authenticity and activity metrics. This shows how real and active your brand presence is.',
     targetSelector: '[data-tour="identity"]',
     position: 'bottom',
   },
@@ -42,14 +44,16 @@ const DEFAULT_TOUR_STEPS: TourStep[] = [
   {
     id: 'archetype',
     title: 'Archetype',
-    description: 'Your brand personality type based on content analysis. Use this to guide your messaging.',
+    description:
+      'Your brand personality type based on content analysis. Use this to guide your messaging.',
     targetSelector: '[data-tour="archetype"]',
     position: 'left',
   },
   {
     id: 'dna',
     title: 'Brand DNA',
-    description: 'Your core keywords and voice signature. This is the essence of what makes your brand unique.',
+    description:
+      'Your core keywords and voice signature. This is the essence of what makes your brand unique.',
     targetSelector: '[data-tour="dna"]',
     position: 'top',
   },
@@ -62,11 +66,7 @@ const DEFAULT_TOUR_STEPS: TourStep[] = [
   },
 ];
 
-export default function GuidedTour({
-  children,
-  onComplete,
-  autoStart = true,
-}: GuidedTourProps) {
+export default function GuidedTour({ children, onComplete, autoStart = true }: GuidedTourProps) {
   const [isActive, setIsActive] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
@@ -303,7 +303,9 @@ export default function GuidedTour({
               </p>
 
               {/* Actions */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div
+                style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+              >
                 <button
                   onClick={handleSkip}
                   style={{

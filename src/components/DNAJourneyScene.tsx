@@ -118,16 +118,9 @@ export default function DNAJourneyScene({
             mipmapBlur
           />
 
-          <ChromaticAberration
-            blendFunction={BlendFunction.NORMAL}
-            offset={[0.0003, 0.0003]}
-          />
+          <ChromaticAberration blendFunction={BlendFunction.NORMAL} offset={[0.0003, 0.0003]} />
 
-          <Vignette
-            offset={0.3}
-            darkness={0.4}
-            blendFunction={BlendFunction.NORMAL}
-          />
+          <Vignette offset={0.3} darkness={0.4} blendFunction={BlendFunction.NORMAL} />
         </EffectComposer>
       </Canvas>
     </div>

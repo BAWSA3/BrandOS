@@ -16,10 +16,17 @@ function isUrlSafe(urlString: string): boolean {
 
     const hostname = url.hostname.toLowerCase();
     const blockedPatterns = [
-      /^127\./, /^10\./, /^172\.(1[6-9]|2[0-9]|3[0-1])\./, /^192\.168\./,
-      /^169\.254\./, /^0\./, /^localhost$/i, /^.*\.local$/i, /^.*\.internal$/i,
+      /^127\./,
+      /^10\./,
+      /^172\.(1[6-9]|2[0-9]|3[0-1])\./,
+      /^192\.168\./,
+      /^169\.254\./,
+      /^0\./,
+      /^localhost$/i,
+      /^.*\.local$/i,
+      /^.*\.internal$/i,
     ];
-    return !blockedPatterns.some(p => p.test(hostname));
+    return !blockedPatterns.some((p) => p.test(hostname));
   } catch {
     return false;
   }
@@ -44,7 +51,7 @@ const DEFAULT_COLORS: ExtractedColors = {
  * Convert RGB array to hex string
  */
 function rgbToHex(rgb: number[]): string {
-  return '#' + rgb.map(c => c.toString(16).padStart(2, '0')).join('');
+  return '#' + rgb.map((c) => c.toString(16).padStart(2, '0')).join('');
 }
 
 /**
@@ -137,7 +144,10 @@ function hslToHex(h: number, s: number, l: number): string {
  * Generate harmonious colors based on color theory
  * Uses split-complementary scheme for visually pleasing combinations
  */
-export function generateHarmoniousColors(primaryHex: string): { secondary: string; accent: string } {
+export function generateHarmoniousColors(primaryHex: string): {
+  secondary: string;
+  accent: string;
+} {
   try {
     const [r, g, b] = hexToRgb(primaryHex);
     const [h, s, l] = rgbToHsl(r, g, b);
@@ -204,9 +214,7 @@ function isUsableColor(hex: string): boolean {
 function colorDistance(hex1: string, hex2: string): number {
   const [r1, g1, b1] = hexToRgb(hex1);
   const [r2, g2, b2] = hexToRgb(hex2);
-  return Math.sqrt(
-    Math.pow(r1 - r2, 2) + Math.pow(g1 - g2, 2) + Math.pow(b1 - b2, 2)
-  );
+  return Math.sqrt(Math.pow(r1 - r2, 2) + Math.pow(g1 - g2, 2) + Math.pow(b1 - b2, 2));
 }
 
 /**
@@ -236,7 +244,11 @@ function findBestPrimaryColor(palette: string[]): string {
   const avgSat = getAverageSaturation(palette);
   const isGrayscaleImage = avgSat < 25; // Below 25% average saturation = mostly grayscale
 
-  console.log('Average palette saturation:', avgSat.toFixed(1) + '%', isGrayscaleImage ? '(grayscale detected)' : '');
+  console.log(
+    'Average palette saturation:',
+    avgSat.toFixed(1) + '%',
+    isGrayscaleImage ? '(grayscale detected)' : ''
+  );
 
   for (const color of palette) {
     if (!isUsableColor(color)) continue;
@@ -305,9 +317,7 @@ function findSecondaryColor(palette: string[], primaryColor: string): string {
  * Extract dominant colors from an image URL
  * Uses node-vibrant to analyze the image and return a color palette
  */
-export async function extractColorsFromImage(
-  imageUrl: string
-): Promise<ExtractedColors> {
+export async function extractColorsFromImage(imageUrl: string): Promise<ExtractedColors> {
   let tempPath: string | null = null;
 
   try {
@@ -326,8 +336,8 @@ export async function extractColorsFromImage(
 
     const response = await fetch(highResUrl, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-      }
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+      },
     });
 
     if (!response.ok) {
@@ -356,17 +366,11 @@ export async function extractColorsFromImage(
     }
 
     // Separate vibrant and muted swatches to detect grayscale images
-    const vibrantSwatches = [
-      palette.Vibrant,
-      palette.DarkVibrant,
-      palette.LightVibrant,
-    ].filter(Boolean);
+    const vibrantSwatches = [palette.Vibrant, palette.DarkVibrant, palette.LightVibrant].filter(
+      Boolean
+    );
 
-    const mutedSwatches = [
-      palette.Muted,
-      palette.DarkMuted,
-      palette.LightMuted,
-    ].filter(Boolean);
+    const mutedSwatches = [palette.Muted, palette.DarkMuted, palette.LightMuted].filter(Boolean);
 
     const allSwatches = [...vibrantSwatches, ...mutedSwatches];
 
@@ -376,9 +380,9 @@ export async function extractColorsFromImage(
     }
 
     // Convert to hex colors
-    const vibrantHex = vibrantSwatches.map(s => s!.hex);
-    const mutedHex = mutedSwatches.map(s => s!.hex);
-    const hexPalette = allSwatches.map(swatch => swatch!.hex);
+    const vibrantHex = vibrantSwatches.map((s) => s!.hex);
+    const mutedHex = mutedSwatches.map((s) => s!.hex);
+    const hexPalette = allSwatches.map((swatch) => swatch!.hex);
 
     console.log('=== EXTRACTED COLORS FROM PFP (node-vibrant) ===');
     console.log('Raw Palette:', hexPalette);
@@ -436,8 +440,5 @@ export async function extractColorsFromImage(
  * Check if extracted colors are valid (not all defaults)
  */
 export function hasValidExtractedColors(colors: ExtractedColors): boolean {
-  return (
-    colors.primary !== DEFAULT_COLORS.primary ||
-    colors.secondary !== DEFAULT_COLORS.secondary
-  );
+  return colors.primary !== DEFAULT_COLORS.primary || colors.secondary !== DEFAULT_COLORS.secondary;
 }

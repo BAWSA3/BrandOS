@@ -13,19 +13,19 @@ export default function TasteTranslator() {
 
   const commonFeedback = [
     "This doesn't feel premium",
-    "Too corporate / stiff",
-    "Not modern enough",
-    "Feels cheap",
-    "Too busy / cluttered",
+    'Too corporate / stiff',
+    'Not modern enough',
+    'Feels cheap',
+    'Too busy / cluttered',
     "Doesn't feel on-brand",
-    "Too playful / not serious",
-    "Lacks energy",
+    'Too playful / not serious',
+    'Lacks energy',
   ];
 
   const translateFeedback = async (text?: string) => {
     const feedbackText = text || feedback;
     if (!feedbackText.trim() || !brandDNA) return;
-    
+
     setFeedback(feedbackText);
     setIsProcessing(true);
     setError('');
@@ -39,9 +39,9 @@ export default function TasteTranslator() {
       });
 
       const data = await response.json();
-      
+
       if (!response.ok) throw new Error(data.error);
-      
+
       setTranslation(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to translate feedback');
@@ -114,7 +114,9 @@ export default function TasteTranslator() {
       {translation && (
         <div className="border border-border rounded-lg p-6 animate-fade-in">
           <div className="flex items-center gap-3 mb-6">
-            <span className={`px-3 py-1 rounded-full text-xs font-medium ${categoryColors[translation.category]}`}>
+            <span
+              className={`px-3 py-1 rounded-full text-xs font-medium ${categoryColors[translation.category]}`}
+            >
               {translation.category}
             </span>
           </div>
@@ -147,4 +149,3 @@ export default function TasteTranslator() {
     </div>
   );
 }
-

@@ -58,11 +58,11 @@ export default function PinterestSearch({ onSelectImage }: PinterestSearchProps)
       });
 
       const data = await response.json();
-      
+
       if (data.message) {
         setMessage(data.message);
       }
-      
+
       setResults(data.images || []);
     } catch (error) {
       console.error('Search failed:', error);
@@ -75,18 +75,18 @@ export default function PinterestSearch({ onSelectImage }: PinterestSearchProps)
 
   const smartSearch = async () => {
     if (!query.trim()) return;
-    
+
     setIsExpanding(true);
-    
+
     try {
       const response = await fetch('/api/expand-search', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt: query, brandDNA }),
       });
-      
+
       const data = await response.json();
-      
+
       if (data.queries && data.queries.length > 0) {
         // Search with the first expanded query
         await search(data.queries[0]);
@@ -97,7 +97,7 @@ export default function PinterestSearch({ onSelectImage }: PinterestSearchProps)
       console.error('Smart search failed:', error);
       await search();
     }
-    
+
     setIsExpanding(false);
   };
 
@@ -181,9 +181,7 @@ export default function PinterestSearch({ onSelectImage }: PinterestSearchProps)
       {results.length > 0 && (
         <div className="bg-surface rounded-xl p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-medium">
-              Results for &ldquo;{query}&rdquo;
-            </h3>
+            <h3 className="text-sm font-medium">Results for &ldquo;{query}&rdquo;</h3>
             {selectedImages.size > 0 && (
               <button
                 onClick={addSelectedToBoard}
@@ -218,12 +216,7 @@ export default function PinterestSearch({ onSelectImage }: PinterestSearchProps)
                 {/* Selection indicator */}
                 {selectedImages.has(result.url) && (
                   <div className="absolute top-2 right-2 w-6 h-6 bg-foreground text-background rounded-full flex items-center justify-center">
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -259,4 +252,3 @@ export default function PinterestSearch({ onSelectImage }: PinterestSearchProps)
     </div>
   );
 }
-

@@ -1,6 +1,13 @@
 'use client';
 
-import { ReactNode, createContext, useContext, Children, cloneElement, isValidElement } from 'react';
+import {
+  ReactNode,
+  createContext,
+  useContext,
+  Children,
+  cloneElement,
+  isValidElement,
+} from 'react';
 import { usePinnedSection } from './PinnedSection';
 
 // Context to share reveal progress with RevealItems
@@ -45,8 +52,8 @@ export default function RevealContainer({
     }
 
     // Each item starts revealing at a staggered point
-    const itemStart = revealStart + (itemIndex * staggerDelay);
-    const itemEnd = itemStart + ((revealEnd - revealStart) / totalItems);
+    const itemStart = revealStart + itemIndex * staggerDelay;
+    const itemEnd = itemStart + (revealEnd - revealStart) / totalItems;
 
     if (sectionProgress <= itemStart) return 0;
     if (sectionProgress >= itemEnd) return 1;
@@ -62,10 +69,13 @@ export default function RevealContainer({
   // Clone children and inject index
   const childrenWithIndex = childArray.map((child, index) => {
     if (isValidElement(child)) {
-      return cloneElement(child as React.ReactElement<{ itemIndex?: number; totalItems?: number }>, {
-        itemIndex: index,
-        totalItems,
-      });
+      return cloneElement(
+        child as React.ReactElement<{ itemIndex?: number; totalItems?: number }>,
+        {
+          itemIndex: index,
+          totalItems,
+        }
+      );
     }
     return child;
   });

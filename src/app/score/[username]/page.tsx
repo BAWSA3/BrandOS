@@ -11,11 +11,11 @@ import XBrandScoreHero from '@/components/XBrandScoreHero';
 // =============================================================================
 
 // Cursor-reactive Klein Blue Orb Component
-function KleinBlueOrb({ 
-  theme, 
-  mouseX, 
-  mouseY 
-}: { 
+function KleinBlueOrb({
+  theme,
+  mouseX,
+  mouseY,
+}: {
   theme: string;
   mouseX: ReturnType<typeof useSpring>;
   mouseY: ReturnType<typeof useSpring>;
@@ -37,9 +37,10 @@ function KleinBlueOrb({
         right: '10%',
         width: 'clamp(300px, 50vw, 600px)',
         height: 'clamp(300px, 50vw, 600px)',
-        background: theme === 'dark'
-          ? 'radial-gradient(circle at 40% 40%, rgba(0, 71, 255, 0.5) 0%, rgba(0, 47, 167, 0.3) 30%, rgba(0, 24, 71, 0.15) 60%, transparent 80%)'
-          : 'radial-gradient(circle at 40% 40%, rgba(60, 138, 255, 0.6) 0%, rgba(0, 71, 255, 0.4) 30%, rgba(0, 47, 167, 0.2) 60%, transparent 80%)',
+        background:
+          theme === 'dark'
+            ? 'radial-gradient(circle at 40% 40%, rgba(0, 71, 255, 0.5) 0%, rgba(0, 47, 167, 0.3) 30%, rgba(0, 24, 71, 0.15) 60%, transparent 80%)'
+            : 'radial-gradient(circle at 40% 40%, rgba(60, 138, 255, 0.6) 0%, rgba(0, 71, 255, 0.4) 30%, rgba(0, 47, 167, 0.2) 60%, transparent 80%)',
         borderRadius: '50%',
         filter: 'blur(60px)',
         pointerEvents: 'none',
@@ -51,11 +52,11 @@ function KleinBlueOrb({
   );
 }
 
-function SecondaryOrb({ 
-  theme, 
-  mouseX, 
-  mouseY 
-}: { 
+function SecondaryOrb({
+  theme,
+  mouseX,
+  mouseY,
+}: {
   theme: string;
   mouseX: ReturnType<typeof useSpring>;
   mouseY: ReturnType<typeof useSpring>;
@@ -77,9 +78,10 @@ function SecondaryOrb({
         left: '5%',
         width: 'clamp(150px, 25vw, 300px)',
         height: 'clamp(150px, 25vw, 300px)',
-        background: theme === 'dark'
-          ? 'radial-gradient(circle, rgba(0, 71, 255, 0.35) 0%, rgba(0, 47, 167, 0.15) 50%, transparent 80%)'
-          : 'radial-gradient(circle, rgba(60, 138, 255, 0.45) 0%, rgba(0, 71, 255, 0.2) 50%, transparent 80%)',
+        background:
+          theme === 'dark'
+            ? 'radial-gradient(circle, rgba(0, 71, 255, 0.35) 0%, rgba(0, 47, 167, 0.15) 50%, transparent 80%)'
+            : 'radial-gradient(circle, rgba(60, 138, 255, 0.45) 0%, rgba(0, 71, 255, 0.2) 50%, transparent 80%)',
         borderRadius: '50%',
         filter: 'blur(50px)',
         pointerEvents: 'none',
@@ -91,20 +93,20 @@ function SecondaryOrb({
   );
 }
 
-function FloatingCircle({ 
-  size, 
-  top, 
-  left, 
-  delay, 
+function FloatingCircle({
+  size,
+  top,
+  left,
+  delay,
   duration,
   theme,
   mouseX,
   mouseY,
   parallaxFactor,
-}: { 
-  size: number; 
-  top: string; 
-  left: string; 
+}: {
+  size: number;
+  top: string;
+  left: string;
   delay: number;
   duration: number;
   theme: string;
@@ -118,7 +120,7 @@ function FloatingCircle({
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.8 }}
-      animate={{ 
+      animate={{
         opacity: [0.08, 0.15, 0.08],
         scale: [0.95, 1.05, 0.95],
         rotate: [0, 180, 360],
@@ -145,18 +147,18 @@ function FloatingCircle({
   );
 }
 
-function CrossMark({ 
-  top, 
-  left, 
+function CrossMark({
+  top,
+  left,
   size,
   theme,
   delay,
   mouseX,
   mouseY,
   parallaxFactor,
-}: { 
-  top: string; 
-  left: string; 
+}: {
+  top: string;
+  left: string;
   size: number;
   theme: string;
   delay: number;
@@ -185,10 +187,10 @@ function CrossMark({
       }}
     >
       <svg width={size} height={size} viewBox="0 0 20 20" fill="none">
-        <path 
-          d="M10 4V16M4 10H16" 
-          stroke={theme === 'dark' ? 'rgba(0, 71, 255, 0.5)' : 'rgba(0, 71, 255, 0.4)'} 
-          strokeWidth="1" 
+        <path
+          d="M10 4V16M4 10H16"
+          stroke={theme === 'dark' ? 'rgba(0, 71, 255, 0.5)' : 'rgba(0, 71, 255, 0.4)'}
+          strokeWidth="1"
           strokeLinecap="round"
         />
       </svg>
@@ -196,16 +198,16 @@ function CrossMark({
   );
 }
 
-function PulsingDot({ 
-  top, 
-  left, 
+function PulsingDot({
+  top,
+  left,
   theme,
   mouseX,
   mouseY,
   parallaxFactor,
-}: { 
-  top: string; 
-  left: string; 
+}: {
+  top: string;
+  left: string;
   theme: string;
   mouseX: ReturnType<typeof useSpring>;
   mouseY: ReturnType<typeof useSpring>;
@@ -217,13 +219,13 @@ function PulsingDot({
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0 }}
-      animate={{ 
+      animate={{
         opacity: [0.3, 0.6, 0.3],
         scale: [1, 1.2, 1],
       }}
-      transition={{ 
-        duration: 3, 
-        repeat: Infinity, 
+      transition={{
+        duration: 3,
+        repeat: Infinity,
         ease: 'easeInOut',
         delay: Math.random() * 2,
       }}
@@ -270,9 +272,10 @@ function CursorGlow({
         height: '100%',
         pointerEvents: 'none',
         zIndex: 3,
-        background: theme === 'dark'
-          ? `radial-gradient(600px circle at ${glowX.get()} ${glowY.get()}, rgba(0, 71, 255, 0.06), transparent 40%)`
-          : `radial-gradient(600px circle at ${glowX.get()} ${glowY.get()}, rgba(60, 138, 255, 0.08), transparent 40%)`,
+        background:
+          theme === 'dark'
+            ? `radial-gradient(600px circle at ${glowX.get()} ${glowY.get()}, rgba(0, 71, 255, 0.06), transparent 40%)`
+            : `radial-gradient(600px circle at ${glowX.get()} ${glowY.get()}, rgba(60, 138, 255, 0.08), transparent 40%)`,
       }}
     >
       <motion.div
@@ -284,9 +287,10 @@ function CursorGlow({
           height: 400,
           marginLeft: -200,
           marginTop: -200,
-          background: theme === 'dark'
-            ? 'radial-gradient(circle, rgba(0, 71, 255, 0.08) 0%, transparent 70%)'
-            : 'radial-gradient(circle, rgba(60, 138, 255, 0.1) 0%, transparent 70%)',
+          background:
+            theme === 'dark'
+              ? 'radial-gradient(circle, rgba(0, 71, 255, 0.08) 0%, transparent 70%)'
+              : 'radial-gradient(circle, rgba(60, 138, 255, 0.1) 0%, transparent 70%)',
           borderRadius: '50%',
           filter: 'blur(40px)',
         }}
@@ -326,9 +330,10 @@ export default function DynamicScorePage() {
     <div
       style={{
         minHeight: '100vh',
-        background: theme === 'dark'
-          ? 'linear-gradient(160deg, #0a0a0f 0%, #0d0d18 40%, #0f0f1a 70%, #141428 100%)'
-          : 'linear-gradient(160deg, #f0e6d8 0%, #e8d8f0 35%, #d0e0f8 70%, #c8d8ff 100%)',
+        background:
+          theme === 'dark'
+            ? 'linear-gradient(160deg, #0a0a0f 0%, #0d0d18 40%, #0f0f1a 70%, #141428 100%)'
+            : 'linear-gradient(160deg, #f0e6d8 0%, #e8d8f0 35%, #d0e0f8 70%, #c8d8ff 100%)',
         position: 'relative',
         overflowX: 'hidden',
         overflowY: 'auto',
@@ -339,12 +344,13 @@ export default function DynamicScorePage() {
         style={{
           position: 'fixed',
           inset: 0,
-          background: theme === 'dark'
-            ? `
+          background:
+            theme === 'dark'
+              ? `
               radial-gradient(ellipse 100% 80% at 50% 120%, rgba(0, 47, 167, 0.15) 0%, transparent 60%),
               radial-gradient(ellipse 80% 60% at 100% 0%, rgba(0, 71, 255, 0.08) 0%, transparent 50%)
             `
-            : `
+              : `
               radial-gradient(ellipse 100% 80% at 50% 120%, rgba(0, 71, 255, 0.1) 0%, transparent 60%),
               radial-gradient(ellipse 80% 60% at 100% 0%, rgba(60, 138, 255, 0.15) 0%, transparent 50%)
             `,
@@ -354,9 +360,7 @@ export default function DynamicScorePage() {
       />
 
       {/* Cursor glow effect */}
-      {mounted && (
-        <CursorGlow theme={theme} mouseX={mouseXRaw} mouseY={mouseYRaw} />
-      )}
+      {mounted && <CursorGlow theme={theme} mouseX={mouseXRaw} mouseY={mouseYRaw} />}
 
       {/* Klein Blue Orbs */}
       {mounted && (
@@ -369,17 +373,38 @@ export default function DynamicScorePage() {
       {/* Floating Geometric Circles */}
       {mounted && (
         <>
-          <FloatingCircle 
-            size={400} top="10%" left="60%" delay={0} duration={8} 
-            theme={theme} mouseX={mouseX} mouseY={mouseY} parallaxFactor={1.5} 
+          <FloatingCircle
+            size={400}
+            top="10%"
+            left="60%"
+            delay={0}
+            duration={8}
+            theme={theme}
+            mouseX={mouseX}
+            mouseY={mouseY}
+            parallaxFactor={1.5}
           />
-          <FloatingCircle 
-            size={250} top="50%" left="75%" delay={1} duration={10} 
-            theme={theme} mouseX={mouseX} mouseY={mouseY} parallaxFactor={1} 
+          <FloatingCircle
+            size={250}
+            top="50%"
+            left="75%"
+            delay={1}
+            duration={10}
+            theme={theme}
+            mouseX={mouseX}
+            mouseY={mouseY}
+            parallaxFactor={1}
           />
-          <FloatingCircle 
-            size={180} top="70%" left="15%" delay={2} duration={12} 
-            theme={theme} mouseX={mouseX} mouseY={mouseY} parallaxFactor={0.8} 
+          <FloatingCircle
+            size={180}
+            top="70%"
+            left="15%"
+            delay={2}
+            duration={12}
+            theme={theme}
+            mouseX={mouseX}
+            mouseY={mouseY}
+            parallaxFactor={0.8}
           />
         </>
       )}
@@ -387,19 +412,76 @@ export default function DynamicScorePage() {
       {/* Cross Marks */}
       {mounted && (
         <>
-          <CrossMark top="20%" left="25%" size={20} theme={theme} delay={0} mouseX={mouseX} mouseY={mouseY} parallaxFactor={2} />
-          <CrossMark top="35%" left="80%" size={16} theme={theme} delay={1.5} mouseX={mouseX} mouseY={mouseY} parallaxFactor={1.5} />
-          <CrossMark top="65%" left="10%" size={18} theme={theme} delay={0.8} mouseX={mouseX} mouseY={mouseY} parallaxFactor={1.8} />
-          <CrossMark top="80%" left="70%" size={14} theme={theme} delay={2.2} mouseX={mouseX} mouseY={mouseY} parallaxFactor={1.2} />
+          <CrossMark
+            top="20%"
+            left="25%"
+            size={20}
+            theme={theme}
+            delay={0}
+            mouseX={mouseX}
+            mouseY={mouseY}
+            parallaxFactor={2}
+          />
+          <CrossMark
+            top="35%"
+            left="80%"
+            size={16}
+            theme={theme}
+            delay={1.5}
+            mouseX={mouseX}
+            mouseY={mouseY}
+            parallaxFactor={1.5}
+          />
+          <CrossMark
+            top="65%"
+            left="10%"
+            size={18}
+            theme={theme}
+            delay={0.8}
+            mouseX={mouseX}
+            mouseY={mouseY}
+            parallaxFactor={1.8}
+          />
+          <CrossMark
+            top="80%"
+            left="70%"
+            size={14}
+            theme={theme}
+            delay={2.2}
+            mouseX={mouseX}
+            mouseY={mouseY}
+            parallaxFactor={1.2}
+          />
         </>
       )}
 
       {/* Pulsing Dots */}
       {mounted && (
         <>
-          <PulsingDot top="15%" left="40%" theme={theme} mouseX={mouseX} mouseY={mouseY} parallaxFactor={2.5} />
-          <PulsingDot top="45%" left="85%" theme={theme} mouseX={mouseX} mouseY={mouseY} parallaxFactor={1.8} />
-          <PulsingDot top="75%" left="30%" theme={theme} mouseX={mouseX} mouseY={mouseY} parallaxFactor={2} />
+          <PulsingDot
+            top="15%"
+            left="40%"
+            theme={theme}
+            mouseX={mouseX}
+            mouseY={mouseY}
+            parallaxFactor={2.5}
+          />
+          <PulsingDot
+            top="45%"
+            left="85%"
+            theme={theme}
+            mouseX={mouseX}
+            mouseY={mouseY}
+            parallaxFactor={1.8}
+          />
+          <PulsingDot
+            top="75%"
+            left="30%"
+            theme={theme}
+            mouseX={mouseX}
+            mouseY={mouseY}
+            parallaxFactor={2}
+          />
         </>
       )}
 
@@ -433,14 +515,9 @@ export default function DynamicScorePage() {
         }}
       />
 
-
       {/* Main Content - XBrandScoreHero with initialUsername */}
       <div style={{ position: 'relative', zIndex: 10 }}>
-        <XBrandScoreHero 
-          theme={theme} 
-          initialUsername={cleanUsername}
-          autoStart={true}
-        />
+        <XBrandScoreHero theme={theme} initialUsername={cleanUsername} autoStart={true} />
       </div>
     </div>
   );

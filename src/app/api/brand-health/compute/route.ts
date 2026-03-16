@@ -25,7 +25,10 @@ async function getAuthUser() {
   if (!accessToken) return null;
 
   const supabase = createClient(supabaseUrl, supabaseAnonKey);
-  const { data: { user }, error } = await supabase.auth.getUser(accessToken);
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser(accessToken);
   if (error || !user) return null;
 
   return prisma.user.findUnique({ where: { supabaseId: user.id } });
@@ -83,43 +86,44 @@ export async function POST(request: NextRequest) {
     const fourteenDaysAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
 
     // Fetch data in parallel
-    const [checkEntries, allHistoryEntries, storedTweets, tweetSyncCount, previousSnapshot] = await Promise.all([
-      // Last 20 check entries for consistency
-      prisma.historyEntry.findMany({
-        where: { brandId, type: 'check', score: { not: null } },
-        orderBy: { createdAt: 'desc' },
-        take: 20,
-        select: { score: true },
-      }),
-      // All history entries in last 14 days for activity
-      prisma.historyEntry.findMany({
-        where: { brandId, createdAt: { gte: fourteenDaysAgo } },
-        select: { id: true },
-      }),
-      // Fetch stored tweets from BrandTweet table (no live X API call needed)
-      prisma.brandTweet.findMany({
-        where: { brandId },
-        orderBy: { postedAt: 'desc' },
-        take: 20,
-        select: { text: true, metrics: true },
-      }),
-      // Count tweet syncs in last 14 days (contributes to activity)
-      prisma.brandTweet.count({
-        where: { brandId, syncedAt: { gte: fourteenDaysAgo } },
-      }),
-      // Previous snapshot for trend (7 days ago or most recent before that)
-      prisma.brandHealthSnapshot.findFirst({
-        where: {
-          brandId,
-          createdAt: { lt: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000) },
-        },
-        orderBy: { createdAt: 'desc' },
-        select: { overallScore: true },
-      }),
-    ]);
+    const [checkEntries, allHistoryEntries, storedTweets, tweetSyncCount, previousSnapshot] =
+      await Promise.all([
+        // Last 20 check entries for consistency
+        prisma.historyEntry.findMany({
+          where: { brandId, type: 'check', score: { not: null } },
+          orderBy: { createdAt: 'desc' },
+          take: 20,
+          select: { score: true },
+        }),
+        // All history entries in last 14 days for activity
+        prisma.historyEntry.findMany({
+          where: { brandId, createdAt: { gte: fourteenDaysAgo } },
+          select: { id: true },
+        }),
+        // Fetch stored tweets from BrandTweet table (no live X API call needed)
+        prisma.brandTweet.findMany({
+          where: { brandId },
+          orderBy: { postedAt: 'desc' },
+          take: 20,
+          select: { text: true, metrics: true },
+        }),
+        // Count tweet syncs in last 14 days (contributes to activity)
+        prisma.brandTweet.count({
+          where: { brandId, syncedAt: { gte: fourteenDaysAgo } },
+        }),
+        // Previous snapshot for trend (7 days ago or most recent before that)
+        prisma.brandHealthSnapshot.findFirst({
+          where: {
+            brandId,
+            createdAt: { lt: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000) },
+          },
+          orderBy: { createdAt: 'desc' },
+          select: { overallScore: true },
+        }),
+      ]);
 
     // Transform stored tweets into the shape computeEngagement expects
-    const posts = storedTweets.map(t => {
+    const posts = storedTweets.map((t) => {
       const m = JSON.parse(t.metrics);
       return {
         text: t.text,
@@ -194,4 +198,3 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
-

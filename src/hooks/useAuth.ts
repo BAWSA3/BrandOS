@@ -76,7 +76,10 @@ export function useAuth(): UseAuthReturn {
 
         if (accessToken && refreshToken) {
           // Set the session from hash tokens
-          const { data: { session: hashSession }, error: setSessionError } = await supabase.auth.setSession({
+          const {
+            data: { session: hashSession },
+            error: setSessionError,
+          } = await supabase.auth.setSession({
             access_token: accessToken,
             refresh_token: refreshToken,
           });
@@ -94,7 +97,9 @@ export function useAuth(): UseAuthReturn {
         }
 
         // Standard session check
-        const { data: { session: currentSession } } = await supabase.auth.getSession();
+        const {
+          data: { session: currentSession },
+        } = await supabase.auth.getSession();
         setSession(currentSession);
         await fetchUser(currentSession?.user ?? null);
       } catch (error) {
@@ -108,17 +113,17 @@ export function useAuth(): UseAuthReturn {
 
     // Listen for auth changes
     const supabase = getSupabase();
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, newSession) => {
-        setSession(newSession);
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, newSession) => {
+      setSession(newSession);
 
-        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-          await fetchUser(newSession?.user ?? null);
-        } else if (event === 'SIGNED_OUT') {
-          setUser(null);
-        }
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+        await fetchUser(newSession?.user ?? null);
+      } else if (event === 'SIGNED_OUT') {
+        setUser(null);
       }
-    );
+    });
 
     return () => {
       subscription.unsubscribe();
@@ -126,28 +131,31 @@ export function useAuth(): UseAuthReturn {
   }, [fetchUser]);
 
   // Sign in with X (Twitter) OAuth
-  const signInWithX = useCallback(async (options?: { inviteCode?: string; redirectTo?: string }) => {
-    // Store invite code in cookie for use after callback (server-side readable)
-    if (options?.inviteCode) {
-      document.cookie = `pendingInviteCode=${options.inviteCode}; path=/; max-age=3600; samesite=lax`;
-    }
+  const signInWithX = useCallback(
+    async (options?: { inviteCode?: string; redirectTo?: string }) => {
+      // Store invite code in cookie for use after callback (server-side readable)
+      if (options?.inviteCode) {
+        document.cookie = `pendingInviteCode=${options.inviteCode}; path=/; max-age=3600; samesite=lax`;
+      }
 
-    // Determine redirect URL
-    const redirectTo = options?.redirectTo || `${window.location.origin}/api/auth/callback`;
+      // Determine redirect URL
+      const redirectTo = options?.redirectTo || `${window.location.origin}/api/auth/callback`;
 
-    const supabase = getSupabase();
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'twitter',
-      options: {
-        redirectTo,
-      },
-    });
+      const supabase = getSupabase();
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'twitter',
+        options: {
+          redirectTo,
+        },
+      });
 
-    if (error) {
-      console.error('[useAuth] Sign in error:', error);
-      throw error;
-    }
-  }, []);
+      if (error) {
+        console.error('[useAuth] Sign in error:', error);
+        throw error;
+      }
+    },
+    []
+  );
 
   // Sign out
   const signOut = useCallback(async () => {

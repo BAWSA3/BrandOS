@@ -146,12 +146,14 @@ export function createUserProfile(
     username: normalized,
     displayName,
     archetype: archetypeWithTimestamp,
-    archetypeHistory: [{
-      archetype: archetypeWithTimestamp,
-      reason: 'initial',
-      score,
-      timestamp: now,
-    }],
+    archetypeHistory: [
+      {
+        archetype: archetypeWithTimestamp,
+        reason: 'initial',
+        score,
+        timestamp: now,
+      },
+    ],
     scores: [{ value: score, scannedAt: now }],
     highestScore: score,
     currentScore: score,
@@ -214,7 +216,9 @@ export function updateUserScan(
     };
     profile.archetypeHistory.push(historyEntry);
     profile.archetype = newArchetype;
-    console.log(`[UserProfiles] @${profile.displayName} evolved: ${historyEntry.previousArchetype} -> ${newArchetype.primary}`);
+    console.log(
+      `[UserProfiles] @${profile.displayName} evolved: ${historyEntry.previousArchetype} -> ${newArchetype.primary}`
+    );
   }
 
   storage.profiles[normalized] = profile;
@@ -286,7 +290,9 @@ export function getUserStats(username: string): {
 
   const now = Date.now();
   const daysSinceFirstScan = Math.floor((now - profile.firstScannedAt) / (1000 * 60 * 60 * 24));
-  const daysSinceArchetypeChange = Math.floor((now - profile.archetype.assignedAt) / (1000 * 60 * 60 * 24));
+  const daysSinceArchetypeChange = Math.floor(
+    (now - profile.archetype.assignedAt) / (1000 * 60 * 60 * 24)
+  );
 
   const scoreSum = profile.scores.reduce((sum, s) => sum + s.value, 0);
   const averageScore = profile.scores.length > 0 ? Math.round(scoreSum / profile.scores.length) : 0;

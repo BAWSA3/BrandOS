@@ -54,20 +54,26 @@ export default function WorldPath({
     return (idx + 0.5) / PHASE_ORDER.length;
   }, [activeIdx]);
 
-  const isPhaseUnlocked = useCallback((phase: Phase) => {
-    if (phase === 'home' || phase === 'define' || phase === 'scale') return true;
-    if (phase === 'check') return PHASE_UNLOCK.check(brandCompleteness);
-    if (phase === 'generate') return PHASE_UNLOCK.generate(brandCompleteness, hasChecked);
-    return true;
-  }, [brandCompleteness, hasChecked]);
+  const isPhaseUnlocked = useCallback(
+    (phase: Phase) => {
+      if (phase === 'home' || phase === 'define' || phase === 'scale') return true;
+      if (phase === 'check') return PHASE_UNLOCK.check(brandCompleteness);
+      if (phase === 'generate') return PHASE_UNLOCK.generate(brandCompleteness, hasChecked);
+      return true;
+    },
+    [brandCompleteness, hasChecked]
+  );
 
-  const getGrowthForPhase = useCallback((phase: Phase) => {
-    if (phase === 'define') return Math.min(1, brandCompleteness / 100);
-    if (phase === 'check') return hasChecked ? 0.7 : 0.1;
-    if (phase === 'generate') return hasGenerated ? 0.8 : 0.15;
-    if (phase === 'scale') return Math.min(1, brandCompleteness / 100) * 0.5;
-    return 0.3;
-  }, [brandCompleteness, hasChecked, hasGenerated]);
+  const getGrowthForPhase = useCallback(
+    (phase: Phase) => {
+      if (phase === 'define') return Math.min(1, brandCompleteness / 100);
+      if (phase === 'check') return hasChecked ? 0.7 : 0.1;
+      if (phase === 'generate') return hasGenerated ? 0.8 : 0.15;
+      if (phase === 'scale') return Math.min(1, brandCompleteness / 100) * 0.5;
+      return 0.3;
+    },
+    [brandCompleteness, hasChecked, hasGenerated]
+  );
 
   return (
     <div className={`relative ${className}`} style={{ height }}>
@@ -125,8 +131,19 @@ export default function WorldPath({
                   className="absolute inset-0 flex items-center justify-center"
                   style={{ background: 'rgba(5,5,16,0.7)' }}
                 >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="rgba(255,255,255,0.2)"
+                    strokeWidth={1.5}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                    />
                   </svg>
                 </div>
               )}
@@ -139,10 +156,13 @@ export default function WorldPath({
                   style={{
                     height: 2,
                     background: `linear-gradient(90deg, transparent, ${
-                      season === 'spring' ? '#E8A838' :
-                      season === 'summer' ? '#00FF88' :
-                      season === 'autumn' ? '#FF6B35' :
-                      '#00D4FF'
+                      season === 'spring'
+                        ? '#E8A838'
+                        : season === 'summer'
+                          ? '#00FF88'
+                          : season === 'autumn'
+                            ? '#FF6B35'
+                            : '#00D4FF'
                     }, transparent)`,
                   }}
                   transition={{ type: 'spring', stiffness: 300, damping: 30 }}
@@ -161,11 +181,7 @@ export default function WorldPath({
         })}
 
         {/* Path avatar overlay */}
-        <PathAvatar
-          season={activeSeason}
-          x={avatarPosition}
-          size={14}
-        />
+        <PathAvatar season={activeSeason} x={avatarPosition} size={14} />
       </div>
     </div>
   );

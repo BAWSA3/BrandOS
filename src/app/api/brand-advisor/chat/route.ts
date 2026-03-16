@@ -26,26 +26,17 @@ export async function POST(request: NextRequest) {
 
     // Validate brand DNA
     if (!brandDNA || !brandDNA.archetype || !brandDNA.voiceProfile) {
-      return NextResponse.json(
-        { error: 'Brand DNA is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Brand DNA is required' }, { status: 400 });
     }
 
     // Validate message
     if (!message || typeof message !== 'string' || message.trim().length === 0) {
-      return NextResponse.json(
-        { error: 'Message is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Message is required' }, { status: 400 });
     }
 
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) {
-      return NextResponse.json(
-        { error: 'API key not configured' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'API key not configured' }, { status: 500 });
     }
 
     const anthropic = new Anthropic({ apiKey });
@@ -75,15 +66,15 @@ export async function POST(request: NextRequest) {
       messages,
     });
 
-    const responseContent = response.content[0].type === 'text'
-      ? response.content[0].text
-      : 'I apologize, but I had trouble processing that request.';
+    const responseContent =
+      response.content[0].type === 'text'
+        ? response.content[0].text
+        : 'I apologize, but I had trouble processing that request.';
 
     return NextResponse.json({
       content: responseContent,
       processingTime: Date.now() - startTime,
     });
-
   } catch (error) {
     console.error('Brand Advisor chat error:', error);
 

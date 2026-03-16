@@ -35,13 +35,15 @@ export default function BottleneckSection({ plan, onComplete }: BottleneckSectio
             style={{ padding: '60px 24px', maxWidth: '640px', margin: '0 auto' }}
           >
             {/* Terminal header */}
-            <div style={{
-              fontFamily: "'VCR OSD Mono', monospace",
-              fontSize: '10px',
-              letterSpacing: '0.1em',
-              color: 'rgba(0,0,0,0.4)',
-              marginBottom: '32px',
-            }}>
+            <div
+              style={{
+                fontFamily: "'VCR OSD Mono', monospace",
+                fontSize: '10px',
+                letterSpacing: '0.1em',
+                color: 'rgba(0,0,0,0.4)',
+                marginBottom: '32px',
+              }}
+            >
               /* ═══════════════════════════════════ */
               <br />
               /*{'  '}THE BOTTLENECK{'                    '}*/
@@ -62,31 +64,37 @@ export default function BottleneckSection({ plan, onComplete }: BottleneckSectio
                 marginBottom: '24px',
               }}
             >
-              <div style={{
-                fontFamily: "'VCR OSD Mono', monospace",
-                fontSize: '10px',
-                letterSpacing: '0.1em',
-                color: '#EF4444',
-                marginBottom: '12px',
-              }}>
+              <div
+                style={{
+                  fontFamily: "'VCR OSD Mono', monospace",
+                  fontSize: '10px',
+                  letterSpacing: '0.1em',
+                  color: '#EF4444',
+                  marginBottom: '12px',
+                }}
+              >
                 [CRITICAL]
               </div>
-              <h3 style={{
-                fontFamily: "'Helvetica Neue', sans-serif",
-                fontSize: '24px',
-                fontWeight: 600,
-                color: '#000',
-                margin: '0 0 12px 0',
-              }}>
+              <h3
+                style={{
+                  fontFamily: "'Helvetica Neue', sans-serif",
+                  fontSize: '24px',
+                  fontWeight: 600,
+                  color: '#000',
+                  margin: '0 0 12px 0',
+                }}
+              >
                 {plan.bottleneck.title}
               </h3>
-              <p style={{
-                fontFamily: "'Helvetica Neue', sans-serif",
-                fontSize: '14px',
-                color: 'rgba(0,0,0,0.6)',
-                lineHeight: 1.7,
-                margin: 0,
-              }}>
+              <p
+                style={{
+                  fontFamily: "'Helvetica Neue', sans-serif",
+                  fontSize: '14px',
+                  color: 'rgba(0,0,0,0.6)',
+                  lineHeight: 1.7,
+                  margin: 0,
+                }}
+              >
                 {plan.bottleneck.description}
               </p>
             </motion.div>
@@ -107,7 +115,9 @@ export default function BottleneckSection({ plan, onComplete }: BottleneckSectio
               {'>'} the numbers that explain everything:
             </motion.div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '32px' }}>
+            <div
+              style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '32px' }}
+            >
               {plan.bottleneck.keyMetrics.map((metric, i) => (
                 <motion.div
                   key={i}
@@ -125,28 +135,34 @@ export default function BottleneckSection({ plan, onComplete }: BottleneckSectio
                     alignItems: 'center',
                   }}
                 >
-                  <span style={{
-                    fontFamily: "'Helvetica Neue', sans-serif",
-                    fontSize: '13px',
-                    fontWeight: 500,
-                    color: '#000',
-                  }}>
+                  <span
+                    style={{
+                      fontFamily: "'Helvetica Neue', sans-serif",
+                      fontSize: '13px',
+                      fontWeight: 500,
+                      color: '#000',
+                    }}
+                  >
                     {metric.metric}
                   </span>
-                  <span style={{
-                    fontFamily: "'VCR OSD Mono', monospace",
-                    fontSize: '12px',
-                    color: '#EF4444',
-                    fontWeight: 600,
-                  }}>
+                  <span
+                    style={{
+                      fontFamily: "'VCR OSD Mono', monospace",
+                      fontSize: '12px',
+                      color: '#EF4444',
+                      fontWeight: 600,
+                    }}
+                  >
                     {metric.current}
                   </span>
-                  <span style={{
-                    fontFamily: "'VCR OSD Mono', monospace",
-                    fontSize: '12px',
-                    color: '#10B981',
-                    fontWeight: 600,
-                  }}>
+                  <span
+                    style={{
+                      fontFamily: "'VCR OSD Mono', monospace",
+                      fontSize: '12px',
+                      color: '#10B981',
+                      fontWeight: 600,
+                    }}
+                  >
                     → {metric.target}
                   </span>
                 </motion.div>
@@ -161,13 +177,15 @@ export default function BottleneckSection({ plan, onComplete }: BottleneckSectio
                 transition={{ delay: 1.2 }}
                 style={{ marginBottom: '32px' }}
               >
-                <div style={{
-                  fontFamily: "'VCR OSD Mono', monospace",
-                  fontSize: '10px',
-                  letterSpacing: '0.05em',
-                  color: 'rgba(0,0,0,0.4)',
-                  marginBottom: '16px',
-                }}>
+                <div
+                  style={{
+                    fontFamily: "'VCR OSD Mono', monospace",
+                    fontSize: '10px',
+                    letterSpacing: '0.05em',
+                    color: 'rgba(0,0,0,0.4)',
+                    marginBottom: '16px',
+                  }}
+                >
                   {'>'} gap analysis breakdown:
                 </div>
                 {[
@@ -177,60 +195,66 @@ export default function BottleneckSection({ plan, onComplete }: BottleneckSectio
                   { label: 'FORMAT MATCH', score: plan.gapScores.formatMatch },
                   { label: 'ENGAGEMENT VEL.', score: plan.gapScores.engagementVelocity },
                   { label: 'CTA EFFECTIVENESS', score: plan.gapScores.ctaEffectiveness },
-                ].sort((a, b) => b.score - a.score).map((dim, i) => (
-                  <motion.div
-                    key={dim.label}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 1.4 + i * 0.1 }}
-                    style={{
-                      display: 'grid',
-                      gridTemplateColumns: '140px 1fr 40px',
-                      gap: '12px',
-                      alignItems: 'center',
-                      marginBottom: '8px',
-                    }}
-                  >
-                    <span style={{
-                      fontFamily: "'VCR OSD Mono', monospace",
-                      fontSize: '9px',
-                      letterSpacing: '0.05em',
-                      color: 'rgba(0,0,0,0.5)',
-                    }}>
-                      {dim.label}
-                    </span>
-                    <div style={{
-                      height: '8px',
-                      background: 'rgba(0,0,0,0.04)',
-                      borderRadius: '4px',
-                      overflow: 'hidden',
-                    }}>
-                      <motion.div
-                        initial={{ width: 0 }}
-                        animate={{ width: `${dim.score}%` }}
-                        transition={{ delay: 1.6 + i * 0.1, duration: 0.8, ease: 'easeOut' }}
+                ]
+                  .sort((a, b) => b.score - a.score)
+                  .map((dim, i) => (
+                    <motion.div
+                      key={dim.label}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 1.4 + i * 0.1 }}
+                      style={{
+                        display: 'grid',
+                        gridTemplateColumns: '140px 1fr 40px',
+                        gap: '12px',
+                        alignItems: 'center',
+                        marginBottom: '8px',
+                      }}
+                    >
+                      <span
                         style={{
-                          height: '100%',
-                          borderRadius: '4px',
-                          background: dim.score >= 70 ? '#10B981'
-                            : dim.score >= 50 ? '#F59E0B'
-                            : '#EF4444',
+                          fontFamily: "'VCR OSD Mono', monospace",
+                          fontSize: '9px',
+                          letterSpacing: '0.05em',
+                          color: 'rgba(0,0,0,0.5)',
                         }}
-                      />
-                    </div>
-                    <span style={{
-                      fontFamily: "'VCR OSD Mono', monospace",
-                      fontSize: '11px',
-                      fontWeight: 600,
-                      color: dim.score >= 70 ? '#10B981'
-                        : dim.score >= 50 ? '#F59E0B'
-                        : '#EF4444',
-                      textAlign: 'right',
-                    }}>
-                      {dim.score}
-                    </span>
-                  </motion.div>
-                ))}
+                      >
+                        {dim.label}
+                      </span>
+                      <div
+                        style={{
+                          height: '8px',
+                          background: 'rgba(0,0,0,0.04)',
+                          borderRadius: '4px',
+                          overflow: 'hidden',
+                        }}
+                      >
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${dim.score}%` }}
+                          transition={{ delay: 1.6 + i * 0.1, duration: 0.8, ease: 'easeOut' }}
+                          style={{
+                            height: '100%',
+                            borderRadius: '4px',
+                            background:
+                              dim.score >= 70 ? '#10B981' : dim.score >= 50 ? '#F59E0B' : '#EF4444',
+                          }}
+                        />
+                      </div>
+                      <span
+                        style={{
+                          fontFamily: "'VCR OSD Mono', monospace",
+                          fontSize: '11px',
+                          fontWeight: 600,
+                          color:
+                            dim.score >= 70 ? '#10B981' : dim.score >= 50 ? '#F59E0B' : '#EF4444',
+                          textAlign: 'right',
+                        }}
+                      >
+                        {dim.score}
+                      </span>
+                    </motion.div>
+                  ))}
               </motion.div>
             )}
 
@@ -251,15 +275,19 @@ export default function BottleneckSection({ plan, onComplete }: BottleneckSectio
                   cursor: 'pointer',
                   transition: 'background 0.2s',
                 }}
-                onMouseEnter={(e) => e.currentTarget.style.background = '#0038CC'}
-                onMouseLeave={(e) => e.currentTarget.style.background = '#0047FF'}
+                onMouseEnter={(e) => (e.currentTarget.style.background = '#0038CC')}
+                onMouseLeave={(e) => (e.currentTarget.style.background = '#0047FF')}
               >
-                <span style={{
-                  fontFamily: "'VCR OSD Mono', monospace",
-                  fontSize: '11px',
-                  letterSpacing: '0.12em',
-                  color: '#fff',
-                }}>HOW DO I FIX THIS?</span>
+                <span
+                  style={{
+                    fontFamily: "'VCR OSD Mono', monospace",
+                    fontSize: '11px',
+                    letterSpacing: '0.12em',
+                    color: '#fff',
+                  }}
+                >
+                  HOW DO I FIX THIS?
+                </span>
               </button>
             </motion.div>
           </motion.div>

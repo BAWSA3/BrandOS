@@ -12,14 +12,14 @@ const LEGACY_NAME_MAP: Record<string, string> = {
   'The Contrarian': 'ENTROPY',
   'The Creator': 'BUILD.EXE',
   // "Descriptor" era names
-  'Professor': 'SIGNAL_SAGE',
-  'Plug': 'RELAY',
+  Professor: 'SIGNAL_SAGE',
+  Plug: 'RELAY',
   'Chief Vibes Officer': 'FREQ',
-  'Prophet': 'FORESIGHT',
+  Prophet: 'FORESIGHT',
   'Ship-or-Die': 'BUILD.EXE',
   'Underdog-Arc': 'ARC',
-  'Degen': 'ENTROPY',
-  'Anon': 'NULL',
+  Degen: 'ENTROPY',
+  Anon: 'NULL',
 };
 
 /** Normalize any archetype name (legacy or current) to the current name */

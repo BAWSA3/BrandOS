@@ -8,7 +8,7 @@ const anthropic = new Anthropic({
 
 export async function POST(request: NextRequest) {
   try {
-    const { prompt, brandDNA } = await request.json() as {
+    const { prompt, brandDNA } = (await request.json()) as {
       prompt: string;
       brandDNA: BrandDNA;
     };
@@ -17,12 +17,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing prompt or brand DNA' }, { status: 400 });
     }
 
-    const toneDescriptors = [
-      brandDNA.tone.minimal > 70 ? 'minimal' : '',
-      brandDNA.tone.bold > 70 ? 'bold' : '',
-      brandDNA.tone.playful > 70 ? 'playful' : '',
-      brandDNA.tone.experimental > 70 ? 'experimental' : '',
-    ].filter(Boolean).join(', ') || 'balanced';
+    const toneDescriptors =
+      [
+        brandDNA.tone.minimal > 70 ? 'minimal' : '',
+        brandDNA.tone.bold > 70 ? 'bold' : '',
+        brandDNA.tone.playful > 70 ? 'playful' : '',
+        brandDNA.tone.experimental > 70 ? 'experimental' : '',
+      ]
+        .filter(Boolean)
+        .join(', ') || 'balanced';
 
     const message = await anthropic.messages.create({
       model: 'claude-sonnet-4-20250514',
@@ -49,18 +52,19 @@ Return ONLY a JSON array of strings, no explanation:
 
     const responseText = message.content[0].type === 'text' ? message.content[0].text : '';
     const jsonMatch = responseText.match(/\[[\s\S]*\]/);
-    
+
     if (!jsonMatch) {
       throw new Error('Invalid response format');
     }
-    
+
     const queries = JSON.parse(jsonMatch[0]);
 
     return NextResponse.json({ queries });
-
   } catch (error: any) {
     console.error('Expand search error:', error);
-    return NextResponse.json({ error: error.message || 'Failed to expand search' }, { status: 500 });
+    return NextResponse.json(
+      { error: error.message || 'Failed to expand search' },
+      { status: 500 }
+    );
   }
 }
-

@@ -38,7 +38,7 @@ export default function ImagerySection({ brandId }: ImagerySectionProps) {
 
     for (const file of Array.from(files)) {
       const url = URL.createObjectURL(file);
-      
+
       addImagery(brandId, {
         name: file.name.replace(/\.[^/.]+$/, ''),
         url,
@@ -62,9 +62,10 @@ export default function ImagerySection({ brandId }: ImagerySectionProps) {
     setSelectedImage(null);
   };
 
-  const filteredImages = activeFilter === 'all' 
-    ? brandKit.imagery 
-    : brandKit.imagery.filter((img) => img.category === activeFilter);
+  const filteredImages =
+    activeFilter === 'all'
+      ? brandKit.imagery
+      : brandKit.imagery.filter((img) => img.category === activeFilter);
 
   const doExamples = brandKit.imagery.filter((img) => img.doExample);
   const dontExamples = brandKit.imagery.filter((img) => img.dontExample);
@@ -89,12 +90,28 @@ export default function ImagerySection({ brandId }: ImagerySectionProps) {
           >
             {isUploading ? (
               <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                />
               </svg>
             ) : (
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.5}
+                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
+                />
               </svg>
             )}
             Upload Images
@@ -128,11 +145,23 @@ export default function ImagerySection({ brandId }: ImagerySectionProps) {
       {/* Image Grid */}
       {filteredImages.length === 0 ? (
         <div className="text-center py-12 border-2 border-dashed border-border rounded-xl">
-          <svg className="w-16 h-16 mx-auto mb-4 text-muted opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          <svg
+            className="w-16 h-16 mx-auto mb-4 text-muted opacity-50"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={1}
+              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+            />
           </svg>
           <p className="text-muted mb-2">No images uploaded yet</p>
-          <p className="text-xs text-muted">Upload images to create your mood board and style guide</p>
+          <p className="text-xs text-muted">
+            Upload images to create your mood board and style guide
+          </p>
         </div>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
@@ -159,7 +188,10 @@ export default function ImagerySection({ brandId }: ImagerySectionProps) {
             </h4>
             <div className="grid grid-cols-2 gap-3">
               {doExamples.map((img) => (
-                <div key={img.id} className="relative aspect-video rounded-lg overflow-hidden border-2 border-green-500/30">
+                <div
+                  key={img.id}
+                  className="relative aspect-video rounded-lg overflow-hidden border-2 border-green-500/30"
+                >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={img.url} alt={img.name} className="w-full h-full object-cover" />
                 </div>
@@ -174,7 +206,10 @@ export default function ImagerySection({ brandId }: ImagerySectionProps) {
             </h4>
             <div className="grid grid-cols-2 gap-3">
               {dontExamples.map((img) => (
-                <div key={img.id} className="relative aspect-video rounded-lg overflow-hidden border-2 border-red-500/30">
+                <div
+                  key={img.id}
+                  className="relative aspect-video rounded-lg overflow-hidden border-2 border-red-500/30"
+                >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={img.url} alt={img.name} className="w-full h-full object-cover" />
                 </div>
@@ -187,7 +222,9 @@ export default function ImagerySection({ brandId }: ImagerySectionProps) {
       {/* Style Guidelines */}
       {brandKit.imagery.length > 0 && (
         <div className="p-4 bg-surface rounded-lg">
-          <h4 className="text-xs uppercase tracking-widest text-muted mb-3">Photography Guidelines</h4>
+          <h4 className="text-xs uppercase tracking-widest text-muted mb-3">
+            Photography Guidelines
+          </h4>
           <ul className="space-y-2 text-sm">
             <li className="flex items-start gap-2">
               <span className="text-muted">•</span>
@@ -243,30 +280,52 @@ function ImageCard({ image, isSelected, onSelect, onUpdate, onDelete }: ImageCar
         onClick={onSelect}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={image.url}
-          alt={image.name}
-          className="w-full h-full object-cover"
-        />
-        
+        <img src={image.url} alt={image.name} className="w-full h-full object-cover" />
+
         {/* Quick Actions Overlay */}
         <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
           <button
-            onClick={(e) => { e.stopPropagation(); onUpdate({ doExample: !image.doExample, dontExample: false }); }}
+            onClick={(e) => {
+              e.stopPropagation();
+              onUpdate({ doExample: !image.doExample, dontExample: false });
+            }}
             className={`p-2 rounded-lg ${image.doExample ? 'bg-green-500' : 'bg-white/20 hover:bg-white/30'}`}
             title="Mark as Do"
           >
-            <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            <svg
+              className="w-4 h-4 text-white"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M5 13l4 4L19 7"
+              />
             </svg>
           </button>
           <button
-            onClick={(e) => { e.stopPropagation(); onUpdate({ dontExample: !image.dontExample, doExample: false }); }}
+            onClick={(e) => {
+              e.stopPropagation();
+              onUpdate({ dontExample: !image.dontExample, doExample: false });
+            }}
             className={`p-2 rounded-lg ${image.dontExample ? 'bg-red-500' : 'bg-white/20 hover:bg-white/30'}`}
             title="Mark as Don't"
           >
-            <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            <svg
+              className="w-4 h-4 text-white"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         </div>
@@ -299,7 +358,9 @@ function ImageCard({ image, isSelected, onSelect, onUpdate, onDelete }: ImageCar
                 className="w-full px-2 py-1 text-sm bg-surface border border-border rounded outline-none focus:border-foreground"
               >
                 {imageryTypes.map((type) => (
-                  <option key={type.id} value={type.id}>{type.label}</option>
+                  <option key={type.id} value={type.id}>
+                    {type.label}
+                  </option>
                 ))}
               </select>
             </div>
@@ -311,7 +372,9 @@ function ImageCard({ image, isSelected, onSelect, onUpdate, onDelete }: ImageCar
                 className="w-full px-2 py-1 text-sm bg-surface border border-border rounded outline-none focus:border-foreground"
               >
                 {imageryCategories.map((cat) => (
-                  <option key={cat.id} value={cat.id}>{cat.label}</option>
+                  <option key={cat.id} value={cat.id}>
+                    {cat.label}
+                  </option>
                 ))}
               </select>
             </div>
@@ -356,16 +419,10 @@ function ImageCard({ image, isSelected, onSelect, onUpdate, onDelete }: ImageCar
             />
           </div>
           <div className="flex justify-between pt-2">
-            <button
-              onClick={onDelete}
-              className="text-xs text-red-500 hover:text-red-400"
-            >
+            <button onClick={onDelete} className="text-xs text-red-500 hover:text-red-400">
               Delete
             </button>
-            <button
-              onClick={onSelect}
-              className="text-xs text-muted hover:text-foreground"
-            >
+            <button onClick={onSelect} className="text-xs text-muted hover:text-foreground">
               Done
             </button>
           </div>
@@ -374,19 +431,3 @@ function ImageCard({ image, isSelected, onSelect, onUpdate, onDelete }: ImageCar
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

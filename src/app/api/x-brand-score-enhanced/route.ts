@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { geminiFlash, xBrandScorePrompt, enhancedBrandScorePrompt, XProfileData } from '@/lib/gemini';
+import {
+  geminiFlash,
+  xBrandScorePrompt,
+  enhancedBrandScorePrompt,
+  XProfileData,
+} from '@/lib/gemini';
 import { features, getTierInfo } from '@/lib/features';
 import { analyzeVoiceConsistency } from '@/lib/voice-consistency';
 import type { VoiceConsistencyReport } from '@/lib/schemas/voice-consistency.schema';
@@ -7,7 +12,7 @@ import { recordScan } from '@/lib/scan-tracking';
 
 /**
  * Enhanced Brand Score API
- * 
+ *
  * Automatically uses tweet analysis if X API Basic tier is available.
  * Falls back to profile-only analysis on Free tier.
  */
@@ -30,7 +35,7 @@ async function fetchProfile(username: string, origin: string): Promise<XProfileD
     });
 
     if (!response.ok) return null;
-    
+
     const data = await response.json();
     if (!data.profile) return null;
 
@@ -78,14 +83,25 @@ async function fetchTweets(username: string, origin: string) {
 
     const data = await response.json();
     return {
-      tweets: data.tweets.map((t: { text: string; created_at: string; public_metrics: { like_count: number; retweet_count: number; reply_count: number; impression_count?: number } }) => ({
-        text: t.text,
-        created_at: t.created_at,
-        likes: t.public_metrics?.like_count || 0,
-        retweets: t.public_metrics?.retweet_count || 0,
-        replies: t.public_metrics?.reply_count || 0,
-        impressions: t.public_metrics?.impression_count,
-      })) as TweetData[],
+      tweets: data.tweets.map(
+        (t: {
+          text: string;
+          created_at: string;
+          public_metrics: {
+            like_count: number;
+            retweet_count: number;
+            reply_count: number;
+            impression_count?: number;
+          };
+        }) => ({
+          text: t.text,
+          created_at: t.created_at,
+          likes: t.public_metrics?.like_count || 0,
+          retweets: t.public_metrics?.retweet_count || 0,
+          replies: t.public_metrics?.reply_count || 0,
+          impressions: t.public_metrics?.impression_count,
+        })
+      ) as TweetData[],
       rawTweets: data.tweets.map((t: { id: string; text: string; created_at: string }) => ({
         id: t.id,
         text: t.text,
@@ -102,13 +118,10 @@ async function fetchTweets(username: string, origin: string) {
 
 export async function POST(request: NextRequest) {
   try {
-    const { username } = await request.json() as { username: string };
+    const { username } = (await request.json()) as { username: string };
 
     if (!username) {
-      return NextResponse.json(
-        { error: 'Username is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Username is required' }, { status: 400 });
     }
 
     const cleanUsername = username.replace(/^@/, '').trim();
@@ -117,10 +130,7 @@ export async function POST(request: NextRequest) {
     // Fetch profile (always required)
     const profile = await fetchProfile(cleanUsername, origin);
     if (!profile) {
-      return NextResponse.json(
-        { error: 'Could not fetch profile' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Could not fetch profile' }, { status: 404 });
     }
 
     // Try to fetch tweets if Basic tier is available
@@ -173,10 +183,7 @@ export async function POST(request: NextRequest) {
     } catch (parseError) {
       console.error('Failed to parse Gemini response:', parseError);
       console.error('Raw response:', responseText);
-      return NextResponse.json(
-        { error: 'Failed to analyze profile' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'Failed to analyze profile' }, { status: 500 });
     }
 
     // Validate contentIdentity if present
@@ -201,9 +208,9 @@ export async function POST(request: NextRequest) {
       const phases = brandScore.phases;
       const recalculated = Math.round(
         (phases.define?.score ?? 0) * 0.3 +
-        phases.check.score * 0.25 +
-        (phases.generate?.score ?? 0) * 0.25 +
-        (phases.scale?.score ?? 0) * 0.2
+          phases.check.score * 0.25 +
+          (phases.generate?.score ?? 0) * 0.25 +
+          (phases.scale?.score ?? 0) * 0.2
       );
       brandScore.overallScore = Math.min(100, recalculated);
 
@@ -234,7 +241,7 @@ export async function POST(request: NextRequest) {
       score: brandScore.overallScore,
       archetype: brandScore.archetype?.primary || '',
       enhanced: isEnhanced,
-    }).catch(err => console.error('Scan tracking error:', err));
+    }).catch((err) => console.error('Scan tracking error:', err));
 
     return NextResponse.json({
       profile,
@@ -248,13 +255,9 @@ export async function POST(request: NextRequest) {
         analyzedAt: new Date().toISOString(),
       },
     });
-
   } catch (error) {
     console.error('Enhanced Brand Score API error:', error);
-    return NextResponse.json(
-      { error: 'An unexpected error occurred' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }
 
@@ -264,9 +267,3 @@ export async function POST(request: NextRequest) {
 export async function GET() {
   return NextResponse.json(getTierInfo());
 }
-
-
-
-
-
-

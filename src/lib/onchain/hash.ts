@@ -7,9 +7,12 @@
 async function sha256(data: string): Promise<string> {
   const encoder = new TextEncoder();
   const buffer = await crypto.subtle.digest('SHA-256', encoder.encode(data));
-  return '0x' + Array.from(new Uint8Array(buffer))
-    .map((b) => b.toString(16).padStart(2, '0'))
-    .join('');
+  return (
+    '0x' +
+    Array.from(new Uint8Array(buffer))
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join('')
+  );
 }
 
 function canonicalize(obj: unknown): string {

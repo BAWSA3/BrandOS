@@ -7,19 +7,15 @@ import { useEffect, useRef, useState } from 'react';
 // Types
 // ============================================================================
 interface JourneyBackgroundProps {
-  progress: number;      // 0-1 (overall progress across all phases)
-  currentPhase: number;  // 1-4
+  progress: number; // 0-1 (overall progress across all phases)
+  currentPhase: number; // 1-4
   theme: string;
 }
 
 // ============================================================================
 // Phase Pulse Component - DRAMATIC MODE
 // ============================================================================
-function PhasePulse({
-  trigger,
-}: {
-  trigger: number;
-}) {
+function PhasePulse({ trigger }: { trigger: number }) {
   if (trigger === 0) return null;
 
   return (
@@ -31,7 +27,7 @@ function PhasePulse({
         animate={{ scale: 4, opacity: 0 }}
         transition={{
           duration: 1.2,
-          ease: [0.34, 1.56, 0.64, 1]
+          ease: [0.34, 1.56, 0.64, 1],
         }}
         style={{
           position: 'absolute',
@@ -54,7 +50,7 @@ function PhasePulse({
         transition={{
           duration: 1,
           delay: 0.15,
-          ease: "easeOut"
+          ease: 'easeOut',
         }}
         style={{
           position: 'absolute',
@@ -75,12 +71,13 @@ function PhasePulse({
         animate={{ opacity: 0 }}
         transition={{
           duration: 0.4,
-          ease: "easeOut"
+          ease: 'easeOut',
         }}
         style={{
           position: 'absolute',
           inset: 0,
-          background: 'radial-gradient(circle at 50% 50%, rgba(0, 71, 255, 0.15) 0%, transparent 50%)',
+          background:
+            'radial-gradient(circle at 50% 50%, rgba(0, 71, 255, 0.15) 0%, transparent 50%)',
           pointerEvents: 'none',
         }}
       />
@@ -102,7 +99,7 @@ export default function JourneyBackground({
   // Detect phase transitions and trigger pulse
   useEffect(() => {
     if (currentPhase !== prevPhaseRef.current) {
-      setPulseKey(prev => prev + 1);
+      setPulseKey((prev) => prev + 1);
       prevPhaseRef.current = currentPhase;
     }
   }, [currentPhase]);
@@ -120,10 +117,10 @@ export default function JourneyBackground({
       {/* Ambient glow layer that intensifies with progress */}
       <motion.div
         animate={{
-          opacity: 0.2 + (progress * 0.5),
-          scale: 1 + (progress * 0.3),
+          opacity: 0.2 + progress * 0.5,
+          scale: 1 + progress * 0.3,
         }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
+        transition={{ duration: 0.8, ease: 'easeOut' }}
         style={{
           position: 'absolute',
           top: '50%',
@@ -145,7 +142,7 @@ export default function JourneyBackground({
         transition={{
           duration: 3 - progress * 1.5,
           repeat: Infinity,
-          ease: "easeInOut",
+          ease: 'easeInOut',
         }}
         style={{
           position: 'absolute',
@@ -154,7 +151,8 @@ export default function JourneyBackground({
           transform: 'translate(-50%, -50%)',
           width: '120vw',
           height: '120vh',
-          background: 'radial-gradient(ellipse at center, rgba(0, 71, 255, 0.2) 0%, transparent 50%)',
+          background:
+            'radial-gradient(ellipse at center, rgba(0, 71, 255, 0.2) 0%, transparent 50%)',
           pointerEvents: 'none',
         }}
       />
@@ -167,7 +165,7 @@ export default function JourneyBackground({
       {/* Subtle vignette that decreases with progress (more open feel as energy builds) */}
       <motion.div
         animate={{
-          opacity: 0.4 - (progress * 0.2),
+          opacity: 0.4 - progress * 0.2,
         }}
         transition={{ duration: 0.5 }}
         style={{

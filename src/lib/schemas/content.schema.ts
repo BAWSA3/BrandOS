@@ -1,8 +1,13 @@
 import { z } from 'zod';
 
 const CONTENT_TYPES = [
-  'tweet', 'thread', 'poll', 'hot-take',
-  'educational', 'counter-argument', 'story',
+  'tweet',
+  'thread',
+  'poll',
+  'hot-take',
+  'educational',
+  'counter-argument',
+  'story',
 ] as const;
 
 const DRAFT_STATUSES = ['idea', 'draft', 'scheduled', 'published'] as const;

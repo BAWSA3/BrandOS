@@ -39,8 +39,8 @@ export default function RepurposePanel({ source, onClose, onSaveDraft }: Repurpo
   const [error, setError] = useState<string | null>(null);
 
   const toggleFormat = useCallback((id: string) => {
-    setSelectedFormats(prev =>
-      prev.includes(id) ? prev.filter(f => f !== id) : [...prev, id]
+    setSelectedFormats((prev) =>
+      prev.includes(id) ? prev.filter((f) => f !== id) : [...prev, id]
     );
   }, []);
 
@@ -79,26 +79,29 @@ export default function RepurposePanel({ source, onClose, onSaveDraft }: Repurpo
     }
   }, [selectedFormats, brand, source.content]);
 
-  const handleSave = useCallback(async (index: number) => {
-    const d = derivatives[index];
-    if (!d || d.saved) return;
+  const handleSave = useCallback(
+    async (index: number) => {
+      const d = derivatives[index];
+      if (!d || d.saved) return;
 
-    await onSaveDraft({
-      content: d.content,
-      contentType: d.format,
-      tone: source.tone,
-      status: 'draft',
-      scheduledFor: null,
-    });
+      await onSaveDraft({
+        content: d.content,
+        contentType: d.format,
+        tone: source.tone,
+        status: 'draft',
+        scheduledFor: null,
+      });
 
-    setDerivatives(prev =>
-      prev.map((item, i) => i === index ? { ...item, saved: true } : item)
-    );
-  }, [derivatives, onSaveDraft, source.tone]);
+      setDerivatives((prev) =>
+        prev.map((item, i) => (i === index ? { ...item, saved: true } : item))
+      );
+    },
+    [derivatives, onSaveDraft, source.tone]
+  );
 
   const handleEditContent = useCallback((index: number, newContent: string) => {
-    setDerivatives(prev =>
-      prev.map((item, i) => i === index ? { ...item, content: newContent } : item)
+    setDerivatives((prev) =>
+      prev.map((item, i) => (i === index ? { ...item, content: newContent } : item))
     );
   }, []);
 
@@ -148,8 +151,16 @@ export default function RepurposePanel({ source, onClose, onSaveDraft }: Repurpo
               justifyContent: 'center',
             }}
           >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
           </button>
         </div>
@@ -164,7 +175,15 @@ export default function RepurposePanel({ source, onClose, onSaveDraft }: Repurpo
             marginBottom: 20,
           }}
         >
-          <span style={{ fontSize: 11, fontWeight: 500, color: 'var(--text-tertiary)', display: 'block', marginBottom: 6 }}>
+          <span
+            style={{
+              fontSize: 11,
+              fontWeight: 500,
+              color: 'var(--text-tertiary)',
+              display: 'block',
+              marginBottom: 6,
+            }}
+          >
             Source
           </span>
           <p style={{ fontSize: 13, color: 'var(--text-primary)', lineHeight: 1.5, margin: 0 }}>
@@ -174,11 +193,19 @@ export default function RepurposePanel({ source, onClose, onSaveDraft }: Repurpo
 
         {/* Format selection */}
         <div style={{ marginBottom: 20 }}>
-          <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-secondary)', display: 'block', marginBottom: 8 }}>
+          <span
+            style={{
+              fontSize: 13,
+              fontWeight: 500,
+              color: 'var(--text-secondary)',
+              display: 'block',
+              marginBottom: 8,
+            }}
+          >
             Select formats to generate
           </span>
           <div className="grid grid-cols-2 gap-2">
-            {formats.map(f => {
+            {formats.map((f) => {
               const selected = selectedFormats.includes(f.id);
               return (
                 <button
@@ -193,7 +220,13 @@ export default function RepurposePanel({ source, onClose, onSaveDraft }: Repurpo
                     textAlign: 'left',
                   }}
                 >
-                  <div style={{ fontSize: 12, fontWeight: 500, color: selected ? '#0A84FF' : 'var(--text-primary)' }}>
+                  <div
+                    style={{
+                      fontSize: 12,
+                      fontWeight: 500,
+                      color: selected ? '#0A84FF' : 'var(--text-primary)',
+                    }}
+                  >
                     {f.label}
                   </div>
                   <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 2 }}>
@@ -215,7 +248,8 @@ export default function RepurposePanel({ source, onClose, onSaveDraft }: Repurpo
             padding: '10px 20px',
             borderRadius: 8,
             border: 'none',
-            background: selectedFormats.length > 0 && !isGenerating ? '#0A84FF' : 'var(--surface-hover)',
+            background:
+              selectedFormats.length > 0 && !isGenerating ? '#0A84FF' : 'var(--surface-hover)',
             color: selectedFormats.length > 0 && !isGenerating ? '#fff' : 'var(--text-tertiary)',
             cursor: selectedFormats.length > 0 && !isGenerating ? 'pointer' : 'default',
             marginBottom: 20,
@@ -234,17 +268,13 @@ export default function RepurposePanel({ source, onClose, onSaveDraft }: Repurpo
               Generating...
             </>
           ) : (
-            <>
-              Generate {selectedFormats.length > 0 ? `(${selectedFormats.length})` : ''}
-            </>
+            <>Generate {selectedFormats.length > 0 ? `(${selectedFormats.length})` : ''}</>
           )}
         </button>
 
         {/* Error */}
         {error && (
-          <p style={{ fontSize: 13, color: 'var(--error, #ff3b30)', marginBottom: 12 }}>
-            {error}
-          </p>
+          <p style={{ fontSize: 13, color: 'var(--error, #ff3b30)', marginBottom: 12 }}>{error}</p>
         )}
 
         {/* Results */}
@@ -264,14 +294,16 @@ export default function RepurposePanel({ source, onClose, onSaveDraft }: Repurpo
                 }}
               >
                 <div className="flex items-center justify-between mb-2">
-                  <span style={{
-                    fontSize: 11,
-                    fontWeight: 500,
-                    color: '#0A84FF',
-                    background: 'rgba(10,132,255,0.12)',
-                    padding: '2px 8px',
-                    borderRadius: 4,
-                  }}>
+                  <span
+                    style={{
+                      fontSize: 11,
+                      fontWeight: 500,
+                      color: '#0A84FF',
+                      background: 'rgba(10,132,255,0.12)',
+                      padding: '2px 8px',
+                      borderRadius: 4,
+                    }}
+                  >
                     {d.format}
                   </span>
                   <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>

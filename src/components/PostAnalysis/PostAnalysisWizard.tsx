@@ -44,7 +44,9 @@ export default function PostAnalysisWizard({
   const [scanProgress, setScanProgress] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
   const [postTags, setPostTags] = useState<{ label: string; color: string }[]>([]);
-  const [highlightPhrases, setHighlightPhrases] = useState<{ text: string; color: string; label: string }[]>([]);
+  const [highlightPhrases, setHighlightPhrases] = useState<
+    { text: string; color: string; label: string }[]
+  >([]);
   const stepRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   // Start scanning when user initiates
@@ -57,7 +59,7 @@ export default function PostAnalysisWizard({
   useEffect(() => {
     if (isScanning && scanProgress < 100) {
       const timer = setTimeout(() => {
-        setScanProgress(prev => Math.min(prev + 2, 100));
+        setScanProgress((prev) => Math.min(prev + 2, 100));
       }, 40);
       return () => clearTimeout(timer);
     } else if (scanProgress >= 100 && isScanning) {
@@ -75,33 +77,45 @@ export default function PostAnalysisWizard({
 
     if (completedSteps.includes(0)) {
       // DEFINE phase complete - add tone tag
-      const toneParam = analysisData.define.parameters.find(p => p.id === 'tone');
+      const toneParam = analysisData.define.parameters.find((p) => p.id === 'tone');
       if (toneParam) {
-        tags.push({ label: `TONE: ${String(toneParam.value).toUpperCase()}`, color: PHASE_HIGHLIGHTS.define.color });
+        tags.push({
+          label: `TONE: ${String(toneParam.value).toUpperCase()}`,
+          color: PHASE_HIGHLIGHTS.define.color,
+        });
       }
     }
 
     if (completedSteps.includes(1)) {
       // CHECK phase complete - add consistency tag
-      const consistencyParam = analysisData.check.parameters.find(p => p.id === 'consistency');
+      const consistencyParam = analysisData.check.parameters.find((p) => p.id === 'consistency');
       if (consistencyParam) {
-        tags.push({ label: `CONSISTENCY: ${consistencyParam.value}%`, color: PHASE_HIGHLIGHTS.check.color });
+        tags.push({
+          label: `CONSISTENCY: ${consistencyParam.value}%`,
+          color: PHASE_HIGHLIGHTS.check.color,
+        });
       }
     }
 
     if (completedSteps.includes(2)) {
       // GENERATE phase complete - add hook/template tags
-      const hookParam = analysisData.generate.parameters.find(p => p.id === 'hook');
+      const hookParam = analysisData.generate.parameters.find((p) => p.id === 'hook');
       if (hookParam) {
-        tags.push({ label: `HOOK: ${String(hookParam.value).toUpperCase()}`, color: PHASE_HIGHLIGHTS.generate.color });
+        tags.push({
+          label: `HOOK: ${String(hookParam.value).toUpperCase()}`,
+          color: PHASE_HIGHLIGHTS.generate.color,
+        });
       }
     }
 
     if (completedSteps.includes(3)) {
       // SCALE phase complete - add virality tag
-      const viralityParam = analysisData.scale.parameters.find(p => p.id === 'virality');
+      const viralityParam = analysisData.scale.parameters.find((p) => p.id === 'virality');
       if (viralityParam) {
-        tags.push({ label: `VIRAL POTENTIAL: ${viralityParam.value}`, color: PHASE_HIGHLIGHTS.scale.color });
+        tags.push({
+          label: `VIRAL POTENTIAL: ${viralityParam.value}`,
+          color: PHASE_HIGHLIGHTS.scale.color,
+        });
       }
     }
 
@@ -119,7 +133,7 @@ export default function PostAnalysisWizard({
   }, [currentStep]);
 
   const handleStepComplete = (stepIndex: number) => {
-    setCompletedSteps(prev => [...prev, stepIndex]);
+    setCompletedSteps((prev) => [...prev, stepIndex]);
     if (stepIndex < 3) {
       setCurrentStep(stepIndex + 1);
     } else {
@@ -225,7 +239,7 @@ export default function PostAnalysisWizard({
         >
           /* ═══════════════════════════════════════ */
           <br />
-          <span style={{ color: '#0047FF' }}>/*  YOUR TOP PERFORMING POST  */</span>
+          <span style={{ color: '#0047FF' }}>/* YOUR TOP PERFORMING POST */</span>
           <br />
           /* ═══════════════════════════════════════ */
         </div>
@@ -263,8 +277,8 @@ export default function PostAnalysisWizard({
                   cursor: 'pointer',
                   transition: 'background 0.2s ease',
                 }}
-                onMouseEnter={(e) => e.currentTarget.style.background = '#0038CC'}
-                onMouseLeave={(e) => e.currentTarget.style.background = '#0047FF'}
+                onMouseEnter={(e) => (e.currentTarget.style.background = '#0038CC')}
+                onMouseLeave={(e) => (e.currentTarget.style.background = '#0047FF')}
               >
                 <span
                   style={{
@@ -276,9 +290,7 @@ export default function PostAnalysisWizard({
                 >
                   BEGIN DEEP ANALYSIS
                 </span>
-                <span style={{ color: '#fff', fontSize: '14px' }}>
-                  →
-                </span>
+                <span style={{ color: '#fff', fontSize: '14px' }}>→</span>
               </button>
               <p
                 style={{
@@ -305,13 +317,12 @@ export default function PostAnalysisWizard({
             style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}
           >
             {PHASES.map((phase, index) => (
-              <ScrollReveal
-                key={phase}
-                direction="up"
-                delay={index * 0.08}
-                distance={25}
-              >
-                <div ref={el => { stepRefs.current[index] = el; }}>
+              <ScrollReveal key={phase} direction="up" delay={index * 0.08} distance={25}>
+                <div
+                  ref={(el) => {
+                    stepRefs.current[index] = el;
+                  }}
+                >
                   <AnalysisStep
                     data={analysisData[phase]}
                     isActive={currentStep === index}
@@ -337,7 +348,8 @@ export default function PostAnalysisWizard({
             style={{
               marginTop: '32px',
               padding: '24px',
-              background: 'linear-gradient(135deg, rgba(0, 71, 255, 0.05), rgba(16, 185, 129, 0.05))',
+              background:
+                'linear-gradient(135deg, rgba(0, 71, 255, 0.05), rgba(16, 185, 129, 0.05))',
               border: '1px solid rgba(0, 71, 255, 0.15)',
               borderRadius: '6px',
               textAlign: 'center',
@@ -383,8 +395,8 @@ export default function PostAnalysisWizard({
                 cursor: 'pointer',
                 transition: 'background 0.2s ease',
               }}
-              onMouseEnter={(e) => e.currentTarget.style.background = '#0038CC'}
-              onMouseLeave={(e) => e.currentTarget.style.background = '#0047FF'}
+              onMouseEnter={(e) => (e.currentTarget.style.background = '#0038CC')}
+              onMouseLeave={(e) => (e.currentTarget.style.background = '#0047FF')}
             >
               <span
                 style={{

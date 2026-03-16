@@ -5,7 +5,7 @@ import type { Season } from '../ascii-sky/ascii-sky-engine';
 
 interface PathAvatarProps {
   season: Season;
-  x: number;  // 0-1, position along the full path
+  x: number; // 0-1, position along the full path
   size?: number;
 }
 

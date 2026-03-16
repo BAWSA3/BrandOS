@@ -1,11 +1,11 @@
-import type { Metadata, Viewport } from "next";
-import "./globals.css";
-import ThemeProvider from "@/components/ThemeProvider";
-import { Analytics } from "@vercel/analytics/react";
-import { SpeedInsights } from "@vercel/speed-insights/next";
-import { ToastProvider } from "@/components/ToastProvider";
-import BetaBadge from "@/components/BetaBadge";
-import PostHogProvider from "@/components/PostHogProvider";
+import type { Metadata, Viewport } from 'next';
+import './globals.css';
+import ThemeProvider from '@/components/ThemeProvider';
+import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/next';
+import { ToastProvider } from '@/components/ToastProvider';
+import BetaBadge from '@/components/BetaBadge';
+import PostHogProvider from '@/components/PostHogProvider';
 
 export const viewport = {
   width: 'device-width',
@@ -14,34 +14,45 @@ export const viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "BrandOS — Discover Your Brand DNA",
-  description: "AI-powered brand analysis that reveals your unique creator identity. Get your Brand Score, discover your archetype, and unlock personalized growth insights.",
-  keywords: ["brand", "AI", "creator", "brand score", "brand DNA", "personal branding", "content strategy"],
-  authors: [{ name: "BrandOS" }],
-  creator: "BrandOS",
-  metadataBase: new URL("https://mybrandos.app"),
+  title: 'BrandOS — Discover Your Brand DNA',
+  description:
+    'AI-powered brand analysis that reveals your unique creator identity. Get your Brand Score, discover your archetype, and unlock personalized growth insights.',
+  keywords: [
+    'brand',
+    'AI',
+    'creator',
+    'brand score',
+    'brand DNA',
+    'personal branding',
+    'content strategy',
+  ],
+  authors: [{ name: 'BrandOS' }],
+  creator: 'BrandOS',
+  metadataBase: new URL('https://mybrandos.app'),
   openGraph: {
-    type: "website",
-    locale: "en_US",
-    url: "https://mybrandos.app",
-    siteName: "BrandOS",
-    title: "BrandOS — Discover Your Brand DNA",
-    description: "AI-powered brand analysis that reveals your unique creator identity. Get your Brand Score and unlock personalized growth insights.",
+    type: 'website',
+    locale: 'en_US',
+    url: 'https://mybrandos.app',
+    siteName: 'BrandOS',
+    title: 'BrandOS — Discover Your Brand DNA',
+    description:
+      'AI-powered brand analysis that reveals your unique creator identity. Get your Brand Score and unlock personalized growth insights.',
     images: [
       {
-        url: "/og-image.png",
+        url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: "BrandOS - Discover Your Brand DNA",
+        alt: 'BrandOS - Discover Your Brand DNA',
       },
     ],
   },
   twitter: {
-    card: "summary_large_image",
-    title: "BrandOS — Discover Your Brand DNA",
-    description: "AI-powered brand analysis that reveals your unique creator identity. Get your Brand Score and unlock personalized growth insights.",
-    images: ["/og-image.png"],
-    creator: "@mybrandos",
+    card: 'summary_large_image',
+    title: 'BrandOS — Discover Your Brand DNA',
+    description:
+      'AI-powered brand analysis that reveals your unique creator identity. Get your Brand Score and unlock personalized growth insights.',
+    images: ['/og-image.png'],
+    creator: '@mybrandos',
   },
   robots: {
     index: true,
@@ -49,9 +60,9 @@ export const metadata: Metadata = {
     googleBot: {
       index: true,
       follow: true,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
     },
   },
 };

@@ -67,10 +67,7 @@ export async function POST(request: NextRequest) {
     const result = await createAttestation('brand-score', attestationData);
 
     if (!result.success || !result.attestation) {
-      return NextResponse.json(
-        { error: result.error || 'Attestation failed' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: result.error || 'Attestation failed' }, { status: 500 });
     }
 
     // Look up user by X username to link the attestation
@@ -116,10 +113,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('[Attest Score] Error:', error);
-    return NextResponse.json(
-      { error: 'Failed to create score attestation' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to create score attestation' }, { status: 500 });
   }
 }
 
@@ -170,9 +164,6 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error('[Attest Score] GET error:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch score attestations' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch score attestations' }, { status: 500 });
   }
 }

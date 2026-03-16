@@ -4,11 +4,7 @@
 // =============================================================================
 
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import type {
-  SocialPlatform,
-  CrossPlatformContentType,
-  PrePublishCheck,
-} from './types';
+import type { SocialPlatform, CrossPlatformContentType, PrePublishCheck } from './types';
 import { PLATFORM_NORMS, PLATFORM_LABELS } from './types';
 import type { BrandDNA } from '@/lib/types';
 import type { VoiceFingerprint } from '@/lib/voice-fingerprint';
@@ -52,7 +48,10 @@ BRAND DNA:
 - Keywords to use: ${brandDNA.keywords.join(', ')}
 - Do Patterns: ${brandDNA.doPatterns.join('; ')}
 - Don't Patterns: ${brandDNA.dontPatterns.join('; ')}
-- Voice Samples: ${brandDNA.voiceSamples.slice(0, 3).map((s) => `"${s.substring(0, 100)}"`).join(', ')}
+- Voice Samples: ${brandDNA.voiceSamples
+    .slice(0, 3)
+    .map((s) => `"${s.substring(0, 100)}"`)
+    .join(', ')}
 ${fingerprintSection}
 
 SCORING CRITERIA:

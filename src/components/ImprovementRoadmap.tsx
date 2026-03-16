@@ -44,14 +44,31 @@ interface ImprovementRoadmapProps {
 
 const ImpactBadge = ({ impact }: { impact: Issue['impact'] }) => {
   const config = {
-    high: { bg: 'bg-red-500/20', border: 'border-red-500/40', text: 'text-red-400', label: 'HIGH IMPACT' },
-    medium: { bg: 'bg-amber-500/20', border: 'border-amber-500/40', text: 'text-amber-400', label: 'MEDIUM' },
-    low: { bg: 'bg-gray-500/20', border: 'border-gray-500/40', text: 'text-gray-400', label: 'LOW' },
+    high: {
+      bg: 'bg-red-500/20',
+      border: 'border-red-500/40',
+      text: 'text-red-400',
+      label: 'HIGH IMPACT',
+    },
+    medium: {
+      bg: 'bg-amber-500/20',
+      border: 'border-amber-500/40',
+      text: 'text-amber-400',
+      label: 'MEDIUM',
+    },
+    low: {
+      bg: 'bg-gray-500/20',
+      border: 'border-gray-500/40',
+      text: 'text-gray-400',
+      label: 'LOW',
+    },
   };
   const c = config[impact];
 
   return (
-    <span className={`${c.bg} ${c.border} ${c.text} border px-2 py-0.5 text-[9px] font-os tracking-wider rounded`}>
+    <span
+      className={`${c.bg} ${c.border} ${c.text} border px-2 py-0.5 text-[9px] font-os tracking-wider rounded`}
+    >
       {c.label}
     </span>
   );
@@ -67,7 +84,9 @@ const CategoryBadge = ({ category }: { category: Issue['category'] }) => {
   const c = config[category];
 
   return (
-    <span className={`${c.bg} ${c.text} px-2 py-0.5 text-[9px] font-os tracking-wider rounded uppercase`}>
+    <span
+      className={`${c.bg} ${c.text} px-2 py-0.5 text-[9px] font-os tracking-wider rounded uppercase`}
+    >
       {category}
     </span>
   );
@@ -98,9 +117,7 @@ const IssueCard = ({ issue, index }: { issue: Issue; index: number }) => {
               <ImpactBadge impact={issue.impact} />
               <CategoryBadge category={issue.category} />
             </div>
-            <h4 className="font-brand font-bold text-white text-sm leading-tight">
-              {issue.title}
-            </h4>
+            <h4 className="font-brand font-bold text-white text-sm leading-tight">{issue.title}</h4>
           </div>
         </div>
         <ChevronRight
@@ -118,9 +135,7 @@ const IssueCard = ({ issue, index }: { issue: Issue; index: number }) => {
             className="overflow-hidden"
           >
             <div className="px-4 pb-4 pt-0">
-              <p className="text-gray-400 text-xs leading-relaxed ml-9">
-                {issue.description}
-              </p>
+              <p className="text-gray-400 text-xs leading-relaxed ml-9">{issue.description}</p>
             </div>
           </motion.div>
         )}
@@ -150,9 +165,7 @@ const QuickWinCard = ({ win, index }: { win: QuickWin; index: number }) => {
         <button
           onClick={() => setIsDone(!isDone)}
           className={`mt-0.5 w-5 h-5 rounded border flex-shrink-0 flex items-center justify-center transition-all ${
-            isDone
-              ? 'bg-[#10B981] border-[#10B981]'
-              : 'border-[#333] hover:border-[#10B981]/50'
+            isDone ? 'bg-[#10B981] border-[#10B981]' : 'border-[#333] hover:border-[#10B981]/50'
           }`}
         >
           {isDone && <Check className="w-3 h-3 text-white" />}
@@ -163,7 +176,9 @@ const QuickWinCard = ({ win, index }: { win: QuickWin; index: number }) => {
             <Clock className="w-3 h-3 text-gray-500" />
             <span className="text-[10px] text-gray-500 font-os">{win.timeEstimate}</span>
           </div>
-          <p className={`text-sm font-medium leading-tight ${isDone ? 'text-gray-500 line-through' : 'text-white'}`}>
+          <p
+            className={`text-sm font-medium leading-tight ${isDone ? 'text-gray-500 line-through' : 'text-white'}`}
+          >
             {win.action}
           </p>
 
@@ -222,7 +237,9 @@ const WeeklyFocusCard = ({ focus }: { focus: WeeklyFocus }) => {
           <div className="w-8 h-8 rounded-lg bg-[#2E6AFF] flex items-center justify-center">
             <Target className="w-4 h-4 text-white" />
           </div>
-          <span className="text-[10px] text-[#2E6AFF] font-os tracking-widest">THIS WEEK'S FOCUS</span>
+          <span className="text-[10px] text-[#2E6AFF] font-os tracking-widest">
+            THIS WEEK'S FOCUS
+          </span>
         </div>
 
         <h3 className="text-xl font-brand font-bold text-white mb-2 leading-tight">
@@ -230,7 +247,9 @@ const WeeklyFocusCard = ({ focus }: { focus: WeeklyFocus }) => {
         </h3>
 
         <div className="bg-[#0a0a0a]/50 rounded-lg p-3 mb-4 border border-[#2E6AFF]/20">
-          <span className="text-[9px] text-[#2E6AFF] font-os tracking-wider block mb-1">SUCCESS METRIC</span>
+          <span className="text-[9px] text-[#2E6AFF] font-os tracking-wider block mb-1">
+            SUCCESS METRIC
+          </span>
           <p className="text-sm text-white">{focus.metric}</p>
         </div>
 
@@ -295,7 +314,9 @@ const ImprovementRoadmap: React.FC<ImprovementRoadmapProps> = ({ data, onJoinWai
           <div>
             <div className="flex items-center gap-2 mb-4">
               <AlertTriangle className="w-4 h-4 text-red-400" />
-              <span className="text-[11px] text-gray-500 font-os tracking-wider">TOP ISSUES TO FIX</span>
+              <span className="text-[11px] text-gray-500 font-os tracking-wider">
+                TOP ISSUES TO FIX
+              </span>
             </div>
             <div className="space-y-3">
               {data.topIssues.map((issue, i) => (
@@ -308,7 +329,9 @@ const ImprovementRoadmap: React.FC<ImprovementRoadmapProps> = ({ data, onJoinWai
           <div>
             <div className="flex items-center gap-2 mb-4">
               <Zap className="w-4 h-4 text-[#FFD700]" />
-              <span className="text-[11px] text-gray-500 font-os tracking-wider">QUICK WINS (5 MIN EACH)</span>
+              <span className="text-[11px] text-gray-500 font-os tracking-wider">
+                QUICK WINS (5 MIN EACH)
+              </span>
             </div>
             <div className="space-y-3">
               {data.quickWins.map((win, i) => (
@@ -332,14 +355,15 @@ const ImprovementRoadmap: React.FC<ImprovementRoadmapProps> = ({ data, onJoinWai
           >
             <div className="flex items-center gap-2 mb-3">
               <span className="text-lg">🚀</span>
-              <span className="text-[10px] text-[#D4A574] font-os tracking-widest">COMING SOON</span>
+              <span className="text-[10px] text-[#D4A574] font-os tracking-widest">
+                COMING SOON
+              </span>
             </div>
 
-            <h3 className="text-lg font-brand font-bold text-white mb-2">
-              Want ongoing guidance?
-            </h3>
+            <h3 className="text-lg font-brand font-bold text-white mb-2">Want ongoing guidance?</h3>
             <p className="text-xs text-gray-400 mb-4 leading-relaxed">
-              BrandOS Pro will give you weekly check-ins, content suggestions that match your voice, and track your brand improvement over time.
+              BrandOS Pro will give you weekly check-ins, content suggestions that match your voice,
+              and track your brand improvement over time.
             </p>
 
             <motion.button
@@ -363,7 +387,9 @@ const ImprovementRoadmap: React.FC<ImprovementRoadmapProps> = ({ data, onJoinWai
             transition={{ delay: 0.9 }}
             className="border border-[#222] rounded-lg p-4 bg-[#0a0a0a]"
           >
-            <span className="text-[9px] text-gray-600 font-os tracking-wider block mb-2">THE BRANDOS FRAMEWORK</span>
+            <span className="text-[9px] text-gray-600 font-os tracking-wider block mb-2">
+              THE BRANDOS FRAMEWORK
+            </span>
             <div className="flex justify-between text-[10px] font-os">
               <span className="text-[#E8A838]">DEFINE</span>
               <span className="text-gray-600">→</span>

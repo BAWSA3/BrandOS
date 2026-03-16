@@ -23,7 +23,7 @@ interface ConversationalGateProps {
 function TypewriterText({
   text,
   speed = 25,
-  onComplete
+  onComplete,
 }: {
   text: string;
   speed?: number;
@@ -42,8 +42,8 @@ function TypewriterText({
   useEffect(() => {
     if (currentIndex < text.length) {
       const timeout = setTimeout(() => {
-        setDisplayText(prev => prev + text[currentIndex]);
-        setCurrentIndex(prev => prev + 1);
+        setDisplayText((prev) => prev + text[currentIndex]);
+        setCurrentIndex((prev) => prev + 1);
       }, speed);
       return () => clearTimeout(timeout);
     } else if (!isComplete) {
@@ -174,11 +174,7 @@ export default function ConversationalGate({
           }}
         >
           {showMessage && (
-            <TypewriterText
-              text={message}
-              speed={20}
-              onComplete={() => setMessageComplete(true)}
-            />
+            <TypewriterText text={message} speed={20} onComplete={() => setMessageComplete(true)} />
           )}
         </h2>
       </div>
@@ -219,8 +215,8 @@ export default function ConversationalGate({
               cursor: 'pointer',
               transition: 'background 0.2s ease',
             }}
-            onMouseEnter={(e) => e.currentTarget.style.background = '#0038CC'}
-            onMouseLeave={(e) => e.currentTarget.style.background = '#0047FF'}
+            onMouseEnter={(e) => (e.currentTarget.style.background = '#0038CC')}
+            onMouseLeave={(e) => (e.currentTarget.style.background = '#0047FF')}
           >
             <span
               style={{

@@ -30,24 +30,28 @@ interface ShareableBadgeProps {
 // =============================================================================
 
 const ARCHETYPE_COLORS: Record<string, { primary: string; secondary: string; glow: string }> = {
-  'FORESIGHT': { primary: '#9D4EDD', secondary: '#7B2CBF', glow: 'rgba(157, 78, 221, 0.5)' },
+  FORESIGHT: { primary: '#9D4EDD', secondary: '#7B2CBF', glow: 'rgba(157, 78, 221, 0.5)' },
   'The Alpha': { primary: '#FF6B35', secondary: '#E85D04', glow: 'rgba(255, 107, 53, 0.5)' },
   'The Builder': { primary: '#2E6AFF', secondary: '#1E4BC8', glow: 'rgba(46, 106, 255, 0.5)' },
   'The Educator': { primary: '#10B981', secondary: '#059669', glow: 'rgba(16, 185, 129, 0.5)' },
-  'ENTROPY': { primary: '#F59E0B', secondary: '#D97706', glow: 'rgba(245, 158, 11, 0.5)' },
+  ENTROPY: { primary: '#F59E0B', secondary: '#D97706', glow: 'rgba(245, 158, 11, 0.5)' },
   'The Analyst': { primary: '#06B6D4', secondary: '#0891B2', glow: 'rgba(6, 182, 212, 0.5)' },
   'The Philosopher': { primary: '#8B5CF6', secondary: '#7C3AED', glow: 'rgba(139, 92, 246, 0.5)' },
   'The Networker': { primary: '#EC4899', secondary: '#DB2777', glow: 'rgba(236, 72, 153, 0.5)' },
   'The Contrarian': { primary: '#EF4444', secondary: '#DC2626', glow: 'rgba(239, 68, 68, 0.5)' },
-  'ARC': { primary: '#10B981', secondary: '#059669', glow: 'rgba(16, 185, 129, 0.5)' },
-  'NULL': { primary: '#8B5CF6', secondary: '#7C3AED', glow: 'rgba(139, 92, 246, 0.5)' },
-  'FREQ': { primary: '#EC4899', secondary: '#DB2777', glow: 'rgba(236, 72, 153, 0.5)' },
-  'RELAY': { primary: '#06B6D4', secondary: '#0891B2', glow: 'rgba(6, 182, 212, 0.5)' },
+  ARC: { primary: '#10B981', secondary: '#059669', glow: 'rgba(16, 185, 129, 0.5)' },
+  NULL: { primary: '#8B5CF6', secondary: '#7C3AED', glow: 'rgba(139, 92, 246, 0.5)' },
+  FREQ: { primary: '#EC4899', secondary: '#DB2777', glow: 'rgba(236, 72, 153, 0.5)' },
+  RELAY: { primary: '#06B6D4', secondary: '#0891B2', glow: 'rgba(6, 182, 212, 0.5)' },
   'BUILD.EXE': { primary: '#EF4444', secondary: '#DC2626', glow: 'rgba(239, 68, 68, 0.5)' },
-  'SIGNAL_SAGE': { primary: '#3B82F6', secondary: '#2563EB', glow: 'rgba(59, 130, 246, 0.5)' },
+  SIGNAL_SAGE: { primary: '#3B82F6', secondary: '#2563EB', glow: 'rgba(59, 130, 246, 0.5)' },
 };
 
-const DEFAULT_COLORS = { primary: '#2E6AFF', secondary: '#1E4BC8', glow: 'rgba(46, 106, 255, 0.5)' };
+const DEFAULT_COLORS = {
+  primary: '#2E6AFF',
+  secondary: '#1E4BC8',
+  glow: 'rgba(46, 106, 255, 0.5)',
+};
 
 // =============================================================================
 // HELPER FUNCTIONS
@@ -62,7 +66,11 @@ function getScoreLabel(score: number): string {
   return 'EMERGING';
 }
 
-function getArchetypeColors(archetype: string): { primary: string; secondary: string; glow: string } {
+function getArchetypeColors(archetype: string): {
+  primary: string;
+  secondary: string;
+  glow: string;
+} {
   return ARCHETYPE_COLORS[archetype] || DEFAULT_COLORS;
 }
 
@@ -108,8 +116,12 @@ export async function generateBadgeImage(data: BadgeData): Promise<Blob | null> 
 
   // Radial gradient accent in top-right
   const gradientTR = ctx.createRadialGradient(
-    canvas.width - 100, 100, 0,
-    canvas.width - 100, 100, 400
+    canvas.width - 100,
+    100,
+    0,
+    canvas.width - 100,
+    100,
+    400
   );
   gradientTR.addColorStop(0, `${colors.primary}20`);
   gradientTR.addColorStop(1, 'transparent');
@@ -118,8 +130,12 @@ export async function generateBadgeImage(data: BadgeData): Promise<Blob | null> 
 
   // Radial gradient accent in bottom-left
   const gradientBL = ctx.createRadialGradient(
-    100, canvas.height - 100, 0,
-    100, canvas.height - 100, 350
+    100,
+    canvas.height - 100,
+    0,
+    100,
+    canvas.height - 100,
+    350
   );
   gradientBL.addColorStop(0, `${colors.secondary}15`);
   gradientBL.addColorStop(1, 'transparent');
@@ -504,7 +520,14 @@ export default function ShareableBadge({ data, onShare }: ShareableBadgeProps) {
             </>
           ) : downloadComplete ? (
             <>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+              >
                 <polyline points="20 6 9 17 4 12" />
               </svg>
               OPENING X...

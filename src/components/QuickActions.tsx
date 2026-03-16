@@ -18,7 +18,12 @@ export default function QuickActions({ onNavigate, canCheck, canGenerate }: Quic
       label: 'Quick Check',
       icon: (
         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={1.5}
+            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+          />
         </svg>
       ),
       phase: 'check' as Phase,
@@ -31,7 +36,12 @@ export default function QuickActions({ onNavigate, canCheck, canGenerate }: Quic
       label: 'Generate',
       icon: (
         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={1.5}
+            d="M13 10V3L4 14h7v7l9-11h-7z"
+          />
         </svg>
       ),
       phase: 'generate' as Phase,
@@ -44,7 +54,12 @@ export default function QuickActions({ onNavigate, canCheck, canGenerate }: Quic
       label: 'Edit Brand',
       icon: (
         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z" />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={1.5}
+            d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z"
+          />
         </svg>
       ),
       phase: 'define' as Phase,
@@ -57,9 +72,11 @@ export default function QuickActions({ onNavigate, canCheck, canGenerate }: Quic
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col-reverse items-end gap-3">
       {/* Action buttons */}
-      <div className={`flex flex-col-reverse gap-2 transition-all duration-300 ${
-        isExpanded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
-      }`}>
+      <div
+        className={`flex flex-col-reverse gap-2 transition-all duration-300 ${
+          isExpanded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
+        }`}
+      >
         {actions.map((action) => (
           <button
             key={action.id}
@@ -73,9 +90,10 @@ export default function QuickActions({ onNavigate, canCheck, canGenerate }: Quic
             className={`
               flex items-center gap-3 px-4 py-3 rounded-full text-white text-sm font-medium
               shadow-lg transition-all duration-200
-              ${action.enabled 
-                ? `${action.color} hover:scale-105 active:scale-95` 
-                : 'bg-gray-400 cursor-not-allowed opacity-50'
+              ${
+                action.enabled
+                  ? `${action.color} hover:scale-105 active:scale-95`
+                  : 'bg-gray-400 cursor-not-allowed opacity-50'
               }
             `}
           >
@@ -83,7 +101,12 @@ export default function QuickActions({ onNavigate, canCheck, canGenerate }: Quic
             <span>{action.label}</span>
             {!action.enabled && (
               <svg className="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                />
               </svg>
             )}
           </button>
@@ -102,7 +125,12 @@ export default function QuickActions({ onNavigate, canCheck, canGenerate }: Quic
         `}
       >
         <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+          />
         </svg>
       </button>
 
@@ -119,9 +147,9 @@ export default function QuickActions({ onNavigate, canCheck, canGenerate }: Quic
 }
 
 // Keyboard shortcut handler component
-export function KeyboardShortcuts({ 
-  onCheck, 
-  onGenerate, 
+export function KeyboardShortcuts({
+  onCheck,
+  onGenerate,
   onBrand,
   canCheck,
   canGenerate,
@@ -136,20 +164,3 @@ export function KeyboardShortcuts({
   // to handle Cmd+K or other keyboard shortcuts
   return null;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

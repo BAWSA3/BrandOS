@@ -15,56 +15,57 @@ const getMockBrandScore = (profile: XProfileData) => ({
     define: {
       score: 92,
       insights: [
-        "Strong personal brand identity with memorable name",
-        "Content consistently reflects philosophical approach",
-        "Clear positioning as a thought leader through posts"
-      ]
+        'Strong personal brand identity with memorable name',
+        'Content consistently reflects philosophical approach',
+        'Clear positioning as a thought leader through posts',
+      ],
     },
     check: {
       score: 88,
       insights: [
-        "Username and display name are perfectly aligned",
-        "Consistent minimalist brand voice across content",
-        "High credibility through follower ratio"
-      ]
+        'Username and display name are perfectly aligned',
+        'Consistent minimalist brand voice across content',
+        'High credibility through follower ratio',
+      ],
     },
     generate: {
       score: 82,
       insights: [
-        "Content output demonstrates brand confidence",
-        "Profile image present and professional",
-        "No CTA needed at this influence level"
-      ]
+        'Content output demonstrates brand confidence',
+        'Profile image present and professional',
+        'No CTA needed at this influence level',
+      ],
     },
     scale: {
       score: 95,
       insights: [
         `Exceptional follower count: ${profile.public_metrics.followers_count.toLocaleString()}`,
-        "Elite tier influence with massive reach",
-        `Listed on ${profile.public_metrics.listed_count.toLocaleString()} curated lists`
-      ]
+        'Elite tier influence with massive reach',
+        `Listed on ${profile.public_metrics.listed_count.toLocaleString()} curated lists`,
+      ],
     },
   },
   topStrengths: [
-    "Elite-tier influence with 2.9M+ followers",
-    "Strong authority ratio showing thought leadership",
-    "Highly curated by others (50K+ lists)"
+    'Elite-tier influence with 2.9M+ followers',
+    'Strong authority ratio showing thought leadership',
+    'Highly curated by others (50K+ lists)',
   ],
   topImprovements: [
-    "Consider adding a link to latest project",
-    "Verification badge would add extra credibility",
-    "Experiment with thread-based content for deeper engagement"
+    'Consider adding a link to latest project',
+    'Verification badge would add extra credibility',
+    'Experiment with thread-based content for deeper engagement',
   ],
   summary: `@${profile.username} represents an elite-tier personal brand with exceptional reach and influence. Their content consistently reflects strong brand positioning. Their follower-to-following ratio signals strong thought leadership authority.`,
   archetype: {
-    primary: "The Prophet",
-    emoji: "🔮",
-    tagline: "Wisdom Dealer",
-    description: "A visionary thought leader who shares philosophical insights and unconventional wisdom. Known for memorable one-liners and contrarian takes that challenge conventional thinking.",
-    strengths: ["Memorable philosophical insights", "Strong conviction in ideas"],
-    growthTip: "Continue sharing timeless wisdom - your archive is your legacy."
+    primary: 'The Prophet',
+    emoji: '🔮',
+    tagline: 'Wisdom Dealer',
+    description:
+      'A visionary thought leader who shares philosophical insights and unconventional wisdom. Known for memorable one-liners and contrarian takes that challenge conventional thinking.',
+    strengths: ['Memorable philosophical insights', 'Strong conviction in ideas'],
+    growthTip: 'Continue sharing timeless wisdom - your archive is your legacy.',
   },
-  influenceTier: "elite"
+  influenceTier: 'elite',
 });
 
 async function fetchProfile(username: string, origin: string): Promise<XProfileData | null> {
@@ -104,16 +105,13 @@ async function fetchProfile(username: string, origin: string): Promise<XProfileD
 
 async function handlePost(request: NextRequest) {
   try {
-    const { username, forceReevaluate = false } = await request.json() as {
+    const { username, forceReevaluate = false } = (await request.json()) as {
       username: string;
       forceReevaluate?: boolean;
     };
 
     if (!username) {
-      return NextResponse.json(
-        { error: 'Username is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Username is required' }, { status: 400 });
     }
 
     const cleanUsername = username.replace(/^@/, '').trim();
@@ -122,10 +120,7 @@ async function handlePost(request: NextRequest) {
     // Fetch profile
     const profile = await fetchProfile(cleanUsername, origin);
     if (!profile) {
-      return NextResponse.json(
-        { error: 'Could not fetch profile' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Could not fetch profile' }, { status: 404 });
     }
 
     console.log('=== BRAND SCORE ANALYSIS ===');
@@ -153,10 +148,7 @@ async function handlePost(request: NextRequest) {
         brandScore = getMockBrandScore(profile);
       } else {
         console.error('Failed to get Gemini response:', geminiError);
-        return NextResponse.json(
-          { error: 'Failed to analyze profile' },
-          { status: 500 }
-        );
+        return NextResponse.json({ error: 'Failed to analyze profile' }, { status: 500 });
       }
     }
 
@@ -175,7 +167,9 @@ async function handlePost(request: NextRequest) {
       // Replace Gemini's archetype with the resolved (consistent) one
       brandScore.archetype = archetypeDecision.archetype;
 
-      console.log(`[BrandScore] Archetype for @${cleanUsername}: ${archetypeDecision.archetype.primary} (${archetypeDecision.reason})`);
+      console.log(
+        `[BrandScore] Archetype for @${cleanUsername}: ${archetypeDecision.archetype.primary} (${archetypeDecision.reason})`
+      );
     } catch (archetypeError) {
       console.error('Archetype resolution error:', archetypeError);
       // Continue with Gemini's result if archetype engine fails
@@ -207,7 +201,7 @@ async function handlePost(request: NextRequest) {
       score: brandScore.overallScore,
       archetype: brandScore.archetype?.primary || '',
       enhanced: false,
-    }).catch(err => console.error('Scan tracking error:', err));
+    }).catch((err) => console.error('Scan tracking error:', err));
 
     return NextResponse.json({
       profile,
@@ -221,13 +215,9 @@ async function handlePost(request: NextRequest) {
         evolutionInfo: evolutionInfo || undefined,
       },
     });
-
   } catch (error) {
     console.error('Brand Score API error:', error);
-    return NextResponse.json(
-      { error: 'An unexpected error occurred' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }
 

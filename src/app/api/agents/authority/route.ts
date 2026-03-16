@@ -110,10 +110,7 @@ export async function POST(request: NextRequest) {
       // ===== HANDLE OBJECTION =====
       case 'handle-objection': {
         if (!params.objectionType) {
-          return NextResponse.json(
-            { error: 'Missing objectionType parameter' },
-            { status: 400 }
-          );
+          return NextResponse.json({ error: 'Missing objectionType parameter' }, { status: 400 });
         }
 
         const result = await agents.handleCustomerObjection({
@@ -137,10 +134,7 @@ export async function POST(request: NextRequest) {
       // ===== COMPETITIVE CONTENT =====
       case 'competitive': {
         if (!params.competitor) {
-          return NextResponse.json(
-            { error: 'Missing competitor parameter' },
-            { status: 400 }
-          );
+          return NextResponse.json({ error: 'Missing competitor parameter' }, { status: 400 });
         }
 
         const result = await agents.createCompetitiveContent({
@@ -191,10 +185,7 @@ export async function POST(request: NextRequest) {
       // ===== TRUST CONTENT =====
       case 'trust': {
         if (!params.trustFormat) {
-          return NextResponse.json(
-            { error: 'Missing trustFormat parameter' },
-            { status: 400 }
-          );
+          return NextResponse.json({ error: 'Missing trustFormat parameter' }, { status: 400 });
         }
 
         const result = await agents.createTrustContent({
@@ -298,8 +289,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Authority API error:', error);
 
-    const errorMessage =
-      error instanceof Error ? error.message : 'Authority operation failed';
+    const errorMessage = error instanceof Error ? error.message : 'Authority operation failed';
 
     return NextResponse.json(
       {
@@ -341,7 +331,8 @@ export async function GET() {
           action:
             'generate | handle-objection | competitive | educational | trust | trend-to-authority | get-framework | get-objections | get-competitors | get-educational-topics',
           params: {
-            contentType: 'thought-leadership | educational | competitive | trust-building | conversion (for generate)',
+            contentType:
+              'thought-leadership | educational | competitive | trust-building | conversion (for generate)',
             audience: 'collector | trader | seller (optional)',
             pillar: 'security | transparency | liquidity | authenticity (optional)',
             topic: 'string (optional)',
@@ -351,7 +342,8 @@ export async function GET() {
             format: 'short | detailed | empathetic (optional)',
             competitor: 'ebay | tcgplayer | localshop | courtyard | alt | dibbs (for competitive)',
             competitiveFormat: 'comparison | differentiation | migration-guide (optional)',
-            educationalTopic: 'how-vaulting-works | nft-basics | tokenization-explained | ... (for educational)',
+            educationalTopic:
+              'how-vaulting-works | nft-basics | tokenization-explained | ... (for educational)',
             depth: 'beginner | intermediate | advanced (optional)',
             trustFormat: 'vault-tour | security-feature | process-transparency | ... (for trust)',
             trendTopic: 'string (for trend-to-authority)',

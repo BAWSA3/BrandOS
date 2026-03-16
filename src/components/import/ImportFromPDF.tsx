@@ -66,30 +66,65 @@ export default function ImportFromPDF({ onExtract }: ImportFromPDFProps) {
         sourceDetails: file.name,
         overallConfidence: result.overallConfidence || 75,
         extractedAt: new Date(),
-        name: result.name ? { value: result.name, confidence: result.nameConfidence || 80, source: 'PDF title/header' } : undefined,
-        colors: result.colors ? {
-          primary: result.colors.primary ? { value: result.colors.primary, confidence: 85, source: 'PDF color analysis' } : undefined,
-          secondary: result.colors.secondary ? { value: result.colors.secondary, confidence: 80, source: 'PDF color analysis' } : undefined,
-          accent: result.colors.accent ? { value: result.colors.accent, confidence: 75, source: 'PDF color analysis' } : undefined,
-        } : undefined,
-        tone: result.tone ? {
-          formality: { value: result.tone.formality, confidence: 70, source: 'Text analysis' },
-          energy: { value: result.tone.energy, confidence: 70, source: 'Text analysis' },
-          confidence: { value: result.tone.confidence, confidence: 70, source: 'Text analysis' },
-          style: { value: result.tone.style, confidence: 70, source: 'Text analysis' },
-        } : undefined,
-        keywords: result.keywords?.map((k: string) => ({ value: k, confidence: 75, source: 'Text extraction' })),
-        doPatterns: result.doPatterns?.map((p: string) => ({ value: p, confidence: 80, source: 'Guidelines parsing' })),
-        dontPatterns: result.dontPatterns?.map((p: string) => ({ value: p, confidence: 80, source: 'Guidelines parsing' })),
-        voiceSamples: result.voiceSamples?.map((s: string) => ({ value: s, confidence: 85, source: 'Text samples' })),
+        name: result.name
+          ? {
+              value: result.name,
+              confidence: result.nameConfidence || 80,
+              source: 'PDF title/header',
+            }
+          : undefined,
+        colors: result.colors
+          ? {
+              primary: result.colors.primary
+                ? { value: result.colors.primary, confidence: 85, source: 'PDF color analysis' }
+                : undefined,
+              secondary: result.colors.secondary
+                ? { value: result.colors.secondary, confidence: 80, source: 'PDF color analysis' }
+                : undefined,
+              accent: result.colors.accent
+                ? { value: result.colors.accent, confidence: 75, source: 'PDF color analysis' }
+                : undefined,
+            }
+          : undefined,
+        tone: result.tone
+          ? {
+              formality: { value: result.tone.formality, confidence: 70, source: 'Text analysis' },
+              energy: { value: result.tone.energy, confidence: 70, source: 'Text analysis' },
+              confidence: {
+                value: result.tone.confidence,
+                confidence: 70,
+                source: 'Text analysis',
+              },
+              style: { value: result.tone.style, confidence: 70, source: 'Text analysis' },
+            }
+          : undefined,
+        keywords: result.keywords?.map((k: string) => ({
+          value: k,
+          confidence: 75,
+          source: 'Text extraction',
+        })),
+        doPatterns: result.doPatterns?.map((p: string) => ({
+          value: p,
+          confidence: 80,
+          source: 'Guidelines parsing',
+        })),
+        dontPatterns: result.dontPatterns?.map((p: string) => ({
+          value: p,
+          confidence: 80,
+          source: 'Guidelines parsing',
+        })),
+        voiceSamples: result.voiceSamples?.map((s: string) => ({
+          value: s,
+          confidence: 85,
+          source: 'Text samples',
+        })),
       };
 
       setProgress({ stage: 'complete', progress: 100, message: 'Analysis complete!' });
-      
+
       setTimeout(() => {
         onExtract(extractedBrand, previewText);
       }, 500);
-
     } catch (error) {
       setProgress({
         stage: 'error',
@@ -104,8 +139,18 @@ export default function ImportFromPDF({ onExtract }: ImportFromPDFProps) {
     <div className="max-w-2xl mx-auto">
       <div className="text-center mb-8">
         <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-red-500/10 flex items-center justify-center">
-          <svg className="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+          <svg
+            className="w-8 h-8 text-red-500"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={1.5}
+              d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+            />
           </svg>
         </div>
         <h2 className="text-2xl font-light tracking-tight mb-2">Upload Brand Guidelines PDF</h2>
@@ -131,12 +176,22 @@ export default function ImportFromPDF({ onExtract }: ImportFromPDFProps) {
           onChange={handleFileSelect}
           className="hidden"
         />
-        
+
         {file ? (
           <div className="flex items-center justify-center gap-4">
             <div className="w-12 h-12 rounded-lg bg-red-500/10 flex items-center justify-center">
-              <svg className="w-6 h-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              <svg
+                className="w-6 h-6 text-red-500"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.5}
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                />
               </svg>
             </div>
             <div className="text-left">
@@ -151,15 +206,35 @@ export default function ImportFromPDF({ onExtract }: ImportFromPDFProps) {
               }}
               className="ml-4 p-2 hover:bg-border rounded-lg transition-colors"
             >
-              <svg className="w-5 h-5 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
+              <svg
+                className="w-5 h-5 text-muted"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.5}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
           </div>
         ) : (
           <>
-            <svg className="w-12 h-12 mx-auto mb-4 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+            <svg
+              className="w-12 h-12 mx-auto mb-4 text-muted"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={1}
+                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+              />
             </svg>
             <p className="text-lg mb-2">Drop your PDF here</p>
             <p className="text-sm text-muted">or click to browse</p>
@@ -182,22 +257,24 @@ export default function ImportFromPDF({ onExtract }: ImportFromPDFProps) {
               style={{ width: `${progress.progress}%` }}
             />
           </div>
-          {progress.error && (
-            <p className="mt-3 text-sm text-red-500">{progress.error}</p>
-          )}
+          {progress.error && <p className="mt-3 text-sm text-red-500">{progress.error}</p>}
         </div>
       )}
 
       {/* Analyze Button */}
       <button
         onClick={handleAnalyze}
-        disabled={!file || progress?.stage === 'uploading' || progress?.stage === 'parsing' || progress?.stage === 'analyzing'}
+        disabled={
+          !file ||
+          progress?.stage === 'uploading' ||
+          progress?.stage === 'parsing' ||
+          progress?.stage === 'analyzing'
+        }
         className="w-full mt-8 py-4 bg-foreground text-background rounded-xl text-sm font-medium disabled:opacity-30 disabled:cursor-not-allowed hover:opacity-90 transition-opacity"
       >
         {progress && progress.stage !== 'error' && progress.stage !== 'complete'
           ? 'Analyzing...'
-          : 'Analyze PDF'
-        }
+          : 'Analyze PDF'}
       </button>
 
       {/* Tips */}
@@ -221,19 +298,3 @@ export default function ImportFromPDF({ onExtract }: ImportFromPDFProps) {
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

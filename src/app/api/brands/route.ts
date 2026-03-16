@@ -20,7 +20,10 @@ async function getAuthUser() {
   }
 
   const supabase = createClient(supabaseUrl, supabaseAnonKey);
-  const { data: { user }, error } = await supabase.auth.getUser(accessToken);
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser(accessToken);
 
   if (error || !user) {
     return null;
@@ -48,7 +51,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Parse JSON fields
-    const parsedBrands = brands.map(brand => ({
+    const parsedBrands = brands.map((brand) => ({
       id: brand.id,
       name: brand.name,
       colors: JSON.parse(brand.colors),
@@ -101,20 +104,23 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return NextResponse.json({
-      brand: {
-        id: brand.id,
-        name: brand.name,
-        colors: JSON.parse(brand.colors),
-        tone: JSON.parse(brand.tone),
-        keywords: JSON.parse(brand.keywords),
-        doPatterns: JSON.parse(brand.doPatterns),
-        dontPatterns: JSON.parse(brand.dontPatterns),
-        voiceSamples: JSON.parse(brand.voiceSamples),
-        createdAt: brand.createdAt,
-        updatedAt: brand.updatedAt,
+    return NextResponse.json(
+      {
+        brand: {
+          id: brand.id,
+          name: brand.name,
+          colors: JSON.parse(brand.colors),
+          tone: JSON.parse(brand.tone),
+          keywords: JSON.parse(brand.keywords),
+          doPatterns: JSON.parse(brand.doPatterns),
+          dontPatterns: JSON.parse(brand.dontPatterns),
+          voiceSamples: JSON.parse(brand.voiceSamples),
+          createdAt: brand.createdAt,
+          updatedAt: brand.updatedAt,
+        },
       },
-    }, { status: 201 });
+      { status: 201 }
+    );
   } catch (error) {
     console.error('[Brands API] POST error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
@@ -152,9 +158,12 @@ export async function PUT(request: NextRequest) {
     if (updates.colors !== undefined) updateData.colors = JSON.stringify(updates.colors);
     if (updates.tone !== undefined) updateData.tone = JSON.stringify(updates.tone);
     if (updates.keywords !== undefined) updateData.keywords = JSON.stringify(updates.keywords);
-    if (updates.doPatterns !== undefined) updateData.doPatterns = JSON.stringify(updates.doPatterns);
-    if (updates.dontPatterns !== undefined) updateData.dontPatterns = JSON.stringify(updates.dontPatterns);
-    if (updates.voiceSamples !== undefined) updateData.voiceSamples = JSON.stringify(updates.voiceSamples);
+    if (updates.doPatterns !== undefined)
+      updateData.doPatterns = JSON.stringify(updates.doPatterns);
+    if (updates.dontPatterns !== undefined)
+      updateData.dontPatterns = JSON.stringify(updates.dontPatterns);
+    if (updates.voiceSamples !== undefined)
+      updateData.voiceSamples = JSON.stringify(updates.voiceSamples);
 
     const brand = await prisma.brand.update({
       where: { id },

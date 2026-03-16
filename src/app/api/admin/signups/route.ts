@@ -13,10 +13,7 @@ function isAuthorized(request: NextRequest): boolean {
 export async function GET(request: NextRequest) {
   // Check authorization
   if (!isAuthorized(request)) {
-    return NextResponse.json(
-      { error: 'Unauthorized' },
-      { status: 401 }
-    );
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   try {
@@ -29,20 +26,18 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ count });
     }
 
-    const signups = source 
-      ? await getSignupsBySource(source)
-      : await getAllSignups();
+    const signups = source ? await getSignupsBySource(source) : await getAllSignups();
 
     // Group by source for summary
     const bySource: Record<string, number> = {};
-    signups.forEach(s => {
+    signups.forEach((s) => {
       bySource[s.source] = (bySource[s.source] || 0) + 1;
     });
 
     return NextResponse.json({
       total: signups.length,
       bySource,
-      signups: signups.map(s => ({
+      signups: signups.map((s) => ({
         email: s.email,
         source: s.source,
         createdAt: s.createdAt,
@@ -50,9 +45,6 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error('[Admin/Signups] Error:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch signups' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch signups' }, { status: 500 });
   }
 }

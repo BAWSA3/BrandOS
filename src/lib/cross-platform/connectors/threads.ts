@@ -2,7 +2,12 @@
 // THREADS CONNECTOR — Meta Threads API
 // =============================================================================
 
-import type { PlatformConnector, OAuthTokens, PlatformProfile, PlatformConnectorConfig } from './base';
+import type {
+  PlatformConnector,
+  OAuthTokens,
+  PlatformProfile,
+  PlatformConnectorConfig,
+} from './base';
 import type { ContentItem } from '../types';
 import { normalizeThreadsPost } from '../normalizers';
 

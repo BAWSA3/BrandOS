@@ -9,7 +9,7 @@ export default function SharedBrand() {
   const params = useParams();
   const token = params.token as string;
   const { theme, createBrand, setBrandDNA, switchBrand, brands } = useBrandStore();
-  
+
   const [sharedBrand, setSharedBrand] = useState<BrandDNA | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -20,12 +20,12 @@ export default function SharedBrand() {
       try {
         const res = await fetch(`/api/brands/share?token=${token}`);
         const data = await res.json();
-        
+
         if (!res.ok) {
           setError(data.error || 'Failed to load shared brand');
           return;
         }
-        
+
         setSharedBrand(data.brand);
       } catch (err) {
         console.error(err);
@@ -40,10 +40,10 @@ export default function SharedBrand() {
 
   const handleImport = () => {
     if (!sharedBrand) return;
-    
+
     // Create new brand and apply the shared settings
     createBrand(sharedBrand.name + ' (Imported)');
-    
+
     // Get the newly created brand and update it
     const newBrand = brands[brands.length - 1];
     if (newBrand) {
@@ -57,7 +57,7 @@ export default function SharedBrand() {
         voiceSamples: sharedBrand.voiceSamples,
       });
     }
-    
+
     setImported(true);
   };
 
@@ -75,7 +75,10 @@ export default function SharedBrand() {
         <div className="text-center">
           <h1 className="text-2xl font-light mb-4">Oops!</h1>
           <p className="text-muted mb-8">{error}</p>
-          <a href="/" className="px-6 py-3 bg-foreground text-background rounded-full text-sm font-medium">
+          <a
+            href="/"
+            className="px-6 py-3 bg-foreground text-background rounded-full text-sm font-medium"
+          >
             Go to brandos
           </a>
         </div>
@@ -88,7 +91,10 @@ export default function SharedBrand() {
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border">
         <div className="max-w-4xl mx-auto px-6 h-14 flex items-center justify-between">
-          <a href="/" className="text-sm font-medium tracking-tight hover:text-muted transition-colors">
+          <a
+            href="/"
+            className="text-sm font-medium tracking-tight hover:text-muted transition-colors"
+          >
             brandos
           </a>
         </div>
@@ -96,7 +102,9 @@ export default function SharedBrand() {
 
       <main className="pt-14">
         <section className="py-20 px-6 text-center border-b border-border">
-          <p className="text-xs uppercase tracking-widest text-muted mb-4">Shared Brand Guidelines</p>
+          <p className="text-xs uppercase tracking-widest text-muted mb-4">
+            Shared Brand Guidelines
+          </p>
           <h1 className="text-5xl font-light tracking-tight mb-4">{sharedBrand?.name}</h1>
         </section>
 
@@ -106,9 +114,18 @@ export default function SharedBrand() {
             {imported ? (
               <div className="inline-flex items-center gap-2 px-6 py-3 bg-green-500/10 text-green-500 rounded-full">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
                 </svg>
-                Imported! Go to <a href="/" className="underline">brandos</a> to use it.
+                Imported! Go to{' '}
+                <a href="/" className="underline">
+                  brandos
+                </a>{' '}
+                to use it.
               </div>
             ) : (
               <button
@@ -159,7 +176,9 @@ export default function SharedBrand() {
                 <h4 className="text-xs uppercase tracking-widest text-muted mb-4">Keywords</h4>
                 <div className="flex flex-wrap gap-2">
                   {sharedBrand.keywords.map((k, i) => (
-                    <span key={i} className="px-3 py-1 bg-surface rounded-full text-sm">{k}</span>
+                    <span key={i} className="px-3 py-1 bg-surface rounded-full text-sm">
+                      {k}
+                    </span>
                   ))}
                 </div>
               </div>
@@ -172,7 +191,8 @@ export default function SharedBrand() {
                   <h4 className="text-xs uppercase tracking-widest text-muted mb-4">Do</h4>
                   {sharedBrand.doPatterns.map((p, i) => (
                     <p key={i} className="text-sm flex items-start gap-2 mb-2">
-                      <span className="text-green-500">✓</span>{p}
+                      <span className="text-green-500">✓</span>
+                      {p}
                     </p>
                   ))}
                 </div>
@@ -182,7 +202,8 @@ export default function SharedBrand() {
                   <h4 className="text-xs uppercase tracking-widest text-muted mb-4">Don&apos;t</h4>
                   {sharedBrand.dontPatterns.map((p, i) => (
                     <p key={i} className="text-sm flex items-start gap-2 mb-2">
-                      <span className="text-red-500">✗</span>{p}
+                      <span className="text-red-500">✗</span>
+                      {p}
                     </p>
                   ))}
                 </div>
@@ -194,7 +215,9 @@ export default function SharedBrand() {
               <div>
                 <h4 className="text-xs uppercase tracking-widest text-muted mb-4">Voice Samples</h4>
                 {sharedBrand.voiceSamples.map((s, i) => (
-                  <blockquote key={i} className="p-4 bg-surface rounded-lg text-sm italic mb-3">&ldquo;{s}&rdquo;</blockquote>
+                  <blockquote key={i} className="p-4 bg-surface rounded-lg text-sm italic mb-3">
+                    &ldquo;{s}&rdquo;
+                  </blockquote>
                 ))}
               </div>
             )}
@@ -210,4 +233,3 @@ export default function SharedBrand() {
     </div>
   );
 }
-

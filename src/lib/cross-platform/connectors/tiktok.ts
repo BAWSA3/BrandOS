@@ -2,7 +2,12 @@
 // TIKTOK CONNECTOR — TikTok for Developers API
 // =============================================================================
 
-import type { PlatformConnector, OAuthTokens, PlatformProfile, PlatformConnectorConfig } from './base';
+import type {
+  PlatformConnector,
+  OAuthTokens,
+  PlatformProfile,
+  PlatformConnectorConfig,
+} from './base';
 import type { ContentItem } from '../types';
 import { normalizeTikTokVideo } from '../normalizers';
 

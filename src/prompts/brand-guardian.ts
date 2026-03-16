@@ -2,7 +2,10 @@ import { BrandDNA, ContentType } from '@/lib/types';
 import { VoiceFingerprintSummary } from '@/lib/voice-fingerprint';
 import { buildVoiceFingerprintInstructions } from '@/prompts/voice-fingerprint';
 
-export function buildBrandContext(brand: BrandDNA, fingerprintSummary?: VoiceFingerprintSummary): string {
+export function buildBrandContext(
+  brand: BrandDNA,
+  fingerprintSummary?: VoiceFingerprintSummary
+): string {
   let context = `
 BRAND DNA:
 - Brand Name: ${brand.name}
@@ -39,20 +42,35 @@ Analyze how well this content matches the brand identity. Return ONLY valid JSON
 }
 
 const contentTypeInstructions: Record<ContentType, string> = {
-  'general': 'Generate versatile content that matches the brand voice.',
-  'social-twitter': 'Generate Twitter/X posts. Keep under 280 characters. Be punchy, direct, and shareable. Can include 1-2 relevant hashtags if appropriate.',
-  'social-linkedin': 'Generate LinkedIn posts. Professional yet personable. Include a hook, value, and call-to-action. Can be 1-3 paragraphs.',
-  'social-instagram': 'Generate Instagram captions. Visual and engaging. Include line breaks for readability. End with 3-5 relevant hashtags.',
-  'headline': 'Generate attention-grabbing headlines. Be concise (under 10 words ideally), clear, and compelling. Create curiosity or promise value.',
-  'tagline': 'Generate memorable taglines/slogans. Keep to 3-7 words. Be timeless, distinctive, and encapsulate the brand essence.',
-  'email-subject': 'Generate email subject lines. Keep under 50 characters. Create urgency or curiosity. Avoid spam trigger words.',
-  'email-body': 'Generate full email content. Include greeting, body, and sign-off. Be concise but warm. Include clear call-to-action.',
-  'ad-copy': 'Generate advertising copy. Lead with benefit, create desire, include call-to-action. Be persuasive but authentic to the brand.',
-  'product-description': 'Generate product descriptions. Highlight key features as benefits. Be specific and sensory. Address customer pain points.',
-  'blog-intro': 'Generate blog introduction paragraphs. Hook the reader immediately. Preview the value they\'ll get. Create momentum to keep reading.',
+  general: 'Generate versatile content that matches the brand voice.',
+  'social-twitter':
+    'Generate Twitter/X posts. Keep under 280 characters. Be punchy, direct, and shareable. Can include 1-2 relevant hashtags if appropriate.',
+  'social-linkedin':
+    'Generate LinkedIn posts. Professional yet personable. Include a hook, value, and call-to-action. Can be 1-3 paragraphs.',
+  'social-instagram':
+    'Generate Instagram captions. Visual and engaging. Include line breaks for readability. End with 3-5 relevant hashtags.',
+  headline:
+    'Generate attention-grabbing headlines. Be concise (under 10 words ideally), clear, and compelling. Create curiosity or promise value.',
+  tagline:
+    'Generate memorable taglines/slogans. Keep to 3-7 words. Be timeless, distinctive, and encapsulate the brand essence.',
+  'email-subject':
+    'Generate email subject lines. Keep under 50 characters. Create urgency or curiosity. Avoid spam trigger words.',
+  'email-body':
+    'Generate full email content. Include greeting, body, and sign-off. Be concise but warm. Include clear call-to-action.',
+  'ad-copy':
+    'Generate advertising copy. Lead with benefit, create desire, include call-to-action. Be persuasive but authentic to the brand.',
+  'product-description':
+    'Generate product descriptions. Highlight key features as benefits. Be specific and sensory. Address customer pain points.',
+  'blog-intro':
+    "Generate blog introduction paragraphs. Hook the reader immediately. Preview the value they'll get. Create momentum to keep reading.",
 };
 
-export function buildGeneratePrompt(brand: BrandDNA, userRequest: string, contentType: ContentType = 'general', fingerprintSummary?: VoiceFingerprintSummary): string {
+export function buildGeneratePrompt(
+  brand: BrandDNA,
+  userRequest: string,
+  contentType: ContentType = 'general',
+  fingerprintSummary?: VoiceFingerprintSummary
+): string {
   const voiceWarning = fingerprintSummary
     ? `\n\nCRITICAL — VOICE AUTHENTICITY:
 The content MUST sound like this specific creator wrote it. Apply every rule from the Voice Fingerprint below.
@@ -102,7 +120,11 @@ Analyze the tone of this content and how well it matches the brand. Return ONLY 
 }`;
 }
 
-export function buildCompetitorAnalysisPrompt(brand: BrandDNA, competitorName: string, competitorSamples: string[]): string {
+export function buildCompetitorAnalysisPrompt(
+  brand: BrandDNA,
+  competitorName: string,
+  competitorSamples: string[]
+): string {
   return `You are a brand strategist. Compare this brand to a competitor's voice.
 
 YOUR BRAND:

@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { TranscriptRequestSchema } from '@/lib/cross-platform/schemas';
-import {
-  fetchTranscript,
-  detectVideoSource,
-} from '@/lib/cross-platform/transcript-engine';
+import { fetchTranscript, detectVideoSource } from '@/lib/cross-platform/transcript-engine';
 
 /**
  * POST /api/cross-platform/transcript
@@ -24,10 +21,7 @@ export async function POST(request: NextRequest) {
     const { videoUrl } = parsed.data;
 
     if (!videoUrl) {
-      return NextResponse.json(
-        { error: 'Video URL is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Video URL is required' }, { status: 400 });
     }
 
     const source = detectVideoSource(videoUrl);
@@ -69,9 +63,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('Transcript extraction error:', error);
-    return NextResponse.json(
-      { error: 'Failed to extract transcript' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to extract transcript' }, { status: 500 });
   }
 }

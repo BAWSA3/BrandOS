@@ -6,7 +6,6 @@ import { Suspense } from 'react';
 import { useInnerCircle } from '@/components/InnerCircleBadge';
 import { useAuth } from '@/hooks/useAuth';
 
-
 // =============================================================================
 // Landing Page — Klein blue ASCII DNA background
 // =============================================================================

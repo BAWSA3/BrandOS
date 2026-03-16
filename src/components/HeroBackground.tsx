@@ -3,13 +3,7 @@
 export default function HeroBackground() {
   return (
     <div className="fixed inset-0 w-full h-screen z-0">
-      <video
-        className="w-full h-full object-cover"
-        autoPlay
-        loop
-        muted
-        playsInline
-      >
+      <video className="w-full h-full object-cover" autoPlay loop muted playsInline>
         <source src="/sky-loop.webm" type="video/webm" />
         <source src="/sky-loop.mp4" type="video/mp4" />
       </video>

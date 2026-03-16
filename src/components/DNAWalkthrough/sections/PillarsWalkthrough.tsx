@@ -34,9 +34,10 @@ const PILLAR_COLORS = ['#FFFFFF', '#0047FF', '#FF6B00'];
 // Calculate balance score (higher is more balanced)
 function getBalanceScore(pillars: ContentPillar[]): number {
   if (pillars.length === 0) return 0;
-  const frequencies = pillars.map(p => p.frequency);
+  const frequencies = pillars.map((p) => p.frequency);
   const avg = frequencies.reduce((a, b) => a + b, 0) / frequencies.length;
-  const variance = frequencies.reduce((sum, f) => sum + Math.pow(f - avg, 2), 0) / frequencies.length;
+  const variance =
+    frequencies.reduce((sum, f) => sum + Math.pow(f - avg, 2), 0) / frequencies.length;
   // Lower variance = higher balance score
   return Math.round(Math.max(0, 100 - variance));
 }
@@ -49,11 +50,16 @@ function getBalanceLabel(score: number): { label: string; color: string } {
 }
 
 // Calculate engagement efficiency
-function getEngagementEfficiency(pillars: ContentPillar[]): { best: string; worst: string; efficiency: number } {
+function getEngagementEfficiency(pillars: ContentPillar[]): {
+  best: string;
+  worst: string;
+  efficiency: number;
+} {
   if (pillars.length === 0) return { best: 'N/A', worst: 'N/A', efficiency: 0 };
 
   const sorted = [...pillars].sort((a, b) => (b.avgEngagement || 0) - (a.avgEngagement || 0));
-  const avgEngagement = pillars.reduce((sum, p) => sum + (p.avgEngagement || 0), 0) / pillars.length;
+  const avgEngagement =
+    pillars.reduce((sum, p) => sum + (p.avgEngagement || 0), 0) / pillars.length;
 
   return {
     best: sorted[0]?.name || 'N/A',
@@ -239,7 +245,9 @@ export default function PillarsWalkthrough({
                       {/* Bar */}
                       <div
                         className="h-3 rounded-[2px] overflow-hidden"
-                        style={{ background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }}
+                        style={{
+                          background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+                        }}
                       >
                         <motion.div
                           initial={{ width: 0 }}
@@ -282,16 +290,10 @@ export default function PillarsWalkthrough({
                   BALANCE SCORE
                 </div>
                 <div className="flex items-baseline gap-1">
-                  <span
-                    className="text-3xl font-bold"
-                    style={{ color: '#FFFFFF' }}
-                  >
+                  <span className="text-3xl font-bold" style={{ color: '#FFFFFF' }}>
                     {balanceScore}
                   </span>
-                  <span
-                    className="text-sm"
-                    style={{ color: 'rgba(255,255,255,0.7)' }}
-                  >
+                  <span className="text-sm" style={{ color: 'rgba(255,255,255,0.7)' }}>
                     /100
                   </span>
                 </div>
@@ -370,7 +372,8 @@ export default function PillarsWalkthrough({
                     className="text-2xl font-semibold"
                     style={{
                       color:
-                        (voiceConsistencyReport?.overallScore ?? performanceInsights.voiceConsistency) >= 70
+                        (voiceConsistencyReport?.overallScore ??
+                          performanceInsights.voiceConsistency) >= 70
                           ? '#10B981'
                           : '#F59E0B',
                     }}
@@ -403,7 +406,8 @@ export default function PillarsWalkthrough({
                               transition={{ duration: 0.6 }}
                               className="h-full rounded-full"
                               style={{
-                                background: val >= 70 ? '#10B981' : val >= 50 ? '#F59E0B' : '#EF4444',
+                                background:
+                                  val >= 70 ? '#10B981' : val >= 50 ? '#F59E0B' : '#EF4444',
                               }}
                             />
                           </div>
@@ -425,8 +429,10 @@ export default function PillarsWalkthrough({
                         }}
                       >
                         {voiceConsistencyReport.drift.direction === 'stable' && '→ Voice is stable'}
-                        {voiceConsistencyReport.drift.direction === 'drifting' && '↘ Voice is drifting'}
-                        {voiceConsistencyReport.drift.direction === 'evolving' && '↗ Voice is evolving'}
+                        {voiceConsistencyReport.drift.direction === 'drifting' &&
+                          '↘ Voice is drifting'}
+                        {voiceConsistencyReport.drift.direction === 'evolving' &&
+                          '↗ Voice is evolving'}
                       </div>
 
                       {/* Outlier count */}
@@ -438,7 +444,8 @@ export default function PillarsWalkthrough({
                             color: '#EF4444',
                           }}
                         >
-                          {voiceConsistencyReport.outliers.length} off-brand post{voiceConsistencyReport.outliers.length !== 1 ? 's' : ''} detected
+                          {voiceConsistencyReport.outliers.length} off-brand post
+                          {voiceConsistencyReport.outliers.length !== 1 ? 's' : ''} detected
                         </div>
                       )}
                     </div>
@@ -499,7 +506,9 @@ export default function PillarsWalkthrough({
                 className="rounded-[4px] p-4 text-center"
                 style={{
                   background: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
-                  border: isDark ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(0,0,0,0.05)',
+                  border: isDark
+                    ? '1px solid rgba(255,255,255,0.05)'
+                    : '1px solid rgba(0,0,0,0.05)',
                 }}
               >
                 <div
@@ -559,7 +568,9 @@ export default function PillarsWalkthrough({
                 className="rounded-[4px] p-4"
                 style={{
                   background: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
-                  border: isDark ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(0,0,0,0.05)',
+                  border: isDark
+                    ? '1px solid rgba(255,255,255,0.05)'
+                    : '1px solid rgba(0,0,0,0.05)',
                 }}
               >
                 <div

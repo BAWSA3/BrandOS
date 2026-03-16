@@ -10,21 +10,47 @@ export type SubTab =
   // Home phase
   | 'home'
   // Define phase
-  | 'brand' | 'safezones' | 'intents' | 'voiceprint'
+  | 'brand'
+  | 'safezones'
+  | 'intents'
+  | 'voiceprint'
   // Check phase
-  | 'check' | 'cohesion' | 'guardrails' | 'protect' | 'taste'
+  | 'check'
+  | 'cohesion'
+  | 'guardrails'
+  | 'protect'
+  | 'taste'
   // Generate phase (consolidated)
-  | 'generate' | 'calendar' | 'platforms' | 'context' | 'visual'
-  | 'kit-canvas' | 'kit-logos' | 'kit-colors' | 'kit-typography' | 'kit-imagery' | 'kit-icons' | 'kit-templates' | 'kit-ai-studio'
+  | 'generate'
+  | 'calendar'
+  | 'platforms'
+  | 'context'
+  | 'visual'
+  | 'kit-canvas'
+  | 'kit-logos'
+  | 'kit-colors'
+  | 'kit-typography'
+  | 'kit-imagery'
+  | 'kit-icons'
+  | 'kit-templates'
+  | 'kit-ai-studio'
   // Scale phase
-  | 'dashboard' | 'history' | 'export' | 'competitors' | 'memory';
+  | 'dashboard'
+  | 'history'
+  | 'export'
+  | 'competitors'
+  | 'memory';
 
 interface PhaseConfig {
   id: Phase;
   label: string;
   description: string;
   tabs: { id: SubTab; label: string }[];
-  unlockCondition: (brandCompleteness: number, hasChecked: boolean, hasGenerated: boolean) => boolean;
+  unlockCondition: (
+    brandCompleteness: number,
+    hasChecked: boolean,
+    hasGenerated: boolean
+  ) => boolean;
 }
 
 const phases: PhaseConfig[] = [
@@ -129,7 +155,7 @@ export default function PhaseNavigation({
     });
   }, [activePhase, brandCompleteness, hasChecked, hasGenerated]);
 
-  const activePhaseConfig = phaseStates.find(p => p.id === activePhase);
+  const activePhaseConfig = phaseStates.find((p) => p.id === activePhase);
   const showSubTabs = activePhaseConfig && activePhaseConfig.tabs.length > 1;
   const accentColor = PHASE_SEASON_COLORS[activePhase] || '#E8A838';
 
@@ -162,7 +188,10 @@ export default function PhaseNavigation({
                 fontWeight: activePhase === 'home' ? 600 : 400,
                 color: activePhase === 'home' ? '#E8A838' : 'rgba(255,255,255,0.35)',
                 background: activePhase === 'home' ? 'rgba(232,168,56,0.1)' : 'transparent',
-                border: activePhase === 'home' ? '1px solid rgba(232,168,56,0.2)' : '1px solid transparent',
+                border:
+                  activePhase === 'home'
+                    ? '1px solid rgba(232,168,56,0.2)'
+                    : '1px solid transparent',
                 borderRadius: 4,
                 cursor: 'pointer',
                 transition: 'all 200ms ease',
@@ -171,45 +200,63 @@ export default function PhaseNavigation({
               ◆ HOME
             </button>
 
-            <span style={{ width: 1, height: 16, background: 'rgba(255,255,255,0.06)', margin: '0 4px' }} />
+            <span
+              style={{
+                width: 1,
+                height: 16,
+                background: 'rgba(255,255,255,0.06)',
+                margin: '0 4px',
+              }}
+            />
 
             {/* Phase buttons */}
-            {phaseStates.filter(p => p.id !== 'home').map((phase) => (
-              <button
-                key={phase.id}
-                onClick={() => phase.isUnlocked && onPhaseChange(phase.id)}
-                disabled={!phase.isUnlocked}
-                style={{
-                  padding: '4px 10px',
-                  fontSize: 11,
-                  fontFamily: "'VCR OSD Mono', monospace",
-                  letterSpacing: '0.08em',
-                  fontWeight: phase.isActive ? 600 : 400,
-                  color: phase.isActive
-                    ? PHASE_SEASON_COLORS[phase.id]
-                    : phase.isUnlocked
-                      ? 'rgba(255,255,255,0.35)'
-                      : 'rgba(255,255,255,0.12)',
-                  background: phase.isActive ? `${PHASE_SEASON_COLORS[phase.id]}10` : 'transparent',
-                  border: phase.isActive ? `1px solid ${PHASE_SEASON_COLORS[phase.id]}25` : '1px solid transparent',
-                  borderRadius: 4,
-                  cursor: phase.isUnlocked ? 'pointer' : 'default',
-                  transition: 'all 200ms ease',
-                  position: 'relative',
-                }}
-              >
-                {!phase.isUnlocked && (
-                  <span style={{ marginRight: 3, opacity: 0.5 }}>⬡</span>
-                )}
-                {phase.label.toUpperCase()}
-              </button>
-            ))}
+            {phaseStates
+              .filter((p) => p.id !== 'home')
+              .map((phase) => (
+                <button
+                  key={phase.id}
+                  onClick={() => phase.isUnlocked && onPhaseChange(phase.id)}
+                  disabled={!phase.isUnlocked}
+                  style={{
+                    padding: '4px 10px',
+                    fontSize: 11,
+                    fontFamily: "'VCR OSD Mono', monospace",
+                    letterSpacing: '0.08em',
+                    fontWeight: phase.isActive ? 600 : 400,
+                    color: phase.isActive
+                      ? PHASE_SEASON_COLORS[phase.id]
+                      : phase.isUnlocked
+                        ? 'rgba(255,255,255,0.35)'
+                        : 'rgba(255,255,255,0.12)',
+                    background: phase.isActive
+                      ? `${PHASE_SEASON_COLORS[phase.id]}10`
+                      : 'transparent',
+                    border: phase.isActive
+                      ? `1px solid ${PHASE_SEASON_COLORS[phase.id]}25`
+                      : '1px solid transparent',
+                    borderRadius: 4,
+                    cursor: phase.isUnlocked ? 'pointer' : 'default',
+                    transition: 'all 200ms ease',
+                    position: 'relative',
+                  }}
+                >
+                  {!phase.isUnlocked && <span style={{ marginRight: 3, opacity: 0.5 }}>⬡</span>}
+                  {phase.label.toUpperCase()}
+                </button>
+              ))}
 
-            <span style={{ width: 1, height: 16, background: 'rgba(255,255,255,0.06)', margin: '0 4px' }} />
+            <span
+              style={{
+                width: 1,
+                height: 16,
+                background: 'rgba(255,255,255,0.06)',
+                margin: '0 4px',
+              }}
+            />
 
             {/* World toggle */}
             <button
-              onClick={() => setWorldExpanded(prev => !prev)}
+              onClick={() => setWorldExpanded((prev) => !prev)}
               style={{
                 padding: '4px 8px',
                 fontSize: 11,
@@ -230,7 +277,14 @@ export default function PhaseNavigation({
           {/* Right: Avatar / Brand */}
           <div className="flex items-center gap-3 shrink-0">
             {brandName && (
-              <span style={{ fontSize: 11, fontFamily: "'VCR OSD Mono', monospace", color: 'rgba(255,255,255,0.25)', letterSpacing: '0.05em' }}>
+              <span
+                style={{
+                  fontSize: 11,
+                  fontFamily: "'VCR OSD Mono', monospace",
+                  color: 'rgba(255,255,255,0.25)',
+                  letterSpacing: '0.05em',
+                }}
+              >
                 {brandName}
               </span>
             )}
@@ -249,14 +303,33 @@ export default function PhaseNavigation({
                 justifyContent: 'center',
                 transition: 'opacity 200ms ease',
               }}
-              onMouseEnter={(e) => { e.currentTarget.style.opacity = '0.8'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.opacity = '1'; }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.opacity = '0.8';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.opacity = '1';
+              }}
             >
               {userAvatar ? (
-                <img src={userAvatar} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <img
+                  src={userAvatar}
+                  alt=""
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
               ) : (
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="rgba(255,255,255,0.3)"
+                  strokeWidth={1.5}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"
+                  />
                 </svg>
               )}
             </button>
@@ -334,7 +407,21 @@ export function getPhaseFromTab(tab: SubTab): Phase {
   if (tab === 'home') return 'home';
   const definesTabs: SubTab[] = ['brand', 'voiceprint', 'safezones', 'intents'];
   const checkTabs: SubTab[] = ['check', 'cohesion', 'guardrails', 'protect', 'taste'];
-  const generateTabs: SubTab[] = ['generate', 'calendar', 'platforms', 'context', 'visual', 'kit-ai-studio', 'kit-canvas', 'kit-logos', 'kit-colors', 'kit-typography', 'kit-imagery', 'kit-icons', 'kit-templates'];
+  const generateTabs: SubTab[] = [
+    'generate',
+    'calendar',
+    'platforms',
+    'context',
+    'visual',
+    'kit-ai-studio',
+    'kit-canvas',
+    'kit-logos',
+    'kit-colors',
+    'kit-typography',
+    'kit-imagery',
+    'kit-icons',
+    'kit-templates',
+  ];
 
   if (definesTabs.includes(tab)) return 'define';
   if (checkTabs.includes(tab)) return 'check';
@@ -345,11 +432,16 @@ export function getPhaseFromTab(tab: SubTab): Phase {
 // Helper to get default tab for phase
 export function getDefaultTabForPhase(phase: Phase): SubTab {
   switch (phase) {
-    case 'home': return 'home';
-    case 'define': return 'brand';
-    case 'check': return 'check';
-    case 'generate': return 'generate';
-    case 'scale': return 'dashboard';
+    case 'home':
+      return 'home';
+    case 'define':
+      return 'brand';
+    case 'check':
+      return 'check';
+    case 'generate':
+      return 'generate';
+    case 'scale':
+      return 'dashboard';
   }
 }
 

@@ -1,6 +1,6 @@
-'use client'
+'use client';
 
-import { InterviewSummary } from '../types'
+import { InterviewSummary } from '../types';
 
 export default function SummaryView({ summary }: { summary: InterviewSummary }) {
   return (
@@ -133,7 +133,7 @@ export default function SummaryView({ summary }: { summary: InterviewSummary }) 
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 function BulletList({
@@ -142,10 +142,10 @@ function BulletList({
   prefix,
   prefixColor,
 }: {
-  label: string
-  items: string[]
-  prefix: string
-  prefixColor: string
+  label: string;
+  items: string[];
+  prefix: string;
+  prefixColor: string;
 }) {
   return (
     <div
@@ -169,7 +169,16 @@ function BulletList({
       >
         {label}
       </div>
-      <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <ul
+        style={{
+          listStyle: 'none',
+          margin: 0,
+          padding: 0,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 8,
+        }}
+      >
         {items.map((item, i) => (
           <li
             key={i}
@@ -200,5 +209,5 @@ function BulletList({
         ))}
       </ul>
     </div>
-  )
+  );
 }

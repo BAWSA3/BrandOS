@@ -13,7 +13,10 @@ async function getAuthenticatedUser() {
   if (!accessToken) return null;
 
   const supabase = createClient(supabaseUrl, supabaseAnonKey);
-  const { data: { user: authUser }, error } = await supabase.auth.getUser(accessToken);
+  const {
+    data: { user: authUser },
+    error,
+  } = await supabase.auth.getUser(accessToken);
   if (error || !authUser) return null;
 
   return prisma.user.findUnique({ where: { supabaseId: authUser.id } });
@@ -68,7 +71,7 @@ export async function GET(request: NextRequest) {
     });
 
     return NextResponse.json({
-      drafts: drafts.map(d => ({
+      drafts: drafts.map((d) => ({
         id: d.id,
         content: d.content,
         contentType: d.contentType,
@@ -100,7 +103,18 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { brandId, content, contentType, tone, status, scheduledFor, sourceType, sourceId, parentId, authenticity } = body;
+    const {
+      brandId,
+      content,
+      contentType,
+      tone,
+      status,
+      scheduledFor,
+      sourceType,
+      sourceId,
+      parentId,
+      authenticity,
+    } = body;
 
     if (!brandId || !content) {
       return NextResponse.json({ error: 'brandId and content are required' }, { status: 400 });

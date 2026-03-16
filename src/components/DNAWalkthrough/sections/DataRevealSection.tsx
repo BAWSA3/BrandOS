@@ -62,10 +62,7 @@ export default function DataRevealSection({
   };
 
   return (
-    <section
-      className="min-h-screen"
-      style={{ background: '#ffffff', position: 'relative' }}
-    >
+    <section className="min-h-screen" style={{ background: '#ffffff', position: 'relative' }}>
       {/* Stage 1: Introduction */}
       <AnimatePresence mode="wait">
         {stage === 'intro' && (
@@ -135,7 +132,15 @@ export default function DataRevealSection({
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.5 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '4px' }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    marginBottom: '4px',
+                  }}
+                >
                   <span style={{ fontSize: '20px', fontWeight: 600, color: '#000' }}>
                     {profile.name}
                   </span>
@@ -248,8 +253,8 @@ export default function DataRevealSection({
                 cursor: 'pointer',
                 transition: 'background 0.2s ease',
               }}
-              onMouseEnter={(e) => e.currentTarget.style.background = '#0038CC'}
-              onMouseLeave={(e) => e.currentTarget.style.background = '#0047FF'}
+              onMouseEnter={(e) => (e.currentTarget.style.background = '#0038CC')}
+              onMouseLeave={(e) => (e.currentTarget.style.background = '#0047FF')}
             >
               <span
                 style={{
@@ -302,11 +307,20 @@ export default function DataRevealSection({
                 marginBottom: '16px',
               }}
             >
-              [{Array(20).fill(null).map((_, i) => (
-                <span key={i} style={{ color: i < Math.floor(scanProgress / 5) ? '#0047FF' : 'rgba(0,0,0,0.15)' }}>
-                  {i < Math.floor(scanProgress / 5) ? '█' : '░'}
-                </span>
-              ))}] {scanProgress}%
+              [
+              {Array(20)
+                .fill(null)
+                .map((_, i) => (
+                  <span
+                    key={i}
+                    style={{
+                      color: i < Math.floor(scanProgress / 5) ? '#0047FF' : 'rgba(0,0,0,0.15)',
+                    }}
+                  >
+                    {i < Math.floor(scanProgress / 5) ? '█' : '░'}
+                  </span>
+                ))}
+              ] {scanProgress}%
             </div>
 
             <div
@@ -401,8 +415,24 @@ export default function DataRevealSection({
             >
               {[
                 { label: 'Posts Scanned', value: rawTweets.length || '—' },
-                { label: 'Total Engagement', value: formatNumber(rawTweets.reduce((sum, t) => sum + (t.public_metrics?.like_count || 0) + (t.public_metrics?.retweet_count || 0), 0)) },
-                { label: 'Top Post Likes', value: topTweets[0] ? formatNumber(topTweets[0].public_metrics?.like_count || 0) : '—' },
+                {
+                  label: 'Total Engagement',
+                  value: formatNumber(
+                    rawTweets.reduce(
+                      (sum, t) =>
+                        sum +
+                        (t.public_metrics?.like_count || 0) +
+                        (t.public_metrics?.retweet_count || 0),
+                      0
+                    )
+                  ),
+                },
+                {
+                  label: 'Top Post Likes',
+                  value: topTweets[0]
+                    ? formatNumber(topTweets[0].public_metrics?.like_count || 0)
+                    : '—',
+                },
               ].map((stat, i) => (
                 <motion.div
                   key={stat.label}
@@ -456,7 +486,8 @@ export default function DataRevealSection({
                 marginBottom: '24px',
               }}
             >
-              Now let me show you exactly why your best content works — and how you can replicate it.
+              Now let me show you exactly why your best content works — and how you can replicate
+              it.
             </motion.p>
 
             <motion.button
@@ -472,8 +503,8 @@ export default function DataRevealSection({
                 cursor: 'pointer',
                 transition: 'background 0.2s ease',
               }}
-              onMouseEnter={(e) => e.currentTarget.style.background = '#0038CC'}
-              onMouseLeave={(e) => e.currentTarget.style.background = '#0047FF'}
+              onMouseEnter={(e) => (e.currentTarget.style.background = '#0038CC')}
+              onMouseLeave={(e) => (e.currentTarget.style.background = '#0047FF')}
             >
               <span
                 style={{

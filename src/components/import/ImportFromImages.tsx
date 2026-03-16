@@ -20,14 +20,14 @@ export default function ImportFromImages({ onExtract }: ImportFromImagesProps) {
   };
 
   const addFiles = (newFiles: File[]) => {
-    const imageFiles = newFiles.filter(f => f.type.startsWith('image/'));
-    setFiles(prev => [...prev, ...imageFiles]);
-    
+    const imageFiles = newFiles.filter((f) => f.type.startsWith('image/'));
+    setFiles((prev) => [...prev, ...imageFiles]);
+
     // Create previews
-    imageFiles.forEach(file => {
+    imageFiles.forEach((file) => {
       const reader = new FileReader();
       reader.onload = (e) => {
-        setPreviews(prev => [...prev, e.target?.result as string]);
+        setPreviews((prev) => [...prev, e.target?.result as string]);
       };
       reader.readAsDataURL(file);
     });
@@ -40,8 +40,8 @@ export default function ImportFromImages({ onExtract }: ImportFromImagesProps) {
   };
 
   const removeFile = (index: number) => {
-    setFiles(prev => prev.filter((_, i) => i !== index));
-    setPreviews(prev => prev.filter((_, i) => i !== index));
+    setFiles((prev) => prev.filter((_, i) => i !== index));
+    setPreviews((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleAnalyze = async () => {
@@ -65,7 +65,11 @@ export default function ImportFromImages({ onExtract }: ImportFromImagesProps) {
         throw new Error(error.error || 'Failed to analyze images');
       }
 
-      setProgress({ stage: 'analyzing', progress: 60, message: 'Extracting colors and patterns...' });
+      setProgress({
+        stage: 'analyzing',
+        progress: 60,
+        message: 'Extracting colors and patterns...',
+      });
 
       const result = await response.json();
 
@@ -77,22 +81,47 @@ export default function ImportFromImages({ onExtract }: ImportFromImagesProps) {
         sourceDetails: `${files.length} image(s)`,
         overallConfidence: result.overallConfidence || 70,
         extractedAt: new Date(),
-        colors: result.colors ? {
-          primary: result.colors.primary ? { value: result.colors.primary, confidence: 90, source: 'Dominant color extraction' } : undefined,
-          secondary: result.colors.secondary ? { value: result.colors.secondary, confidence: 85, source: 'Secondary color extraction' } : undefined,
-          accent: result.colors.accent ? { value: result.colors.accent, confidence: 80, source: 'Accent color extraction' } : undefined,
-          additional: result.colors.additional?.map((c: string) => ({ value: c, confidence: 75, source: 'Color palette' })),
-        } : undefined,
-        logoDescriptions: result.logoDescriptions?.map((d: string) => ({ value: d, confidence: 70, source: 'Image analysis' })),
-        imageryStyle: result.imageryStyle ? { value: result.imageryStyle, confidence: 65, source: 'Style detection' } : undefined,
+        colors: result.colors
+          ? {
+              primary: result.colors.primary
+                ? {
+                    value: result.colors.primary,
+                    confidence: 90,
+                    source: 'Dominant color extraction',
+                  }
+                : undefined,
+              secondary: result.colors.secondary
+                ? {
+                    value: result.colors.secondary,
+                    confidence: 85,
+                    source: 'Secondary color extraction',
+                  }
+                : undefined,
+              accent: result.colors.accent
+                ? { value: result.colors.accent, confidence: 80, source: 'Accent color extraction' }
+                : undefined,
+              additional: result.colors.additional?.map((c: string) => ({
+                value: c,
+                confidence: 75,
+                source: 'Color palette',
+              })),
+            }
+          : undefined,
+        logoDescriptions: result.logoDescriptions?.map((d: string) => ({
+          value: d,
+          confidence: 70,
+          source: 'Image analysis',
+        })),
+        imageryStyle: result.imageryStyle
+          ? { value: result.imageryStyle, confidence: 65, source: 'Style detection' }
+          : undefined,
       };
 
       setProgress({ stage: 'complete', progress: 100, message: 'Analysis complete!' });
-      
+
       setTimeout(() => {
         onExtract(extractedBrand, previews[0]);
       }, 500);
-
     } catch (error) {
       setProgress({
         stage: 'error',
@@ -107,8 +136,18 @@ export default function ImportFromImages({ onExtract }: ImportFromImagesProps) {
     <div className="max-w-2xl mx-auto">
       <div className="text-center mb-8">
         <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-purple-500/10 flex items-center justify-center">
-          <svg className="w-8 h-8 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          <svg
+            className="w-8 h-8 text-purple-500"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={1.5}
+              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+            />
           </svg>
         </div>
         <h2 className="text-2xl font-light tracking-tight mb-2">Upload Brand Images</h2>
@@ -132,9 +171,19 @@ export default function ImportFromImages({ onExtract }: ImportFromImagesProps) {
           onChange={handleFileSelect}
           className="hidden"
         />
-        
-        <svg className="w-12 h-12 mx-auto mb-4 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+
+        <svg
+          className="w-12 h-12 mx-auto mb-4 text-muted"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={1}
+            d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+          />
         </svg>
         <p className="text-lg mb-2">Drop images here</p>
         <p className="text-sm text-muted">or click to browse (PNG, JPG, SVG)</p>
@@ -144,7 +193,10 @@ export default function ImportFromImages({ onExtract }: ImportFromImagesProps) {
       {previews.length > 0 && (
         <div className="mt-6 grid grid-cols-4 gap-4">
           {previews.map((preview, index) => (
-            <div key={index} className="relative group aspect-square rounded-lg overflow-hidden bg-surface">
+            <div
+              key={index}
+              className="relative group aspect-square rounded-lg overflow-hidden bg-surface"
+            >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={preview}
@@ -158,8 +210,18 @@ export default function ImportFromImages({ onExtract }: ImportFromImagesProps) {
                 }}
                 className="absolute top-2 right-2 p-1 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
               >
-                <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <svg
+                  className="w-4 h-4 text-white"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               </button>
             </div>
@@ -182,22 +244,22 @@ export default function ImportFromImages({ onExtract }: ImportFromImagesProps) {
               style={{ width: `${progress.progress}%` }}
             />
           </div>
-          {progress.error && (
-            <p className="mt-3 text-sm text-red-500">{progress.error}</p>
-          )}
+          {progress.error && <p className="mt-3 text-sm text-red-500">{progress.error}</p>}
         </div>
       )}
 
       {/* Analyze Button */}
       <button
         onClick={handleAnalyze}
-        disabled={files.length === 0 || (progress?.stage !== 'error' && progress?.stage !== 'complete' && progress !== null)}
+        disabled={
+          files.length === 0 ||
+          (progress?.stage !== 'error' && progress?.stage !== 'complete' && progress !== null)
+        }
         className="w-full mt-8 py-4 bg-foreground text-background rounded-xl text-sm font-medium disabled:opacity-30 disabled:cursor-not-allowed hover:opacity-90 transition-opacity"
       >
         {progress && progress.stage !== 'error' && progress.stage !== 'complete'
           ? 'Analyzing...'
-          : `Analyze ${files.length} Image${files.length !== 1 ? 's' : ''}`
-        }
+          : `Analyze ${files.length} Image${files.length !== 1 ? 's' : ''}`}
       </button>
 
       {/* Tips */}
@@ -221,19 +283,3 @@ export default function ImportFromImages({ onExtract }: ImportFromImagesProps) {
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

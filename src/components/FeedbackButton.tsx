@@ -8,9 +8,7 @@ interface FeedbackButtonProps {
 
 type FeedbackType = 'bug' | 'idea' | 'other';
 
-export default function FeedbackButton({
-  className = ''
-}: FeedbackButtonProps) {
+export default function FeedbackButton({ className = '' }: FeedbackButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [feedbackType, setFeedbackType] = useState<FeedbackType>('bug');
   const [message, setMessage] = useState('');
@@ -74,7 +72,8 @@ export default function FeedbackButton({
         onClick={() => setIsOpen(true)}
         className={`fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-full shadow-lg transition-all duration-300 hover:scale-105 active:scale-95 ${className}`}
         style={{
-          background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.9) 0%, rgba(139, 92, 246, 0.9) 100%)',
+          background:
+            'linear-gradient(135deg, rgba(99, 102, 241, 0.9) 0%, rgba(139, 92, 246, 0.9) 100%)',
           backdropFilter: 'blur(12px)',
           border: '1px solid rgba(255, 255, 255, 0.2)',
         }}
@@ -120,7 +119,14 @@ export default function FeedbackButton({
                 className="w-8 h-8 rounded-lg flex items-center justify-center"
                 style={{ background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)' }}
               >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="white"
+                  strokeWidth="2"
+                >
                   <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
                 </svg>
               </div>
@@ -133,7 +139,14 @@ export default function FeedbackButton({
               onClick={handleClose}
               className="p-1 rounded-lg hover:bg-white/10 transition-colors"
             >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="white"
+                strokeWidth="2"
+              >
                 <line x1="18" y1="6" x2="6" y2="18" />
                 <line x1="6" y1="6" x2="18" y2="18" />
               </svg>
@@ -144,12 +157,21 @@ export default function FeedbackButton({
             /* Success State */
             <div className="p-8 text-center">
               <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-green-500/20 flex items-center justify-center">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2">
+                <svg
+                  width="32"
+                  height="32"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#22c55e"
+                  strokeWidth="2"
+                >
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
               </div>
               <h4 className="text-white font-semibold mb-2">Thanks for your feedback!</h4>
-              <p className="text-white/60 text-sm">We&apos;ll review it and use it to improve BrandOS.</p>
+              <p className="text-white/60 text-sm">
+                We&apos;ll review it and use it to improve BrandOS.
+              </p>
             </div>
           ) : (
             /* Form */
@@ -197,10 +219,10 @@ export default function FeedbackButton({
                   onChange={(e) => setMessage(e.target.value)}
                   placeholder={
                     feedbackType === 'bug'
-                      ? "Describe what happened and what you expected..."
+                      ? 'Describe what happened and what you expected...'
                       : feedbackType === 'idea'
-                      ? "What feature would make BrandOS better for you?"
-                      : "What's on your mind?"
+                        ? 'What feature would make BrandOS better for you?'
+                        : "What's on your mind?"
                   }
                   rows={4}
                   className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-white text-sm placeholder:text-white/30 outline-none focus:border-white/30 resize-none transition-colors"

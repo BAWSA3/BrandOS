@@ -26,9 +26,9 @@ export interface ShareCardData {
   };
   voiceProfile?: string;
   // New metrics for redesigned card
-  voiceConsistency?: number;      // 0-100
-  engagementScore?: number;       // 0-100
-  influenceTier?: string;         // 'Nano' | 'Micro' | 'Mid' | 'Macro' | 'Mega'
+  voiceConsistency?: number; // 0-100
+  engagementScore?: number; // 0-100
+  influenceTier?: string; // 'Nano' | 'Micro' | 'Mid' | 'Macro' | 'Mega'
 }
 
 interface ShareableScoreCardProps {
@@ -64,11 +64,13 @@ function getScoreLabel(score: number): string {
 
 function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return result ? {
-    r: parseInt(result[1], 16),
-    g: parseInt(result[2], 16),
-    b: parseInt(result[3], 16)
-  } : null;
+  return result
+    ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16),
+      }
+    : null;
 }
 
 function darkenColor(hex: string, percent: number): string {
@@ -93,12 +95,17 @@ function lightenColor(hex: string, percent: number): string {
 
 function getInfluenceTierWidth(tier?: string): number {
   switch (tier) {
-    case 'Mega': return 100;
-    case 'Macro': return 85;
-    case 'Mid': return 65;
-    case 'Micro': return 45;
+    case 'Mega':
+      return 100;
+    case 'Macro':
+      return 85;
+    case 'Mid':
+      return 65;
+    case 'Micro':
+      return 45;
     case 'Nano':
-    default: return 25;
+    default:
+      return 25;
   }
 }
 
@@ -145,7 +152,7 @@ export async function generateShareableImage(data: ShareCardData): Promise<Blob 
 
   // Panel dimensions
   const leftPanelWidth = Math.floor(canvas.width * 0.55); // 660px
-  const rightPanelWidth = canvas.width - leftPanelWidth;  // 540px
+  const rightPanelWidth = canvas.width - leftPanelWidth; // 540px
   const cornerRadius = 32;
 
   // ==========================================================================
@@ -202,10 +209,17 @@ export async function generateShareableImage(data: ShareCardData): Promise<Blob 
   const primaryRgb = hexToRgb(primaryColor);
   if (primaryRgb) {
     const lightLeak = ctx.createRadialGradient(
-      canvas.width + 50, -50, 0,
-      canvas.width + 50, -50, 300
+      canvas.width + 50,
+      -50,
+      0,
+      canvas.width + 50,
+      -50,
+      300
     );
-    lightLeak.addColorStop(0, `rgba(${Math.min(255, primaryRgb.r + 100)}, ${Math.min(255, primaryRgb.g + 100)}, ${Math.min(255, primaryRgb.b + 100)}, 0.4)`);
+    lightLeak.addColorStop(
+      0,
+      `rgba(${Math.min(255, primaryRgb.r + 100)}, ${Math.min(255, primaryRgb.g + 100)}, ${Math.min(255, primaryRgb.b + 100)}, 0.4)`
+    );
     lightLeak.addColorStop(1, 'transparent');
     ctx.fillStyle = lightLeak;
     ctx.fillRect(leftPanelWidth, 0, rightPanelWidth, canvas.height);
@@ -215,10 +229,17 @@ export async function generateShareableImage(data: ShareCardData): Promise<Blob 
   const secondaryRgb = hexToRgb(secondaryColor);
   if (secondaryRgb) {
     const depthEffect = ctx.createRadialGradient(
-      leftPanelWidth - 50, canvas.height + 50, 0,
-      leftPanelWidth - 50, canvas.height + 50, 250
+      leftPanelWidth - 50,
+      canvas.height + 50,
+      0,
+      leftPanelWidth - 50,
+      canvas.height + 50,
+      250
     );
-    depthEffect.addColorStop(0, `rgba(${Math.max(0, secondaryRgb.r - 80)}, ${Math.max(0, secondaryRgb.g - 80)}, ${Math.max(0, secondaryRgb.b - 80)}, 0.4)`);
+    depthEffect.addColorStop(
+      0,
+      `rgba(${Math.max(0, secondaryRgb.r - 80)}, ${Math.max(0, secondaryRgb.g - 80)}, ${Math.max(0, secondaryRgb.b - 80)}, 0.4)`
+    );
     depthEffect.addColorStop(1, 'transparent');
     ctx.fillStyle = depthEffect;
     ctx.fillRect(leftPanelWidth, 0, rightPanelWidth, canvas.height);
@@ -326,7 +347,13 @@ export async function generateShareableImage(data: ShareCardData): Promise<Blob 
   const metricSpacing = 70;
 
   // Helper function to draw a metric
-  const drawMetric = (label: string, value: string, widthPercent: number, color: string, y: number) => {
+  const drawMetric = (
+    label: string,
+    value: string,
+    widthPercent: number,
+    color: string,
+    y: number
+  ) => {
     // Label
     ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
     ctx.font = '500 14px "Helvetica Neue", Arial, sans-serif';
@@ -452,12 +479,17 @@ export async function generateShareableImage(data: ShareCardData): Promise<Blob 
 }
 
 // Helper to wrap text
-function wrapText(ctx: CanvasRenderingContext2D, text: string, maxWidth: number, maxLines: number = 3): string[] {
+function wrapText(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  maxWidth: number,
+  maxLines: number = 3
+): string[] {
   const words = text.split(' ');
   const lines: string[] = [];
   let currentLine = '';
 
-  words.forEach(word => {
+  words.forEach((word) => {
     const testLine = currentLine ? `${currentLine} ${word}` : word;
     const metrics = ctx.measureText(testLine);
     if (metrics.width > maxWidth && currentLine) {
@@ -479,12 +511,10 @@ export async function copyImageToClipboard(blob: Blob): Promise<boolean> {
   try {
     // Modern Clipboard API with image support
     if (navigator.clipboard && typeof ClipboardItem !== 'undefined') {
-      await navigator.clipboard.write([
-        new ClipboardItem({ 'image/png': blob })
-      ]);
+      await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
       return true;
     }
-    
+
     // Fallback: Create download link instead
     console.warn('Clipboard image support not available, falling back to download');
     return false;
@@ -511,7 +541,9 @@ export default function ShareableScoreCard({ data, theme, onCopied }: ShareableS
       try {
         if (navigator.clipboard && typeof ClipboardItem !== 'undefined') {
           // Additional check for write permission
-          const permission = await navigator.permissions.query({ name: 'clipboard-write' as PermissionName });
+          const permission = await navigator.permissions.query({
+            name: 'clipboard-write' as PermissionName,
+          });
           setCopySupported(permission.state !== 'denied');
         } else {
           setCopySupported(false);
@@ -526,7 +558,7 @@ export default function ShareableScoreCard({ data, theme, onCopied }: ShareableS
 
   const handleCopyToClipboard = useCallback(async () => {
     setIsGenerating(true);
-    
+
     try {
       const blob = await generateShareableImage(data);
       if (!blob) {
@@ -535,7 +567,7 @@ export default function ShareableScoreCard({ data, theme, onCopied }: ShareableS
 
       // Try to copy to clipboard
       const success = await copyImageToClipboard(blob);
-      
+
       if (success) {
         setIsCopied(true);
         onCopied?.();
@@ -607,8 +639,8 @@ export default function ShareableScoreCard({ data, theme, onCopied }: ShareableS
           justifyContent: 'center',
           gap: '10px',
           padding: '16px 28px',
-          background: isCopied 
-            ? scoreColors.primary 
+          background: isCopied
+            ? scoreColors.primary
             : `linear-gradient(135deg, ${scoreColors.primary}, ${scoreColors.secondary})`,
           border: 'none',
           borderRadius: '14px',
@@ -640,14 +672,28 @@ export default function ShareableScoreCard({ data, theme, onCopied }: ShareableS
           </>
         ) : isCopied ? (
           <>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+            >
               <polyline points="20 6 9 17 4 12" />
             </svg>
             COPIED! PASTE IN X
           </>
         ) : (
           <>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
               <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
               <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
             </svg>
@@ -677,7 +723,7 @@ export default function ShareableScoreCard({ data, theme, onCopied }: ShareableS
         >
           PREVIEW
         </motion.button>
-        
+
         <motion.button
           onClick={handleDownload}
           disabled={isGenerating}
@@ -736,27 +782,31 @@ export default function ShareableScoreCard({ data, theme, onCopied }: ShareableS
                 cursor: 'default',
               }}
             >
-              <img 
-                src={previewUrl} 
-                alt="Share card preview" 
-                style={{ 
+              <img
+                src={previewUrl}
+                alt="Share card preview"
+                style={{
                   display: 'block',
-                  maxWidth: '100%', 
+                  maxWidth: '100%',
                   maxHeight: '80vh',
-                }} 
+                }}
               />
-              <div style={{
-                padding: '16px 24px',
-                background: theme === 'dark' ? '#1a1a1a' : '#f5f5f5',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-              }}>
-                <span style={{
-                  fontFamily: "'VCR OSD Mono', monospace",
-                  fontSize: '12px',
-                  color: theme === 'dark' ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)',
-                }}>
+              <div
+                style={{
+                  padding: '16px 24px',
+                  background: theme === 'dark' ? '#1a1a1a' : '#f5f5f5',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}
+              >
+                <span
+                  style={{
+                    fontFamily: "'VCR OSD Mono', monospace",
+                    fontSize: '12px',
+                    color: theme === 'dark' ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)',
+                  }}
+                >
                   1200 × 630 px • Twitter Card
                 </span>
                 <div style={{ display: 'flex', gap: '8px' }}>
@@ -827,7 +877,14 @@ export default function ShareableScoreCard({ data, theme, onCopied }: ShareableS
               gap: '10px',
             }}
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+            >
               <polyline points="20 6 9 17 4 12" />
             </svg>
             Image copied! Paste in your X post
@@ -837,5 +894,3 @@ export default function ShareableScoreCard({ data, theme, onCopied }: ShareableS
     </>
   );
 }
-
-

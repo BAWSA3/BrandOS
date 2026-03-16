@@ -59,7 +59,16 @@ function ContentGeneratorNode(_props: NodeProps) {
     } finally {
       setIsGenerating(false);
     }
-  }, [topic, tone, brandDNA, setIsGenerating, setGenerationError, setVariations, markFirstGeneration, phaseProgress.hasCompletedFirstGeneration]);
+  }, [
+    topic,
+    tone,
+    brandDNA,
+    setIsGenerating,
+    setGenerationError,
+    setVariations,
+    markFirstGeneration,
+    phaseProgress.hasCompletedFirstGeneration,
+  ]);
 
   const canGenerate = topic.trim().length > 0 && brandDNA?.name;
   const hasOutput = variations.length > 0;
@@ -94,15 +103,9 @@ function ContentGeneratorNode(_props: NodeProps) {
             )}
           </div>
           <div className="flex items-center gap-2">
-            <div
-              className={`w-1.5 h-1.5 rounded-full ${
-                tone ? 'bg-[#FFD700]' : 'bg-white/20'
-              }`}
-            />
+            <div className={`w-1.5 h-1.5 rounded-full ${tone ? 'bg-[#FFD700]' : 'bg-white/20'}`} />
             <span className="text-[10px] text-white/40">Tone</span>
-            {tone && (
-              <span className="text-[10px] text-[#FFD700]/60">{tone}</span>
-            )}
+            {tone && <span className="text-[10px] text-[#FFD700]/60">{tone}</span>}
           </div>
           <div className="flex items-center gap-2">
             <div
@@ -112,9 +115,7 @@ function ContentGeneratorNode(_props: NodeProps) {
             />
             <span className="text-[10px] text-white/40">Brand DNA</span>
             {brandDNA?.name && (
-              <span className="text-[10px] text-[#00FF41]/60">
-                {brandDNA.name}
-              </span>
+              <span className="text-[10px] text-[#00FF41]/60">{brandDNA.name}</span>
             )}
           </div>
         </div>
@@ -127,8 +128,8 @@ function ContentGeneratorNode(_props: NodeProps) {
             isGenerating
               ? 'bg-[#00FF41]/10 text-[#00FF41]/60 border border-[#00FF41]/20'
               : canGenerate
-              ? 'bg-[#00FF41]/15 text-[#00FF41] border border-[#00FF41]/30 hover:bg-[#00FF41]/25 hover:shadow-[0_0_20px_rgba(0,255,65,0.15)]'
-              : 'bg-white/[0.03] text-white/20 border border-white/[0.06] cursor-not-allowed'
+                ? 'bg-[#00FF41]/15 text-[#00FF41] border border-[#00FF41]/30 hover:bg-[#00FF41]/25 hover:shadow-[0_0_20px_rgba(0,255,65,0.15)]'
+                : 'bg-white/[0.03] text-white/20 border border-white/[0.06] cursor-not-allowed'
           }`}
         >
           {isGenerating ? (

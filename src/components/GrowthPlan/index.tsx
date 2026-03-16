@@ -13,7 +13,7 @@ import type { GrowthPlanData } from './types';
 
 const SECTION_NAMES = [
   'THE MATH',
-  'WHAT\'S WORKING',
+  "WHAT'S WORKING",
   'THE BOTTLENECK',
   'GROWTH LEVERS',
   'EXECUTION PLAN',
@@ -29,7 +29,7 @@ export default function GrowthPlanWalkthrough({ plan, onComplete }: GrowthPlanWa
 
   function advance() {
     if (currentSection < SECTION_NAMES.length - 1) {
-      setCurrentSection(prev => prev + 1);
+      setCurrentSection((prev) => prev + 1);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
       onComplete();
@@ -50,18 +50,14 @@ export default function GrowthPlanWalkthrough({ plan, onComplete }: GrowthPlanWa
 
       <div style={{ position: 'relative', zIndex: 1 }}>
         <AnimatePresence mode="wait">
-          {currentSection === 0 && (
-            <TheMathSection key="math" plan={plan} onComplete={advance} />
-          )}
+          {currentSection === 0 && <TheMathSection key="math" plan={plan} onComplete={advance} />}
           {currentSection === 1 && (
             <WhatsWorkingSection key="working" plan={plan} onComplete={advance} />
           )}
           {currentSection === 2 && (
             <BottleneckSection key="bottleneck" plan={plan} onComplete={advance} />
           )}
-          {currentSection === 3 && (
-            <LeversSection key="levers" plan={plan} onComplete={advance} />
-          )}
+          {currentSection === 3 && <LeversSection key="levers" plan={plan} onComplete={advance} />}
           {currentSection === 4 && (
             <ExecutionSection key="execution" plan={plan} onComplete={advance} />
           )}

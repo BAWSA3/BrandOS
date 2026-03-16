@@ -70,10 +70,7 @@ export function getPermissions(role: TeamRole): TeamPermissions {
   return ROLE_PERMISSIONS[role];
 }
 
-export function hasPermission(
-  role: TeamRole,
-  permission: keyof TeamPermissions
-): boolean {
+export function hasPermission(role: TeamRole, permission: keyof TeamPermissions): boolean {
   return ROLE_PERMISSIONS[role][permission];
 }
 
@@ -118,9 +115,7 @@ export function canReview(reviewerRole: TeamRole): boolean {
 /**
  * Compute approval workflow status summary for a brand/team.
  */
-export function computeApprovalSummary(
-  workflows: Pick<ApprovalWorkflow, 'status'>[]
-): {
+export function computeApprovalSummary(workflows: Pick<ApprovalWorkflow, 'status'>[]): {
   total: number;
   pending: number;
   approved: number;
@@ -151,9 +146,7 @@ export interface AgencyBrandOverview {
 /**
  * Agency-level overview: summarize all brands under management.
  */
-export function computeAgencyOverview(
-  brands: AgencyBrandOverview[]
-): {
+export function computeAgencyOverview(brands: AgencyBrandOverview[]): {
   totalBrands: number;
   avgScore: number;
   totalPendingApprovals: number;
@@ -162,9 +155,10 @@ export function computeAgencyOverview(
 } {
   const totalBrands = brands.length;
 
-  const avgScore = totalBrands > 0
-    ? Math.round(brands.reduce((s, b) => s + b.crossPlatformScore, 0) / totalBrands)
-    : 0;
+  const avgScore =
+    totalBrands > 0
+      ? Math.round(brands.reduce((s, b) => s + b.crossPlatformScore, 0) / totalBrands)
+      : 0;
 
   const totalPendingApprovals = brands.reduce((s, b) => s + b.pendingApprovals, 0);
 

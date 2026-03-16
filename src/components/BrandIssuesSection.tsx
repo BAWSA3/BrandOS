@@ -2,7 +2,17 @@
 
 import React from 'react';
 import { motion } from 'motion/react';
-import { AlertTriangle, AlertCircle, Info, TrendingDown, MessageSquare, Users, Target, Zap, Volume2 } from 'lucide-react';
+import {
+  AlertTriangle,
+  AlertCircle,
+  Info,
+  TrendingDown,
+  MessageSquare,
+  Users,
+  Target,
+  Zap,
+  Volume2,
+} from 'lucide-react';
 
 // ============================================================================
 // Types
@@ -62,9 +72,11 @@ function detectBrandIssues(props: BrandIssuesSectionProps): BrandIssue[] {
       severity: 'critical',
       title: 'Inconsistent Voice',
       metric: `${voiceConsistency}%`,
-      description: 'Your messaging style varies significantly across posts, confusing your audience about who you are.',
+      description:
+        'Your messaging style varies significantly across posts, confusing your audience about who you are.',
       impact: 'Followers struggle to recognize your content, reducing engagement and memorability.',
-      fixTeaser: 'BrandOS analyzes your best-performing content to establish consistent voice guidelines.',
+      fixTeaser:
+        'BrandOS analyzes your best-performing content to establish consistent voice guidelines.',
       icon: <Volume2 size={18} />,
     });
   } else if (voiceConsistency < 70) {
@@ -87,7 +99,8 @@ function detectBrandIssues(props: BrandIssuesSectionProps): BrandIssue[] {
       severity: 'critical',
       title: 'Low Engagement',
       metric: `${engagementScore}/100`,
-      description: 'Your content isn\'t resonating. Low likes, replies, and shares indicate a disconnect.',
+      description:
+        "Your content isn't resonating. Low likes, replies, and shares indicate a disconnect.",
       impact: 'Algorithm deprioritization leads to shrinking reach over time.',
       fixTeaser: 'AI-powered content suggestions based on what works for your archetype.',
       icon: <TrendingDown size={18} />,
@@ -98,7 +111,7 @@ function detectBrandIssues(props: BrandIssuesSectionProps): BrandIssue[] {
       severity: 'warning',
       title: 'Engagement Below Potential',
       metric: `${engagementScore}/100`,
-      description: 'Your engagement is average for your follower count. There\'s room to grow.',
+      description: "Your engagement is average for your follower count. There's room to grow.",
       impact: 'Missing opportunities to convert followers into fans.',
       fixTeaser: 'Discover your high-performing content patterns.',
       icon: <TrendingDown size={18} />,
@@ -112,7 +125,7 @@ function detectBrandIssues(props: BrandIssuesSectionProps): BrandIssue[] {
       severity: 'critical',
       title: 'Weak Bio',
       metric: bioLength > 0 ? `${bioLength} chars` : 'Empty',
-      description: 'Your bio doesn\'t clearly communicate who you are or what value you provide.',
+      description: "Your bio doesn't clearly communicate who you are or what value you provide.",
       impact: 'Profile visitors leave without following—wasted discovery opportunities.',
       fixTeaser: 'Generate an optimized bio based on your Brand DNA.',
       icon: <MessageSquare size={18} />,
@@ -123,7 +136,7 @@ function detectBrandIssues(props: BrandIssuesSectionProps): BrandIssue[] {
       severity: 'warning',
       title: 'Bio Underutilized',
       metric: `${bioLength}/160 chars`,
-      description: 'You\'re not using your full bio space to communicate your value.',
+      description: "You're not using your full bio space to communicate your value.",
       impact: 'Missing keywords and CTAs that could drive conversions.',
       fixTeaser: 'Optimize your bio with strategic keywords.',
       icon: <MessageSquare size={18} />,
@@ -137,7 +150,7 @@ function detectBrandIssues(props: BrandIssuesSectionProps): BrandIssue[] {
       severity: 'warning',
       title: 'Content Gaps',
       metric: contentPillarsCount > 0 ? `${contentPillarsCount} pillars` : 'None detected',
-      description: 'Your content lacks clear themes. Audiences can\'t predict what to expect.',
+      description: "Your content lacks clear themes. Audiences can't predict what to expect.",
       impact: 'Harder to build authority in any specific area.',
       fixTeaser: 'Identify and strengthen your content pillars.',
       icon: <Target size={18} />,
@@ -193,7 +206,7 @@ function detectBrandIssues(props: BrandIssuesSectionProps): BrandIssue[] {
       severity: 'warning',
       title: 'Brand Needs Polish',
       metric: `${brandScore}/100`,
-      description: 'You have a foundation, but your brand isn\'t fully optimized.',
+      description: "You have a foundation, but your brand isn't fully optimized.",
       impact: 'Leaving growth and opportunities on the table.',
       fixTeaser: 'Fine-tune your brand with targeted improvements.',
       icon: <Zap size={18} />,
@@ -211,7 +224,10 @@ function detectBrandIssues(props: BrandIssuesSectionProps): BrandIssue[] {
 // Severity Styling
 // ============================================================================
 
-const severityStyles: Record<IssueSeverity, { bg: string; border: string; icon: string; badge: string; badgeBg: string }> = {
+const severityStyles: Record<
+  IssueSeverity,
+  { bg: string; border: string; icon: string; badge: string; badgeBg: string }
+> = {
   critical: {
     bg: 'bg-red-500/5',
     border: 'border-red-500/30',
@@ -269,32 +285,34 @@ const IssueCard: React.FC<IssueCardProps> = ({ issue, index }) => {
           <div>
             <h4 className="font-semibold text-white text-sm leading-tight">{issue.title}</h4>
             {issue.metric && (
-              <span className="font-mono text-[10px] text-gray-500 tracking-wider">{issue.metric}</span>
+              <span className="font-mono text-[10px] text-gray-500 tracking-wider">
+                {issue.metric}
+              </span>
             )}
           </div>
         </div>
-        <span className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wider uppercase ${styles.badgeBg} ${styles.badge}`}>
+        <span
+          className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wider uppercase ${styles.badgeBg} ${styles.badge}`}
+        >
           <SeverityIcon severity={issue.severity} />
           {issue.severity}
         </span>
       </div>
 
       {/* Description */}
-      <p className="text-[13px] text-gray-400 leading-relaxed mb-3">
-        {issue.description}
-      </p>
+      <p className="text-[13px] text-gray-400 leading-relaxed mb-3">{issue.description}</p>
 
       {/* Impact */}
       <div className="bg-black/30 rounded-lg p-2.5 mb-3">
-        <span className="text-[9px] font-mono text-gray-500 uppercase tracking-wider block mb-1">IMPACT</span>
+        <span className="text-[9px] font-mono text-gray-500 uppercase tracking-wider block mb-1">
+          IMPACT
+        </span>
         <p className="text-[12px] text-gray-300 leading-relaxed">{issue.impact}</p>
       </div>
 
       {/* Fix Teaser */}
       <div className="flex items-center gap-2 pt-2 border-t border-white/5">
-        <span className="text-[10px] text-[#D4A574] font-medium">
-          💡 {issue.fixTeaser}
-        </span>
+        <span className="text-[10px] text-[#D4A574] font-medium">💡 {issue.fixTeaser}</span>
       </div>
     </motion.div>
   );
@@ -307,9 +325,9 @@ const IssueCard: React.FC<IssueCardProps> = ({ issue, index }) => {
 const BrandIssuesSection: React.FC<BrandIssuesSectionProps> = (props) => {
   const issues = detectBrandIssues(props);
 
-  const criticalCount = issues.filter(i => i.severity === 'critical').length;
-  const warningCount = issues.filter(i => i.severity === 'warning').length;
-  const infoCount = issues.filter(i => i.severity === 'info').length;
+  const criticalCount = issues.filter((i) => i.severity === 'critical').length;
+  const warningCount = issues.filter((i) => i.severity === 'warning').length;
+  const infoCount = issues.filter((i) => i.severity === 'info').length;
 
   if (issues.length === 0) {
     return (
@@ -320,12 +338,23 @@ const BrandIssuesSection: React.FC<BrandIssuesSectionProps> = (props) => {
       >
         <div className="text-center py-8 px-6 rounded-2xl bg-emerald-500/5 border border-emerald-500/20">
           <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-emerald-500/20 flex items-center justify-center">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#10B981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="20 6 9 17 4 12"/>
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#10B981"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <polyline points="20 6 9 17 4 12" />
             </svg>
           </div>
           <h3 className="text-lg font-semibold text-emerald-400 mb-2">No Major Issues Detected</h3>
-          <p className="text-sm text-gray-400">Your brand is performing well! Minor optimizations may still be available.</p>
+          <p className="text-sm text-gray-400">
+            Your brand is performing well! Minor optimizations may still be available.
+          </p>
         </div>
       </motion.div>
     );
@@ -341,7 +370,7 @@ const BrandIssuesSection: React.FC<BrandIssuesSectionProps> = (props) => {
       {/* Section Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <div>
-          <h2 
+          <h2
             className="text-lg font-bold text-white mb-1"
             style={{ fontFamily: "'VCR OSD Mono', monospace", letterSpacing: '0.1em' }}
           >
@@ -351,7 +380,7 @@ const BrandIssuesSection: React.FC<BrandIssuesSectionProps> = (props) => {
             Areas that need attention to strengthen your brand
           </p>
         </div>
-        
+
         {/* Summary Badges */}
         <div className="flex items-center gap-2">
           {criticalCount > 0 && (

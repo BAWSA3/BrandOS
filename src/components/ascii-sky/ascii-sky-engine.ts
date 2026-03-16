@@ -6,33 +6,46 @@
    ──────────────────────────────────────────────────────────── */
 
 export interface Cloud {
-  x: number;       // center column (float, wraps)
-  y: number;       // center row
-  rx: number;      // horizontal radius (columns)
-  ry: number;      // vertical radius (rows)
-  speed: number;   // cols per second
+  x: number; // center column (float, wraps)
+  y: number; // center row
+  rx: number; // horizontal radius (columns)
+  ry: number; // vertical radius (rows)
+  speed: number; // cols per second
   density: number; // 0-1, thicker clouds are more opaque
 }
 
 export interface AsciiCell {
   char: string;
   color: string;
-  elementId?: string;  // interactive element identifier
+  elementId?: string; // interactive element identifier
 }
 
 export type Season = 'spring' | 'summer' | 'autumn' | 'winter';
 
 export interface GroundElement {
   col: number;
-  type: 'sapling' | 'flower' | 'tree' | 'bush' | 'rock' | 'mushroom' | 'sign' | 'fruit-tree' | 'wheat' | 'lantern' | 'snowtree' | 'crystal' | 'star-flower';
+  type:
+    | 'sapling'
+    | 'flower'
+    | 'tree'
+    | 'bush'
+    | 'rock'
+    | 'mushroom'
+    | 'sign'
+    | 'fruit-tree'
+    | 'wheat'
+    | 'lantern'
+    | 'snowtree'
+    | 'crystal'
+    | 'star-flower';
   id?: string;
   growth: number; // 0-1, how grown the element is
 }
 
 export interface PathConfig {
   enabled: boolean;
-  yOffset?: number;      // vertical offset (0 = default, uses bottom ~20%)
-  amplitude?: number;    // how wavy the path is (0-1)
+  yOffset?: number; // vertical offset (0 = default, uses bottom ~20%)
+  amplitude?: number; // how wavy the path is (0-1)
   color?: string;
   borderColor?: string;
 }
@@ -58,8 +71,8 @@ export interface SceneConfig {
 
 export const SEASON_PALETTES = {
   spring: {
-    skyTop: '#2D1B4E',     // pre-dawn purple
-    skyBottom: '#E8A0BF',  // soft pink
+    skyTop: '#2D1B4E', // pre-dawn purple
+    skyBottom: '#E8A0BF', // soft pink
     hillColor: '#7CB87C',
     hillColorFar: '#4A7A4A',
     cloudColor: '#FFD4E8',
@@ -109,10 +122,7 @@ const PATH_BORDER_CHARS = ['═', '─', '═', '─'];
 
 const ELEMENT_SHAPES: Record<string, { chars: string[][]; colors?: string[] }> = {
   sapling: {
-    chars: [
-      ['⌃'],
-      ['|'],
-    ],
+    chars: [['⌃'], ['|']],
   },
   flower: {
     chars: [['✿']],
@@ -131,10 +141,7 @@ const ELEMENT_SHAPES: Record<string, { chars: string[][]; colors?: string[] }> =
     chars: [['▄', '█']],
   },
   mushroom: {
-    chars: [
-      ['●'],
-      ['│'],
-    ],
+    chars: [['●'], ['│']],
   },
   sign: {
     chars: [
@@ -151,16 +158,10 @@ const ELEMENT_SHAPES: Record<string, { chars: string[][]; colors?: string[] }> =
     ],
   },
   wheat: {
-    chars: [
-      ['≈'],
-      ['|'],
-    ],
+    chars: [['≈'], ['|']],
   },
   lantern: {
-    chars: [
-      ['◆'],
-      ['│'],
-    ],
+    chars: [['◆'], ['│']],
   },
   snowtree: {
     chars: [
@@ -170,10 +171,7 @@ const ELEMENT_SHAPES: Record<string, { chars: string[][]; colors?: string[] }> =
     ],
   },
   crystal: {
-    chars: [
-      ['◇'],
-      ['△'],
-    ],
+    chars: [['◇'], ['△']],
   },
   'star-flower': {
     chars: [['✦']],
@@ -191,11 +189,7 @@ function hash(x: number, y: number): number {
 
 // ── Cloud generation ──
 
-export function generateInitialClouds(
-  cols: number,
-  rows: number,
-  count: number,
-): Cloud[] {
+export function generateInitialClouds(cols: number, rows: number, count: number): Cloud[] {
   const clouds: Cloud[] = [];
   const skyRows = Math.floor(rows * 0.6); // clouds only in top 60%
   for (let i = 0; i < count; i++) {
@@ -205,10 +199,10 @@ export function generateInitialClouds(
     clouds.push({
       x: seed * cols,
       y: 2 + seed2 * (skyRows - 4),
-      rx: 6 + seed3 * 14,                  // 6-20 cols wide
-      ry: 1.5 + hash(i, 99) * 2.5,        // 1.5-4 rows tall
-      speed: 1.5 + hash(i, 42) * 3,       // 1.5-4.5 cols/sec
-      density: 0.4 + hash(i, 77) * 0.5,   // 0.4-0.9
+      rx: 6 + seed3 * 14, // 6-20 cols wide
+      ry: 1.5 + hash(i, 99) * 2.5, // 1.5-4 rows tall
+      speed: 1.5 + hash(i, 42) * 3, // 1.5-4.5 cols/sec
+      density: 0.4 + hash(i, 77) * 0.5, // 0.4-0.9
     });
   }
   return clouds;
@@ -269,7 +263,12 @@ function rgbWithAlpha(hex: string, alpha: number): string {
 
 // ── Cloud ellipse test ──
 
-function cloudDensityAt(col: number, row: number, clouds: Cloud[], cols: number): { density: number; closest: Cloud | null } {
+function cloudDensityAt(
+  col: number,
+  row: number,
+  clouds: Cloud[],
+  cols: number
+): { density: number; closest: Cloud | null } {
   let maxDensity = 0;
   let closest: Cloud | null = null;
 
@@ -310,11 +309,17 @@ function cloudDensityAt(col: number, row: number, clouds: Cloud[], cols: number)
 
 // ── Path height (sum of sines for winding trail) ──
 
-export function pathCenterRow(col: number, cols: number, rows: number, amplitude: number = 0.5): number {
+export function pathCenterRow(
+  col: number,
+  cols: number,
+  rows: number,
+  amplitude: number = 0.5
+): number {
   const t = col / cols;
   const baseRow = rows * 0.78;
-  const wave = Math.sin(t * Math.PI * 3.0 + 0.8) * amplitude * 3
-             + Math.sin(t * Math.PI * 1.5 + 2.1) * amplitude * 2;
+  const wave =
+    Math.sin(t * Math.PI * 3.0 + 0.8) * amplitude * 3 +
+    Math.sin(t * Math.PI * 1.5 + 2.1) * amplitude * 2;
   return Math.round(baseRow + wave);
 }
 
@@ -323,7 +328,7 @@ export function pathCenterRow(col: number, cols: number, rows: number, amplitude
 export function getTimeOfDayColors(
   baseTop: string,
   baseBottom: string,
-  timeOfDay: number,
+  timeOfDay: number
 ): { top: string; bottom: string } {
   // timeOfDay: 0=midnight, 0.25=dawn, 0.5=noon, 0.75=dusk
   const nightTop = '#050510';
@@ -360,7 +365,7 @@ export function generateSeasonElements(
   season: Season,
   cols: number,
   rows: number,
-  density: number = 0.5,
+  density: number = 0.5
 ): GroundElement[] {
   const elements: GroundElement[] = [];
   const spacing = Math.max(6, Math.floor(20 * (1 - density)));
@@ -397,16 +402,27 @@ export function generateSeasonElements(
 
 export function computeScene(config: SceneConfig): AsciiCell[][] {
   const {
-    cols, rows, clouds, showHills,
-    skyColorTop, skyColorBottom, cloudColor,
-    hillColor, hillColorFar, time,
-    season, path, groundElements, timeOfDay,
+    cols,
+    rows,
+    clouds,
+    showHills,
+    skyColorTop,
+    skyColorBottom,
+    cloudColor,
+    hillColor,
+    hillColorFar,
+    time,
+    season,
+    path,
+    groundElements,
+    timeOfDay,
   } = config;
 
   // Apply time-of-day color shifting
-  const todColors = timeOfDay !== undefined
-    ? getTimeOfDayColors(skyColorTop, skyColorBottom, timeOfDay)
-    : { top: skyColorTop, bottom: skyColorBottom };
+  const todColors =
+    timeOfDay !== undefined
+      ? getTimeOfDayColors(skyColorTop, skyColorBottom, timeOfDay)
+      : { top: skyColorTop, bottom: skyColorBottom };
 
   const grid: AsciiCell[][] = [];
 
@@ -415,7 +431,7 @@ export function computeScene(config: SceneConfig): AsciiCell[][] {
   if (showHills) {
     for (let c = 0; c < cols; c++) {
       const hNorm = hillHeight(c, cols);
-      const hillRows = Math.floor(rows * 0.30);
+      const hillRows = Math.floor(rows * 0.3);
       hillHeights[c] = rows - Math.floor(hNorm * hillRows);
     }
   }
@@ -478,7 +494,12 @@ export function computeScene(config: SceneConfig): AsciiCell[][] {
       let elementId: string | undefined;
 
       // Stars (more visible at night/winter)
-      const starThreshold = season === 'winter' ? 0.93 : (timeOfDay !== undefined && (timeOfDay < 0.2 || timeOfDay > 0.8)) ? 0.94 : 0.97;
+      const starThreshold =
+        season === 'winter'
+          ? 0.93
+          : timeOfDay !== undefined && (timeOfDay < 0.2 || timeOfDay > 0.8)
+            ? 0.94
+            : 0.97;
       if (r < rows * 0.25 && hash(c + Math.floor(time * 0.3), r) > starThreshold) {
         const twinkle = Math.sin(time * 2 + c * 0.5 + r * 0.3) * 0.5 + 0.5;
         char = twinkle > 0.5 ? '✦' : '·';
@@ -490,7 +511,7 @@ export function computeScene(config: SceneConfig): AsciiCell[][] {
       if (cDensity > 0.05) {
         const charIdx = Math.min(
           CLOUD_CHARS_BY_DENSITY.length - 1,
-          Math.floor(cDensity * CLOUD_CHARS_BY_DENSITY.length),
+          Math.floor(cDensity * CLOUD_CHARS_BY_DENSITY.length)
         );
         char = CLOUD_CHARS_BY_DENSITY[charIdx];
         color = rgbWithAlpha(cloudColor, 0.4 + cDensity * 0.6);
@@ -501,7 +522,7 @@ export function computeScene(config: SceneConfig): AsciiCell[][] {
         const depth = (r - hillHeights[c]) / (rows - hillHeights[c]);
         const hillCharIdx = Math.min(
           HILL_CHARS.length - 1,
-          Math.floor(hash(c, r + 500) * HILL_CHARS.length),
+          Math.floor(hash(c, r + 500) * HILL_CHARS.length)
         );
 
         if (r === hillHeights[c]) {
@@ -556,11 +577,20 @@ export function computeScene(config: SceneConfig): AsciiCell[][] {
   return grid;
 }
 
-function getElementColor(type: GroundElement['type'], season: Season, palette: typeof SEASON_PALETTES[Season], time: number): string {
+function getElementColor(
+  type: GroundElement['type'],
+  season: Season,
+  palette: (typeof SEASON_PALETTES)[Season],
+  time: number
+): string {
   switch (type) {
     case 'flower':
     case 'star-flower':
-      return season === 'spring' ? '#E8A0BF' : season === 'winter' ? '#00D4FF' : palette.groundAccent;
+      return season === 'spring'
+        ? '#E8A0BF'
+        : season === 'winter'
+          ? '#00D4FF'
+          : palette.groundAccent;
     case 'sapling':
     case 'bush':
       return palette.hillColor;
@@ -623,7 +653,9 @@ export function gridToHtml(grid: AsciiCell[][]): string {
 
 function flushRun(parts: string[], color: string, chars: string, elementId?: string): void {
   if (elementId) {
-    parts.push(`<span data-element="${escapeHtml(elementId)}" style="color:${color};cursor:pointer" class="world-element">${escapeHtml(chars)}</span>`);
+    parts.push(
+      `<span data-element="${escapeHtml(elementId)}" style="color:${color};cursor:pointer" class="world-element">${escapeHtml(chars)}</span>`
+    );
   } else {
     parts.push(`<span style="color:${color}">${escapeHtml(chars)}</span>`);
   }

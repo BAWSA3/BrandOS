@@ -85,7 +85,11 @@ export default function DNAWalkthrough({
     for (const [name, phase] of phaseEntries) {
       const diff = phase.score - avgScore;
       if (diff > best.diff) {
-        best = { name: name.charAt(0).toUpperCase() + name.slice(1), score: phase.score, diff: Math.round(diff) };
+        best = {
+          name: name.charAt(0).toUpperCase() + name.slice(1),
+          score: phase.score,
+          diff: Math.round(diff),
+        };
       }
     }
     return best;
@@ -107,7 +111,7 @@ export default function DNAWalkthrough({
 
   const advanceSection = () => {
     if (currentSection < totalSections - 1) {
-      setCurrentSection(prev => prev + 1);
+      setCurrentSection((prev) => prev + 1);
       // Scroll to top smoothly when section changes
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -132,9 +136,9 @@ export default function DNAWalkthrough({
   };
 
   const voiceConsistencyScore =
-    generatedBrandDNA.voiceConsistencyReport?.overallScore
-    ?? generatedBrandDNA.performanceInsights?.voiceConsistency
-    ?? null;
+    generatedBrandDNA.voiceConsistencyReport?.overallScore ??
+    generatedBrandDNA.performanceInsights?.voiceConsistency ??
+    null;
 
   // Map currentSection to actual section based on whether we have tweets
   // With tweets: 0=DataReveal, 1=PostDeepDive, 2=Analysis, 3=BrandDNA, 4=ActionPlan
@@ -293,11 +297,7 @@ export default function DNAWalkthrough({
       </div>
 
       {showJourneyEnd && (
-        <JourneyEnd
-          data={journeyEndData}
-          theme="light"
-          onComplete={handleJourneyEndComplete}
-        />
+        <JourneyEnd data={journeyEndData} theme="light" onComplete={handleJourneyEndComplete} />
       )}
     </div>
   );

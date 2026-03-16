@@ -104,7 +104,9 @@ export function XTweetEmbed({
     loadWidgetsScript().then(() => {
       if (!cancelled) renderEmbed();
     });
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [renderEmbed]);
 
   const isDark = theme === 'dark';
@@ -218,11 +220,14 @@ function formatNumber(n: number): string {
 function highlightText(text: string, words: string[], color: string) {
   if (!words.length) return text;
 
-  const pattern = new RegExp(`(${words.map(w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})`, 'gi');
+  const pattern = new RegExp(
+    `(${words.map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})`,
+    'gi'
+  );
   const parts = text.split(pattern);
 
   return parts.map((part, i) => {
-    const isMatch = words.some(w => part.toLowerCase() === w.toLowerCase());
+    const isMatch = words.some((w) => part.toLowerCase() === w.toLowerCase());
     if (isMatch) {
       return (
         <span key={i} style={{ color, fontWeight: 600, borderBottom: `1px solid ${color}40` }}>
@@ -269,7 +274,11 @@ export function TweetExcerptText({
           fontFamily: "'Helvetica Neue', Arial, sans-serif",
         }}
       >
-        &ldquo;{highlightWords.length ? highlightText(truncatedText, highlightWords, accentColor) : truncatedText}&rdquo;
+        &ldquo;
+        {highlightWords.length
+          ? highlightText(truncatedText, highlightWords, accentColor)
+          : truncatedText}
+        &rdquo;
       </p>
 
       <div

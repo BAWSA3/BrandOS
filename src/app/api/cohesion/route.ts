@@ -8,7 +8,7 @@ const anthropic = new Anthropic({
 
 export async function POST(request: NextRequest) {
   try {
-    const { brandDNA, assets } = await request.json() as {
+    const { brandDNA, assets } = (await request.json()) as {
       brandDNA: BrandDNA;
       assets: { type: string; content: string }[];
     };
@@ -17,7 +17,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing brand DNA or assets' }, { status: 400 });
     }
 
-    const assetsList = assets.map((a, i) => `Asset ${i + 1} (${a.type}): "${a.content}"`).join('\n');
+    const assetsList = assets
+      .map((a, i) => `Asset ${i + 1} (${a.type}): "${a.content}"`)
+      .join('\n');
 
     const message = await anthropic.messages.create({
       model: 'claude-sonnet-4-20250514',
@@ -61,14 +63,13 @@ Return ONLY valid JSON:
 
     const responseText = message.content[0].type === 'text' ? message.content[0].text : '';
     const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-    
+
     if (!jsonMatch) {
       throw new Error('Invalid response format');
     }
 
     const analysis: CohesionAnalysis = JSON.parse(jsonMatch[0]);
     return NextResponse.json(analysis);
-
   } catch (error: any) {
     console.error('Cohesion Analysis API error:', error);
     return NextResponse.json(
@@ -77,4 +78,3 @@ Return ONLY valid JSON:
     );
   }
 }
-

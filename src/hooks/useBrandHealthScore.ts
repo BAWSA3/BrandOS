@@ -44,10 +44,15 @@ export function useBrandHealthScore(): BrandHealthScore {
 
   const [overallScore, setOverallScore] = useState(0);
   const [dimensions, setDimensions] = useState<BrandHealthDimensions>({
-    completeness: 0, consistency: 0, voiceMatch: 0, engagement: 0, activity: 0,
+    completeness: 0,
+    consistency: 0,
+    voiceMatch: 0,
+    engagement: 0,
+    activity: 0,
   });
   const [trend, setTrend] = useState<{ direction: 'up' | 'down' | 'stable'; delta: number }>({
-    direction: 'stable', delta: 0,
+    direction: 'stable',
+    delta: 0,
   });
   const [history, setHistory] = useState<HealthHistoryPoint[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -92,7 +97,11 @@ export function useBrandHealthScore(): BrandHealthScore {
         // Fallback: use completeness only
         setOverallScore(completeness);
         setDimensions({
-          completeness, consistency: 0, voiceMatch: 0, engagement: 0, activity: 0,
+          completeness,
+          consistency: 0,
+          voiceMatch: 0,
+          engagement: 0,
+          activity: 0,
         });
         setHasSnapshot(false);
       }
@@ -101,15 +110,25 @@ export function useBrandHealthScore(): BrandHealthScore {
         setHistory(
           historyData.snapshots
             .reverse()
-            .map((s: { overallScore: number; completeness: number; consistency: number; voiceMatch: number; engagement: number; activity: number; createdAt: string }) => ({
-              score: s.overallScore,
-              date: s.createdAt,
-              completeness: s.completeness,
-              consistency: s.consistency,
-              voiceMatch: s.voiceMatch,
-              engagement: s.engagement,
-              activity: s.activity,
-            }))
+            .map(
+              (s: {
+                overallScore: number;
+                completeness: number;
+                consistency: number;
+                voiceMatch: number;
+                engagement: number;
+                activity: number;
+                createdAt: string;
+              }) => ({
+                score: s.overallScore,
+                date: s.createdAt,
+                completeness: s.completeness,
+                consistency: s.consistency,
+                voiceMatch: s.voiceMatch,
+                engagement: s.engagement,
+                activity: s.activity,
+              })
+            )
         );
       }
     } catch (err) {
@@ -117,7 +136,11 @@ export function useBrandHealthScore(): BrandHealthScore {
       // Fallback to completeness
       setOverallScore(completeness);
       setDimensions({
-        completeness, consistency: 0, voiceMatch: 0, engagement: 0, activity: 0,
+        completeness,
+        consistency: 0,
+        voiceMatch: 0,
+        engagement: 0,
+        activity: 0,
       });
     } finally {
       setIsLoading(false);
@@ -165,15 +188,25 @@ export function useBrandHealthScore(): BrandHealthScore {
           setHistory(
             historyData.snapshots
               .reverse()
-              .map((snap: { overallScore: number; completeness: number; consistency: number; voiceMatch: number; engagement: number; activity: number; createdAt: string }) => ({
-                score: snap.overallScore,
-                date: snap.createdAt,
-                completeness: snap.completeness,
-                consistency: snap.consistency,
-                voiceMatch: snap.voiceMatch,
-                engagement: snap.engagement,
-                activity: snap.activity,
-              }))
+              .map(
+                (snap: {
+                  overallScore: number;
+                  completeness: number;
+                  consistency: number;
+                  voiceMatch: number;
+                  engagement: number;
+                  activity: number;
+                  createdAt: string;
+                }) => ({
+                  score: snap.overallScore,
+                  date: snap.createdAt,
+                  completeness: snap.completeness,
+                  consistency: snap.consistency,
+                  voiceMatch: snap.voiceMatch,
+                  engagement: snap.engagement,
+                  activity: snap.activity,
+                })
+              )
           );
         }
       }

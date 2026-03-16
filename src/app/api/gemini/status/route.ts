@@ -17,7 +17,7 @@ export async function GET() {
     try {
       const result = await geminiFlash.generateContent('Say "API working" in 2 words');
       const text = result.response.text();
-      
+
       return NextResponse.json({
         configured: true,
         status: 'connected',
@@ -31,7 +31,6 @@ export async function GET() {
         message: apiError instanceof Error ? apiError.message : 'API connection failed',
       });
     }
-
   } catch (error) {
     return NextResponse.json({
       configured: false,
@@ -40,19 +39,3 @@ export async function GET() {
     });
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

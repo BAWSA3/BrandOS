@@ -91,7 +91,15 @@ export default function ContentIntelligenceCard({ brandId }: ContentIntelligence
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <span style={{ fontSize: 16 }}>🧠</span>
-          <h3 style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+          <h3
+            style={{
+              fontSize: 13,
+              fontWeight: 600,
+              color: 'var(--text-secondary)',
+              letterSpacing: '0.05em',
+              textTransform: 'uppercase',
+            }}
+          >
             Content Intelligence
           </h3>
         </div>
@@ -114,14 +122,14 @@ export default function ContentIntelligenceCard({ brandId }: ContentIntelligence
         </button>
       </div>
 
-      {error && (
-        <p style={{ fontSize: 11, color: '#FF453A', marginBottom: 8 }}>{error}</p>
-      )}
+      {error && <p style={{ fontSize: 11, color: '#FF453A', marginBottom: 8 }}>{error}</p>}
 
       {!analysis ? (
         <div className="flex-1 flex items-center justify-center">
           <p style={{ fontSize: 12, color: 'var(--text-tertiary)', textAlign: 'center' }}>
-            No intelligence data yet.<br />Run the pipeline to get started.
+            No intelligence data yet.
+            <br />
+            Run the pipeline to get started.
           </p>
         </div>
       ) : (
@@ -129,12 +137,14 @@ export default function ContentIntelligenceCard({ brandId }: ContentIntelligence
           {/* Gap Score */}
           <div className="flex items-center justify-between">
             <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Gap Score</span>
-            <span style={{
-              fontSize: 28,
-              fontWeight: 700,
-              color: scoreColor(analysis.overallGapScore),
-              letterSpacing: '-0.02em',
-            }}>
+            <span
+              style={{
+                fontSize: 28,
+                fontWeight: 700,
+                color: scoreColor(analysis.overallGapScore),
+                letterSpacing: '-0.02em',
+              }}
+            >
               {analysis.overallGapScore}
             </span>
           </div>
@@ -148,21 +158,45 @@ export default function ContentIntelligenceCard({ brandId }: ContentIntelligence
               { label: 'CTA', value: analysis.ctaEffectiveness },
               { label: 'VEL', value: analysis.engagementVelocity },
               { label: 'FREQ', value: analysis.postingConsistency },
-            ].map(dim => (
+            ].map((dim) => (
               <div key={dim.label} className="flex items-center gap-2">
-                <span style={{ fontSize: 9, color: 'var(--text-tertiary)', width: 32, letterSpacing: '0.05em' }}>
+                <span
+                  style={{
+                    fontSize: 9,
+                    color: 'var(--text-tertiary)',
+                    width: 32,
+                    letterSpacing: '0.05em',
+                  }}
+                >
                   {dim.label}
                 </span>
-                <div style={{ flex: 1, height: 4, background: 'var(--surface-hover)', borderRadius: 2, overflow: 'hidden' }}>
-                  <div style={{
-                    width: `${dim.value}%`,
-                    height: '100%',
-                    background: scoreColor(dim.value),
+                <div
+                  style={{
+                    flex: 1,
+                    height: 4,
+                    background: 'var(--surface-hover)',
                     borderRadius: 2,
-                    transition: 'width 500ms ease',
-                  }} />
+                    overflow: 'hidden',
+                  }}
+                >
+                  <div
+                    style={{
+                      width: `${dim.value}%`,
+                      height: '100%',
+                      background: scoreColor(dim.value),
+                      borderRadius: 2,
+                      transition: 'width 500ms ease',
+                    }}
+                  />
                 </div>
-                <span style={{ fontSize: 10, color: 'var(--text-secondary)', width: 24, textAlign: 'right' }}>
+                <span
+                  style={{
+                    fontSize: 10,
+                    color: 'var(--text-secondary)',
+                    width: 24,
+                    textAlign: 'right',
+                  }}
+                >
                   {dim.value}
                 </span>
               </div>
@@ -172,11 +206,27 @@ export default function ContentIntelligenceCard({ brandId }: ContentIntelligence
           {/* Top gaps */}
           {topGaps.length > 0 && (
             <div>
-              <p style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 4, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+              <p
+                style={{
+                  fontSize: 10,
+                  color: 'var(--text-tertiary)',
+                  marginBottom: 4,
+                  letterSpacing: '0.05em',
+                  textTransform: 'uppercase',
+                }}
+              >
                 Top Gaps
               </p>
               {topGaps.map((gap, i) => (
-                <p key={i} style={{ fontSize: 11, color: 'var(--text-secondary)', lineHeight: 1.4, marginBottom: 2 }}>
+                <p
+                  key={i}
+                  style={{
+                    fontSize: 11,
+                    color: 'var(--text-secondary)',
+                    lineHeight: 1.4,
+                    marginBottom: 2,
+                  }}
+                >
                   • {gap}
                 </p>
               ))}
@@ -184,7 +234,10 @@ export default function ContentIntelligenceCard({ brandId }: ContentIntelligence
           )}
 
           {/* Ideas count */}
-          <div className="flex items-center justify-between" style={{ paddingTop: 8, borderTop: '1px solid var(--border)' }}>
+          <div
+            className="flex items-center justify-between"
+            style={{ paddingTop: 8, borderTop: '1px solid var(--border)' }}
+          >
             <span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>Ideas Ready</span>
             <span style={{ fontSize: 14, fontWeight: 600, color: '#0047FF' }}>{ideasCount}</span>
           </div>

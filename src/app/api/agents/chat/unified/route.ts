@@ -3,10 +3,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
-import { 
-  createAgents, 
-  validateBrandDNA,
-} from '@/lib/agents';
+import { createAgents, validateBrandDNA } from '@/lib/agents';
 import { routeToAgent, RoutingDecision, getRoutingExplanation } from '@/lib/agents/conductor';
 import { agentPersonas, ChatMessage, ChatArtifact } from '@/lib/agents/chat.types';
 import { AgentName } from '@/lib/agents/types';
@@ -29,22 +26,16 @@ export async function POST(request: NextRequest) {
 
     // Validate brand
     if (!validateBrandDNA(brandDNA)) {
-      return NextResponse.json(
-        { error: 'Invalid brand DNA' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid brand DNA' }, { status: 400 });
     }
 
     if (!message?.trim()) {
-      return NextResponse.json(
-        { error: 'Message is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Message is required' }, { status: 400 });
     }
 
     // Route to appropriate agent
     let routing: RoutingDecision;
-    
+
     // If there's a current agent and the message seems like a follow-up, keep the same agent
     if (currentAgent && isFollowUp(message)) {
       routing = {
@@ -60,15 +51,16 @@ export async function POST(request: NextRequest) {
     const agentName = routing.agent;
     const persona = agentPersonas[agentName];
     const agents = createAgents(brandDNA);
-    
+
     let responseContent = '';
     const artifacts: ChatArtifact[] = [];
 
     // Execute agent action based on routing
-    if (routing.suggestedAction === 'create_campaign' || 
-        routing.suggestedAction === 'create_launch_campaign' ||
-        routing.suggestedAction === 'create_calendar') {
-      
+    if (
+      routing.suggestedAction === 'create_campaign' ||
+      routing.suggestedAction === 'create_launch_campaign' ||
+      routing.suggestedAction === 'create_calendar'
+    ) {
       const result = await agents.planCampaign({ idea: message });
 
       if (result.success && result.data) {
@@ -78,7 +70,7 @@ export async function POST(request: NextRequest) {
           data: result.data,
           expandable: true,
         });
-        
+
         responseContent = `I've created a campaign plan: **${result.data.name}**\n\n${result.data.summary}\n\n`;
         responseContent += `📅 **${result.data.phases.length} phases** over **${result.data.contentCalendar.length} weeks**\n`;
         responseContent += `🎯 Primary objective: ${result.data.objectives.primary}\n\n`;
@@ -86,10 +78,11 @@ export async function POST(request: NextRequest) {
       } else {
         responseContent = `I had some trouble creating that campaign. ${result.error || ''}\n\nCould you give me more details about:\n- What you're promoting\n- Your target audience\n- Timeline (if any)`;
       }
-    } else if (routing.suggestedAction === 'create_content' || 
-               routing.suggestedAction === 'create_thread' ||
-               routing.suggestedAction === 'create_email') {
-      
+    } else if (
+      routing.suggestedAction === 'create_content' ||
+      routing.suggestedAction === 'create_thread' ||
+      routing.suggestedAction === 'create_email'
+    ) {
       const platform = detectPlatform(message);
       const result = await agents.createContent({
         type: 'general',
@@ -107,11 +100,11 @@ export async function POST(request: NextRequest) {
 
         responseContent = `Here's your ${result.data.platform} content:\n\n---\n${result.data.content}\n---\n\n`;
         responseContent += `**Brand alignment: ${result.data.brandAlignmentScore}/100** — ${result.data.brandAlignmentNotes}\n\n`;
-        
+
         if (result.data.variations && result.data.variations.length > 0) {
           responseContent += `I also have ${result.data.variations.length} alternative versions if you want to A/B test.`;
         }
-        
+
         if (result.data.postingNotes.bestTime) {
           responseContent += `\n\n📅 Best time to post: ${result.data.postingNotes.bestTime}`;
         }
@@ -138,9 +131,11 @@ export async function POST(request: NextRequest) {
       } else {
         responseContent = `Let me help you brainstorm. What topic or theme would you like content ideas for?`;
       }
-    } else if (routing.suggestedAction === 'analyze' || 
-               routing.suggestedAction === 'full_report' ||
-               routing.suggestedAction === 'compare_periods') {
+    } else if (
+      routing.suggestedAction === 'analyze' ||
+      routing.suggestedAction === 'full_report' ||
+      routing.suggestedAction === 'compare_periods'
+    ) {
       // Analytics needs data - ask for it or provide guidance
       responseContent = `I'd love to analyze your content performance! To give you useful insights, I'll need some data.\n\n`;
       responseContent += `You can share:\n`;
@@ -152,10 +147,7 @@ export async function POST(request: NextRequest) {
       // Conversational response
       const apiKey = process.env.ANTHROPIC_API_KEY;
       if (!apiKey) {
-        return NextResponse.json(
-          { error: 'API key not configured' },
-          { status: 500 }
-        );
+        return NextResponse.json({ error: 'API key not configured' }, { status: 500 });
       }
 
       const anthropic = new Anthropic({ apiKey });
@@ -184,16 +176,17 @@ Respond helpfully as ${persona.displayName}. Be conversational but valuable. If 
         messages: [
           {
             role: 'user',
-            content: historyText 
+            content: historyText
               ? `Previous conversation:\n${historyText}\n\nNew message: ${message}`
               : message,
           },
         ],
       });
 
-      responseContent = response.content[0].type === 'text'
-        ? response.content[0].text
-        : 'I apologize, but I had trouble processing that.';
+      responseContent =
+        response.content[0].type === 'text'
+          ? response.content[0].text
+          : 'I apologize, but I had trouble processing that.';
     }
 
     return NextResponse.json({
@@ -204,10 +197,9 @@ Respond helpfully as ${persona.displayName}. Be conversational but valuable. If 
       confidence: routing.confidence,
       processingTime: Date.now() - startTime,
     });
-
   } catch (error) {
     console.error('Unified chat error:', error);
-    
+
     return NextResponse.json(
       {
         error: error instanceof Error ? error.message : 'Chat failed',
@@ -227,27 +219,27 @@ function isFollowUp(message: string): boolean {
     /^(more|another|different|alternative)/i,
     /\?$/, // Questions are often follow-ups
   ];
-  
+
   const lowerMessage = message.toLowerCase().trim();
-  
+
   // Short messages are often follow-ups
   if (lowerMessage.split(' ').length <= 5) {
-    return followUpPatterns.some(p => p.test(lowerMessage));
+    return followUpPatterns.some((p) => p.test(lowerMessage));
   }
-  
+
   return false;
 }
 
 // Detect platform from message
 function detectPlatform(message: string): Platform {
   const lowerMessage = message.toLowerCase();
-  
+
   if (lowerMessage.includes('linkedin')) return 'linkedin';
   if (lowerMessage.includes('instagram')) return 'instagram';
   if (lowerMessage.includes('tiktok')) return 'tiktok';
   if (lowerMessage.includes('email')) return 'email';
   if (lowerMessage.includes('blog') || lowerMessage.includes('article')) return 'website';
-  
+
   // Default to Twitter for social content
   return 'twitter';
 }
@@ -278,9 +270,3 @@ export async function GET() {
     },
   });
 }
-
-
-
-
-
-

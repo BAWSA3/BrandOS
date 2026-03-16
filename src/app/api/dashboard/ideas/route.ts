@@ -37,9 +37,10 @@ export async function POST(request: NextRequest) {
     const message = await anthropic.messages.create({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 1200,
-      messages: [{
-        role: 'user',
-        content: `You are a content strategist for X/Twitter. Generate content ideas that match this brand's voice and will perform well.
+      messages: [
+        {
+          role: 'user',
+          content: `You are a content strategist for X/Twitter. Generate content ideas that match this brand's voice and will perform well.
 
 ${buildBrandContext(brandDNA)}
 
@@ -65,7 +66,8 @@ Return ONLY valid JSON:
     }
   ]
 }`,
-      }],
+        },
+      ],
     });
 
     const responseText = message.content[0].type === 'text' ? message.content[0].text : '';

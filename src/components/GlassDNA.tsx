@@ -15,7 +15,7 @@ const STYLE: 'chrome' | 'pearl' | 'hybrid' = 'hybrid';
 
 // Phase colors
 const PHASE_COLORS = [
-  new THREE.Color(0xE8A838), // Golden Amber - Define
+  new THREE.Color(0xe8a838), // Golden Amber - Define
   new THREE.Color(0x00ff88), // Green - Check
   new THREE.Color(0x9d4edd), // Purple - Generate
   new THREE.Color(0xff6b35), // Orange - Scale
@@ -52,7 +52,7 @@ export default function GlassDNA({
   activePhase,
   rotationMultiplier = 1,
   highlightIntensity = 1,
-  interactive = true
+  interactive = true,
 }: GlassDNAProps) {
   const groupRef = useRef<THREE.Group>(null);
   const [hoveredPhase, setHoveredPhase] = useState<number | null>(null);
@@ -202,10 +202,10 @@ export default function GlassDNA({
 
   // Get phase based on t value (top to bottom: Define, Check, Generate, Scale)
   const getPhase = (t: number): number => {
-    if (t >= 0.75) return 0;  // Top: Define (amber)
-    if (t >= 0.5) return 1;   // Upper-middle: Check (green)
-    if (t >= 0.25) return 2;  // Lower-middle: Generate (purple)
-    return 3;                  // Bottom: Scale (orange)
+    if (t >= 0.75) return 0; // Top: Define (amber)
+    if (t >= 0.5) return 1; // Upper-middle: Check (green)
+    if (t >= 0.25) return 2; // Lower-middle: Generate (purple)
+    return 3; // Bottom: Scale (orange)
   };
 
   const handlePointerOver = (phase: number, rungId?: number) => {
@@ -231,182 +231,197 @@ export default function GlassDNA({
         {/* Lighting Setup - Enhanced for rainbow DNA visibility */}
         <ambientLight intensity={0.3} />
 
-      {STYLE === 'pearl' ? (
-        <>
-          {/* Pearl style: Soft colored lights */}
-          <pointLight position={[10, 10, 10]} intensity={8} color="#ff00ff" />
-          <pointLight position={[-10, -10, 10]} intensity={8} color="#00ffff" />
-          <pointLight position={[0, 15, 5]} intensity={5} color="#ffffff" />
-          <pointLight position={[0, -15, 5]} intensity={4} color="#8844ff" />
-          <directionalLight position={[0, 0, 15]} intensity={1} color="#ffffff" />
-        </>
-      ) : STYLE === 'hybrid' ? (
-        <>
-          {/* Hybrid style: Optimized lighting (reduced from 6 to 3 lights) */}
-          <directionalLight position={[5, 10, 8]} intensity={3} color="#ffffff" />
-          <directionalLight position={[-8, 5, 10]} intensity={2.5} color="#ffffff" />
-          <pointLight position={[0, 0, 20]} intensity={5} color="#ffffff" />
-        </>
-      ) : (
-        <>
-          {/* Chrome style: Moderate studio lights */}
-          <spotLight
-            position={[5, 20, 5]}
-            angle={Math.PI / 4}
-            penumbra={1}
-            intensity={15}
-            color="#ffffff"
-          />
-          <directionalLight position={[10, 10, 10]} intensity={1.5} color="#ffffff" />
-          <directionalLight position={[-10, 10, 10]} intensity={1.5} color="#ffffff" />
-          <directionalLight position={[0, -10, 10]} intensity={1} color="#aaaaff" />
-          <pointLight position={[0, 0, 20]} intensity={5} color="#ffffff" />
-        </>
-      )}
+        {STYLE === 'pearl' ? (
+          <>
+            {/* Pearl style: Soft colored lights */}
+            <pointLight position={[10, 10, 10]} intensity={8} color="#ff00ff" />
+            <pointLight position={[-10, -10, 10]} intensity={8} color="#00ffff" />
+            <pointLight position={[0, 15, 5]} intensity={5} color="#ffffff" />
+            <pointLight position={[0, -15, 5]} intensity={4} color="#8844ff" />
+            <directionalLight position={[0, 0, 15]} intensity={1} color="#ffffff" />
+          </>
+        ) : STYLE === 'hybrid' ? (
+          <>
+            {/* Hybrid style: Optimized lighting (reduced from 6 to 3 lights) */}
+            <directionalLight position={[5, 10, 8]} intensity={3} color="#ffffff" />
+            <directionalLight position={[-8, 5, 10]} intensity={2.5} color="#ffffff" />
+            <pointLight position={[0, 0, 20]} intensity={5} color="#ffffff" />
+          </>
+        ) : (
+          <>
+            {/* Chrome style: Moderate studio lights */}
+            <spotLight
+              position={[5, 20, 5]}
+              angle={Math.PI / 4}
+              penumbra={1}
+              intensity={15}
+              color="#ffffff"
+            />
+            <directionalLight position={[10, 10, 10]} intensity={1.5} color="#ffffff" />
+            <directionalLight position={[-10, 10, 10]} intensity={1.5} color="#ffffff" />
+            <directionalLight position={[0, -10, 10]} intensity={1} color="#aaaaff" />
+            <pointLight position={[0, 0, 20]} intensity={5} color="#ffffff" />
+          </>
+        )}
 
-      {/* DNA Strand 1 - White/Pearl ribbon */}
-      {/* Strands block pointer events to prevent triggering ladder glow when hovering through them */}
-      <mesh
-        geometry={geometry1}
-                onPointerOver={(e) => {
-          e.stopPropagation();
-          handlePointerOut(); // Clear any hover state
-        }}
-        onPointerOut={(e) => e.stopPropagation()}
-      >
-        <primitive object={strandMaterial} attach="material" />
-      </mesh>
-
-      {/* DNA Strand 2 - White/Pearl ribbon */}
-      <mesh
-        geometry={geometry2}
-                onPointerOver={(e) => {
-          e.stopPropagation();
-          handlePointerOut(); // Clear any hover state
-        }}
-        onPointerOut={(e) => e.stopPropagation()}
-      >
-        <primitive object={strandMaterial} attach="material" />
-      </mesh>
-
-      {/* Rungs with chrome material */}
-      {rungs.map((rung) => {
-        const phase = getPhase(rung.t);
-        const color = PHASE_COLORS[phase];
-        // Check both external activePhase and hover state
-        const isHighlighted = activePhase !== undefined && activePhase !== null
-          ? activePhase === phase
-          : hoveredPhase === phase;
-        const currentIntensity = isHighlighted ? highlightIntensity : 1;
-
-        // Only allow interaction with rungs in the current active phase
-        const canInteract = interactive && (activePhase === undefined || activePhase === null || activePhase === phase);
-
-        // Check if ANY rung in this phase is being hovered - all rungs in phase glow together
-        const isPhaseHovered = hoveredPhase === phase && canInteract;
-
-        // DRAMATIC glow intensity - all rungs in hovered phase glow together
-        const hoverGlowIntensity = isPhaseHovered
-          ? 3.0  // Bright glow when any rung in this phase is hovered
-          : (isHighlighted ? 0.8 * currentIntensity : 0.15);
-
-        const quaternion = new THREE.Quaternion();
-        const up = new THREE.Vector3(0, 1, 0);
-        quaternion.setFromUnitVectors(up, rung.direction);
-
-        return (
-          <group key={rung.id}>
-
-            {/* Main rung cylinder */}
-            <mesh
-              position={rung.position}
-              quaternion={quaternion}
-              onPointerOver={canInteract ? (e) => {
-                e.stopPropagation();
-                handlePointerOver(phase, rung.id);
-              } : undefined}
-              onPointerOut={canInteract ? handlePointerOut : undefined}
-            >
-              <cylinderGeometry args={[0.12, 0.12, rung.distance, 8]} />
-              {/* High-shine metallic rungs */}
-              <meshPhysicalMaterial
-                color={isHighlighted || isPhaseHovered ? color : 0x555560}
-                metalness={0.98}
-                roughness={isPhaseHovered ? 0.02 : 0.12}
-                clearcoat={isPhaseHovered ? 1.0 : 0.6}
-                clearcoatRoughness={isPhaseHovered ? 0.02 : 0.15}
-                emissive={isHighlighted || isPhaseHovered ? color : 0x282830}
-                emissiveIntensity={hoverGlowIntensity}
-                side={THREE.DoubleSide}
-              />
-            </mesh>
-
-            {/* Endpoint sphere 1 */}
-            <mesh
-              position={rung.p1}
-              onPointerOver={canInteract ? (e) => {
-                e.stopPropagation();
-                handlePointerOver(phase, rung.id);
-              } : undefined}
-              onPointerOut={canInteract ? handlePointerOut : undefined}
-            >
-              <sphereGeometry args={[0.2, 8, 8]} />
-              <meshPhysicalMaterial
-                color={isHighlighted || isPhaseHovered ? color : 0x606570}
-                metalness={0.98}
-                roughness={isPhaseHovered ? 0.02 : 0.1}
-                clearcoat={isPhaseHovered ? 1.0 : 0.7}
-                clearcoatRoughness={isPhaseHovered ? 0.02 : 0.1}
-                emissive={isHighlighted || isPhaseHovered ? color : 0x252530}
-                emissiveIntensity={hoverGlowIntensity}
-              />
-            </mesh>
-
-            {/* Endpoint sphere 2 */}
-            <mesh
-              position={rung.p2}
-              onPointerOver={canInteract ? (e) => {
-                e.stopPropagation();
-                handlePointerOver(phase, rung.id);
-              } : undefined}
-              onPointerOut={canInteract ? handlePointerOut : undefined}
-            >
-              <sphereGeometry args={[0.2, 8, 8]} />
-              <meshPhysicalMaterial
-                color={isHighlighted || isPhaseHovered ? color : 0x606570}
-                metalness={0.98}
-                roughness={isPhaseHovered ? 0.02 : 0.1}
-                clearcoat={isPhaseHovered ? 1.0 : 0.7}
-                clearcoatRoughness={isPhaseHovered ? 0.02 : 0.1}
-                emissive={isHighlighted || isPhaseHovered ? color : 0x252530}
-                emissiveIntensity={hoverGlowIntensity}
-              />
-            </mesh>
-          </group>
-        );
-      })}
-
-      {/* Floating particles (reduced) */}
-      <ChromeParticles count={15} />
-
-      {/* Decorative rings */}
-      {[-8, 0, 8].map((y, i) => (
-        <mesh key={i} position={[0, y, 0]} rotation={[Math.PI / 2, 0, 0]}>
-          <torusGeometry args={[5.5, 0.035, 8, 32]} />
-          <meshPhysicalMaterial
-            color={0x888890}
-            metalness={0.85}
-            roughness={0.38}
-            clearcoat={0.1}
-            clearcoatRoughness={0.45}
-            emissive={0x333340}
-            emissiveIntensity={0.1}
-            transparent
-            opacity={0.7}
-          />
+        {/* DNA Strand 1 - White/Pearl ribbon */}
+        {/* Strands block pointer events to prevent triggering ladder glow when hovering through them */}
+        <mesh
+          geometry={geometry1}
+          onPointerOver={(e) => {
+            e.stopPropagation();
+            handlePointerOut(); // Clear any hover state
+          }}
+          onPointerOut={(e) => e.stopPropagation()}
+        >
+          <primitive object={strandMaterial} attach="material" />
         </mesh>
-      ))}
 
+        {/* DNA Strand 2 - White/Pearl ribbon */}
+        <mesh
+          geometry={geometry2}
+          onPointerOver={(e) => {
+            e.stopPropagation();
+            handlePointerOut(); // Clear any hover state
+          }}
+          onPointerOut={(e) => e.stopPropagation()}
+        >
+          <primitive object={strandMaterial} attach="material" />
+        </mesh>
+
+        {/* Rungs with chrome material */}
+        {rungs.map((rung) => {
+          const phase = getPhase(rung.t);
+          const color = PHASE_COLORS[phase];
+          // Check both external activePhase and hover state
+          const isHighlighted =
+            activePhase !== undefined && activePhase !== null
+              ? activePhase === phase
+              : hoveredPhase === phase;
+          const currentIntensity = isHighlighted ? highlightIntensity : 1;
+
+          // Only allow interaction with rungs in the current active phase
+          const canInteract =
+            interactive &&
+            (activePhase === undefined || activePhase === null || activePhase === phase);
+
+          // Check if ANY rung in this phase is being hovered - all rungs in phase glow together
+          const isPhaseHovered = hoveredPhase === phase && canInteract;
+
+          // DRAMATIC glow intensity - all rungs in hovered phase glow together
+          const hoverGlowIntensity = isPhaseHovered
+            ? 3.0 // Bright glow when any rung in this phase is hovered
+            : isHighlighted
+              ? 0.8 * currentIntensity
+              : 0.15;
+
+          const quaternion = new THREE.Quaternion();
+          const up = new THREE.Vector3(0, 1, 0);
+          quaternion.setFromUnitVectors(up, rung.direction);
+
+          return (
+            <group key={rung.id}>
+              {/* Main rung cylinder */}
+              <mesh
+                position={rung.position}
+                quaternion={quaternion}
+                onPointerOver={
+                  canInteract
+                    ? (e) => {
+                        e.stopPropagation();
+                        handlePointerOver(phase, rung.id);
+                      }
+                    : undefined
+                }
+                onPointerOut={canInteract ? handlePointerOut : undefined}
+              >
+                <cylinderGeometry args={[0.12, 0.12, rung.distance, 8]} />
+                {/* High-shine metallic rungs */}
+                <meshPhysicalMaterial
+                  color={isHighlighted || isPhaseHovered ? color : 0x555560}
+                  metalness={0.98}
+                  roughness={isPhaseHovered ? 0.02 : 0.12}
+                  clearcoat={isPhaseHovered ? 1.0 : 0.6}
+                  clearcoatRoughness={isPhaseHovered ? 0.02 : 0.15}
+                  emissive={isHighlighted || isPhaseHovered ? color : 0x282830}
+                  emissiveIntensity={hoverGlowIntensity}
+                  side={THREE.DoubleSide}
+                />
+              </mesh>
+
+              {/* Endpoint sphere 1 */}
+              <mesh
+                position={rung.p1}
+                onPointerOver={
+                  canInteract
+                    ? (e) => {
+                        e.stopPropagation();
+                        handlePointerOver(phase, rung.id);
+                      }
+                    : undefined
+                }
+                onPointerOut={canInteract ? handlePointerOut : undefined}
+              >
+                <sphereGeometry args={[0.2, 8, 8]} />
+                <meshPhysicalMaterial
+                  color={isHighlighted || isPhaseHovered ? color : 0x606570}
+                  metalness={0.98}
+                  roughness={isPhaseHovered ? 0.02 : 0.1}
+                  clearcoat={isPhaseHovered ? 1.0 : 0.7}
+                  clearcoatRoughness={isPhaseHovered ? 0.02 : 0.1}
+                  emissive={isHighlighted || isPhaseHovered ? color : 0x252530}
+                  emissiveIntensity={hoverGlowIntensity}
+                />
+              </mesh>
+
+              {/* Endpoint sphere 2 */}
+              <mesh
+                position={rung.p2}
+                onPointerOver={
+                  canInteract
+                    ? (e) => {
+                        e.stopPropagation();
+                        handlePointerOver(phase, rung.id);
+                      }
+                    : undefined
+                }
+                onPointerOut={canInteract ? handlePointerOut : undefined}
+              >
+                <sphereGeometry args={[0.2, 8, 8]} />
+                <meshPhysicalMaterial
+                  color={isHighlighted || isPhaseHovered ? color : 0x606570}
+                  metalness={0.98}
+                  roughness={isPhaseHovered ? 0.02 : 0.1}
+                  clearcoat={isPhaseHovered ? 1.0 : 0.7}
+                  clearcoatRoughness={isPhaseHovered ? 0.02 : 0.1}
+                  emissive={isHighlighted || isPhaseHovered ? color : 0x252530}
+                  emissiveIntensity={hoverGlowIntensity}
+                />
+              </mesh>
+            </group>
+          );
+        })}
+
+        {/* Floating particles (reduced) */}
+        <ChromeParticles count={15} />
+
+        {/* Decorative rings */}
+        {[-8, 0, 8].map((y, i) => (
+          <mesh key={i} position={[0, y, 0]} rotation={[Math.PI / 2, 0, 0]}>
+            <torusGeometry args={[5.5, 0.035, 8, 32]} />
+            <meshPhysicalMaterial
+              color={0x888890}
+              metalness={0.85}
+              roughness={0.38}
+              clearcoat={0.1}
+              clearcoatRoughness={0.45}
+              emissive={0x333340}
+              emissiveIntensity={0.1}
+              transparent
+              opacity={0.7}
+            />
+          </mesh>
+        ))}
       </group>
     </>
   );
@@ -543,11 +558,7 @@ function ChromeParticles({ count }: { count: number }) {
       const angle = Math.random() * Math.PI * 2;
       const y = (Math.random() - 0.5) * 30;
       temp.push({
-        position: new THREE.Vector3(
-          Math.cos(angle) * distance,
-          y,
-          Math.sin(angle) * distance
-        ),
+        position: new THREE.Vector3(Math.cos(angle) * distance, y, Math.sin(angle) * distance),
         speed: 0.15 + Math.random() * 0.3,
         offset: Math.random() * Math.PI * 2,
         scale: 0.08 + Math.random() * 0.12,

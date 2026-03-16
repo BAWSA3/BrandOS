@@ -72,12 +72,14 @@ export function useXFeedSync(): XFeedState {
       if (!res.ok) throw new Error('Failed to fetch feed');
       const data = await res.json();
       setTweets(data.tweets || []);
-      setStats(data.stats || {
-        totalSynced: 0,
-        avgAlignmentScore: null,
-        avgEngagementRate: null,
-        lastSyncAt: null,
-      });
+      setStats(
+        data.stats || {
+          totalSynced: 0,
+          avgAlignmentScore: null,
+          avgEngagementRate: null,
+          lastSyncAt: null,
+        }
+      );
     } catch (err) {
       console.error('Failed to fetch X feed:', err);
       setError('Failed to load feed');

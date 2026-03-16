@@ -17,14 +17,14 @@ interface ArchetypeWalkthroughProps {
 
 // Map archetype names to custom SVG emoji paths
 const ARCHETYPE_EMOJI_MAP: Record<string, string> = {
-  'ARC': '/archetypes/ARC.svg',
-  'ENTROPY': '/archetypes/ENTROPY.svg',
-  'NULL': '/archetypes/NULL.svg',
-  'FREQ': '/archetypes/FREQ.svg',
-  'RELAY': '/archetypes/RELAY.svg',
+  ARC: '/archetypes/ARC.svg',
+  ENTROPY: '/archetypes/ENTROPY.svg',
+  NULL: '/archetypes/NULL.svg',
+  FREQ: '/archetypes/FREQ.svg',
+  RELAY: '/archetypes/RELAY.svg',
   'BUILD.EXE': '/archetypes/BUILD.EXE.svg',
-  'SIGNAL_SAGE': '/archetypes/SIGNAL_SAGE.svg',
-  'FORESIGHT': '/archetypes/FORESIGHT.svg',
+  SIGNAL_SAGE: '/archetypes/SIGNAL_SAGE.svg',
+  FORESIGHT: '/archetypes/FORESIGHT.svg',
 };
 
 // Helper to normalize archetype name (strip emoji prefix if present)
@@ -44,7 +44,7 @@ interface ArchetypeData {
 }
 
 const ARCHETYPE_DESCRIPTIONS: Record<string, ArchetypeData> = {
-  'SIGNAL_SAGE': {
+  SIGNAL_SAGE: {
     short: 'a knowledge authority who builds trust through education and deep expertise',
     strengths: ['Educational threads', 'How-to guides', 'Industry analysis'],
     contentTypes: ['Long-form threads', 'Breakdown posts', 'Case studies'],
@@ -59,7 +59,7 @@ const ARCHETYPE_DESCRIPTIONS: Record<string, ArchetypeData> = {
       { trait: 'Virality', score: 60 },
     ],
   },
-  'RELAY': {
+  RELAY: {
     short: 'a super connector who brings people and opportunities together',
     strengths: ['Networking content', 'Introductions', 'Resource sharing'],
     contentTypes: ['Curated lists', 'Recommendations', 'Community highlights'],
@@ -74,7 +74,7 @@ const ARCHETYPE_DESCRIPTIONS: Record<string, ArchetypeData> = {
       { trait: 'Virality', score: 65 },
     ],
   },
-  'FREQ': {
+  FREQ: {
     short: 'an entertainer who builds community through personality and relatability',
     strengths: ['Engagement bait', 'Memes', 'Hot takes'],
     contentTypes: ['Short punchy posts', 'Relatable content', 'Commentary'],
@@ -89,7 +89,7 @@ const ARCHETYPE_DESCRIPTIONS: Record<string, ArchetypeData> = {
       { trait: 'Authority', score: 55 },
     ],
   },
-  'FORESIGHT': {
+  FORESIGHT: {
     short: 'a thought leader who shapes narratives and sees what others miss',
     strengths: ['Predictions', 'Contrarian takes', 'Big picture thinking'],
     contentTypes: ['Thought pieces', 'Industry predictions', 'Manifesto posts'],
@@ -119,7 +119,7 @@ const ARCHETYPE_DESCRIPTIONS: Record<string, ArchetypeData> = {
       { trait: 'Virality', score: 70 },
     ],
   },
-  'ARC': {
+  ARC: {
     short: 'a rising star whose growth story inspires and creates connection',
     strengths: ['Personal stories', 'Milestone posts', 'Vulnerability'],
     contentTypes: ['Journey updates', 'Win/loss reflections', 'Growth metrics'],
@@ -134,7 +134,7 @@ const ARCHETYPE_DESCRIPTIONS: Record<string, ArchetypeData> = {
       { trait: 'Authority', score: 60 },
     ],
   },
-  'ENTROPY': {
+  ENTROPY: {
     short: 'a risk-taker who thrives in chaos and builds cult-like followings',
     strengths: ['FOMO creation', 'Bold calls', 'Community rallying'],
     contentTypes: ['Hot takes', 'Speculation', 'Community memes'],
@@ -149,7 +149,7 @@ const ARCHETYPE_DESCRIPTIONS: Record<string, ArchetypeData> = {
       { trait: 'Trust', score: 50 },
     ],
   },
-  'NULL': {
+  NULL: {
     short: 'a mysterious voice whose ideas speak louder than identity',
     strengths: ['Pure ideas', 'Controversial takes', 'Anonymity mystique'],
     contentTypes: ['Insight threads', 'Philosophical posts', 'Industry secrets'],
@@ -335,16 +335,18 @@ export default function ArchetypeWalkthrough({
             transition={{ duration: 0.5, delay: 0.2 }}
             className="rounded-[4px] p-4"
             style={{
-              background: archetypeInfo.growthPotential === 'Very High'
-                ? 'rgba(16, 185, 129, 0.15)'
-                : archetypeInfo.growthPotential === 'High'
-                ? 'rgba(59, 130, 246, 0.15)'
-                : 'rgba(245, 158, 11, 0.15)',
-              border: archetypeInfo.growthPotential === 'Very High'
-                ? '1px solid rgba(16, 185, 129, 0.3)'
-                : archetypeInfo.growthPotential === 'High'
-                ? '1px solid rgba(59, 130, 246, 0.3)'
-                : '1px solid rgba(245, 158, 11, 0.3)',
+              background:
+                archetypeInfo.growthPotential === 'Very High'
+                  ? 'rgba(16, 185, 129, 0.15)'
+                  : archetypeInfo.growthPotential === 'High'
+                    ? 'rgba(59, 130, 246, 0.15)'
+                    : 'rgba(245, 158, 11, 0.15)',
+              border:
+                archetypeInfo.growthPotential === 'Very High'
+                  ? '1px solid rgba(16, 185, 129, 0.3)'
+                  : archetypeInfo.growthPotential === 'High'
+                    ? '1px solid rgba(59, 130, 246, 0.3)'
+                    : '1px solid rgba(245, 158, 11, 0.3)',
             }}
           >
             <div
@@ -359,11 +361,12 @@ export default function ArchetypeWalkthrough({
             <div
               className="text-xl font-bold"
               style={{
-                color: archetypeInfo.growthPotential === 'Very High'
-                  ? '#10B981'
-                  : archetypeInfo.growthPotential === 'High'
-                  ? '#3B82F6'
-                  : '#F59E0B',
+                color:
+                  archetypeInfo.growthPotential === 'Very High'
+                    ? '#10B981'
+                    : archetypeInfo.growthPotential === 'High'
+                      ? '#3B82F6'
+                      : '#F59E0B',
               }}
             >
               {archetypeInfo.growthPotential}
@@ -549,13 +552,15 @@ export default function ArchetypeWalkthrough({
                 color: isDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.8)',
               }}
             >
-              "<TypewriterText
+              "
+              <TypewriterText
                 text={personalitySummary}
                 delay={500}
                 charDelay={15}
                 cursorColor="#FFD700"
                 showCursor={true}
-              />"
+              />
+              "
             </p>
           </motion.div>
         )}

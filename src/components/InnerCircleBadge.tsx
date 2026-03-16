@@ -8,7 +8,10 @@ interface InnerCircleBadgeProps {
   showEntrance?: boolean;
 }
 
-export function InnerCircleBadge({ variant = 'inline', showEntrance = false }: InnerCircleBadgeProps) {
+export function InnerCircleBadge({
+  variant = 'inline',
+  showEntrance = false,
+}: InnerCircleBadgeProps) {
   const [hasAnimated, setHasAnimated] = useState(!showEntrance);
 
   useEffect(() => {
@@ -36,14 +39,12 @@ export function InnerCircleBadge({ variant = 'inline', showEntrance = false }: I
         }}
       >
         {/* Shimmer overlay */}
-        <div
-          className="absolute inset-0 overflow-hidden"
-          style={{ borderRadius: 'inherit' }}
-        >
+        <div className="absolute inset-0 overflow-hidden" style={{ borderRadius: 'inherit' }}>
           <div
             className="absolute inset-0"
             style={{
-              background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%)',
+              background:
+                'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%)',
               animation: 'innerCircleShimmer 2.5s ease-in-out infinite',
               transform: 'translateX(-100%)',
             }}
@@ -114,7 +115,8 @@ export function InnerCircleBadge({ variant = 'inline', showEntrance = false }: I
       <span
         className="absolute inset-0"
         style={{
-          background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.5) 50%, transparent 100%)',
+          background:
+            'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.5) 50%, transparent 100%)',
           animation: 'innerCircleShimmer 2s ease-in-out infinite',
           transform: 'translateX(-100%)',
         }}
@@ -255,7 +257,8 @@ export function InnerCircleStyles() {
         0% {
           transform: translateX(-100%);
         }
-        50%, 100% {
+        50%,
+        100% {
           transform: translateX(100%);
         }
       }

@@ -47,7 +47,7 @@ const PHASE_ICONS = {
 function TerminalTypewriter({
   text,
   speed = 20,
-  onComplete
+  onComplete,
 }: {
   text: string;
   speed?: number;
@@ -64,8 +64,8 @@ function TerminalTypewriter({
   useEffect(() => {
     if (currentIndex < text.length) {
       const timeout = setTimeout(() => {
-        setDisplayText(prev => prev + text[currentIndex]);
-        setCurrentIndex(prev => prev + 1);
+        setDisplayText((prev) => prev + text[currentIndex]);
+        setCurrentIndex((prev) => prev + 1);
       }, speed);
       return () => clearTimeout(timeout);
     } else if (onComplete) {
@@ -266,9 +266,12 @@ export default function AnalysisStep({
   useEffect(() => {
     if (showParameters && !showInsight && !isCompleted) {
       const paramCount = data?.parameters?.length || 3;
-      const timer = setTimeout(() => {
-        setShowInsight(true);
-      }, paramCount * 100 + 300);
+      const timer = setTimeout(
+        () => {
+          setShowInsight(true);
+        },
+        paramCount * 100 + 300
+      );
       return () => clearTimeout(timer);
     }
   }, [showParameters, showInsight, isCompleted, data?.parameters?.length]);
@@ -446,7 +449,9 @@ export default function AnalysisStep({
 
         {/* Parameters */}
         {showParameters && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '16px' }}>
+          <div
+            style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '16px' }}
+          >
             {data.parameters.map((param, i) => (
               <ParameterCard key={param.id} param={param} index={i} />
             ))}
@@ -518,11 +523,7 @@ export default function AnalysisStep({
 
         {/* Continue button */}
         {showInsight && !isCompleted && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-          >
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
             <button
               onClick={onComplete}
               style={{
@@ -538,8 +539,8 @@ export default function AnalysisStep({
                 cursor: 'pointer',
                 transition: 'opacity 0.2s ease',
               }}
-              onMouseEnter={(e) => e.currentTarget.style.opacity = '0.9'}
-              onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+              onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.9')}
+              onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
             >
               <span
                 style={{
@@ -551,9 +552,7 @@ export default function AnalysisStep({
               >
                 {stepNumber < totalSteps ? 'CONTINUE TO NEXT PHASE' : 'COMPLETE ANALYSIS'}
               </span>
-              <span style={{ color: '#fff' }}>
-                →
-              </span>
+              <span style={{ color: '#fff' }}>→</span>
             </button>
           </motion.div>
         )}

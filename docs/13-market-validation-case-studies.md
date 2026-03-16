@@ -59,23 +59,23 @@ Each case study follows a consistent analysis structure:
 
 ### Primary Comparables
 
-| Company | Category | Relevance to BrandOS | Analysis Doc |
-|---------|----------|---------------------|--------------|
-| **Brand.ai** | AI Brand Management | Direct competitor in AI + brand | [14-case-study-brand-ai.md](14-case-study-brand-ai.md) |
-| **Omneky** | AI Creative Platform | AI-powered content at scale | [15-case-study-omneky.md](15-case-study-omneky.md) |
-| **Frontify** | Brand Management | Market leader in brand platforms | [16-case-study-frontify.md](16-case-study-frontify.md) |
-| **Google Pomelli** | Brand Design Tool | Big tech entry into space | [17-case-study-google-pomelli.md](17-case-study-google-pomelli.md) |
+| Company            | Category             | Relevance to BrandOS             | Analysis Doc                                                       |
+| ------------------ | -------------------- | -------------------------------- | ------------------------------------------------------------------ |
+| **Brand.ai**       | AI Brand Management  | Direct competitor in AI + brand  | [14-case-study-brand-ai.md](14-case-study-brand-ai.md)             |
+| **Omneky**         | AI Creative Platform | AI-powered content at scale      | [15-case-study-omneky.md](15-case-study-omneky.md)                 |
+| **Frontify**       | Brand Management     | Market leader in brand platforms | [16-case-study-frontify.md](16-case-study-frontify.md)             |
+| **Google Pomelli** | Brand Design Tool    | Big tech entry into space        | [17-case-study-google-pomelli.md](17-case-study-google-pomelli.md) |
 
 ### Adjacent Comparables (Referenced)
 
-| Company | Category | Key Learning |
-|---------|----------|--------------|
-| **Jasper** | AI Writing | AI content generation at scale |
-| **Copy.ai** | AI Copywriting | Product-led growth in AI tools |
-| **Bynder** | DAM | Enterprise brand asset management |
-| **Brandfolder** | DAM | Mid-market brand assets |
-| **Canva** | Design | Self-serve design democratization |
-| **Grammarly** | Writing Assistant | Ubiquitous checking via extension |
+| Company         | Category          | Key Learning                      |
+| --------------- | ----------------- | --------------------------------- |
+| **Jasper**      | AI Writing        | AI content generation at scale    |
+| **Copy.ai**     | AI Copywriting    | Product-led growth in AI tools    |
+| **Bynder**      | DAM               | Enterprise brand asset management |
+| **Brandfolder** | DAM               | Mid-market brand assets           |
+| **Canva**       | Design            | Self-serve design democratization |
+| **Grammarly**   | Writing Assistant | Ubiquitous checking via extension |
 
 ---
 
@@ -108,14 +108,14 @@ MGMT  ├──────────────────┼────�
 
 ### Funding Landscape
 
-| Company | Total Raised | Latest Round | Valuation |
-|---------|--------------|--------------|-----------|
-| Frontify | $80M+ | Series C (2022) | ~$400M |
-| Bynder | $100M+ | Series E | ~$500M |
-| Jasper | $125M | Series A (2022) | $1.5B |
-| Canva | $572M | Various | $40B |
-| Copy.ai | $14M | Series A (2021) | ~$100M |
-| Omneky | $10M+ | Series A (2022) | ~$50M |
+| Company  | Total Raised | Latest Round    | Valuation |
+| -------- | ------------ | --------------- | --------- |
+| Frontify | $80M+        | Series C (2022) | ~$400M    |
+| Bynder   | $100M+       | Series E        | ~$500M    |
+| Jasper   | $125M        | Series A (2022) | $1.5B     |
+| Canva    | $572M        | Various         | $40B      |
+| Copy.ai  | $14M         | Series A (2021) | ~$100M    |
+| Omneky   | $10M+        | Series A (2022) | ~$50M     |
 
 **Signal:** Significant capital deployed validates market opportunity
 
@@ -176,30 +176,30 @@ Based on case study analysis, market-validated features include:
 
 ### Must-Have (Table Stakes)
 
-| Feature | Validation Source | BrandOS Status |
-|---------|-------------------|----------------|
-| Brand asset storage | Frontify, Bynder | ⚠️ Basic |
-| Brand guidelines | All players | ✅ Complete |
-| Team collaboration | All players | ✅ Complete |
-| Search/discovery | DAM players | ❌ Not yet |
+| Feature             | Validation Source | BrandOS Status |
+| ------------------- | ----------------- | -------------- |
+| Brand asset storage | Frontify, Bynder  | ⚠️ Basic       |
+| Brand guidelines    | All players       | ✅ Complete    |
+| Team collaboration  | All players       | ✅ Complete    |
+| Search/discovery    | DAM players       | ❌ Not yet     |
 
 ### Differentiators (Emerging)
 
-| Feature | Validation Source | BrandOS Status |
-|---------|-------------------|----------------|
-| AI content generation | Jasper, Omneky | ✅ Complete |
-| Brand voice definition | Brand.ai | ✅ Complete |
-| Content scoring/checking | Emerging need | ✅ Complete |
-| Platform adaptation | Social tools | ✅ Complete |
+| Feature                  | Validation Source | BrandOS Status |
+| ------------------------ | ----------------- | -------------- |
+| AI content generation    | Jasper, Omneky    | ✅ Complete    |
+| Brand voice definition   | Brand.ai          | ✅ Complete    |
+| Content scoring/checking | Emerging need     | ✅ Complete    |
+| Platform adaptation      | Social tools      | ✅ Complete    |
 
 ### Innovations (Whitespace)
 
-| Feature | Market Gap | BrandOS Status |
-|---------|------------|----------------|
-| Taste translation | No competitor | ✅ Complete |
-| Design intent blocks | No competitor | ✅ Complete |
-| Creator guardrails | Limited solutions | ✅ Complete |
-| Brand memory | No competitor | ✅ Complete |
+| Feature              | Market Gap        | BrandOS Status |
+| -------------------- | ----------------- | -------------- |
+| Taste translation    | No competitor     | ✅ Complete    |
+| Design intent blocks | No competitor     | ✅ Complete    |
+| Creator guardrails   | Limited solutions | ✅ Complete    |
+| Brand memory         | No competitor     | ✅ Complete    |
 
 ---
 
@@ -207,21 +207,21 @@ Based on case study analysis, market-validated features include:
 
 ### Market Price Points
 
-| Segment | Annual Spend | Key Players |
-|---------|--------------|-------------|
-| Self-serve | $0-500 | Canva, Copy.ai |
-| SMB | $500-5,000 | Jasper, emerging |
+| Segment    | Annual Spend  | Key Players           |
+| ---------- | ------------- | --------------------- |
+| Self-serve | $0-500        | Canva, Copy.ai        |
+| SMB        | $500-5,000    | Jasper, emerging      |
 | Mid-market | $5,000-50,000 | Frontify, Brandfolder |
-| Enterprise | $50,000+ | Bynder, Frontify |
+| Enterprise | $50,000+      | Bynder, Frontify      |
 
 ### Price-to-Value Validation
 
-| Feature | Comparable Pricing | BrandOS Approach |
-|---------|-------------------|------------------|
-| AI generations | $50-125/mo (Jasper) | Included in plans |
+| Feature          | Comparable Pricing    | BrandOS Approach  |
+| ---------------- | --------------------- | ----------------- |
+| AI generations   | $50-125/mo (Jasper)   | Included in plans |
 | Brand guidelines | $99-299/mo (Frontify) | Included in plans |
-| Team seats | $20-50/seat | $20/seat add-on |
-| API access | $500+/mo | Pro plan included |
+| Team seats       | $20-50/seat           | $20/seat add-on   |
+| API access       | $500+/mo              | Pro plan included |
 
 **BrandOS Positioning:** Premium to generic AI, accessible vs. enterprise DAM
 
@@ -231,21 +231,21 @@ Based on case study analysis, market-validated features include:
 
 ### What Works
 
-| Strategy | Evidence | BrandOS Application |
-|----------|----------|---------------------|
-| Product-led growth | Jasper, Copy.ai growth | Free tier, self-serve |
-| Content marketing | Frontify's resource hub | Brand consistency content |
-| Community building | Jasper's community | Brand manager community |
-| Integration partnerships | All major players | Figma, Slack priority |
+| Strategy                 | Evidence                | BrandOS Application       |
+| ------------------------ | ----------------------- | ------------------------- |
+| Product-led growth       | Jasper, Copy.ai growth  | Free tier, self-serve     |
+| Content marketing        | Frontify's resource hub | Brand consistency content |
+| Community building       | Jasper's community      | Brand manager community   |
+| Integration partnerships | All major players       | Figma, Slack priority     |
 
 ### What to Avoid
 
-| Anti-pattern | Evidence | BrandOS Approach |
-|--------------|----------|------------------|
-| Enterprise-only | Bynder accessibility issues | Multi-tier pricing |
-| Feature bloat | Frontify complexity complaints | Focused core features |
-| Generic positioning | Jasper brand issues | Brand-specific positioning |
-| Slow iteration | DAM players' pace | Rapid shipping culture |
+| Anti-pattern        | Evidence                       | BrandOS Approach           |
+| ------------------- | ------------------------------ | -------------------------- |
+| Enterprise-only     | Bynder accessibility issues    | Multi-tier pricing         |
+| Feature bloat       | Frontify complexity complaints | Focused core features      |
+| Generic positioning | Jasper brand issues            | Brand-specific positioning |
+| Slow iteration      | DAM players' pace              | Rapid shipping culture     |
 
 ---
 
@@ -291,26 +291,10 @@ Proceed to individual case studies for detailed analysis:
 4. [Google Pomelli Case Study →](17-case-study-google-pomelli.md)
 
 Then see:
+
 - [Feature Validation Mapping →](18-feature-validation-mapping.md)
 - [Competitive Positioning →](19-competitive-positioning.md)
 
 ---
 
-*Next: [Case Study: Brand.ai →](14-case-study-brand-ai.md)*
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+_Next: [Case Study: Brand.ai →](14-case-study-brand-ai.md)_

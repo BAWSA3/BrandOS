@@ -33,19 +33,25 @@ export async function GET(_request: NextRequest) {
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
         cookies: {
-          getAll() { return cookieStore.getAll(); },
+          getAll() {
+            return cookieStore.getAll();
+          },
           setAll(cookiesToSet) {
             try {
               cookiesToSet.forEach(({ name, value, options }) =>
                 cookieStore.set(name, value, options)
               );
-            } catch { /* Server component */ }
+            } catch {
+              /* Server component */
+            }
           },
         },
       }
     );
 
-    const { data: { session } } = await supabase.auth.getSession();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
 
     if (!session) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
@@ -55,7 +61,11 @@ export async function GET(_request: NextRequest) {
     const providerToken = session.provider_token;
 
     // Check cache
-    if (postsCache && postsCache.userId === xUserId && Date.now() - postsCache.timestamp < CACHE_TTL) {
+    if (
+      postsCache &&
+      postsCache.userId === xUserId &&
+      Date.now() - postsCache.timestamp < CACHE_TTL
+    ) {
       return NextResponse.json({ posts: postsCache.data });
     }
 
@@ -99,7 +109,11 @@ export async function GET(_request: NextRequest) {
       text: tweet.text,
       created_at: tweet.created_at,
       public_metrics: tweet.public_metrics || {
-        retweet_count: 0, reply_count: 0, like_count: 0, quote_count: 0, impression_count: 0,
+        retweet_count: 0,
+        reply_count: 0,
+        like_count: 0,
+        quote_count: 0,
+        impression_count: 0,
       },
       entities: tweet.entities || {},
     }));

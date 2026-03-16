@@ -26,21 +26,21 @@ export default function BrandReviewGrid({
     if (brand.tone?.energy) initial['tone.energy'] = true;
     if (brand.tone?.confidence) initial['tone.confidence'] = true;
     if (brand.tone?.style) initial['tone.style'] = true;
-    brand.keywords?.forEach((_, i) => initial[`keywords.${i}`] = true);
-    brand.doPatterns?.forEach((_, i) => initial[`doPatterns.${i}`] = true);
-    brand.dontPatterns?.forEach((_, i) => initial[`dontPatterns.${i}`] = true);
-    brand.voiceSamples?.forEach((_, i) => initial[`voiceSamples.${i}`] = true);
+    brand.keywords?.forEach((_, i) => (initial[`keywords.${i}`] = true));
+    brand.doPatterns?.forEach((_, i) => (initial[`doPatterns.${i}`] = true));
+    brand.dontPatterns?.forEach((_, i) => (initial[`dontPatterns.${i}`] = true));
+    brand.voiceSamples?.forEach((_, i) => (initial[`voiceSamples.${i}`] = true));
     return initial;
   });
 
   const toggleElement = (key: string) => {
-    setIncludedElements(prev => ({ ...prev, [key]: !prev[key] }));
+    setIncludedElements((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
   const toggleAll = (keys: string[], value: boolean) => {
-    setIncludedElements(prev => {
+    setIncludedElements((prev) => {
       const updated = { ...prev };
-      keys.forEach(k => updated[k] = value);
+      keys.forEach((k) => (updated[k] = value));
       return updated;
     });
   };
@@ -81,11 +81,16 @@ export default function BrandReviewGrid({
             className="flex items-center gap-2 text-muted hover:text-foreground transition-colors"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
             </svg>
             Back
           </button>
-          
+
           <div className="text-sm text-muted">
             {includedCount} of {totalCount} elements selected
           </div>
@@ -103,7 +108,7 @@ export default function BrandReviewGrid({
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-medium uppercase tracking-widest text-muted">Identity</h3>
             </div>
-            
+
             {/* Name */}
             {brand.name && (
               <GridItem
@@ -115,7 +120,7 @@ export default function BrandReviewGrid({
                 <span className="text-xl font-light">{brand.name.value}</span>
               </GridItem>
             )}
-            
+
             {/* Colors */}
             <div className="mt-4 space-y-3">
               {brand.colors?.primary && (
@@ -126,7 +131,10 @@ export default function BrandReviewGrid({
                   confidence={brand.colors.primary.confidence}
                 >
                   <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded" style={{ backgroundColor: brand.colors.primary.value }} />
+                    <div
+                      className="w-8 h-8 rounded"
+                      style={{ backgroundColor: brand.colors.primary.value }}
+                    />
                     <span className="font-mono text-sm">{brand.colors.primary.value}</span>
                   </div>
                 </GridItem>
@@ -139,7 +147,10 @@ export default function BrandReviewGrid({
                   confidence={brand.colors.secondary.confidence}
                 >
                   <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded" style={{ backgroundColor: brand.colors.secondary.value }} />
+                    <div
+                      className="w-8 h-8 rounded"
+                      style={{ backgroundColor: brand.colors.secondary.value }}
+                    />
                     <span className="font-mono text-sm">{brand.colors.secondary.value}</span>
                   </div>
                 </GridItem>
@@ -152,7 +163,10 @@ export default function BrandReviewGrid({
                   confidence={brand.colors.accent.confidence}
                 >
                   <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded" style={{ backgroundColor: brand.colors.accent.value }} />
+                    <div
+                      className="w-8 h-8 rounded"
+                      style={{ backgroundColor: brand.colors.accent.value }}
+                    />
                     <span className="font-mono text-sm">{brand.colors.accent.value}</span>
                   </div>
                 </GridItem>
@@ -166,8 +180,13 @@ export default function BrandReviewGrid({
               <h3 className="text-sm font-medium uppercase tracking-widest text-muted">Tone</h3>
               <button
                 onClick={() => {
-                  const toneKeys = ['tone.formality', 'tone.energy', 'tone.confidence', 'tone.style'].filter(k => brand.tone?.[k.split('.')[1] as keyof typeof brand.tone]);
-                  const allSelected = toneKeys.every(k => includedElements[k]);
+                  const toneKeys = [
+                    'tone.formality',
+                    'tone.energy',
+                    'tone.confidence',
+                    'tone.style',
+                  ].filter((k) => brand.tone?.[k.split('.')[1] as keyof typeof brand.tone]);
+                  const allSelected = toneKeys.every((k) => includedElements[k]);
                   toggleAll(toneKeys, !allSelected);
                 }}
                 className="text-xs text-muted hover:text-foreground"
@@ -175,7 +194,7 @@ export default function BrandReviewGrid({
                 Toggle all
               </button>
             </div>
-            
+
             <div className="space-y-3">
               {brand.tone?.formality && (
                 <GridItem
@@ -184,7 +203,11 @@ export default function BrandReviewGrid({
                   onToggle={() => toggleElement('tone.formality')}
                   confidence={brand.tone.formality.confidence}
                 >
-                  <ToneBar value={brand.tone.formality.value} leftLabel="Casual" rightLabel="Formal" />
+                  <ToneBar
+                    value={brand.tone.formality.value}
+                    leftLabel="Casual"
+                    rightLabel="Formal"
+                  />
                 </GridItem>
               )}
               {brand.tone?.energy && (
@@ -194,7 +217,11 @@ export default function BrandReviewGrid({
                   onToggle={() => toggleElement('tone.energy')}
                   confidence={brand.tone.energy.confidence}
                 >
-                  <ToneBar value={brand.tone.energy.value} leftLabel="Reserved" rightLabel="Energetic" />
+                  <ToneBar
+                    value={brand.tone.energy.value}
+                    leftLabel="Reserved"
+                    rightLabel="Energetic"
+                  />
                 </GridItem>
               )}
               {brand.tone?.confidence && (
@@ -204,7 +231,11 @@ export default function BrandReviewGrid({
                   onToggle={() => toggleElement('tone.confidence')}
                   confidence={brand.tone.confidence.confidence}
                 >
-                  <ToneBar value={brand.tone.confidence.value} leftLabel="Humble" rightLabel="Bold" />
+                  <ToneBar
+                    value={brand.tone.confidence.value}
+                    leftLabel="Humble"
+                    rightLabel="Bold"
+                  />
                 </GridItem>
               )}
               {brand.tone?.style && (
@@ -214,7 +245,11 @@ export default function BrandReviewGrid({
                   onToggle={() => toggleElement('tone.style')}
                   confidence={brand.tone.style.confidence}
                 >
-                  <ToneBar value={brand.tone.style.value} leftLabel="Classic" rightLabel="Experimental" />
+                  <ToneBar
+                    value={brand.tone.style.value}
+                    leftLabel="Classic"
+                    rightLabel="Experimental"
+                  />
                 </GridItem>
               )}
             </div>
@@ -228,7 +263,7 @@ export default function BrandReviewGrid({
                 <button
                   onClick={() => {
                     const keys = brand.keywords!.map((_, i) => `keywords.${i}`);
-                    const allSelected = keys.every(k => includedElements[k]);
+                    const allSelected = keys.every((k) => includedElements[k]);
                     toggleAll(keys, !allSelected);
                   }}
                   className="text-xs text-muted hover:text-foreground"
@@ -237,7 +272,7 @@ export default function BrandReviewGrid({
                 </button>
               )}
             </div>
-            
+
             {brand.keywords && brand.keywords.length > 0 ? (
               <div className="flex flex-wrap gap-2">
                 {brand.keywords.map((keyword, i) => (
@@ -261,8 +296,10 @@ export default function BrandReviewGrid({
 
           {/* Patterns */}
           <div className="bg-surface rounded-xl p-6">
-            <h3 className="text-sm font-medium uppercase tracking-widest text-muted mb-4">Patterns</h3>
-            
+            <h3 className="text-sm font-medium uppercase tracking-widest text-muted mb-4">
+              Patterns
+            </h3>
+
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p className="text-xs text-green-500 mb-2 flex items-center gap-1">
@@ -286,7 +323,7 @@ export default function BrandReviewGrid({
                   <p className="text-xs text-muted">None</p>
                 )}
               </div>
-              
+
               <div>
                 <p className="text-xs text-red-500 mb-2 flex items-center gap-1">
                   <span>✗</span> Don&apos;t
@@ -315,12 +352,14 @@ export default function BrandReviewGrid({
           {/* Voice Samples */}
           <div className="col-span-2 bg-surface rounded-xl p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-medium uppercase tracking-widest text-muted">Voice Samples</h3>
+              <h3 className="text-sm font-medium uppercase tracking-widest text-muted">
+                Voice Samples
+              </h3>
               {brand.voiceSamples && brand.voiceSamples.length > 0 && (
                 <button
                   onClick={() => {
                     const keys = brand.voiceSamples!.map((_, i) => `voiceSamples.${i}`);
-                    const allSelected = keys.every(k => includedElements[k]);
+                    const allSelected = keys.every((k) => includedElements[k]);
                     toggleAll(keys, !allSelected);
                   }}
                   className="text-xs text-muted hover:text-foreground"
@@ -329,7 +368,7 @@ export default function BrandReviewGrid({
                 </button>
               )}
             </div>
-            
+
             {brand.voiceSamples && brand.voiceSamples.length > 0 ? (
               <div className="grid grid-cols-2 gap-3">
                 {brand.voiceSamples.map((sample, i) => (
@@ -382,7 +421,9 @@ interface GridItemProps {
 
 function GridItem({ label, included, onToggle, confidence, children }: GridItemProps) {
   return (
-    <div className={`flex items-center gap-3 p-3 rounded-lg transition-all ${included ? '' : 'opacity-40'}`}>
+    <div
+      className={`flex items-center gap-3 p-3 rounded-lg transition-all ${included ? '' : 'opacity-40'}`}
+    >
       <button
         onClick={onToggle}
         className={`w-4 h-4 rounded border flex-shrink-0 flex items-center justify-center transition-colors ${
@@ -390,7 +431,12 @@ function GridItem({ label, included, onToggle, confidence, children }: GridItemP
         }`}
       >
         {included && (
-          <svg className="w-2.5 h-2.5 text-background" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg
+            className="w-2.5 h-2.5 text-background"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
           </svg>
         )}
@@ -398,7 +444,9 @@ function GridItem({ label, included, onToggle, confidence, children }: GridItemP
       <div className="flex-1">
         <div className="flex items-center justify-between mb-1">
           <span className="text-xs text-muted">{label}</span>
-          <span className={`text-xs ${confidence >= 80 ? 'text-green-500' : confidence >= 60 ? 'text-yellow-500' : 'text-orange-500'}`}>
+          <span
+            className={`text-xs ${confidence >= 80 ? 'text-green-500' : confidence >= 60 ? 'text-yellow-500' : 'text-orange-500'}`}
+          >
             {confidence}%
           </span>
         </div>
@@ -408,7 +456,15 @@ function GridItem({ label, included, onToggle, confidence, children }: GridItemP
   );
 }
 
-function ToneBar({ value, leftLabel, rightLabel }: { value: number; leftLabel: string; rightLabel: string }) {
+function ToneBar({
+  value,
+  leftLabel,
+  rightLabel,
+}: {
+  value: number;
+  leftLabel: string;
+  rightLabel: string;
+}) {
   return (
     <div>
       <div className="h-2 bg-border rounded-full overflow-hidden">
@@ -422,19 +478,3 @@ function ToneBar({ value, leftLabel, rightLabel }: { value: number; leftLabel: s
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

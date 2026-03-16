@@ -94,9 +94,8 @@ export default function PillarsSection({ contentPillars }: PillarsSectionProps) 
         }}
       >
         {topPillars.map((pillar, index) => {
-          const percentage = totalFrequency > 0 
-            ? Math.round((pillar.frequency / totalFrequency) * 100) 
-            : 25;
+          const percentage =
+            totalFrequency > 0 ? Math.round((pillar.frequency / totalFrequency) * 100) : 25;
           const color = PILLAR_COLORS[index % PILLAR_COLORS.length];
 
           return (

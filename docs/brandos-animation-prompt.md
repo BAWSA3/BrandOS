@@ -8,12 +8,12 @@
 
 **Brandos (BrandOS)** is an AI-powered brand operating system that extracts, analyzes, and maintains a creator's unique brand DNA across all content.
 
-| Aspect | Details |
-|--------|---------|
-| **Concept** | "An OS for your brand's DNA" |
-| **Tagline** | "Your brand, everywhere it needs to be." |
-| **Core Loop** | Define → Check → Generate → Scale |
-| **Target Users** | Creators, Marketers, Agencies, Founders |
+| Aspect           | Details                                  |
+| ---------------- | ---------------------------------------- |
+| **Concept**      | "An OS for your brand's DNA"             |
+| **Tagline**      | "Your brand, everywhere it needs to be." |
+| **Core Loop**    | Define → Check → Generate → Scale        |
+| **Target Users** | Creators, Marketers, Agencies, Founders  |
 
 ---
 
@@ -23,12 +23,12 @@ The product experience is built around **four sequential phases**. Each phase ha
 
 ### Phase Breakdown
 
-| # | Phase | Color (Hex) | Icon Concept | Action |
-|---|-------|-------------|--------------|--------|
-| 1 | **DEFINE** | `#E8A838` (Golden Amber) | DNA helix extracting | Captures brand voice, keywords, tone |
-| 2 | **CHECK** | `#00ff88` (Neon Green) | Checkmark / Scanner | Scores content 0-100 against brand rules |
-| 3 | **GENERATE** | `#9d4edd` (Purple) | Sparkle / AI wand | Creates on-brand content with AI |
-| 4 | **SCALE** | `#ff6b35` (Orange) | Rocket / Growth chart | Expands reach while staying consistent |
+| #   | Phase        | Color (Hex)              | Icon Concept          | Action                                   |
+| --- | ------------ | ------------------------ | --------------------- | ---------------------------------------- |
+| 1   | **DEFINE**   | `#E8A838` (Golden Amber) | DNA helix extracting  | Captures brand voice, keywords, tone     |
+| 2   | **CHECK**    | `#00ff88` (Neon Green)   | Checkmark / Scanner   | Scores content 0-100 against brand rules |
+| 3   | **GENERATE** | `#9d4edd` (Purple)       | Sparkle / AI wand     | Creates on-brand content with AI         |
+| 4   | **SCALE**    | `#ff6b35` (Orange)       | Rocket / Growth chart | Expands reach while staying consistent   |
 
 ### Phase Animation Ideas
 
@@ -45,24 +45,24 @@ SCALE: Upward graph motion, network nodes expanding
 
 ### Color Palette
 
-| Usage | Color | Hex |
-|-------|-------|-----|
-| Background (Dark) | Near Black | `#050505` |
-| Background (Light) | Warm Cream | `#faf8f5` |
-| Primary Accent | Electric Blue | `#0047FF` |
-| Warm Accent | Amber/Sand | `#D4A574` |
-| Success | Emerald | `#10B981` |
-| Warning | Yellow | `#F59E0B` |
-| Error | Red | `#EF4444` |
+| Usage              | Color         | Hex       |
+| ------------------ | ------------- | --------- |
+| Background (Dark)  | Near Black    | `#050505` |
+| Background (Light) | Warm Cream    | `#faf8f5` |
+| Primary Accent     | Electric Blue | `#0047FF` |
+| Warm Accent        | Amber/Sand    | `#D4A574` |
+| Success            | Emerald       | `#10B981` |
+| Warning            | Yellow        | `#F59E0B` |
+| Error              | Red           | `#EF4444` |
 
 ### Typography Treatment
 
-| Element | Font | Style |
-|---------|------|-------|
-| "Brand" (Logo) | Helvetica Neue / Inter | Bold Italic, tight tracking (-0.06em) |
-| "OS" (Logo) | Press Start 2P / PP Mondwest | Pixelated bitmap font |
-| UI Labels | VCR OSD Mono | Monospace, uppercase, letter-spacing 0.1em |
-| Body Text | Helvetica Neue | Light weight, clean |
+| Element        | Font                         | Style                                      |
+| -------------- | ---------------------------- | ------------------------------------------ |
+| "Brand" (Logo) | Helvetica Neue / Inter       | Bold Italic, tight tracking (-0.06em)      |
+| "OS" (Logo)    | Press Start 2P / PP Mondwest | Pixelated bitmap font                      |
+| UI Labels      | VCR OSD Mono                 | Monospace, uppercase, letter-spacing 0.1em |
+| Body Text      | Helvetica Neue               | Light weight, clean                        |
 
 ### Signature Effects
 
@@ -81,6 +81,7 @@ SCALE: Upward graph motion, network nodes expanding
 **Current State**: Letter-by-letter animation with blur fade-in
 
 **Enhance With**:
+
 - "Brand" slides in from left with italic momentum
 - "OS" pixelates in from scattered blocks assembling
 - Subtle glow pulse after assembly
@@ -95,12 +96,14 @@ SCALE: Upward graph motion, network nodes expanding
 **Concept**: A rotating 3D DNA strand that represents the brand's genetic code
 
 **Animation Properties**:
+
 - Continuous slow rotation (8-10 seconds per revolution)
 - Colored rungs that light up sequentially during analysis
 - Particle effects floating around the strand
 - Depth-of-field blur for premium feel
 
 **Phase Colors on Rungs**:
+
 ```
 Top rungs: #E8A838 (Define)
 Upper-mid rungs: #00ff88 (Check)
@@ -113,6 +116,7 @@ Bottom rungs: #ff6b35 (Scale)
 ### 3. Input Experience
 
 **Elements to Animate**:
+
 - Input field: Subtle border glow on focus (blue → amber)
 - Placeholder text: Gentle cursor blink
 - Submit button: Magnetic hover effect (follows cursor slightly)
@@ -125,6 +129,7 @@ Bottom rungs: #ff6b35 (Scale)
 **Flow**: User enters username → 4 phases animate sequentially
 
 **Per Phase Animation**:
+
 1. Phase badge pulses and scales up
 2. Progress ring fills clockwise (0 to 100%)
 3. Analysis items check off one by one
@@ -132,6 +137,7 @@ Bottom rungs: #ff6b35 (Scale)
 5. Profile data values fade in with highlight
 
 **Transition Between Phases**:
+
 - Current phase slides out to left
 - New phase slides in from right
 - DNA strand rotates to next section
@@ -143,6 +149,7 @@ Bottom rungs: #ff6b35 (Scale)
 **The Moment**: After all phases complete, the final brand score appears
 
 **Animation Sequence**:
+
 1. Screen darkens slightly (focus effect)
 2. Circular gauge appears at center
 3. Score number counts up rapidly (0 → final score)
@@ -163,12 +170,14 @@ Bottom rungs: #ff6b35 (Scale)
 ### 6. Background Ambient Motion
 
 **Floating Orbs**:
+
 - 3-4 soft gradient orbs at different depths
 - Slow drift motion (parallax on scroll)
 - Colors: Blue, Amber, Purple (matching phase colors)
 - Blur: 40-60px for dreamy effect
 
 **Particle System** (optional):
+
 - Tiny dots floating upward
 - Very low opacity (10-20%)
 - Random horizontal drift
@@ -178,6 +187,7 @@ Bottom rungs: #ff6b35 (Scale)
 ## Motion Principles
 
 ### Spring Physics (Primary)
+
 ```
 damping: 15
 stiffness: 150
@@ -186,17 +196,18 @@ mass: 1
 
 ### Timing Guidelines
 
-| Animation Type | Duration | Easing |
-|----------------|----------|--------|
-| Micro-interactions | 150-300ms | ease-out |
-| Element reveals | 400-600ms | spring |
-| Page transitions | 500-800ms | ease-in-out |
-| Background ambient | 3-10s | linear (looping) |
-| Score counting | 1.5-2s | ease-out |
+| Animation Type     | Duration  | Easing           |
+| ------------------ | --------- | ---------------- |
+| Micro-interactions | 150-300ms | ease-out         |
+| Element reveals    | 400-600ms | spring           |
+| Page transitions   | 500-800ms | ease-in-out      |
+| Background ambient | 3-10s     | linear (looping) |
+| Score counting     | 1.5-2s    | ease-out         |
 
 ### Stagger Delays
 
 For sequential reveals:
+
 ```
 First item: 0ms
 Second item: 50-100ms
@@ -210,17 +221,18 @@ Third item: 100-200ms
 
 ### The Feel
 
-| Mood | How to Achieve |
-|------|----------------|
-| **Premium** | Slow, deliberate motion; generous white space; subtle effects |
-| **Technical** | Monospace fonts; grid alignments; data visualization |
-| **Modern** | Glass effects; spring physics; smooth gradients |
-| **Confident** | Bold color accents; strong typography; decisive animations |
-| **Playful** | Bouncy springs; confetti; magnetic interactions |
+| Mood          | How to Achieve                                                |
+| ------------- | ------------------------------------------------------------- |
+| **Premium**   | Slow, deliberate motion; generous white space; subtle effects |
+| **Technical** | Monospace fonts; grid alignments; data visualization          |
+| **Modern**    | Glass effects; spring physics; smooth gradients               |
+| **Confident** | Bold color accents; strong typography; decisive animations    |
+| **Playful**   | Bouncy springs; confetti; magnetic interactions               |
 
 ### Reference Keywords
+
 - Apple keynote transitions
-- Terminal/CLI aesthetics  
+- Terminal/CLI aesthetics
 - Biotech/DNA visualization
 - Luxury brand minimalism
 - Retro-futurism (CRT + modern)
@@ -230,7 +242,9 @@ Third item: 100-200ms
 ## Specific Animation Requests
 
 ### Priority 1: Hero Section
+
 Create an animated hero that reveals:
+
 1. "Brand" text with italic momentum
 2. "OS" assembling from pixels
 3. Tagline fading in below
@@ -238,14 +252,18 @@ Create an animated hero that reveals:
 5. CTA button with subtle pulse
 
 ### Priority 2: DNA Analysis Loop
+
 Create a looping animation showing:
+
 1. DNA strand rotating
 2. Rungs lighting up in phase colors
 3. Particles extracting from the strand
 4. Data points appearing around it
 
 ### Priority 3: Score Reveal
+
 Create a dramatic reveal:
+
 1. Circular gauge appearing
 2. Score counting up with spring bounce
 3. Color fill matching score tier
@@ -286,6 +304,7 @@ Create a dramatic reveal:
 Based on the existing `landing.png`, the current design features:
 
 ### Visual Layout
+
 ```
 ┌──────────────────────────────────────────────────────────┐
 │ [corner bracket]                         [theme toggle]  │
@@ -316,6 +335,7 @@ Based on the existing `landing.png`, the current design features:
 ```
 
 ### Key Elements to Preserve
+
 1. **Grid Pattern**: Subtle grid overlay creating depth
 2. **Blue Glow Gradient**: Soft radial glow at top center
 3. **Logo Split**: "Brand" (white) + "OS" (blue #0047FF)
@@ -336,13 +356,13 @@ Based on the existing `landing.png`, the current design features:
 
 ## Copy Reference
 
-| Location | Text |
-|----------|------|
-| Pre-headline | "BRAND DRIFT KILLS COMPANIES SLOWLY." |
+| Location     | Text                                                            |
+| ------------ | --------------------------------------------------------------- |
+| Pre-headline | "BRAND DRIFT KILLS COMPANIES SLOWLY."                           |
 | Main tagline | "Your brand is a promise — customers notice when you break it." |
-| Value prop | "One system. Zero Drift." |
-| CTA | "SEE HOW IT WORKS" |
+| Value prop   | "One system. Zero Drift."                                       |
+| CTA          | "SEE HOW IT WORKS"                                              |
 
 ---
 
-*This document should give Gemini full context to generate animations that feel native to the Brandos product experience.*
+_This document should give Gemini full context to generate animations that feel native to the Brandos product experience._

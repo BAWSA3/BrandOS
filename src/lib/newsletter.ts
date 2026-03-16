@@ -39,15 +39,13 @@ export async function addEmailSignup(
     const id = `signup_${randomUUID()}`;
 
     // Add new signup with explicit id and createdAt
-    const { error } = await supabase
-      .from('EmailSignup')
-      .insert({
-        id,
-        email: normalizedEmail,
-        source,
-        createdAt: new Date().toISOString(),
-        ...(xUsername ? { xUsername: xUsername.toLowerCase() } : {}),
-      });
+    const { error } = await supabase.from('EmailSignup').insert({
+      id,
+      email: normalizedEmail,
+      source,
+      createdAt: new Date().toISOString(),
+      ...(xUsername ? { xUsername: xUsername.toLowerCase() } : {}),
+    });
 
     if (error) {
       console.error('[Newsletter] Supabase error:', error);

@@ -1,33 +1,33 @@
-'use client'
+'use client';
 
-import { useState, useMemo } from 'react'
-import { Interview, ProfileType, TrackKey } from '../types'
-import { TRACK_META, getQuestionsForProfile } from '../lib/data'
-import { exportInterviewText } from '../lib/export'
-import { generateSummary } from '../lib/api'
-import TrackSection from './TrackSection'
-import SummaryView from './SummaryView'
+import { useState, useMemo } from 'react';
+import { Interview, ProfileType, TrackKey } from '../types';
+import { TRACK_META, getQuestionsForProfile } from '../lib/data';
+import { exportInterviewText } from '../lib/export';
+import { generateSummary } from '../lib/api';
+import TrackSection from './TrackSection';
+import SummaryView from './SummaryView';
 
 const colorMap = {
-  blue:  { bg: 'rgba(0,71,255,0.08)',    text: '#0047FF',  border: 'rgba(0,71,255,0.15)' },
-  green: { bg: 'rgba(16,185,129,0.08)',   text: '#10B981',  border: 'rgba(16,185,129,0.15)' },
-  amber: { bg: 'rgba(245,158,11,0.08)',   text: '#F59E0B',  border: 'rgba(245,158,11,0.15)' },
-  red:   { bg: 'rgba(239,68,68,0.08)',    text: '#EF4444',  border: 'rgba(239,68,68,0.15)' },
-}
+  blue: { bg: 'rgba(0,71,255,0.08)', text: '#0047FF', border: 'rgba(0,71,255,0.15)' },
+  green: { bg: 'rgba(16,185,129,0.08)', text: '#10B981', border: 'rgba(16,185,129,0.15)' },
+  amber: { bg: 'rgba(245,158,11,0.08)', text: '#F59E0B', border: 'rgba(245,158,11,0.15)' },
+  red: { bg: 'rgba(239,68,68,0.08)', text: '#EF4444', border: 'rgba(239,68,68,0.15)' },
+};
 
 const profileColor: Record<ProfileType, keyof typeof colorMap> = {
   intuitive: 'blue',
   grinder: 'amber',
   builder: 'green',
-}
+};
 
 interface Props {
-  iv: Interview
-  onBack: () => void
-  onUpdate: (iv: Interview) => void
-  onDelete: (id: string) => void
-  apiKey: string
-  onNeedKey: () => void
+  iv: Interview;
+  onBack: () => void;
+  onUpdate: (iv: Interview) => void;
+  onDelete: (id: string) => void;
+  apiKey: string;
+  onNeedKey: () => void;
 }
 
 export default function InterviewDetail({
@@ -38,47 +38,47 @@ export default function InterviewDetail({
   apiKey,
   onNeedKey,
 }: Props) {
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [confirmDelete, setConfirmDelete] = useState(false)
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
-  const pc = iv.profile ? colorMap[profileColor[iv.profile]] : null
-  const statusColor = iv.status === 'complete' ? colorMap.green : colorMap.amber
+  const pc = iv.profile ? colorMap[profileColor[iv.profile]] : null;
+  const statusColor = iv.status === 'complete' ? colorMap.green : colorMap.amber;
 
   const questions = useMemo(() => {
-    if (!iv.profile) return []
-    return getQuestionsForProfile(iv.profile)
-  }, [iv.profile])
+    if (!iv.profile) return [];
+    return getQuestionsForProfile(iv.profile);
+  }, [iv.profile]);
 
   const trackGroups = useMemo(() => {
-    const groups: Record<string, typeof questions> = {}
+    const groups: Record<string, typeof questions> = {};
     for (const q of questions) {
-      if (!groups[q.track]) groups[q.track] = []
-      groups[q.track].push(q)
+      if (!groups[q.track]) groups[q.track] = [];
+      groups[q.track].push(q);
     }
-    return groups
-  }, [questions])
+    return groups;
+  }, [questions]);
 
   const handleGenerate = async () => {
     if (!apiKey) {
-      onNeedKey()
-      return
+      onNeedKey();
+      return;
     }
-    setLoading(true)
-    setError(null)
+    setLoading(true);
+    setError(null);
     try {
-      const summary = await generateSummary(iv, apiKey)
-      onUpdate({ ...iv, summary })
+      const summary = await generateSummary(iv, apiKey);
+      onUpdate({ ...iv, summary });
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to generate summary')
+      setError(e instanceof Error ? e.message : 'Failed to generate summary');
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleExport = () => {
-    exportInterviewText(iv)
-  }
+    exportInterviewText(iv);
+  };
 
   const mono: React.CSSProperties = {
     fontFamily: "'VCR OSD Mono', monospace",
@@ -86,11 +86,11 @@ export default function InterviewDetail({
     fontWeight: 700,
     letterSpacing: '0.1em',
     textTransform: 'uppercase',
-  }
+  };
 
   const body: React.CSSProperties = {
     fontFamily: "'Helvetica Neue', 'Helvetica', sans-serif",
-  }
+  };
 
   return (
     <div>
@@ -122,7 +122,15 @@ export default function InterviewDetail({
           onMouseEnter={(e) => (e.currentTarget.style.color = 'rgba(0,0,0,0.65)')}
           onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(0,0,0,0.35)')}
         >
-          <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
+          <svg
+            width={16}
+            height={16}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+            strokeLinecap="round"
+          >
             <path d="M15 18l-6-6 6-6" />
           </svg>
         </button>
@@ -201,7 +209,15 @@ export default function InterviewDetail({
           onMouseEnter={(e) => (e.currentTarget.style.borderColor = 'rgba(0,0,0,0.25)')}
           onMouseLeave={(e) => (e.currentTarget.style.borderColor = 'rgba(0,0,0,0.15)')}
         >
-          <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
+          <svg
+            width={14}
+            height={14}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+            strokeLinecap="round"
+          >
             <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
           </svg>
           Download .txt
@@ -252,7 +268,13 @@ export default function InterviewDetail({
                 justifyContent: 'space-between',
               }}
             >
-              <span style={{ fontFamily: "'VCR OSD Mono', monospace", fontSize: 11, color: colorMap.red.text }}>
+              <span
+                style={{
+                  fontFamily: "'VCR OSD Mono', monospace",
+                  fontSize: 11,
+                  color: colorMap.red.text,
+                }}
+              >
                 {error}
               </span>
               <button
@@ -397,21 +419,19 @@ export default function InterviewDetail({
               transition: 'color 0.15s, border-color 0.15s',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.color = '#EF4444'
-              e.currentTarget.style.borderColor = 'rgba(239,68,68,0.25)'
+              e.currentTarget.style.color = '#EF4444';
+              e.currentTarget.style.borderColor = 'rgba(239,68,68,0.25)';
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.color = 'rgba(0,0,0,0.5)'
-              e.currentTarget.style.borderColor = 'rgba(0,0,0,0.15)'
+              e.currentTarget.style.color = 'rgba(0,0,0,0.5)';
+              e.currentTarget.style.borderColor = 'rgba(0,0,0,0.15)';
             }}
           >
             Delete Interview
           </button>
         ) : (
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span style={{ ...body, fontSize: 13, color: '#EF4444' }}>
-              Are you sure?
-            </span>
+            <span style={{ ...body, fontSize: 13, color: '#EF4444' }}>Are you sure?</span>
             <button
               onClick={() => onDelete(iv.id)}
               style={{
@@ -456,5 +476,5 @@ export default function InterviewDetail({
         }
       `}</style>
     </div>
-  )
+  );
 }

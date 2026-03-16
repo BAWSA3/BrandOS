@@ -10,7 +10,8 @@ export async function POST(request: Request) {
       );
     }
 
-    const { type, brandName, industry, values, tone, audience, customPrompt } = await request.json();
+    const { type, brandName, industry, values, tone, audience, customPrompt } =
+      await request.json();
 
     let prompt: string;
 
@@ -45,16 +46,12 @@ export async function POST(request: Request) {
       content: text,
       type,
     });
-
   } catch (error) {
     console.error('Gemini text generation error:', error);
-    
+
     if (error instanceof Error) {
       if (error.message.includes('API key')) {
-        return NextResponse.json(
-          { error: 'Invalid Gemini API key' },
-          { status: 401 }
-        );
+        return NextResponse.json({ error: 'Invalid Gemini API key' }, { status: 401 });
       }
       if (error.message.includes('quota')) {
         return NextResponse.json(
@@ -70,19 +67,3 @@ export async function POST(request: Request) {
     );
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

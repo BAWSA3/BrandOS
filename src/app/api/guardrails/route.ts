@@ -8,7 +8,7 @@ const anthropic = new Anthropic({
 
 export async function POST(request: NextRequest) {
   try {
-    const { brandDNA, draft, safeZones } = await request.json() as {
+    const { brandDNA, draft, safeZones } = (await request.json()) as {
       brandDNA: BrandDNA;
       draft: { id: string; content: string; contentType: string; creatorName?: string };
       safeZones?: SafeZone[];
@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
     }
 
     const safeZonesContext = safeZones?.length
-      ? `\nSAFE ZONES (must respect these):\n${safeZones.map(sz => `- ${sz.element} (${sz.status}): ${sz.rules.join(', ')}`).join('\n')}`
+      ? `\nSAFE ZONES (must respect these):\n${safeZones.map((sz) => `- ${sz.element} (${sz.status}): ${sz.rules.join(', ')}`).join('\n')}`
       : '';
 
     const message = await anthropic.messages.create({
@@ -71,13 +71,13 @@ Return ONLY valid JSON:
 
     const responseText = message.content[0].type === 'text' ? message.content[0].text : '';
     const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-    
+
     if (!jsonMatch) {
       throw new Error('Invalid response format');
     }
 
     const parsed = JSON.parse(jsonMatch[0]);
-    
+
     const result: GuardrailResult = {
       draftId: draft.id,
       alignmentScore: parsed.alignmentScore,
@@ -88,7 +88,6 @@ Return ONLY valid JSON:
     };
 
     return NextResponse.json(result);
-
   } catch (error: any) {
     console.error('Guardrails API error:', error);
     return NextResponse.json(
@@ -97,4 +96,3 @@ Return ONLY valid JSON:
     );
   }
 }
-

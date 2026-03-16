@@ -9,19 +9,13 @@ export async function POST(request: NextRequest) {
 
     // Validate email
     if (!email || typeof email !== 'string') {
-      return NextResponse.json(
-        { error: 'Email is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Email is required' }, { status: 400 });
     }
 
     // Basic email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      return NextResponse.json(
-        { error: 'Invalid email format' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid email format' }, { status: 400 });
     }
 
     // Add signup (continue even if already exists — we still want to send the email)
@@ -29,11 +23,13 @@ export async function POST(request: NextRequest) {
     const isExisting = !result.success;
 
     // Build segment indicators from signup data
-    const segmentIndicators: SegmentIndicators | undefined = segmentData ? {
-      role: segmentData.role || 'other',
-      companySize: segmentData.companySize || '1-10',
-      industry: segmentData.industry || 'other',
-    } : undefined;
+    const segmentIndicators: SegmentIndicators | undefined = segmentData
+      ? {
+          role: segmentData.role || 'other',
+          companySize: segmentData.companySize || '1-10',
+          industry: segmentData.industry || 'other',
+        }
+      : undefined;
 
     // Trigger welcome email sequence
     try {
@@ -86,9 +82,6 @@ export async function POST(request: NextRequest) {
     );
   } catch (error) {
     console.error('Signup error:', error instanceof Error ? error.message : error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

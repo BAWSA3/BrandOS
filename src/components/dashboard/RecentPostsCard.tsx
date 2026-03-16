@@ -28,9 +28,7 @@ function getMaxEngagement(posts: DashboardPost[]): number {
   return Math.max(
     ...posts.map(
       (p) =>
-        p.public_metrics.like_count +
-        p.public_metrics.retweet_count +
-        p.public_metrics.reply_count
+        p.public_metrics.like_count + p.public_metrics.retweet_count + p.public_metrics.reply_count
     ),
     1
   );
@@ -40,15 +38,28 @@ export default function RecentPostsCard({ posts, isLoading }: RecentPostsCardPro
   const maxEngagement = getMaxEngagement(posts);
 
   return (
-    <div style={{ background: 'var(--surface)', borderRadius: 16, padding: 24, border: '1px solid var(--border)', boxShadow: 'var(--shadow-card)' }}>
+    <div
+      style={{
+        background: 'var(--surface)',
+        borderRadius: 16,
+        padding: 24,
+        border: '1px solid var(--border)',
+        boxShadow: 'var(--shadow-card)',
+      }}
+    >
       <div className="flex items-center justify-between mb-4">
-        <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-secondary)', letterSpacing: '-0.01em' }}>
+        <h3
+          style={{
+            fontSize: 14,
+            fontWeight: 600,
+            color: 'var(--text-secondary)',
+            letterSpacing: '-0.01em',
+          }}
+        >
           Recent Posts
         </h3>
         {posts.length > 0 && (
-          <span style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>
-            {posts.length} posts
-          </span>
+          <span style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>{posts.length} posts</span>
         )}
       </div>
 
@@ -60,7 +71,14 @@ export default function RecentPostsCard({ posts, isLoading }: RecentPostsCardPro
           />
         </div>
       ) : posts.length === 0 ? (
-        <p style={{ fontSize: 14, color: 'var(--text-tertiary)', padding: '24px 0', textAlign: 'center' }}>
+        <p
+          style={{
+            fontSize: 14,
+            color: 'var(--text-tertiary)',
+            padding: '24px 0',
+            textAlign: 'center',
+          }}
+        >
           No recent posts found. Connect your X account or start creating content!
         </p>
       ) : (
@@ -147,7 +165,14 @@ export default function RecentPostsCard({ posts, isLoading }: RecentPostsCardPro
                       style={{ fontSize: 12, color: 'var(--text-secondary)' }}
                       title="Likes"
                     >
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <svg
+                        width="12"
+                        height="12"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
                         <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
                       </svg>
                       {formatNumber(post.public_metrics.like_count)}
@@ -157,7 +182,14 @@ export default function RecentPostsCard({ posts, isLoading }: RecentPostsCardPro
                       style={{ fontSize: 12, color: 'var(--text-secondary)' }}
                       title="Reposts"
                     >
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <svg
+                        width="12"
+                        height="12"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
                         <path d="M17 1l4 4-4 4" />
                         <path d="M3 11V9a4 4 0 014-4h14" />
                         <path d="M7 23l-4-4 4-4" />
@@ -170,7 +202,14 @@ export default function RecentPostsCard({ posts, isLoading }: RecentPostsCardPro
                       style={{ fontSize: 12, color: 'var(--text-secondary)' }}
                       title="Replies"
                     >
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <svg
+                        width="12"
+                        height="12"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
                         <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
                       </svg>
                       {formatNumber(post.public_metrics.reply_count)}
@@ -181,7 +220,14 @@ export default function RecentPostsCard({ posts, isLoading }: RecentPostsCardPro
                         style={{ fontSize: 12, color: 'var(--text-tertiary)' }}
                         title="Views"
                       >
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <svg
+                          width="12"
+                          height="12"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
                           <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
                           <circle cx="12" cy="12" r="3" />
                         </svg>

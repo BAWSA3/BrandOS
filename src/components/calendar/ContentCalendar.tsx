@@ -1,7 +1,14 @@
 'use client';
 
 import { useState, useMemo, useCallback } from 'react';
-import { DndContext, DragOverlay, DragStartEvent, DragEndEvent, DragOverEvent, pointerWithin } from '@dnd-kit/core';
+import {
+  DndContext,
+  DragOverlay,
+  DragStartEvent,
+  DragEndEvent,
+  DragOverEvent,
+  pointerWithin,
+} from '@dnd-kit/core';
 import { useCalendarDrafts, CalendarDraft } from '@/hooks/useCalendarDrafts';
 import CalendarDayColumn from './CalendarDayColumn';
 import CalendarBacklog from './CalendarBacklog';
@@ -27,9 +34,11 @@ function formatWeekRange(monday: Date): string {
 }
 
 function isSameDay(d1: Date, d2: Date): boolean {
-  return d1.getFullYear() === d2.getFullYear() &&
+  return (
+    d1.getFullYear() === d2.getFullYear() &&
     d1.getMonth() === d2.getMonth() &&
-    d1.getDate() === d2.getDate();
+    d1.getDate() === d2.getDate()
+  );
 }
 
 export default function ContentCalendar() {
@@ -57,10 +66,10 @@ export default function ContentCalendar() {
   // Group drafts by day
   const draftsByDay = useMemo(() => {
     const map: Record<string, CalendarDraft[]> = {};
-    weekDays.forEach(d => {
+    weekDays.forEach((d) => {
       map[d.toISOString().split('T')[0]] = [];
     });
-    drafts.forEach(d => {
+    drafts.forEach((d) => {
       if (d.scheduledFor) {
         const key = d.scheduledFor.split('T')[0];
         if (map[key]) map[key].push(d);
@@ -72,7 +81,7 @@ export default function ContentCalendar() {
   // Cadence indicators
   const dayStats = useMemo(() => {
     const stats: Record<string, { overloaded: boolean; gap: boolean }> = {};
-    const dayKeys = weekDays.map(d => d.toISOString().split('T')[0]);
+    const dayKeys = weekDays.map((d) => d.toISOString().split('T')[0]);
 
     dayKeys.forEach((key, i) => {
       const count = draftsByDay[key]?.length || 0;
@@ -81,8 +90,8 @@ export default function ContentCalendar() {
       // Gap = 0 drafts and neighbors also 0 (consecutive empty days)
       let isGap = false;
       if (count === 0) {
-        const prevCount = i > 0 ? (draftsByDay[dayKeys[i - 1]]?.length || 0) : 1;
-        const nextCount = i < dayKeys.length - 1 ? (draftsByDay[dayKeys[i + 1]]?.length || 0) : 1;
+        const prevCount = i > 0 ? draftsByDay[dayKeys[i - 1]]?.length || 0 : 1;
+        const nextCount = i < dayKeys.length - 1 ? draftsByDay[dayKeys[i + 1]]?.length || 0 : 1;
         isGap = prevCount === 0 || nextCount === 0;
       }
 
@@ -97,54 +106,63 @@ export default function ContentCalendar() {
     setActiveDraft(draft);
   }, []);
 
-  const handleDragEnd = useCallback(async (event: DragEndEvent) => {
-    setActiveDraft(null);
-    setOverDropId(null);
+  const handleDragEnd = useCallback(
+    async (event: DragEndEvent) => {
+      setActiveDraft(null);
+      setOverDropId(null);
 
-    const { active, over } = event;
-    if (!over) return;
+      const { active, over } = event;
+      if (!over) return;
 
-    const draft = active.data.current?.draft as CalendarDraft;
-    if (!draft) return;
+      const draft = active.data.current?.draft as CalendarDraft;
+      if (!draft) return;
 
-    const overId = over.id as string;
+      const overId = over.id as string;
 
-    if (overId === 'backlog') {
-      // Unschedule
-      await updateDraft(draft.id, { scheduledFor: null });
-    } else if (overId.startsWith('day-')) {
-      const dateStr = overId.replace('day-', '');
-      // Schedule to that day (noon UTC to avoid timezone issues)
-      await updateDraft(draft.id, { scheduledFor: `${dateStr}T12:00:00.000Z` });
-    }
-  }, [updateDraft]);
+      if (overId === 'backlog') {
+        // Unschedule
+        await updateDraft(draft.id, { scheduledFor: null });
+      } else if (overId.startsWith('day-')) {
+        const dateStr = overId.replace('day-', '');
+        // Schedule to that day (noon UTC to avoid timezone issues)
+        await updateDraft(draft.id, { scheduledFor: `${dateStr}T12:00:00.000Z` });
+      }
+    },
+    [updateDraft]
+  );
 
   const handleDragOver = useCallback((event: DragOverEvent) => {
     setOverDropId(event.over?.id != null ? String(event.over.id) : null);
   }, []);
 
-  const handleStatusChange = useCallback(async (id: string, status: string) => {
-    await updateDraft(id, { status });
-  }, [updateDraft]);
+  const handleStatusChange = useCallback(
+    async (id: string, status: string) => {
+      await updateDraft(id, { status });
+    },
+    [updateDraft]
+  );
 
   const handleAddDraft = useCallback((date: string) => {
     setNewDraftDate(date);
     setShowNewDraft(true);
   }, []);
 
-  const handleCreateDraft = useCallback(async (data: {
-    content: string;
-    contentType: string;
-    tone: string;
-    scheduledFor: string | null;
-    status: string;
-  }) => {
-    await createDraft({
-      ...data,
-      scheduledFor: data.scheduledFor ? `${data.scheduledFor}T12:00:00.000Z` : null,
-      sourceType: 'manual',
-    });
-  }, [createDraft]);
+  const handleCreateDraft = useCallback(
+    async (data: {
+      content: string;
+      contentType: string;
+      tone: string;
+      scheduledFor: string | null;
+      status: string;
+    }) => {
+      await createDraft({
+        ...data,
+        scheduledFor: data.scheduledFor ? `${data.scheduledFor}T12:00:00.000Z` : null,
+        sourceType: 'manual',
+      });
+    },
+    [createDraft]
+  );
 
   const handleRepurpose = useCallback((draft: CalendarDraft) => {
     setRepurposeSource(draft);
@@ -152,11 +170,11 @@ export default function ContentCalendar() {
 
   // Cadence summary
   const cadenceSummary = useMemo(() => {
-    const scheduled = drafts.filter(d => d.status === 'scheduled').length;
-    const draftCount = drafts.filter(d => d.status === 'draft').length;
-    const ideaCount = [...drafts, ...backlog].filter(d => d.status === 'idea').length;
-    const gapDays = Object.values(dayStats).filter(s => s.gap).length;
-    const overloadedDays = Object.values(dayStats).filter(s => s.overloaded).length;
+    const scheduled = drafts.filter((d) => d.status === 'scheduled').length;
+    const draftCount = drafts.filter((d) => d.status === 'draft').length;
+    const ideaCount = [...drafts, ...backlog].filter((d) => d.status === 'idea').length;
+    const gapDays = Object.values(dayStats).filter((s) => s.gap).length;
+    const overloadedDays = Object.values(dayStats).filter((s) => s.overloaded).length;
 
     let indicator = 'On track';
     let indicatorColor = '#30D158';
@@ -177,7 +195,15 @@ export default function ContentCalendar() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 style={{ fontSize: 28, fontWeight: 600, color: 'var(--text-primary)', letterSpacing: '-0.02em', marginBottom: 4 }}>
+          <h2
+            style={{
+              fontSize: 28,
+              fontWeight: 600,
+              color: 'var(--text-primary)',
+              letterSpacing: '-0.02em',
+              marginBottom: 4,
+            }}
+          >
             Content Calendar
           </h2>
           <p style={{ fontSize: 14, color: 'var(--text-secondary)' }}>
@@ -185,7 +211,10 @@ export default function ContentCalendar() {
           </p>
         </div>
         <button
-          onClick={() => { setNewDraftDate(null); setShowNewDraft(true); }}
+          onClick={() => {
+            setNewDraftDate(null);
+            setShowNewDraft(true);
+          }}
           style={{
             fontSize: 13,
             fontWeight: 500,
@@ -200,8 +229,16 @@ export default function ContentCalendar() {
             gap: 6,
           }}
         >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
           </svg>
           New Draft
         </button>
@@ -222,17 +259,23 @@ export default function ContentCalendar() {
           gap: 8,
         }}
       >
-        <div className="flex items-center gap-4" style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
+        <div
+          className="flex items-center gap-4"
+          style={{ fontSize: 13, color: 'var(--text-secondary)' }}
+        >
           <span>
-            <strong style={{ color: 'var(--text-primary)' }}>{cadenceSummary.scheduled}</strong> scheduled
+            <strong style={{ color: 'var(--text-primary)' }}>{cadenceSummary.scheduled}</strong>{' '}
+            scheduled
           </span>
           <span style={{ opacity: 0.3 }}>|</span>
           <span>
-            <strong style={{ color: 'var(--text-primary)' }}>{cadenceSummary.draftCount}</strong> drafts
+            <strong style={{ color: 'var(--text-primary)' }}>{cadenceSummary.draftCount}</strong>{' '}
+            drafts
           </span>
           <span style={{ opacity: 0.3 }}>|</span>
           <span>
-            <strong style={{ color: 'var(--text-primary)' }}>{cadenceSummary.ideaCount}</strong> ideas
+            <strong style={{ color: 'var(--text-primary)' }}>{cadenceSummary.ideaCount}</strong>{' '}
+            ideas
           </span>
         </div>
         <span style={{ fontSize: 12, fontWeight: 500, color: cadenceSummary.indicatorColor }}>
@@ -257,7 +300,14 @@ export default function ContentCalendar() {
             gap: 4,
           }}
         >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
             <polyline points="15 18 9 12 15 6" />
           </svg>
           Prev
@@ -281,7 +331,14 @@ export default function ContentCalendar() {
           }}
         >
           Next
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
             <polyline points="9 18 15 12 9 6" />
           </svg>
         </button>
@@ -289,9 +346,7 @@ export default function ContentCalendar() {
 
       {/* Error */}
       {error && (
-        <p style={{ fontSize: 13, color: 'var(--error, #ff3b30)', marginBottom: 12 }}>
-          {error}
-        </p>
+        <p style={{ fontSize: 13, color: 'var(--error, #ff3b30)', marginBottom: 12 }}>{error}</p>
       )}
 
       {/* Loading */}
@@ -316,7 +371,9 @@ export default function ContentCalendar() {
               onStatusChange={handleStatusChange}
               onRepurpose={handleRepurpose}
               onDelete={deleteDraft}
-              onEdit={(draft) => { setRepurposeSource(null); /* TODO: edit modal */ }}
+              onEdit={(draft) => {
+                setRepurposeSource(null); /* TODO: edit modal */
+              }}
               isOver={overDropId === 'backlog'}
             />
 
@@ -335,7 +392,9 @@ export default function ContentCalendar() {
                     onStatusChange={handleStatusChange}
                     onRepurpose={handleRepurpose}
                     onDelete={deleteDraft}
-                    onEdit={(draft) => { /* TODO: edit modal */ }}
+                    onEdit={(draft) => {
+                      /* TODO: edit modal */
+                    }}
                     isOverloaded={stats.overloaded}
                     isGap={stats.gap}
                     isOver={overDropId === `day-${dateStr}`}

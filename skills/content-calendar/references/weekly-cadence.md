@@ -3,42 +3,50 @@
 ## The 2x/Day System
 
 Every day has exactly 2 slots:
+
 - **Post 1 (Anchor)** — AM or early PM. High-effort. Growth driver.
 - **Post 2 (Lighter)** — PM or evening. Conversational. Algorithm fuel.
 
 ## Weekly Map
 
 ### Monday — Framework Day
+
 - P1: Framework / system reveal (Save This)
 - P2: Conversational question or Monday morning prompt (Reply)
 - Vibe: start the week with value
 
 ### Tuesday — Thread Day
+
 - P1: 5-7 tweet thread deep dive (RT + Follow)
 - P2: Observation repurposed from thread OR quote RT bait (Quote RT)
 - Vibe: demonstrate expertise at depth
 
 ### Wednesday — Hot Take Day
+
 - P1: Polarizing opinion or contrarian take (Agree/Disagree)
 - P2: Personal insight or value offer reply trigger (Reply / Reply Trigger)
 - Vibe: drive conversation and replies
 
 ### Thursday — Build Day
+
 - P1: Behind-the-scenes or build log (Reply With Yours)
 - P2: Quick data insight or tip (Save This)
 - Vibe: show the work
 
 ### Friday — Data / Thread Day
+
 - P1: Data post or second thread of the week (Tag Someone)
 - P2: Friday shipping update or energy post (Reply)
 - Vibe: end the work week strong
 
 ### Saturday — Community Day
+
 - P1: Community engagement post (Drop Handle)
 - P2: Weekend personal or shareable insight (RT + Follow)
 - Vibe: be human, build connections
 
 ### Sunday — Reflection Day
+
 - P1: Reflection or big-picture thinking (Quote RT)
 - P2: Week recap (Follow / RT + Follow)
 - Vibe: close the loop, tease next week
@@ -55,6 +63,7 @@ Every day has exactly 2 slots:
 ## Content Theme Rotation
 
 Cycle through these 6 themes each week:
+
 1. Building systems > random posting
 2. Data-driven decisions
 3. Vibe coding + BrandOS journey

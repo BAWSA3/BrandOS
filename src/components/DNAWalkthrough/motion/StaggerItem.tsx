@@ -45,13 +45,10 @@ export function StaggerItem({
 }: StaggerItemProps) {
   // Check for reduced motion preference
   const prefersReducedMotion =
-    typeof window !== 'undefined' &&
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   const itemVariants: Variants = variants || {
-    hidden: prefersReducedMotion
-      ? { opacity: 0 }
-      : directionVariants[direction].hidden,
+    hidden: prefersReducedMotion ? { opacity: 0 } : directionVariants[direction].hidden,
     visible: {
       opacity: 1,
       y: 0,

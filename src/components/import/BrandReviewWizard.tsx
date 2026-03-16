@@ -42,50 +42,54 @@ export default function BrandReviewWizard({
     if (brand.tone?.energy) initial['tone.energy'] = true;
     if (brand.tone?.confidence) initial['tone.confidence'] = true;
     if (brand.tone?.style) initial['tone.style'] = true;
-    brand.keywords?.forEach((_, i) => initial[`keywords.${i}`] = true);
-    brand.doPatterns?.forEach((_, i) => initial[`doPatterns.${i}`] = true);
-    brand.dontPatterns?.forEach((_, i) => initial[`dontPatterns.${i}`] = true);
-    brand.voiceSamples?.forEach((_, i) => initial[`voiceSamples.${i}`] = true);
+    brand.keywords?.forEach((_, i) => (initial[`keywords.${i}`] = true));
+    brand.doPatterns?.forEach((_, i) => (initial[`doPatterns.${i}`] = true));
+    brand.dontPatterns?.forEach((_, i) => (initial[`dontPatterns.${i}`] = true));
+    brand.voiceSamples?.forEach((_, i) => (initial[`voiceSamples.${i}`] = true));
     return initial;
   });
 
   const toggleElement = (key: string) => {
-    setIncludedElements(prev => ({ ...prev, [key]: !prev[key] }));
+    setIncludedElements((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
   const updateValue = <T,>(path: string, newValue: T) => {
-    setBrand(prev => {
+    setBrand((prev) => {
       const updated = { ...prev };
       const parts = path.split('.');
       let current: Record<string, unknown> = updated;
-      
+
       for (let i = 0; i < parts.length - 1; i++) {
         if (current[parts[i]] === undefined) {
           current[parts[i]] = {};
         }
         current = current[parts[i]] as Record<string, unknown>;
       }
-      
+
       const lastPart = parts[parts.length - 1];
-      if (current[lastPart] && typeof current[lastPart] === 'object' && 'value' in (current[lastPart] as Record<string, unknown>)) {
+      if (
+        current[lastPart] &&
+        typeof current[lastPart] === 'object' &&
+        'value' in (current[lastPart] as Record<string, unknown>)
+      ) {
         (current[lastPart] as ExtractedValue<T>).value = newValue;
       } else {
         current[lastPart] = newValue;
       }
-      
+
       return updated;
     });
   };
 
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
-      setCurrentStep(prev => prev + 1);
+      setCurrentStep((prev) => prev + 1);
     }
   };
 
   const handlePrev = () => {
     if (currentStep > 0) {
-      setCurrentStep(prev => prev - 1);
+      setCurrentStep((prev) => prev - 1);
     }
   };
 
@@ -125,23 +129,32 @@ export default function BrandReviewWizard({
             className="flex items-center gap-2 text-muted hover:text-foreground transition-colors"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
             </svg>
             Back
           </button>
-          
+
           {/* Progress */}
           <div className="flex items-center gap-2">
             {steps.map((s, i) => (
               <div
                 key={s.id}
                 className={`w-2 h-2 rounded-full transition-colors ${
-                  i === currentStep ? 'bg-foreground' : i < currentStep ? 'bg-foreground/50' : 'bg-border'
+                  i === currentStep
+                    ? 'bg-foreground'
+                    : i < currentStep
+                      ? 'bg-foreground/50'
+                      : 'bg-border'
                 }`}
               />
             ))}
           </div>
-          
+
           <span className="text-sm text-muted">
             {currentStep + 1} / {steps.length}
           </span>
@@ -154,7 +167,7 @@ export default function BrandReviewWizard({
             <div>
               <h2 className="text-3xl font-light tracking-tight mb-2">Brand Name</h2>
               <p className="text-muted mb-8">Confirm or edit your brand name</p>
-              
+
               {brand.name ? (
                 <ExtractedElement
                   label="Brand Name"
@@ -167,7 +180,9 @@ export default function BrandReviewWizard({
               ) : (
                 <div className="p-8 bg-surface rounded-xl text-center">
                   <p className="text-muted">No brand name detected</p>
-                  <p className="text-sm text-muted mt-1">You can add one manually in the Define phase</p>
+                  <p className="text-sm text-muted mt-1">
+                    You can add one manually in the Define phase
+                  </p>
                 </div>
               )}
             </div>
@@ -178,7 +193,7 @@ export default function BrandReviewWizard({
             <div>
               <h2 className="text-3xl font-light tracking-tight mb-2">Brand Colors</h2>
               <p className="text-muted mb-8">Review extracted colors from your brand assets</p>
-              
+
               <div className="space-y-4">
                 {brand.colors?.primary && (
                   <ExtractedElement
@@ -224,7 +239,7 @@ export default function BrandReviewWizard({
             <div>
               <h2 className="text-3xl font-light tracking-tight mb-2">Brand Tone</h2>
               <p className="text-muted mb-8">Review the detected tone profile</p>
-              
+
               <div className="space-y-4">
                 {brand.tone?.formality && (
                   <ExtractedElement
@@ -266,11 +281,14 @@ export default function BrandReviewWizard({
                     onEdit={(v) => updateValue('tone.style.value', v)}
                   />
                 )}
-                {!brand.tone?.formality && !brand.tone?.energy && !brand.tone?.confidence && !brand.tone?.style && (
-                  <div className="p-8 bg-surface rounded-xl text-center">
-                    <p className="text-muted">No tone data detected</p>
-                  </div>
-                )}
+                {!brand.tone?.formality &&
+                  !brand.tone?.energy &&
+                  !brand.tone?.confidence &&
+                  !brand.tone?.style && (
+                    <div className="p-8 bg-surface rounded-xl text-center">
+                      <p className="text-muted">No tone data detected</p>
+                    </div>
+                  )}
               </div>
             </div>
           )}
@@ -280,7 +298,7 @@ export default function BrandReviewWizard({
             <div>
               <h2 className="text-3xl font-light tracking-tight mb-2">Brand Keywords</h2>
               <p className="text-muted mb-8">Select the keywords that represent your brand</p>
-              
+
               {brand.keywords && brand.keywords.length > 0 ? (
                 <div className="space-y-2">
                   {brand.keywords.map((keyword, i) => (
@@ -308,7 +326,7 @@ export default function BrandReviewWizard({
             <div>
               <h2 className="text-3xl font-light tracking-tight mb-2">Brand Patterns</h2>
               <p className="text-muted mb-8">Review do&apos;s and don&apos;ts for your brand</p>
-              
+
               <div className="grid grid-cols-2 gap-6">
                 <div>
                   <h3 className="text-sm font-medium mb-3 flex items-center gap-2">
@@ -334,7 +352,7 @@ export default function BrandReviewWizard({
                     </div>
                   )}
                 </div>
-                
+
                 <div>
                   <h3 className="text-sm font-medium mb-3 flex items-center gap-2">
                     <span className="text-red-500">✗</span> Don&apos;t
@@ -368,32 +386,48 @@ export default function BrandReviewWizard({
             <div>
               <h2 className="text-3xl font-light tracking-tight mb-2">Voice Samples</h2>
               <p className="text-muted mb-8">Review examples of your brand voice</p>
-              
+
               {brand.voiceSamples && brand.voiceSamples.length > 0 ? (
                 <div className="space-y-3">
                   {brand.voiceSamples.map((sample, i) => (
                     <div
                       key={i}
                       className={`p-4 rounded-xl border transition-all ${
-                        includedElements[`voiceSamples.${i}`] ? 'border-foreground/20 bg-surface' : 'border-border opacity-50'
+                        includedElements[`voiceSamples.${i}`]
+                          ? 'border-foreground/20 bg-surface'
+                          : 'border-border opacity-50'
                       }`}
                     >
                       <div className="flex items-start gap-3">
                         <button
                           onClick={() => toggleElement(`voiceSamples.${i}`)}
                           className={`w-4 h-4 mt-1 rounded border flex-shrink-0 flex items-center justify-center transition-colors ${
-                            includedElements[`voiceSamples.${i}`] ? 'bg-foreground border-foreground' : 'border-muted'
+                            includedElements[`voiceSamples.${i}`]
+                              ? 'bg-foreground border-foreground'
+                              : 'border-muted'
                           }`}
                         >
                           {includedElements[`voiceSamples.${i}`] && (
-                            <svg className="w-2.5 h-2.5 text-background" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                            <svg
+                              className="w-2.5 h-2.5 text-background"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={3}
+                                d="M5 13l4 4L19 7"
+                              />
                             </svg>
                           )}
                         </button>
                         <div className="flex-1">
                           <p className="text-sm italic">&ldquo;{sample.value}&rdquo;</p>
-                          <p className="text-xs text-muted mt-2">{sample.confidence}% confidence · {sample.source}</p>
+                          <p className="text-xs text-muted mt-2">
+                            {sample.confidence}% confidence · {sample.source}
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -412,7 +446,7 @@ export default function BrandReviewWizard({
             <div>
               <h2 className="text-3xl font-light tracking-tight mb-2">Review Complete</h2>
               <p className="text-muted mb-8">Here&apos;s a summary of what will be imported</p>
-              
+
               <div className="p-6 bg-surface rounded-xl space-y-4">
                 {includedElements['name'] && brand.name && (
                   <div className="flex justify-between">
@@ -420,40 +454,65 @@ export default function BrandReviewWizard({
                     <span className="font-medium">{brand.name.value}</span>
                   </div>
                 )}
-                
+
                 <div className="flex justify-between">
                   <span className="text-muted">Colors</span>
                   <div className="flex gap-2">
                     {includedElements['colors.primary'] && brand.colors?.primary && (
-                      <div className="w-6 h-6 rounded" style={{ backgroundColor: brand.colors.primary.value }} />
+                      <div
+                        className="w-6 h-6 rounded"
+                        style={{ backgroundColor: brand.colors.primary.value }}
+                      />
                     )}
                     {includedElements['colors.secondary'] && brand.colors?.secondary && (
-                      <div className="w-6 h-6 rounded" style={{ backgroundColor: brand.colors.secondary.value }} />
+                      <div
+                        className="w-6 h-6 rounded"
+                        style={{ backgroundColor: brand.colors.secondary.value }}
+                      />
                     )}
                     {includedElements['colors.accent'] && brand.colors?.accent && (
-                      <div className="w-6 h-6 rounded" style={{ backgroundColor: brand.colors.accent.value }} />
+                      <div
+                        className="w-6 h-6 rounded"
+                        style={{ backgroundColor: brand.colors.accent.value }}
+                      />
                     )}
                   </div>
                 </div>
-                
+
                 <div className="flex justify-between">
                   <span className="text-muted">Keywords</span>
-                  <span>{brand.keywords?.filter((_, i) => includedElements[`keywords.${i}`]).length || 0} selected</span>
+                  <span>
+                    {brand.keywords?.filter((_, i) => includedElements[`keywords.${i}`]).length ||
+                      0}{' '}
+                    selected
+                  </span>
                 </div>
-                
+
                 <div className="flex justify-between">
                   <span className="text-muted">Do Patterns</span>
-                  <span>{brand.doPatterns?.filter((_, i) => includedElements[`doPatterns.${i}`]).length || 0} selected</span>
+                  <span>
+                    {brand.doPatterns?.filter((_, i) => includedElements[`doPatterns.${i}`])
+                      .length || 0}{' '}
+                    selected
+                  </span>
                 </div>
-                
+
                 <div className="flex justify-between">
                   <span className="text-muted">Don&apos;t Patterns</span>
-                  <span>{brand.dontPatterns?.filter((_, i) => includedElements[`dontPatterns.${i}`]).length || 0} selected</span>
+                  <span>
+                    {brand.dontPatterns?.filter((_, i) => includedElements[`dontPatterns.${i}`])
+                      .length || 0}{' '}
+                    selected
+                  </span>
                 </div>
-                
+
                 <div className="flex justify-between">
                   <span className="text-muted">Voice Samples</span>
-                  <span>{brand.voiceSamples?.filter((_, i) => includedElements[`voiceSamples.${i}`]).length || 0} selected</span>
+                  <span>
+                    {brand.voiceSamples?.filter((_, i) => includedElements[`voiceSamples.${i}`])
+                      .length || 0}{' '}
+                    selected
+                  </span>
                 </div>
               </div>
             </div>
@@ -468,7 +527,7 @@ export default function BrandReviewWizard({
           >
             {currentStep === 0 ? 'Cancel' : 'Previous'}
           </button>
-          
+
           {currentStep < steps.length - 1 ? (
             <button
               onClick={handleNext}
@@ -489,19 +548,3 @@ export default function BrandReviewWizard({
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

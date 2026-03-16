@@ -23,9 +23,24 @@ const typeIcons: Record<string, string> = {
 
 export default function AIInsightsPanel({ insights, isLoading }: AIInsightsPanelProps) {
   return (
-    <div style={{ background: 'var(--surface)', borderRadius: 16, padding: 24, border: '1px solid var(--border)', boxShadow: 'var(--shadow-card)' }}>
+    <div
+      style={{
+        background: 'var(--surface)',
+        borderRadius: 16,
+        padding: 24,
+        border: '1px solid var(--border)',
+        boxShadow: 'var(--shadow-card)',
+      }}
+    >
       <div className="flex items-center justify-between mb-4">
-        <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-secondary)', letterSpacing: '-0.01em' }}>
+        <h3
+          style={{
+            fontSize: 14,
+            fontWeight: 600,
+            color: 'var(--text-secondary)',
+            letterSpacing: '-0.01em',
+          }}
+        >
           AI Insights
         </h3>
         {insights.length > 0 && (

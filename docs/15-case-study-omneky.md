@@ -8,15 +8,15 @@
 
 ### Quick Facts
 
-| Attribute | Details |
-|-----------|---------|
-| **Company** | Omneky |
-| **Founded** | 2018 |
-| **Headquarters** | San Francisco, CA |
-| **Category** | AI Creative/Ad Platform |
-| **Stage** | Series A |
-| **Funding** | $10M+ |
-| **Website** | omneky.com |
+| Attribute        | Details                 |
+| ---------------- | ----------------------- |
+| **Company**      | Omneky                  |
+| **Founded**      | 2018                    |
+| **Headquarters** | San Francisco, CA       |
+| **Category**     | AI Creative/Ad Platform |
+| **Stage**        | Series A                |
+| **Funding**      | $10M+                   |
+| **Website**      | omneky.com              |
 
 ### Mission & Vision
 
@@ -25,6 +25,7 @@ Omneky's mission is to use AI to generate personalized creative content at scale
 ### Founding Story
 
 Founded by Hikari Senju, Omneky was born from the insight that:
+
 - Digital ad creative is the biggest performance lever
 - Manual creative production can't keep pace with testing needs
 - AI can analyze performance data to inform creative decisions
@@ -38,13 +39,13 @@ Founded by Hikari Senju, Omneky was born from the insight that:
 
 ### Core Features
 
-| Feature | Description | Maturity |
-|---------|-------------|----------|
-| **AI Creative Generation** | Generate ad variations at scale | Core |
-| **Performance Analytics** | Analyze creative performance | Core |
-| **Personalization Engine** | Audience-specific creative | Core |
-| **Asset Management** | Organize and version creatives | Supporting |
-| **Platform Integration** | Meta, Google, TikTok connections | Core |
+| Feature                    | Description                      | Maturity   |
+| -------------------------- | -------------------------------- | ---------- |
+| **AI Creative Generation** | Generate ad variations at scale  | Core       |
+| **Performance Analytics**  | Analyze creative performance     | Core       |
+| **Personalization Engine** | Audience-specific creative       | Core       |
+| **Asset Management**       | Organize and version creatives   | Supporting |
+| **Platform Integration**   | Meta, Google, TikTok connections | Core       |
 
 ### Feature Deep Dive
 
@@ -70,17 +71,20 @@ Founded by Hikari Senju, Omneky was born from the insight that:
 ```
 
 **Approach:**
+
 - Ingest brand assets and guidelines
 - Analyze historical ad performance
 - Generate creative variations
 - Optimize based on results
 
 **Strengths:**
+
 - Scale of generation is impressive
 - Performance-driven approach
 - Platform-native output
 
 **Limitations:**
+
 - Focused on paid ads, not organic content
 - Requires performance data to optimize
 - Less focus on brand consistency than performance
@@ -88,6 +92,7 @@ Founded by Hikari Senju, Omneky was born from the insight that:
 #### Performance Analytics
 
 Omneky closes the loop by:
+
 - Tracking ad performance by creative element
 - Identifying winning patterns
 - Feeding insights back into generation
@@ -98,23 +103,25 @@ Omneky closes the loop by:
 ### Target Users
 
 **Primary:**
+
 - Performance marketing teams
 - D2C brands with high ad spend
 - Agencies managing paid media
 - Growth teams at startups
 
 **Secondary:**
+
 - Enterprise marketing departments
 - Multi-brand retailers
 - App developers (UA campaigns)
 
 ### Pricing
 
-| Model | Details |
-|-------|---------|
-| **Ad spend-based** | Percentage of managed ad spend |
-| **Platform fee** | Base subscription + usage |
-| **Enterprise** | Custom pricing for large accounts |
+| Model              | Details                           |
+| ------------------ | --------------------------------- |
+| **Ad spend-based** | Percentage of managed ad spend    |
+| **Platform fee**   | Base subscription + usage         |
+| **Enterprise**     | Custom pricing for large accounts |
 
 **Analysis:** Pricing aligned with value (ad performance) rather than features. This model works well for performance marketing but may limit appeal to brand-focused use cases.
 
@@ -127,6 +134,7 @@ Omneky closes the loop by:
 > "AI-powered creative that performs"
 
 Omneky positions at the intersection of:
+
 - Creative production (agencies, design teams)
 - Performance marketing (ad platforms)
 - AI/automation (emerging technology)
@@ -134,12 +142,14 @@ Omneky positions at the intersection of:
 ### Go-to-Market Strategy
 
 **Primary channels:**
+
 - Direct sales to high-spend advertisers
 - Agency partnerships
 - Integration with ad platforms
 - Performance marketing content
 
 **Sales motion:**
+
 - ROI-focused pitch (better ad performance)
 - Pilot with portion of ad spend
 - Expand based on results
@@ -147,12 +157,12 @@ Omneky positions at the intersection of:
 
 ### Competitive Differentiation
 
-| vs. Competitor | Omneky Advantage |
-|----------------|-----------------|
-| vs. Creative agencies | Speed and scale |
-| vs. Canva | Performance optimization |
-| vs. Manual A/B testing | Volume of variations |
-| vs. Generic AI tools | Ad-specific optimization |
+| vs. Competitor         | Omneky Advantage         |
+| ---------------------- | ------------------------ |
+| vs. Creative agencies  | Speed and scale          |
+| vs. Canva              | Performance optimization |
+| vs. Manual A/B testing | Volume of variations     |
+| vs. Generic AI tools   | Ad-specific optimization |
 
 ---
 
@@ -160,21 +170,23 @@ Omneky positions at the intersection of:
 
 ### Growth Signals
 
-| Signal | Evidence | Implication |
-|--------|----------|-------------|
-| **Series A raised** | $10M+ from notable VCs | Market validation |
-| **Enterprise customers** | Fortune 500 logos | Product maturity |
-| **Team growth** | 30+ employees | Scaling operations |
-| **Ad spend managed** | Significant (undisclosed) | Revenue traction |
+| Signal                   | Evidence                  | Implication        |
+| ------------------------ | ------------------------- | ------------------ |
+| **Series A raised**      | $10M+ from notable VCs    | Market validation  |
+| **Enterprise customers** | Fortune 500 logos         | Product maturity   |
+| **Team growth**          | 30+ employees             | Scaling operations |
+| **Ad spend managed**     | Significant (undisclosed) | Revenue traction   |
 
 ### Customer Case Studies
 
 **D2C Brands:**
+
 - Generate 100s of ad variations weekly
 - Improve ROAS by 20-40%
 - Reduce creative production time by 80%
 
 **Agencies:**
+
 - Scale creative for multiple clients
 - Improve client retention with performance
 - Reduce designer workload on variations
@@ -192,21 +204,21 @@ Omneky positions at the intersection of:
 
 ### What to Emulate
 
-| Lesson | Application |
-|--------|-------------|
-| **Performance metrics** | Build brand consistency metrics |
-| **Platform integration** | Integrate with content destinations |
-| **Scale positioning** | Emphasize volume handling capability |
-| **ROI storytelling** | Quantify brand consistency value |
+| Lesson                   | Application                          |
+| ------------------------ | ------------------------------------ |
+| **Performance metrics**  | Build brand consistency metrics      |
+| **Platform integration** | Integrate with content destinations  |
+| **Scale positioning**    | Emphasize volume handling capability |
+| **ROI storytelling**     | Quantify brand consistency value     |
 
 ### What to Avoid
 
-| Anti-pattern | BrandOS Approach |
-|--------------|------------------|
+| Anti-pattern               | BrandOS Approach                 |
+| -------------------------- | -------------------------------- |
 | **Performance over brand** | Balance consistency with results |
-| **Ad-only focus** | All content types, not just ads |
-| **Complex pricing** | Simple, predictable subscription |
-| **Data dependency** | Work without historical data |
+| **Ad-only focus**          | All content types, not just ads  |
+| **Complex pricing**        | Simple, predictable subscription |
+| **Data dependency**        | Work without historical data     |
 
 ### Differentiation Opportunities
 
@@ -268,6 +280,7 @@ PERFORMANCE MARKETING                BRAND MARKETING
 ### Integration Opportunity
 
 Omneky and BrandOS could be complementary:
+
 - BrandOS defines brand guardrails
 - Omneky generates ad variations within guardrails
 - Result: Performance + consistency
@@ -283,6 +296,7 @@ Omneky and BrandOS could be complementary:
 **Likelihood:** Medium (natural expansion, but dilutes focus)
 
 **BrandOS Response:**
+
 - Emphasize brand-first vs. performance-first positioning
 - Build deeper brand DNA capabilities
 - Focus on checking, not just generation
@@ -293,6 +307,7 @@ Omneky and BrandOS could be complementary:
 **Likelihood:** Low (not core to their value prop)
 
 **BrandOS Response:**
+
 - Likely would be basic/add-on feature
 - Our depth in checking is defensible
 - Taste translation is unique moat
@@ -303,6 +318,7 @@ Omneky and BrandOS could be complementary:
 **Likelihood:** High (complementary positioning)
 
 **BrandOS Response:**
+
 - Could be partnership opportunity
 - Position as preferred brand layer
 - Ensure API is integration-ready
@@ -328,33 +344,16 @@ STRENGTHS                          WEAKNESSES
 
 Omneky validates AI creative generation at scale, but is narrowly focused on performance marketing. BrandOS occupies adjacent but distinct positioning:
 
-| Dimension | Omneky | BrandOS |
-|-----------|--------|---------|
-| Primary goal | Ad performance | Brand consistency |
-| Content types | Paid ads | All content |
-| Success metric | ROAS, conversions | Brand score, alignment |
-| Data requirement | Performance history | Brand DNA |
-| Decision driver | What converts | What's on-brand |
+| Dimension        | Omneky              | BrandOS                |
+| ---------------- | ------------------- | ---------------------- |
+| Primary goal     | Ad performance      | Brand consistency      |
+| Content types    | Paid ads            | All content            |
+| Success metric   | ROAS, conversions   | Brand score, alignment |
+| Data requirement | Performance history | Brand DNA              |
+| Decision driver  | What converts       | What's on-brand        |
 
 **Strategic recommendation:** Position BrandOS as the "brand consistency layer" that complements performance tools. Performance teams use Omneky for ads; brand teams use BrandOS for everything.
 
 ---
 
-*Next: [Case Study: Frontify →](16-case-study-frontify.md)*
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+_Next: [Case Study: Frontify →](16-case-study-frontify.md)_

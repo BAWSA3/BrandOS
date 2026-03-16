@@ -11,13 +11,13 @@ interface JourneyProgressProps {
 
 const phaseNames = ['DEFINE', 'CHECK', 'GENERATE', 'SCALE'];
 
-export default function JourneyProgress({ 
-  currentPhase, 
-  totalPhases, 
-  phaseProgress, 
-  theme 
+export default function JourneyProgress({
+  currentPhase,
+  totalPhases,
+  phaseProgress,
+  theme,
 }: JourneyProgressProps) {
-  const overallProgress = ((currentPhase - 1) + phaseProgress) / totalPhases;
+  const overallProgress = (currentPhase - 1 + phaseProgress) / totalPhases;
 
   return (
     <motion.div
@@ -54,7 +54,7 @@ export default function JourneyProgress({
           const phaseNumber = index + 1;
           const isActive = currentPhase === phaseNumber;
           const isCompleted = currentPhase > phaseNumber;
-          
+
           return (
             <motion.div
               key={name}
@@ -69,13 +69,13 @@ export default function JourneyProgress({
                 gap: '6px',
                 padding: '6px 12px',
                 borderRadius: '20px',
-                background: isActive 
-                  ? 'rgba(0, 71, 255, 0.15)' 
-                  : isCompleted 
-                    ? 'rgba(16, 185, 129, 0.15)' 
+                background: isActive
+                  ? 'rgba(0, 71, 255, 0.15)'
+                  : isCompleted
+                    ? 'rgba(16, 185, 129, 0.15)'
                     : 'transparent',
-                border: isActive 
-                  ? '1px solid rgba(0, 71, 255, 0.3)' 
+                border: isActive
+                  ? '1px solid rgba(0, 71, 255, 0.3)'
                   : isCompleted
                     ? '1px solid rgba(16, 185, 129, 0.3)'
                     : '1px solid transparent',
@@ -88,22 +88,26 @@ export default function JourneyProgress({
                   fontFamily: "'VCR OSD Mono', monospace",
                   fontSize: '10px',
                   fontWeight: 500,
-                  color: isActive 
-                    ? '#0047FF' 
-                    : isCompleted 
-                      ? '#10B981' 
-                      : theme === 'dark' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)',
+                  color: isActive
+                    ? '#0047FF'
+                    : isCompleted
+                      ? '#10B981'
+                      : theme === 'dark'
+                        ? 'rgba(255,255,255,0.4)'
+                        : 'rgba(0,0,0,0.4)',
                   width: '16px',
                   height: '16px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   borderRadius: '50%',
-                  background: isActive 
-                    ? 'rgba(0, 71, 255, 0.2)' 
-                    : isCompleted 
-                      ? 'rgba(16, 185, 129, 0.2)' 
-                      : theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+                  background: isActive
+                    ? 'rgba(0, 71, 255, 0.2)'
+                    : isCompleted
+                      ? 'rgba(16, 185, 129, 0.2)'
+                      : theme === 'dark'
+                        ? 'rgba(255,255,255,0.1)'
+                        : 'rgba(0,0,0,0.1)',
                 }}
               >
                 {isCompleted ? '✓' : phaseNumber}
@@ -168,11 +172,3 @@ export default function JourneyProgress({
     </motion.div>
   );
 }
-
-
-
-
-
-
-
-

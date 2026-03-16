@@ -51,7 +51,7 @@ function getToneLabel(tone: ToneData | undefined): string {
 function getHookType(tweetText: string): string {
   if (!tweetText) return 'Statement';
   const text = String(tweetText).toLowerCase();
-  if (text.startsWith('why') || text.includes('here\'s why')) return 'Curiosity Gap';
+  if (text.startsWith('why') || text.includes("here's why")) return 'Curiosity Gap';
   if (text.includes('hot take') || text.includes('unpopular opinion')) return 'Contrarian';
   if (text.match(/^\d+/) || text.includes('thread')) return 'List/Thread';
   if (text.includes('?')) return 'Question';
@@ -87,10 +87,18 @@ function identifyContentPillar(text: string, pillars: string[]): string {
   if (textLower.includes('build') || textLower.includes('ship') || textLower.includes('launch')) {
     return 'Building/Shipping';
   }
-  if (textLower.includes('think') || textLower.includes('believe') || textLower.includes('opinion')) {
+  if (
+    textLower.includes('think') ||
+    textLower.includes('believe') ||
+    textLower.includes('opinion')
+  ) {
     return 'Thought Leadership';
   }
-  if (textLower.includes('learn') || textLower.includes('lesson') || textLower.includes('mistake')) {
+  if (
+    textLower.includes('learn') ||
+    textLower.includes('lesson') ||
+    textLower.includes('mistake')
+  ) {
     return 'Lessons & Growth';
   }
   return 'General';
@@ -111,13 +119,17 @@ export function generateAnalysisData(
   const hookType = getHookType(tweet?.text || '');
   const viralityScore = getViralityScore(tweet?.public_metrics);
   const contentPillar = identifyContentPillar(tweet?.text || '', brandDNA?.contentPillars || []);
-  const consistencyScore = Math.min(95, (brandScore?.phases?.check?.score ?? 50) + Math.floor(Math.random() * 10));
+  const consistencyScore = Math.min(
+    95,
+    (brandScore?.phases?.check?.score ?? 50) + Math.floor(Math.random() * 10)
+  );
 
   return {
     define: {
       phase: 'define',
       title: 'Voice & Identity',
-      subtitle: 'How does this post express your brand voice? Let\'s identify the tone markers and identity signals.',
+      subtitle:
+        "How does this post express your brand voice? Let's identify the tone markers and identity signals.",
       parameters: [
         {
           id: 'tone',
@@ -125,12 +137,14 @@ export function generateAnalysisData(
           value: toneLabel,
           explanation: `This post uses a ${toneLabel.toLowerCase()} tone, which ${toneLabel === 'Bold' ? 'creates authority and demands attention' : toneLabel === 'Minimal' ? 'communicates efficiently without fluff' : toneLabel === 'Playful' ? 'builds connection through relatability' : 'keeps your voice versatile'}.`,
           status: 'positive',
-          details: tone ? [
-            `Minimal: ${tone.minimal ?? 0}%`,
-            `Playful: ${tone.playful ?? 0}%`,
-            `Bold: ${tone.bold ?? 0}%`,
-            `Experimental: ${tone.experimental ?? 0}%`,
-          ] : ['Tone data not available'],
+          details: tone
+            ? [
+                `Minimal: ${tone.minimal ?? 0}%`,
+                `Playful: ${tone.playful ?? 0}%`,
+                `Bold: ${tone.bold ?? 0}%`,
+                `Experimental: ${tone.experimental ?? 0}%`,
+              ]
+            : ['Tone data not available'],
         },
         {
           id: 'pillar',
@@ -138,7 +152,7 @@ export function generateAnalysisData(
           value: contentPillar,
           explanation: `This post falls under your "${contentPillar}" content pillar. Posts in this category typically perform ${(brandScore?.phases?.define?.score ?? 0) > 70 ? 'well' : 'averagely'} for your audience.`,
           status: (brandScore?.phases?.define?.score ?? 0) > 60 ? 'positive' : 'neutral',
-          details: brandDNA?.contentPillars?.slice(0, 3).map(p => `• ${p}`) || [],
+          details: brandDNA?.contentPillars?.slice(0, 3).map((p) => `• ${p}`) || [],
         },
         {
           id: 'archetype',
@@ -148,21 +162,25 @@ export function generateAnalysisData(
           status: 'positive',
         },
       ],
-      insight: brandScore?.phases?.define?.insights?.[0] || `Your ${toneLabel.toLowerCase()} tone in this post is consistent with your brand voice and resonates with your audience.`,
+      insight:
+        brandScore?.phases?.define?.insights?.[0] ||
+        `Your ${toneLabel.toLowerCase()} tone in this post is consistent with your brand voice and resonates with your audience.`,
       actionItem: `Keep using this ${toneLabel.toLowerCase()} approach when posting about ${String(contentPillar || 'this topic').toLowerCase()}.`,
     },
 
     check: {
       phase: 'check',
       title: 'Consistency Analysis',
-      subtitle: 'How well does this post match your established brand patterns? We\'ll compare it to your baseline.',
+      subtitle:
+        "How well does this post match your established brand patterns? We'll compare it to your baseline.",
       parameters: [
         {
           id: 'consistency',
           label: 'VOICE CONSISTENCY',
           value: consistencyScore,
-          explanation: `This post is ${consistencyScore}% consistent with your typical voice. ${consistencyScore > 85 ? 'Your audience would immediately recognize this as yours.' : 'There\'s some variation from your usual style, which can be good for experimentation.'}`,
-          status: consistencyScore > 80 ? 'positive' : consistencyScore > 60 ? 'neutral' : 'needs-work',
+          explanation: `This post is ${consistencyScore}% consistent with your typical voice. ${consistencyScore > 85 ? 'Your audience would immediately recognize this as yours.' : "There's some variation from your usual style, which can be good for experimentation."}`,
+          status:
+            consistencyScore > 80 ? 'positive' : consistencyScore > 60 ? 'neutral' : 'needs-work',
           details: [
             `Tone match: ${consistencyScore > 85 ? 'Strong' : 'Moderate'}`,
             `Topic alignment: ${contentPillar !== 'General' ? 'On-brand' : 'Exploratory'}`,
@@ -172,7 +190,12 @@ export function generateAnalysisData(
         {
           id: 'audience-fit',
           label: 'AUDIENCE ALIGNMENT',
-          value: (brandScore?.phases?.check?.score ?? 0) > 70 ? 'High' : (brandScore?.phases?.check?.score ?? 0) > 50 ? 'Medium' : 'Low',
+          value:
+            (brandScore?.phases?.check?.score ?? 0) > 70
+              ? 'High'
+              : (brandScore?.phases?.check?.score ?? 0) > 50
+                ? 'Medium'
+                : 'Low',
           explanation: `Based on engagement patterns, this post ${(brandScore?.phases?.check?.score ?? 0) > 70 ? 'strongly resonates' : 'moderately connects'} with your core audience.`,
           status: (brandScore?.phases?.check?.score ?? 0) > 70 ? 'positive' : 'neutral',
           details: [
@@ -186,17 +209,20 @@ export function generateAnalysisData(
           value: (brandScore?.phases?.check?.score ?? 0) > 60 ? 'Matches' : 'Deviates',
           explanation: `This post ${(brandScore?.phases?.check?.score ?? 0) > 60 ? 'follows' : 'breaks from'} your typical high-performing content patterns.`,
           status: (brandScore?.phases?.check?.score ?? 0) > 60 ? 'positive' : 'neutral',
-          details: brandDNA?.doPatterns?.slice(0, 2).map(p => `✓ ${p}`) || [],
+          details: brandDNA?.doPatterns?.slice(0, 2).map((p) => `✓ ${p}`) || [],
         },
       ],
-      insight: brandScore?.phases?.check?.insights?.[0] || `This post maintains strong brand consistency while still feeling fresh and engaging.`,
+      insight:
+        brandScore?.phases?.check?.insights?.[0] ||
+        `This post maintains strong brand consistency while still feeling fresh and engaging.`,
       actionItem: `${consistencyScore > 85 ? 'This is your signature style. Document this approach for future reference.' : 'Consider if this variation is intentional experimentation or drift from your brand.'}`,
     },
 
     generate: {
       phase: 'generate',
       title: 'Replicable Elements',
-      subtitle: 'What made this post work? Let\'s extract the template and patterns you can use again.',
+      subtitle:
+        "What made this post work? Let's extract the template and patterns you can use again.",
       parameters: [
         {
           id: 'hook',
@@ -214,7 +240,8 @@ export function generateAnalysisData(
           id: 'template',
           label: 'EXTRACTABLE TEMPLATE',
           value: 'Yes',
-          explanation: 'We\'ve identified a repeatable structure in this post that you can adapt for future content.',
+          explanation:
+            "We've identified a repeatable structure in this post that you can adapt for future content.",
           status: 'positive',
           details: [
             `Format: ${hookType} opener`,
@@ -225,20 +252,23 @@ export function generateAnalysisData(
         {
           id: 'keywords',
           label: 'POWER WORDS USED',
-          value: `${Math.min((brandDNA?.keywords || []).filter(k => (tweet?.text || '').toLowerCase().includes(k.toLowerCase())).length, 3)} found`,
+          value: `${Math.min((brandDNA?.keywords || []).filter((k) => (tweet?.text || '').toLowerCase().includes(k.toLowerCase())).length, 3)} found`,
           explanation: 'These are words that consistently appear in your high-performing content.',
           status: 'positive',
-          details: (brandDNA?.keywords || []).slice(0, 4).map(k => `• "${k}"`),
+          details: (brandDNA?.keywords || []).slice(0, 4).map((k) => `• "${k}"`),
         },
       ],
-      insight: brandScore?.phases?.generate?.insights?.[0] || `The ${hookType} format combined with your ${toneLabel.toLowerCase()} tone creates a repeatable formula for engagement.`,
+      insight:
+        brandScore?.phases?.generate?.insights?.[0] ||
+        `The ${hookType} format combined with your ${toneLabel.toLowerCase()} tone creates a repeatable formula for engagement.`,
       actionItem: `Save this as a template: "${hookType} + ${toneLabel} + ${contentPillar}" for future posts in this pillar.`,
     },
 
     scale: {
       phase: 'scale',
       title: 'Growth & Amplification',
-      subtitle: 'Why did this spread? Understanding the virality factors helps you amplify future content.',
+      subtitle:
+        'Why did this spread? Understanding the virality factors helps you amplify future content.',
       parameters: [
         {
           id: 'virality',
@@ -246,20 +276,30 @@ export function generateAnalysisData(
           value: viralityScore,
           explanation: `This post has ${viralityScore.toLowerCase()} viral potential based on engagement-to-view ratio and sharing patterns.`,
           status: viralityScore === 'Viral' || viralityScore === 'High' ? 'positive' : 'neutral',
-          details: tweet.public_metrics ? [
-            `Likes: ${tweet.public_metrics.like_count.toLocaleString()}`,
-            `Retweets: ${tweet.public_metrics.retweet_count.toLocaleString()}`,
-            `Replies: ${tweet.public_metrics.reply_count.toLocaleString()}`,
-            tweet.public_metrics.impression_count ? `Views: ${tweet.public_metrics.impression_count.toLocaleString()}` : '',
-          ].filter(Boolean) : [],
+          details: tweet.public_metrics
+            ? [
+                `Likes: ${tweet.public_metrics.like_count.toLocaleString()}`,
+                `Retweets: ${tweet.public_metrics.retweet_count.toLocaleString()}`,
+                `Replies: ${tweet.public_metrics.reply_count.toLocaleString()}`,
+                tweet.public_metrics.impression_count
+                  ? `Views: ${tweet.public_metrics.impression_count.toLocaleString()}`
+                  : '',
+              ].filter(Boolean)
+            : [],
         },
         {
           id: 'shareability',
           label: 'SHARE TRIGGERS',
-          value: tweet.public_metrics && tweet.public_metrics.retweet_count > tweet.public_metrics.reply_count ? 'High' : 'Medium',
-          explanation: tweet.public_metrics && tweet.public_metrics.retweet_count > tweet.public_metrics.reply_count
-            ? 'People shared this more than they replied, meaning it resonated enough to endorse publicly.'
-            : 'This sparked more conversation than shares, indicating strong engagement but room for more shareability.',
+          value:
+            tweet.public_metrics &&
+            tweet.public_metrics.retweet_count > tweet.public_metrics.reply_count
+              ? 'High'
+              : 'Medium',
+          explanation:
+            tweet.public_metrics &&
+            tweet.public_metrics.retweet_count > tweet.public_metrics.reply_count
+              ? 'People shared this more than they replied, meaning it resonated enough to endorse publicly.'
+              : 'This sparked more conversation than shares, indicating strong engagement but room for more shareability.',
           status: 'positive',
           details: [
             `Retweet/Like ratio: ${tweet.public_metrics ? ((tweet.public_metrics.retweet_count / Math.max(tweet.public_metrics.like_count, 1)) * 100).toFixed(1) : 0}%`,
@@ -278,7 +318,9 @@ export function generateAnalysisData(
           ],
         },
       ],
-      insight: brandScore?.phases?.scale?.insights?.[0] || `Posts like this ${viralityScore === 'High' || viralityScore === 'Viral' ? 'significantly expand your reach' : 'maintain your current audience'} while staying on-brand.`,
+      insight:
+        brandScore?.phases?.scale?.insights?.[0] ||
+        `Posts like this ${viralityScore === 'High' || viralityScore === 'Viral' ? 'significantly expand your reach' : 'maintain your current audience'} while staying on-brand.`,
       actionItem: `To amplify: ${viralityScore === 'High' || viralityScore === 'Viral' ? 'Create a thread expanding on this topic within 24 hours.' : 'Increase shareability by adding a clear takeaway or quotable line.'}`,
     },
   };

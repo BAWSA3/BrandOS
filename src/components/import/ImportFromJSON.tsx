@@ -22,7 +22,7 @@ export default function ImportFromJSON({ onExtract }: ImportFromJSONProps) {
       setFile(selectedFile);
       setProgress(null);
       setValidationError(null);
-      
+
       // Read file content for preview
       const text = await selectedFile.text();
       setJsonContent(text);
@@ -36,7 +36,7 @@ export default function ImportFromJSON({ onExtract }: ImportFromJSONProps) {
       setFile(droppedFile);
       setProgress(null);
       setValidationError(null);
-      
+
       const text = await droppedFile.text();
       setJsonContent(text);
     }
@@ -45,17 +45,17 @@ export default function ImportFromJSON({ onExtract }: ImportFromJSONProps) {
   const validateAndExtract = () => {
     try {
       const data = JSON.parse(jsonContent);
-      
+
       // Check for BrandOS format
       if (data.id && data.name && data.colors) {
         return { type: 'brandos', data };
       }
-      
+
       // Check for generic brand format
       if (data.brand || data.brandName || data.name) {
         return { type: 'generic', data };
       }
-      
+
       throw new Error('Unrecognized format. Please use BrandOS export or a standard brand format.');
     } catch (e) {
       if (e instanceof SyntaxError) {
@@ -86,22 +86,62 @@ export default function ImportFromJSON({ onExtract }: ImportFromJSONProps) {
           sourceDetails: file?.name || 'Pasted JSON',
           overallConfidence: 100, // Direct import has full confidence
           extractedAt: new Date(),
-          name: data.name ? { value: data.name, confidence: 100, source: 'BrandOS export' } : undefined,
-          colors: data.colors ? {
-            primary: data.colors.primary ? { value: data.colors.primary, confidence: 100, source: 'BrandOS export' } : undefined,
-            secondary: data.colors.secondary ? { value: data.colors.secondary, confidence: 100, source: 'BrandOS export' } : undefined,
-            accent: data.colors.accent ? { value: data.colors.accent, confidence: 100, source: 'BrandOS export' } : undefined,
-          } : undefined,
-          tone: data.tone ? {
-            formality: data.tone.minimal !== undefined ? { value: data.tone.minimal, confidence: 100, source: 'BrandOS export' } : undefined,
-            energy: data.tone.playful !== undefined ? { value: data.tone.playful, confidence: 100, source: 'BrandOS export' } : undefined,
-            confidence: data.tone.bold !== undefined ? { value: data.tone.bold, confidence: 100, source: 'BrandOS export' } : undefined,
-            style: data.tone.experimental !== undefined ? { value: data.tone.experimental, confidence: 100, source: 'BrandOS export' } : undefined,
-          } : undefined,
-          keywords: data.keywords?.map((k: string) => ({ value: k, confidence: 100, source: 'BrandOS export' })),
-          doPatterns: data.doPatterns?.map((p: string) => ({ value: p, confidence: 100, source: 'BrandOS export' })),
-          dontPatterns: data.dontPatterns?.map((p: string) => ({ value: p, confidence: 100, source: 'BrandOS export' })),
-          voiceSamples: data.voiceSamples?.map((s: string) => ({ value: s, confidence: 100, source: 'BrandOS export' })),
+          name: data.name
+            ? { value: data.name, confidence: 100, source: 'BrandOS export' }
+            : undefined,
+          colors: data.colors
+            ? {
+                primary: data.colors.primary
+                  ? { value: data.colors.primary, confidence: 100, source: 'BrandOS export' }
+                  : undefined,
+                secondary: data.colors.secondary
+                  ? { value: data.colors.secondary, confidence: 100, source: 'BrandOS export' }
+                  : undefined,
+                accent: data.colors.accent
+                  ? { value: data.colors.accent, confidence: 100, source: 'BrandOS export' }
+                  : undefined,
+              }
+            : undefined,
+          tone: data.tone
+            ? {
+                formality:
+                  data.tone.minimal !== undefined
+                    ? { value: data.tone.minimal, confidence: 100, source: 'BrandOS export' }
+                    : undefined,
+                energy:
+                  data.tone.playful !== undefined
+                    ? { value: data.tone.playful, confidence: 100, source: 'BrandOS export' }
+                    : undefined,
+                confidence:
+                  data.tone.bold !== undefined
+                    ? { value: data.tone.bold, confidence: 100, source: 'BrandOS export' }
+                    : undefined,
+                style:
+                  data.tone.experimental !== undefined
+                    ? { value: data.tone.experimental, confidence: 100, source: 'BrandOS export' }
+                    : undefined,
+              }
+            : undefined,
+          keywords: data.keywords?.map((k: string) => ({
+            value: k,
+            confidence: 100,
+            source: 'BrandOS export',
+          })),
+          doPatterns: data.doPatterns?.map((p: string) => ({
+            value: p,
+            confidence: 100,
+            source: 'BrandOS export',
+          })),
+          dontPatterns: data.dontPatterns?.map((p: string) => ({
+            value: p,
+            confidence: 100,
+            source: 'BrandOS export',
+          })),
+          voiceSamples: data.voiceSamples?.map((s: string) => ({
+            value: s,
+            confidence: 100,
+            source: 'BrandOS export',
+          })),
         };
       } else {
         // Generic format - best effort extraction
@@ -112,13 +152,40 @@ export default function ImportFromJSON({ onExtract }: ImportFromJSONProps) {
           sourceDetails: file?.name || 'Pasted JSON',
           overallConfidence: 85,
           extractedAt: new Date(),
-          name: brandData.name || brandData.brandName ? { value: brandData.name || brandData.brandName, confidence: 100, source: 'JSON import' } : undefined,
-          colors: brandData.colors ? {
-            primary: brandData.colors.primary ? { value: brandData.colors.primary, confidence: 95, source: 'JSON import' } : undefined,
-            secondary: brandData.colors.secondary ? { value: brandData.colors.secondary, confidence: 95, source: 'JSON import' } : undefined,
-            accent: brandData.colors.accent || brandData.colors.highlight ? { value: brandData.colors.accent || brandData.colors.highlight, confidence: 95, source: 'JSON import' } : undefined,
-          } : undefined,
-          keywords: brandData.keywords || brandData.tags ? (brandData.keywords || brandData.tags).map((k: string) => ({ value: k, confidence: 90, source: 'JSON import' })) : undefined,
+          name:
+            brandData.name || brandData.brandName
+              ? {
+                  value: brandData.name || brandData.brandName,
+                  confidence: 100,
+                  source: 'JSON import',
+                }
+              : undefined,
+          colors: brandData.colors
+            ? {
+                primary: brandData.colors.primary
+                  ? { value: brandData.colors.primary, confidence: 95, source: 'JSON import' }
+                  : undefined,
+                secondary: brandData.colors.secondary
+                  ? { value: brandData.colors.secondary, confidence: 95, source: 'JSON import' }
+                  : undefined,
+                accent:
+                  brandData.colors.accent || brandData.colors.highlight
+                    ? {
+                        value: brandData.colors.accent || brandData.colors.highlight,
+                        confidence: 95,
+                        source: 'JSON import',
+                      }
+                    : undefined,
+              }
+            : undefined,
+          keywords:
+            brandData.keywords || brandData.tags
+              ? (brandData.keywords || brandData.tags).map((k: string) => ({
+                  value: k,
+                  confidence: 90,
+                  source: 'JSON import',
+                }))
+              : undefined,
         };
       }
 
@@ -127,7 +194,6 @@ export default function ImportFromJSON({ onExtract }: ImportFromJSONProps) {
       setTimeout(() => {
         onExtract(extractedBrand);
       }, 500);
-
     } catch (error) {
       setValidationError(error instanceof Error ? error.message : 'Unknown error');
       setProgress({
@@ -143,14 +209,22 @@ export default function ImportFromJSON({ onExtract }: ImportFromJSONProps) {
     <div className="max-w-2xl mx-auto">
       <div className="text-center mb-8">
         <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-green-500/10 flex items-center justify-center">
-          <svg className="w-8 h-8 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+          <svg
+            className="w-8 h-8 text-green-500"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={1.5}
+              d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
+            />
           </svg>
         </div>
         <h2 className="text-2xl font-light tracking-tight mb-2">Import JSON Data</h2>
-        <p className="text-muted">
-          Import a BrandOS export or any structured brand data
-        </p>
+        <p className="text-muted">Import a BrandOS export or any structured brand data</p>
       </div>
 
       {/* Input Mode Toggle */}
@@ -191,12 +265,22 @@ export default function ImportFromJSON({ onExtract }: ImportFromJSONProps) {
             onChange={handleFileSelect}
             className="hidden"
           />
-          
+
           {file ? (
             <div className="flex items-center justify-center gap-4">
               <div className="w-12 h-12 rounded-lg bg-green-500/10 flex items-center justify-center">
-                <svg className="w-6 h-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                <svg
+                  className="w-6 h-6 text-green-500"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1.5}
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                  />
                 </svg>
               </div>
               <div className="text-left">
@@ -212,15 +296,35 @@ export default function ImportFromJSON({ onExtract }: ImportFromJSONProps) {
                 }}
                 className="ml-4 p-2 hover:bg-border rounded-lg transition-colors"
               >
-                <svg className="w-5 h-5 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
+                <svg
+                  className="w-5 h-5 text-muted"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1.5}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               </button>
             </div>
           ) : (
             <>
-              <svg className="w-12 h-12 mx-auto mb-4 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+              <svg
+                className="w-12 h-12 mx-auto mb-4 text-muted"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1}
+                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                />
               </svg>
               <p className="text-lg mb-2">Drop your JSON file here</p>
               <p className="text-sm text-muted">or click to browse</p>
@@ -267,13 +371,15 @@ export default function ImportFromJSON({ onExtract }: ImportFromJSONProps) {
       {/* Import Button */}
       <button
         onClick={handleImport}
-        disabled={!jsonContent.trim() || (progress?.stage !== 'error' && progress?.stage !== 'complete' && progress !== null)}
+        disabled={
+          !jsonContent.trim() ||
+          (progress?.stage !== 'error' && progress?.stage !== 'complete' && progress !== null)
+        }
         className="w-full mt-8 py-4 bg-foreground text-background rounded-xl text-sm font-medium disabled:opacity-30 disabled:cursor-not-allowed hover:opacity-90 transition-opacity"
       >
         {progress && progress.stage !== 'error' && progress.stage !== 'complete'
           ? 'Importing...'
-          : 'Import JSON'
-        }
+          : 'Import JSON'}
       </button>
 
       {/* Format Info */}
@@ -293,19 +399,3 @@ export default function ImportFromJSON({ onExtract }: ImportFromJSONProps) {
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

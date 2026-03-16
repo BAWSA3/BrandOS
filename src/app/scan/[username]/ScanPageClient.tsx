@@ -45,7 +45,7 @@ export default function ScanPageClient({ data }: { data: ScoreData }) {
   ];
 
   // Find weakest phase
-  const weakest = phases.reduce((min, p) => p.score < min.score ? p : min, phases[0]);
+  const weakest = phases.reduce((min, p) => (p.score < min.score ? p : min), phases[0]);
 
   const shareUrl = typeof window !== 'undefined' ? window.location.href : '';
   const shareText = `my brand DNA score: ${data.score}/100. archetype: THE ${data.archetype.toUpperCase()}.\n\nweakest dimension: ${weakest.label} (${weakest.score}/100)\n\nthink you can beat it? get yours free:`;
@@ -62,28 +62,43 @@ export default function ScanPageClient({ data }: { data: ScoreData }) {
   }
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: '#000',
-      color: '#fff',
-      fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace",
-    }}>
+    <div
+      style={{
+        minHeight: '100vh',
+        background: '#000',
+        color: '#fff',
+        fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace",
+      }}
+    >
       {/* Terminal header */}
-      <div style={{
-        padding: '16px 24px',
-        borderBottom: '1px solid rgba(255,255,255,0.08)',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-      }}>
+      <div
+        style={{
+          padding: '16px 24px',
+          borderBottom: '1px solid rgba(255,255,255,0.08)',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
+      >
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <span style={{ color: '#0047FF', fontSize: '12px', letterSpacing: '0.15em' }}>BRANDOS</span>
+          <span style={{ color: '#0047FF', fontSize: '12px', letterSpacing: '0.15em' }}>
+            BRANDOS
+          </span>
           <span style={{ color: 'rgba(255,255,255,0.2)' }}>//</span>
-          <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', letterSpacing: '0.1em' }}>SCAN RESULTS</span>
+          <span
+            style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', letterSpacing: '0.1em' }}
+          >
+            SCAN RESULTS
+          </span>
         </div>
         <a
           href="/"
-          style={{ color: 'rgba(255,255,255,0.3)', fontSize: '10px', letterSpacing: '0.1em', textDecoration: 'none' }}
+          style={{
+            color: 'rgba(255,255,255,0.3)',
+            fontSize: '10px',
+            letterSpacing: '0.1em',
+            textDecoration: 'none',
+          }}
         >
           mybrandos.app
         </a>
@@ -102,7 +117,9 @@ export default function ScanPageClient({ data }: { data: ScoreData }) {
         >
           {'/* ═══════════════════════════════════════════════════════ */'}
           <br />
-          {'/*  BRAND DNA SCAN: @'}{data.username}{'                              */'}
+          {'/*  BRAND DNA SCAN: @'}
+          {data.username}
+          {'                              */'}
           <br />
           {'/* ═══════════════════════════════════════════════════════ */'}
         </motion.div>
@@ -119,37 +136,61 @@ export default function ScanPageClient({ data }: { data: ScoreData }) {
             marginBottom: '40px',
           }}
         >
-          <div style={{
-            width: '140px',
-            height: '140px',
-            borderRadius: '70px',
-            border: `3px solid ${scoreColor}`,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexDirection: 'column',
-            flexShrink: 0,
-          }}>
+          <div
+            style={{
+              width: '140px',
+              height: '140px',
+              borderRadius: '70px',
+              border: `3px solid ${scoreColor}`,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexDirection: 'column',
+              flexShrink: 0,
+            }}
+          >
             <div style={{ color: scoreColor, fontSize: '48px', fontWeight: 700 }}>{data.score}</div>
-            <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '9px', letterSpacing: '0.15em' }}>BRAND SCORE</div>
+            <div
+              style={{ color: 'rgba(255,255,255,0.4)', fontSize: '9px', letterSpacing: '0.15em' }}
+            >
+              BRAND SCORE
+            </div>
           </div>
           <div>
-            <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px', letterSpacing: '0.1em', marginBottom: '4px' }}>
-              {'> '}{data.displayName}
+            <div
+              style={{
+                color: 'rgba(255,255,255,0.5)',
+                fontSize: '12px',
+                letterSpacing: '0.1em',
+                marginBottom: '4px',
+              }}
+            >
+              {'> '}
+              {data.displayName}
             </div>
-            <div style={{ color: '#0047FF', fontSize: '24px', fontWeight: 600, marginBottom: '8px', textTransform: 'uppercase' }}>
+            <div
+              style={{
+                color: '#0047FF',
+                fontSize: '24px',
+                fontWeight: 600,
+                marginBottom: '8px',
+                textTransform: 'uppercase',
+              }}
+            >
               THE {data.archetype}
             </div>
-            <div style={{
-              display: 'inline-block',
-              padding: '4px 12px',
-              background: `${scoreColor}20`,
-              border: `1px solid ${scoreColor}40`,
-              borderRadius: '4px',
-              color: scoreColor,
-              fontSize: '10px',
-              letterSpacing: '0.12em',
-            }}>
+            <div
+              style={{
+                display: 'inline-block',
+                padding: '4px 12px',
+                background: `${scoreColor}20`,
+                border: `1px solid ${scoreColor}40`,
+                borderRadius: '4px',
+                color: scoreColor,
+                fontSize: '10px',
+                letterSpacing: '0.12em',
+              }}
+            >
               {getTier(data.score)}
             </div>
           </div>
@@ -162,7 +203,14 @@ export default function ScanPageClient({ data }: { data: ScoreData }) {
           transition={{ delay: 0.4 }}
           style={{ marginBottom: '40px' }}
         >
-          <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', letterSpacing: '0.12em', marginBottom: '16px' }}>
+          <div
+            style={{
+              color: 'rgba(255,255,255,0.4)',
+              fontSize: '11px',
+              letterSpacing: '0.12em',
+              marginBottom: '16px',
+            }}
+          >
             PHASE BREAKDOWN
           </div>
           {phases.map((phase, i) => (
@@ -182,13 +230,35 @@ export default function ScanPageClient({ data }: { data: ScoreData }) {
                 border: '1px solid rgba(255,255,255,0.06)',
               }}
             >
-              <span style={{ color: phase.color, fontSize: '11px', letterSpacing: '0.1em', width: '80px' }}>
+              <span
+                style={{
+                  color: phase.color,
+                  fontSize: '11px',
+                  letterSpacing: '0.1em',
+                  width: '80px',
+                }}
+              >
                 {phase.label}
               </span>
-              <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: '12px', flex: 1, letterSpacing: '0.02em' }}>
+              <span
+                style={{
+                  color: 'rgba(255,255,255,0.25)',
+                  fontSize: '12px',
+                  flex: 1,
+                  letterSpacing: '0.02em',
+                }}
+              >
                 {renderBar(phase.score)}
               </span>
-              <span style={{ color: '#fff', fontSize: '14px', fontWeight: 600, width: '36px', textAlign: 'right' }}>
+              <span
+                style={{
+                  color: '#fff',
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  width: '36px',
+                  textAlign: 'right',
+                }}
+              >
                 {phase.score}
               </span>
             </motion.div>
@@ -202,14 +272,33 @@ export default function ScanPageClient({ data }: { data: ScoreData }) {
           transition={{ delay: 0.9 }}
           style={{ marginBottom: '40px' }}
         >
-          <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', letterSpacing: '0.12em', marginBottom: '16px' }}>
+          <div
+            style={{
+              color: 'rgba(255,255,255,0.4)',
+              fontSize: '11px',
+              letterSpacing: '0.12em',
+              marginBottom: '16px',
+            }}
+          >
             UNLOCK MORE
           </div>
 
           {[
-            { label: 'GROWTH PLAN', desc: `Your #1 gap is ${weakest.label} (${weakest.score}). We built a plan to fix it.`, icon: '📈' },
-            { label: 'CONTENT ENGINE', desc: '7 AI-generated posts targeting your weakest dimensions.', icon: '⚡' },
-            { label: 'VOICE FINGERPRINT', desc: 'Deep voice analysis + consistency scoring across platforms.', icon: '🧬' },
+            {
+              label: 'GROWTH PLAN',
+              desc: `Your #1 gap is ${weakest.label} (${weakest.score}). We built a plan to fix it.`,
+              icon: '📈',
+            },
+            {
+              label: 'CONTENT ENGINE',
+              desc: '7 AI-generated posts targeting your weakest dimensions.',
+              icon: '⚡',
+            },
+            {
+              label: 'VOICE FINGERPRINT',
+              desc: 'Deep voice analysis + consistency scoring across platforms.',
+              icon: '🧬',
+            },
           ].map((item) => (
             <div
               key={item.label}
@@ -225,24 +314,30 @@ export default function ScanPageClient({ data }: { data: ScoreData }) {
                 position: 'relative',
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+              <div
+                style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}
+              >
                 <span>{item.icon}</span>
-                <span style={{ color: '#0047FF', fontSize: '11px', letterSpacing: '0.1em' }}>{item.label}</span>
+                <span style={{ color: '#0047FF', fontSize: '11px', letterSpacing: '0.1em' }}>
+                  {item.label}
+                </span>
               </div>
               <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px' }}>{item.desc}</div>
             </div>
           ))}
 
           {/* Unlock CTA overlay */}
-          <div style={{
-            marginTop: '-180px',
-            position: 'relative',
-            zIndex: 10,
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            height: '180px',
-          }}>
+          <div
+            style={{
+              marginTop: '-180px',
+              position: 'relative',
+              zIndex: 10,
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              height: '180px',
+            }}
+          >
             <a
               href="/score"
               style={{
@@ -288,7 +383,14 @@ export default function ScanPageClient({ data }: { data: ScoreData }) {
               gap: '8px',
             }}
           >
-            <span style={{ fontSize: '12px', letterSpacing: '0.1em', color: '#000', fontFamily: "'VCR OSD Mono', monospace" }}>
+            <span
+              style={{
+                fontSize: '12px',
+                letterSpacing: '0.1em',
+                color: '#000',
+                fontFamily: "'VCR OSD Mono', monospace",
+              }}
+            >
               SHARE ON X
             </span>
           </button>
@@ -323,7 +425,14 @@ export default function ScanPageClient({ data }: { data: ScoreData }) {
             borderRadius: '8px',
           }}
         >
-          <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px', letterSpacing: '0.1em', marginBottom: '16px' }}>
+          <div
+            style={{
+              color: 'rgba(255,255,255,0.5)',
+              fontSize: '12px',
+              letterSpacing: '0.1em',
+              marginBottom: '16px',
+            }}
+          >
             {'>'} want to know YOUR brand score?
           </div>
           <a
@@ -345,19 +454,19 @@ export default function ScanPageClient({ data }: { data: ScoreData }) {
         </motion.div>
 
         {/* Footer */}
-        <div style={{
-          marginTop: '48px',
-          paddingTop: '24px',
-          borderTop: '1px solid rgba(255,255,255,0.06)',
-          display: 'flex',
-          justifyContent: 'space-between',
-        }}>
+        <div
+          style={{
+            marginTop: '48px',
+            paddingTop: '24px',
+            borderTop: '1px solid rgba(255,255,255,0.06)',
+            display: 'flex',
+            justifyContent: 'space-between',
+          }}
+        >
           <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: '10px' }}>
             {'// powered by AI brand intelligence'}
           </span>
-          <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: '10px' }}>
-            brandos v2.0
-          </span>
+          <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: '10px' }}>brandos v2.0</span>
         </div>
       </div>
     </div>

@@ -31,13 +31,13 @@ interface MarketScannerViewProps {
 
 const patternColors: Record<string, string> = {
   'bold-claim': '#FF453A',
-  'question': '#0A84FF',
-  'contrarian': '#FF9F0A',
-  'story': '#BF5AF2',
-  'data': '#30D158',
-  'list': '#64D2FF',
+  question: '#0A84FF',
+  contrarian: '#FF9F0A',
+  story: '#BF5AF2',
+  data: '#30D158',
+  list: '#64D2FF',
   'how-to': '#AC8E68',
-  'observation': '#FFD60A',
+  observation: '#FFD60A',
 };
 
 export default function MarketScannerView({ brandId }: MarketScannerViewProps) {
@@ -67,9 +67,8 @@ export default function MarketScannerView({ brandId }: MarketScannerViewProps) {
     }
   }
 
-  const filtered = selectedNiche === 'all'
-    ? benchmarks
-    : benchmarks.filter(b => b.niche === selectedNiche);
+  const filtered =
+    selectedNiche === 'all' ? benchmarks : benchmarks.filter((b) => b.niche === selectedNiche);
 
   return (
     <div
@@ -84,7 +83,15 @@ export default function MarketScannerView({ brandId }: MarketScannerViewProps) {
     >
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <h3 style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+        <h3
+          style={{
+            fontSize: 13,
+            fontWeight: 600,
+            color: 'var(--text-secondary)',
+            letterSpacing: '0.05em',
+            textTransform: 'uppercase',
+          }}
+        >
           Viral Benchmarks
         </h3>
         <div className="flex gap-1 flex-wrap">
@@ -103,7 +110,7 @@ export default function MarketScannerView({ brandId }: MarketScannerViewProps) {
           >
             All
           </button>
-          {niches.map(n => (
+          {niches.map((n) => (
             <button
               key={n}
               onClick={() => setSelectedNiche(n)}
@@ -126,15 +133,25 @@ export default function MarketScannerView({ brandId }: MarketScannerViewProps) {
 
       {isLoading ? (
         <div className="flex items-center justify-center py-8">
-          <div className="w-4 h-4 border-2 rounded-full animate-spin" style={{ borderColor: 'var(--border)', borderTopColor: 'var(--accent)' }} />
+          <div
+            className="w-4 h-4 border-2 rounded-full animate-spin"
+            style={{ borderColor: 'var(--border)', borderTopColor: 'var(--accent)' }}
+          />
         </div>
       ) : filtered.length === 0 ? (
-        <p style={{ fontSize: 12, color: 'var(--text-tertiary)', textAlign: 'center', padding: '24px 0' }}>
+        <p
+          style={{
+            fontSize: 12,
+            color: 'var(--text-tertiary)',
+            textAlign: 'center',
+            padding: '24px 0',
+          }}
+        >
           No benchmarks yet. Run the market scanner to discover viral patterns.
         </p>
       ) : (
         <div className="space-y-3">
-          {filtered.map(benchmark => (
+          {filtered.map((benchmark) => (
             <div
               key={benchmark.id}
               style={{
@@ -146,66 +163,96 @@ export default function MarketScannerView({ brandId }: MarketScannerViewProps) {
             >
               {/* Score + content */}
               <div className="flex gap-3">
-                <div style={{
-                  width: 36,
-                  height: 36,
-                  borderRadius: 8,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: 14,
-                  fontWeight: 700,
-                  color: benchmark.viralScore >= 70 ? '#30D158' : benchmark.viralScore >= 40 ? '#FFD60A' : '#FF453A',
-                  background: benchmark.viralScore >= 70 ? 'rgba(48,209,88,0.1)' : benchmark.viralScore >= 40 ? 'rgba(255,214,10,0.1)' : 'rgba(255,69,58,0.1)',
-                  flexShrink: 0,
-                }}>
+                <div
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: 8,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 14,
+                    fontWeight: 700,
+                    color:
+                      benchmark.viralScore >= 70
+                        ? '#30D158'
+                        : benchmark.viralScore >= 40
+                          ? '#FFD60A'
+                          : '#FF453A',
+                    background:
+                      benchmark.viralScore >= 70
+                        ? 'rgba(48,209,88,0.1)'
+                        : benchmark.viralScore >= 40
+                          ? 'rgba(255,214,10,0.1)'
+                          : 'rgba(255,69,58,0.1)',
+                    flexShrink: 0,
+                  }}
+                >
                   {benchmark.viralScore}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p style={{ fontSize: 12, color: 'var(--text-primary)', lineHeight: 1.4, marginBottom: 4 }}>
-                    {benchmark.content.length > 200 ? benchmark.content.substring(0, 200) + '...' : benchmark.content}
+                  <p
+                    style={{
+                      fontSize: 12,
+                      color: 'var(--text-primary)',
+                      lineHeight: 1.4,
+                      marginBottom: 4,
+                    }}
+                  >
+                    {benchmark.content.length > 200
+                      ? benchmark.content.substring(0, 200) + '...'
+                      : benchmark.content}
                   </p>
                   {benchmark.authorUsername && (
-                    <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>@{benchmark.authorUsername}</span>
+                    <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>
+                      @{benchmark.authorUsername}
+                    </span>
                   )}
                 </div>
               </div>
 
               {/* Pattern pills */}
               <div className="flex gap-1.5 mt-2 flex-wrap">
-                <span style={{
-                  fontSize: 9,
-                  fontWeight: 500,
-                  color: patternColors[benchmark.patterns.hookType] || '#999',
-                  background: `${patternColors[benchmark.patterns.hookType] || '#999'}18`,
-                  padding: '2px 6px',
-                  borderRadius: 3,
-                  letterSpacing: '0.03em',
-                }}>
+                <span
+                  style={{
+                    fontSize: 9,
+                    fontWeight: 500,
+                    color: patternColors[benchmark.patterns.hookType] || '#999',
+                    background: `${patternColors[benchmark.patterns.hookType] || '#999'}18`,
+                    padding: '2px 6px',
+                    borderRadius: 3,
+                    letterSpacing: '0.03em',
+                  }}
+                >
                   {benchmark.patterns.hookType}
                 </span>
-                <span style={{
-                  fontSize: 9,
-                  color: 'var(--text-tertiary)',
-                  background: 'var(--surface)',
-                  padding: '2px 6px',
-                  borderRadius: 3,
-                }}>
+                <span
+                  style={{
+                    fontSize: 9,
+                    color: 'var(--text-tertiary)',
+                    background: 'var(--surface)',
+                    padding: '2px 6px',
+                    borderRadius: 3,
+                  }}
+                >
                   {benchmark.patterns.format}
                 </span>
-                <span style={{
-                  fontSize: 9,
-                  color: 'var(--text-tertiary)',
-                  background: 'var(--surface)',
-                  padding: '2px 6px',
-                  borderRadius: 3,
-                }}>
+                <span
+                  style={{
+                    fontSize: 9,
+                    color: 'var(--text-tertiary)',
+                    background: 'var(--surface)',
+                    padding: '2px 6px',
+                    borderRadius: 3,
+                  }}
+                >
                   {benchmark.patterns.tone}
                 </span>
 
                 {/* Metrics */}
                 <span style={{ fontSize: 9, color: 'var(--text-tertiary)', marginLeft: 'auto' }}>
-                  {benchmark.metrics.likes}L · {benchmark.metrics.retweets}RT · {benchmark.metrics.replies}R
+                  {benchmark.metrics.likes}L · {benchmark.metrics.retweets}RT ·{' '}
+                  {benchmark.metrics.replies}R
                 </span>
               </div>
             </div>

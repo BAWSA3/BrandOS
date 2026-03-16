@@ -4,10 +4,10 @@ import { createServerClient } from '@supabase/ssr';
 
 /**
  * Post content to X (Twitter) via the X API v2.
- * 
+ *
  * Requirements:
  * - User must be authenticated via Supabase with X OAuth
- * - X OAuth scopes must include tweet.write (this may require 
+ * - X OAuth scopes must include tweet.write (this may require
  *   re-authorization if originally set up with read-only scopes)
  * - The Supabase provider token is used to authenticate with X API
  */
@@ -19,17 +19,11 @@ export async function POST(request: NextRequest) {
     };
 
     if (!content || content.trim().length === 0) {
-      return NextResponse.json(
-        { error: 'Content is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Content is required' }, { status: 400 });
     }
 
     if (content.length > 280) {
-      return NextResponse.json(
-        { error: 'Content exceeds 280 character limit' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Content exceeds 280 character limit' }, { status: 400 });
     }
 
     // Get the authenticated user's session to access the X provider token
@@ -113,9 +107,7 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json(
         {
-          error:
-            (errorData as { detail?: string }).detail ||
-            `X API error: ${xResponse.status}`,
+          error: (errorData as { detail?: string }).detail || `X API error: ${xResponse.status}`,
         },
         { status: xResponse.status }
       );
@@ -144,8 +136,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(
       {
-        error:
-          error instanceof Error ? error.message : 'Failed to post to X',
+        error: error instanceof Error ? error.message : 'Failed to post to X',
       },
       { status: 500 }
     );

@@ -58,44 +58,59 @@ export function ToastProvider({ children, maxToasts = 5 }: ToastProviderProps) {
   const [toasts, setToasts] = useState<Toast[]>([]);
 
   const removeToast = useCallback((id: string) => {
-    setToasts(prev => prev.filter(t => t.id !== id));
+    setToasts((prev) => prev.filter((t) => t.id !== id));
   }, []);
 
-  const addToast = useCallback((toast: Omit<Toast, 'id'>) => {
-    const id = `toast-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
-    const duration = toast.duration ?? 4000;
+  const addToast = useCallback(
+    (toast: Omit<Toast, 'id'>) => {
+      const id = `toast-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+      const duration = toast.duration ?? 4000;
 
-    setToasts(prev => {
-      const newToasts = [...prev, { ...toast, id }];
-      // Limit max toasts
-      if (newToasts.length > maxToasts) {
-        return newToasts.slice(-maxToasts);
+      setToasts((prev) => {
+        const newToasts = [...prev, { ...toast, id }];
+        // Limit max toasts
+        if (newToasts.length > maxToasts) {
+          return newToasts.slice(-maxToasts);
+        }
+        return newToasts;
+      });
+
+      // Auto-remove after duration
+      if (duration > 0) {
+        setTimeout(() => removeToast(id), duration);
       }
-      return newToasts;
-    });
-
-    // Auto-remove after duration
-    if (duration > 0) {
-      setTimeout(() => removeToast(id), duration);
-    }
-  }, [maxToasts, removeToast]);
+    },
+    [maxToasts, removeToast]
+  );
 
   // Convenience methods
-  const success = useCallback((title: string, description?: string) => {
-    addToast({ type: 'success', title, description });
-  }, [addToast]);
+  const success = useCallback(
+    (title: string, description?: string) => {
+      addToast({ type: 'success', title, description });
+    },
+    [addToast]
+  );
 
-  const error = useCallback((title: string, description?: string) => {
-    addToast({ type: 'error', title, description, duration: 6000 });
-  }, [addToast]);
+  const error = useCallback(
+    (title: string, description?: string) => {
+      addToast({ type: 'error', title, description, duration: 6000 });
+    },
+    [addToast]
+  );
 
-  const warning = useCallback((title: string, description?: string) => {
-    addToast({ type: 'warning', title, description });
-  }, [addToast]);
+  const warning = useCallback(
+    (title: string, description?: string) => {
+      addToast({ type: 'warning', title, description });
+    },
+    [addToast]
+  );
 
-  const info = useCallback((title: string, description?: string) => {
-    addToast({ type: 'info', title, description });
-  }, [addToast]);
+  const info = useCallback(
+    (title: string, description?: string) => {
+      addToast({ type: 'info', title, description });
+    },
+    [addToast]
+  );
 
   return (
     <ToastContext.Provider value={{ toasts, addToast, removeToast, success, error, warning, info }}>
@@ -118,7 +133,7 @@ function ToastContainer({ toasts, onRemove }: ToastContainerProps) {
   if (toasts.length === 0) return null;
 
   return (
-    <div 
+    <div
       className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[200] flex flex-col gap-2 pointer-events-none"
       aria-live="polite"
       aria-atomic="true"
@@ -185,7 +200,7 @@ function ToastItem({ toast, onRemove }: ToastItemProps) {
   };
 
   return (
-    <div 
+    <div
       className="pointer-events-auto flex items-start gap-3 px-4 py-3 rounded-xl shadow-lg animate-toast-in min-w-[300px] max-w-[420px]"
       style={{
         background: `linear-gradient(135deg, rgba(15, 15, 15, 0.95) 0%, rgba(20, 20, 20, 0.95) 100%)`,
@@ -195,7 +210,7 @@ function ToastItem({ toast, onRemove }: ToastItemProps) {
       role="alert"
     >
       {/* Icon */}
-      <div 
+      <div
         className="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center"
         style={{ background: bgColors[toast.type] }}
       >
@@ -224,7 +239,15 @@ function ToastItem({ toast, onRemove }: ToastItemProps) {
         className="flex-shrink-0 p-1 rounded-lg hover:bg-white/10 transition-colors"
         aria-label="Dismiss"
       >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeOpacity="0.5">
+        <svg
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="white"
+          strokeWidth="2"
+          strokeOpacity="0.5"
+        >
           <line x1="18" y1="6" x2="6" y2="18" />
           <line x1="6" y1="6" x2="18" y2="18" />
         </svg>

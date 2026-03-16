@@ -101,6 +101,7 @@ BrandOS supports multiple user types through distinct journey paths:
 ### Time to Value: ~10 minutes
 
 ### Key Moments of Delight
+
 - Template pre-fill eliminates blank page anxiety
 - Instant validation confirms setup works
 - Visual tone sliders make abstract concepts tangible
@@ -186,6 +187,7 @@ BrandOS supports multiple user types through distinct journey paths:
 ### Time to Value: ~2 minutes
 
 ### Key Moments of Delight
+
 - Instant feedback eliminates waiting for brand team
 - Specific issues (not vague "doesn't feel right")
 - One-click suggested revision
@@ -285,6 +287,7 @@ BrandOS supports multiple user types through distinct journey paths:
 ### Time to Value: ~30 minutes for full campaign
 
 ### Key Moments of Delight
+
 - Platform-aware generation eliminates manual adaptation
 - Auto-checking ensures quality before export
 - History tracks all generated content
@@ -368,6 +371,7 @@ BrandOS supports multiple user types through distinct journey paths:
 ### Time to Value: ~45 minutes for full setup
 
 ### Key Moments of Delight
+
 - Multi-brand support in single interface
 - Validation against known-good content
 - Shareable read-only access for team
@@ -447,6 +451,7 @@ BrandOS supports multiple user types through distinct journey paths:
 ### Time to Value: ~10 minutes
 
 ### Key Moments of Delight
+
 - Transforms frustrating feedback into clear direction
 - Builds institutional knowledge
 - Reduces back-and-forth cycles
@@ -520,6 +525,7 @@ BrandOS supports multiple user types through distinct journey paths:
 ### Time to Value: ~5 minutes
 
 ### Key Moments of Delight
+
 - Prevents tone-deaf messaging in sensitive moments
 - Maintains brand coherence even in crisis
 - Speeds up time-critical communications
@@ -528,32 +534,15 @@ BrandOS supports multiple user types through distinct journey paths:
 
 ## User Journey Metrics
 
-| Journey | Avg. Time | User Satisfaction | Repeat Usage |
-|---------|-----------|-------------------|--------------|
-| Brand Setup | 10 min | 4.5/5 | N/A (one-time) |
-| Content Check | 2 min | 4.7/5 | Daily |
-| Generation | 5 min | 4.4/5 | Weekly |
-| Multi-brand | 45 min | 4.6/5 | Per client |
-| Taste Translation | 10 min | 4.8/5 | As needed |
-| Crisis Comms | 5 min | 4.9/5 | Rare |
+| Journey           | Avg. Time | User Satisfaction | Repeat Usage   |
+| ----------------- | --------- | ----------------- | -------------- |
+| Brand Setup       | 10 min    | 4.5/5             | N/A (one-time) |
+| Content Check     | 2 min     | 4.7/5             | Daily          |
+| Generation        | 5 min     | 4.4/5             | Weekly         |
+| Multi-brand       | 45 min    | 4.6/5             | Per client     |
+| Taste Translation | 10 min    | 4.8/5             | As needed      |
+| Crisis Comms      | 5 min     | 4.9/5             | Rare           |
 
 ---
 
-*Next: [Product Roadmap →](08-product-roadmap.md)*
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+_Next: [Product Roadmap →](08-product-roadmap.md)_

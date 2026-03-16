@@ -1,10 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { NextRequest, NextResponse } from 'next/server';
-import {
-  VoiceFingerprint,
-  AuthenticityFlag,
-  AuthenticityScore,
-} from '@/lib/voice-fingerprint';
+import { VoiceFingerprint, AuthenticityFlag, AuthenticityScore } from '@/lib/voice-fingerprint';
 import {
   buildAuthenticityRewritePrompt,
   buildAuthenticityCheckPrompt,
@@ -15,10 +11,7 @@ export async function POST(request: NextRequest) {
     const apiKey = process.env.ANTHROPIC_API_KEY;
 
     if (!apiKey) {
-      return NextResponse.json(
-        { error: 'API key not configured' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'API key not configured' }, { status: 500 });
     }
 
     const { content, fingerprint, flags } = (await request.json()) as {
@@ -28,17 +21,11 @@ export async function POST(request: NextRequest) {
     };
 
     if (!content?.trim()) {
-      return NextResponse.json(
-        { error: 'Content is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Content is required' }, { status: 400 });
     }
 
     if (!fingerprint?.metadata) {
-      return NextResponse.json(
-        { error: 'Voice fingerprint is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Voice fingerprint is required' }, { status: 400 });
     }
 
     if (!flags || flags.length === 0) {
@@ -63,9 +50,7 @@ export async function POST(request: NextRequest) {
     });
 
     const rewriteText =
-      rewriteMessage.content[0].type === 'text'
-        ? rewriteMessage.content[0].text
-        : '';
+      rewriteMessage.content[0].type === 'text' ? rewriteMessage.content[0].text : '';
 
     const rewriteJson = rewriteText.match(/\{[\s\S]*\}/);
     if (!rewriteJson) {
@@ -86,10 +71,7 @@ export async function POST(request: NextRequest) {
       ],
     });
 
-    const scoreText =
-      scoreMessage.content[0].type === 'text'
-        ? scoreMessage.content[0].text
-        : '';
+    const scoreText = scoreMessage.content[0].type === 'text' ? scoreMessage.content[0].text : '';
 
     const scoreJson = scoreText.match(/\{[\s\S]*\}/);
     let newScore: AuthenticityScore | null = null;
@@ -108,8 +90,7 @@ export async function POST(request: NextRequest) {
     let message = 'Rewrite failed';
     if (error instanceof Error) {
       if (error.message.includes('credit balance is too low')) {
-        message =
-          'API credits depleted. Please add credits at console.anthropic.com';
+        message = 'API credits depleted. Please add credits at console.anthropic.com';
       } else {
         message = error.message;
       }

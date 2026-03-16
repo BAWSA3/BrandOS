@@ -17,11 +17,7 @@ export type OnchainStatus =
   | 'failed';
 
 // Supported chains — env var NEXT_PUBLIC_ONCHAIN_CHAIN selects the active one
-export type OnchainChainKey =
-  | 'avalanche'
-  | 'avalanche-fuji'
-  | 'base'
-  | 'base-sepolia';
+export type OnchainChainKey = 'avalanche' | 'avalanche-fuji' | 'base' | 'base-sepolia';
 
 export interface AttestationRecord {
   uid: string;

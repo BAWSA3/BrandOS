@@ -69,10 +69,7 @@ export async function analyzeVoiceConsistencyByPlatform(
   const results: Record<string, VoiceConsistencyReport | null> = {};
 
   for (const [platform, platformItems] of Object.entries(grouped)) {
-    results[platform] = await analyzeVoiceConsistencyForContent(
-      platformItems,
-      options
-    );
+    results[platform] = await analyzeVoiceConsistencyForContent(platformItems, options);
   }
 
   return results as Record<SocialPlatform, VoiceConsistencyReport | null>;
@@ -120,8 +117,7 @@ export function computeCrossPlatformVoiceScore(
 
   // Variance — lower variance = more consistent across platforms
   const variance =
-    scores.reduce((sum, s) => sum + Math.pow(s.score - avgScore, 2), 0) /
-    scores.length;
+    scores.reduce((sum, s) => sum + Math.pow(s.score - avgScore, 2), 0) / scores.length;
   const stdDev = Math.sqrt(variance);
 
   // Consistency bonus: low variance across platforms adds up to 10 points
@@ -146,9 +142,7 @@ export function computeCrossPlatformVoiceScore(
 
 // ── Helpers ─────────────────────────────────────────────────────
 
-function groupByPlatform(
-  items: ContentItem[]
-): Partial<Record<SocialPlatform, ContentItem[]>> {
+function groupByPlatform(items: ContentItem[]): Partial<Record<SocialPlatform, ContentItem[]>> {
   const grouped: Partial<Record<SocialPlatform, ContentItem[]>> = {};
   for (const item of items) {
     if (!grouped[item.platform]) grouped[item.platform] = [];

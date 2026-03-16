@@ -3,13 +3,28 @@
 
 import { z } from 'zod';
 
-export type DayOfWeek = 'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday' | 'Saturday' | 'Sunday';
+export type DayOfWeek =
+  | 'Monday'
+  | 'Tuesday'
+  | 'Wednesday'
+  | 'Thursday'
+  | 'Friday'
+  | 'Saturday'
+  | 'Sunday';
 export type SlotId = 'post1' | 'post2';
 
-export const DAYS_OF_WEEK: DayOfWeek[] = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+export const DAYS_OF_WEEK: DayOfWeek[] = [
+  'Monday',
+  'Tuesday',
+  'Wednesday',
+  'Thursday',
+  'Friday',
+  'Saturday',
+  'Sunday',
+];
 
 export interface SlotConfig {
-  format: string;       // e.g., "Framework", "Thread", "Hot Take"
+  format: string; // e.g., "Framework", "Thread", "Hot Take"
   description?: string;
 }
 
@@ -68,7 +83,15 @@ export interface ContentEngineOutput {
 
 // ===== ZOD SCHEMAS =====
 
-const DayOfWeekSchema = z.enum(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']);
+const DayOfWeekSchema = z.enum([
+  'Monday',
+  'Tuesday',
+  'Wednesday',
+  'Thursday',
+  'Friday',
+  'Saturday',
+  'Sunday',
+]);
 const SlotIdSchema = z.enum(['post1', 'post2']);
 
 const SlotConfigSchema = z.object({
@@ -82,7 +105,10 @@ const DayScheduleSchema = z.object({
 });
 
 const ContentScheduleSchema = z.record(DayOfWeekSchema, DayScheduleSchema);
-const CTARotationSchema = z.record(DayOfWeekSchema, z.object({ post1: z.string(), post2: z.string() }));
+const CTARotationSchema = z.record(
+  DayOfWeekSchema,
+  z.object({ post1: z.string(), post2: z.string() })
+);
 
 const EngagementContextSchema = z.object({
   followerCount: z.number().optional(),
@@ -115,20 +141,22 @@ const BrandToneSchema = z.object({
   experimental: z.number(),
 });
 
-const BrandDNASchema = z.object({
-  id: z.string(),
-  name: z.string().min(1),
-  colors: z.object({
-    primary: z.string(),
-    secondary: z.string(),
-    accent: z.string(),
-  }),
-  tone: BrandToneSchema,
-  keywords: z.array(z.string()),
-  doPatterns: z.array(z.string()),
-  dontPatterns: z.array(z.string()),
-  voiceSamples: z.array(z.string()),
-}).passthrough();
+const BrandDNASchema = z
+  .object({
+    id: z.string(),
+    name: z.string().min(1),
+    colors: z.object({
+      primary: z.string(),
+      secondary: z.string(),
+      accent: z.string(),
+    }),
+    tone: BrandToneSchema,
+    keywords: z.array(z.string()),
+    doPatterns: z.array(z.string()),
+    dontPatterns: z.array(z.string()),
+    voiceSamples: z.array(z.string()),
+  })
+  .passthrough();
 
 export const ContentEngineRequestSchema = z.object({
   brandDNA: BrandDNASchema,
@@ -146,18 +174,21 @@ export const TryEngineRequestSchema = z.object({
   topic: z.string().max(500).optional(),
   ctaType: z.string().max(100).optional(),
   gapTargeted: z.string().max(100).optional(),
-  voiceScan: z.object({
-    toneWords: z.array(z.string()),
-    doPatterns: z.array(z.string()),
-    dontPatterns: z.array(z.string()),
-    sampleTopics: z.array(z.string()),
-    suggestedVibe: z.string(),
-    confidence: z.number(),
-  }).optional(),
+  voiceScan: z
+    .object({
+      toneWords: z.array(z.string()),
+      doPatterns: z.array(z.string()),
+      dontPatterns: z.array(z.string()),
+      sampleTopics: z.array(z.string()),
+      suggestedVibe: z.string(),
+      confidence: z.number(),
+    })
+    .optional(),
 });
 
 export const VoiceScanRequestSchema = z.object({
-  username: z.string()
+  username: z
+    .string()
     .min(1, 'Username is required')
     .regex(/^@?[a-zA-Z0-9_]{1,15}$/, 'Invalid X username format'),
 });
@@ -165,22 +196,22 @@ export const VoiceScanRequestSchema = z.object({
 // Sensible defaults for new users
 export const DEFAULT_CONTENT_ENGINE_CONFIG: ContentEngineConfig = {
   schedule: {
-    Monday:    { post1: { format: 'Framework' },      post2: { format: 'Conversational' } },
-    Tuesday:   { post1: { format: 'Thread' },          post2: { format: 'Observation/QRT' } },
-    Wednesday: { post1: { format: 'Hot Take' },        post2: { format: 'Personal Insight' } },
-    Thursday:  { post1: { format: 'Build Log' },       post2: { format: 'Quick Insight' } },
-    Friday:    { post1: { format: 'Thread' },          post2: { format: 'Friday Energy' } },
-    Saturday:  { post1: { format: 'Community' },       post2: { format: 'Weekend Personal' } },
-    Sunday:    { post1: { format: 'Reflection' },      post2: { format: 'Week Recap' } },
+    Monday: { post1: { format: 'Framework' }, post2: { format: 'Conversational' } },
+    Tuesday: { post1: { format: 'Thread' }, post2: { format: 'Observation/QRT' } },
+    Wednesday: { post1: { format: 'Hot Take' }, post2: { format: 'Personal Insight' } },
+    Thursday: { post1: { format: 'Build Log' }, post2: { format: 'Quick Insight' } },
+    Friday: { post1: { format: 'Thread' }, post2: { format: 'Friday Energy' } },
+    Saturday: { post1: { format: 'Community' }, post2: { format: 'Weekend Personal' } },
+    Sunday: { post1: { format: 'Reflection' }, post2: { format: 'Week Recap' } },
   },
   ctaRotation: {
-    Monday:    { post1: 'Bookmark This',    post2: 'Reply With Yours' },
-    Tuesday:   { post1: 'Quote RT',         post2: 'Agree/Disagree' },
-    Wednesday: { post1: 'Agree/Disagree',   post2: 'Reply With Yours' },
-    Thursday:  { post1: 'Reply With Yours', post2: 'Bookmark This' },
-    Friday:    { post1: 'Quote RT',         post2: 'Reply With Yours' },
-    Saturday:  { post1: 'Bookmark This',    post2: 'Agree/Disagree' },
-    Sunday:    { post1: 'Quote RT',         post2: 'Reply With Yours' },
+    Monday: { post1: 'Bookmark This', post2: 'Reply With Yours' },
+    Tuesday: { post1: 'Quote RT', post2: 'Agree/Disagree' },
+    Wednesday: { post1: 'Agree/Disagree', post2: 'Reply With Yours' },
+    Thursday: { post1: 'Reply With Yours', post2: 'Bookmark This' },
+    Friday: { post1: 'Quote RT', post2: 'Reply With Yours' },
+    Saturday: { post1: 'Bookmark This', post2: 'Agree/Disagree' },
+    Sunday: { post1: 'Quote RT', post2: 'Reply With Yours' },
   },
   engagement: {
     topGaps: ['CTA'],

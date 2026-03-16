@@ -133,58 +133,111 @@ export interface BrandKitAssets {
 interface BrandKitStore {
   // Brand kit assets per brand
   brandKits: Record<string, BrandKitAssets>;
-  
+
   // Get current brand kit
   getCurrentBrandKit: (brandId: string) => BrandKitAssets;
-  
+
   // Initialize brand kit for a brand
   initializeBrandKit: (brandId: string) => void;
-  
+
   // Logo management
   addLogo: (brandId: string, logo: Omit<LogoAsset, 'id' | 'createdAt'>) => void;
   updateLogo: (brandId: string, logoId: string, updates: Partial<LogoAsset>) => void;
   deleteLogo: (brandId: string, logoId: string) => void;
-  
+
   // Color management
   addColor: (brandId: string, color: Omit<ExtendedColor, 'id'>) => void;
   updateColor: (brandId: string, colorId: string, updates: Partial<ExtendedColor>) => void;
   deleteColor: (brandId: string, colorId: string) => void;
-  
+
   // Typography management
   updateTypography: (brandId: string, typography: Partial<TypographyConfig>) => void;
   addFont: (brandId: string, font: Omit<FontConfig, 'id'>) => void;
   deleteFont: (brandId: string, fontId: string) => void;
-  
+
   // Imagery management
   addImagery: (brandId: string, image: Omit<ImageryAsset, 'id' | 'createdAt'>) => void;
   updateImagery: (brandId: string, imageId: string, updates: Partial<ImageryAsset>) => void;
   deleteImagery: (brandId: string, imageId: string) => void;
-  
+
   // Icon management
   addIcon: (brandId: string, icon: Omit<IconAsset, 'id' | 'createdAt'>) => void;
   updateIcon: (brandId: string, iconId: string, updates: Partial<IconAsset>) => void;
   deleteIcon: (brandId: string, iconId: string) => void;
-  
+
   // Template management
   addTemplate: (brandId: string, template: Omit<TemplateAsset, 'id' | 'createdAt'>) => void;
   updateTemplate: (brandId: string, templateId: string, updates: Partial<TemplateAsset>) => void;
   deleteTemplate: (brandId: string, templateId: string) => void;
-  
+
   // Canvas layout
   updateCanvasLayout: (brandId: string, layout: Partial<CanvasLayout>) => void;
-  updateCanvasSection: (brandId: string, sectionId: string, updates: Partial<CanvasSection>) => void;
+  updateCanvasSection: (
+    brandId: string,
+    sectionId: string,
+    updates: Partial<CanvasSection>
+  ) => void;
 }
 
 const defaultTypography: TypographyConfig = {
   fonts: [],
   scale: [
-    { name: 'H1', fontSize: '3rem', lineHeight: '1.2', fontWeight: 700, letterSpacing: '-0.02em', fontFamily: 'inherit' },
-    { name: 'H2', fontSize: '2.25rem', lineHeight: '1.3', fontWeight: 600, letterSpacing: '-0.01em', fontFamily: 'inherit' },
-    { name: 'H3', fontSize: '1.5rem', lineHeight: '1.4', fontWeight: 600, letterSpacing: '0', fontFamily: 'inherit' },
-    { name: 'H4', fontSize: '1.25rem', lineHeight: '1.5', fontWeight: 500, letterSpacing: '0', fontFamily: 'inherit' },
-    { name: 'Body', fontSize: '1rem', lineHeight: '1.6', fontWeight: 400, letterSpacing: '0', fontFamily: 'inherit' },
-    { name: 'Small', fontSize: '0.875rem', lineHeight: '1.5', fontWeight: 400, letterSpacing: '0.01em', fontFamily: 'inherit' },
-    { name: 'Caption', fontSize: '0.75rem', lineHeight: '1.4', fontWeight: 400, letterSpacing: '0.02em', fontFamily: 'inherit' },
+    {
+      name: 'H1',
+      fontSize: '3rem',
+      lineHeight: '1.2',
+      fontWeight: 700,
+      letterSpacing: '-0.02em',
+      fontFamily: 'inherit',
+    },
+    {
+      name: 'H2',
+      fontSize: '2.25rem',
+      lineHeight: '1.3',
+      fontWeight: 600,
+      letterSpacing: '-0.01em',
+      fontFamily: 'inherit',
+    },
+    {
+      name: 'H3',
+      fontSize: '1.5rem',
+      lineHeight: '1.4',
+      fontWeight: 600,
+      letterSpacing: '0',
+      fontFamily: 'inherit',
+    },
+    {
+      name: 'H4',
+      fontSize: '1.25rem',
+      lineHeight: '1.5',
+      fontWeight: 500,
+      letterSpacing: '0',
+      fontFamily: 'inherit',
+    },
+    {
+      name: 'Body',
+      fontSize: '1rem',
+      lineHeight: '1.6',
+      fontWeight: 400,
+      letterSpacing: '0',
+      fontFamily: 'inherit',
+    },
+    {
+      name: 'Small',
+      fontSize: '0.875rem',
+      lineHeight: '1.5',
+      fontWeight: 400,
+      letterSpacing: '0.01em',
+      fontFamily: 'inherit',
+    },
+    {
+      name: 'Caption',
+      fontSize: '0.75rem',
+      lineHeight: '1.4',
+      fontWeight: 400,
+      letterSpacing: '0.02em',
+      fontFamily: 'inherit',
+    },
   ],
   pairing: {
     heading: 'system-ui',
@@ -196,10 +249,26 @@ const defaultCanvasLayout: CanvasLayout = {
   sections: [
     { id: 'logos', type: 'logos', x: 0, y: 0, width: 400, height: 200, collapsed: false },
     { id: 'colors', type: 'colors', x: 420, y: 0, width: 400, height: 200, collapsed: false },
-    { id: 'typography', type: 'typography', x: 0, y: 220, width: 400, height: 250, collapsed: false },
+    {
+      id: 'typography',
+      type: 'typography',
+      x: 0,
+      y: 220,
+      width: 400,
+      height: 250,
+      collapsed: false,
+    },
     { id: 'imagery', type: 'imagery', x: 420, y: 220, width: 400, height: 250, collapsed: false },
     { id: 'icons', type: 'icons', x: 0, y: 490, width: 400, height: 200, collapsed: false },
-    { id: 'templates', type: 'templates', x: 420, y: 490, width: 400, height: 200, collapsed: false },
+    {
+      id: 'templates',
+      type: 'templates',
+      x: 420,
+      y: 490,
+      width: 400,
+      height: 200,
+      collapsed: false,
+    },
   ],
   zoom: 1,
   panX: 0,
@@ -222,7 +291,7 @@ export const useBrandKitStore = create<BrandKitStore>()(
   persist(
     (set, get) => ({
       brandKits: {},
-      
+
       getCurrentBrandKit: (brandId: string) => {
         const kit = get().brandKits[brandId];
         if (!kit) {
@@ -231,7 +300,7 @@ export const useBrandKitStore = create<BrandKitStore>()(
         }
         return kit;
       },
-      
+
       initializeBrandKit: (brandId: string) =>
         set((state) => ({
           brandKits: {
@@ -239,7 +308,7 @@ export const useBrandKitStore = create<BrandKitStore>()(
             [brandId]: state.brandKits[brandId] || createDefaultBrandKit(),
           },
         })),
-      
+
       // Logo management
       addLogo: (brandId, logo) =>
         set((state) => {
@@ -254,7 +323,7 @@ export const useBrandKitStore = create<BrandKitStore>()(
             },
           };
         }),
-      
+
       updateLogo: (brandId, logoId, updates) =>
         set((state) => {
           const kit = state.brandKits[brandId];
@@ -269,7 +338,7 @@ export const useBrandKitStore = create<BrandKitStore>()(
             },
           };
         }),
-      
+
       deleteLogo: (brandId, logoId) =>
         set((state) => {
           const kit = state.brandKits[brandId];
@@ -284,7 +353,7 @@ export const useBrandKitStore = create<BrandKitStore>()(
             },
           };
         }),
-      
+
       // Color management
       addColor: (brandId, color) =>
         set((state) => {
@@ -299,7 +368,7 @@ export const useBrandKitStore = create<BrandKitStore>()(
             },
           };
         }),
-      
+
       updateColor: (brandId, colorId, updates) =>
         set((state) => {
           const kit = state.brandKits[brandId];
@@ -316,7 +385,7 @@ export const useBrandKitStore = create<BrandKitStore>()(
             },
           };
         }),
-      
+
       deleteColor: (brandId, colorId) =>
         set((state) => {
           const kit = state.brandKits[brandId];
@@ -331,7 +400,7 @@ export const useBrandKitStore = create<BrandKitStore>()(
             },
           };
         }),
-      
+
       // Typography management
       updateTypography: (brandId, typography) =>
         set((state) => {
@@ -346,7 +415,7 @@ export const useBrandKitStore = create<BrandKitStore>()(
             },
           };
         }),
-      
+
       addFont: (brandId, font) =>
         set((state) => {
           const kit = state.brandKits[brandId] || createDefaultBrandKit();
@@ -363,7 +432,7 @@ export const useBrandKitStore = create<BrandKitStore>()(
             },
           };
         }),
-      
+
       deleteFont: (brandId, fontId) =>
         set((state) => {
           const kit = state.brandKits[brandId];
@@ -381,7 +450,7 @@ export const useBrandKitStore = create<BrandKitStore>()(
             },
           };
         }),
-      
+
       // Imagery management
       addImagery: (brandId, image) =>
         set((state) => {
@@ -396,7 +465,7 @@ export const useBrandKitStore = create<BrandKitStore>()(
             },
           };
         }),
-      
+
       updateImagery: (brandId, imageId, updates) =>
         set((state) => {
           const kit = state.brandKits[brandId];
@@ -411,7 +480,7 @@ export const useBrandKitStore = create<BrandKitStore>()(
             },
           };
         }),
-      
+
       deleteImagery: (brandId, imageId) =>
         set((state) => {
           const kit = state.brandKits[brandId];
@@ -426,7 +495,7 @@ export const useBrandKitStore = create<BrandKitStore>()(
             },
           };
         }),
-      
+
       // Icon management
       addIcon: (brandId, icon) =>
         set((state) => {
@@ -441,7 +510,7 @@ export const useBrandKitStore = create<BrandKitStore>()(
             },
           };
         }),
-      
+
       updateIcon: (brandId, iconId, updates) =>
         set((state) => {
           const kit = state.brandKits[brandId];
@@ -456,7 +525,7 @@ export const useBrandKitStore = create<BrandKitStore>()(
             },
           };
         }),
-      
+
       deleteIcon: (brandId, iconId) =>
         set((state) => {
           const kit = state.brandKits[brandId];
@@ -471,7 +540,7 @@ export const useBrandKitStore = create<BrandKitStore>()(
             },
           };
         }),
-      
+
       // Template management
       addTemplate: (brandId, template) =>
         set((state) => {
@@ -486,7 +555,7 @@ export const useBrandKitStore = create<BrandKitStore>()(
             },
           };
         }),
-      
+
       updateTemplate: (brandId, templateId, updates) =>
         set((state) => {
           const kit = state.brandKits[brandId];
@@ -503,7 +572,7 @@ export const useBrandKitStore = create<BrandKitStore>()(
             },
           };
         }),
-      
+
       deleteTemplate: (brandId, templateId) =>
         set((state) => {
           const kit = state.brandKits[brandId];
@@ -518,7 +587,7 @@ export const useBrandKitStore = create<BrandKitStore>()(
             },
           };
         }),
-      
+
       // Canvas layout
       updateCanvasLayout: (brandId, layout) =>
         set((state) => {
@@ -533,7 +602,7 @@ export const useBrandKitStore = create<BrandKitStore>()(
             },
           };
         }),
-      
+
       updateCanvasSection: (brandId, sectionId, updates) =>
         set((state) => {
           const kit = state.brandKits[brandId];
@@ -559,19 +628,3 @@ export const useBrandKitStore = create<BrandKitStore>()(
     }
   )
 );
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

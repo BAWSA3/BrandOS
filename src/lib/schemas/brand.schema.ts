@@ -26,15 +26,16 @@ export const CreateBrandSchema = z.object({
 
 export const UpdateBrandSchema = CreateBrandSchema.partial();
 
-export const ShareBrandSchema = z.object({
-  brandId: z.string().min(1),
-  permission: z.enum(['view', 'edit']),
-  userId: z.string().min(1).optional(),
-  email: z.string().email().optional(),
-}).refine(
-  (data) => data.userId || data.email,
-  { message: 'Either userId or email must be provided' }
-);
+export const ShareBrandSchema = z
+  .object({
+    brandId: z.string().min(1),
+    permission: z.enum(['view', 'edit']),
+    userId: z.string().min(1).optional(),
+    email: z.string().email().optional(),
+  })
+  .refine((data) => data.userId || data.email, {
+    message: 'Either userId or email must be provided',
+  });
 
 export type CreateBrandInput = z.infer<typeof CreateBrandSchema>;
 export type UpdateBrandInput = z.infer<typeof UpdateBrandSchema>;

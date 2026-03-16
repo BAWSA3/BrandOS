@@ -14,4 +14,3 @@ export { default as TemplateSection } from './sections/TemplateSection';
 
 // Utils
 export * from './utils/exportBrandKit';
-

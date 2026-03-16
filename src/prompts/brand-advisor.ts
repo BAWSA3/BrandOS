@@ -3,23 +3,26 @@ import { VoiceFingerprintSummary, formatSummaryForPrompt } from '@/lib/voice-fin
 
 // Archetype descriptions for the welcome message
 const ARCHETYPE_DESCRIPTIONS: Record<string, string> = {
-  'SIGNAL_SAGE': 'a knowledge authority who builds trust through education and deep expertise',
-  'RELAY': 'a super connector who brings people and opportunities together',
-  'FREQ': 'an entertainer who builds community through personality and relatability',
-  'FORESIGHT': 'a thought leader who shapes narratives and sees what others miss',
+  SIGNAL_SAGE: 'a knowledge authority who builds trust through education and deep expertise',
+  RELAY: 'a super connector who brings people and opportunities together',
+  FREQ: 'an entertainer who builds community through personality and relatability',
+  FORESIGHT: 'a thought leader who shapes narratives and sees what others miss',
   'BUILD.EXE': 'a builder who earns credibility by shipping and sharing the journey',
-  'ARC': 'a rising star whose growth story inspires and creates connection',
-  'ENTROPY': 'a risk-taker who thrives in chaos and builds cult-like followings',
-  'NULL': 'a mysterious voice whose ideas speak louder than identity',
+  ARC: 'a rising star whose growth story inspires and creates connection',
+  ENTROPY: 'a risk-taker who thrives in chaos and builds cult-like followings',
+  NULL: 'a mysterious voice whose ideas speak louder than identity',
 };
 
 /**
  * Build the system prompt for the Brand Advisor
  * This injects the user's Brand DNA as persistent context
  */
-export function buildAdvisorSystemPrompt(brandDNA: GeneratedBrandDNA, fingerprintSummary?: VoiceFingerprintSummary): string {
+export function buildAdvisorSystemPrompt(
+  brandDNA: GeneratedBrandDNA,
+  fingerprintSummary?: VoiceFingerprintSummary
+): string {
   const contentPillarsSection = brandDNA.contentPillars?.length
-    ? `\n- Content Pillars: ${brandDNA.contentPillars.map(p => p.name).join(', ')}`
+    ? `\n- Content Pillars: ${brandDNA.contentPillars.map((p) => p.name).join(', ')}`
     : '';
 
   const performanceSection = brandDNA.performanceInsights
@@ -82,21 +85,26 @@ You are their trusted brand advisor who deeply understands their unique identity
 - Building sustainable content systems
 
 Remember: They came to you because generic AI advice doesn't cut it. Make every response feel personalized to THEIR brand.
-${fingerprintSummary ? `
+${
+  fingerprintSummary
+    ? `
 ## Voice Fingerprint
 
 You have a detailed understanding of how this creator writes. When generating content examples or suggestions, match their actual voice:
 
 ${formatSummaryForPrompt(fingerprintSummary)}
 
-Always write examples in THEIR voice, never generic AI voice.` : ''}`;
+Always write examples in THEIR voice, never generic AI voice.`
+    : ''
+}`;
 }
 
 /**
  * Generate the welcome message when the chat opens
  */
 export function getWelcomeMessage(brandDNA: GeneratedBrandDNA): string {
-  const archetypeDesc = ARCHETYPE_DESCRIPTIONS[brandDNA.archetype] || 'a unique voice in your space';
+  const archetypeDesc =
+    ARCHETYPE_DESCRIPTIONS[brandDNA.archetype] || 'a unique voice in your space';
 
   return `I've analyzed your X presence and captured your Brand DNA.
 
@@ -145,6 +153,7 @@ export const SUGGESTED_PROMPTS = [
  */
 export const WAITLIST_GATE_MESSAGE = {
   title: "You're getting advice no generic AI can give.",
-  subtitle: "Your Brand Advisor knows your archetype, voice, and audience. This is personalized strategy, not templates.",
-  cta: "Join the waitlist to unlock unlimited conversations with your Brand Advisor.",
+  subtitle:
+    'Your Brand Advisor knows your archetype, voice, and audience. This is personalized strategy, not templates.',
+  cta: 'Join the waitlist to unlock unlimited conversations with your Brand Advisor.',
 };

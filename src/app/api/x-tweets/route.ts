@@ -55,52 +55,44 @@ export interface TweetAnalysis {
 /**
  * Fetch recent tweets for a user
  * REQUIRES: X API Basic tier ($100/month)
- * 
+ *
  * This endpoint will return 403 on Free tier
  */
 export async function POST(request: NextRequest) {
   try {
-    const { userId, username, maxResults = 100 } = await request.json() as { 
+    const {
+      userId,
+      username,
+      maxResults = 100,
+    } = (await request.json()) as {
       userId?: string;
       username?: string;
       maxResults?: number;
     };
 
     if (!userId && !username) {
-      return NextResponse.json(
-        { error: 'Either userId or username is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Either userId or username is required' }, { status: 400 });
     }
 
     const bearerToken = process.env.X_BEARER_TOKEN;
 
     if (!bearerToken) {
-      return NextResponse.json(
-        { error: 'X API not configured' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'X API not configured' }, { status: 500 });
     }
 
     // If username provided, first get user ID
     let targetUserId = userId;
     if (!targetUserId && username) {
-      const userResponse = await fetch(
-        `https://api.twitter.com/2/users/by/username/${username}`,
-        {
-          headers: {
-            'Authorization': `Bearer ${bearerToken}`,
-          },
-        }
-      );
+      const userResponse = await fetch(`https://api.twitter.com/2/users/by/username/${username}`, {
+        headers: {
+          Authorization: `Bearer ${bearerToken}`,
+        },
+      });
 
       if (!userResponse.ok) {
         const error = await userResponse.json();
         console.error('User lookup error:', error);
-        return NextResponse.json(
-          { error: 'Failed to find user' },
-          { status: userResponse.status }
-        );
+        return NextResponse.json({ error: 'Failed to find user' }, { status: userResponse.status });
       }
 
       const userData = await userResponse.json();
@@ -108,10 +100,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (!targetUserId) {
-      return NextResponse.json(
-        { error: 'Could not resolve user ID' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Could not resolve user ID' }, { status: 400 });
     }
 
     // Fetch user's tweets (requires Basic tier)
@@ -120,21 +109,21 @@ export async function POST(request: NextRequest) {
 
     const tweetsResponse = await fetch(tweetsUrl, {
       headers: {
-        'Authorization': `Bearer ${bearerToken}`,
+        Authorization: `Bearer ${bearerToken}`,
       },
     });
 
     if (!tweetsResponse.ok) {
       const error = await tweetsResponse.json();
       console.error('Tweets fetch error:', tweetsResponse.status, error);
-      
+
       // Check for tier-specific errors
       if (tweetsResponse.status === 403) {
         return NextResponse.json(
-          { 
+          {
             error: 'Tweet access requires X API Basic tier ($100/month)',
             upgradeRequired: true,
-            upgradeUrl: 'https://developer.twitter.com/en/portal/products'
+            upgradeUrl: 'https://developer.twitter.com/en/portal/products',
           },
           { status: 403 }
         );
@@ -163,13 +152,9 @@ export async function POST(request: NextRequest) {
       analysis,
       meta: tweetsData.meta,
     });
-
   } catch (error) {
     console.error('X Tweets API error:', error);
-    return NextResponse.json(
-      { error: 'An unexpected error occurred' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }
 
@@ -205,19 +190,23 @@ function analyzeTweets(tweets: Tweet[]): TweetAnalysis {
   const totalLikes = tweets.reduce((sum, t) => sum + (t.public_metrics?.like_count || 0), 0);
   const totalRetweets = tweets.reduce((sum, t) => sum + (t.public_metrics?.retweet_count || 0), 0);
   const totalReplies = tweets.reduce((sum, t) => sum + (t.public_metrics?.reply_count || 0), 0);
-  const totalImpressions = tweets.reduce((sum, t) => sum + (t.public_metrics?.impression_count || 0), 0);
+  const totalImpressions = tweets.reduce(
+    (sum, t) => sum + (t.public_metrics?.impression_count || 0),
+    0
+  );
 
   const avgLikes = totalLikes / tweets.length;
   const avgRetweets = totalRetweets / tweets.length;
   const avgReplies = totalReplies / tweets.length;
-  const avgEngagementRate = totalImpressions > 0 
-    ? ((totalLikes + totalRetweets + totalReplies) / totalImpressions) * 100 
-    : 0;
+  const avgEngagementRate =
+    totalImpressions > 0
+      ? ((totalLikes + totalRetweets + totalReplies) / totalImpressions) * 100
+      : 0;
 
   // Hashtag analysis
   const hashtagCounts: Record<string, number> = {};
-  tweets.forEach(t => {
-    t.entities?.hashtags?.forEach(h => {
+  tweets.forEach((t) => {
+    t.entities?.hashtags?.forEach((h) => {
       hashtagCounts[h.tag] = (hashtagCounts[h.tag] || 0) + 1;
     });
   });
@@ -230,8 +219,8 @@ function analyzeTweets(tweets: Tweet[]): TweetAnalysis {
   const hourCounts: Record<number, number> = {};
   const dayCounts: Record<string, number> = {};
   const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-  
-  tweets.forEach(t => {
+
+  tweets.forEach((t) => {
     if (t.created_at) {
       const date = new Date(t.created_at);
       const hour = date.getUTCHours();
@@ -241,23 +230,25 @@ function analyzeTweets(tweets: Tweet[]): TweetAnalysis {
     }
   });
 
-  const mostActiveHour = Object.entries(hourCounts)
-    .sort((a, b) => b[1] - a[1])[0]?.[0] || '0';
-  const mostActiveDay = Object.entries(dayCounts)
-    .sort((a, b) => b[1] - a[1])[0]?.[0] || 'Unknown';
+  const mostActiveHour = Object.entries(hourCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || '0';
+  const mostActiveDay = Object.entries(dayCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || 'Unknown';
 
   // Content pattern analysis
-  const emojiRegex = /[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu;
-  
+  const emojiRegex =
+    /[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu;
+
   const avgTweetLength = tweets.reduce((sum, t) => sum + t.text.length, 0) / tweets.length;
-  const tweetsWithEmojis = tweets.filter(t => emojiRegex.test(t.text)).length;
+  const tweetsWithEmojis = tweets.filter((t) => emojiRegex.test(t.text)).length;
   const emojiUsage = (tweetsWithEmojis / tweets.length) * 100;
-  const questionTweets = tweets.filter(t => t.text.includes('?')).length;
-  const threadStarters = tweets.filter(t => t.text.includes('🧵') || t.text.toLowerCase().includes('thread')).length;
-  const mediaUsage = tweets.filter(t => t.entities?.urls?.some(u => 
-    u.expanded_url.includes('pic.twitter') || 
-    u.expanded_url.includes('video.twimg')
-  )).length;
+  const questionTweets = tweets.filter((t) => t.text.includes('?')).length;
+  const threadStarters = tweets.filter(
+    (t) => t.text.includes('🧵') || t.text.toLowerCase().includes('thread')
+  ).length;
+  const mediaUsage = tweets.filter((t) =>
+    t.entities?.urls?.some(
+      (u) => u.expanded_url.includes('pic.twitter') || u.expanded_url.includes('video.twimg')
+    )
+  ).length;
 
   // Calculate posting frequency
   let postingFrequency = 'Unknown';
@@ -266,7 +257,7 @@ function analyzeTweets(tweets: Tweet[]): TweetAnalysis {
     const lastDate = new Date(tweets[0].created_at);
     const daysDiff = (lastDate.getTime() - firstDate.getTime()) / (1000 * 60 * 60 * 24);
     const tweetsPerDay = tweets.length / Math.max(daysDiff, 1);
-    
+
     if (tweetsPerDay >= 5) postingFrequency = 'Very Active (5+ per day)';
     else if (tweetsPerDay >= 2) postingFrequency = 'Active (2-5 per day)';
     else if (tweetsPerDay >= 1) postingFrequency = 'Regular (1-2 per day)';
@@ -296,9 +287,3 @@ function analyzeTweets(tweets: Tweet[]): TweetAnalysis {
     },
   };
 }
-
-
-
-
-
-

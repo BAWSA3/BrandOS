@@ -6,26 +6,21 @@ import { getUserProfile } from '@/lib/user-profiles';
 import { checkRateLimit } from '@/lib/rate-limit';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const supabaseServiceKey =
+  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
 // Specific extension ID — update when published to Chrome Web Store
 const BRANDOS_EXTENSION_ID = process.env.BRANDOS_CHROME_EXTENSION_ID;
 
-const ALLOWED_ORIGINS = [
-  'https://brandos.app',
-  'https://www.brandos.app',
-  'http://localhost:3000',
-];
+const ALLOWED_ORIGINS = ['https://brandos.app', 'https://www.brandos.app', 'http://localhost:3000'];
 
 function corsHeaders(origin?: string | null) {
-  const isAllowed = origin && (
-    ALLOWED_ORIGINS.includes(origin) ||
-    // Only allow the specific extension ID, or any in dev
-    (origin.startsWith('chrome-extension://') && (
-      !BRANDOS_EXTENSION_ID ||
-      origin === `chrome-extension://${BRANDOS_EXTENSION_ID}`
-    ))
-  );
+  const isAllowed =
+    origin &&
+    (ALLOWED_ORIGINS.includes(origin) ||
+      // Only allow the specific extension ID, or any in dev
+      (origin.startsWith('chrome-extension://') &&
+        (!BRANDOS_EXTENSION_ID || origin === `chrome-extension://${BRANDOS_EXTENSION_ID}`)));
   const corsOrigin = isAllowed ? origin : ALLOWED_ORIGINS[0];
 
   return {
@@ -41,7 +36,9 @@ export async function OPTIONS(request: NextRequest) {
   return new NextResponse(null, { status: 204, headers: corsHeaders(origin) });
 }
 
-async function authenticateRequest(request: NextRequest): Promise<{ userId: string; error?: never } | { userId?: never; error: string }> {
+async function authenticateRequest(
+  request: NextRequest
+): Promise<{ userId: string; error?: never } | { userId?: never; error: string }> {
   const authHeader = request.headers.get('authorization');
   if (!authHeader?.startsWith('Bearer ')) {
     return { error: 'Missing or invalid Authorization header' };
@@ -49,7 +46,10 @@ async function authenticateRequest(request: NextRequest): Promise<{ userId: stri
 
   const token = authHeader.slice(7);
   const supabase = createClient(supabaseUrl, supabaseServiceKey);
-  const { data: { user }, error } = await supabase.auth.getUser(token);
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser(token);
 
   if (error || !user) {
     return { error: 'Invalid or expired token' };
@@ -76,7 +76,10 @@ async function fetchProfile(username: string, origin: string): Promise<XProfileD
       description: data.profile.description,
       profile_image_url: data.profile.profile_image_url,
       public_metrics: data.profile.public_metrics || {
-        followers_count: 0, following_count: 0, tweet_count: 0, listed_count: 0,
+        followers_count: 0,
+        following_count: 0,
+        tweet_count: 0,
+        listed_count: 0,
       },
       created_at: data.profile.created_at,
       verified: data.profile.verified,
@@ -99,10 +102,10 @@ export async function GET(request: NextRequest) {
   }
 
   // Rate limit: 60 req/min per user
-  const { limited, remaining, resetIn } = checkRateLimit(
-    `ext:${auth.userId}`,
-    { interval: 60_000, maxRequests: 60 }
-  );
+  const { limited, remaining, resetIn } = checkRateLimit(`ext:${auth.userId}`, {
+    interval: 60_000,
+    maxRequests: 60,
+  });
   if (limited) {
     return NextResponse.json(
       { error: 'Rate limit exceeded', retryAfter: Math.ceil(resetIn / 1000) },
@@ -113,36 +116,54 @@ export async function GET(request: NextRequest) {
   // Get username
   const username = request.nextUrl.searchParams.get('username');
   if (!username) {
-    return NextResponse.json({ error: 'username query parameter required' }, { status: 400, headers });
+    return NextResponse.json(
+      { error: 'username query parameter required' },
+      { status: 400, headers }
+    );
   }
   const cleanUsername = username.replace(/^@/, '').trim();
 
   // Check cached profile first
   const cachedProfile = getUserProfile(cleanUsername);
-  if (cachedProfile && (Date.now() - cachedProfile.lastScannedAt) < 24 * 60 * 60 * 1000) {
+  if (cachedProfile && Date.now() - cachedProfile.lastScannedAt < 24 * 60 * 60 * 1000) {
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin;
-    return NextResponse.json({
-      username: cachedProfile.username,
-      displayName: cachedProfile.displayName,
-      profileImageUrl: null,
-      overallScore: cachedProfile.currentScore,
-      phases: {
-        define: { score: Math.round(cachedProfile.currentScore * 0.92), topInsight: 'Cached score' },
-        check: { score: Math.round(cachedProfile.currentScore * 0.88), topInsight: 'Cached score' },
-        generate: { score: Math.round(cachedProfile.currentScore * 0.82), topInsight: 'Cached score' },
-        scale: { score: Math.round(cachedProfile.currentScore * 0.95), topInsight: 'Cached score' },
+    return NextResponse.json(
+      {
+        username: cachedProfile.username,
+        displayName: cachedProfile.displayName,
+        profileImageUrl: null,
+        overallScore: cachedProfile.currentScore,
+        phases: {
+          define: {
+            score: Math.round(cachedProfile.currentScore * 0.92),
+            topInsight: 'Cached score',
+          },
+          check: {
+            score: Math.round(cachedProfile.currentScore * 0.88),
+            topInsight: 'Cached score',
+          },
+          generate: {
+            score: Math.round(cachedProfile.currentScore * 0.82),
+            topInsight: 'Cached score',
+          },
+          scale: {
+            score: Math.round(cachedProfile.currentScore * 0.95),
+            topInsight: 'Cached score',
+          },
+        },
+        archetype: {
+          primary: cachedProfile.archetype.primary,
+          emoji: cachedProfile.archetype.emoji,
+          tagline: cachedProfile.archetype.tagline,
+        },
+        personalityCode: cachedProfile.archetype.primary.charAt(0).toUpperCase(),
+        influenceTier: 'established',
+        contentStyle: { topics: [], patterns: [], pillars: [] },
+        cachedAt: new Date(cachedProfile.lastScannedAt).toISOString(),
+        scoreUrl: `${appUrl}/score/${cleanUsername}`,
       },
-      archetype: {
-        primary: cachedProfile.archetype.primary,
-        emoji: cachedProfile.archetype.emoji,
-        tagline: cachedProfile.archetype.tagline,
-      },
-      personalityCode: cachedProfile.archetype.primary.charAt(0).toUpperCase(),
-      influenceTier: 'established',
-      contentStyle: { topics: [], patterns: [], pillars: [] },
-      cachedAt: new Date(cachedProfile.lastScannedAt).toISOString(),
-      scoreUrl: `${appUrl}/score/${cleanUsername}`,
-    }, { headers: { ...headers, 'X-RateLimit-Remaining': remaining.toString() } });
+      { headers: { ...headers, 'X-RateLimit-Remaining': remaining.toString() } }
+    );
   }
 
   // Fresh score: fetch profile + score with Gemini
@@ -164,31 +185,45 @@ export async function GET(request: NextRequest) {
     const msg = geminiError instanceof Error ? geminiError.message : '';
     if (msg.includes('429') || msg.includes('quota')) {
       // Return basic score from profile heuristics
-      const heuristicScore = Math.min(100, Math.round(
-        30 + (profile.description ? 15 : 0) +
-        Math.min(20, Math.log10(Math.max(1, profile.public_metrics.followers_count)) * 5) +
-        (profile.verified ? 10 : 0) +
-        Math.min(15, Math.log10(Math.max(1, profile.public_metrics.tweet_count)) * 4)
-      ));
+      const heuristicScore = Math.min(
+        100,
+        Math.round(
+          30 +
+            (profile.description ? 15 : 0) +
+            Math.min(20, Math.log10(Math.max(1, profile.public_metrics.followers_count)) * 5) +
+            (profile.verified ? 10 : 0) +
+            Math.min(15, Math.log10(Math.max(1, profile.public_metrics.tweet_count)) * 4)
+        )
+      );
       const appUrl = process.env.NEXT_PUBLIC_APP_URL || reqOrigin;
-      return NextResponse.json({
-        username: cleanUsername,
-        displayName: profile.name,
-        profileImageUrl: profile.profile_image_url,
-        overallScore: heuristicScore,
-        phases: {
-          define: { score: heuristicScore, topInsight: 'Quick estimate — full analysis on BrandOS' },
-          check: { score: heuristicScore, topInsight: 'Quick estimate' },
-          generate: { score: heuristicScore, topInsight: 'Quick estimate' },
-          scale: { score: heuristicScore, topInsight: 'Quick estimate' },
+      return NextResponse.json(
+        {
+          username: cleanUsername,
+          displayName: profile.name,
+          profileImageUrl: profile.profile_image_url,
+          overallScore: heuristicScore,
+          phases: {
+            define: {
+              score: heuristicScore,
+              topInsight: 'Quick estimate — full analysis on BrandOS',
+            },
+            check: { score: heuristicScore, topInsight: 'Quick estimate' },
+            generate: { score: heuristicScore, topInsight: 'Quick estimate' },
+            scale: { score: heuristicScore, topInsight: 'Quick estimate' },
+          },
+          archetype: {
+            primary: 'Unknown',
+            emoji: '❓',
+            tagline: 'Scan on BrandOS for full analysis',
+          },
+          personalityCode: '?',
+          influenceTier: 'emerging',
+          contentStyle: { topics: [], patterns: [], pillars: [] },
+          cachedAt: new Date().toISOString(),
+          scoreUrl: `${appUrl}/score/${cleanUsername}`,
         },
-        archetype: { primary: 'Unknown', emoji: '❓', tagline: 'Scan on BrandOS for full analysis' },
-        personalityCode: '?',
-        influenceTier: 'emerging',
-        contentStyle: { topics: [], patterns: [], pillars: [] },
-        cachedAt: new Date().toISOString(),
-        scoreUrl: `${appUrl}/score/${cleanUsername}`,
-      }, { headers: { ...headers, 'X-RateLimit-Remaining': remaining.toString() } });
+        { headers: { ...headers, 'X-RateLimit-Remaining': remaining.toString() } }
+      );
     }
     return NextResponse.json({ error: 'Failed to analyze profile' }, { status: 500, headers });
   }
@@ -213,30 +248,36 @@ export async function GET(request: NextRequest) {
   const generatePhase = brandScore.phases?.generate;
   const scalePhase = brandScore.phases?.scale;
 
-  return NextResponse.json({
-    username: cleanUsername,
-    displayName: profile.name,
-    profileImageUrl: profile.profile_image_url,
-    overallScore: brandScore.overallScore,
-    phases: {
-      define: { score: definePhase?.score || 0, topInsight: definePhase?.insights?.[0] || '' },
-      check: { score: checkPhase?.score || 0, topInsight: checkPhase?.insights?.[0] || '' },
-      generate: { score: generatePhase?.score || 0, topInsight: generatePhase?.insights?.[0] || '' },
-      scale: { score: scalePhase?.score || 0, topInsight: scalePhase?.insights?.[0] || '' },
+  return NextResponse.json(
+    {
+      username: cleanUsername,
+      displayName: profile.name,
+      profileImageUrl: profile.profile_image_url,
+      overallScore: brandScore.overallScore,
+      phases: {
+        define: { score: definePhase?.score || 0, topInsight: definePhase?.insights?.[0] || '' },
+        check: { score: checkPhase?.score || 0, topInsight: checkPhase?.insights?.[0] || '' },
+        generate: {
+          score: generatePhase?.score || 0,
+          topInsight: generatePhase?.insights?.[0] || '',
+        },
+        scale: { score: scalePhase?.score || 0, topInsight: scalePhase?.insights?.[0] || '' },
+      },
+      archetype: {
+        primary: brandScore.archetype?.primary || 'Unknown',
+        emoji: brandScore.archetype?.emoji || '❓',
+        tagline: brandScore.archetype?.tagline || '',
+      },
+      personalityCode: (brandScore.archetype?.primary || '?').charAt(0).toUpperCase(),
+      influenceTier: brandScore.influenceTier || 'emerging',
+      contentStyle: {
+        topics: brandScore.topStrengths?.slice(0, 3) || [],
+        patterns: brandScore.topImprovements?.slice(0, 2) || [],
+        pillars: [],
+      },
+      cachedAt: new Date().toISOString(),
+      scoreUrl: `${appUrl}/score/${cleanUsername}`,
     },
-    archetype: {
-      primary: brandScore.archetype?.primary || 'Unknown',
-      emoji: brandScore.archetype?.emoji || '❓',
-      tagline: brandScore.archetype?.tagline || '',
-    },
-    personalityCode: (brandScore.archetype?.primary || '?').charAt(0).toUpperCase(),
-    influenceTier: brandScore.influenceTier || 'emerging',
-    contentStyle: {
-      topics: brandScore.topStrengths?.slice(0, 3) || [],
-      patterns: brandScore.topImprovements?.slice(0, 2) || [],
-      pillars: [],
-    },
-    cachedAt: new Date().toISOString(),
-    scoreUrl: `${appUrl}/score/${cleanUsername}`,
-  }, { headers: { ...headers, 'X-RateLimit-Remaining': remaining.toString() } });
+    { headers: { ...headers, 'X-RateLimit-Remaining': remaining.toString() } }
+  );
 }

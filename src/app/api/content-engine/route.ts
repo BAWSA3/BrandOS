@@ -10,17 +10,17 @@ export async function POST(request: NextRequest) {
     // Auth guard
     const user = await getUser();
     if (!user) {
-      return NextResponse.json(
-        { error: 'Authentication required' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
     }
 
     // User-based rate limit
     const { limited, resetIn } = withUserRateLimit(user.id, 'ai');
     if (limited) {
       return NextResponse.json(
-        { error: 'Rate limit reached. Please wait before generating again.', retryAfter: Math.ceil(resetIn / 1000) },
+        {
+          error: 'Rate limit reached. Please wait before generating again.',
+          retryAfter: Math.ceil(resetIn / 1000),
+        },
         { status: 429 }
       );
     }
@@ -47,28 +47,19 @@ export async function POST(request: NextRequest) {
     const { brandDNA, engineConfig, day, slot, topic } = parsed.data;
 
     if (!validateBrandDNA(brandDNA)) {
-      return NextResponse.json(
-        { error: 'Invalid or missing brand DNA' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid or missing brand DNA' }, { status: 400 });
     }
 
     const agents = createAgents(brandDNA);
     const result = await agents.createScheduledContent(engineConfig, { day, slot, topic });
 
     if (!result.success) {
-      return NextResponse.json(
-        { error: result.error || 'Generation failed' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: result.error || 'Generation failed' }, { status: 500 });
     }
 
     return NextResponse.json(result.data);
   } catch (err) {
     console.error('Content engine generation failed:', err);
-    return NextResponse.json(
-      { error: 'Generation failed' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Generation failed' }, { status: 500 });
   }
 }

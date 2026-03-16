@@ -86,20 +86,11 @@ function encodeBrandScoreData(data: BrandScoreAttestation): string {
 
   // Offsets for dynamic strings
   const usernameOffset = encodeUint256(8 * 32);
-  const archetypeOffset = encodeUint256(
-    8 * 32 + 32 + Math.ceil(data.username.length / 32) * 32
-  );
+  const archetypeOffset = encodeUint256(8 * 32 + 32 + Math.ceil(data.username.length / 32) * 32);
   const usernameEncoded = encodeString(data.username);
   const archetypeEncoded = encodeString(data.archetype);
 
-  return (
-    '0x' +
-    staticPart +
-    usernameOffset +
-    archetypeOffset +
-    usernameEncoded +
-    archetypeEncoded
-  );
+  return '0x' + staticPart + usernameOffset + archetypeOffset + usernameEncoded + archetypeEncoded;
 }
 
 export function encodeAttestationData(
@@ -183,9 +174,7 @@ export async function createAttestation(
   }
 }
 
-function schemaKeyForType(
-  type: AttestationType
-): keyof import('./types').OnchainConfig['schemas'] {
+function schemaKeyForType(type: AttestationType): keyof import('./types').OnchainConfig['schemas'] {
   switch (type) {
     case 'brand-dna':
       return 'brandDna';

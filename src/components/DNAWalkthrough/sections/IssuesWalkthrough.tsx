@@ -58,11 +58,11 @@ function detectIssues(
   const issues: Issue[] = [];
 
   // Authenticity issues
-  if (authenticity && (100 - authenticity.score) < 50) {
+  if (authenticity && 100 - authenticity.score < 50) {
     issues.push({
       title: 'Authenticity Concerns',
       severity: 'critical',
-      metric: `${(100 - authenticity.score)}% authentic`,
+      metric: `${100 - authenticity.score}% authentic`,
       description: 'Unusual patterns detected that may indicate inauthentic activity.',
       fix: 'Focus on genuine engagement rather than growth hacks. Quality interactions build lasting audiences.',
       impact: 15,
@@ -89,10 +89,10 @@ function detectIssues(
           phase.name === 'Define'
             ? 'Clarify your brand identity through focused content themes and consistent voice.'
             : phase.name === 'Check'
-            ? 'Improve consistency in your posting frequency and voice.'
-            : phase.name === 'Generate'
-            ? 'Increase your content output and experiment with engaging formats.'
-            : 'Focus on growth tactics and engagement optimization.',
+              ? 'Improve consistency in your posting frequency and voice.'
+              : phase.name === 'Generate'
+                ? 'Increase your content output and experiment with engaging formats.'
+                : 'Focus on growth tactics and engagement optimization.',
         impact: phase.score < 30 ? 10 : 6,
         priority: phase.score < 30 ? 2 : 3,
       });
@@ -149,9 +149,10 @@ export default function IssuesWalkthrough({
 
   const isDark = theme === 'dark';
 
-  const howWeCalculated = criticalCount > 0 || warningCount > 0
-    ? `Compared against successful creators: ${criticalCount} critical, ${warningCount} warning${warningCount !== 1 ? 's' : ''}, ${infoCount} info. Health score: ${healthScore}/100.`
-    : 'No issues detected - your brand fundamentals are solid.';
+  const howWeCalculated =
+    criticalCount > 0 || warningCount > 0
+      ? `Compared against successful creators: ${criticalCount} critical, ${warningCount} warning${warningCount !== 1 ? 's' : ''}, ${infoCount} info. Health score: ${healthScore}/100.`
+      : 'No issues detected - your brand fundamentals are solid.';
 
   const whyItMatters = `Addressing issues removes friction from growth. Critical issues hurt reach; warnings are missed opportunities.`;
 
@@ -203,16 +204,10 @@ export default function IssuesWalkthrough({
                 BRAND HEALTH
               </div>
               <div className="flex items-baseline gap-1">
-                <span
-                  className="text-4xl font-bold"
-                  style={{ color: '#FFFFFF' }}
-                >
+                <span className="text-4xl font-bold" style={{ color: '#FFFFFF' }}>
                   {healthScore}
                 </span>
-                <span
-                  className="text-lg"
-                  style={{ color: 'rgba(255,255,255,0.8)' }}
-                >
+                <span className="text-lg" style={{ color: 'rgba(255,255,255,0.8)' }}>
                   /100
                 </span>
               </div>
@@ -268,10 +263,7 @@ export default function IssuesWalkthrough({
                         Critical
                       </span>
                     </div>
-                    <span
-                      className="text-sm font-medium"
-                      style={{ color: '#EF4444' }}
-                    >
+                    <span className="text-sm font-medium" style={{ color: '#EF4444' }}>
                       {criticalCount}
                     </span>
                   </div>
@@ -290,10 +282,7 @@ export default function IssuesWalkthrough({
                         Warning
                       </span>
                     </div>
-                    <span
-                      className="text-sm font-medium"
-                      style={{ color: '#F59E0B' }}
-                    >
+                    <span className="text-sm font-medium" style={{ color: '#F59E0B' }}>
                       {warningCount}
                     </span>
                   </div>
@@ -312,10 +301,7 @@ export default function IssuesWalkthrough({
                         Info
                       </span>
                     </div>
-                    <span
-                      className="text-sm font-medium"
-                      style={{ color: '#3B82F6' }}
-                    >
+                    <span className="text-sm font-medium" style={{ color: '#3B82F6' }}>
                       {infoCount}
                     </span>
                   </div>
@@ -345,10 +331,7 @@ export default function IssuesWalkthrough({
                 POTENTIAL GAIN
               </div>
               <div className="flex items-baseline gap-1">
-                <span
-                  className="text-3xl font-bold"
-                  style={{ color: '#10B981' }}
-                >
+                <span className="text-3xl font-bold" style={{ color: '#10B981' }}>
                   +{totalPotentialImprovement}
                 </span>
                 <span
@@ -370,7 +353,11 @@ export default function IssuesWalkthrough({
             </motion.div>
 
             {/* Issue Cards Grid */}
-            <StaggerContainer className="md:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4" staggerDelay={0.1} initialDelay={0.3}>
+            <StaggerContainer
+              className="md:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4"
+              staggerDelay={0.1}
+              initialDelay={0.3}
+            >
               {issues.map((issue, index) => (
                 <StaggerItem
                   key={issue.title}
@@ -381,19 +368,19 @@ export default function IssuesWalkthrough({
                       ? issue.severity === 'critical'
                         ? 'rgba(239, 68, 68, 0.1)'
                         : issue.severity === 'warning'
-                        ? 'rgba(245, 158, 11, 0.1)'
-                        : 'rgba(59, 130, 246, 0.1)'
+                          ? 'rgba(245, 158, 11, 0.1)'
+                          : 'rgba(59, 130, 246, 0.1)'
                       : issue.severity === 'critical'
-                      ? 'rgba(239, 68, 68, 0.08)'
-                      : issue.severity === 'warning'
-                      ? 'rgba(245, 158, 11, 0.08)'
-                      : 'rgba(59, 130, 246, 0.08)',
+                        ? 'rgba(239, 68, 68, 0.08)'
+                        : issue.severity === 'warning'
+                          ? 'rgba(245, 158, 11, 0.08)'
+                          : 'rgba(59, 130, 246, 0.08)',
                     border: `1px solid ${
                       issue.severity === 'critical'
                         ? 'rgba(239, 68, 68, 0.3)'
                         : issue.severity === 'warning'
-                        ? 'rgba(245, 158, 11, 0.3)'
-                        : 'rgba(59, 130, 246, 0.3)'
+                          ? 'rgba(245, 158, 11, 0.3)'
+                          : 'rgba(59, 130, 246, 0.3)'
                     }`,
                   }}
                 >
@@ -409,14 +396,14 @@ export default function IssuesWalkthrough({
                               issue.severity === 'critical'
                                 ? 'rgba(239, 68, 68, 0.3)'
                                 : issue.severity === 'warning'
-                                ? 'rgba(245, 158, 11, 0.3)'
-                                : 'rgba(59, 130, 246, 0.3)',
+                                  ? 'rgba(245, 158, 11, 0.3)'
+                                  : 'rgba(59, 130, 246, 0.3)',
                             color:
                               issue.severity === 'critical'
                                 ? '#EF4444'
                                 : issue.severity === 'warning'
-                                ? '#F59E0B'
-                                : '#3B82F6',
+                                  ? '#F59E0B'
+                                  : '#3B82F6',
                           }}
                         >
                           #{index + 1} {issue.severity.toUpperCase()}
@@ -451,8 +438,8 @@ export default function IssuesWalkthrough({
                           issue.severity === 'critical'
                             ? '#EF4444'
                             : issue.severity === 'warning'
-                            ? '#F59E0B'
-                            : '#3B82F6',
+                              ? '#F59E0B'
+                              : '#3B82F6',
                       }}
                     >
                       {issue.metric}
@@ -536,10 +523,7 @@ export default function IssuesWalkthrough({
               </p>
               <div className="flex items-center justify-center gap-6">
                 <div className="text-center">
-                  <div
-                    className="text-3xl font-bold"
-                    style={{ color: '#10B981' }}
-                  >
+                  <div className="text-3xl font-bold" style={{ color: '#10B981' }}>
                     100
                   </div>
                   <div

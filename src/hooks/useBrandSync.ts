@@ -107,18 +107,19 @@ export function useBrandSync(): UseBrandSyncReturn {
 
         // If there are local brands not on server, sync them up
         for (const localBrand of localBrands) {
-          const existsOnServer = serverBrands.some(b => b.id === localBrand.id);
+          const existsOnServer = serverBrands.some((b) => b.id === localBrand.id);
           if (!existsOnServer && localBrand.name !== 'My Brand') {
             await saveBrandToServer(localBrand);
           }
         }
       } else {
         // No server brands - migrate localStorage brands if they have content
-        const brandsToMigrate = brands.filter(b =>
-          b.name !== 'My Brand' ||
-          b.keywords.length > 0 ||
-          b.doPatterns.length > 0 ||
-          b.voiceSamples.length > 0
+        const brandsToMigrate = brands.filter(
+          (b) =>
+            b.name !== 'My Brand' ||
+            b.keywords.length > 0 ||
+            b.doPatterns.length > 0 ||
+            b.voiceSamples.length > 0
         );
 
         for (const brand of brandsToMigrate) {

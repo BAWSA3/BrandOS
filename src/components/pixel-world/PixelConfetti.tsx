@@ -21,7 +21,16 @@ export default function PixelConfetti({ isActive }: PixelConfettiProps) {
 
   useEffect(() => {
     if (isActive) {
-      const colors = ['#5ABF3E', '#FFE066', '#E88A4A', '#B0D8F0', '#10B981', '#FFD700', '#FF6B8A', '#E6E6FA'];
+      const colors = [
+        '#5ABF3E',
+        '#FFE066',
+        '#E88A4A',
+        '#B0D8F0',
+        '#10B981',
+        '#FFD700',
+        '#FF6B8A',
+        '#E6E6FA',
+      ];
       const newParticles = Array.from({ length: 50 }, (_, i) => ({
         id: i,
         x: 50 + (Math.random() - 0.5) * 100,
@@ -37,7 +46,15 @@ export default function PixelConfetti({ isActive }: PixelConfettiProps) {
   if (!isActive) return null;
 
   return (
-    <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden', imageRendering: 'pixelated' }}>
+    <div
+      style={{
+        position: 'absolute',
+        inset: 0,
+        pointerEvents: 'none',
+        overflow: 'hidden',
+        imageRendering: 'pixelated',
+      }}
+    >
       {particles.map((particle) => (
         <motion.div
           key={particle.id}

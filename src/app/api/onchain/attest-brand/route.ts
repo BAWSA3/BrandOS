@@ -17,7 +17,10 @@ async function getAuthUser() {
   if (!accessToken) return null;
 
   const supabase = createClient(supabaseUrl, supabaseAnonKey);
-  const { data: { user }, error } = await supabase.auth.getUser(accessToken);
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser(accessToken);
   if (error || !user) return null;
 
   return prisma.user.findUnique({ where: { supabaseId: user.id } });
@@ -104,10 +107,7 @@ export async function POST(request: NextRequest) {
     );
 
     if (!result.success || !result.attestation) {
-      return NextResponse.json(
-        { error: result.error || 'Attestation failed' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: result.error || 'Attestation failed' }, { status: 500 });
     }
 
     // Persist to database
@@ -143,10 +143,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('[Attest Brand DNA] Error:', error);
-    return NextResponse.json(
-      { error: 'Failed to create attestation' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to create attestation' }, { status: 500 });
   }
 }
 
@@ -182,9 +179,6 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error('[Attest Brand DNA] GET error:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch attestations' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch attestations' }, { status: 500 });
   }
 }

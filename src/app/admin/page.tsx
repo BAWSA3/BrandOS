@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useCallback, Fragment, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useState, useEffect, useCallback, Fragment, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import {
   Copy,
   Power,
@@ -19,8 +19,8 @@ import {
   ChevronDown,
   Trash2,
   Zap,
-} from "lucide-react";
-import ContentEngineDashboard from "@/components/content-engine/dashboard/ContentEngineDashboard";
+} from 'lucide-react';
+import ContentEngineDashboard from '@/components/content-engine/dashboard/ContentEngineDashboard';
 
 // ===== TYPES =====
 
@@ -71,7 +71,7 @@ interface FeedbackStats {
   npsScore: number | null;
 }
 
-type TabType = "invites" | "feedback" | "content-engine";
+type TabType = 'invites' | 'feedback' | 'content-engine';
 
 // ===== LOADING FALLBACK =====
 
@@ -98,10 +98,10 @@ export default function AdminPage() {
 
 function AdminPageContent() {
   const searchParams = useSearchParams();
-  const adminKey = searchParams.get("key");
+  const adminKey = searchParams.get('key');
 
   const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
-  const [activeTab, setActiveTab] = useState<TabType>("invites");
+  const [activeTab, setActiveTab] = useState<TabType>('invites');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -112,14 +112,14 @@ function AdminPageContent() {
   // Feedback state
   const [feedbackStats, setFeedbackStats] = useState<FeedbackStats | null>(null);
   const [feedback, setFeedback] = useState<FeedbackItem[]>([]);
-  const [feedbackFilter, setFeedbackFilter] = useState<string>("all");
+  const [feedbackFilter, setFeedbackFilter] = useState<string>('all');
 
   // Generate form state
   const [showGenerateForm, setShowGenerateForm] = useState(false);
-  const [generateUsername, setGenerateUsername] = useState("");
+  const [generateUsername, setGenerateUsername] = useState('');
   const [generateCount, setGenerateCount] = useState(3);
   const [generateMaxUses, setGenerateMaxUses] = useState(3);
-  const [generateExpiry, setGenerateExpiry] = useState("");
+  const [generateExpiry, setGenerateExpiry] = useState('');
   const [generating, setGenerating] = useState(false);
 
   // Expanded rows
@@ -135,7 +135,7 @@ function AdminPageContent() {
     if (!adminKey) return;
 
     try {
-      const response = await fetch("/api/admin/invites", {
+      const response = await fetch('/api/admin/invites', {
         headers: { Authorization: `Bearer ${adminKey}` },
       });
 
@@ -144,14 +144,14 @@ function AdminPageContent() {
         return;
       }
 
-      if (!response.ok) throw new Error("Failed to fetch invites");
+      if (!response.ok) throw new Error('Failed to fetch invites');
 
       const data = await response.json();
       setIsAuthorized(true);
       setInviteStats(data.stats);
       setCodes(data.codes);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
+      setError(err instanceof Error ? err.message : 'An error occurred');
     }
   }, [adminKey]);
 
@@ -160,11 +160,11 @@ function AdminPageContent() {
 
     try {
       const params = new URLSearchParams();
-      if (feedbackFilter !== "all") {
-        if (["new", "reviewed", "in_progress", "resolved"].includes(feedbackFilter)) {
-          params.set("status", feedbackFilter);
+      if (feedbackFilter !== 'all') {
+        if (['new', 'reviewed', 'in_progress', 'resolved'].includes(feedbackFilter)) {
+          params.set('status', feedbackFilter);
         } else {
-          params.set("type", feedbackFilter);
+          params.set('type', feedbackFilter);
         }
       }
 
@@ -177,14 +177,14 @@ function AdminPageContent() {
         return;
       }
 
-      if (!response.ok) throw new Error("Failed to fetch feedback");
+      if (!response.ok) throw new Error('Failed to fetch feedback');
 
       const data = await response.json();
       setIsAuthorized(true);
       setFeedbackStats(data.stats);
       setFeedback(data.feedback);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
+      setError(err instanceof Error ? err.message : 'An error occurred');
     }
   }, [adminKey, feedbackFilter]);
 
@@ -208,7 +208,7 @@ function AdminPageContent() {
   }, [fetchData]);
 
   useEffect(() => {
-    if (activeTab === "feedback" && adminKey) {
+    if (activeTab === 'feedback' && adminKey) {
       fetchFeedback();
     }
   }, [feedbackFilter, activeTab, adminKey, fetchFeedback]);
@@ -221,10 +221,10 @@ function AdminPageContent() {
 
     setGenerating(true);
     try {
-      const response = await fetch("/api/admin/invites", {
-        method: "POST",
+      const response = await fetch('/api/admin/invites', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
           Authorization: `Bearer ${adminKey}`,
         },
         body: JSON.stringify({
@@ -235,16 +235,16 @@ function AdminPageContent() {
         }),
       });
 
-      if (!response.ok) throw new Error("Failed to generate codes");
+      if (!response.ok) throw new Error('Failed to generate codes');
 
       await fetchInvites();
       setShowGenerateForm(false);
-      setGenerateUsername("");
+      setGenerateUsername('');
       setGenerateCount(3);
       setGenerateMaxUses(3);
-      setGenerateExpiry("");
+      setGenerateExpiry('');
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to generate codes");
+      setError(err instanceof Error ? err.message : 'Failed to generate codes');
     } finally {
       setGenerating(false);
     }
@@ -252,22 +252,20 @@ function AdminPageContent() {
 
   const handleToggleActive = async (code: InviteCode) => {
     try {
-      const response = await fetch("/api/admin/invites", {
-        method: "PATCH",
+      const response = await fetch('/api/admin/invites', {
+        method: 'PATCH',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
           Authorization: `Bearer ${adminKey}`,
         },
         body: JSON.stringify({ id: code.id, isActive: !code.isActive }),
       });
 
-      if (!response.ok) throw new Error("Failed to update code");
+      if (!response.ok) throw new Error('Failed to update code');
 
-      setCodes((prev) =>
-        prev.map((c) => (c.id === code.id ? { ...c, isActive: !c.isActive } : c))
-      );
+      setCodes((prev) => prev.map((c) => (c.id === code.id ? { ...c, isActive: !c.isActive } : c)));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to update code");
+      setError(err instanceof Error ? err.message : 'Failed to update code');
     }
   };
 
@@ -294,40 +292,38 @@ function AdminPageContent() {
     updates: { status?: string; priority?: string; adminNotes?: string }
   ) => {
     try {
-      const response = await fetch("/api/admin/feedback", {
-        method: "PATCH",
+      const response = await fetch('/api/admin/feedback', {
+        method: 'PATCH',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
           Authorization: `Bearer ${adminKey}`,
         },
         body: JSON.stringify({ id, ...updates }),
       });
 
-      if (!response.ok) throw new Error("Failed to update feedback");
+      if (!response.ok) throw new Error('Failed to update feedback');
 
       const data = await response.json();
-      setFeedback((prev) =>
-        prev.map((f) => (f.id === id ? data.feedback : f))
-      );
+      setFeedback((prev) => prev.map((f) => (f.id === id ? data.feedback : f)));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to update feedback");
+      setError(err instanceof Error ? err.message : 'Failed to update feedback');
     }
   };
 
   const handleDeleteFeedback = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this feedback?")) return;
+    if (!confirm('Are you sure you want to delete this feedback?')) return;
 
     try {
       const response = await fetch(`/api/admin/feedback?id=${id}`, {
-        method: "DELETE",
+        method: 'DELETE',
         headers: { Authorization: `Bearer ${adminKey}` },
       });
 
-      if (!response.ok) throw new Error("Failed to delete feedback");
+      if (!response.ok) throw new Error('Failed to delete feedback');
 
       setFeedback((prev) => prev.filter((f) => f.id !== id));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to delete feedback");
+      setError(err instanceof Error ? err.message : 'Failed to delete feedback');
     }
   };
 
@@ -343,20 +339,20 @@ function AdminPageContent() {
   // ===== HELPERS =====
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
+    return new Date(dateString).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
     });
   };
 
   const getTypeIcon = (type: string) => {
     switch (type) {
-      case "bug":
+      case 'bug':
         return <Bug className="w-4 h-4 text-red-400" />;
-      case "idea":
+      case 'idea':
         return <Lightbulb className="w-4 h-4 text-yellow-400" />;
       default:
         return <MessageSquare className="w-4 h-4 text-blue-400" />;
@@ -365,33 +361,33 @@ function AdminPageContent() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "new":
-        return "bg-blue-500/10 text-blue-400 border-blue-500/20";
-      case "reviewed":
-        return "bg-purple-500/10 text-purple-400 border-purple-500/20";
-      case "in_progress":
-        return "bg-yellow-500/10 text-yellow-400 border-yellow-500/20";
-      case "resolved":
-        return "bg-green-500/10 text-green-400 border-green-500/20";
-      case "wont_fix":
-        return "bg-gray-500/10 text-gray-400 border-gray-500/20";
+      case 'new':
+        return 'bg-blue-500/10 text-blue-400 border-blue-500/20';
+      case 'reviewed':
+        return 'bg-purple-500/10 text-purple-400 border-purple-500/20';
+      case 'in_progress':
+        return 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20';
+      case 'resolved':
+        return 'bg-green-500/10 text-green-400 border-green-500/20';
+      case 'wont_fix':
+        return 'bg-gray-500/10 text-gray-400 border-gray-500/20';
       default:
-        return "bg-white/10 text-white/60 border-white/20";
+        return 'bg-white/10 text-white/60 border-white/20';
     }
   };
 
   const getPriorityColor = (priority: string | null) => {
     switch (priority) {
-      case "critical":
-        return "bg-red-500/10 text-red-400 border-red-500/20";
-      case "high":
-        return "bg-orange-500/10 text-orange-400 border-orange-500/20";
-      case "medium":
-        return "bg-yellow-500/10 text-yellow-400 border-yellow-500/20";
-      case "low":
-        return "bg-gray-500/10 text-gray-400 border-gray-500/20";
+      case 'critical':
+        return 'bg-red-500/10 text-red-400 border-red-500/20';
+      case 'high':
+        return 'bg-orange-500/10 text-orange-400 border-orange-500/20';
+      case 'medium':
+        return 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20';
+      case 'low':
+        return 'bg-gray-500/10 text-gray-400 border-gray-500/20';
       default:
-        return "";
+        return '';
     }
   };
 
@@ -427,9 +423,7 @@ function AdminPageContent() {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-2xl font-semibold">Admin Dashboard</h1>
-            <p className="text-white/50 text-sm mt-1">
-              Manage invite codes and user feedback
-            </p>
+            <p className="text-white/50 text-sm mt-1">Manage invite codes and user feedback</p>
           </div>
           <div className="flex items-center gap-3">
             <button
@@ -439,7 +433,7 @@ function AdminPageContent() {
             >
               <RefreshCw className="w-4 h-4" />
             </button>
-            {activeTab === "invites" && (
+            {activeTab === 'invites' && (
               <button
                 onClick={() => setShowGenerateForm(true)}
                 className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#0047FF] hover:bg-[#0047FF]/80 transition-colors font-medium"
@@ -454,22 +448,22 @@ function AdminPageContent() {
         {/* Tabs */}
         <div className="flex gap-2 mb-6">
           <button
-            onClick={() => setActiveTab("invites")}
+            onClick={() => setActiveTab('invites')}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
-              activeTab === "invites"
-                ? "bg-white/10 text-white border border-white/20"
-                : "bg-white/5 text-white/60 border border-transparent hover:bg-white/10"
+              activeTab === 'invites'
+                ? 'bg-white/10 text-white border border-white/20'
+                : 'bg-white/5 text-white/60 border border-transparent hover:bg-white/10'
             }`}
           >
             <Users className="w-4 h-4" />
             Invite Codes
           </button>
           <button
-            onClick={() => setActiveTab("feedback")}
+            onClick={() => setActiveTab('feedback')}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
-              activeTab === "feedback"
-                ? "bg-white/10 text-white border border-white/20"
-                : "bg-white/5 text-white/60 border border-transparent hover:bg-white/10"
+              activeTab === 'feedback'
+                ? 'bg-white/10 text-white border border-white/20'
+                : 'bg-white/5 text-white/60 border border-transparent hover:bg-white/10'
             }`}
           >
             <MessageSquare className="w-4 h-4" />
@@ -481,11 +475,11 @@ function AdminPageContent() {
             )}
           </button>
           <button
-            onClick={() => setActiveTab("content-engine")}
+            onClick={() => setActiveTab('content-engine')}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
-              activeTab === "content-engine"
-                ? "bg-white/10 text-white border border-white/20"
-                : "bg-white/5 text-white/60 border border-transparent hover:bg-white/10"
+              activeTab === 'content-engine'
+                ? 'bg-white/10 text-white border border-white/20'
+                : 'bg-white/5 text-white/60 border border-transparent hover:bg-white/10'
             }`}
           >
             <Zap className="w-4 h-4" />
@@ -501,7 +495,7 @@ function AdminPageContent() {
         )}
 
         {/* ===== INVITES TAB ===== */}
-        {activeTab === "invites" && (
+        {activeTab === 'invites' && (
           <>
             {/* Stats Cards */}
             {inviteStats && (
@@ -586,7 +580,7 @@ function AdminPageContent() {
                         disabled={generating || !generateUsername.trim()}
                         className="px-4 py-2 rounded-lg bg-[#0047FF] hover:bg-[#0047FF]/80 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        {generating ? "Generating..." : "Generate"}
+                        {generating ? 'Generating...' : 'Generate'}
                       </button>
                     </div>
                   </form>
@@ -634,20 +628,20 @@ function AdminPageContent() {
                             <span
                               className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium ${
                                 code.isActive && code.usedCount < code.maxUses
-                                  ? "bg-green-500/10 text-green-400 border border-green-500/20"
-                                  : "bg-red-500/10 text-red-400 border border-red-500/20"
+                                  ? 'bg-green-500/10 text-green-400 border border-green-500/20'
+                                  : 'bg-red-500/10 text-red-400 border border-red-500/20'
                               }`}
                             >
                               <span
                                 className={`w-1.5 h-1.5 rounded-full ${
                                   code.isActive && code.usedCount < code.maxUses
-                                    ? "bg-green-400"
-                                    : "bg-red-400"
+                                    ? 'bg-green-400'
+                                    : 'bg-red-400'
                                 }`}
                               />
                               {code.isActive && code.usedCount < code.maxUses
-                                ? "Active"
-                                : "Inactive"}
+                                ? 'Active'
+                                : 'Inactive'}
                             </span>
                           </td>
                           <td className="px-4 py-3">
@@ -676,9 +670,9 @@ function AdminPageContent() {
                               <button
                                 onClick={() => handleToggleActive(code)}
                                 className={`p-1.5 rounded-lg hover:bg-white/10 transition-colors group ${
-                                  code.isActive ? "text-green-400" : "text-red-400"
+                                  code.isActive ? 'text-green-400' : 'text-red-400'
                                 }`}
-                                title={code.isActive ? "Deactivate" : "Activate"}
+                                title={code.isActive ? 'Deactivate' : 'Activate'}
                               >
                                 <Power className="w-4 h-4" />
                               </button>
@@ -703,7 +697,7 @@ function AdminPageContent() {
                             <td colSpan={6} className="px-4 py-3">
                               <div className="text-sm">
                                 <span className="text-white/50">Redeemed by: </span>
-                                <span className="text-white/70">{code.usedBy.join(", ")}</span>
+                                <span className="text-white/70">{code.usedBy.join(', ')}</span>
                               </div>
                             </td>
                           </tr>
@@ -725,17 +719,29 @@ function AdminPageContent() {
         )}
 
         {/* ===== FEEDBACK TAB ===== */}
-        {activeTab === "feedback" && (
+        {activeTab === 'feedback' && (
           <>
             {/* Stats Cards */}
             {feedbackStats && (
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-8">
                 <StatCard label="Total" value={feedbackStats.total} />
-                <StatCard label="New" value={feedbackStats.new} trend={feedbackStats.new > 0 ? "up" : undefined} />
+                <StatCard
+                  label="New"
+                  value={feedbackStats.new}
+                  trend={feedbackStats.new > 0 ? 'up' : undefined}
+                />
                 <StatCard label="In Progress" value={feedbackStats.inProgress} />
                 <StatCard label="Resolved" value={feedbackStats.resolved} trend="up" />
-                <StatCard label="Bugs" value={feedbackStats.bugs} icon={<Bug className="w-4 h-4 text-red-400" />} />
-                <StatCard label="Ideas" value={feedbackStats.ideas} icon={<Lightbulb className="w-4 h-4 text-yellow-400" />} />
+                <StatCard
+                  label="Bugs"
+                  value={feedbackStats.bugs}
+                  icon={<Bug className="w-4 h-4 text-red-400" />}
+                />
+                <StatCard
+                  label="Ideas"
+                  value={feedbackStats.ideas}
+                  icon={<Lightbulb className="w-4 h-4 text-yellow-400" />}
+                />
               </div>
             )}
 
@@ -748,11 +754,9 @@ function AdminPageContent() {
                   </span>
                   <div className="mt-2 flex items-center gap-2">
                     <span className="text-3xl font-light text-white">
-                      {feedbackStats.avgRating !== null ? feedbackStats.avgRating.toFixed(1) : "—"}
+                      {feedbackStats.avgRating !== null ? feedbackStats.avgRating.toFixed(1) : '—'}
                     </span>
-                    {feedbackStats.avgRating !== null && (
-                      <span className="text-white/50">/ 5</span>
-                    )}
+                    {feedbackStats.avgRating !== null && <span className="text-white/50">/ 5</span>}
                   </div>
                 </div>
                 <div className="bg-[rgba(255,255,255,0.05)] backdrop-blur-xl border border-[rgba(255,255,255,0.1)] rounded-2xl p-4">
@@ -764,14 +768,14 @@ function AdminPageContent() {
                       className={`text-3xl font-light ${
                         feedbackStats.npsScore !== null
                           ? feedbackStats.npsScore >= 50
-                            ? "text-green-400"
+                            ? 'text-green-400'
                             : feedbackStats.npsScore >= 0
-                            ? "text-yellow-400"
-                            : "text-red-400"
-                          : "text-white"
+                              ? 'text-yellow-400'
+                              : 'text-red-400'
+                          : 'text-white'
                       }`}
                     >
-                      {feedbackStats.npsScore !== null ? feedbackStats.npsScore : "—"}
+                      {feedbackStats.npsScore !== null ? feedbackStats.npsScore : '—'}
                     </span>
                   </div>
                 </div>
@@ -781,20 +785,20 @@ function AdminPageContent() {
             {/* Filters */}
             <div className="flex flex-wrap gap-2 mb-6">
               {[
-                { value: "all", label: "All" },
-                { value: "new", label: "New" },
-                { value: "in_progress", label: "In Progress" },
-                { value: "resolved", label: "Resolved" },
-                { value: "bug", label: "Bugs" },
-                { value: "idea", label: "Ideas" },
+                { value: 'all', label: 'All' },
+                { value: 'new', label: 'New' },
+                { value: 'in_progress', label: 'In Progress' },
+                { value: 'resolved', label: 'Resolved' },
+                { value: 'bug', label: 'Bugs' },
+                { value: 'idea', label: 'Ideas' },
               ].map((filter) => (
                 <button
                   key={filter.value}
                   onClick={() => setFeedbackFilter(filter.value)}
                   className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
                     feedbackFilter === filter.value
-                      ? "bg-white/20 text-white border border-white/30"
-                      : "bg-white/5 text-white/60 border border-transparent hover:bg-white/10"
+                      ? 'bg-white/20 text-white border border-white/30'
+                      : 'bg-white/5 text-white/60 border border-transparent hover:bg-white/10'
                   }`}
                 >
                   {filter.label}
@@ -817,11 +821,15 @@ function AdminPageContent() {
                     <div className="flex-shrink-0 mt-1">{getTypeIcon(item.type)}</div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap mb-1">
-                        <span className={`px-2 py-0.5 text-xs rounded-full border ${getStatusColor(item.status)}`}>
-                          {item.status.replace("_", " ")}
+                        <span
+                          className={`px-2 py-0.5 text-xs rounded-full border ${getStatusColor(item.status)}`}
+                        >
+                          {item.status.replace('_', ' ')}
                         </span>
                         {item.priority && (
-                          <span className={`px-2 py-0.5 text-xs rounded-full border ${getPriorityColor(item.priority)}`}>
+                          <span
+                            className={`px-2 py-0.5 text-xs rounded-full border ${getPriorityColor(item.priority)}`}
+                          >
                             {item.priority}
                           </span>
                         )}
@@ -834,14 +842,14 @@ function AdminPageContent() {
                       </div>
                       <p className="text-white/80 text-sm line-clamp-2">{item.message}</p>
                       <div className="flex items-center gap-3 mt-2 text-xs text-white/40">
-                        <span>{item.userHandle ? `@${item.userHandle}` : "Anonymous"}</span>
+                        <span>{item.userHandle ? `@${item.userHandle}` : 'Anonymous'}</span>
                         <span>{formatDate(item.createdAt)}</span>
                         {item.url && <span className="truncate max-w-[200px]">{item.url}</span>}
                       </div>
                     </div>
                     <ChevronDown
                       className={`w-5 h-5 text-white/30 transition-transform ${
-                        expandedFeedback.has(item.id) ? "rotate-180" : ""
+                        expandedFeedback.has(item.id) ? 'rotate-180' : ''
                       }`}
                     />
                   </div>
@@ -866,7 +874,9 @@ function AdminPageContent() {
                           </label>
                           <select
                             value={item.status}
-                            onChange={(e) => handleUpdateFeedback(item.id, { status: e.target.value })}
+                            onChange={(e) =>
+                              handleUpdateFeedback(item.id, { status: e.target.value })
+                            }
                             className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:border-[#0047FF] focus:outline-none"
                           >
                             <option value="new">New</option>
@@ -883,7 +893,7 @@ function AdminPageContent() {
                             Priority
                           </label>
                           <select
-                            value={item.priority || ""}
+                            value={item.priority || ''}
                             onChange={(e) =>
                               handleUpdateFeedback(item.id, {
                                 priority: e.target.value || undefined,
@@ -917,7 +927,7 @@ function AdminPageContent() {
                           Admin Notes
                         </label>
                         <textarea
-                          value={item.adminNotes || ""}
+                          value={item.adminNotes || ''}
                           onChange={(e) =>
                             handleUpdateFeedback(item.id, { adminNotes: e.target.value })
                           }
@@ -941,7 +951,7 @@ function AdminPageContent() {
         )}
 
         {/* ===== CONTENT ENGINE TAB ===== */}
-        {activeTab === "content-engine" && adminKey && (
+        {activeTab === 'content-engine' && adminKey && (
           <ContentEngineDashboard adminKey={adminKey} />
         )}
       </div>
@@ -959,13 +969,13 @@ function StatCard({
 }: {
   label: string;
   value: number;
-  trend?: "up" | "down" | "neutral";
+  trend?: 'up' | 'down' | 'neutral';
   icon?: React.ReactNode;
 }) {
   const trendColors = {
-    up: "text-green-400",
-    down: "text-red-400",
-    neutral: "text-white",
+    up: 'text-green-400',
+    down: 'text-red-400',
+    neutral: 'text-white',
   };
 
   return (
@@ -975,7 +985,7 @@ function StatCard({
         {label}
       </span>
       <div className="mt-2">
-        <span className={`text-3xl font-light ${trend ? trendColors[trend] : "text-white"}`}>
+        <span className={`text-3xl font-light ${trend ? trendColors[trend] : 'text-white'}`}>
           {value}
         </span>
       </div>

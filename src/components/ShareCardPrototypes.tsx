@@ -75,7 +75,10 @@ function boostDarkColor(hex: string): string {
 }
 
 // Get the best gradient colors from brand colors
-function getGradientColors(brandColors: ShareCardData['brandColors']): { color1: string; color2: string } {
+function getGradientColors(brandColors: ShareCardData['brandColors']): {
+  color1: string;
+  color2: string;
+} {
   let primary = brandColors?.primary || '#0047FF';
   const secondary = brandColors?.secondary || '#9d4edd';
   const accent = brandColors?.accent || '#10B981';
@@ -146,7 +149,10 @@ export async function generateBillboardCard(data: ShareCardData): Promise<Blob |
   const bgGradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
   bgGradient.addColorStop(0, primary);
   bgGradient.addColorStop(0.5, secondary);
-  bgGradient.addColorStop(1, `rgb(${Math.max(0, r2 - 40)}, ${Math.max(0, g2 - 40)}, ${Math.max(0, b2 - 40)})`);
+  bgGradient.addColorStop(
+    1,
+    `rgb(${Math.max(0, r2 - 40)}, ${Math.max(0, g2 - 40)}, ${Math.max(0, b2 - 40)})`
+  );
   ctx.fillStyle = bgGradient;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -157,7 +163,14 @@ export async function generateBillboardCard(data: ShareCardData): Promise<Blob |
   }
 
   // Light leak effect top-right
-  const lightLeak = ctx.createRadialGradient(canvas.width - 100, 100, 0, canvas.width - 100, 100, 400);
+  const lightLeak = ctx.createRadialGradient(
+    canvas.width - 100,
+    100,
+    0,
+    canvas.width - 100,
+    100,
+    400
+  );
   lightLeak.addColorStop(0, 'rgba(255,255,255,0.25)');
   lightLeak.addColorStop(1, 'transparent');
   ctx.fillStyle = lightLeak;
@@ -288,7 +301,10 @@ export async function generateSplitCard(data: ShareCardData): Promise<Blob | nul
   const rightGradient = ctx.createLinearGradient(splitX, 0, canvas.width, canvas.height);
   rightGradient.addColorStop(0, primary);
   rightGradient.addColorStop(0.6, secondary);
-  rightGradient.addColorStop(1, `rgb(${Math.max(0, r2 - 50)}, ${Math.max(0, g2 - 50)}, ${Math.max(0, b2 - 50)})`);
+  rightGradient.addColorStop(
+    1,
+    `rgb(${Math.max(0, r2 - 50)}, ${Math.max(0, g2 - 50)}, ${Math.max(0, b2 - 50)})`
+  );
   ctx.fillStyle = rightGradient;
   ctx.beginPath();
   ctx.roundRect(splitX, 0, canvas.width - splitX, canvas.height, [0, 24, 24, 0]);
@@ -363,7 +379,9 @@ export async function generateSplitCard(data: ShareCardData): Promise<Blob | nul
   ctx.fillStyle = 'rgba(255,255,255,0.7)';
   ctx.font = '400 15px "Helvetica Neue", Arial, sans-serif';
   // Truncate summary to ~180 chars to prevent overflow
-  const fullSummary = data.personalitySummary || 'You bring ideas to life with precision and purpose. Your community trusts you to deliver.';
+  const fullSummary =
+    data.personalitySummary ||
+    'You bring ideas to life with precision and purpose. Your community trusts you to deliver.';
   const summary = fullSummary.length > 180 ? fullSummary.substring(0, 180) + '...' : fullSummary;
   const words = summary.split(' ');
   let line = '';
@@ -398,7 +416,9 @@ export async function generateSplitCard(data: ShareCardData): Promise<Blob | nul
   ctx.stroke();
 
   // Metrics on left - start below divider
-  const engagement = Math.round((data.tone.formality + data.tone.energy + data.tone.confidence + data.tone.style) / 4);
+  const engagement = Math.round(
+    (data.tone.formality + data.tone.energy + data.tone.confidence + data.tone.style) / 4
+  );
   const metrics = [
     { label: 'Voice Consistency', value: `${data.voiceConsistency}%` },
     { label: 'Influence Tier', value: data.influenceTier },

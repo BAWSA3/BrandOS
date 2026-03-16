@@ -439,7 +439,9 @@ export default function BrandDNAPreview({
             margin: 0,
           }}
         >
-          Based on @{username}'s profile{generatedDNA.dataSource === 'profile-and-tweets' ? ' & tweets' : ''}, here's what makes your brand uniquely yours.
+          Based on @{username}'s profile
+          {generatedDNA.dataSource === 'profile-and-tweets' ? ' & tweets' : ''}, here's what makes
+          your brand uniquely yours.
         </p>
       </motion.div>
 
@@ -841,10 +843,7 @@ export default function BrandDNAPreview({
 
           {/* Voice Consistency */}
           {generatedDNA.voiceConsistencyReport ? (
-            <VoiceConsistencyDetail
-              report={generatedDNA.voiceConsistencyReport}
-              theme={theme}
-            />
+            <VoiceConsistencyDetail report={generatedDNA.voiceConsistencyReport} theme={theme} />
           ) : (
             <div
               style={{
@@ -852,9 +851,10 @@ export default function BrandDNAPreview({
                 alignItems: 'center',
                 gap: '12px',
                 padding: '12px',
-                background: generatedDNA.performanceInsights.voiceConsistency >= 70
-                  ? 'rgba(16,185,129,0.1)'
-                  : 'rgba(245,158,11,0.1)',
+                background:
+                  generatedDNA.performanceInsights.voiceConsistency >= 70
+                    ? 'rgba(16,185,129,0.1)'
+                    : 'rgba(245,158,11,0.1)',
                 borderRadius: '8px',
               }}
             >
@@ -961,11 +961,6 @@ export default function BrandDNAPreview({
       >
         CLAIM YOUR BRAND DNA
       </motion.button>
-
     </motion.div>
   );
 }
-
-
-
-

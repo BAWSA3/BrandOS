@@ -2,12 +2,15 @@ import { NextRequest, NextResponse } from 'next/server';
 import { uploadToCloudinary } from '@/lib/cloudinary';
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-const ALLOWED_IMAGE_TYPES = [
-  'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml',
-];
+const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
 const ALLOWED_FONT_TYPES = [
-  'font/woff', 'font/woff2', 'font/ttf', 'font/otf',
-  'application/x-font-woff', 'application/x-font-ttf', 'application/vnd.ms-opentype',
+  'font/woff',
+  'font/woff2',
+  'font/ttf',
+  'font/otf',
+  'application/x-font-woff',
+  'application/x-font-ttf',
+  'application/vnd.ms-opentype',
 ];
 
 export async function POST(request: NextRequest) {
@@ -21,10 +24,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (file.size > MAX_FILE_SIZE) {
-      return NextResponse.json(
-        { error: 'File too large. Maximum size is 10MB.' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'File too large. Maximum size is 10MB.' }, { status: 400 });
     }
 
     const allowedTypes = assetType === 'font' ? ALLOWED_FONT_TYPES : ALLOWED_IMAGE_TYPES;

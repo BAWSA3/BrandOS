@@ -131,40 +131,60 @@ export default function PinnedSection({
 
     // Zoom in (0% to 5%) - faster reveal
     if (!isFirst) {
-      tl.to(content, {
-        scale: 1,
-        opacity: 1,
-        filter: 'blur(0px)',
-        duration: 0.05,
-        ease: 'power1.out',
-      }, 0);
+      tl.to(
+        content,
+        {
+          scale: 1,
+          opacity: 1,
+          filter: 'blur(0px)',
+          duration: 0.05,
+          ease: 'power1.out',
+        },
+        0
+      );
     }
 
     // Hold at full scale (5% to 92%)
-    tl.to(content, {
-      scale: 1,
-      opacity: 1,
-      filter: 'blur(0px)',
-      duration: 0.87,
-    }, 0.05);
+    tl.to(
+      content,
+      {
+        scale: 1,
+        opacity: 1,
+        filter: 'blur(0px)',
+        duration: 0.87,
+      },
+      0.05
+    );
 
     // Zoom out (92% to 100%) - faster exit, except for last section
     // Keep opacity high so content stays visible during scroll navigation
     if (!isLast) {
-      tl.to(content, {
-        scale: 0.96,
-        opacity: 0.7,
-        filter: 'blur(2px)',
-        duration: 0.08,
-        ease: 'power1.in',
-      }, 0.92);
+      tl.to(
+        content,
+        {
+          scale: 0.96,
+          opacity: 0.7,
+          filter: 'blur(2px)',
+          duration: 0.08,
+          ease: 'power1.in',
+        },
+        0.92
+      );
     }
 
     return () => {
       trigger.kill();
       tl.kill();
     };
-  }, [index, totalSections, pinDuration, onProgressChange, onActiveChange, prefersReducedMotion, isActive]);
+  }, [
+    index,
+    totalSections,
+    pinDuration,
+    onProgressChange,
+    onActiveChange,
+    prefersReducedMotion,
+    isActive,
+  ]);
 
   // Reduced motion fallback - just show content normally
   if (prefersReducedMotion) {

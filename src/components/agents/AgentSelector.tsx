@@ -103,10 +103,7 @@ function AgentCard({
 
       {/* Info */}
       <h3 className="text-lg font-semibold text-white mb-1">{persona.displayName}</h3>
-      <p
-        className="text-sm font-medium mb-2"
-        style={{ color: persona.accentColor }}
-      >
+      <p className="text-sm font-medium mb-2" style={{ color: persona.accentColor }}>
         {persona.title}
       </p>
       <p className="text-sm text-neutral-400 mb-4">{persona.description}</p>
@@ -148,15 +145,12 @@ export function AgentSelectorMini({
           key={persona.name}
           onClick={() => onSelectAgent(persona.name)}
           className={`w-10 h-10 rounded-lg flex items-center justify-center text-xl transition-all ${
-            selectedAgent === persona.name
-              ? ''
-              : 'opacity-50 hover:opacity-100'
+            selectedAgent === persona.name ? '' : 'opacity-50 hover:opacity-100'
           }`}
           style={{
             backgroundColor: `${persona.accentColor}20`,
-            boxShadow: selectedAgent === persona.name
-              ? `0 0 0 2px ${persona.accentColor}`
-              : undefined,
+            boxShadow:
+              selectedAgent === persona.name ? `0 0 0 2px ${persona.accentColor}` : undefined,
           }}
           title={`${persona.displayName} - ${persona.title}`}
         >
@@ -166,9 +160,3 @@ export function AgentSelectorMini({
     </div>
   );
 }
-
-
-
-
-
-

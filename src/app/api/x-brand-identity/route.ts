@@ -116,11 +116,16 @@ async function handlePost(request: NextRequest) {
             );
             console.log('=== TWEET VOICE ANALYSIS RESULT ===');
             console.log('Content Themes:', tweetVoiceAnalysis?.contentThemes?.length || 0);
-            console.log('Themes:', tweetVoiceAnalysis?.contentThemes?.map(t => t.pillar).join(', ') || 'None');
+            console.log(
+              'Themes:',
+              tweetVoiceAnalysis?.contentThemes?.map((t) => t.pillar).join(', ') || 'None'
+            );
           } else if (tweetCount > 0) {
             // Some tweets, but not enough for full content analysis
             analysisMode = 'limited-tweets';
-            console.log(`=== LIMITED TWEETS MODE: Only ${tweetCount} tweets (need ${MINIMUM_TWEETS_FOR_CONTENT_ANALYSIS} for content-primary) ===`);
+            console.log(
+              `=== LIMITED TWEETS MODE: Only ${tweetCount} tweets (need ${MINIMUM_TWEETS_FOR_CONTENT_ANALYSIS} for content-primary) ===`
+            );
             // Still analyze what we have
             tweetVoiceAnalysis = await analyzeTweetVoice(
               tweetsData.tweets,
@@ -168,7 +173,9 @@ async function handlePost(request: NextRequest) {
     const activityAnalysis = analyzeActivityLevel(profile);
 
     console.log('=== ACCOUNT ANALYSIS ===');
-    console.log(`Authenticity: ${authenticityAnalysis.tierLabel} (score: ${authenticityAnalysis.score})`);
+    console.log(
+      `Authenticity: ${authenticityAnalysis.tierLabel} (score: ${authenticityAnalysis.score})`
+    );
     console.log(`Activity: ${activityAnalysis.levelLabel} (${activityAnalysis.detail})`);
     console.log('========================');
 
@@ -218,4 +225,3 @@ async function handlePost(request: NextRequest) {
 }
 
 export const POST = withRateLimit(handlePost, rateLimiters.ai);
-

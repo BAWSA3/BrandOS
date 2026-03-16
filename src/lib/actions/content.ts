@@ -40,11 +40,12 @@ export async function updateContentDraft(id: string, input: UpdateContentDraftIn
     where: { id },
     data: {
       ...parsed.data,
-      scheduledFor: parsed.data.scheduledFor === null
-        ? null
-        : parsed.data.scheduledFor
-          ? new Date(parsed.data.scheduledFor)
-          : undefined,
+      scheduledFor:
+        parsed.data.scheduledFor === null
+          ? null
+          : parsed.data.scheduledFor
+            ? new Date(parsed.data.scheduledFor)
+            : undefined,
     },
   });
 

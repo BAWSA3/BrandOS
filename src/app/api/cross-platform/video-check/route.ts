@@ -10,16 +10,17 @@ import { analyzeVoiceConsistencyForContent } from '@/lib/cross-platform/voice-en
 import { SocialPlatformSchema } from '@/lib/cross-platform/schemas';
 import type { VoiceFingerprint } from '@/lib/voice-fingerprint';
 
-const VideoCheckRequestSchema = z.object({
-  videoUrl: z.string().url().optional(),
-  manualTranscript: z.string().optional(),
-  platform: SocialPlatformSchema.optional(),
-  fingerprintJson: z.string().optional(),
-  fallbackDescription: z.string().optional(),
-}).refine(
-  (data) => data.videoUrl || data.manualTranscript,
-  { message: 'Provide either a videoUrl or manualTranscript' }
-);
+const VideoCheckRequestSchema = z
+  .object({
+    videoUrl: z.string().url().optional(),
+    manualTranscript: z.string().optional(),
+    platform: SocialPlatformSchema.optional(),
+    fingerprintJson: z.string().optional(),
+    fallbackDescription: z.string().optional(),
+  })
+  .refine((data) => data.videoUrl || data.manualTranscript, {
+    message: 'Provide either a videoUrl or manualTranscript',
+  });
 
 /**
  * POST /api/cross-platform/video-check
@@ -38,7 +39,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { videoUrl, manualTranscript, platform, fingerprintJson, fallbackDescription } = parsed.data;
+    const { videoUrl, manualTranscript, platform, fingerprintJson, fallbackDescription } =
+      parsed.data;
 
     // Step 1: Get transcript
     let transcriptText: string | null = null;
@@ -66,7 +68,8 @@ export async function POST(request: NextRequest) {
     if (!transcriptText) {
       return NextResponse.json(
         {
-          error: 'Could not obtain transcript. Paste the transcript manually or try a different video.',
+          error:
+            'Could not obtain transcript. Paste the transcript manually or try a different video.',
         },
         { status: 404 }
       );
@@ -111,9 +114,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('Video brand check error:', error);
-    return NextResponse.json(
-      { error: 'Video brand check failed' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Video brand check failed' }, { status: 500 });
   }
 }

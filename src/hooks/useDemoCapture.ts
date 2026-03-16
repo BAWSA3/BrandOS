@@ -3,16 +3,8 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useBrandStore } from '@/lib/store';
-import {
-  captureViewport,
-  captureElement,
-  type CapturedScreenshot,
-} from '@/lib/screenshot';
-import {
-  saveScreenshot,
-  saveSession,
-  getSessionScreenshots,
-} from '@/lib/screenshot/storage';
+import { captureViewport, captureElement, type CapturedScreenshot } from '@/lib/screenshot';
+import { saveScreenshot, saveSession, getSessionScreenshots } from '@/lib/screenshot/storage';
 import { getMomentById, JOURNEY_MOMENTS } from '@/lib/screenshot/moments';
 
 export interface UseDemoCaptureReturn {
@@ -36,13 +28,8 @@ export function useDemoCapture(): UseDemoCaptureReturn {
   const searchParams = useSearchParams();
   const isDemoParam = searchParams.get('demo') === 'true';
 
-  const {
-    demoMode,
-    startDemoSession,
-    endDemoSession,
-    setDemoMoment,
-    recordDemoCapture,
-  } = useBrandStore();
+  const { demoMode, startDemoSession, endDemoSession, setDemoMoment, recordDemoCapture } =
+    useBrandStore();
 
   const sessionInitialized = useRef(false);
 

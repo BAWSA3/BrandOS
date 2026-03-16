@@ -4,7 +4,7 @@ export async function POST(request: Request) {
   try {
     const formData = await request.formData();
     const images: File[] = [];
-    
+
     // Collect all uploaded images
     for (const [key, value] of formData.entries()) {
       if (key.startsWith('image_') && value instanceof File) {
@@ -19,21 +19,21 @@ export async function POST(request: Request) {
     // In production, you would:
     // 1. Use sharp or canvas to extract colors from images
     // 2. Use AI vision to detect logos and imagery style
-    
+
     // For now, mock the extraction with reasonable defaults
     // In a real implementation, use color quantization algorithms
-    
+
     const colors: string[] = [];
-    
+
     // Process each image and extract colors
     for (const image of images) {
       // Read image data
       const arrayBuffer = await image.arrayBuffer();
-      
+
       // In production: Use sharp or canvas to get dominant colors
       // const sharp = require('sharp');
       // const { dominant } = await sharp(buffer).stats();
-      
+
       // Mock color extraction based on image name
       if (image.name.toLowerCase().includes('logo')) {
         colors.push('#1a1a2e', '#e94560');
@@ -44,7 +44,7 @@ export async function POST(request: Request) {
 
     // Dedupe and organize colors
     const uniqueColors = [...new Set(colors)];
-    
+
     const result = {
       overallConfidence: 70,
       colors: {
@@ -54,33 +54,14 @@ export async function POST(request: Request) {
         additional: uniqueColors.slice(3),
       },
       logoDescriptions: images
-        .filter(img => img.name.toLowerCase().includes('logo'))
-        .map(img => `Logo variant: ${img.name}`),
+        .filter((img) => img.name.toLowerCase().includes('logo'))
+        .map((img) => `Logo variant: ${img.name}`),
       imageryStyle: images.length > 2 ? 'photography-focused' : 'minimal',
     };
 
     return NextResponse.json(result);
   } catch (error) {
     console.error('Image analysis error:', error);
-    return NextResponse.json(
-      { error: 'Failed to analyze images' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to analyze images' }, { status: 500 });
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -42,15 +42,8 @@ const GROWTH_MILESTONES = [
 ];
 
 export default function DashboardHome({ onNavigatePhase }: DashboardHomeProps) {
-  const {
-    insights,
-    ideas,
-    health,
-    stats,
-    isLoadingInsights,
-    isLoadingIdeas,
-    refreshIdeas,
-  } = useDashboardData();
+  const { insights, ideas, health, stats, isLoadingInsights, isLoadingIdeas, refreshIdeas } =
+    useDashboardData();
 
   const completeness = useBrandCompleteness();
   const { phaseProgress } = useBrandStore();
@@ -132,7 +125,8 @@ export default function DashboardHome({ onNavigatePhase }: DashboardHomeProps) {
         <div
           className="absolute inset-0 flex flex-col justify-end pointer-events-none"
           style={{
-            background: 'linear-gradient(to top, rgba(5,5,16,0.85) 0%, rgba(5,5,16,0.3) 40%, transparent 100%)',
+            background:
+              'linear-gradient(to top, rgba(5,5,16,0.85) 0%, rgba(5,5,16,0.3) 40%, transparent 100%)',
             padding: 24,
           }}
         >
@@ -198,8 +192,24 @@ export default function DashboardHome({ onNavigatePhase }: DashboardHomeProps) {
                 />
               </div>
               <div className="flex justify-between mt-1">
-                <span style={{ fontFamily: "'VCR OSD Mono', monospace", fontSize: 8, color: 'rgba(255,255,255,0.2)' }}>SEED</span>
-                <span style={{ fontFamily: "'VCR OSD Mono', monospace", fontSize: 8, color: 'rgba(255,255,255,0.2)' }}>BLOOM</span>
+                <span
+                  style={{
+                    fontFamily: "'VCR OSD Mono', monospace",
+                    fontSize: 8,
+                    color: 'rgba(255,255,255,0.2)',
+                  }}
+                >
+                  SEED
+                </span>
+                <span
+                  style={{
+                    fontFamily: "'VCR OSD Mono', monospace",
+                    fontSize: 8,
+                    color: 'rgba(255,255,255,0.2)',
+                  }}
+                >
+                  BLOOM
+                </span>
               </div>
             </div>
           </div>
@@ -254,9 +264,7 @@ export default function DashboardHome({ onNavigatePhase }: DashboardHomeProps) {
             />
           </div>
           <div className="space-y-4 animate-fade-in" style={staggerStyle(7)}>
-            <CalendarSummaryCard
-              onOpenCalendar={() => onNavigatePhase('generate')}
-            />
+            <CalendarSummaryCard onOpenCalendar={() => onNavigatePhase('generate')} />
             <PhaseQuickAccess
               brandCompleteness={completeness}
               hasChecked={phaseProgress.hasCompletedFirstCheck}

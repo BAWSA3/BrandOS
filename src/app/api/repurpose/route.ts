@@ -8,12 +8,17 @@ import { BrandDNA } from '@/lib/types';
 import { summarizeFingerprint, VoiceFingerprint } from '@/lib/voice-fingerprint';
 
 const formatInstructions: Record<string, string> = {
-  thread: 'Create a 3-5 tweet thread that expands on this idea. Each tweet should be under 280 characters. Format: number each tweet like "1/ ...", "2/ ...", etc.',
+  thread:
+    'Create a 3-5 tweet thread that expands on this idea. Each tweet should be under 280 characters. Format: number each tweet like "1/ ...", "2/ ...", etc.',
   poll: 'Create a Twitter poll. Format as: QUESTION: [the question]\\nOPTION 1: [option]\\nOPTION 2: [option]\\nOPTION 3: [option]\\nOPTION 4: [option]',
-  'hot-take': 'Rewrite this as a provocative hot take. Be bold, contrarian, and attention-grabbing. Keep under 280 characters.',
-  educational: 'Rewrite this as an educational post with structure: Hook (attention-grabbing first line) → Concept (the core idea) → Example (concrete illustration) → Takeaway (actionable conclusion).',
-  'counter-argument': 'Argue the opposite side of this take. Be thoughtful and nuanced. Present a compelling counter-perspective.',
-  story: 'Rewrite this as a short narrative/story format. Use personal or hypothetical storytelling to convey the same core message.',
+  'hot-take':
+    'Rewrite this as a provocative hot take. Be bold, contrarian, and attention-grabbing. Keep under 280 characters.',
+  educational:
+    'Rewrite this as an educational post with structure: Hook (attention-grabbing first line) → Concept (the core idea) → Example (concrete illustration) → Takeaway (actionable conclusion).',
+  'counter-argument':
+    'Argue the opposite side of this take. Be thoughtful and nuanced. Present a compelling counter-perspective.',
+  story:
+    'Rewrite this as a short narrative/story format. Use personal or hypothetical storytelling to convey the same core message.',
 };
 
 export async function POST(request: NextRequest) {
@@ -37,7 +42,10 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = createClient(supabaseUrl, supabaseAnonKey);
-    const { data: { user: authUser }, error: authError } = await supabase.auth.getUser(accessToken);
+    const {
+      data: { user: authUser },
+      error: authError,
+    } = await supabase.auth.getUser(accessToken);
     if (authError || !authUser) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
@@ -47,14 +55,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    const { brandId, sourceContent, formats } = await request.json() as {
+    const { brandId, sourceContent, formats } = (await request.json()) as {
       brandId: string;
       sourceContent: string;
       formats: string[];
     };
 
     if (!brandId || !sourceContent || !formats?.length) {
-      return NextResponse.json({ error: 'brandId, sourceContent, and formats are required' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'brandId, sourceContent, and formats are required' },
+        { status: 400 }
+      );
     }
 
     // Verify brand ownership
@@ -93,11 +104,11 @@ export async function POST(request: NextRequest) {
     const brandContext = buildBrandContext(brandDNA, fingerprintSummary);
 
     // Build format-specific prompts
-    const validFormats = formats.filter(f => formatInstructions[f]);
+    const validFormats = formats.filter((f) => formatInstructions[f]);
 
     const anthropic = new Anthropic({ apiKey });
 
-    const formatPrompts = validFormats.map(format => ({
+    const formatPrompts = validFormats.map((format) => ({
       format,
       prompt: `You are a content repurposing assistant. Your job is to transform source content into different formats while maintaining the brand voice.
 

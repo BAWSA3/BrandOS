@@ -17,7 +17,9 @@ export async function GET(request: NextRequest) {
     if (!accessToken) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
 
     const supabase = createClient(supabaseUrl, supabaseAnonKey);
-    const { data: { user } } = await supabase.auth.getUser(accessToken);
+    const {
+      data: { user },
+    } = await supabase.auth.getUser(accessToken);
     if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
 
     const dbUser = await prisma.user.findUnique({ where: { supabaseId: user.id } });
@@ -45,14 +47,16 @@ export async function GET(request: NextRequest) {
     });
 
     // Parse posting pattern if exists
-    const parsed = snapshot ? {
-      ...snapshot,
-      postingPattern: snapshot.postingPattern ? JSON.parse(snapshot.postingPattern) : null,
-    } : null;
+    const parsed = snapshot
+      ? {
+          ...snapshot,
+          postingPattern: snapshot.postingPattern ? JSON.parse(snapshot.postingPattern) : null,
+        }
+      : null;
 
     return NextResponse.json({
       snapshot: parsed,
-      history: history.map(h => ({
+      history: history.map((h) => ({
         ...h,
         postingPattern: h.postingPattern ? JSON.parse(h.postingPattern) : null,
       })),

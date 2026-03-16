@@ -16,18 +16,18 @@ function isUrlSafe(urlString: string): boolean {
     // Block private/internal IPs and metadata endpoints
     const hostname = url.hostname.toLowerCase();
     const blockedPatterns = [
-      /^127\./,                          // Localhost IPv4
-      /^10\./,                           // Private Class A
-      /^172\.(1[6-9]|2[0-9]|3[0-1])\./,  // Private Class B
-      /^192\.168\./,                     // Private Class C
-      /^169\.254\./,                     // Link-local / AWS metadata
-      /^0\./,                            // Current network
+      /^127\./, // Localhost IPv4
+      /^10\./, // Private Class A
+      /^172\.(1[6-9]|2[0-9]|3[0-1])\./, // Private Class B
+      /^192\.168\./, // Private Class C
+      /^169\.254\./, // Link-local / AWS metadata
+      /^0\./, // Current network
       /^localhost$/i,
       /^.*\.local$/i,
       /^.*\.internal$/i,
-      /^\[::1\]$/,                       // IPv6 localhost
-      /^\[fc00:/i,                       // IPv6 private
-      /^\[fe80:/i,                       // IPv6 link-local
+      /^\[::1\]$/, // IPv6 localhost
+      /^\[fc00:/i, // IPv6 private
+      /^\[fe80:/i, // IPv6 link-local
     ];
 
     for (const pattern of blockedPatterns) {
@@ -61,15 +61,12 @@ export async function POST(request: NextRequest) {
     const apiKey = process.env.ANTHROPIC_API_KEY;
 
     if (!apiKey) {
-      return NextResponse.json(
-        { error: 'API key not configured' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'API key not configured' }, { status: 500 });
     }
 
     const anthropic = new Anthropic({ apiKey });
 
-    const { imageUrl, imageBase64, brandDNA, action } = await request.json() as {
+    const { imageUrl, imageBase64, brandDNA, action } = (await request.json()) as {
       imageUrl?: string;
       imageBase64?: string;
       brandDNA: BrandDNA;
@@ -145,9 +142,8 @@ export async function POST(request: NextRequest) {
       const responseText = message.content[0].type === 'text' ? message.content[0].text : '';
       const jsonMatch = responseText.match(/\{[\s\S]*\}/);
       if (!jsonMatch) throw new Error('Invalid response');
-      
-      return NextResponse.json(JSON.parse(jsonMatch[0]));
 
+      return NextResponse.json(JSON.parse(jsonMatch[0]));
     } else {
       // Generate visual concept blending Pinterest + Brand DNA
       const message = await anthropic.messages.create({
@@ -201,13 +197,12 @@ Return ONLY valid JSON:
       const responseText = message.content[0].type === 'text' ? message.content[0].text : '';
       const jsonMatch = responseText.match(/\{[\s\S]*\}/);
       if (!jsonMatch) throw new Error('Invalid response');
-      
+
       return NextResponse.json(JSON.parse(jsonMatch[0]));
     }
-
   } catch (error: unknown) {
     console.error('Image analysis error:', error);
-    
+
     let message = 'Analysis failed';
     if (error instanceof Error) {
       if (error.message.includes('credit balance is too low')) {
@@ -216,8 +211,7 @@ Return ONLY valid JSON:
         message = error.message;
       }
     }
-    
+
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
-

@@ -94,8 +94,8 @@ export default function EnterprisePage() {
               at scale_
             </h1>
             <p className="mt-4 text-lg text-white/50">
-              give your team the tools to maintain brand alignment across
-              every piece of content, every channel, every time.
+              give your team the tools to maintain brand alignment across every piece of content,
+              every channel, every time.
             </p>
 
             <div className="mt-10 space-y-6">
@@ -137,7 +137,9 @@ export default function EnterprisePage() {
             </div>
 
             <div className="mt-10 rounded-xl border border-white/10 bg-white/[0.02] p-5">
-              <p className="text-sm font-medium text-white">trusted by teams who care about brand</p>
+              <p className="text-sm font-medium text-white">
+                trusted by teams who care about brand
+              </p>
               <p className="mt-1 text-xs text-white/40">
                 starting at $500/mo for teams of 5+. custom pricing based on seats and usage.
               </p>

@@ -10,12 +10,7 @@ interface SaveResultsProps {
   theme: string;
 }
 
-export default function SaveResults({
-  username,
-  onSave,
-  onSkip,
-  theme,
-}: SaveResultsProps) {
+export default function SaveResults({ username, onSave, onSkip, theme }: SaveResultsProps) {
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -293,7 +288,14 @@ export default function SaveResults({
                   marginBottom: i < 2 ? '8px' : 0,
                 }}
               >
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#10B981" strokeWidth="2.5">
+                <svg
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#10B981"
+                  strokeWidth="2.5"
+                >
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
                 <span

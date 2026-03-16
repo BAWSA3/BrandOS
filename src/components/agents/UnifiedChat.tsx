@@ -2,8 +2,8 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  ChatMessage, 
+import {
+  ChatMessage,
   ChatArtifact,
   createChatMessage,
   getAgentPersona,
@@ -82,7 +82,7 @@ export default function UnifiedChat({ brandDNA, brandId }: UnifiedChatProps) {
       if (!response.ok) throw new Error('Failed to get response');
 
       const data = await response.json();
-      
+
       setIsRouting(false);
       setCurrentAgent(data.agent);
 
@@ -132,9 +132,9 @@ export default function UnifiedChat({ brandDNA, brandId }: UnifiedChatProps) {
   };
 
   const examplePrompts = [
-    { text: "Create a launch campaign for our new feature", agent: "campaign" as AgentName },
-    { text: "Write a Twitter thread about brand consistency", agent: "content" as AgentName },
-    { text: "What content performs best on LinkedIn?", agent: "analytics" as AgentName },
+    { text: 'Create a launch campaign for our new feature', agent: 'campaign' as AgentName },
+    { text: 'Write a Twitter thread about brand consistency', agent: 'content' as AgentName },
+    { text: 'What content performs best on LinkedIn?', agent: 'analytics' as AgentName },
   ];
 
   return (
@@ -148,15 +148,14 @@ export default function UnifiedChat({ brandDNA, brandId }: UnifiedChatProps) {
                 <div
                   key={persona.name}
                   className={`w-8 h-8 rounded-full flex items-center justify-center text-sm border-2 border-neutral-950 transition-all ${
-                    currentAgent === persona.name
-                      ? 'z-10'
-                      : 'opacity-60'
+                    currentAgent === persona.name ? 'z-10' : 'opacity-60'
                   }`}
                   style={{
                     backgroundColor: `${persona.accentColor}30`,
-                    boxShadow: currentAgent === persona.name
-                      ? `0 0 0 2px #0a0a0a, 0 0 0 4px ${persona.accentColor}`
-                      : undefined,
+                    boxShadow:
+                      currentAgent === persona.name
+                        ? `0 0 0 2px #0a0a0a, 0 0 0 4px ${persona.accentColor}`
+                        : undefined,
                   }}
                 >
                   {persona.avatar}
@@ -166,7 +165,7 @@ export default function UnifiedChat({ brandDNA, brandId }: UnifiedChatProps) {
             <div>
               <h2 className="text-lg font-semibold text-white">AI Assistant</h2>
               <p className="text-sm text-neutral-400">
-                {currentAgent 
+                {currentAgent
                   ? `${getAgentPersona(currentAgent).displayName} is helping`
                   : 'Auto-routes to the right specialist'}
               </p>
@@ -200,8 +199,8 @@ export default function UnifiedChat({ brandDNA, brandId }: UnifiedChatProps) {
                 {message.role === 'assistant' && message.agentName && (
                   <div
                     className="w-8 h-8 rounded-full flex items-center justify-center text-sm flex-shrink-0"
-                    style={{ 
-                      backgroundColor: `${getAgentPersona(message.agentName).accentColor}20` 
+                    style={{
+                      backgroundColor: `${getAgentPersona(message.agentName).accentColor}20`,
                     }}
                   >
                     {getAgentPersona(message.agentName).avatar}
@@ -217,7 +216,7 @@ export default function UnifiedChat({ brandDNA, brandId }: UnifiedChatProps) {
                 >
                   {/* Routing indicator */}
                   {message.routing && message.routing.confidence < 0.9 && (
-                    <div 
+                    <div
                       className="px-4 pt-2 text-xs flex items-center gap-1"
                       style={{ color: getAgentPersona(message.agentName!).accentColor }}
                     >
@@ -242,8 +241,8 @@ export default function UnifiedChat({ brandDNA, brandId }: UnifiedChatProps) {
                           isExpanded={expandedArtifacts.has(`${message.id}-${idx}`)}
                           onToggle={() => toggleArtifact(`${message.id}-${idx}`)}
                           accentColor={
-                            message.agentName 
-                              ? getAgentPersona(message.agentName).accentColor 
+                            message.agentName
+                              ? getAgentPersona(message.agentName).accentColor
                               : '#8B5CF6'
                           }
                         />
@@ -287,8 +286,8 @@ export default function UnifiedChat({ brandDNA, brandId }: UnifiedChatProps) {
               <div className="bg-neutral-900 rounded-2xl rounded-bl-sm border border-neutral-800 px-4 py-3">
                 <div className="flex items-center gap-2">
                   <span className="text-neutral-400 text-sm">
-                    {isRouting 
-                      ? 'Finding the right specialist...' 
+                    {isRouting
+                      ? 'Finding the right specialist...'
                       : `${currentAgent ? getAgentPersona(currentAgent).displayName : 'Assistant'} is thinking...`}
                   </span>
                 </div>
@@ -313,7 +312,7 @@ export default function UnifiedChat({ brandDNA, brandId }: UnifiedChatProps) {
                   onClick={() => handleExampleClick(prompt.text)}
                   className="text-sm px-3 py-1.5 rounded-full bg-neutral-900 border border-neutral-700 text-neutral-300 hover:border-neutral-600 hover:text-white transition-colors flex items-center gap-2"
                 >
-                  <span 
+                  <span
                     className="w-4 h-4 rounded-full flex items-center justify-center text-[10px]"
                     style={{ backgroundColor: `${persona.accentColor}30` }}
                   >
@@ -348,7 +347,12 @@ export default function UnifiedChat({ brandDNA, brandId }: UnifiedChatProps) {
             className="px-4 py-3 rounded-xl font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed bg-gradient-to-r from-violet-600 to-emerald-600 text-white hover:from-violet-500 hover:to-emerald-500"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+              />
             </svg>
           </button>
         </div>
@@ -364,8 +368,14 @@ export default function UnifiedChat({ brandDNA, brandId }: UnifiedChatProps) {
 function formatMessage(content: string): React.ReactNode {
   // Split by ** for bold
   const parts = content.split(/\*\*(.*?)\*\*/g);
-  return parts.map((part, i) => 
-    i % 2 === 1 ? <strong key={i} className="font-semibold">{part}</strong> : part
+  return parts.map((part, i) =>
+    i % 2 === 1 ? (
+      <strong key={i} className="font-semibold">
+        {part}
+      </strong>
+    ) : (
+      part
+    )
   );
 }
 
@@ -383,12 +393,18 @@ function ArtifactCard({
 }) {
   const getIcon = () => {
     switch (artifact.type) {
-      case 'campaign-plan': return '🎯';
-      case 'content': return '📝';
-      case 'analytics-report': return '📊';
-      case 'content-ideas': return '💡';
-      case 'quick-check': return '⚡';
-      default: return '📄';
+      case 'campaign-plan':
+        return '🎯';
+      case 'content':
+        return '📝';
+      case 'analytics-report':
+        return '📊';
+      case 'content-ideas':
+        return '💡';
+      case 'quick-check':
+        return '⚡';
+      default:
+        return '📄';
     }
   };
 
@@ -405,7 +421,9 @@ function ArtifactCard({
         </span>
         <svg
           className={`w-4 h-4 text-neutral-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
-          fill="none" stroke="currentColor" viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
         >
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
         </svg>
@@ -432,9 +450,3 @@ function ArtifactCard({
     </div>
   );
 }
-
-
-
-
-
-

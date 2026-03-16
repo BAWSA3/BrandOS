@@ -20,7 +20,7 @@
   min-height: 100vh;
   background: var(--phantom-black);
   color: var(--phantom-cream);
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   position: relative;
   overflow-x: hidden;
 }
@@ -76,7 +76,8 @@
 }
 
 @keyframes orbFloat {
-  0%, 100% {
+  0%,
+  100% {
     transform: translate(0, 0) scale(1);
   }
   25% {
@@ -295,7 +296,8 @@
 }
 
 @keyframes scrollPulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 0.3;
     transform: scaleY(1);
   }
@@ -380,7 +382,9 @@
 .productCard:hover {
   transform: translateY(-8px);
   border-color: rgba(171, 159, 242, 0.3);
-  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.4), 0 0 48px var(--purple-subtle);
+  box-shadow:
+    0 24px 64px rgba(0, 0, 0, 0.4),
+    0 0 48px var(--purple-subtle);
 }
 
 /* Frosted Overlay */
@@ -491,7 +495,9 @@
 
 .ledIndicator.ledActive {
   background: var(--phantom-purple);
-  box-shadow: 0 0 12px var(--phantom-purple), 0 0 24px var(--purple-glow);
+  box-shadow:
+    0 0 12px var(--phantom-purple),
+    0 0 24px var(--purple-glow);
 }
 
 /* Product Info */

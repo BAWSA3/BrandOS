@@ -177,10 +177,7 @@ export function isUnlimited(value: number): boolean {
   return value === -1;
 }
 
-export function canAccessFeature(
-  tier: SubscriptionTier,
-  feature: keyof PlanLimits
-): boolean {
+export function canAccessFeature(tier: SubscriptionTier, feature: keyof PlanLimits): boolean {
   const limits = getPlanLimits(tier);
   const value = limits[feature];
   if (typeof value === 'boolean') return value;
@@ -194,7 +191,8 @@ export const SELF_SERVE_TIERS: SubscriptionTier[] = ['CREATOR', 'PRO', 'AGENCY']
 export const ONE_TIME_PRODUCTS = {
   BRAND_DNA_REPORT: {
     name: 'Brand DNA Deep-Dive Report',
-    description: 'A comprehensive AI-generated analysis of your brand identity, voice, and strategy — delivered as a premium PDF.',
+    description:
+      'A comprehensive AI-generated analysis of your brand identity, voice, and strategy — delivered as a premium PDF.',
     price: 39,
     stripePriceId: process.env.STRIPE_PRICE_DNA_REPORT || '',
   },

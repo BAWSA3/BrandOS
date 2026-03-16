@@ -10,18 +10,19 @@
 
 **Goal:** Ensure all user data is being captured and stored correctly before inviting users.
 
-| Task | Status | Notes |
-|------|--------|-------|
-| Verify Prisma schema is up-to-date | ⬜ | Run `npx prisma db push` to sync |
-| Test user creation flow end-to-end | ⬜ | OAuth → DB write → Session |
-| Verify `isInnerCircle` flag is set on invite redemption | ⬜ | Check `/api/auth/callback` |
-| Confirm `invitedBy` tracking works | ⬜ | Test referral chain |
-| Test Brand DNA data persistence | ⬜ | Complete full journey |
-| Verify HistoryEntry audit trail | ⬜ | Check/Generate operations logged |
-| Set up database backups | ⬜ | Vercel/Postgres auto-backup or manual |
-| Create data export script | ⬜ | For analytics and user requests |
+| Task                                                    | Status | Notes                                 |
+| ------------------------------------------------------- | ------ | ------------------------------------- |
+| Verify Prisma schema is up-to-date                      | ⬜     | Run `npx prisma db push` to sync      |
+| Test user creation flow end-to-end                      | ⬜     | OAuth → DB write → Session            |
+| Verify `isInnerCircle` flag is set on invite redemption | ⬜     | Check `/api/auth/callback`            |
+| Confirm `invitedBy` tracking works                      | ⬜     | Test referral chain                   |
+| Test Brand DNA data persistence                         | ⬜     | Complete full journey                 |
+| Verify HistoryEntry audit trail                         | ⬜     | Check/Generate operations logged      |
+| Set up database backups                                 | ⬜     | Vercel/Postgres auto-backup or manual |
+| Create data export script                               | ⬜     | For analytics and user requests       |
 
 **Commands to verify:**
+
 ```bash
 # Check database schema sync
 npx prisma db push --dry-run
@@ -35,22 +36,22 @@ npx prisma db pull
 
 ### 1.2 Monitoring Setup
 
-| Task | Status | Notes |
-|------|--------|-------|
-| Verify Vercel Analytics is tracking | ⬜ | Check dashboard |
-| Confirm Sentry error tracking | ⬜ | Test with intentional error |
-| Set up uptime monitoring | ⬜ | Better Uptime, Pingdom, or UptimeRobot |
-| Create Slack/Discord alerts for errors | ⬜ | Sentry → Slack integration |
-| Monitor database connection pool | ⬜ | Prisma connection limits |
+| Task                                   | Status | Notes                                  |
+| -------------------------------------- | ------ | -------------------------------------- |
+| Verify Vercel Analytics is tracking    | ⬜     | Check dashboard                        |
+| Confirm Sentry error tracking          | ⬜     | Test with intentional error            |
+| Set up uptime monitoring               | ⬜     | Better Uptime, Pingdom, or UptimeRobot |
+| Create Slack/Discord alerts for errors | ⬜     | Sentry → Slack integration             |
+| Monitor database connection pool       | ⬜     | Prisma connection limits               |
 
 ### 1.3 Invite Code Preparation
 
-| Task | Status | Notes |
-|------|--------|-------|
-| Generate initial batch of invite codes | ⬜ | Admin dashboard: `/admin?key=YOUR_KEY` |
-| Create personal invite codes for founders | ⬜ | Track who brought which users |
-| Prepare invite code tracking spreadsheet | ⬜ | Code → Person → Status |
-| Test invite flow completely | ⬜ | Fresh browser, new X account |
+| Task                                      | Status | Notes                                  |
+| ----------------------------------------- | ------ | -------------------------------------- |
+| Generate initial batch of invite codes    | ⬜     | Admin dashboard: `/admin?key=YOUR_KEY` |
+| Create personal invite codes for founders | ⬜     | Track who brought which users          |
+| Prepare invite code tracking spreadsheet  | ⬜     | Code → Person → Status                 |
+| Test invite flow completely               | ⬜     | Fresh browser, new X account           |
 
 ---
 
@@ -59,6 +60,7 @@ npx prisma db pull
 ### 2.1 Target User Selection
 
 **Ideal Inner Circle Profile:**
+
 - Active X creators (100+ posts)
 - Engaged audience (not just follower count)
 - Willingness to give feedback
@@ -66,6 +68,7 @@ npx prisma db pull
 - Mix of niches: tech, creator economy, crypto, lifestyle
 
 **Target Numbers:**
+
 - Wave 1: 10-15 users (Day 1-2)
 - Wave 2: 10-15 users (Day 3-4)
 - Wave 3: 10-15 users (Day 5-7)
@@ -74,6 +77,7 @@ npx prisma db pull
 ### 2.2 Outreach Templates
 
 **DM Template - Personal Connection:**
+
 ```
 Hey [Name]!
 
@@ -87,6 +91,7 @@ No pressure either way 🤙
 ```
 
 **DM Template - Mutual Connection:**
+
 ```
 Hey [Name]!
 
@@ -102,21 +107,25 @@ Interested?
 ### 2.3 Onboarding Sequence
 
 **Immediate (On Signup):**
+
 1. Welcome email with quick start guide
 2. Slack/Discord invite for feedback channel (optional)
 3. Personal DM thanking them for joining
 
 **Day 1 After Signup:**
+
 1. Check if they completed the score journey
 2. If not, send gentle reminder
 3. If yes, ask initial reaction
 
 **Day 3 After Signup:**
+
 1. Follow-up on feature usage
 2. Ask for 1-2 pieces of feedback
 3. Mention their invite codes they can share
 
 **Day 7 After Signup:**
+
 1. Comprehensive feedback request
 2. Ask for testimonial/quote if positive
 3. Remind about sharing invite codes
@@ -128,10 +137,12 @@ Interested?
 ### 3.1 Current State
 
 **Existing:**
+
 - FeedbackButton component (mailto-based)
 - Email goes to `bawsa@mybrandos.app`
 
 **Needed Enhancements:**
+
 - Database-backed feedback storage
 - Structured feedback categories
 - In-app feedback without leaving
@@ -140,6 +151,7 @@ Interested?
 ### 3.2 Enhanced Feedback System Implementation
 
 **Database Schema Addition:**
+
 ```prisma
 model Feedback {
   id          String   @id @default(cuid())
@@ -159,11 +171,13 @@ model Feedback {
 ```
 
 **API Endpoints Needed:**
+
 - `POST /api/feedback` - Submit feedback
 - `GET /api/admin/feedback` - View all feedback (admin)
 - `PATCH /api/admin/feedback/[id]` - Update status (admin)
 
 **Admin Dashboard Features:**
+
 - View all feedback with filters (type, status, date)
 - Mark feedback as reviewed/resolved
 - Export feedback to CSV
@@ -173,15 +187,16 @@ model Feedback {
 
 **Strategic Feedback Triggers:**
 
-| Trigger | Question Type | Timing |
-|---------|--------------|--------|
-| Score journey complete | NPS (0-10) | Immediate |
-| First Brand DNA view | Quick reaction | 3 seconds after load |
-| After using an Agent | Helpfulness rating | After response |
-| After 7 days active | Feature survey | In-app modal |
-| On score card share | Share experience | After share action |
+| Trigger                | Question Type      | Timing               |
+| ---------------------- | ------------------ | -------------------- |
+| Score journey complete | NPS (0-10)         | Immediate            |
+| First Brand DNA view   | Quick reaction     | 3 seconds after load |
+| After using an Agent   | Helpfulness rating | After response       |
+| After 7 days active    | Feature survey     | In-app modal         |
+| On score card share    | Share experience   | After share action   |
 
 **Sample Questions:**
+
 1. "How useful was your Brand Score? (1-5 stars)"
 2. "What's the ONE thing you wish BrandOS did?"
 3. "Would you recommend BrandOS to a friend? (0-10)"
@@ -189,14 +204,14 @@ model Feedback {
 
 ### 3.4 Feedback Collection Channels
 
-| Channel | Purpose | Priority |
-|---------|---------|----------|
-| In-app modal | Quick reactions | High |
-| Feedback button | Detailed feedback/bugs | High |
-| Email follow-ups | Thoughtful responses | Medium |
-| DM conversations | Deep insights | High |
-| Slack/Discord | Community discussion | Medium |
-| User interviews | Qualitative insights | High |
+| Channel          | Purpose                | Priority |
+| ---------------- | ---------------------- | -------- |
+| In-app modal     | Quick reactions        | High     |
+| Feedback button  | Detailed feedback/bugs | High     |
+| Email follow-ups | Thoughtful responses   | Medium   |
+| DM conversations | Deep insights          | High     |
+| Slack/Discord    | Community discussion   | Medium   |
+| User interviews  | Qualitative insights   | High     |
 
 ---
 
@@ -205,12 +220,14 @@ model Feedback {
 ### 4.1 Feedback Triage Process
 
 **Daily Review:**
+
 1. Check new feedback submissions
 2. Categorize by type (bug/idea/other)
 3. Assign priority (critical → low)
 4. Add to appropriate backlog
 
 **Weekly Analysis:**
+
 1. Identify patterns/themes
 2. Calculate NPS score
 3. Review completion rates
@@ -218,30 +235,33 @@ model Feedback {
 
 ### 4.2 Feedback Categories & Response
 
-| Category | Response Time | Action |
-|----------|---------------|--------|
-| Critical Bug | < 4 hours | Hotfix deploy |
-| Major Bug | < 24 hours | Patch release |
-| Minor Bug | < 1 week | Batch fix |
-| UX Issue | < 1 week | Design review |
-| Feature Request | Backlog | Evaluate & prioritize |
-| Praise | < 24 hours | Thank + ask for testimonial |
+| Category        | Response Time | Action                      |
+| --------------- | ------------- | --------------------------- |
+| Critical Bug    | < 4 hours     | Hotfix deploy               |
+| Major Bug       | < 24 hours    | Patch release               |
+| Minor Bug       | < 1 week      | Batch fix                   |
+| UX Issue        | < 1 week      | Design review               |
+| Feature Request | Backlog       | Evaluate & prioritize       |
+| Praise          | < 24 hours    | Thank + ask for testimonial |
 
 ### 4.3 Iteration Cycles
 
 **Fast Iterations (1-3 days):**
+
 - Critical bug fixes
 - Copy/text changes
 - Simple UX improvements
 - Error message clarity
 
 **Medium Iterations (1 week):**
+
 - Feature enhancements
 - New feedback integrations
 - Performance optimizations
 - UI polish
 
 **Major Iterations (2+ weeks):**
+
 - New features
 - Architecture changes
 - New agent capabilities
@@ -250,6 +270,7 @@ model Feedback {
 ### 4.4 Tracking Improvements
 
 Create a simple changelog users can see:
+
 - `/changelog` page or section
 - Version number updates
 - "What's New" modal on login after updates
@@ -288,6 +309,7 @@ Create a simple changelog users can see:
 ### 5.2 Launch Readiness Checklist
 
 **Minimum Viable Launch Criteria:**
+
 - [ ] 30+ Inner Circle users onboarded
 - [ ] NPS > 30 from Inner Circle
 - [ ] Zero critical/major bugs open
@@ -298,6 +320,7 @@ Create a simple changelog users can see:
 - [ ] Landing page optimized with social proof
 
 **Nice-to-Have Before Launch:**
+
 - [ ] 50+ Inner Circle users
 - [ ] NPS > 50
 - [ ] Video testimonials (2-3)
@@ -311,37 +334,38 @@ Create a simple changelog users can see:
 
 ### 6.1 Pre-Launch (1 Week Before)
 
-| Day | Task |
-|-----|------|
-| D-7 | Finalize landing page copy |
-| D-6 | Prepare social content calendar |
-| D-5 | Queue tweets/threads for launch week |
-| D-4 | Notify Inner Circle of public launch |
-| D-3 | Final bug sweep and fixes |
-| D-2 | Scale infrastructure if needed |
+| Day | Task                                    |
+| --- | --------------------------------------- |
+| D-7 | Finalize landing page copy              |
+| D-6 | Prepare social content calendar         |
+| D-5 | Queue tweets/threads for launch week    |
+| D-4 | Notify Inner Circle of public launch    |
+| D-3 | Final bug sweep and fixes               |
+| D-2 | Scale infrastructure if needed          |
 | D-1 | Team briefing, prepare for support load |
 
 ### 6.2 Launch Day
 
 **Timeline:**
 
-| Time | Action |
-|------|--------|
-| 6:00 AM | Final production check |
-| 7:00 AM | Remove invite-only restriction |
-| 7:30 AM | Launch tweet from main account |
-| 8:00 AM | Inner Circle retweet/engagement |
-| 9:00 AM | Thread explaining the product |
-| 12:00 PM | Founder story thread |
-| 3:00 PM | Behind-the-scenes content |
-| 6:00 PM | Day 1 metrics review |
-| 9:00 PM | Thank you post + highlights |
+| Time     | Action                          |
+| -------- | ------------------------------- |
+| 6:00 AM  | Final production check          |
+| 7:00 AM  | Remove invite-only restriction  |
+| 7:30 AM  | Launch tweet from main account  |
+| 8:00 AM  | Inner Circle retweet/engagement |
+| 9:00 AM  | Thread explaining the product   |
+| 12:00 PM | Founder story thread            |
+| 3:00 PM  | Behind-the-scenes content       |
+| 6:00 PM  | Day 1 metrics review            |
+| 9:00 PM  | Thank you post + highlights     |
 
 **Technical Preparation:**
+
 ```javascript
 // Feature flag for public access
 // In .env or database config
-PUBLIC_ACCESS_ENABLED=false // Change to true on launch day
+PUBLIC_ACCESS_ENABLED = false; // Change to true on launch day
 
 // Or remove invite code requirement
 // In auth callback, make invite code optional
@@ -349,26 +373,26 @@ PUBLIC_ACCESS_ENABLED=false // Change to true on launch day
 
 ### 6.3 Post-Launch Monitoring (Week 1)
 
-| Metric | Check Frequency |
-|--------|-----------------|
-| Error rates | Every 2 hours |
-| Server load | Every hour |
-| Signup numbers | Every 4 hours |
-| Completion rates | Daily |
-| Feedback volume | Every 4 hours |
-| Social mentions | Every 2 hours |
+| Metric           | Check Frequency |
+| ---------------- | --------------- |
+| Error rates      | Every 2 hours   |
+| Server load      | Every hour      |
+| Signup numbers   | Every 4 hours   |
+| Completion rates | Daily           |
+| Feedback volume  | Every 4 hours   |
+| Social mentions  | Every 2 hours   |
 
 ### 6.4 Launch Channels
 
-| Channel | Timing | Content Type |
-|---------|--------|--------------|
-| X/Twitter | Launch day | Thread + engagement |
-| Product Hunt | Day 1 or 2 | Full listing |
-| LinkedIn | Day 1 | Professional angle |
-| Indie Hackers | Day 1-2 | Building in public story |
-| Hacker News | Day 2-3 | If product fits |
-| Reddit (relevant subs) | Day 2-3 | Community value add |
-| Email list | Day 1 | Announcement to signups |
+| Channel                | Timing     | Content Type             |
+| ---------------------- | ---------- | ------------------------ |
+| X/Twitter              | Launch day | Thread + engagement      |
+| Product Hunt           | Day 1 or 2 | Full listing             |
+| LinkedIn               | Day 1      | Professional angle       |
+| Indie Hackers          | Day 1-2    | Building in public story |
+| Hacker News            | Day 2-3    | If product fits          |
+| Reddit (relevant subs) | Day 2-3    | Community value add      |
+| Email list             | Day 1      | Announcement to signups  |
 
 ---
 
@@ -456,10 +480,10 @@ curl https://mybrandos.app/api/admin/feedback?export=csv \
 
 ### A. Inner Circle Tracking Spreadsheet
 
-| Code | Assigned To | Status | Signed Up | Completed Score | Feedback Given | Notes |
-|------|-------------|--------|-----------|-----------------|----------------|-------|
-| ABC123 | @user1 | Sent | ⬜ | ⬜ | ⬜ | Tech influencer |
-| DEF456 | @user2 | Sent | ✅ | ✅ | ⬜ | Creator coach |
+| Code   | Assigned To | Status | Signed Up | Completed Score | Feedback Given | Notes           |
+| ------ | ----------- | ------ | --------- | --------------- | -------------- | --------------- |
+| ABC123 | @user1      | Sent   | ⬜        | ⬜              | ⬜             | Tech influencer |
+| DEF456 | @user2      | Sent   | ✅        | ✅              | ⬜             | Creator coach   |
 
 ### B. Feedback Email Template
 
@@ -499,5 +523,5 @@ Totally cool if not, and thanks either way for the support!
 
 ---
 
-*Last updated: [Date]*
-*Version: 1.0*
+_Last updated: [Date]_
+_Version: 1.0_

@@ -46,14 +46,20 @@ export default function ConductorPage() {
           </div>
           <h1 className="text-2xl font-bold text-white mb-3">set up your brand first_</h1>
           <p className="text-neutral-400 mb-6">
-            the conductor needs your brand dna to orchestrate the ai agents. create your brand to get started.
+            the conductor needs your brand dna to orchestrate the ai agents. create your brand to
+            get started.
           </p>
           <Link
             href="/app"
             className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white font-medium rounded-xl hover:from-indigo-500 hover:via-purple-500 hover:to-pink-500 transition-all shadow-lg shadow-indigo-500/25"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+              />
             </svg>
             create brand
           </Link>
@@ -68,12 +74,17 @@ export default function ConductorPage() {
       <header className="border-b border-neutral-800 px-6 py-4 bg-neutral-950/50 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link 
-              href="/app" 
+            <Link
+              href="/app"
               className="text-neutral-400 hover:text-white transition-colors p-2 -ml-2 rounded-lg hover:bg-neutral-800"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
               </svg>
             </Link>
             <div className="flex items-center gap-3">
@@ -89,9 +100,7 @@ export default function ConductorPage() {
                     Beta
                   </span>
                 </h1>
-                <p className="text-sm text-neutral-400">
-                  ai orchestration for {brand.name}
-                </p>
+                <p className="text-sm text-neutral-400">ai orchestration for {brand.name}</p>
               </div>
             </div>
           </div>
@@ -103,9 +112,15 @@ export default function ConductorPage() {
               className="text-sm px-4 py-2 rounded-xl bg-neutral-800 text-neutral-400 hover:text-white hover:bg-neutral-700 transition-colors flex items-center gap-2"
             >
               <span className="flex -space-x-1">
-                <span className="w-4 h-4 rounded-full bg-violet-500/20 flex items-center justify-center text-[10px]">🎯</span>
-                <span className="w-4 h-4 rounded-full bg-emerald-500/20 flex items-center justify-center text-[10px]">✍️</span>
-                <span className="w-4 h-4 rounded-full bg-amber-500/20 flex items-center justify-center text-[10px]">📊</span>
+                <span className="w-4 h-4 rounded-full bg-violet-500/20 flex items-center justify-center text-[10px]">
+                  🎯
+                </span>
+                <span className="w-4 h-4 rounded-full bg-emerald-500/20 flex items-center justify-center text-[10px]">
+                  ✍️
+                </span>
+                <span className="w-4 h-4 rounded-full bg-amber-500/20 flex items-center justify-center text-[10px]">
+                  📊
+                </span>
               </span>
               direct agents
             </Link>
@@ -132,9 +147,7 @@ export default function ConductorPage() {
                   <h3 className="text-white font-medium mb-1">
                     {conductorPersona.displayName} — {conductorPersona.title}
                   </h3>
-                  <p className="text-sm text-neutral-400 mb-3">
-                    {conductorPersona.description}
-                  </p>
+                  <p className="text-sm text-neutral-400 mb-3">{conductorPersona.description}</p>
                   <div className="flex flex-wrap gap-2">
                     {conductorPersona.capabilities.slice(0, 3).map((cap, idx) => (
                       <span
@@ -166,7 +179,3 @@ export default function ConductorPage() {
     </div>
   );
 }
-
-
-
-

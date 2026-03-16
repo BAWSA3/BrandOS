@@ -39,7 +39,7 @@ export default function IconSection({ brandId }: IconSectionProps) {
 
     for (const file of Array.from(files)) {
       const url = URL.createObjectURL(file);
-      
+
       addIcon(brandId, {
         name: file.name.replace(/\.[^/.]+$/, ''),
         url,
@@ -63,21 +63,24 @@ export default function IconSection({ brandId }: IconSectionProps) {
   };
 
   // Get unique categories from icons
-  const categories = Array.from(new Set([
-    ...defaultCategories,
-    ...brandKit.icons.map((i) => i.category),
-  ]));
+  const categories = Array.from(
+    new Set([...defaultCategories, ...brandKit.icons.map((i) => i.category)])
+  );
 
-  const filteredIcons = activeFilter === 'all'
-    ? brandKit.icons
-    : brandKit.icons.filter((icon) => icon.category === activeFilter);
+  const filteredIcons =
+    activeFilter === 'all'
+      ? brandKit.icons
+      : brandKit.icons.filter((icon) => icon.category === activeFilter);
 
   // Group by category
-  const iconsByCategory = filteredIcons.reduce((acc, icon) => {
-    if (!acc[icon.category]) acc[icon.category] = [];
-    acc[icon.category].push(icon);
-    return acc;
-  }, {} as Record<string, IconAsset[]>);
+  const iconsByCategory = filteredIcons.reduce(
+    (acc, icon) => {
+      if (!acc[icon.category]) acc[icon.category] = [];
+      acc[icon.category].push(icon);
+      return acc;
+    },
+    {} as Record<string, IconAsset[]>
+  );
 
   return (
     <div className="space-y-6">
@@ -99,12 +102,28 @@ export default function IconSection({ brandId }: IconSectionProps) {
           >
             {isUploading ? (
               <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                />
               </svg>
             ) : (
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.5}
+                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
+                />
               </svg>
             )}
             Upload Icons
@@ -139,8 +158,18 @@ export default function IconSection({ brandId }: IconSectionProps) {
       {/* Icon Grid */}
       {brandKit.icons.length === 0 ? (
         <div className="text-center py-12 border-2 border-dashed border-border rounded-xl">
-          <svg className="w-16 h-16 mx-auto mb-4 text-muted opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5" />
+          <svg
+            className="w-16 h-16 mx-auto mb-4 text-muted opacity-50"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={1}
+              d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5"
+            />
           </svg>
           <p className="text-muted mb-2">No icons uploaded yet</p>
           <p className="text-xs text-muted">Upload SVG icons to build your icon library</p>
@@ -218,11 +247,7 @@ function IconCard({ icon, isSelected, onSelect, onUpdate, onDelete, categories }
         onClick={onSelect}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={icon.url}
-          alt={icon.name}
-          className="w-6 h-6 object-contain"
-        />
+        <img src={icon.url} alt={icon.name} className="w-6 h-6 object-contain" />
       </div>
 
       {/* Icon Name Tooltip */}
@@ -254,7 +279,9 @@ function IconCard({ icon, isSelected, onSelect, onUpdate, onDelete, categories }
               className="w-full px-2 py-1 text-sm bg-surface border border-border rounded outline-none focus:border-foreground"
             >
               {categories.map((cat) => (
-                <option key={cat} value={cat}>{cat}</option>
+                <option key={cat} value={cat}>
+                  {cat}
+                </option>
               ))}
             </select>
           </div>
@@ -266,7 +293,9 @@ function IconCard({ icon, isSelected, onSelect, onUpdate, onDelete, categories }
               className="w-full px-2 py-1 text-sm bg-surface border border-border rounded outline-none focus:border-foreground"
             >
               {iconStyles.map((style) => (
-                <option key={style.id} value={style.id}>{style.label}</option>
+                <option key={style.id} value={style.id}>
+                  {style.label}
+                </option>
               ))}
             </select>
           </div>
@@ -293,16 +322,10 @@ function IconCard({ icon, isSelected, onSelect, onUpdate, onDelete, categories }
             </div>
           </div>
           <div className="flex justify-between pt-2">
-            <button
-              onClick={onDelete}
-              className="text-xs text-red-500 hover:text-red-400"
-            >
+            <button onClick={onDelete} className="text-xs text-red-500 hover:text-red-400">
               Delete
             </button>
-            <button
-              onClick={onSelect}
-              className="text-xs text-muted hover:text-foreground"
-            >
+            <button onClick={onSelect} className="text-xs text-muted hover:text-foreground">
               Done
             </button>
           </div>
@@ -311,19 +334,3 @@ function IconCard({ icon, isSelected, onSelect, onUpdate, onDelete, categories }
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -78,7 +78,12 @@ async function searchNicheTweets(
     parts.push(`(${keywords.slice(0, 3).join(' OR ')})`);
   }
   if (hashtags.length > 0) {
-    parts.push(`(${hashtags.slice(0, 3).map(h => `#${h.replace(/^#/, '')}`).join(' OR ')})`);
+    parts.push(
+      `(${hashtags
+        .slice(0, 3)
+        .map((h) => `#${h.replace(/^#/, '')}`)
+        .join(' OR ')})`
+    );
   }
 
   let query = parts.join(' OR ');
@@ -129,7 +134,9 @@ async function searchNicheTweets(
 /**
  * Use Claude to extract structured patterns from a viral tweet
  */
-async function extractPatterns(tweets: { text: string; viralScore: number }[]): Promise<ViralPatterns[]> {
+async function extractPatterns(
+  tweets: { text: string; viralScore: number }[]
+): Promise<ViralPatterns[]> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey || tweets.length === 0) return [];
 
@@ -143,9 +150,10 @@ async function extractPatterns(tweets: { text: string; viralScore: number }[]): 
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 2000,
-      messages: [{
-        role: 'user',
-        content: `Analyze these high-performing tweets and extract patterns for each.
+      messages: [
+        {
+          role: 'user',
+          content: `Analyze these high-performing tweets and extract patterns for each.
 
 TWEETS:
 ${tweetList}
@@ -162,7 +170,8 @@ Return ONLY valid JSON array:
 [
   { "hookType": "...", "format": "...", "tone": "...", "cta": "...", "length": "...", "topic": "..." }
 ]`,
-      }],
+        },
+      ],
     });
 
     const responseText = response.content[0].type === 'text' ? response.content[0].text : '';
@@ -208,12 +217,12 @@ export async function runMarketScanner(brandId: string): Promise<{
 
     // Score tweets
     const scoredTweets = tweets
-      .map(tweet => ({
+      .map((tweet) => ({
         tweet,
         viralScore: computeViralScore(tweet.public_metrics),
         authorUsername: (tweet as unknown as { _authorUsername?: string })._authorUsername,
       }))
-      .filter(t => t.viralScore >= 30) // Only keep reasonably viral content
+      .filter((t) => t.viralScore >= 30) // Only keep reasonably viral content
       .sort((a, b) => b.viralScore - a.viralScore)
       .slice(0, 10); // Top 10 per niche
 
@@ -221,7 +230,7 @@ export async function runMarketScanner(brandId: string): Promise<{
 
     // Extract patterns via Claude
     const patterns = await extractPatterns(
-      scoredTweets.map(t => ({ text: t.tweet.text, viralScore: t.viralScore }))
+      scoredTweets.map((t) => ({ text: t.tweet.text, viralScore: t.viralScore }))
     );
 
     // Upsert benchmarks
@@ -269,7 +278,7 @@ export async function runMarketScanner(brandId: string): Promise<{
     }
 
     // Small delay between niches to respect rate limits
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 500));
   }
 
   // Prune benchmarks older than 30 days

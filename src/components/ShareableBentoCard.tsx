@@ -52,13 +52,13 @@ interface ShareableBentoCardProps {
 // =============================================================================
 
 const CARD_COLORS = {
-  brandScore: '#10B981',    // Green
-  toneProfile: '#6366F1',   // Blue/Indigo
+  brandScore: '#10B981', // Green
+  toneProfile: '#6366F1', // Blue/Indigo
   voiceConsistency: '#9CA3AF', // Gray
-  followers: '#F97316',     // Orange
-  influence: '#8B5CF6',     // Purple
-  engagement: '#22C55E',    // Green
-  archetype: '#EAB308',     // Yellow
+  followers: '#F97316', // Orange
+  influence: '#8B5CF6', // Purple
+  engagement: '#22C55E', // Green
+  archetype: '#EAB308', // Yellow
 };
 
 // =============================================================================
@@ -88,11 +88,13 @@ function getScoreLabel(score: number): string {
 
 function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return result ? {
-    r: parseInt(result[1], 16),
-    g: parseInt(result[2], 16),
-    b: parseInt(result[3], 16)
-  } : null;
+  return result
+    ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16),
+      }
+    : null;
 }
 
 function formatNumber(num: number): string {
@@ -313,9 +315,10 @@ function renderEngagementCard(
   }
 
   // Stats at bottom
-  const avgEngagement = pillars.length > 0
-    ? Math.round(pillars.reduce((sum, p) => sum + p.avgEngagement, 0) / pillars.length)
-    : 0;
+  const avgEngagement =
+    pillars.length > 0
+      ? Math.round(pillars.reduce((sum, p) => sum + p.avgEngagement, 0) / pillars.length)
+      : 0;
 
   ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
   ctx.font = '400 9px "Helvetica Neue", sans-serif';
@@ -353,13 +356,13 @@ function renderInfluenceTierCard(
   // Tier bars
   const barWidth = 24;
   const barGap = 6;
-  const totalBarsWidth = (barWidth * 5) + (barGap * 4);
+  const totalBarsWidth = barWidth * 5 + barGap * 4;
   const barsStartX = centerX - totalBarsWidth / 2;
   const barsY = y + 50;
 
   tiers.forEach((t, i) => {
     const barX = barsStartX + i * (barWidth + barGap);
-    const barHeight = 8 + (i * 6); // Progressive height
+    const barHeight = 8 + i * 6; // Progressive height
     const isActive = i <= tierIndex;
 
     ctx.fillStyle = isActive ? CARD_COLORS.influence : 'rgba(255, 255, 255, 0.1)';
@@ -560,7 +563,14 @@ export async function generateBentoShareImage(data: BentoShareCardData): Promise
   // Brand color accent blobs
   const primaryRgb = hexToRgb(data.brandColors.primary);
   if (primaryRgb) {
-    const blob1 = ctx.createRadialGradient(canvas.width - 150, 100, 0, canvas.width - 150, 100, 350);
+    const blob1 = ctx.createRadialGradient(
+      canvas.width - 150,
+      100,
+      0,
+      canvas.width - 150,
+      100,
+      350
+    );
     blob1.addColorStop(0, `rgba(${primaryRgb.r}, ${primaryRgb.g}, ${primaryRgb.b}, 0.2)`);
     blob1.addColorStop(1, 'transparent');
     ctx.fillStyle = blob1;
@@ -647,18 +657,63 @@ export async function generateBentoShareImage(data: BentoShareCardData): Promise
   // Row 1: 4 small cards + start of large card
   const row1Y = gridStartY;
   renderToneProfileCard(ctx, gridPadding, row1Y, smallCardWidth, smallCardHeight, data.tone);
-  renderVoiceConsistencyCard(ctx, gridPadding + smallCardWidth + cardGap, row1Y, smallCardWidth, smallCardHeight, data.voiceConsistency);
-  renderEngagementCard(ctx, gridPadding + (smallCardWidth + cardGap) * 2, row1Y, smallCardWidth, smallCardHeight, data.contentPillars || []);
-  renderInfluenceTierCard(ctx, gridPadding + (smallCardWidth + cardGap) * 3, row1Y, smallCardWidth, smallCardHeight, data.influenceTier, data.followersCount);
+  renderVoiceConsistencyCard(
+    ctx,
+    gridPadding + smallCardWidth + cardGap,
+    row1Y,
+    smallCardWidth,
+    smallCardHeight,
+    data.voiceConsistency
+  );
+  renderEngagementCard(
+    ctx,
+    gridPadding + (smallCardWidth + cardGap) * 2,
+    row1Y,
+    smallCardWidth,
+    smallCardHeight,
+    data.contentPillars || []
+  );
+  renderInfluenceTierCard(
+    ctx,
+    gridPadding + (smallCardWidth + cardGap) * 3,
+    row1Y,
+    smallCardWidth,
+    smallCardHeight,
+    data.influenceTier,
+    data.followersCount
+  );
 
   // Large brand score card (right side, spans 2 rows)
   const largeCardX = gridPadding + (smallCardWidth + cardGap) * 4;
-  renderBrandScoreCard(ctx, largeCardX, row1Y, largeCardWidth, largeCardHeight, data.brandScore, data.tone);
+  renderBrandScoreCard(
+    ctx,
+    largeCardX,
+    row1Y,
+    largeCardWidth,
+    largeCardHeight,
+    data.brandScore,
+    data.tone
+  );
 
   // Row 2: 2 cards below first 4
   const row2Y = row1Y + smallCardHeight + cardGap;
-  renderFollowersCard(ctx, gridPadding, row2Y, smallCardWidth, smallCardHeight, data.followersCount);
-  renderArchetypeCard(ctx, gridPadding + smallCardWidth + cardGap, row2Y, wideCardWidth + smallCardWidth + cardGap, smallCardHeight, data.archetype, data.archetypeEmoji);
+  renderFollowersCard(
+    ctx,
+    gridPadding,
+    row2Y,
+    smallCardWidth,
+    smallCardHeight,
+    data.followersCount
+  );
+  renderArchetypeCard(
+    ctx,
+    gridPadding + smallCardWidth + cardGap,
+    row2Y,
+    wideCardWidth + smallCardWidth + cardGap,
+    smallCardHeight,
+    data.archetype,
+    data.archetypeEmoji
+  );
 
   // ==========================================================================
   // FOOTER
@@ -681,9 +736,7 @@ export async function generateBentoShareImage(data: BentoShareCardData): Promise
 export async function copyImageToClipboard(blob: Blob): Promise<boolean> {
   try {
     if (navigator.clipboard && typeof ClipboardItem !== 'undefined') {
-      await navigator.clipboard.write([
-        new ClipboardItem({ 'image/png': blob })
-      ]);
+      await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
       return true;
     }
     return false;
@@ -708,7 +761,9 @@ export default function ShareableBentoCard({ data, theme, onCopied }: ShareableB
     const checkSupport = async () => {
       try {
         if (navigator.clipboard && typeof ClipboardItem !== 'undefined') {
-          const permission = await navigator.permissions.query({ name: 'clipboard-write' as PermissionName });
+          const permission = await navigator.permissions.query({
+            name: 'clipboard-write' as PermissionName,
+          });
           setCopySupported(permission.state !== 'denied');
         } else {
           setCopySupported(false);
@@ -833,14 +888,28 @@ export default function ShareableBentoCard({ data, theme, onCopied }: ShareableB
           </>
         ) : isCopied ? (
           <>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+            >
               <polyline points="20 6 9 17 4 12" />
             </svg>
             COPIED! PASTE IN X
           </>
         ) : (
           <>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
               <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
               <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
             </svg>
@@ -938,18 +1007,22 @@ export default function ShareableBentoCard({ data, theme, onCopied }: ShareableB
                   maxHeight: '80vh',
                 }}
               />
-              <div style={{
-                padding: '16px 24px',
-                background: theme === 'dark' ? '#1a1a1a' : '#f5f5f5',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-              }}>
-                <span style={{
-                  fontFamily: "'VCR OSD Mono', monospace",
-                  fontSize: '12px',
-                  color: theme === 'dark' ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)',
-                }}>
+              <div
+                style={{
+                  padding: '16px 24px',
+                  background: theme === 'dark' ? '#1a1a1a' : '#f5f5f5',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}
+              >
+                <span
+                  style={{
+                    fontFamily: "'VCR OSD Mono', monospace",
+                    fontSize: '12px',
+                    color: theme === 'dark' ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)',
+                  }}
+                >
                   1200 x 630 px - Bento Card
                 </span>
                 <div style={{ display: 'flex', gap: '8px' }}>
@@ -1020,7 +1093,14 @@ export default function ShareableBentoCard({ data, theme, onCopied }: ShareableB
               gap: '10px',
             }}
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+            >
               <polyline points="20 6 9 17 4 12" />
             </svg>
             Bento card copied! Paste in your X post
@@ -1088,7 +1168,9 @@ export function mapToBentoData(
     // Personality system
     personalityType: generatedDNA.personalityType || 'BUILD.EXE',
     personalityEmoji: generatedDNA.personalityEmoji || '🛠️',
-    personalitySummary: generatedDNA.personalitySummary || 'You bring ideas to life with precision and purpose. Your community trusts you to deliver substance over hype. Keep building—the market rewards those who ship.',
+    personalitySummary:
+      generatedDNA.personalitySummary ||
+      'You bring ideas to life with precision and purpose. Your community trusts you to deliver substance over hype. Keep building—the market rewards those who ship.',
     influenceTier,
     brandColors: generatedDNA.colors || {
       primary: '#0047FF',

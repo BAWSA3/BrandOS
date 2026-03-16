@@ -45,9 +45,7 @@ export default function UpgradeModal({
 
   const tierOrder: SubscriptionTier[] = ['FREE', 'CREATOR', 'PRO', 'AGENCY', 'ENTERPRISE'];
   const currentIndex = tierOrder.indexOf(currentTier);
-  const upgradeTiers = SELF_SERVE_TIERS.filter(
-    (t) => tierOrder.indexOf(t) > currentIndex
-  );
+  const upgradeTiers = SELF_SERVE_TIERS.filter((t) => tierOrder.indexOf(t) > currentIndex);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -69,9 +67,7 @@ export default function UpgradeModal({
           </div>
           <div>
             <h2 className="text-xl font-bold text-white">Upgrade Your Plan</h2>
-            {reason && (
-              <p className="text-sm text-white/50">{reason}</p>
-            )}
+            {reason && <p className="text-sm text-white/50">{reason}</p>}
           </div>
         </div>
 
@@ -89,9 +85,7 @@ export default function UpgradeModal({
           <button
             onClick={() => setInterval('annual')}
             className={`flex-1 rounded-lg px-4 py-2 text-sm font-medium transition-all ${
-              interval === 'annual'
-                ? 'bg-white/10 text-white'
-                : 'text-white/50 hover:text-white/70'
+              interval === 'annual' ? 'bg-white/10 text-white' : 'text-white/50 hover:text-white/70'
             }`}
           >
             Annual <span className="text-emerald-400">Save 20%</span>
@@ -125,7 +119,9 @@ export default function UpgradeModal({
                     <div className="mt-2 flex flex-wrap gap-2">
                       <PlanBadge label={`${plan.limits.checksPerMonth} checks/mo`} />
                       <PlanBadge label={`${plan.limits.generationsPerMonth} generations/mo`} />
-                      <PlanBadge label={`${plan.limits.brands} brand${plan.limits.brands > 1 ? 's' : ''}`} />
+                      <PlanBadge
+                        label={`${plan.limits.brands} brand${plan.limits.brands > 1 ? 's' : ''}`}
+                      />
                       {plan.limits.aiAgents && <PlanBadge label="AI Agents" accent />}
                       {plan.limits.apiAccess && <PlanBadge label="API Access" accent />}
                     </div>
@@ -171,9 +167,7 @@ function PlanBadge({ label, accent }: { label: string; accent?: boolean }) {
   return (
     <span
       className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs ${
-        accent
-          ? 'bg-blue-500/10 text-blue-400'
-          : 'bg-white/5 text-white/60'
+        accent ? 'bg-blue-500/10 text-blue-400' : 'bg-white/5 text-white/60'
       }`}
     >
       <Check className="h-3 w-3" />

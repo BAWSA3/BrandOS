@@ -90,7 +90,9 @@ export default function BuyDNAReport({ hasPurchased, brandId }: BuyDNAReportProp
             {isGenerating ? (
               <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
             ) : (
-              <>Generate Report <ArrowRight className="h-4 w-4" /></>
+              <>
+                Generate Report <ArrowRight className="h-4 w-4" />
+              </>
             )}
           </button>
         </div>
@@ -108,9 +110,7 @@ export default function BuyDNAReport({ hasPurchased, brandId }: BuyDNAReportProp
             </div>
             <div>
               <h3 className="text-lg font-bold text-white">{product.name}</h3>
-              <p className="mt-1 max-w-md text-sm text-white/50">
-                {product.description}
-              </p>
+              <p className="mt-1 max-w-md text-sm text-white/50">{product.description}</p>
             </div>
           </div>
         </div>

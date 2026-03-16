@@ -98,7 +98,10 @@ export default function ApiDocs() {
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border">
         <div className="max-w-4xl mx-auto px-6 h-14 flex items-center justify-between">
-          <a href="/" className="text-sm font-medium tracking-tight hover:text-muted transition-colors">
+          <a
+            href="/"
+            className="text-sm font-medium tracking-tight hover:text-muted transition-colors"
+          >
             ← Back to brandos
           </a>
         </div>
@@ -117,13 +120,16 @@ export default function ApiDocs() {
           <div className="mb-16">
             <h2 className="text-2xl font-light tracking-tight mb-4">Authentication</h2>
             <p className="text-muted mb-4">
-              All API requests require an API key passed in the <code className="px-2 py-1 bg-surface rounded text-sm font-mono">x-api-key</code> header.
+              All API requests require an API key passed in the{' '}
+              <code className="px-2 py-1 bg-surface rounded text-sm font-mono">x-api-key</code>{' '}
+              header.
             </p>
             <div className="p-4 bg-surface rounded-lg font-mono text-sm">
               <span className="text-muted">x-api-key:</span> your-api-key-here
             </div>
             <p className="text-sm text-muted mt-4">
-              Set your API key in <code className="px-1 bg-surface rounded">.env.local</code> as <code className="px-1 bg-surface rounded">BRANDOS_API_KEY</code>
+              Set your API key in <code className="px-1 bg-surface rounded">.env.local</code> as{' '}
+              <code className="px-1 bg-surface rounded">BRANDOS_API_KEY</code>
             </p>
           </div>
 
@@ -157,7 +163,7 @@ export default function ApiDocs() {
           {/* Endpoints */}
           <div className="mb-16">
             <h2 className="text-2xl font-light tracking-tight mb-8">Endpoints</h2>
-            
+
             {endpoints.map((endpoint) => (
               <div key={endpoint.id} className="mb-12 p-6 border border-border rounded-lg">
                 <div className="flex items-center gap-3 mb-4">
@@ -167,7 +173,7 @@ export default function ApiDocs() {
                   <code className="font-mono">{endpoint.path}</code>
                 </div>
                 <p className="text-muted mb-6">{endpoint.description}</p>
-                
+
                 <div className="mb-6">
                   <div className="flex items-center justify-between mb-2">
                     <h4 className="text-xs uppercase tracking-widest text-muted">Request Body</h4>
@@ -205,12 +211,14 @@ export default function ApiDocs() {
           <div className="mb-16">
             <h2 className="text-2xl font-light tracking-tight mb-4">Webhooks (Callbacks)</h2>
             <p className="text-muted mb-4">
-              Optionally provide a <code className="px-2 py-1 bg-surface rounded text-sm font-mono">callbackUrl</code> in your request to receive results via webhook.
+              Optionally provide a{' '}
+              <code className="px-2 py-1 bg-surface rounded text-sm font-mono">callbackUrl</code> in
+              your request to receive results via webhook.
             </p>
             <div className="p-4 bg-surface rounded-lg">
               <p className="text-sm mb-2">The callback will receive a POST request with:</p>
               <pre className="text-sm font-mono text-muted">
-{`{
+                {`{
   "type": "check" | "generate",
   "brandName": "Your Brand",
   "input": "Original input",
@@ -225,7 +233,7 @@ export default function ApiDocs() {
           <div>
             <h2 className="text-2xl font-light tracking-tight mb-4">Example (cURL)</h2>
             <pre className="p-4 bg-surface rounded-lg text-sm font-mono overflow-x-auto whitespace-pre-wrap">
-{`curl -X POST ${baseUrl}/api/webhook/check \\
+              {`curl -X POST ${baseUrl}/api/webhook/check \\
   -H "Content-Type: application/json" \\
   -H "x-api-key: your-api-key" \\
   -d '{
@@ -252,4 +260,3 @@ export default function ApiDocs() {
     </div>
   );
 }
-

@@ -36,9 +36,7 @@ export default function FeatureGate({
     <>
       <div className="relative overflow-hidden rounded-xl border border-white/10 bg-white/[0.02]">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#1a1a1f]/90" />
-        <div className="pointer-events-none opacity-30 blur-[2px]">
-          {children}
-        </div>
+        <div className="pointer-events-none opacity-30 blur-[2px]">{children}</div>
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 p-6">
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500/20 to-purple-600/20 ring-1 ring-white/10">
             <Lock className="h-6 w-6 text-white/70" />

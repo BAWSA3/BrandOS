@@ -1,25 +1,25 @@
-'use client'
+'use client';
 
-import { InterviewMeta, ProfileType } from '../types'
-import { PROFILES } from '../lib/data'
+import { InterviewMeta, ProfileType } from '../types';
+import { PROFILES } from '../lib/data';
 
 const colorMap = {
-  blue:  { bg: 'rgba(0,71,255,0.08)',    text: '#0047FF',  border: 'rgba(0,71,255,0.15)' },
-  green: { bg: 'rgba(16,185,129,0.08)',   text: '#10B981',  border: 'rgba(16,185,129,0.15)' },
-  amber: { bg: 'rgba(245,158,11,0.08)',   text: '#F59E0B',  border: 'rgba(245,158,11,0.15)' },
-  red:   { bg: 'rgba(239,68,68,0.08)',    text: '#EF4444',  border: 'rgba(239,68,68,0.15)' },
-}
+  blue: { bg: 'rgba(0,71,255,0.08)', text: '#0047FF', border: 'rgba(0,71,255,0.15)' },
+  green: { bg: 'rgba(16,185,129,0.08)', text: '#10B981', border: 'rgba(16,185,129,0.15)' },
+  amber: { bg: 'rgba(245,158,11,0.08)', text: '#F59E0B', border: 'rgba(245,158,11,0.15)' },
+  red: { bg: 'rgba(239,68,68,0.08)', text: '#EF4444', border: 'rgba(239,68,68,0.15)' },
+};
 
 const profileColor: Record<ProfileType, keyof typeof colorMap> = {
   intuitive: 'blue',
   grinder: 'amber',
   builder: 'green',
-}
+};
 
 interface Props {
-  interviews: InterviewMeta[]
-  onNew: () => void
-  onOpen: (id: string) => void
+  interviews: InterviewMeta[];
+  onNew: () => void;
+  onOpen: (id: string) => void;
 }
 
 function StatCard({ label, value, color }: { label: string; value: number; color?: string }) {
@@ -61,18 +61,12 @@ function StatCard({ label, value, color }: { label: string; value: number; color
         {value}
       </div>
     </div>
-  )
+  );
 }
 
-function IVRow({
-  iv,
-  onClick,
-}: {
-  iv: InterviewMeta
-  onClick: () => void
-}) {
-  const pc = iv.profile ? colorMap[profileColor[iv.profile]] : null
-  const statusColor = iv.status === 'complete' ? colorMap.green : colorMap.amber
+function IVRow({ iv, onClick }: { iv: InterviewMeta; onClick: () => void }) {
+  const pc = iv.profile ? colorMap[profileColor[iv.profile]] : null;
+  const statusColor = iv.status === 'complete' ? colorMap.green : colorMap.amber;
 
   return (
     <div
@@ -193,17 +187,17 @@ function IVRow({
         <path d="M9 18l6-6-6-6" />
       </svg>
     </div>
-  )
+  );
 }
 
 export default function Dashboard({ interviews, onNew, onOpen }: Props) {
   const sorted = [...interviews].sort(
-    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
-  )
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+  );
 
-  const complete = interviews.filter((iv) => iv.status === 'complete').length
-  const intuitive = interviews.filter((iv) => iv.profile === 'intuitive').length
-  const builder = interviews.filter((iv) => iv.profile === 'builder').length
+  const complete = interviews.filter((iv) => iv.status === 'complete').length;
+  const intuitive = interviews.filter((iv) => iv.profile === 'intuitive').length;
+  const builder = interviews.filter((iv) => iv.profile === 'builder').length;
 
   return (
     <div>
@@ -263,7 +257,15 @@ export default function Dashboard({ interviews, onNew, onOpen }: Props) {
             boxShadow: '0 4px 24px rgba(0,71,255,0.3)',
           }}
         >
-          <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round">
+          <svg
+            width={14}
+            height={14}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2.5}
+            strokeLinecap="round"
+          >
             <path d="M12 5v14M5 12h14" />
           </svg>
           New Interview
@@ -327,5 +329,5 @@ export default function Dashboard({ interviews, onNew, onOpen }: Props) {
         </div>
       )}
     </div>
-  )
+  );
 }

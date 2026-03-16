@@ -17,10 +17,13 @@ interface RevealItemProps {
 }
 
 // Animation configurations
-const animations: Record<AnimationType, {
-  hidden: { opacity: number; y?: number; x?: number; scale?: number };
-  visible: { opacity: number; y?: number; x?: number; scale?: number };
-}> = {
+const animations: Record<
+  AnimationType,
+  {
+    hidden: { opacity: number; y?: number; x?: number; scale?: number };
+    visible: { opacity: number; y?: number; x?: number; scale?: number };
+  }
+> = {
   'fade-up': {
     hidden: { opacity: 0, y: 30, scale: 0.95 },
     visible: { opacity: 1, y: 0, scale: 1 },
@@ -37,7 +40,7 @@ const animations: Record<AnimationType, {
     hidden: { opacity: 0, x: 40 },
     visible: { opacity: 1, x: 0 },
   },
-  'fade': {
+  fade: {
     hidden: { opacity: 0 },
     visible: { opacity: 1 },
   },

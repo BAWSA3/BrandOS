@@ -13,16 +13,21 @@ Inspiration  →  v0.dev  →  BrandOS Codebase  →  Claude Code Adapts  →  L
 ```
 
 ### Step 1: Find Inspiration
+
 Grab a screenshot, mood board, Pinterest pin, Dribbble shot, rough sketch, or any visual reference.
 
 ### Step 2: v0.dev — Image + Prompt → React Code
+
 Paste the image into [v0.dev](https://v0.dev) with a text description of what you want. v0 outputs production React + Tailwind code. Iterate with follow-up prompts until it looks right.
 
 ### Step 3: Copy into BrandOS
+
 Paste the v0-generated component into the BrandOS codebase (`src/components/`).
 
 ### Step 4: Claude Code Adapts to Design System
+
 Claude Code refactors the component to match BrandOS conventions:
+
 - Swiss design tokens (spacing, typography, colors from `globals.css`)
 - Motion/Framer Motion animations
 - Three.js integration where needed
@@ -30,9 +35,11 @@ Claude Code refactors the component to match BrandOS conventions:
 - Next.js patterns (server components, dynamic imports, etc.)
 
 ### Step 5: Live in BrandOS
+
 Component is production-ready and running.
 
 ### Optional: Push to Figma
+
 Use `generate_figma_design` to snapshot the live component back into Figma for team review or documentation.
 
 ---
@@ -74,6 +81,7 @@ You tell Claude Code:
 > "Adapt this TestimonialCard to the BrandOS Swiss design system."
 
 Claude Code automatically:
+
 - Replaces hardcoded Tailwind colors with your CSS variables from `globals.css` (e.g. `bg-gray-900` → `var(--color-surface)`)
 - Swaps the hover effect for a Motion `whileHover` animation to match other BrandOS components
 - Connects the testimonial data to your Zustand store if needed
@@ -95,26 +103,26 @@ Compare that to the old way: screenshot → Gemini mockup → Nano Banana layout
 
 ## Why This Workflow
 
-| Old (5-step, lossy) | New (v0 + Claude Code) |
-|---------------------|----------------------|
-| Pinterest → Gemini AI → Nano Banana Pro → Gemini Code Extract → Copy/Paste | Inspiration → v0 → Claude Code → Live |
-| Lossy handoff at every step | Image goes directly to code |
-| Code extraction is approximate | v0 outputs real React components |
-| Manual copy-paste, manual tweaks | Claude Code auto-adapts to design system |
-| No single source of truth | Code is the source of truth |
+| Old (5-step, lossy)                                                        | New (v0 + Claude Code)                   |
+| -------------------------------------------------------------------------- | ---------------------------------------- |
+| Pinterest → Gemini AI → Nano Banana Pro → Gemini Code Extract → Copy/Paste | Inspiration → v0 → Claude Code → Live    |
+| Lossy handoff at every step                                                | Image goes directly to code              |
+| Code extraction is approximate                                             | v0 outputs real React components         |
+| Manual copy-paste, manual tweaks                                           | Claude Code auto-adapts to design system |
+| No single source of truth                                                  | Code is the source of truth              |
 
 ---
 
 ## Tool Reference
 
-| Tool | What it does | Accepts images? | Output |
-|------|-------------|-----------------|--------|
-| **v0.dev** | Generates React code from images, screenshots, or text | Yes | Production React + Tailwind code |
-| **Figma MCP `generate_figma_design`** | Captures live running UI into Figma | No (needs running app) | Figma frames from live code |
-| **Figma MCP `get_design_context`** | Reads design tokens from Figma frames | N/A (reads Figma) | Design context for Claude Code |
-| **Figma First Draft** | Generates wireframes from text prompts | No (text only) | Editable Figma wireframes |
-| **Figma Make** | Generates prototypes from text prompts | No (text only) | Clickable Figma prototypes |
-| **Figma plugins (Codia, FigVision)** | Converts screenshots → Figma designs | Yes | Figma layers/components |
+| Tool                                  | What it does                                           | Accepts images?        | Output                           |
+| ------------------------------------- | ------------------------------------------------------ | ---------------------- | -------------------------------- |
+| **v0.dev**                            | Generates React code from images, screenshots, or text | Yes                    | Production React + Tailwind code |
+| **Figma MCP `generate_figma_design`** | Captures live running UI into Figma                    | No (needs running app) | Figma frames from live code      |
+| **Figma MCP `get_design_context`**    | Reads design tokens from Figma frames                  | N/A (reads Figma)      | Design context for Claude Code   |
+| **Figma First Draft**                 | Generates wireframes from text prompts                 | No (text only)         | Editable Figma wireframes        |
+| **Figma Make**                        | Generates prototypes from text prompts                 | No (text only)         | Clickable Figma prototypes       |
+| **Figma plugins (Codia, FigVision)**  | Converts screenshots → Figma designs                   | Yes                    | Figma layers/components          |
 
 ---
 
@@ -146,4 +154,4 @@ Text prompt  →  Figma Make / First Draft  →  Quick Figma adjustments  →  g
 
 ---
 
-*v0 handles inspiration → code. Claude Code handles adaptation. Figma handles documentation and review.*
+_v0 handles inspiration → code. Claude Code handles adaptation. Figma handles documentation and review._

@@ -1,50 +1,44 @@
-'use client'
+'use client';
 
-import { useRef, useCallback } from 'react'
-import { TrackKey, Question } from '../types'
-import { TRACK_META } from '../lib/data'
+import { useRef, useCallback } from 'react';
+import { TrackKey, Question } from '../types';
+import { TRACK_META } from '../lib/data';
 
 const colorMap = {
-  blue:  { bg: 'rgba(0,71,255,0.08)',    text: '#0047FF',  border: 'rgba(0,71,255,0.15)' },
-  green: { bg: 'rgba(16,185,129,0.08)',   text: '#10B981',  border: 'rgba(16,185,129,0.15)' },
-  amber: { bg: 'rgba(245,158,11,0.08)',   text: '#F59E0B',  border: 'rgba(245,158,11,0.15)' },
-  red:   { bg: 'rgba(239,68,68,0.08)',    text: '#EF4444',  border: 'rgba(239,68,68,0.15)' },
-}
+  blue: { bg: 'rgba(0,71,255,0.08)', text: '#0047FF', border: 'rgba(0,71,255,0.15)' },
+  green: { bg: 'rgba(16,185,129,0.08)', text: '#10B981', border: 'rgba(16,185,129,0.15)' },
+  amber: { bg: 'rgba(245,158,11,0.08)', text: '#F59E0B', border: 'rgba(245,158,11,0.15)' },
+  red: { bg: 'rgba(239,68,68,0.08)', text: '#EF4444', border: 'rgba(239,68,68,0.15)' },
+};
 
 const trackColor: Record<TrackKey, keyof typeof colorMap> = {
   t2: 'blue',
   t3: 'green',
   t4: 'amber',
   t5: 'red',
-}
+};
 
 interface Props {
-  track: TrackKey
-  questions: Question[]
-  responses: Record<string, string>
-  onChange?: (id: string, value: string) => void
-  readOnly?: boolean
+  track: TrackKey;
+  questions: Question[];
+  responses: Record<string, string>;
+  onChange?: (id: string, value: string) => void;
+  readOnly?: boolean;
 }
 
-function AutoTextarea({
-  value,
-  onChange,
-}: {
-  value: string
-  onChange: (v: string) => void
-}) {
-  const ref = useRef<HTMLTextAreaElement>(null)
+function AutoTextarea({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const ref = useRef<HTMLTextAreaElement>(null);
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      onChange(e.target.value)
+      onChange(e.target.value);
       if (ref.current) {
-        ref.current.style.height = 'auto'
-        ref.current.style.height = ref.current.scrollHeight + 'px'
+        ref.current.style.height = 'auto';
+        ref.current.style.height = ref.current.scrollHeight + 'px';
       }
     },
-    [onChange],
-  )
+    [onChange]
+  );
 
   return (
     <textarea
@@ -68,15 +62,15 @@ function AutoTextarea({
         boxSizing: 'border-box',
       }}
       onFocus={(e) => {
-        e.currentTarget.style.borderColor = 'rgba(0,71,255,0.5)'
-        e.currentTarget.style.boxShadow = '0 0 0 3px rgba(0,71,255,0.1)'
+        e.currentTarget.style.borderColor = 'rgba(0,71,255,0.5)';
+        e.currentTarget.style.boxShadow = '0 0 0 3px rgba(0,71,255,0.1)';
       }}
       onBlur={(e) => {
-        e.currentTarget.style.borderColor = 'rgba(0,0,0,0.15)'
-        e.currentTarget.style.boxShadow = 'none'
+        e.currentTarget.style.borderColor = 'rgba(0,0,0,0.15)';
+        e.currentTarget.style.boxShadow = 'none';
       }}
     />
-  )
+  );
 }
 
 export default function TrackSection({
@@ -86,8 +80,8 @@ export default function TrackSection({
   onChange,
   readOnly = false,
 }: Props) {
-  const meta = TRACK_META[track]
-  const c = colorMap[trackColor[track]]
+  const meta = TRACK_META[track];
+  const c = colorMap[trackColor[track]];
 
   return (
     <div style={{ marginBottom: 32 }}>
@@ -119,7 +113,9 @@ export default function TrackSection({
             color: 'rgba(0,0,0,0.35)',
           }}
         >
-          {'/* \u2500\u2500 TRACK: '}{meta.label.toUpperCase()}{' \u2500\u2500 */'}
+          {'/* \u2500\u2500 TRACK: '}
+          {meta.label.toUpperCase()}
+          {' \u2500\u2500 */'}
         </span>
       </div>
 
@@ -161,14 +157,11 @@ export default function TrackSection({
                 {responses[q.id] || 'No response recorded'}
               </div>
             ) : (
-              <AutoTextarea
-                value={responses[q.id] || ''}
-                onChange={(v) => onChange?.(q.id, v)}
-              />
+              <AutoTextarea value={responses[q.id] || ''} onChange={(v) => onChange?.(q.id, v)} />
             )}
           </div>
         ))}
       </div>
     </div>
-  )
+  );
 }

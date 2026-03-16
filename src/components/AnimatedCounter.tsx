@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef } from 'react';
 
 interface AnimatedCounterProps {
   value: number;
@@ -13,11 +13,11 @@ interface AnimatedCounterProps {
 
 export default function AnimatedCounter({
   value,
-  prefix = "",
-  suffix = "",
+  prefix = '',
+  suffix = '',
   duration = 2000,
   decimals = 0,
-  className = "",
+  className = '',
 }: AnimatedCounterProps) {
   const [displayValue, setDisplayValue] = useState(0);
   const [hasAnimated, setHasAnimated] = useState(false);
@@ -65,10 +65,10 @@ export default function AnimatedCounter({
 
   const formatValue = (val: number) => {
     if (val >= 1000000) {
-      return (val / 1000000).toFixed(1) + "M";
+      return (val / 1000000).toFixed(1) + 'M';
     }
     if (val >= 1000) {
-      return (val / 1000).toFixed(1) + "K";
+      return (val / 1000).toFixed(1) + 'K';
     }
     return val.toFixed(decimals);
   };

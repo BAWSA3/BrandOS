@@ -40,9 +40,7 @@ export function AuthButton({ variant = 'default', showInnerCircle = true }: Auth
   };
 
   if (isLoading) {
-    return (
-      <div className="h-10 w-10 rounded-full bg-white/10 animate-pulse" />
-    );
+    return <div className="h-10 w-10 rounded-full bg-white/10 animate-pulse" />;
   }
 
   // Not signed in - show sign in button
@@ -59,8 +57,19 @@ export function AuthButton({ variant = 'default', showInnerCircle = true }: Auth
         {isSigningIn ? (
           <>
             <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              />
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              />
             </svg>
             <span>Connecting...</span>
           </>
@@ -105,9 +114,7 @@ export function AuthButton({ variant = 'default', showInnerCircle = true }: Auth
             <span className="text-white/90 text-sm font-medium max-w-[120px] truncate">
               @{user.xUsername}
             </span>
-            {showInnerCircle && user.isInnerCircle && (
-              <InnerCircleBadge variant="inline" />
-            )}
+            {showInnerCircle && user.isInnerCircle && <InnerCircleBadge variant="inline" />}
           </div>
         )}
 
@@ -131,10 +138,7 @@ export function AuthButton({ variant = 'default', showInnerCircle = true }: Auth
         {showMenu && (
           <>
             {/* Backdrop */}
-            <div
-              className="fixed inset-0 z-40"
-              onClick={() => setShowMenu(false)}
-            />
+            <div className="fixed inset-0 z-40" onClick={() => setShowMenu(false)} />
 
             {/* Menu */}
             <motion.div
@@ -167,18 +171,14 @@ export function AuthButton({ variant = 'default', showInnerCircle = true }: Auth
                     <div className="text-white font-medium truncate">
                       {user.name || `@${user.xUsername}`}
                     </div>
-                    <div className="text-white/50 text-sm truncate">
-                      @{user.xUsername}
-                    </div>
+                    <div className="text-white/50 text-sm truncate">@{user.xUsername}</div>
                   </div>
                 </div>
                 {user.isInnerCircle && (
                   <div className="mt-2">
                     <InnerCircleBadge variant="inline" />
                     {user.invitedBy && (
-                      <span className="text-white/40 text-xs ml-2">
-                        via @{user.invitedBy}
-                      </span>
+                      <span className="text-white/40 text-xs ml-2">via @{user.invitedBy}</span>
                     )}
                   </div>
                 )}
@@ -193,11 +193,29 @@ export function AuthButton({ variant = 'default', showInnerCircle = true }: Auth
                 >
                   {isSigningOut ? (
                     <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                      />
                     </svg>
                   ) : (
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
                       <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
                       <polyline points="16 17 21 12 16 7" />
                       <line x1="21" y1="12" x2="9" y2="12" />

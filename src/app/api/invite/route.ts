@@ -7,9 +7,7 @@ import { checkRateLimit, getClientIdentifier, rateLimiters } from '@/lib/rate-li
 function generateCode(): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // exclude confusing chars (O, 0, I, 1, L)
   const bytes = randomBytes(6);
-  return Array.from(bytes, (byte) =>
-    chars[byte % chars.length]
-  ).join('');
+  return Array.from(bytes, (byte) => chars[byte % chars.length]).join('');
 }
 
 // GET /api/invite?code=XXX - Validate an invite code
@@ -33,10 +31,7 @@ export async function GET(request: NextRequest) {
     const code = searchParams.get('code');
 
     if (!code) {
-      return NextResponse.json(
-        { error: 'Code parameter is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Code parameter is required' }, { status: 400 });
     }
 
     const inviteCode = await prisma.inviteCode.findUnique({
@@ -44,18 +39,12 @@ export async function GET(request: NextRequest) {
     });
 
     if (!inviteCode) {
-      return NextResponse.json(
-        { valid: false, error: 'Invalid invite code' },
-        { status: 404 }
-      );
+      return NextResponse.json({ valid: false, error: 'Invalid invite code' }, { status: 404 });
     }
 
     // Check if code is expired
     if (inviteCode.expiresAt && new Date() > inviteCode.expiresAt) {
-      return NextResponse.json(
-        { valid: false, error: 'Invite code has expired' },
-        { status: 410 }
-      );
+      return NextResponse.json({ valid: false, error: 'Invite code has expired' }, { status: 410 });
     }
 
     // Check if code is still active
@@ -81,10 +70,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error('[Invite] Validation error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
 
@@ -97,10 +83,7 @@ export async function POST(request: NextRequest) {
     const { username, count = 3 } = body;
 
     if (!username || typeof username !== 'string') {
-      return NextResponse.json(
-        { error: 'Username is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Username is required' }, { status: 400 });
     }
 
     // Check how many codes this user has already generated
@@ -115,7 +98,7 @@ export async function POST(request: NextRequest) {
     if (remainingAllowance <= 0) {
       return NextResponse.json({
         success: true,
-        codes: existingCodes.map(c => ({
+        codes: existingCodes.map((c) => ({
           code: c.code,
           maxUses: c.maxUses,
           usedCount: c.usedCount,
@@ -139,10 +122,7 @@ export async function POST(request: NextRequest) {
         code = generateCode();
         attempts++;
         if (attempts > 10) {
-          return NextResponse.json(
-            { error: 'Failed to generate unique codes' },
-            { status: 500 }
-          );
+          return NextResponse.json({ error: 'Failed to generate unique codes' }, { status: 500 });
         }
       } while (await prisma.inviteCode.findUnique({ where: { code } }));
 
@@ -166,23 +146,30 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    return NextResponse.json({
-      success: true,
-      codes,
-    }, { status: 201 });
+    return NextResponse.json(
+      {
+        success: true,
+        codes,
+      },
+      { status: 201 }
+    );
   } catch (error: unknown) {
-    const prismaCode = error && typeof error === 'object' && 'code' in error ? (error as { code: string }).code : undefined;
+    const prismaCode =
+      error && typeof error === 'object' && 'code' in error
+        ? (error as { code: string }).code
+        : undefined;
     if (prismaCode === 'P2021') {
-      console.error('[Invite] Generation error: InviteCode table does not exist. Run `npx prisma db push` to create it.');
+      console.error(
+        '[Invite] Generation error: InviteCode table does not exist. Run `npx prisma db push` to create it.'
+      );
     } else if (prismaCode === 'P1001') {
-      console.error('[Invite] Generation error: Cannot reach database server. Check DATABASE_URL and ensure the database is running.');
+      console.error(
+        '[Invite] Generation error: Cannot reach database server. Check DATABASE_URL and ensure the database is running.'
+      );
     } else {
       console.error('[Invite] Generation error:', error);
     }
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
 
@@ -193,17 +180,11 @@ export async function PATCH(request: NextRequest) {
     const { code, username } = body;
 
     if (!code || typeof code !== 'string') {
-      return NextResponse.json(
-        { error: 'Code is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Code is required' }, { status: 400 });
     }
 
     if (!username || typeof username !== 'string') {
-      return NextResponse.json(
-        { error: 'Username is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Username is required' }, { status: 400 });
     }
 
     const inviteCode = await prisma.inviteCode.findUnique({
@@ -211,10 +192,7 @@ export async function PATCH(request: NextRequest) {
     });
 
     if (!inviteCode) {
-      return NextResponse.json(
-        { success: false, error: 'Invalid invite code' },
-        { status: 404 }
-      );
+      return NextResponse.json({ success: false, error: 'Invalid invite code' }, { status: 404 });
     }
 
     // Check if code is expired
@@ -271,9 +249,6 @@ export async function PATCH(request: NextRequest) {
     });
   } catch (error) {
     console.error('[Invite] Redemption error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

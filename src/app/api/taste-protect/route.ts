@@ -8,7 +8,7 @@ const anthropic = new Anthropic({
 
 export async function POST(request: NextRequest) {
   try {
-    const { brandDNA, content } = await request.json() as {
+    const { brandDNA, content } = (await request.json()) as {
       brandDNA: BrandDNA;
       content: string;
     };
@@ -67,13 +67,13 @@ Return ONLY valid JSON:
 
     const responseText = message.content[0].type === 'text' ? message.content[0].text : '';
     const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-    
+
     if (!jsonMatch) {
       throw new Error('Invalid response format');
     }
 
     const parsed = JSON.parse(jsonMatch[0]);
-    
+
     const result: TasteProtectionResult = {
       originalContent: content,
       analysis: parsed.analysis,
@@ -82,7 +82,6 @@ Return ONLY valid JSON:
     };
 
     return NextResponse.json(result);
-
   } catch (error: any) {
     console.error('Taste Protection API error:', error);
     return NextResponse.json(
@@ -91,4 +90,3 @@ Return ONLY valid JSON:
     );
   }
 }
-

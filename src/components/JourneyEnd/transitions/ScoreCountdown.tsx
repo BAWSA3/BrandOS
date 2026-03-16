@@ -21,11 +21,7 @@ interface Particle {
   life: number;
 }
 
-export default function ScoreCountdown({
-  targetScore,
-  onComplete,
-  theme,
-}: ScoreCountdownProps) {
+export default function ScoreCountdown({ targetScore, onComplete, theme }: ScoreCountdownProps) {
   const [stage, setStage] = useState<'counting' | 'burst' | 'complete'>('counting');
   const [particles, setParticles] = useState<Particle[]>([]);
   const count = useMotionValue(0);

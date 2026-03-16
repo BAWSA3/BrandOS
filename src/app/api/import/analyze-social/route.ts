@@ -5,10 +5,7 @@ export async function POST(request: Request) {
     const { platform, handle } = await request.json();
 
     if (!platform || !handle) {
-      return NextResponse.json(
-        { error: 'Platform and handle are required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Platform and handle are required' }, { status: 400 });
     }
 
     // Clean up handle
@@ -20,26 +17,23 @@ export async function POST(request: Request) {
     // In production, you would:
     // 1. Use official APIs (Twitter API, Instagram Graph API, LinkedIn API)
     // 2. Or use web scraping with proper rate limiting
-    
+
     // For now, provide mock analysis based on platform
     // This demonstrates the structure of the response
-    
+
     const result = await mockSocialAnalysis(platform, cleanHandle);
-    
+
     return NextResponse.json(result);
   } catch (error) {
     console.error('Social analysis error:', error);
-    return NextResponse.json(
-      { error: 'Failed to analyze social profile' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to analyze social profile' }, { status: 500 });
   }
 }
 
 async function mockSocialAnalysis(platform: string, handle: string) {
   // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 500));
-  
+  await new Promise((resolve) => setTimeout(resolve, 500));
+
   // Mock data - in production, this would come from actual API calls
   const baseResult = {
     overallConfidence: 70,
@@ -77,7 +71,7 @@ async function mockSocialAnalysis(platform: string, handle: string) {
         ],
         keywords: ['community', 'updates', 'innovation', 'support'],
       };
-    
+
     case 'instagram':
       return {
         ...baseResult,
@@ -98,7 +92,7 @@ async function mockSocialAnalysis(platform: string, handle: string) {
           secondary: '#e1306c',
         },
       };
-    
+
     case 'linkedin':
       return {
         ...baseResult,
@@ -109,7 +103,7 @@ async function mockSocialAnalysis(platform: string, handle: string) {
           style: 35,
         },
         voiceSamples: [
-          'We\'re thrilled to announce a new partnership that will transform how we serve our customers.',
+          "We're thrilled to announce a new partnership that will transform how we serve our customers.",
           'Our team continues to push boundaries in innovation and excellence.',
           'Join us in our mission to create lasting impact in the industry.',
         ],
@@ -119,7 +113,7 @@ async function mockSocialAnalysis(platform: string, handle: string) {
           secondary: '#313335',
         },
       };
-    
+
     default:
       return baseResult;
   }
@@ -130,22 +124,6 @@ function capitalizeHandle(handle: string): string {
   return handle
     .replace(/[_-]/g, ' ')
     .split(' ')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join(' ');
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

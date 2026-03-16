@@ -13,7 +13,7 @@ export default function TasteProtection() {
 
   const analyzeContent = async () => {
     if (!content.trim() || !brandDNA) return;
-    
+
     setIsAnalyzing(true);
     setError('');
     setResult(null);
@@ -26,9 +26,9 @@ export default function TasteProtection() {
       });
 
       const data = await response.json();
-      
+
       if (!response.ok) throw new Error(data.error);
-      
+
       setResult(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to analyze content');
@@ -53,7 +53,9 @@ export default function TasteProtection() {
     <div className="space-y-8">
       {/* Philosophy */}
       <div className="p-6 bg-surface rounded-lg border border-border">
-        <h3 className="text-xs uppercase tracking-widest text-muted mb-4">Taste Protection Philosophy</h3>
+        <h3 className="text-xs uppercase tracking-widest text-muted mb-4">
+          Taste Protection Philosophy
+        </h3>
         <div className="grid grid-cols-3 gap-4 text-center">
           <div>
             <p className="text-2xl mb-2">−</p>
@@ -106,13 +108,17 @@ export default function TasteProtection() {
       {result && (
         <div className="animate-fade-in space-y-6">
           {/* Status */}
-          <div className={`p-6 rounded-lg border ${
-            result.analysis.isOverDesigned 
-              ? 'border-yellow-500/30 bg-yellow-500/5' 
-              : 'border-green-500/30 bg-green-500/5'
-          }`}>
+          <div
+            className={`p-6 rounded-lg border ${
+              result.analysis.isOverDesigned
+                ? 'border-yellow-500/30 bg-yellow-500/5'
+                : 'border-green-500/30 bg-green-500/5'
+            }`}
+          >
             <div className="flex items-center gap-3 mb-2">
-              <span className={`text-2xl ${result.analysis.isOverDesigned ? 'text-yellow-500' : 'text-green-500'}`}>
+              <span
+                className={`text-2xl ${result.analysis.isOverDesigned ? 'text-yellow-500' : 'text-green-500'}`}
+              >
                 {result.analysis.isOverDesigned ? '⚠' : '✓'}
               </span>
               <h3 className="font-medium">
@@ -121,7 +127,10 @@ export default function TasteProtection() {
             </div>
             {result.analysis.isOverDesigned && (
               <p className="text-sm text-muted">
-                This content has {result.analysis.excessElements.length + result.analysis.unnecessaryAdditions.length} elements that could be refined.
+                This content has{' '}
+                {result.analysis.excessElements.length +
+                  result.analysis.unnecessaryAdditions.length}{' '}
+                elements that could be refined.
               </p>
             )}
           </div>
@@ -195,4 +204,3 @@ export default function TasteProtection() {
     </div>
   );
 }
-

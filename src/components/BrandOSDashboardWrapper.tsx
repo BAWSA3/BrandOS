@@ -84,21 +84,21 @@ function formatFollowers(count: number): string {
 // Determine personality type label
 function getPersonalityType(archetype?: string): string {
   const typeMap: Record<string, string> = {
-    'FORESIGHT': 'INTJ',
+    FORESIGHT: 'INTJ',
     'The Alpha': 'ENTJ',
     'The Builder': 'ISTP',
     'The Educator': 'ENFJ',
-    'ENTROPY': 'ESTP',
+    ENTROPY: 'ESTP',
     'The Analyst': 'INTP',
     'The Philosopher': 'INFJ',
     'The Networker': 'ESFJ',
     'The Contrarian': 'ENTP',
-    'ARC': 'ESTP',
-    'NULL': 'INTJ',
-    'FREQ': 'ESFJ',
-    'RELAY': 'ESFJ',
+    ARC: 'ESTP',
+    NULL: 'INTJ',
+    FREQ: 'ESFJ',
+    RELAY: 'ESFJ',
     'BUILD.EXE': 'ISTP',
-    'SIGNAL_SAGE': 'ENFJ',
+    SIGNAL_SAGE: 'ENFJ',
   };
   return typeMap[archetype || ''] || 'INTJ';
 }
@@ -114,7 +114,7 @@ function transformToDashboardData(
   // Default tone values based on phase scores if not provided
   const defaultTone = {
     formality: Math.round((brandScore.phases.define.score + brandScore.phases.check.score) / 2),
-    energy: Math.round((brandScore.phases.generate.score * 0.8)),
+    energy: Math.round(brandScore.phases.generate.score * 0.8),
     confidence: Math.round((brandScore.phases.scale.score + brandScore.phases.define.score) / 2),
   };
 
@@ -126,10 +126,11 @@ function transformToDashboardData(
   ];
 
   // Extract keywords from strengths and insights
-  const keywords = brandScore.brandKeywords ||
-    brandScore.topStrengths.slice(0, 5).map(s => {
+  const keywords =
+    brandScore.brandKeywords ||
+    brandScore.topStrengths.slice(0, 5).map((s) => {
       // Extract key word from strength
-      const words = s.split(' ').filter(w => w.length > 4);
+      const words = s.split(' ').filter((w) => w.length > 4);
       return words[0] || s.split(' ')[0];
     });
 
@@ -152,18 +153,25 @@ function transformToDashboardData(
       type: getPersonalityType(brandScore.archetype?.primary),
     },
     tone: brandScore.toneAnalysis || defaultTone,
-    pillars: brandScore.contentPillars?.slice(0, 3).map(p => ({
-      label: p.name,
-      value: p.frequency,
-    })) || defaultPillars,
+    pillars:
+      brandScore.contentPillars?.slice(0, 3).map((p) => ({
+        label: p.name,
+        value: p.frequency,
+      })) || defaultPillars,
     dna: {
       keywords: keywords.slice(0, 5),
-      voice: brandScore.summary || brandScore.archetype?.description || 'Authentic voice that resonates with your audience.',
+      voice:
+        brandScore.summary ||
+        brandScore.archetype?.description ||
+        'Authentic voice that resonates with your audience.',
     },
   };
 }
 
-export default function BrandOSDashboardWrapper({ profile, brandScore }: BrandOSDashboardWrapperProps) {
+export default function BrandOSDashboardWrapper({
+  profile,
+  brandScore,
+}: BrandOSDashboardWrapperProps) {
   const dashboardData = transformToDashboardData(profile, brandScore);
 
   return <BrandOSDashboard data={dashboardData} />;

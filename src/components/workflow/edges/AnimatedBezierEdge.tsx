@@ -89,9 +89,7 @@ export default function AnimatedBezierEdge({
         strokeOpacity={isFlowing ? 0.6 : 0.2}
         strokeDasharray={isFlowing ? '6 8' : '4 12'}
         style={{
-          animation: isFlowing
-            ? 'flowDash 1.5s linear infinite'
-            : 'flowDash 4s linear infinite',
+          animation: isFlowing ? 'flowDash 1.5s linear infinite' : 'flowDash 4s linear infinite',
         }}
       />
 

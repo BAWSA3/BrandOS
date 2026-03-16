@@ -1,11 +1,6 @@
 // ===== TWITTER/X DATA SOURCE =====
 
-import {
-  TwitterPost,
-  TCGVertical,
-  VERTICAL_CONFIGS,
-  SourceStatus,
-} from '../research.types';
+import { TwitterPost, TCGVertical, VERTICAL_CONFIGS, SourceStatus } from '../research.types';
 
 interface TwitterSearchResponse {
   data?: {
@@ -64,11 +59,14 @@ export async function getTwitterStatus(): Promise<SourceStatus> {
 
   try {
     // Simple rate limit check endpoint
-    const response = await fetch(`${TWITTER_API_BASE}/tweets/search/recent?query=test&max_results=10`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response = await fetch(
+      `${TWITTER_API_BASE}/tweets/search/recent?query=test&max_results=10`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
     const rateLimitRemaining = response.headers.get('x-rate-limit-remaining');
     const rateLimitReset = response.headers.get('x-rate-limit-reset');
@@ -80,7 +78,9 @@ export async function getTwitterStatus(): Promise<SourceStatus> {
         apiStatus: 'healthy',
         lastChecked: new Date().toISOString(),
         rateLimitRemaining: rateLimitRemaining ? parseInt(rateLimitRemaining) : undefined,
-        rateLimitReset: rateLimitReset ? new Date(parseInt(rateLimitReset) * 1000).toISOString() : undefined,
+        rateLimitReset: rateLimitReset
+          ? new Date(parseInt(rateLimitReset) * 1000).toISOString()
+          : undefined,
       };
     } else if (response.status === 429) {
       return {
@@ -89,7 +89,9 @@ export async function getTwitterStatus(): Promise<SourceStatus> {
         apiStatus: 'degraded',
         lastChecked: new Date().toISOString(),
         rateLimitRemaining: 0,
-        rateLimitReset: rateLimitReset ? new Date(parseInt(rateLimitReset) * 1000).toISOString() : undefined,
+        rateLimitReset: rateLimitReset
+          ? new Date(parseInt(rateLimitReset) * 1000).toISOString()
+          : undefined,
       };
     } else {
       return {
@@ -112,10 +114,7 @@ export async function getTwitterStatus(): Promise<SourceStatus> {
 /**
  * Search Twitter for posts matching a query
  */
-async function searchTwitter(
-  query: string,
-  maxResults: number = 50
-): Promise<TwitterPost[]> {
+async function searchTwitter(query: string, maxResults: number = 50): Promise<TwitterPost[]> {
   const token = getBearerToken();
   if (!token) {
     console.warn('Twitter API: No bearer token configured');
@@ -131,14 +130,11 @@ async function searchTwitter(
       expansions: 'author_id',
     });
 
-    const response = await fetch(
-      `${TWITTER_API_BASE}/tweets/search/recent?${params}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+    const response = await fetch(`${TWITTER_API_BASE}/tweets/search/recent?${params}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
     if (!response.ok) {
       if (response.status === 429) {

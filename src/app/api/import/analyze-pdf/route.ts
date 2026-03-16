@@ -19,15 +19,15 @@ export async function POST(request: Request) {
     // Read the file as array buffer
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
-    
+
     // In production, you would use pdf-parse here:
     // const pdfParse = require('pdf-parse');
     // const pdfData = await pdfParse(buffer);
     // const text = pdfData.text;
-    
+
     // For now, mock the extraction
     const extractedText = `Brand Guidelines Document - ${file.name}`;
-    
+
     // Mock analysis results - in production, send to AI for analysis
     const result = {
       extractedText,
@@ -46,29 +46,15 @@ export async function POST(request: Request) {
         style: 45,
       },
       keywords: ['professional', 'innovative', 'modern', 'trusted'],
-      doPatterns: [
-        'Use active voice',
-        'Keep sentences concise',
-        'Lead with benefits',
-      ],
-      dontPatterns: [
-        'Avoid jargon',
-        'Never use passive voice',
-        'Don\'t be overly formal',
-      ],
-      voiceSamples: [
-        'We believe in building something different.',
-        'Your success is our mission.',
-      ],
+      doPatterns: ['Use active voice', 'Keep sentences concise', 'Lead with benefits'],
+      dontPatterns: ['Avoid jargon', 'Never use passive voice', "Don't be overly formal"],
+      voiceSamples: ['We believe in building something different.', 'Your success is our mission.'],
     };
 
     return NextResponse.json(result);
   } catch (error) {
     console.error('PDF analysis error:', error);
-    return NextResponse.json(
-      { error: 'Failed to analyze PDF' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to analyze PDF' }, { status: 500 });
   }
 }
 
@@ -79,25 +65,9 @@ function extractNameFromFilename(filename: string): string | null {
     .replace(/[-_]/g, ' ')
     .replace(/\b(brand|guidelines|guide|style|manual)\b/gi, '')
     .trim();
-  
+
   if (cleaned.length > 0) {
     return cleaned.split(' ')[0]; // Return first word as potential brand name
   }
   return null;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

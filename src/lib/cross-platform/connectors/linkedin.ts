@@ -2,7 +2,12 @@
 // LINKEDIN CONNECTOR — LinkedIn API v2
 // =============================================================================
 
-import type { PlatformConnector, OAuthTokens, PlatformProfile, PlatformConnectorConfig } from './base';
+import type {
+  PlatformConnector,
+  OAuthTokens,
+  PlatformProfile,
+  PlatformConnectorConfig,
+} from './base';
 import type { ContentItem } from '../types';
 import { normalizeLinkedInPost } from '../normalizers';
 

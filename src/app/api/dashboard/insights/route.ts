@@ -42,7 +42,8 @@ export async function POST(request: NextRequest) {
             type: 'content',
             icon: '📝',
             title: 'Start posting to see insights',
-            description: 'Once you have posts, we\'ll analyze your performance and give actionable suggestions.',
+            description:
+              "Once you have posts, we'll analyze your performance and give actionable suggestions.",
             trend: 'stable' as const,
           },
         ],
@@ -51,16 +52,21 @@ export async function POST(request: NextRequest) {
 
     const anthropic = new Anthropic({ apiKey });
 
-    const postsContext = posts.slice(0, 15).map((p, i) => 
-      `Post ${i + 1} (${p.created_at}): "${p.text.slice(0, 200)}" — Likes: ${p.public_metrics.like_count}, Retweets: ${p.public_metrics.retweet_count}, Replies: ${p.public_metrics.reply_count}, Views: ${p.public_metrics.impression_count || 'N/A'}`
-    ).join('\n');
+    const postsContext = posts
+      .slice(0, 15)
+      .map(
+        (p, i) =>
+          `Post ${i + 1} (${p.created_at}): "${p.text.slice(0, 200)}" — Likes: ${p.public_metrics.like_count}, Retweets: ${p.public_metrics.retweet_count}, Replies: ${p.public_metrics.reply_count}, Views: ${p.public_metrics.impression_count || 'N/A'}`
+      )
+      .join('\n');
 
     const message = await anthropic.messages.create({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 1000,
-      messages: [{
-        role: 'user',
-        content: `You are a social media performance analyst for a brand. Analyze these recent X/Twitter posts and provide insights.
+      messages: [
+        {
+          role: 'user',
+          content: `You are a social media performance analyst for a brand. Analyze these recent X/Twitter posts and provide insights.
 
 ${buildBrandContext(brandDNA)}
 
@@ -82,7 +88,8 @@ Analyze the data and return ONLY valid JSON with 3-5 insights:
 }
 
 Focus on: best performing content types, optimal posting times, engagement patterns, brand voice consistency, and growth opportunities. Be specific with numbers from the data.`,
-      }],
+        },
+      ],
     });
 
     const responseText = message.content[0].type === 'text' ? message.content[0].text : '';
@@ -94,13 +101,15 @@ Focus on: best performing content types, optimal posting times, engagement patte
       return NextResponse.json({ insights: parsed.insights });
     } catch {
       return NextResponse.json({
-        insights: [{
-          type: 'content',
-          icon: '📊',
-          title: 'Analysis in progress',
-          description: 'We\'re still learning your posting patterns. Check back after more posts.',
-          trend: 'stable',
-        }],
+        insights: [
+          {
+            type: 'content',
+            icon: '📊',
+            title: 'Analysis in progress',
+            description: "We're still learning your posting patterns. Check back after more posts.",
+            trend: 'stable',
+          },
+        ],
       });
     }
   } catch (error) {

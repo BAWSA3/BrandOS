@@ -53,7 +53,8 @@ const BrandScoreCard: React.FC<BrandScoreCardProps> = ({
             <span className="relative">
               <Info className="w-3 h-3 text-white/50 hover:text-white/80 cursor-help peer" />
               <span className="absolute left-full bottom-0 ml-2 w-[220px] px-3 py-2 bg-black/95 border border-white/15 rounded text-[10px] leading-relaxed text-white/70 font-os tracking-wide opacity-0 peer-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50">
-                Your Brand Score measures how strong, consistent, and recognizable your brand is across identity, content, voice, and growth.
+                Your Brand Score measures how strong, consistent, and recognizable your brand is
+                across identity, content, voice, and growth.
               </span>
             </span>
           </span>

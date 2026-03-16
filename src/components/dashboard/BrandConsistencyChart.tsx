@@ -21,7 +21,12 @@ function formatDate(dateStr: string): string {
 
 function formatDateTime(dateStr: string): string {
   const d = new Date(dateStr);
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+  return d.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  });
 }
 
 function getValue(point: HealthHistoryPoint, key: DimensionKey): number {
@@ -56,10 +61,7 @@ function Chart({
     (i: number) => padLeft + (data.length <= 1 ? chartW / 2 : (i / (data.length - 1)) * chartW),
     [data.length, chartW]
   );
-  const yScale = useCallback(
-    (v: number) => padTop + (1 - v / 100) * chartH,
-    [chartH]
-  );
+  const yScale = useCallback((v: number) => padTop + (1 - v / 100) * chartH, [chartH]);
 
   // Y-axis gridlines
   const yTicks = [0, 25, 50, 75, 100];
@@ -77,10 +79,8 @@ function Chart({
 
   // Build polyline paths per dimension
   const paths = useMemo(() => {
-    return DIMENSIONS.filter(d => activeDimensions.has(d.key)).map(dim => {
-      const points = data
-        .map((p, i) => `${xScale(i)},${yScale(getValue(p, dim.key))}`)
-        .join(' ');
+    return DIMENSIONS.filter((d) => activeDimensions.has(d.key)).map((dim) => {
+      const points = data.map((p, i) => `${xScale(i)},${yScale(getValue(p, dim.key))}`).join(' ');
       return { key: dim.key, color: dim.color, points };
     });
   }, [data, activeDimensions, xScale, yScale]);
@@ -121,7 +121,7 @@ function Chart({
         onMouseLeave={() => setTooltip(null)}
       >
         {/* Gridlines */}
-        {yTicks.map(v => (
+        {yTicks.map((v) => (
           <g key={v}>
             <line
               x1={padLeft}
@@ -194,7 +194,7 @@ function Chart({
               strokeWidth="1"
               strokeDasharray="3,3"
             />
-            {DIMENSIONS.filter(d => activeDimensions.has(d.key)).map(dim => (
+            {DIMENSIONS.filter((d) => activeDimensions.has(d.key)).map((dim) => (
               <circle
                 key={dim.key}
                 cx={tooltip.x}
@@ -241,11 +241,26 @@ function Chart({
             <div style={{ fontWeight: 600, marginBottom: 4, color: 'var(--text-primary)' }}>
               {formatDateTime(tooltip.point.date)}
             </div>
-            {DIMENSIONS.filter(d => activeDimensions.has(d.key)).map(dim => (
+            {DIMENSIONS.filter((d) => activeDimensions.has(d.key)).map((dim) => (
               <div key={dim.key} className="flex items-center gap-2" style={{ marginBottom: 1 }}>
-                <span style={{ width: 8, height: 8, borderRadius: '50%', background: dim.color, display: 'inline-block' }} />
+                <span
+                  style={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: '50%',
+                    background: dim.color,
+                    display: 'inline-block',
+                  }}
+                />
                 <span style={{ color: 'var(--text-secondary)' }}>{dim.label}</span>
-                <span style={{ fontWeight: 600, color: 'var(--text-primary)', marginLeft: 'auto', paddingLeft: 8 }}>
+                <span
+                  style={{
+                    fontWeight: 600,
+                    color: 'var(--text-primary)',
+                    marginLeft: 'auto',
+                    paddingLeft: 8,
+                  }}
+                >
                   {getValue(tooltip.point, dim.key)}
                 </span>
               </div>
@@ -259,12 +274,10 @@ function Chart({
 
 export default function BrandConsistencyChart() {
   const health = useBrandHealthScore();
-  const [activeDimensions, setActiveDimensions] = useState<Set<DimensionKey>>(
-    new Set(['score'])
-  );
+  const [activeDimensions, setActiveDimensions] = useState<Set<DimensionKey>>(new Set(['score']));
 
   const toggleDimension = (key: DimensionKey) => {
-    setActiveDimensions(prev => {
+    setActiveDimensions((prev) => {
       const next = new Set(prev);
       if (next.has(key)) {
         // Don't allow deselecting everything
@@ -354,7 +367,7 @@ export default function BrandConsistencyChart() {
       {/* Dimension toggles */}
       {hasData && (
         <div className="flex flex-wrap gap-1.5 mb-4">
-          {DIMENSIONS.map(dim => {
+          {DIMENSIONS.map((dim) => {
             const isActive = activeDimensions.has(dim.key);
             return (
               <button

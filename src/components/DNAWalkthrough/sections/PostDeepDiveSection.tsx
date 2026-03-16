@@ -110,17 +110,15 @@ function analyzePostPatterns(
   );
 
   // Find posts with questions
-  const questionPosts = tweets.filter(t => t.text.includes('?'));
+  const questionPosts = tweets.filter((t) => t.text.includes('?'));
 
   // Find posts with hooks (starts with strong statement)
   const hookPatterns = ['The', 'I ', 'You ', 'This', 'Here', 'Why', 'How', 'What'];
-  const hookPosts = tweets.filter(t =>
-    hookPatterns.some(h => t.text.trim().startsWith(h))
-  );
+  const hookPosts = tweets.filter((t) => hookPatterns.some((h) => t.text.trim().startsWith(h)));
 
   // Identify short vs long posts
-  const shortPosts = tweets.filter(t => t.text.length < 100);
-  const longPosts = tweets.filter(t => t.text.length > 200);
+  const shortPosts = tweets.filter((t) => t.text.length < 100);
+  const longPosts = tweets.filter((t) => t.text.length > 200);
 
   // Calculate which length performs better
   const shortAvgLikes = shortPosts.length
@@ -130,7 +128,8 @@ function analyzePostPatterns(
     ? longPosts.reduce((s, t) => s + (t.public_metrics?.like_count || 0), 0) / longPosts.length
     : 0;
 
-  const bestLength = shortAvgLikes > longAvgLikes ? 'Short' : longAvgLikes > shortAvgLikes ? 'Long' : 'Mixed';
+  const bestLength =
+    shortAvgLikes > longAvgLikes ? 'Short' : longAvgLikes > shortAvgLikes ? 'Long' : 'Mixed';
 
   // Build insights
   const insights: ContentInsight[] = [
@@ -149,11 +148,12 @@ function analyzePostPatterns(
     {
       label: 'BEST LENGTH',
       value: bestLength,
-      description: bestLength === 'Short'
-        ? 'Your shorter posts perform better'
-        : bestLength === 'Long'
-          ? 'Your longer posts get more engagement'
-          : 'Length doesn\'t significantly affect your engagement',
+      description:
+        bestLength === 'Short'
+          ? 'Your shorter posts perform better'
+          : bestLength === 'Long'
+            ? 'Your longer posts get more engagement'
+            : "Length doesn't significantly affect your engagement",
       color: '#9D4EDD',
     },
     {
@@ -171,17 +171,18 @@ function analyzePostPatterns(
   if (sortedByLikes[0]) {
     representativePosts.push({
       tweet: sortedByLikes[0],
-      reason: 'This is your highest-performing post. It shows the content style your audience responds to most.',
+      reason:
+        'This is your highest-performing post. It shows the content style your audience responds to most.',
       tag: 'TOP PERFORMER',
       tagColor: '#10B981',
     });
   }
 
   // 2. Best example of brand voice (find one that matches keywords)
-  const keywordLower = (brandDNA.keywords || []).map(k => k.toLowerCase());
-  const brandVoicePost = tweets.find(t =>
-    keywordLower.some(k => t.text.toLowerCase().includes(k)) &&
-    t.id !== sortedByLikes[0]?.id
+  const keywordLower = (brandDNA.keywords || []).map((k) => k.toLowerCase());
+  const brandVoicePost = tweets.find(
+    (t) =>
+      keywordLower.some((k) => t.text.toLowerCase().includes(k)) && t.id !== sortedByLikes[0]?.id
   );
   if (brandVoicePost) {
     representativePosts.push({
@@ -203,9 +204,8 @@ function analyzePostPatterns(
   const recentPosts = [...tweets].sort(
     (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
   );
-  const recentPost = recentPosts.find(t =>
-    t.id !== representativePosts[0]?.tweet.id &&
-    t.id !== representativePosts[1]?.tweet.id
+  const recentPost = recentPosts.find(
+    (t) => t.id !== representativePosts[0]?.tweet.id && t.id !== representativePosts[1]?.tweet.id
   );
   if (recentPost) {
     const recentLikes = recentPost.public_metrics?.like_count || 0;
@@ -285,10 +285,7 @@ export default function PostDeepDiveSection({
   };
 
   return (
-    <section
-      className="min-h-screen"
-      style={{ background: '#ffffff', position: 'relative' }}
-    >
+    <section className="min-h-screen" style={{ background: '#ffffff', position: 'relative' }}>
       <AnimatePresence mode="wait">
         {/* Stage 1: Intro */}
         {stage === 'intro' && (
@@ -339,11 +336,20 @@ export default function PostDeepDiveSection({
                 marginBottom: '16px',
               }}
             >
-              [{Array(20).fill(null).map((_, i) => (
-                <span key={i} style={{ color: i < Math.floor(scanProgress / 5) ? '#0047FF' : 'rgba(0,0,0,0.15)' }}>
-                  {i < Math.floor(scanProgress / 5) ? '█' : '░'}
-                </span>
-              ))}] {scanProgress}%
+              [
+              {Array(20)
+                .fill(null)
+                .map((_, i) => (
+                  <span
+                    key={i}
+                    style={{
+                      color: i < Math.floor(scanProgress / 5) ? '#0047FF' : 'rgba(0,0,0,0.15)',
+                    }}
+                  >
+                    {i < Math.floor(scanProgress / 5) ? '█' : '░'}
+                  </span>
+                ))}
+              ] {scanProgress}%
             </div>
 
             <div
@@ -496,7 +502,7 @@ export default function PostDeepDiveSection({
               <motion.button
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                onClick={() => setRevealedInsights(prev => prev + 2)}
+                onClick={() => setRevealedInsights((prev) => prev + 2)}
                 style={{
                   padding: '14px 28px',
                   background: '#0047FF',
@@ -505,8 +511,8 @@ export default function PostDeepDiveSection({
                   cursor: 'pointer',
                   transition: 'background 0.2s ease',
                 }}
-                onMouseEnter={(e) => e.currentTarget.style.background = '#0038CC'}
-                onMouseLeave={(e) => e.currentTarget.style.background = '#0047FF'}
+                onMouseEnter={(e) => (e.currentTarget.style.background = '#0038CC')}
+                onMouseLeave={(e) => (e.currentTarget.style.background = '#0047FF')}
               >
                 <span
                   style={{
@@ -544,8 +550,8 @@ export default function PostDeepDiveSection({
                     cursor: 'pointer',
                     transition: 'background 0.2s ease',
                   }}
-                  onMouseEnter={(e) => e.currentTarget.style.background = '#0038CC'}
-                  onMouseLeave={(e) => e.currentTarget.style.background = '#0047FF'}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = '#0038CC')}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = '#0047FF')}
                 >
                   <span
                     style={{
@@ -724,7 +730,7 @@ export default function PostDeepDiveSection({
               <motion.button
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                onClick={() => setRevealedPosts(prev => prev + 1)}
+                onClick={() => setRevealedPosts((prev) => prev + 1)}
                 style={{
                   padding: '14px 28px',
                   background: representativePosts[revealedPosts]?.tagColor || '#0047FF',
@@ -733,8 +739,8 @@ export default function PostDeepDiveSection({
                   cursor: 'pointer',
                   transition: 'opacity 0.2s ease',
                 }}
-                onMouseEnter={(e) => e.currentTarget.style.opacity = '0.9'}
-                onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+                onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.9')}
+                onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
               >
                 <span
                   style={{
@@ -773,8 +779,8 @@ export default function PostDeepDiveSection({
                     cursor: 'pointer',
                     transition: 'background 0.2s ease',
                   }}
-                  onMouseEnter={(e) => e.currentTarget.style.background = '#0038CC'}
-                  onMouseLeave={(e) => e.currentTarget.style.background = '#0047FF'}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = '#0038CC')}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = '#0047FF')}
                 >
                   <span
                     style={{

@@ -104,13 +104,7 @@ function EditRefineNode(_props: NodeProps) {
                     cy="12"
                     r="10"
                     fill="none"
-                    stroke={
-                      isOverLimit
-                        ? '#EF4444'
-                        : charPercent > 90
-                        ? '#FFD700'
-                        : '#2E6AFF'
-                    }
+                    stroke={isOverLimit ? '#EF4444' : charPercent > 90 ? '#FFD700' : '#2E6AFF'}
                     strokeWidth="2"
                     strokeDasharray={`${charPercent * 0.628} 62.8`}
                     strokeLinecap="round"
@@ -122,8 +116,8 @@ function EditRefineNode(_props: NodeProps) {
                   isOverLimit
                     ? 'text-red-400'
                     : charPercent > 90
-                    ? 'text-[#FFD700]'
-                    : 'text-white/40'
+                      ? 'text-[#FFD700]'
+                      : 'text-white/40'
                 }`}
               >
                 {280 - charCount}
@@ -133,9 +127,7 @@ function EditRefineNode(_props: NodeProps) {
         </div>
       ) : (
         <div className="text-center py-6">
-          <p className="text-[11px] text-white/25">
-            Select a variation to edit
-          </p>
+          <p className="text-[11px] text-white/25">Select a variation to edit</p>
         </div>
       )}
     </BaseNode>

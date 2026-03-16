@@ -30,10 +30,7 @@ export async function POST(request: NextRequest) {
       try {
         visualDNA = JSON.parse(visualDnaJson);
       } catch {
-        return NextResponse.json(
-          { error: 'Invalid Visual DNA JSON' },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'Invalid Visual DNA JSON' }, { status: 400 });
       }
     } else if (brandDnaJson) {
       // Extract visual signals from brand DNA as fallback
@@ -52,10 +49,7 @@ export async function POST(request: NextRequest) {
           moodKeywords: brandDNA.brandKeywords ?? brandDNA.keywords ?? [],
         };
       } catch {
-        return NextResponse.json(
-          { error: 'Invalid Brand DNA JSON' },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'Invalid Brand DNA JSON' }, { status: 400 });
       }
     } else {
       return NextResponse.json(
@@ -82,9 +76,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ audit, mode: 'multi' });
   } catch (error) {
     console.error('Visual check error:', error);
-    return NextResponse.json(
-      { error: 'Visual consistency check failed' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Visual consistency check failed' }, { status: 500 });
   }
 }

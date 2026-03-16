@@ -14,7 +14,10 @@ async function getAuthUser() {
   if (!accessToken) return null;
 
   const supabase = createClient(supabaseUrl, supabaseAnonKey);
-  const { data: { user }, error } = await supabase.auth.getUser(accessToken);
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser(accessToken);
   if (error || !user) return null;
 
   return prisma.user.findUnique({ where: { supabaseId: user.id } });
@@ -82,9 +85,6 @@ export async function GET(_request: NextRequest) {
     });
   } catch (error) {
     console.error('[Onchain Status] Error:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch onchain status' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch onchain status' }, { status: 500 });
   }
 }

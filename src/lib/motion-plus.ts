@@ -1,64 +1,71 @@
-"use client"
+'use client';
 
-import { useEffect, useRef, useState, createElement, type CSSProperties, type ReactNode } from "react"
-import { motion, useSpring, useTransform } from "motion/react"
+import {
+  useEffect,
+  useRef,
+  useState,
+  createElement,
+  type CSSProperties,
+  type ReactNode,
+} from 'react';
+import { motion, useSpring, useTransform } from 'motion/react';
 
 // ── AnimateNumber ──
 // Rolling number animation that spins digits up/down
 
 interface AnimateNumberProps {
-  children: number | bigint | string
-  suffix?: string
-  prefix?: string
-  trend?: number
-  transition?: Record<string, unknown>
-  format?: Intl.NumberFormatOptions
-  locales?: Intl.LocalesArgument
-  style?: CSSProperties
-  className?: string
+  children: number | bigint | string;
+  suffix?: string;
+  prefix?: string;
+  trend?: number;
+  transition?: Record<string, unknown>;
+  format?: Intl.NumberFormatOptions;
+  locales?: Intl.LocalesArgument;
+  style?: CSSProperties;
+  className?: string;
 }
 
 export function AnimateNumber({
   children,
-  suffix = "",
-  prefix = "",
+  suffix = '',
+  prefix = '',
   style,
   className,
 }: AnimateNumberProps) {
-  const value = typeof children === "string" ? parseFloat(children) : Number(children)
-  const spring = useSpring(0, { stiffness: 80, damping: 20 })
-  const display = useTransform(spring, (v) => Math.round(v))
-  const [rendered, setRendered] = useState(value)
+  const value = typeof children === 'string' ? parseFloat(children) : Number(children);
+  const spring = useSpring(0, { stiffness: 80, damping: 20 });
+  const display = useTransform(spring, (v) => Math.round(v));
+  const [rendered, setRendered] = useState(value);
 
   useEffect(() => {
-    spring.set(value)
-  }, [value, spring])
+    spring.set(value);
+  }, [value, spring]);
 
   useEffect(() => {
-    const unsub = display.on("change", (v) => setRendered(v))
-    return unsub
-  }, [display])
+    const unsub = display.on('change', (v) => setRendered(v));
+    return unsub;
+  }, [display]);
 
   return createElement(
     motion.span,
-    { style: { display: "inline-flex", whiteSpace: "nowrap", ...style }, className },
+    { style: { display: 'inline-flex', whiteSpace: 'nowrap', ...style }, className },
     `${prefix}${rendered}${suffix}`
-  )
+  );
 }
 
 // ── ScrambleText ──
 // Text that scrambles through random characters before settling
 
 interface ScrambleTextProps {
-  children: string
-  duration?: number
-  delay?: number
-  interval?: number
-  chars?: string
-  className?: string
+  children: string;
+  duration?: number;
+  delay?: number;
+  interval?: number;
+  chars?: string;
+  className?: string;
 }
 
-const SCRAMBLE_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+const SCRAMBLE_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
 export function ScrambleText({
   children,
@@ -68,110 +75,110 @@ export function ScrambleText({
   chars = SCRAMBLE_CHARS,
   className,
 }: ScrambleTextProps) {
-  const [text, setText] = useState(children)
-  const target = children
+  const [text, setText] = useState(children);
+  const target = children;
 
   useEffect(() => {
-    const delayMs = delay * 1000
-    const durationMs = duration * 1000
-    const intervalMs = interval * 1000
-    let frame: ReturnType<typeof setTimeout>
+    const delayMs = delay * 1000;
+    const durationMs = duration * 1000;
+    const intervalMs = interval * 1000;
+    let frame: ReturnType<typeof setTimeout>;
 
     const timeout = setTimeout(() => {
-      const start = Date.now()
+      const start = Date.now();
       const tick = () => {
-        const elapsed = Date.now() - start
-        const progress = Math.min(1, elapsed / durationMs)
-        const revealed = Math.floor(progress * target.length)
+        const elapsed = Date.now() - start;
+        const progress = Math.min(1, elapsed / durationMs);
+        const revealed = Math.floor(progress * target.length);
 
-        let result = ""
+        let result = '';
         for (let i = 0; i < target.length; i++) {
           if (i < revealed) {
-            result += target[i]
+            result += target[i];
           } else {
-            result += chars[Math.floor(Math.random() * chars.length)]
+            result += chars[Math.floor(Math.random() * chars.length)];
           }
         }
-        setText(result)
+        setText(result);
 
         if (progress < 1) {
-          frame = setTimeout(tick, intervalMs)
+          frame = setTimeout(tick, intervalMs);
         } else {
-          setText(target)
+          setText(target);
         }
-      }
-      tick()
-    }, delayMs)
+      };
+      tick();
+    }, delayMs);
 
     return () => {
-      clearTimeout(timeout)
-      clearTimeout(frame)
-    }
-  }, [target, duration, delay, interval, chars])
+      clearTimeout(timeout);
+      clearTimeout(frame);
+    };
+  }, [target, duration, delay, interval, chars]);
 
-  return createElement("span", { className }, text)
+  return createElement('span', { className }, text);
 }
 
 // ── Typewriter ──
 // Types text character by character with a blinking cursor
 
 interface TypewriterProps {
-  children: string
-  as?: string
-  className?: string
-  style?: CSSProperties
-  speed?: "slow" | "normal" | "fast" | number
-  variance?: "none" | "natural"
-  cursorStyle?: CSSProperties
+  children: string;
+  as?: string;
+  className?: string;
+  style?: CSSProperties;
+  speed?: 'slow' | 'normal' | 'fast' | number;
+  variance?: 'none' | 'natural';
+  cursorStyle?: CSSProperties;
 }
 
-const SPEED_MAP: Record<string, number> = { slow: 60, normal: 35, fast: 18 }
+const SPEED_MAP: Record<string, number> = { slow: 60, normal: 35, fast: 18 };
 
 export function Typewriter({
   children,
-  as = "span",
+  as = 'span',
   className,
   style,
-  speed = "normal",
-  variance = "none",
+  speed = 'normal',
+  variance = 'none',
   cursorStyle,
 }: TypewriterProps) {
-  const [charIndex, setCharIndex] = useState(0)
-  const [showCursor, setShowCursor] = useState(true)
-  const target = children
-  const baseSpeed = typeof speed === "number" ? speed : (SPEED_MAP[speed] || 35)
+  const [charIndex, setCharIndex] = useState(0);
+  const [showCursor, setShowCursor] = useState(true);
+  const target = children;
+  const baseSpeed = typeof speed === 'number' ? speed : SPEED_MAP[speed] || 35;
 
   useEffect(() => {
-    setCharIndex(0)
-  }, [target])
+    setCharIndex(0);
+  }, [target]);
 
   useEffect(() => {
-    if (charIndex >= target.length) return
-    const jitter = variance === "natural" ? (Math.random() - 0.5) * baseSpeed * 0.6 : 0
-    const ms = Math.max(5, baseSpeed + jitter)
-    const timer = setTimeout(() => setCharIndex((i) => i + 1), ms)
-    return () => clearTimeout(timer)
-  }, [charIndex, target, baseSpeed, variance])
+    if (charIndex >= target.length) return;
+    const jitter = variance === 'natural' ? (Math.random() - 0.5) * baseSpeed * 0.6 : 0;
+    const ms = Math.max(5, baseSpeed + jitter);
+    const timer = setTimeout(() => setCharIndex((i) => i + 1), ms);
+    return () => clearTimeout(timer);
+  }, [charIndex, target, baseSpeed, variance]);
 
   useEffect(() => {
-    const blink = setInterval(() => setShowCursor((v) => !v), 530)
-    return () => clearInterval(blink)
-  }, [])
+    const blink = setInterval(() => setShowCursor((v) => !v), 530);
+    return () => clearInterval(blink);
+  }, []);
 
-  const displayed = target.slice(0, charIndex)
-  const cursorEl = createElement("span", {
+  const displayed = target.slice(0, charIndex);
+  const cursorEl = createElement('span', {
     style: {
-      display: "inline-block",
+      display: 'inline-block',
       width: 2,
-      height: "1em",
-      backgroundColor: "currentColor",
+      height: '1em',
+      backgroundColor: 'currentColor',
       marginLeft: 1,
       opacity: showCursor ? 1 : 0,
-      transition: "opacity 0.1s",
-      verticalAlign: "text-bottom",
+      transition: 'opacity 0.1s',
+      verticalAlign: 'text-bottom',
       ...cursorStyle,
     },
-  })
+  });
 
-  return createElement(as, { className, style }, displayed, cursorEl)
+  return createElement(as, { className, style }, displayed, cursorEl);
 }

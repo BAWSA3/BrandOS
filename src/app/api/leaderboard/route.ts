@@ -70,14 +70,14 @@ export async function GET(request: NextRequest) {
     const monthMs = 30 * 24 * 60 * 60 * 1000;
 
     if (range === 'week') {
-      entries = entries.filter(e => now - e.timestamp < weekMs);
+      entries = entries.filter((e) => now - e.timestamp < weekMs);
     } else if (range === 'month') {
-      entries = entries.filter(e => now - e.timestamp < monthMs);
+      entries = entries.filter((e) => now - e.timestamp < monthMs);
     }
 
     // Filter crypto only
     if (cryptoOnly) {
-      entries = entries.filter(e => e.isCrypto);
+      entries = entries.filter((e) => e.isCrypto);
     }
 
     // Sort by score descending, then by timestamp (most recent first for ties)
@@ -111,10 +111,7 @@ export async function POST(request: NextRequest) {
     const { username, displayName, score, profileImage, isCrypto } = body;
 
     if (!username || typeof score !== 'number') {
-      return NextResponse.json(
-        { error: 'Username and score are required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Username and score are required' }, { status: 400 });
     }
 
     // Validate score range
@@ -125,7 +122,7 @@ export async function POST(request: NextRequest) {
 
     // Find existing entry for this user
     const existingIndex = entries.findIndex(
-      e => e.username.toLowerCase() === username.toLowerCase()
+      (e) => e.username.toLowerCase() === username.toLowerCase()
     );
 
     const newEntry: LeaderboardEntry = {
@@ -141,7 +138,7 @@ export async function POST(request: NextRequest) {
       // Update if new score is higher OR if it's been more than 24 hours
       const existing = entries[existingIndex];
       const hoursSinceLastScore = (now - existing.timestamp) / (1000 * 60 * 60);
-      
+
       if (score > existing.score || hoursSinceLastScore > 24) {
         entries[existingIndex] = newEntry;
       }
@@ -152,15 +149,14 @@ export async function POST(request: NextRequest) {
 
     // Keep only entries from last 90 days to prevent unbounded growth
     const ninetyDaysMs = 90 * 24 * 60 * 60 * 1000;
-    const filteredEntries = entries.filter(e => now - e.timestamp < ninetyDaysMs);
+    const filteredEntries = entries.filter((e) => now - e.timestamp < ninetyDaysMs);
 
     await writeLeaderboard(filteredEntries);
 
     // Calculate rank
     const sortedEntries = [...filteredEntries].sort((a, b) => b.score - a.score);
-    const rank = sortedEntries.findIndex(
-      e => e.username.toLowerCase() === username.toLowerCase()
-    ) + 1;
+    const rank =
+      sortedEntries.findIndex((e) => e.username.toLowerCase() === username.toLowerCase()) + 1;
 
     return NextResponse.json({
       success: true,
@@ -172,9 +168,3 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to update leaderboard' }, { status: 500 });
   }
 }
-
-
-
-
-
-

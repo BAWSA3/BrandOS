@@ -13,7 +13,9 @@ async function getAuthUser() {
   if (!accessToken) return null;
 
   const supabase = createClient(supabaseUrl, supabaseAnonKey);
-  const { data: { user } } = await supabase.auth.getUser(accessToken);
+  const {
+    data: { user },
+  } = await supabase.auth.getUser(accessToken);
   if (!user) return null;
 
   return prisma.user.findUnique({ where: { supabaseId: user.id } });

@@ -35,16 +35,12 @@ export default function UsageLimitBanner({
     <>
       <div
         className={`relative flex items-center justify-between rounded-xl border px-4 py-3 ${
-          isAtLimit
-            ? 'border-red-500/30 bg-red-500/5'
-            : 'border-amber-500/30 bg-amber-500/5'
+          isAtLimit ? 'border-red-500/30 bg-red-500/5' : 'border-amber-500/30 bg-amber-500/5'
         }`}
       >
         <div className="flex items-center gap-3">
           <AlertTriangle
-            className={`h-5 w-5 flex-shrink-0 ${
-              isAtLimit ? 'text-red-400' : 'text-amber-400'
-            }`}
+            className={`h-5 w-5 flex-shrink-0 ${isAtLimit ? 'text-red-400' : 'text-amber-400'}`}
           />
           <div>
             <p className={`text-sm font-medium ${isAtLimit ? 'text-red-300' : 'text-amber-300'}`}>

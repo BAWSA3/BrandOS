@@ -2,27 +2,24 @@
 
 Source: `docs/SCORING-FRAMEWORK.md`
 
-
 ---
-
 
 # Graphic Text (overlay for each post's visual)
 
-| # | Post | Graphic Text |
-|---|------|-------------|
-| 1 | Core Framework | DEFINE. CHECK. GENERATE. SCALE. |
-| 2 | Bio Doesn't Matter | your bio is decoration. your content is the brand. |
-| 3 | Identity Clarity | 10 tweets. that's all someone needs to get you — or not. |
-| 4 | Consistency Compounds | same voice. every post. trust is earned in repetition. |
-| 5 | Profile vs Brand | you don't have a brand. you have a profile. |
-| 6 | Ratio Breakdown | 10:1 = they come to you. <2:1 = you're chasing. |
-| 7 | Brand Without Reach | perfect brand. zero reach. that's a diary. |
-| 8 | Archetype Thread | 8 archetypes. 1 is yours. |
-| 9 | Two Modes | profile data = a guess. tweet data = the truth. |
-| 10 | Why 30-25-25-20 | identity first. everything else compounds from there. |
-| 11 | Building In Public | 500 followers doing it right > 5M coasting. |
-| 12 | Listed Count | followers can be bought. listed count can't. |
-
+| #   | Post                  | Graphic Text                                             |
+| --- | --------------------- | -------------------------------------------------------- |
+| 1   | Core Framework        | DEFINE. CHECK. GENERATE. SCALE.                          |
+| 2   | Bio Doesn't Matter    | your bio is decoration. your content is the brand.       |
+| 3   | Identity Clarity      | 10 tweets. that's all someone needs to get you — or not. |
+| 4   | Consistency Compounds | same voice. every post. trust is earned in repetition.   |
+| 5   | Profile vs Brand      | you don't have a brand. you have a profile.              |
+| 6   | Ratio Breakdown       | 10:1 = they come to you. <2:1 = you're chasing.          |
+| 7   | Brand Without Reach   | perfect brand. zero reach. that's a diary.               |
+| 8   | Archetype Thread      | 8 archetypes. 1 is yours.                                |
+| 9   | Two Modes             | profile data = a guess. tweet data = the truth.          |
+| 10  | Why 30-25-25-20       | identity first. everything else compounds from there.    |
+| 11  | Building In Public    | 500 followers doing it right > 5M coasting.              |
+| 12  | Listed Count          | followers can be bought. listed count can't.             |
 
 ---
 
@@ -43,9 +40,7 @@ Source: `docs/SCORING-FRAMEWORK.md`
 >
 > each one tells a different story about where you're winning and where you're leaking
 
-
 ---
-
 
 ## 2. The "Bio Doesn't Matter" Hot Take
 
@@ -63,9 +58,7 @@ Source: `docs/SCORING-FRAMEWORK.md`
 >
 > they follow because your tweets hit
 
-
 ---
-
 
 ## 3. The Identity Clarity Post
 
@@ -84,9 +77,7 @@ Source: `docs/SCORING-FRAMEWORK.md`
 >
 > identity clarity is the foundation everything else builds on
 
-
 ---
-
 
 ## 4. The Consistency Compounds Post
 
@@ -104,9 +95,7 @@ Source: `docs/SCORING-FRAMEWORK.md`
 >
 > that's not a vibe — it's math
 
-
 ---
-
 
 ## 5. The "Profile vs Brand" One-Liner
 
@@ -120,9 +109,7 @@ Source: `docs/SCORING-FRAMEWORK.md`
 >
 > stop perfecting. start shipping.
 
-
 ---
-
 
 ## 6. The Ratio Breakdown
 
@@ -136,9 +123,7 @@ Source: `docs/SCORING-FRAMEWORK.md`
 >
 > 10K+ listed = the market decided you matter
 
-
 ---
-
 
 ## 7. The "Brand Without Reach" Post
 
@@ -158,9 +143,7 @@ Source: `docs/SCORING-FRAMEWORK.md`
 >
 > the other 3 phases are inputs. scale is the output.
 
-
 ---
-
 
 ## 8. The Archetype Thread
 
@@ -181,9 +164,7 @@ Source: `docs/SCORING-FRAMEWORK.md`
 >
 > BrandOS tells you which one you are
 
-
 ---
-
 
 ## 9. The "Two Modes" Transparency Post
 
@@ -202,9 +183,7 @@ Source: `docs/SCORING-FRAMEWORK.md`
 >
 > honesty > false precision
 
-
 ---
-
 
 ## 10. The "Why 30-25-25-20" Post
 
@@ -221,9 +200,7 @@ Source: `docs/SCORING-FRAMEWORK.md`
 >
 > but it always collapses
 
-
 ---
-
 
 ## 11. The Building In Public Post
 
@@ -239,9 +216,7 @@ Source: `docs/SCORING-FRAMEWORK.md`
 >
 > an emerging creator doing everything right should score higher than an elite creator coasting on reputation
 
-
 ---
-
 
 ## 12. The "Listed Count is Underrated" Post
 

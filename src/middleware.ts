@@ -6,15 +6,15 @@ import type { NextRequest } from 'next/server';
 // Everything else returns 404. Add routes here as you launch them.
 // ============================================================================
 const allowedPages = [
-  '/',              // Homepage / lead magnet
-  '/score',         // Score flow
-  '/scan',          // Scan results (/scan/[username])
-  '/shared',        // Shared brand profiles (/shared/[token])
-  '/thanks',        // Post-signup thank you
-  '/article',       // UTM tracking for article referrals
-  '/early-access',  // Email signup / early access
-  '/privacy',       // Legal: privacy policy
-  '/terms',         // Legal: terms of service
+  '/', // Homepage / lead magnet
+  '/score', // Score flow
+  '/scan', // Scan results (/scan/[username])
+  '/shared', // Shared brand profiles (/shared/[token])
+  '/thanks', // Post-signup thank you
+  '/article', // UTM tracking for article referrals
+  '/early-access', // Email signup / early access
+  '/privacy', // Legal: privacy policy
+  '/terms', // Legal: terms of service
 ];
 
 export function middleware(request: NextRequest) {
@@ -31,8 +31,8 @@ export function middleware(request: NextRequest) {
   }
 
   // Check if page is in the allowed list
-  const isAllowed = allowedPages.some(route =>
-    pathname === route || pathname.startsWith(`${route}/`)
+  const isAllowed = allowedPages.some(
+    (route) => pathname === route || pathname.startsWith(`${route}/`)
   );
 
   if (!isAllowed) {

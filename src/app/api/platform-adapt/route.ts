@@ -10,7 +10,12 @@ const PLATFORM_SPECS: Record<Platform, { maxLength: number; style: string; rules
   twitter: {
     maxLength: 280,
     style: 'Concise, punchy, high-contrast. Use hooks.',
-    rules: ['Max 280 chars', 'Front-load impact', 'Use line breaks strategically', 'Hashtags at end if needed'],
+    rules: [
+      'Max 280 chars',
+      'Front-load impact',
+      'Use line breaks strategically',
+      'Hashtags at end if needed',
+    ],
   },
   instagram: {
     maxLength: 2200,
@@ -20,7 +25,12 @@ const PLATFORM_SPECS: Record<Platform, { maxLength: number; style: string; rules
   linkedin: {
     maxLength: 3000,
     style: 'Professional, insightful, value-driven.',
-    rules: ['Lead with insight', 'Use data points', 'Professional tone', 'Thought leadership angle'],
+    rules: [
+      'Lead with insight',
+      'Use data points',
+      'Professional tone',
+      'Thought leadership angle',
+    ],
   },
   website: {
     maxLength: 500,
@@ -51,18 +61,24 @@ const PLATFORM_SPECS: Record<Platform, { maxLength: number; style: string; rules
 
 export async function POST(request: NextRequest) {
   try {
-    const { brandDNA, content, platforms } = await request.json() as {
+    const { brandDNA, content, platforms } = (await request.json()) as {
       brandDNA: BrandDNA;
       content: string;
       platforms: Platform[];
     };
 
     if (!brandDNA?.name || !content || !platforms?.length) {
-      return NextResponse.json({ error: 'Missing brand DNA, content, or platforms' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Missing brand DNA, content, or platforms' },
+        { status: 400 }
+      );
     }
 
     const platformSpecs = platforms
-      .map(p => `${p.toUpperCase()}:\n- Style: ${PLATFORM_SPECS[p].style}\n- Max Length: ${PLATFORM_SPECS[p].maxLength}\n- Rules: ${PLATFORM_SPECS[p].rules.join(', ')}`)
+      .map(
+        (p) =>
+          `${p.toUpperCase()}:\n- Style: ${PLATFORM_SPECS[p].style}\n- Max Length: ${PLATFORM_SPECS[p].maxLength}\n- Rules: ${PLATFORM_SPECS[p].rules.join(', ')}`
+      )
       .join('\n\n');
 
     const message = await anthropic.messages.create({
@@ -90,7 +106,7 @@ Adapt the content for each platform. Maintain brand voice but optimize for each 
 Return ONLY valid JSON with this structure:
 {
   "adaptations": {
-    ${platforms.map(p => `"${p}": { "content": "adapted content here", "adjustments": ["adjustment 1", "adjustment 2"] }`).join(',\n    ')}
+    ${platforms.map((p) => `"${p}": { "content": "adapted content here", "adjustments": ["adjustment 1", "adjustment 2"] }`).join(',\n    ')}
   }
 }`,
         },
@@ -99,20 +115,19 @@ Return ONLY valid JSON with this structure:
 
     const responseText = message.content[0].type === 'text' ? message.content[0].text : '';
     const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-    
+
     if (!jsonMatch) {
       throw new Error('Invalid response format');
     }
 
     const parsed = JSON.parse(jsonMatch[0]);
-    
+
     const adaptation: PlatformAdaptation = {
       originalContent: content,
       adaptations: parsed.adaptations,
     };
 
     return NextResponse.json(adaptation);
-
   } catch (error: any) {
     console.error('Platform Adaptation API error:', error);
     return NextResponse.json(
@@ -121,4 +136,3 @@ Return ONLY valid JSON with this structure:
     );
   }
 }
-

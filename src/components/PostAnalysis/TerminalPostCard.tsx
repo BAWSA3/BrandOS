@@ -43,7 +43,7 @@ function highlightText(
 ): React.ReactNode[] {
   if (!phrases.length) return [text];
 
-  let result: React.ReactNode[] = [];
+  const result: React.ReactNode[] = [];
   let remaining = text;
   let keyIndex = 0;
 
@@ -128,9 +128,15 @@ export default function TerminalPostCard({
         }}
       >
         <div style={{ display: 'flex', gap: '6px' }}>
-          <div style={{ width: 10, height: 10, borderRadius: '50%', background: 'rgba(0,0,0,0.15)' }} />
-          <div style={{ width: 10, height: 10, borderRadius: '50%', background: 'rgba(0,0,0,0.15)' }} />
-          <div style={{ width: 10, height: 10, borderRadius: '50%', background: 'rgba(0,0,0,0.15)' }} />
+          <div
+            style={{ width: 10, height: 10, borderRadius: '50%', background: 'rgba(0,0,0,0.15)' }}
+          />
+          <div
+            style={{ width: 10, height: 10, borderRadius: '50%', background: 'rgba(0,0,0,0.15)' }}
+          />
+          <div
+            style={{ width: 10, height: 10, borderRadius: '50%', background: 'rgba(0,0,0,0.15)' }}
+          />
         </div>
         <span
           style={{
@@ -206,7 +212,8 @@ export default function TerminalPostCard({
               color: 'rgba(0, 0, 0, 0.5)',
             }}
           >
-            [{('█').repeat(Math.floor(scanProgress / 5))}{('░').repeat(20 - Math.floor(scanProgress / 5))}] {scanProgress}%
+            [{'█'.repeat(Math.floor(scanProgress / 5))}
+            {'░'.repeat(20 - Math.floor(scanProgress / 5))}] {scanProgress}%
           </div>
         </motion.div>
       )}
@@ -233,9 +240,7 @@ export default function TerminalPostCard({
               <span style={{ fontSize: '14px', fontWeight: 600, color: '#000' }}>
                 {author.name}
               </span>
-              {author.verified && (
-                <span style={{ fontSize: '12px', color: '#1D9BF0' }}>✓</span>
-              )}
+              {author.verified && <span style={{ fontSize: '12px', color: '#1D9BF0' }}>✓</span>}
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <span
@@ -271,9 +276,7 @@ export default function TerminalPostCard({
             fontFamily: "'Helvetica Neue', Arial, sans-serif",
           }}
         >
-          {highlightPhrases.length > 0
-            ? highlightText(tweet.text, highlightPhrases)
-            : tweet.text}
+          {highlightPhrases.length > 0 ? highlightText(tweet.text, highlightPhrases) : tweet.text}
         </p>
 
         {/* Metrics */}

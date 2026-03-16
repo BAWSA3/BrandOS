@@ -99,9 +99,9 @@ export async function sendEmail(
 
   try {
     // Convert plain text to HTML (preserve line breaks)
-    let html = body
+    const html = body
       .split('\n')
-      .map(line => {
+      .map((line) => {
         // Replace score card image placeholder
         if (line.includes('{{SCORE_CARD_IMAGE}}')) {
           if (scoreCardImage) {
@@ -128,7 +128,12 @@ export async function sendEmail(
       .join('\n');
 
     // Build attachments array for inline images
-    const attachments: Array<{ filename: string; content: Buffer; contentType: string; contentId: string }> = [];
+    const attachments: Array<{
+      filename: string;
+      content: Buffer;
+      contentType: string;
+      contentId: string;
+    }> = [];
     if (scoreCardImage) {
       // Extract base64 data from data URL (data:image/png;base64,...)
       const base64Data = scoreCardImage.replace(/^data:image\/\w+;base64,/, '');
@@ -146,7 +151,9 @@ export async function sendEmail(
       try {
         // Extract archetype name from URL (e.g. "https://mybrandos.app/archetypes/SIGNAL_SAGE.png" -> "SIGNAL_SAGE")
         const urlPath = archetypeUrlMatch[1];
-        const archetypeName = decodeURIComponent(urlPath.split('/').pop()?.replace('.png', '') || '');
+        const archetypeName = decodeURIComponent(
+          urlPath.split('/').pop()?.replace('.png', '') || ''
+        );
         const fs = await import('fs');
         const path = await import('path');
         const iconPath = path.join(process.cwd(), 'public', 'archetypes', `${archetypeName}.png`);
@@ -282,7 +289,12 @@ export async function sendWelcomeSequence(
 
     if (template.sendDelay === 'immediate') {
       // Send immediately (pass score card image for the first email)
-      const result = await sendEmail(email, content.subject, content.body, templateData.scoreCardImage);
+      const result = await sendEmail(
+        email,
+        content.subject,
+        content.body,
+        templateData.scoreCardImage
+      );
       if (result.success) {
         emailsSent++;
       }
@@ -351,7 +363,7 @@ export async function processPendingEmails(): Promise<{
  */
 export async function getPendingEmailsCount(): Promise<number> {
   const pending = await readPendingEmails();
-  return pending.filter(e => e.status === 'pending').length;
+  return pending.filter((e) => e.status === 'pending').length;
 }
 
 // =============================================================================
@@ -363,9 +375,8 @@ function parseDelay(delay: string): number {
   if (!match) return 0;
 
   const [, amount, unit] = match;
-  const ms = unit === 'h'
-    ? parseInt(amount) * 60 * 60 * 1000
-    : parseInt(amount) * 24 * 60 * 60 * 1000;
+  const ms =
+    unit === 'h' ? parseInt(amount) * 60 * 60 * 1000 : parseInt(amount) * 24 * 60 * 60 * 1000;
 
   return ms;
 }

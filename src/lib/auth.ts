@@ -19,7 +19,10 @@ export async function createServerSupabaseClient() {
     },
     global: {
       headers: {
-        cookie: cookieStore.getAll().map(c => `${c.name}=${c.value}`).join('; '),
+        cookie: cookieStore
+          .getAll()
+          .map((c) => `${c.name}=${c.value}`)
+          .join('; '),
       },
     },
   });
@@ -30,7 +33,10 @@ export async function createServerSupabaseClient() {
 // Get current session from Supabase
 export async function getSession() {
   const supabase = await createServerSupabaseClient();
-  const { data: { session }, error } = await supabase.auth.getSession();
+  const {
+    data: { session },
+    error,
+  } = await supabase.auth.getSession();
 
   if (error) {
     console.error('[Auth] Session error:', error);

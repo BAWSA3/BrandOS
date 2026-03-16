@@ -4,22 +4,31 @@ import { useState, useEffect } from 'react';
 import DOMPurify from 'dompurify';
 import { useCurrentBrand } from '@/lib/store';
 import { useBrandKitStore } from '@/lib/brandKitStore';
-import { 
-  AnimationConcept, 
-  AnimationContext, 
-  UIStyle, 
-  UIComponentType, 
-  Pattern, 
+import {
+  AnimationConcept,
+  AnimationContext,
+  UIStyle,
+  UIComponentType,
+  Pattern,
   PatternType,
   IconSet,
   IconStyle,
   IconCategory,
-  MotionBrief
+  MotionBrief,
 } from '@/lib/types';
 
-type GenerationType = 
-  | 'logo' | 'imagery' | 'icon' | 'colors' | 'tagline' | 'voice'
-  | 'animation' | 'ui-style' | 'pattern' | 'icon-set' | 'motion-brief';
+type GenerationType =
+  | 'logo'
+  | 'imagery'
+  | 'icon'
+  | 'colors'
+  | 'tagline'
+  | 'voice'
+  | 'animation'
+  | 'ui-style'
+  | 'pattern'
+  | 'icon-set'
+  | 'motion-brief';
 
 interface GeneratedAsset {
   type: GenerationType;
@@ -100,12 +109,12 @@ export default function AIStudio() {
   const [activeTab, setActiveTab] = useState<GenerationType>('logo');
   const [isConnected, setIsConnected] = useState<boolean | null>(null);
   const [connectionMessage, setConnectionMessage] = useState('');
-  
+
   // Generation states
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationError, setGenerationError] = useState('');
   const [generatedAssets, setGeneratedAssets] = useState<GeneratedAsset[]>([]);
-  
+
   // Form states - Original
   const [style, setStyle] = useState('minimal');
   const [description, setDescription] = useState('');
@@ -166,14 +175,16 @@ export default function AIStudio() {
       }
 
       const imageUrl = `data:${data.image.mimeType};base64,${data.image.base64}`;
-      
-      setGeneratedAssets(prev => [{
-        type,
-        data: imageUrl,
-        prompt: data.prompt,
-        timestamp: new Date(),
-      }, ...prev]);
 
+      setGeneratedAssets((prev) => [
+        {
+          type,
+          data: imageUrl,
+          prompt: data.prompt,
+          timestamp: new Date(),
+        },
+        ...prev,
+      ]);
     } catch (error) {
       setGenerationError(error instanceof Error ? error.message : 'Generation failed');
     } finally {
@@ -202,13 +213,15 @@ export default function AIStudio() {
         throw new Error(data.error || 'Color generation failed');
       }
 
-      setGeneratedAssets(prev => [{
-        type: 'colors',
-        data: data.palette,
-        prompt: `${mood} - ${industry}`,
-        timestamp: new Date(),
-      }, ...prev]);
-
+      setGeneratedAssets((prev) => [
+        {
+          type: 'colors',
+          data: data.palette,
+          prompt: `${mood} - ${industry}`,
+          timestamp: new Date(),
+        },
+        ...prev,
+      ]);
     } catch (error) {
       setGenerationError(error instanceof Error ? error.message : 'Generation failed');
     } finally {
@@ -240,13 +253,15 @@ export default function AIStudio() {
         throw new Error(data.error || 'Text generation failed');
       }
 
-      setGeneratedAssets(prev => [{
-        type,
-        data: data.content,
-        prompt: `${type} for ${brandDNA?.name}`,
-        timestamp: new Date(),
-      }, ...prev]);
-
+      setGeneratedAssets((prev) => [
+        {
+          type,
+          data: data.content,
+          prompt: `${type} for ${brandDNA?.name}`,
+          timestamp: new Date(),
+        },
+        ...prev,
+      ]);
     } catch (error) {
       setGenerationError(error instanceof Error ? error.message : 'Generation failed');
     } finally {
@@ -282,13 +297,15 @@ export default function AIStudio() {
         throw new Error(data.error || 'Animation generation failed');
       }
 
-      setGeneratedAssets(prev => [{
-        type: 'animation',
-        data: data.animation as AnimationConcept,
-        prompt: `${animationContext} animation for ${brandDNA.name}`,
-        timestamp: new Date(),
-      }, ...prev]);
-
+      setGeneratedAssets((prev) => [
+        {
+          type: 'animation',
+          data: data.animation as AnimationConcept,
+          prompt: `${animationContext} animation for ${brandDNA.name}`,
+          timestamp: new Date(),
+        },
+        ...prev,
+      ]);
     } catch (error) {
       setGenerationError(error instanceof Error ? error.message : 'Generation failed');
     } finally {
@@ -323,13 +340,15 @@ export default function AIStudio() {
         throw new Error(data.error || 'UI Style generation failed');
       }
 
-      setGeneratedAssets(prev => [{
-        type: 'ui-style',
-        data: data.style as UIStyle,
-        prompt: `${componentType} style for ${brandDNA.name}`,
-        timestamp: new Date(),
-      }, ...prev]);
-
+      setGeneratedAssets((prev) => [
+        {
+          type: 'ui-style',
+          data: data.style as UIStyle,
+          prompt: `${componentType} style for ${brandDNA.name}`,
+          timestamp: new Date(),
+        },
+        ...prev,
+      ]);
     } catch (error) {
       setGenerationError(error instanceof Error ? error.message : 'Generation failed');
     } finally {
@@ -364,13 +383,15 @@ export default function AIStudio() {
         throw new Error(data.error || 'Pattern generation failed');
       }
 
-      setGeneratedAssets(prev => [{
-        type: 'pattern',
-        data: data.pattern as Pattern,
-        prompt: `${patternType} pattern for ${brandDNA.name}`,
-        timestamp: new Date(),
-      }, ...prev]);
-
+      setGeneratedAssets((prev) => [
+        {
+          type: 'pattern',
+          data: data.pattern as Pattern,
+          prompt: `${patternType} pattern for ${brandDNA.name}`,
+          timestamp: new Date(),
+        },
+        ...prev,
+      ]);
     } catch (error) {
       setGenerationError(error instanceof Error ? error.message : 'Generation failed');
     } finally {
@@ -388,7 +409,10 @@ export default function AIStudio() {
     setGenerationError('');
 
     try {
-      const icons = iconList.split(',').map(s => s.trim()).filter(Boolean);
+      const icons = iconList
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean);
       if (icons.length === 0) {
         throw new Error('Please enter at least one icon name');
       }
@@ -411,13 +435,15 @@ export default function AIStudio() {
         throw new Error(data.error || 'Icon generation failed');
       }
 
-      setGeneratedAssets(prev => [{
-        type: 'icon-set',
-        data: data.iconSet as IconSet,
-        prompt: `${iconCategory} icons for ${brandDNA.name}`,
-        timestamp: new Date(),
-      }, ...prev]);
-
+      setGeneratedAssets((prev) => [
+        {
+          type: 'icon-set',
+          data: data.iconSet as IconSet,
+          prompt: `${iconCategory} icons for ${brandDNA.name}`,
+          timestamp: new Date(),
+        },
+        ...prev,
+      ]);
     } catch (error) {
       setGenerationError(error instanceof Error ? error.message : 'Generation failed');
     } finally {
@@ -451,13 +477,15 @@ export default function AIStudio() {
         throw new Error(data.error || 'Motion brief generation failed');
       }
 
-      setGeneratedAssets(prev => [{
-        type: 'motion-brief',
-        data: data.motionBrief as MotionBrief,
-        prompt: `Motion brief for ${brandDNA.name}`,
-        timestamp: new Date(),
-      }, ...prev]);
-
+      setGeneratedAssets((prev) => [
+        {
+          type: 'motion-brief',
+          data: data.motionBrief as MotionBrief,
+          prompt: `Motion brief for ${brandDNA.name}`,
+          timestamp: new Date(),
+        },
+        ...prev,
+      ]);
     } catch (error) {
       setGenerationError(error instanceof Error ? error.message : 'Generation failed');
     } finally {
@@ -522,7 +550,7 @@ export default function AIStudio() {
         break;
       case 'colors':
         const palette = asset.data as { colors: { name: string; hex: string; role: string }[] };
-        palette.colors.forEach(color => {
+        palette.colors.forEach((color) => {
           addColor(brandDNA?.id || '', {
             name: color.name,
             hex: color.hex,
@@ -564,7 +592,7 @@ export default function AIStudio() {
           <div>
             <label className="block text-xs uppercase tracking-widest text-muted mb-3">Style</label>
             <div className="grid grid-cols-3 gap-2">
-              {styleOptions.map(opt => (
+              {styleOptions.map((opt) => (
                 <button
                   key={opt.id}
                   onClick={() => setStyle(opt.id)}
@@ -581,14 +609,18 @@ export default function AIStudio() {
             </div>
           </div>
           <div>
-            <label className="block text-xs uppercase tracking-widest text-muted mb-3">Description</label>
+            <label className="block text-xs uppercase tracking-widest text-muted mb-3">
+              Description
+            </label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder={
-                activeTab === 'logo' ? 'Describe your ideal logo...' :
-                activeTab === 'imagery' ? 'Describe the imagery you want...' :
-                'What should the icon represent?'
+                activeTab === 'logo'
+                  ? 'Describe your ideal logo...'
+                  : activeTab === 'imagery'
+                    ? 'Describe the imagery you want...'
+                    : 'What should the icon represent?'
               }
               rows={4}
               className="w-full bg-surface border border-border rounded-lg px-4 py-3 outline-none focus:border-foreground resize-none"
@@ -608,13 +640,17 @@ export default function AIStudio() {
               onChange={(e) => setMood(e.target.value)}
               className="w-full bg-surface border border-border rounded-lg px-4 py-3 outline-none focus:border-foreground"
             >
-              {moodOptions.map(opt => (
-                <option key={opt} value={opt}>{opt}</option>
+              {moodOptions.map((opt) => (
+                <option key={opt} value={opt}>
+                  {opt}
+                </option>
               ))}
             </select>
           </div>
           <div>
-            <label className="block text-xs uppercase tracking-widest text-muted mb-3">Industry</label>
+            <label className="block text-xs uppercase tracking-widest text-muted mb-3">
+              Industry
+            </label>
             <input
               type="text"
               value={industry}
@@ -624,7 +660,9 @@ export default function AIStudio() {
             />
           </div>
           <div>
-            <label className="block text-xs uppercase tracking-widest text-muted mb-3">Additional Context</label>
+            <label className="block text-xs uppercase tracking-widest text-muted mb-3">
+              Additional Context
+            </label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -642,9 +680,11 @@ export default function AIStudio() {
       return (
         <>
           <div>
-            <label className="block text-xs uppercase tracking-widest text-muted mb-3">Animation Context</label>
+            <label className="block text-xs uppercase tracking-widest text-muted mb-3">
+              Animation Context
+            </label>
             <div className="grid grid-cols-3 gap-2">
-              {animationContextOptions.map(opt => (
+              {animationContextOptions.map((opt) => (
                 <button
                   key={opt.id}
                   onClick={() => setAnimationContext(opt.id)}
@@ -661,7 +701,9 @@ export default function AIStudio() {
             </div>
           </div>
           <div>
-            <label className="block text-xs uppercase tracking-widest text-muted mb-3">Additional Notes</label>
+            <label className="block text-xs uppercase tracking-widest text-muted mb-3">
+              Additional Notes
+            </label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -679,9 +721,11 @@ export default function AIStudio() {
       return (
         <>
           <div>
-            <label className="block text-xs uppercase tracking-widest text-muted mb-3">Component Type</label>
+            <label className="block text-xs uppercase tracking-widest text-muted mb-3">
+              Component Type
+            </label>
             <div className="grid grid-cols-4 gap-2">
-              {componentTypeOptions.map(opt => (
+              {componentTypeOptions.map((opt) => (
                 <button
                   key={opt.id}
                   onClick={() => setComponentType(opt.id)}
@@ -699,9 +743,18 @@ export default function AIStudio() {
           <div className="p-4 bg-surface/50 rounded-lg">
             <p className="text-xs text-muted mb-2">Brand Colors Used:</p>
             <div className="flex gap-2">
-              <div className="w-8 h-8 rounded" style={{ backgroundColor: brandDNA?.colors.primary || '#000' }} />
-              <div className="w-8 h-8 rounded" style={{ backgroundColor: brandDNA?.colors.secondary || '#666' }} />
-              <div className="w-8 h-8 rounded" style={{ backgroundColor: brandDNA?.colors.accent || '#00f' }} />
+              <div
+                className="w-8 h-8 rounded"
+                style={{ backgroundColor: brandDNA?.colors.primary || '#000' }}
+              />
+              <div
+                className="w-8 h-8 rounded"
+                style={{ backgroundColor: brandDNA?.colors.secondary || '#666' }}
+              />
+              <div
+                className="w-8 h-8 rounded"
+                style={{ backgroundColor: brandDNA?.colors.accent || '#00f' }}
+              />
             </div>
           </div>
         </>
@@ -713,9 +766,11 @@ export default function AIStudio() {
       return (
         <>
           <div>
-            <label className="block text-xs uppercase tracking-widest text-muted mb-3">Pattern Type</label>
+            <label className="block text-xs uppercase tracking-widest text-muted mb-3">
+              Pattern Type
+            </label>
             <div className="grid grid-cols-3 gap-2">
-              {patternTypeOptions.map(opt => (
+              {patternTypeOptions.map((opt) => (
                 <button
                   key={opt.id}
                   onClick={() => setPatternType(opt.id)}
@@ -732,9 +787,11 @@ export default function AIStudio() {
             </div>
           </div>
           <div>
-            <label className="block text-xs uppercase tracking-widest text-muted mb-3">Density</label>
+            <label className="block text-xs uppercase tracking-widest text-muted mb-3">
+              Density
+            </label>
             <div className="grid grid-cols-3 gap-2">
-              {['sparse', 'medium', 'dense'].map(d => (
+              {['sparse', 'medium', 'dense'].map((d) => (
                 <button
                   key={d}
                   onClick={() => setPatternDensity(d)}
@@ -758,9 +815,11 @@ export default function AIStudio() {
       return (
         <>
           <div>
-            <label className="block text-xs uppercase tracking-widest text-muted mb-3">Icon Style</label>
+            <label className="block text-xs uppercase tracking-widest text-muted mb-3">
+              Icon Style
+            </label>
             <div className="grid grid-cols-4 gap-2">
-              {iconStyleOptions.map(opt => (
+              {iconStyleOptions.map((opt) => (
                 <button
                   key={opt.id}
                   onClick={() => setIconStyle(opt.id)}
@@ -776,9 +835,11 @@ export default function AIStudio() {
             </div>
           </div>
           <div>
-            <label className="block text-xs uppercase tracking-widest text-muted mb-3">Category</label>
+            <label className="block text-xs uppercase tracking-widest text-muted mb-3">
+              Category
+            </label>
             <div className="grid grid-cols-3 gap-2">
-              {iconCategoryOptions.map(opt => (
+              {iconCategoryOptions.map((opt) => (
                 <button
                   key={opt.id}
                   onClick={() => setIconCategory(opt.id)}
@@ -794,7 +855,9 @@ export default function AIStudio() {
             </div>
           </div>
           <div>
-            <label className="block text-xs uppercase tracking-widest text-muted mb-3">Icons to Generate</label>
+            <label className="block text-xs uppercase tracking-widest text-muted mb-3">
+              Icons to Generate
+            </label>
             <textarea
               value={iconList}
               onChange={(e) => setIconList(e.target.value)}
@@ -814,33 +877,46 @@ export default function AIStudio() {
           <div className="p-4 bg-gradient-to-r from-purple-500/10 to-blue-500/10 rounded-lg">
             <h4 className="text-sm font-medium mb-2">Motion Design Brief</h4>
             <p className="text-xs text-muted">
-              Generate a comprehensive motion design document based on your brand&apos;s tone. 
-              This includes animation principles, timing guidelines, easing preferences, and code snippets.
+              Generate a comprehensive motion design document based on your brand&apos;s tone. This
+              includes animation principles, timing guidelines, easing preferences, and code
+              snippets.
             </p>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="p-3 bg-surface rounded-lg">
               <p className="text-xs text-muted mb-1">Minimal</p>
               <div className="h-2 bg-border rounded-full overflow-hidden">
-                <div className="h-full bg-foreground" style={{ width: `${brandDNA?.tone.minimal || 50}%` }} />
+                <div
+                  className="h-full bg-foreground"
+                  style={{ width: `${brandDNA?.tone.minimal || 50}%` }}
+                />
               </div>
             </div>
             <div className="p-3 bg-surface rounded-lg">
               <p className="text-xs text-muted mb-1">Playful</p>
               <div className="h-2 bg-border rounded-full overflow-hidden">
-                <div className="h-full bg-foreground" style={{ width: `${brandDNA?.tone.playful || 50}%` }} />
+                <div
+                  className="h-full bg-foreground"
+                  style={{ width: `${brandDNA?.tone.playful || 50}%` }}
+                />
               </div>
             </div>
             <div className="p-3 bg-surface rounded-lg">
               <p className="text-xs text-muted mb-1">Bold</p>
               <div className="h-2 bg-border rounded-full overflow-hidden">
-                <div className="h-full bg-foreground" style={{ width: `${brandDNA?.tone.bold || 50}%` }} />
+                <div
+                  className="h-full bg-foreground"
+                  style={{ width: `${brandDNA?.tone.bold || 50}%` }}
+                />
               </div>
             </div>
             <div className="p-3 bg-surface rounded-lg">
               <p className="text-xs text-muted mb-1">Experimental</p>
               <div className="h-2 bg-border rounded-full overflow-hidden">
-                <div className="h-full bg-foreground" style={{ width: `${brandDNA?.tone.experimental || 50}%` }} />
+                <div
+                  className="h-full bg-foreground"
+                  style={{ width: `${brandDNA?.tone.experimental || 50}%` }}
+                />
               </div>
             </div>
           </div>
@@ -883,11 +959,7 @@ export default function AIStudio() {
         <div key={index} className="bg-surface rounded-xl p-4">
           <div className="flex gap-2 mb-3">
             {(asset.data as { colors: { hex: string }[] }).colors.map((c, j) => (
-              <div
-                key={j}
-                className="flex-1 h-16 rounded-lg"
-                style={{ backgroundColor: c.hex }}
-              />
+              <div key={j} className="flex-1 h-16 rounded-lg" style={{ backgroundColor: c.hex }} />
             ))}
           </div>
           <div className="flex justify-between items-center">
@@ -929,7 +1001,9 @@ export default function AIStudio() {
         <div key={index} className="bg-surface rounded-xl p-4 space-y-3">
           <div className="flex items-center justify-between">
             <h4 className="font-medium">{anim.name}</h4>
-            <span className="text-xs px-2 py-1 bg-purple-500/10 text-purple-500 rounded">{anim.context}</span>
+            <span className="text-xs px-2 py-1 bg-purple-500/10 text-purple-500 rounded">
+              {anim.context}
+            </span>
           </div>
           <p className="text-sm text-muted">{anim.description}</p>
           <div className="grid grid-cols-3 gap-2 text-xs">
@@ -983,7 +1057,9 @@ export default function AIStudio() {
         <div key={index} className="bg-surface rounded-xl p-4 space-y-3">
           <div className="flex items-center justify-between">
             <h4 className="font-medium">{uiStyle.name}</h4>
-            <span className="text-xs px-2 py-1 bg-blue-500/10 text-blue-500 rounded">{uiStyle.componentType}</span>
+            <span className="text-xs px-2 py-1 bg-blue-500/10 text-blue-500 rounded">
+              {uiStyle.componentType}
+            </span>
           </div>
           <p className="text-sm text-muted">{uiStyle.description}</p>
           <div className="flex gap-2">
@@ -1009,7 +1085,9 @@ export default function AIStudio() {
           <div className="p-3 bg-background rounded-lg">
             <span className="text-xs text-muted block mb-2">CSS Variables</span>
             <pre className="text-xs overflow-x-auto">
-              {Object.entries(uiStyle.cssVariables).map(([k, v]) => `${k}: ${v};`).join('\n')}
+              {Object.entries(uiStyle.cssVariables)
+                .map(([k, v]) => `${k}: ${v};`)
+                .join('\n')}
             </pre>
           </div>
         </div>
@@ -1023,12 +1101,16 @@ export default function AIStudio() {
         <div key={index} className="bg-surface rounded-xl p-4 space-y-3">
           <div className="flex items-center justify-between">
             <h4 className="font-medium">{pattern.name}</h4>
-            <span className="text-xs px-2 py-1 bg-green-500/10 text-green-500 rounded">{pattern.patternType}</span>
+            <span className="text-xs px-2 py-1 bg-green-500/10 text-green-500 rounded">
+              {pattern.patternType}
+            </span>
           </div>
           <p className="text-sm text-muted">{pattern.description}</p>
-          <div 
+          <div
             className="h-24 rounded-lg border border-border"
-            style={{ background: pattern.cssCode.includes('background') ? undefined : pattern.cssCode }}
+            style={{
+              background: pattern.cssCode.includes('background') ? undefined : pattern.cssCode,
+            }}
             dangerouslySetInnerHTML={pattern.cssCode.includes('background') ? undefined : undefined}
           />
           <div className="p-3 bg-background rounded-lg">
@@ -1069,16 +1151,26 @@ export default function AIStudio() {
           <div className="flex items-center justify-between">
             <h4 className="font-medium">{iconSet.name}</h4>
             <div className="flex gap-2">
-              <span className="text-xs px-2 py-1 bg-orange-500/10 text-orange-500 rounded">{iconSet.style}</span>
-              <span className="text-xs px-2 py-1 bg-orange-500/10 text-orange-500 rounded">{iconSet.category}</span>
+              <span className="text-xs px-2 py-1 bg-orange-500/10 text-orange-500 rounded">
+                {iconSet.style}
+              </span>
+              <span className="text-xs px-2 py-1 bg-orange-500/10 text-orange-500 rounded">
+                {iconSet.category}
+              </span>
             </div>
           </div>
           <div className="grid grid-cols-5 gap-2">
             {iconSet.icons.map((icon, i) => (
-              <div key={i} className="p-3 bg-background rounded-lg text-center group cursor-pointer" onClick={() => copyToClipboard(icon.svgCode)}>
+              <div
+                key={i}
+                className="p-3 bg-background rounded-lg text-center group cursor-pointer"
+                onClick={() => copyToClipboard(icon.svgCode)}
+              >
                 <div
                   className="w-8 h-8 mx-auto mb-1"
-                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(icon.svgCode, { USE_PROFILES: { svg: true } }) }}
+                  dangerouslySetInnerHTML={{
+                    __html: DOMPurify.sanitize(icon.svgCode, { USE_PROFILES: { svg: true } }),
+                  }}
                 />
                 <span className="text-xs text-muted group-hover:text-foreground">{icon.name}</span>
               </div>
@@ -1100,7 +1192,7 @@ export default function AIStudio() {
               {brief.brandName}
             </span>
           </div>
-          
+
           <div className="p-4 bg-background rounded-lg">
             <h5 className="text-sm font-medium mb-2">Philosophy</h5>
             <p className="text-sm text-muted">{brief.philosophy}</p>
@@ -1142,13 +1234,17 @@ export default function AIStudio() {
             <div className="p-3 bg-green-500/5 border border-green-500/20 rounded-lg">
               <p className="text-xs text-green-500 mb-2">Do</p>
               <ul className="text-xs space-y-1">
-                {brief.doRules.map((r, i) => <li key={i}>• {r}</li>)}
+                {brief.doRules.map((r, i) => (
+                  <li key={i}>• {r}</li>
+                ))}
               </ul>
             </div>
             <div className="p-3 bg-red-500/5 border border-red-500/20 rounded-lg">
               <p className="text-xs text-red-500 mb-2">Don&apos;t</p>
               <ul className="text-xs space-y-1">
-                {brief.dontRules.map((r, i) => <li key={i}>• {r}</li>)}
+                {brief.dontRules.map((r, i) => (
+                  <li key={i}>• {r}</li>
+                ))}
               </ul>
             </div>
           </div>
@@ -1190,17 +1286,29 @@ export default function AIStudio() {
           <span className="text-[#0047FF] font-medium">Gemini 2.0</span>
         </div>
         <h2 className="text-4xl font-light tracking-tight mb-3 text-white">AI Studio</h2>
-        <p className="text-white/50 text-lg">Generate brand assets, animations, and design systems</p>
-        
+        <p className="text-white/50 text-lg">
+          Generate brand assets, animations, and design systems
+        </p>
+
         {/* Connection Status */}
-        <div className={`inline-flex items-center gap-2 mt-6 px-4 py-2 rounded-full text-xs backdrop-blur-xl ${
-          isConnected === null ? 'bg-[rgba(255,255,255,0.05)] text-white/50 border border-[rgba(255,255,255,0.1)]' :
-          isConnected ? 'bg-[rgba(34,197,94,0.1)] text-green-400 border border-[rgba(34,197,94,0.2)]' : 'bg-[rgba(239,68,68,0.1)] text-red-400 border border-[rgba(239,68,68,0.2)]'
-        }`}>
-          <span className={`w-2 h-2 rounded-full ${
-            isConnected === null ? 'bg-white/30' :
-            isConnected ? 'bg-green-400 shadow-[0_0_8px_rgba(34,197,94,0.5)]' : 'bg-red-400'
-          }`}></span>
+        <div
+          className={`inline-flex items-center gap-2 mt-6 px-4 py-2 rounded-full text-xs backdrop-blur-xl ${
+            isConnected === null
+              ? 'bg-[rgba(255,255,255,0.05)] text-white/50 border border-[rgba(255,255,255,0.1)]'
+              : isConnected
+                ? 'bg-[rgba(34,197,94,0.1)] text-green-400 border border-[rgba(34,197,94,0.2)]'
+                : 'bg-[rgba(239,68,68,0.1)] text-red-400 border border-[rgba(239,68,68,0.2)]'
+          }`}
+        >
+          <span
+            className={`w-2 h-2 rounded-full ${
+              isConnected === null
+                ? 'bg-white/30'
+                : isConnected
+                  ? 'bg-green-400 shadow-[0_0_8px_rgba(34,197,94,0.5)]'
+                  : 'bg-red-400'
+            }`}
+          ></span>
           {isConnected === null ? 'Checking connection...' : connectionMessage}
         </div>
       </div>
@@ -1209,9 +1317,11 @@ export default function AIStudio() {
       <div className="mb-10 space-y-6">
         {/* Asset Generation Tabs */}
         <div className="bg-[rgba(255,255,255,0.03)] backdrop-blur-xl rounded-2xl p-4 border border-[rgba(255,255,255,0.05)]">
-          <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/40 mb-3">Brand Assets</p>
+          <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/40 mb-3">
+            Brand Assets
+          </p>
           <div className="flex gap-2 overflow-x-auto pb-1">
-            {assetTabs.map(tab => (
+            {assetTabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
@@ -1230,9 +1340,11 @@ export default function AIStudio() {
 
         {/* Visual Engine Tabs */}
         <div className="bg-[rgba(0,71,255,0.05)] backdrop-blur-xl rounded-2xl p-4 border border-[rgba(0,71,255,0.1)]">
-          <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#0047FF]/60 mb-3">Visual Design Engine</p>
+          <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#0047FF]/60 mb-3">
+            Visual Design Engine
+          </p>
           <div className="flex gap-2 overflow-x-auto pb-1">
-            {visualEngineTabs.map(tab => (
+            {visualEngineTabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
@@ -1256,8 +1368,18 @@ export default function AIStudio() {
         <div className="bg-[rgba(255,255,255,0.03)] backdrop-blur-xl rounded-2xl p-6 border border-[rgba(255,255,255,0.05)] space-y-6">
           <div className="flex items-center gap-3 pb-4 border-b border-[rgba(255,255,255,0.1)]">
             <div className="w-8 h-8 rounded-lg bg-[rgba(0,71,255,0.15)] border border-[rgba(0,71,255,0.2)] flex items-center justify-center">
-              <svg className="w-4 h-4 text-[#0047FF]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+              <svg
+                className="w-4 h-4 text-[#0047FF]"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.5}
+                  d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"
+                />
               </svg>
             </div>
             <div>
@@ -1265,7 +1387,7 @@ export default function AIStudio() {
               <p className="text-xs text-white/40">Customize your generation settings</p>
             </div>
           </div>
-          
+
           {renderFormControls()}
 
           {/* Generate Button */}
@@ -1273,7 +1395,7 @@ export default function AIStudio() {
             onClick={handleGenerate}
             disabled={isGenerating || !isConnected}
             className={`w-full py-4 rounded-xl text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-all ${
-              visualEngineTabs.some(t => t.id === activeTab)
+              visualEngineTabs.some((t) => t.id === activeTab)
                 ? 'bg-[#0047FF] text-white shadow-[0_0_30px_rgba(0,71,255,0.3)] hover:shadow-[0_0_40px_rgba(0,71,255,0.5)]'
                 : 'bg-white text-[#0a0a0a] hover:bg-white/90'
             }`}
@@ -1281,13 +1403,24 @@ export default function AIStudio() {
             {isGenerating ? (
               <span className="flex items-center justify-center gap-2">
                 <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  />
                 </svg>
                 Generating...
               </span>
             ) : (
-              `Generate ${[...assetTabs, ...visualEngineTabs].find(t => t.id === activeTab)?.label}`
+              `Generate ${[...assetTabs, ...visualEngineTabs].find((t) => t.id === activeTab)?.label}`
             )}
           </button>
 
@@ -1302,8 +1435,18 @@ export default function AIStudio() {
         <div className="bg-[rgba(255,255,255,0.03)] backdrop-blur-xl rounded-2xl p-6 border border-[rgba(255,255,255,0.05)]">
           <div className="flex items-center gap-3 pb-4 border-b border-[rgba(255,255,255,0.1)] mb-6">
             <div className="w-8 h-8 rounded-lg bg-[rgba(255,255,255,0.1)] flex items-center justify-center">
-              <svg className="w-4 h-4 text-white/60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+              <svg
+                className="w-4 h-4 text-white/60"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.5}
+                  d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                />
               </svg>
             </div>
             <div>
@@ -1311,13 +1454,23 @@ export default function AIStudio() {
               <p className="text-xs text-white/40">{generatedAssets.length} items</p>
             </div>
           </div>
-          
+
           {generatedAssets.length === 0 ? (
             <div className="aspect-square bg-[rgba(255,255,255,0.02)] rounded-xl flex items-center justify-center border border-dashed border-[rgba(255,255,255,0.1)]">
               <div className="text-center">
                 <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[rgba(0,71,255,0.1)] border border-[rgba(0,71,255,0.2)] flex items-center justify-center">
-                  <svg className="w-8 h-8 text-[#0047FF]/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                  <svg
+                    className="w-8 h-8 text-[#0047FF]/50"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1}
+                      d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
+                    />
                   </svg>
                 </div>
                 <p className="text-white/50 text-sm">No assets generated yet</p>
@@ -1339,7 +1492,12 @@ export default function AIStudio() {
 function LogoIcon() {
   return (
     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={1.5}
+        d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"
+      />
     </svg>
   );
 }
@@ -1347,7 +1505,12 @@ function LogoIcon() {
 function ImageIcon() {
   return (
     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={1.5}
+        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+      />
     </svg>
   );
 }
@@ -1355,7 +1518,12 @@ function ImageIcon() {
 function IconIcon() {
   return (
     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5" />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={1.5}
+        d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5"
+      />
     </svg>
   );
 }
@@ -1363,7 +1531,12 @@ function IconIcon() {
 function ColorIcon() {
   return (
     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={1.5}
+        d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"
+      />
     </svg>
   );
 }
@@ -1371,7 +1544,12 @@ function ColorIcon() {
 function TaglineIcon() {
   return (
     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={1.5}
+        d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"
+      />
     </svg>
   );
 }
@@ -1379,7 +1557,12 @@ function TaglineIcon() {
 function VoiceIcon() {
   return (
     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={1.5}
+        d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"
+      />
     </svg>
   );
 }
@@ -1388,8 +1571,18 @@ function VoiceIcon() {
 function AnimationIcon() {
   return (
     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={1.5}
+        d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
+      />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={1.5}
+        d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+      />
     </svg>
   );
 }
@@ -1397,7 +1590,12 @@ function AnimationIcon() {
 function UIStyleIcon() {
   return (
     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={1.5}
+        d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"
+      />
     </svg>
   );
 }
@@ -1405,7 +1603,12 @@ function UIStyleIcon() {
 function PatternIcon() {
   return (
     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={1.5}
+        d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
+      />
     </svg>
   );
 }
@@ -1413,7 +1616,12 @@ function PatternIcon() {
 function IconSetIcon() {
   return (
     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={1.5}
+        d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+      />
     </svg>
   );
 }
@@ -1421,7 +1629,12 @@ function IconSetIcon() {
 function MotionBriefIcon() {
   return (
     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={1.5}
+        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+      />
     </svg>
   );
 }

@@ -3,13 +3,7 @@
 // =============================================================================
 
 // Supported social platforms
-export type SocialPlatform =
-  | 'x'
-  | 'linkedin'
-  | 'instagram'
-  | 'youtube'
-  | 'tiktok'
-  | 'threads';
+export type SocialPlatform = 'x' | 'linkedin' | 'instagram' | 'youtube' | 'tiktok' | 'threads';
 
 // All content types across platforms
 export type CrossPlatformContentType =

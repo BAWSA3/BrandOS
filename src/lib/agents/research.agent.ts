@@ -34,14 +34,19 @@ function buildSynthesisPrompt(
   const twitterSummary = rawData.twitter
     ? `Twitter/X Posts (${rawData.twitter.length} posts):\n${rawData.twitter
         .slice(0, 20)
-        .map((t) => `- @${t.authorUsername}: "${t.text.slice(0, 150)}..." (${t.metrics.likes} likes, ${t.metrics.retweets} RTs)`)
+        .map(
+          (t) =>
+            `- @${t.authorUsername}: "${t.text.slice(0, 150)}..." (${t.metrics.likes} likes, ${t.metrics.retweets} RTs)`
+        )
         .join('\n')}`
     : 'No Twitter data';
 
   const redditSummary = rawData.reddit
     ? `Reddit Posts (${rawData.reddit.length} posts):\n${rawData.reddit
         .slice(0, 20)
-        .map((r) => `- r/${r.subreddit}: "${r.title}" (${r.score} upvotes, ${r.numComments} comments)`)
+        .map(
+          (r) => `- r/${r.subreddit}: "${r.title}" (${r.score} upvotes, ${r.numComments} comments)`
+        )
         .join('\n')}`
     : 'No Reddit data';
 
@@ -192,23 +197,25 @@ function parseResearchBrief(
     }
 
     // Transform topics to include source references
-    const topics: ResearchTopic[] = parsed.topics.map((t: Record<string, unknown>, index: number) => ({
-      id: (t.id as string) || `topic-${Date.now()}-${index}`,
-      title: t.title as string,
-      summary: t.summary as string,
-      vertical: t.vertical as TCGVertical,
-      category: (t.category as TopicCategory) || 'trend',
-      relevanceScore: (t.relevanceScore as number) || 50,
-      sentimentScore: t.sentimentScore as number | undefined,
-      engagementLevel: t.engagementLevel as 'low' | 'medium' | 'high' | 'viral' | undefined,
-      sources: buildSourceReferences(t, rawData),
-      keywords: (t.keywords as string[]) || [],
-      hashtags: t.hashtags as string[] | undefined,
-      contentAngles: t.contentAngles as string[] | undefined,
-      suggestedPlatforms: t.suggestedPlatforms as string[] | undefined,
-      firstSeen: new Date().toISOString(),
-      lastUpdated: new Date().toISOString(),
-    }));
+    const topics: ResearchTopic[] = parsed.topics.map(
+      (t: Record<string, unknown>, index: number) => ({
+        id: (t.id as string) || `topic-${Date.now()}-${index}`,
+        title: t.title as string,
+        summary: t.summary as string,
+        vertical: t.vertical as TCGVertical,
+        category: (t.category as TopicCategory) || 'trend',
+        relevanceScore: (t.relevanceScore as number) || 50,
+        sentimentScore: t.sentimentScore as number | undefined,
+        engagementLevel: t.engagementLevel as 'low' | 'medium' | 'high' | 'viral' | undefined,
+        sources: buildSourceReferences(t, rawData),
+        keywords: (t.keywords as string[]) || [],
+        hashtags: t.hashtags as string[] | undefined,
+        contentAngles: t.contentAngles as string[] | undefined,
+        suggestedPlatforms: t.suggestedPlatforms as string[] | undefined,
+        firstSeen: new Date().toISOString(),
+        lastUpdated: new Date().toISOString(),
+      })
+    );
 
     // Build vertical summaries with fallbacks
     const verticalSummaries: Record<TCGVertical, string> = {
@@ -221,7 +228,8 @@ function parseResearchBrief(
 
     if (parsed.verticalSummaries) {
       for (const v of verticals) {
-        verticalSummaries[v] = parsed.verticalSummaries[v] || `No significant updates for ${VERTICAL_CONFIGS[v].name}`;
+        verticalSummaries[v] =
+          parsed.verticalSummaries[v] || `No significant updates for ${VERTICAL_CONFIGS[v].name}`;
       }
     }
 
@@ -248,9 +256,10 @@ function buildSourceReferences(
 
   // Find matching Twitter posts
   if (rawData.twitter) {
-    const matches = rawData.twitter.filter((t) =>
-      keywords.some((k) => t.text.toLowerCase().includes(k.toLowerCase())) ||
-      t.text.toLowerCase().includes(title.slice(0, 30))
+    const matches = rawData.twitter.filter(
+      (t) =>
+        keywords.some((k) => t.text.toLowerCase().includes(k.toLowerCase())) ||
+        t.text.toLowerCase().includes(title.slice(0, 30))
     );
     for (const match of matches.slice(0, 2)) {
       refs.push({
@@ -269,9 +278,10 @@ function buildSourceReferences(
 
   // Find matching Reddit posts
   if (rawData.reddit) {
-    const matches = rawData.reddit.filter((r) =>
-      keywords.some((k) => r.title.toLowerCase().includes(k.toLowerCase())) ||
-      r.title.toLowerCase().includes(title.slice(0, 30))
+    const matches = rawData.reddit.filter(
+      (r) =>
+        keywords.some((k) => r.title.toLowerCase().includes(k.toLowerCase())) ||
+        r.title.toLowerCase().includes(title.slice(0, 30))
     );
     for (const match of matches.slice(0, 2)) {
       refs.push({
@@ -372,11 +382,7 @@ export async function aggregateTrends(
     }
 
     // Set defaults
-    const verticals: TCGVertical[] = options.verticals || [
-      'pokemon',
-      'mtg',
-      'sports-cards',
-    ];
+    const verticals: TCGVertical[] = options.verticals || ['pokemon', 'mtg', 'sports-cards'];
     const timeRange: TrendingPeriod = options.timeRange || 'last-week';
 
     // Get available sources
@@ -423,18 +429,12 @@ export async function aggregateTrends(
       messages: [
         {
           role: 'user',
-          content: buildSynthesisPrompt(
-            context.brandDNA,
-            rawData,
-            verticals,
-            timeRange
-          ),
+          content: buildSynthesisPrompt(context.brandDNA, rawData, verticals, timeRange),
         },
       ],
     });
 
-    const responseText =
-      message.content[0].type === 'text' ? message.content[0].text : '';
+    const responseText = message.content[0].type === 'text' ? message.content[0].text : '';
 
     const researchBrief = parseResearchBrief(responseText, rawData, verticals);
 
@@ -506,9 +506,7 @@ export async function getTopicsForVertical(
     };
   }
 
-  const topics = result.data.topics
-    .filter((t) => t.vertical === vertical)
-    .slice(0, limit);
+  const topics = result.data.topics.filter((t) => t.vertical === vertical).slice(0, limit);
 
   return {
     success: true,
@@ -557,18 +555,12 @@ export async function generateContentBrief(
       messages: [
         {
           role: 'user',
-          content: buildContentBriefPrompt(
-            context.brandDNA,
-            topic,
-            contentType,
-            platform
-          ),
+          content: buildContentBriefPrompt(context.brandDNA, topic, contentType, platform),
         },
       ],
     });
 
-    const responseText =
-      message.content[0].type === 'text' ? message.content[0].text : '';
+    const responseText = message.content[0].type === 'text' ? message.content[0].text : '';
 
     const brief = parseContentBrief(responseText, topic, contentType, platform);
 

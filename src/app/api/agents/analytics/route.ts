@@ -2,9 +2,9 @@
 // POST /api/agents/analytics - Analyze content performance
 
 import { NextRequest, NextResponse } from 'next/server';
-import { 
-  createAgents, 
-  validateBrandDNA, 
+import {
+  createAgents,
+  validateBrandDNA,
   AnalyticsRequest,
   ContentPerformanceData,
 } from '@/lib/agents';
@@ -12,18 +12,10 @@ import { BrandDNA } from '@/lib/types';
 
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
-  
+
   try {
     const body = await request.json();
-    const { 
-      brandDNA, 
-      performanceData,
-      period,
-      goals,
-      questions,
-      quickCheck,
-      compare,
-    } = body as {
+    const { brandDNA, performanceData, period, goals, questions, quickCheck, compare } = body as {
       brandDNA: BrandDNA;
       performanceData?: ContentPerformanceData[];
       period?: string;
@@ -39,7 +31,7 @@ export async function POST(request: NextRequest) {
     // Validate brand DNA
     if (!validateBrandDNA(brandDNA)) {
       return NextResponse.json(
-        { 
+        {
           error: 'Invalid or missing brand DNA',
           details: 'Brand DNA must include at least a name and tone profile',
         },
@@ -74,7 +66,7 @@ export async function POST(request: NextRequest) {
     // Validate performance data for other modes
     if (!performanceData || performanceData.length === 0) {
       return NextResponse.json(
-        { 
+        {
           error: 'Performance data is required',
           details: 'Provide an array of ContentPerformanceData objects',
         },
@@ -116,16 +108,13 @@ export async function POST(request: NextRequest) {
       confidence: result.confidence,
       processingTime: result.processingTime,
     });
-
   } catch (error) {
     console.error('Analytics API error:', error);
-    
-    const errorMessage = error instanceof Error 
-      ? error.message 
-      : 'Analytics failed';
-    
+
+    const errorMessage = error instanceof Error ? error.message : 'Analytics failed';
+
     return NextResponse.json(
-      { 
+      {
         error: errorMessage,
         processingTime: Date.now() - startTime,
       },
@@ -201,13 +190,10 @@ export async function GET() {
       twitter: { engagementRate: { good: '2-3%', great: '5%+' } },
       linkedin: { engagementRate: { good: '4%', great: '6%+' } },
       instagram: { engagementRate: { good: '3%', great: '6%+' } },
-      email: { openRate: { good: '25-35%', great: '40%+' }, clickRate: { good: '2.5%', great: '5%+' } },
+      email: {
+        openRate: { good: '25-35%', great: '40%+' },
+        clickRate: { good: '2.5%', great: '5%+' },
+      },
     },
   });
 }
-
-
-
-
-
-

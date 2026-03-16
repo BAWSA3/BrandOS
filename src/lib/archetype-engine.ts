@@ -29,26 +29,26 @@ export { normalizeArchetypeName } from './archetype-names';
 // Archetype evolution paths (directional progression)
 // Key = current archetype, Value = array of valid next archetypes
 const EVOLUTION_PATHS: Record<string, string[]> = {
-  'ARC': ['ENTROPY', 'NULL', 'FREQ', 'RELAY', 'BUILD.EXE', 'SIGNAL_SAGE', 'FORESIGHT'],
-  'ENTROPY': ['BUILD.EXE', 'FORESIGHT'],
-  'NULL': ['FORESIGHT', 'SIGNAL_SAGE'],
-  'FREQ': ['RELAY', 'FORESIGHT'],
-  'RELAY': ['FORESIGHT', 'SIGNAL_SAGE'],
+  ARC: ['ENTROPY', 'NULL', 'FREQ', 'RELAY', 'BUILD.EXE', 'SIGNAL_SAGE', 'FORESIGHT'],
+  ENTROPY: ['BUILD.EXE', 'FORESIGHT'],
+  NULL: ['FORESIGHT', 'SIGNAL_SAGE'],
+  FREQ: ['RELAY', 'FORESIGHT'],
+  RELAY: ['FORESIGHT', 'SIGNAL_SAGE'],
   'BUILD.EXE': ['SIGNAL_SAGE', 'FORESIGHT'],
-  'SIGNAL_SAGE': [], // Terminal - doesn't evolve
-  'FORESIGHT': [], // Terminal - peak archetype
+  SIGNAL_SAGE: [], // Terminal - doesn't evolve
+  FORESIGHT: [], // Terminal - peak archetype
 };
 
 // Archetype tier levels (higher = more evolved)
 const ARCHETYPE_TIERS: Record<string, number> = {
-  'ARC': 1,
-  'ENTROPY': 2,
-  'NULL': 2,
-  'FREQ': 2,
-  'RELAY': 3,
+  ARC: 1,
+  ENTROPY: 2,
+  NULL: 2,
+  FREQ: 2,
+  RELAY: 3,
   'BUILD.EXE': 3,
-  'SIGNAL_SAGE': 4,
-  'FORESIGHT': 5, // Peak
+  SIGNAL_SAGE: 4,
+  FORESIGHT: 5, // Peak
 };
 
 export interface ArchetypeDecision {
@@ -100,8 +100,10 @@ function checkEvolutionEligibility(
   }
 
   // Check score change OR time threshold
-  const scoreChangedEnough = Math.abs(scoreChange) >= EVOLUTION_CONFIG.MIN_SCORE_CHANGE_FOR_EVOLUTION;
-  const timeThresholdMet = daysSinceArchetypeChange >= EVOLUTION_CONFIG.MAX_DAYS_BEFORE_AUTO_ELIGIBLE;
+  const scoreChangedEnough =
+    Math.abs(scoreChange) >= EVOLUTION_CONFIG.MIN_SCORE_CHANGE_FOR_EVOLUTION;
+  const timeThresholdMet =
+    daysSinceArchetypeChange >= EVOLUTION_CONFIG.MAX_DAYS_BEFORE_AUTO_ELIGIBLE;
 
   if (!scoreChangedEnough && !timeThresholdMet) {
     return {
@@ -149,7 +151,9 @@ export async function resolveArchetype(
 
   // === CASE 1: New User ===
   if (!existingProfile) {
-    console.log(`[ArchetypeEngine] New user @${displayName} - assigning Gemini result: ${geminiArchetype.primary}`);
+    console.log(
+      `[ArchetypeEngine] New user @${displayName} - assigning Gemini result: ${geminiArchetype.primary}`
+    );
 
     const profile = createUserProfile(username, displayName, geminiArchetype, newScore);
 
@@ -204,7 +208,9 @@ export async function resolveArchetype(
   }
 
   // Gemini suggests a different archetype - check if evolution is allowed
-  console.log(`[ArchetypeEngine] @${displayName} - Gemini suggests ${proposedArchetype} (current: ${currentArchetype})`);
+  console.log(
+    `[ArchetypeEngine] @${displayName} - Gemini suggests ${proposedArchetype} (current: ${currentArchetype})`
+  );
 
   // Check evolution eligibility
   const eligibility = checkEvolutionEligibility(existingProfile, newScore);
@@ -232,7 +238,9 @@ export async function resolveArchetype(
   const upgradeCheck = isUpgrade(currentArchetype, proposedArchetype);
 
   if (!validPath) {
-    console.log(`[ArchetypeEngine] Invalid evolution path: ${currentArchetype} -> ${proposedArchetype}`);
+    console.log(
+      `[ArchetypeEngine] Invalid evolution path: ${currentArchetype} -> ${proposedArchetype}`
+    );
 
     const updatedProfile = updateUserScan(username, newScore);
     if (!updatedProfile) {
@@ -249,7 +257,9 @@ export async function resolveArchetype(
   }
 
   if (!upgradeCheck) {
-    console.log(`[ArchetypeEngine] Not an upgrade: ${currentArchetype} (tier ${ARCHETYPE_TIERS[currentArchetype]}) -> ${proposedArchetype} (tier ${ARCHETYPE_TIERS[proposedArchetype]})`);
+    console.log(
+      `[ArchetypeEngine] Not an upgrade: ${currentArchetype} (tier ${ARCHETYPE_TIERS[currentArchetype]}) -> ${proposedArchetype} (tier ${ARCHETYPE_TIERS[proposedArchetype]})`
+    );
 
     const updatedProfile = updateUserScan(username, newScore);
     if (!updatedProfile) {
@@ -266,7 +276,9 @@ export async function resolveArchetype(
   }
 
   // === EVOLUTION APPROVED ===
-  console.log(`[ArchetypeEngine] EVOLUTION APPROVED: @${displayName} ${currentArchetype} -> ${proposedArchetype}`);
+  console.log(
+    `[ArchetypeEngine] EVOLUTION APPROVED: @${displayName} ${currentArchetype} -> ${proposedArchetype}`
+  );
 
   const archetypeWithTimestamp: ArchetypeData = {
     ...geminiArchetype,

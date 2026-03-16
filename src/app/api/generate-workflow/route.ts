@@ -62,10 +62,7 @@ export async function POST(request: NextRequest) {
     const apiKey = process.env.ANTHROPIC_API_KEY;
 
     if (!apiKey) {
-      return NextResponse.json(
-        { error: 'API key not configured' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'API key not configured' }, { status: 500 });
     }
 
     const anthropic = new Anthropic({ apiKey });
@@ -73,10 +70,7 @@ export async function POST(request: NextRequest) {
     const body = (await request.json()) as GenerateWorkflowRequest;
 
     if (!body.brandDNA?.name || !body.topic) {
-      return NextResponse.json(
-        { error: 'Missing brand DNA or topic' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Missing brand DNA or topic' }, { status: 400 });
     }
 
     const message = await anthropic.messages.create({
@@ -90,8 +84,7 @@ export async function POST(request: NextRequest) {
       ],
     });
 
-    const responseText =
-      message.content[0].type === 'text' ? message.content[0].text : '';
+    const responseText = message.content[0].type === 'text' ? message.content[0].text : '';
 
     // Parse the JSON response
     try {
@@ -105,7 +98,12 @@ export async function POST(request: NextRequest) {
 
       // Validate and fix character counts
       const variations = parsed.variations.map(
-        (v: { content: string; characterCount?: number; brandAlignmentScore?: number; hashtags?: string[] }) => ({
+        (v: {
+          content: string;
+          characterCount?: number;
+          brandAlignmentScore?: number;
+          hashtags?: string[];
+        }) => ({
           content: v.content,
           characterCount: v.content.length,
           brandAlignmentScore: v.brandAlignmentScore || 75,
@@ -132,8 +130,7 @@ export async function POST(request: NextRequest) {
     let message = 'Generation failed';
     if (error instanceof Error) {
       if (error.message.includes('credit balance is too low')) {
-        message =
-          'API credits depleted. Please add credits at console.anthropic.com';
+        message = 'API credits depleted. Please add credits at console.anthropic.com';
       } else {
         message = error.message;
       }

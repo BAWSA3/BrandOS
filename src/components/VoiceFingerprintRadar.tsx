@@ -37,7 +37,7 @@ export default function VoiceFingerprintRadar({
 }: VoiceFingerprintRadarProps) {
   const cx = size / 2;
   const cy = size / 2;
-  const radius = (size / 2) - 40;
+  const radius = size / 2 - 40;
   const angleStep = (2 * Math.PI) / LABELS.length;
   const startAngle = -Math.PI / 2; // Start from top
 
@@ -52,26 +52,24 @@ export default function VoiceFingerprintRadar({
 
   // Build polygon path for a given level
   function buildLevelPath(level: number): string {
-    return LABELS.map((_, i) => {
-      const { x, y } = getPoint(i, level);
-      return `${i === 0 ? 'M' : 'L'}${x},${y}`;
-    }).join(' ') + 'Z';
+    return (
+      LABELS.map((_, i) => {
+        const { x, y } = getPoint(i, level);
+        return `${i === 0 ? 'M' : 'L'}${x},${y}`;
+      }).join(' ') + 'Z'
+    );
   }
 
   // Build data polygon path
-  const dataPath = LABELS.map((label, i) => {
-    const value = data[label.key as keyof RadarData] || 0;
-    const { x, y } = getPoint(i, value);
-    return `${i === 0 ? 'M' : 'L'}${x},${y}`;
-  }).join(' ') + 'Z';
+  const dataPath =
+    LABELS.map((label, i) => {
+      const value = data[label.key as keyof RadarData] || 0;
+      const { x, y } = getPoint(i, value);
+      return `${i === 0 ? 'M' : 'L'}${x},${y}`;
+    }).join(' ') + 'Z';
 
   return (
-    <svg
-      width={size}
-      height={size}
-      viewBox={`0 0 ${size} ${size}`}
-      style={{ overflow: 'visible' }}
-    >
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ overflow: 'visible' }}>
       {/* Grid levels */}
       {LEVELS.map((level) => (
         <path
@@ -114,12 +112,7 @@ export default function VoiceFingerprintRadar({
           style={{ transformOrigin: `${cx}px ${cy}px` }}
         />
       ) : (
-        <path
-          d={dataPath}
-          fill="rgba(10, 132, 255, 0.12)"
-          stroke="#0A84FF"
-          strokeWidth={2}
-        />
+        <path d={dataPath} fill="rgba(10, 132, 255, 0.12)" stroke="#0A84FF" strokeWidth={2} />
       )}
 
       {/* Data points */}

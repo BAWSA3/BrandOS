@@ -28,15 +28,17 @@ export async function POST(request: NextRequest) {
 
     if (!apiKey) {
       console.error('ANTHROPIC_API_KEY is not set. Value:', apiKey);
-      return NextResponse.json(
-        { error: 'API key not configured' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'API key not configured' }, { status: 500 });
     }
 
     const anthropic = new Anthropic({ apiKey });
 
-    const { brandDNA, prompt, contentType = 'general', voiceFingerprint } = await request.json() as {
+    const {
+      brandDNA,
+      prompt,
+      contentType = 'general',
+      voiceFingerprint,
+    } = (await request.json()) as {
       brandDNA: BrandDNA;
       prompt: string;
       contentType?: ContentType;
@@ -44,10 +46,7 @@ export async function POST(request: NextRequest) {
     };
 
     if (!brandDNA?.name || !prompt) {
-      return NextResponse.json(
-        { error: 'Missing brand DNA or prompt' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Missing brand DNA or prompt' }, { status: 400 });
     }
 
     const message = await anthropic.messages.create({
@@ -61,15 +60,12 @@ export async function POST(request: NextRequest) {
       ],
     });
 
-    const responseText = message.content[0].type === 'text'
-      ? message.content[0].text
-      : '';
+    const responseText = message.content[0].type === 'text' ? message.content[0].text : '';
 
     return NextResponse.json({ content: responseText });
-    
   } catch (error: unknown) {
     console.error('Generate API error:', error);
-    
+
     // Extract error message
     let message = 'Generation failed';
     if (error instanceof Error) {
@@ -79,12 +75,7 @@ export async function POST(request: NextRequest) {
         message = error.message;
       }
     }
-    
-    return NextResponse.json(
-      { error: message },
-      { status: 500 }
-    );
+
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
-
-

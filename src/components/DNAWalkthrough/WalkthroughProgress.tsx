@@ -63,8 +63,8 @@ export default function WalkthroughProgress({
                   activeIndex === index
                     ? '#0047FF'
                     : index < activeIndex
-                    ? 'rgba(0, 71, 255, 0.5)'
-                    : 'rgba(0, 0, 0, 0.15)',
+                      ? 'rgba(0, 71, 255, 0.5)'
+                      : 'rgba(0, 0, 0, 0.15)',
               }}
               transition={{ duration: 0.2 }}
               className="w-2.5 h-2.5 rounded-full cursor-pointer"
@@ -78,10 +78,7 @@ export default function WalkthroughProgress({
               <div
                 className="absolute top-full left-1/2 -translate-x-1/2 w-px h-3"
                 style={{
-                  background:
-                    index < activeIndex
-                      ? 'rgba(0, 71, 255, 0.4)'
-                      : 'rgba(0, 0, 0, 0.1)',
+                  background: index < activeIndex ? 'rgba(0, 71, 255, 0.4)' : 'rgba(0, 0, 0, 0.1)',
                 }}
               />
             )}
@@ -142,11 +139,7 @@ export default function WalkthroughProgress({
         {/* Section dots */}
         <div className="flex justify-between mt-2">
           {sections.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => onSectionClick(index)}
-              className="p-1"
-            >
+            <button key={index} onClick={() => onSectionClick(index)} className="p-1">
               <div
                 className="w-1.5 h-1.5 rounded-full transition-colors"
                 style={{
@@ -154,8 +147,8 @@ export default function WalkthroughProgress({
                     activeIndex === index
                       ? '#0047FF'
                       : index < activeIndex
-                      ? 'rgba(0, 71, 255, 0.5)'
-                      : 'rgba(0, 0, 0, 0.15)',
+                        ? 'rgba(0, 71, 255, 0.5)'
+                        : 'rgba(0, 0, 0, 0.15)',
                 }}
               />
             </button>

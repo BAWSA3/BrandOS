@@ -7,7 +7,7 @@ import { GeneratedBrandDNA } from './BrandDNAPreview';
 import {
   getWelcomeMessage,
   SUGGESTED_PROMPTS,
-  WAITLIST_GATE_MESSAGE
+  WAITLIST_GATE_MESSAGE,
 } from '@/prompts/brand-advisor';
 
 interface ChatMessage {
@@ -178,7 +178,12 @@ export default function BrandAdvisorChat({
               className="p-2 rounded-lg hover:bg-neutral-800 transition-colors text-neutral-400 hover:text-white"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
           </div>
@@ -203,7 +208,7 @@ export default function BrandAdvisorChat({
                     <div
                       className="text-neutral-100 whitespace-pre-wrap prose prose-invert prose-sm max-w-none"
                       dangerouslySetInnerHTML={{
-                        __html: DOMPurify.sanitize(formatMarkdown(message.content))
+                        __html: DOMPurify.sanitize(formatMarkdown(message.content)),
                       }}
                     />
                   </div>
@@ -234,9 +239,7 @@ export default function BrandAdvisorChat({
                         />
                       ))}
                     </div>
-                    <span className="text-neutral-400 text-sm">
-                      Thinking...
-                    </span>
+                    <span className="text-neutral-400 text-sm">Thinking...</span>
                   </div>
                 </div>
               </motion.div>
@@ -253,12 +256,8 @@ export default function BrandAdvisorChat({
                 <h3 className="text-lg font-semibold text-white mb-2">
                   {WAITLIST_GATE_MESSAGE.title}
                 </h3>
-                <p className="text-neutral-400 text-sm mb-4">
-                  {WAITLIST_GATE_MESSAGE.subtitle}
-                </p>
-                <p className="text-neutral-300 text-sm mb-6">
-                  {WAITLIST_GATE_MESSAGE.cta}
-                </p>
+                <p className="text-neutral-400 text-sm mb-4">{WAITLIST_GATE_MESSAGE.subtitle}</p>
+                <p className="text-neutral-300 text-sm mb-6">{WAITLIST_GATE_MESSAGE.cta}</p>
                 <div className="flex gap-3 justify-center">
                   <button
                     onClick={onJoinWaitlist}
@@ -306,7 +305,11 @@ export default function BrandAdvisorChat({
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder={showWaitlistGate ? "Join the waitlist to continue..." : "Ask your Brand Advisor..."}
+                  placeholder={
+                    showWaitlistGate
+                      ? 'Join the waitlist to continue...'
+                      : 'Ask your Brand Advisor...'
+                  }
                   className="w-full px-4 py-3 bg-neutral-900 border border-neutral-700 rounded-xl text-white placeholder-neutral-500 resize-none focus:outline-none focus:border-violet-500/50 transition-colors disabled:opacity-50"
                   rows={1}
                   disabled={isLoading || showWaitlistGate}
@@ -317,12 +320,7 @@ export default function BrandAdvisorChat({
                 disabled={!input.trim() || isLoading || showWaitlistGate}
                 className="px-4 py-3 rounded-xl font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed bg-violet-600 hover:bg-violet-500 text-white"
               >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -338,7 +336,8 @@ export default function BrandAdvisorChat({
               </p>
               {messageCount > 0 && !showWaitlistGate && (
                 <p className="text-xs text-neutral-500">
-                  {FREE_MESSAGE_LIMIT - messageCount} message{FREE_MESSAGE_LIMIT - messageCount !== 1 ? 's' : ''} remaining
+                  {FREE_MESSAGE_LIMIT - messageCount} message
+                  {FREE_MESSAGE_LIMIT - messageCount !== 1 ? 's' : ''} remaining
                 </p>
               )}
             </div>
@@ -351,11 +350,13 @@ export default function BrandAdvisorChat({
 
 // Simple markdown formatter for bold and bullet points
 function formatMarkdown(text: string): string {
-  return text
-    // Bold
-    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-    // Bullet points
-    .replace(/^• /gm, '<span class="text-violet-400 mr-1">•</span>')
-    // Line breaks
-    .replace(/\n/g, '<br />');
+  return (
+    text
+      // Bold
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      // Bullet points
+      .replace(/^• /gm, '<span class="text-violet-400 mr-1">•</span>')
+      // Line breaks
+      .replace(/\n/g, '<br />')
+  );
 }

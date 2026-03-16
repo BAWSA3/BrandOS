@@ -22,7 +22,10 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = createClient(supabaseUrl, supabaseAnonKey);
-    const { data: { user: authUser }, error: authError } = await supabase.auth.getUser(accessToken);
+    const {
+      data: { user: authUser },
+      error: authError,
+    } = await supabase.auth.getUser(accessToken);
     if (authError || !authUser) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
@@ -74,13 +77,15 @@ export async function POST(request: NextRequest) {
       keywords.length > 0 ? `Keywords: ${keywords.join(', ')}` : null,
       doPatterns.length > 0 ? `Do patterns: ${doPatterns.join('; ')}` : null,
       dontPatterns.length > 0 ? `Don't patterns: ${dontPatterns.join('; ')}` : null,
-      voiceSamples.length > 0 ? `Voice samples:\n${voiceSamples.map((s: string, i: number) => `  ${i + 1}. "${s}"`).join('\n')}` : null,
-    ].filter(Boolean).join('\n');
+      voiceSamples.length > 0
+        ? `Voice samples:\n${voiceSamples.map((s: string, i: number) => `  ${i + 1}. "${s}"`).join('\n')}`
+        : null,
+    ]
+      .filter(Boolean)
+      .join('\n');
 
     // Build the batch scoring prompt
-    const tweetList = unscoredTweets
-      .map((t, i) => `[${i}] "${t.text}"`)
-      .join('\n\n');
+    const tweetList = unscoredTweets.map((t, i) => `[${i}] "${t.text}"`).join('\n\n');
 
     const prompt = `You are a brand alignment scorer. Given a brand's DNA and a list of tweets, score each tweet 0-100 on how well it aligns with the brand voice.
 

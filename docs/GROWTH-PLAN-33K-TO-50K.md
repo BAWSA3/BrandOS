@@ -19,13 +19,13 @@ is 142/day realistic? yes — but only if you fix the bottleneck your data is sc
 
 ### what's working (don't touch this)
 
-| metric | your number | benchmark | verdict |
-|--------|-------------|-----------|---------|
-| engagement rate (7d) | **5.79%** | 3-5% is "strong" | elite |
-| engagement rate (3d) | **8.45%** | 5%+ is "found something" | exceptional |
-| posting frequency | **~3/day** | 1-2/day recommended | above target |
-| tone alignment | **85/100** | 70+ is competitive | your voice works |
-| consistency | **78/100** | 60+ is fine-tuned | solid |
+| metric               | your number | benchmark                | verdict          |
+| -------------------- | ----------- | ------------------------ | ---------------- |
+| engagement rate (7d) | **5.79%**   | 3-5% is "strong"         | elite            |
+| engagement rate (3d) | **8.45%**   | 5%+ is "found something" | exceptional      |
+| posting frequency    | **~3/day**  | 1-2/day recommended      | above target     |
+| tone alignment       | **85/100**  | 70+ is competitive       | your voice works |
+| consistency          | **78/100**  | 60+ is fine-tuned        | solid            |
 
 your engagement rate is 2-3x the "strong performer" threshold. people who see your content engage with it. that's not the problem.
 
@@ -33,11 +33,11 @@ your engagement rate is 2-3x the "strong performer" threshold. people who see yo
 
 here's the number that explains everything:
 
-| metric | your number | what it should be |
-|--------|-------------|-------------------|
-| **total retweets (20 posts)** | **23** | 100-200+ |
-| **avg retweets per post** | **1.15** | 5-10+ |
-| **retweet-to-like ratio** | **1.9%** | 8-15% |
+| metric                        | your number | what it should be |
+| ----------------------------- | ----------- | ----------------- |
+| **total retweets (20 posts)** | **23**      | 100-200+          |
+| **avg retweets per post**     | **1.15**    | 5-10+             |
+| **retweet-to-like ratio**     | **1.9%**    | 8-15%             |
 
 **you have a distribution problem, not a quality problem.**
 
@@ -102,6 +102,7 @@ people read, agree, like, and scroll away. you need them to **reply, retweet, or
 **your format score: 68/100. you're leaving reach on the table.**
 
 all 20 of your recent posts are single tweets. zero threads. threads get:
+
 - 2-5x the impressions of single tweets (algorithm favors dwell time)
 - higher retweet rates (people share the first tweet, exposing the thread)
 - more follows (threads demonstrate expertise → people follow for more)
@@ -116,6 +117,7 @@ all 20 of your recent posts are single tweets. zero threads. threads get:
    - "the best creators in crypto are the builders" → thread with receipts + examples
 
 3. **thread structure that works:**
+
    ```
    tweet 1: bold claim or hook (this IS the content)
    tweet 2-5: proof, examples, framework
@@ -186,19 +188,20 @@ you're in an echo chamber of your existing followers. you need to break out.
 
 ## weekly execution cadence
 
-| day | content | format | CTA type |
-|-----|---------|--------|----------|
-| **Mon** | framework / system reveal | single tweet | "save this" |
-| **Tue** | **thread** (deep dive) | 5-7 tweet thread | "RT tweet 1 + follow" |
-| **Wed** | hot take / polarizing | single tweet | "agree or disagree?" |
-| **Thu** | behind-the-scenes / build log | single tweet | "reply with yours" |
-| **Fri** | **thread** or data post | thread or list | "tag someone" |
-| **Sat** | community engagement | reply trigger | "drop your handle" |
-| **Sun** | space or collab | space/tweet | cross-promotion |
+| day     | content                       | format           | CTA type              |
+| ------- | ----------------------------- | ---------------- | --------------------- |
+| **Mon** | framework / system reveal     | single tweet     | "save this"           |
+| **Tue** | **thread** (deep dive)        | 5-7 tweet thread | "RT tweet 1 + follow" |
+| **Wed** | hot take / polarizing         | single tweet     | "agree or disagree?"  |
+| **Thu** | behind-the-scenes / build log | single tweet     | "reply with yours"    |
+| **Fri** | **thread** or data post       | thread or list   | "tag someone"         |
+| **Sat** | community engagement          | reply trigger    | "drop your handle"    |
+| **Sun** | space or collab               | space/tweet      | cross-promotion       |
 
 **plus:** 2-3 shorter tweets per day (reactions, observations, replies to big accounts).
 
 **daily non-negotiables (30 min total):**
+
 - 15 min: strategic replies on 3-5 large accounts
 - 10 min: engage with your reply section (respond to everyone)
 - 5 min: engage with 5 peers in your follower range
@@ -207,12 +210,12 @@ you're in an echo chamber of your existing followers. you need to break out.
 
 ## monthly milestones
 
-| month | target followers | key focus | success metric |
-|-------|-----------------|-----------|----------------|
-| **april** | 37,000 (+4K) | fix CTAs + start threads | CTA score 45→65, 4 threads published |
-| **may** | 41,500 (+4.5K) | shareable formats + reply strategy | RT avg 1.15→4+, impressions avg 2.5K→4K |
-| **june** | 46,000 (+4.5K) | spaces + collabs + compound | 2 collabs, 4 spaces, thread going semi-viral |
-| **july** | 50,000 (+4K) | maintain + optimize | all gap scores 70+, system on autopilot |
+| month     | target followers | key focus                          | success metric                               |
+| --------- | ---------------- | ---------------------------------- | -------------------------------------------- |
+| **april** | 37,000 (+4K)     | fix CTAs + start threads           | CTA score 45→65, 4 threads published         |
+| **may**   | 41,500 (+4.5K)   | shareable formats + reply strategy | RT avg 1.15→4+, impressions avg 2.5K→4K      |
+| **june**  | 46,000 (+4.5K)   | spaces + collabs + compound        | 2 collabs, 4 spaces, thread going semi-viral |
+| **july**  | 50,000 (+4K)     | maintain + optimize                | all gap scores 70+, system on autopilot      |
 
 ---
 

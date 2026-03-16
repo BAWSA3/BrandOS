@@ -130,8 +130,19 @@ export default function CalendarDraftCard({
             }}
           >
             {/* GitBranch icon inline */}
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ display: 'inline', verticalAlign: '-1px', marginRight: 2 }}>
-              <line x1="6" y1="3" x2="6" y2="15" /><circle cx="18" cy="6" r="3" /><circle cx="6" cy="18" r="3" /><path d="M18 9a9 9 0 0 1-9 9" />
+            <svg
+              width="10"
+              height="10"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              style={{ display: 'inline', verticalAlign: '-1px', marginRight: 2 }}
+            >
+              <line x1="6" y1="3" x2="6" y2="15" />
+              <circle cx="18" cy="6" r="3" />
+              <circle cx="6" cy="18" r="3" />
+              <path d="M18 9a9 9 0 0 1-9 9" />
             </svg>
             {draft.childrenCount}
           </span>
@@ -156,13 +167,13 @@ export default function CalendarDraftCard({
 
       {/* Hover actions */}
       {showActions && !isDragging && (
-        <div
-          className="flex items-center gap-1 mt-1.5"
-          style={{ flexWrap: 'wrap' }}
-        >
+        <div className="flex items-center gap-1 mt-1.5" style={{ flexWrap: 'wrap' }}>
           {action && onStatusChange && (
             <button
-              onClick={(e) => { e.stopPropagation(); onStatusChange(draft.id, action.next); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onStatusChange(draft.id, action.next);
+              }}
               style={{
                 fontSize: 10,
                 fontWeight: 500,
@@ -179,7 +190,10 @@ export default function CalendarDraftCard({
           )}
           {onRepurpose && (
             <button
-              onClick={(e) => { e.stopPropagation(); onRepurpose(draft); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onRepurpose(draft);
+              }}
               style={{
                 fontSize: 10,
                 fontWeight: 500,
@@ -192,15 +206,29 @@ export default function CalendarDraftCard({
               }}
             >
               {/* GitBranch icon */}
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ display: 'inline', verticalAlign: '-1px', marginRight: 2 }}>
-                <line x1="6" y1="3" x2="6" y2="15" /><circle cx="18" cy="6" r="3" /><circle cx="6" cy="18" r="3" /><path d="M18 9a9 9 0 0 1-9 9" />
+              <svg
+                width="10"
+                height="10"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                style={{ display: 'inline', verticalAlign: '-1px', marginRight: 2 }}
+              >
+                <line x1="6" y1="3" x2="6" y2="15" />
+                <circle cx="18" cy="6" r="3" />
+                <circle cx="6" cy="18" r="3" />
+                <path d="M18 9a9 9 0 0 1-9 9" />
               </svg>
               Repurpose
             </button>
           )}
           {onEdit && (
             <button
-              onClick={(e) => { e.stopPropagation(); onEdit(draft); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit(draft);
+              }}
               style={{
                 fontSize: 10,
                 fontWeight: 500,
@@ -217,7 +245,10 @@ export default function CalendarDraftCard({
           )}
           {onDelete && (
             <button
-              onClick={(e) => { e.stopPropagation(); onDelete(draft.id); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete(draft.id);
+              }}
               style={{
                 fontSize: 10,
                 fontWeight: 500,

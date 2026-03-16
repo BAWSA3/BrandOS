@@ -5,7 +5,12 @@ import { useCurrentBrand } from '@/lib/store';
 import { useBrandHealthScore } from '@/hooks/useBrandHealthScore';
 
 // Simple archetype derivation from tone values
-function deriveArchetype(tone: { minimal: number; playful: number; bold: number; experimental: number }): string {
+function deriveArchetype(tone: {
+  minimal: number;
+  playful: number;
+  bold: number;
+  experimental: number;
+}): string {
   const { minimal, playful, bold, experimental } = tone;
   if (bold > 70 && experimental > 50) return 'Rebel';
   if (minimal > 70 && bold > 50) return 'Sage';
@@ -57,7 +62,13 @@ function HealthSparkline({ values }: { values: number[] }) {
 }
 
 // Trend arrow indicator
-function TrendIndicator({ direction, delta }: { direction: 'up' | 'down' | 'stable'; delta: number }) {
+function TrendIndicator({
+  direction,
+  delta,
+}: {
+  direction: 'up' | 'down' | 'stable';
+  delta: number;
+}) {
   const colors = {
     up: '#30D158',
     down: '#FF453A',
@@ -69,23 +80,45 @@ function TrendIndicator({ direction, delta }: { direction: 'up' | 'down' | 'stab
   return (
     <div className="flex items-center gap-1">
       {direction === 'up' && (
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5">
+        <svg
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke={color}
+          strokeWidth="2.5"
+        >
           <path d="M18 15l-6-6-6 6" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       )}
       {direction === 'down' && (
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5">
+        <svg
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke={color}
+          strokeWidth="2.5"
+        >
           <path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       )}
       {direction === 'stable' && (
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5">
+        <svg
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke={color}
+          strokeWidth="2.5"
+        >
           <path d="M5 12h14" strokeLinecap="round" />
         </svg>
       )}
       {absDelta > 0 && (
         <span style={{ fontSize: 12, fontWeight: 600, color }}>
-          {direction === 'down' ? '-' : '+'}{absDelta}
+          {direction === 'down' ? '-' : '+'}
+          {absDelta}
         </span>
       )}
     </div>
@@ -97,10 +130,14 @@ function DimensionBar({ label, score, color }: { label: string; score: number; c
   return (
     <div style={{ marginBottom: 6 }}>
       <div className="flex items-center justify-between" style={{ marginBottom: 3 }}>
-        <span style={{ fontSize: 11, color: 'var(--text-secondary)', letterSpacing: '0.01em' }}>{label}</span>
+        <span style={{ fontSize: 11, color: 'var(--text-secondary)', letterSpacing: '0.01em' }}>
+          {label}
+        </span>
         <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-primary)' }}>{score}</span>
       </div>
-      <div style={{ height: 3, background: 'rgba(0,0,0,0.06)', borderRadius: 2, overflow: 'hidden' }}>
+      <div
+        style={{ height: 3, background: 'rgba(0,0,0,0.06)', borderRadius: 2, overflow: 'hidden' }}
+      >
         <div
           style={{
             height: '100%',
@@ -179,11 +216,20 @@ export default function BrandScoreCard() {
           <svg width="100" height="100" viewBox="0 0 100 100">
             <circle cx="50" cy="50" r="44" fill="none" stroke="rgba(0,0,0,0.06)" strokeWidth="6" />
             <circle
-              cx="50" cy="50" r="44" fill="none"
-              stroke="url(#scoreGradient)" strokeWidth="6" strokeLinecap="round"
+              cx="50"
+              cy="50"
+              r="44"
+              fill="none"
+              stroke="url(#scoreGradient)"
+              strokeWidth="6"
+              strokeLinecap="round"
               strokeDasharray={circumference}
               strokeDashoffset={offset}
-              style={{ transform: 'rotate(-90deg)', transformOrigin: '50% 50%', transition: 'stroke-dashoffset 1s ease-out' }}
+              style={{
+                transform: 'rotate(-90deg)',
+                transformOrigin: '50% 50%',
+                transition: 'stroke-dashoffset 1s ease-out',
+              }}
             />
             <defs>
               <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -193,7 +239,15 @@ export default function BrandScoreCard() {
             </defs>
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.02em', lineHeight: 1 }}>
+            <span
+              style={{
+                fontSize: 28,
+                fontWeight: 700,
+                color: 'var(--text-primary)',
+                letterSpacing: '-0.02em',
+                lineHeight: 1,
+              }}
+            >
               {health.isLoading ? '--' : animatedScore}
             </span>
           </div>
@@ -208,7 +262,14 @@ export default function BrandScoreCard() {
         {/* Brand info + dimensions */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-3 mb-1">
-            <h2 style={{ fontSize: 22, fontWeight: 600, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
+            <h2
+              style={{
+                fontSize: 22,
+                fontWeight: 600,
+                color: 'var(--text-primary)',
+                letterSpacing: '-0.02em',
+              }}
+            >
               {brandDNA?.name || 'Your Brand'}
             </h2>
             {archetype && (
@@ -291,7 +352,7 @@ export default function BrandScoreCard() {
           {/* Sparkline */}
           {health.history.length >= 2 && (
             <div style={{ marginBottom: 8 }}>
-              <HealthSparkline values={health.history.map(h => h.score)} />
+              <HealthSparkline values={health.history.map((h) => h.score)} />
             </div>
           )}
 

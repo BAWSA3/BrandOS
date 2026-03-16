@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { SocialPlatformSchema } from '@/lib/cross-platform/schemas';
-import {
-  initializeConnectors,
-  getConnector,
-} from '@/lib/cross-platform/connectors';
+import { initializeConnectors, getConnector } from '@/lib/cross-platform/connectors';
 
 const SyncRequestSchema = z.object({
   platform: SocialPlatformSchema,

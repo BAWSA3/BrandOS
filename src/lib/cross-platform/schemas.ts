@@ -57,16 +57,17 @@ export const ContentItemSchema = z.object({
 });
 
 // Manual content input (paste/upload flow)
-export const ManualContentInputSchema = z.object({
-  text: z.string().optional(),
-  platform: SocialPlatformSchema,
-  contentType: CrossPlatformContentTypeSchema.optional(),
-  mediaUrls: z.array(z.string()).optional(),
-  transcript: z.string().optional(),
-}).refine(
-  (data) => data.text || data.transcript || (data.mediaUrls && data.mediaUrls.length > 0),
-  { message: 'At least one of text, transcript, or media must be provided' }
-);
+export const ManualContentInputSchema = z
+  .object({
+    text: z.string().optional(),
+    platform: SocialPlatformSchema,
+    contentType: CrossPlatformContentTypeSchema.optional(),
+    mediaUrls: z.array(z.string()).optional(),
+    transcript: z.string().optional(),
+  })
+  .refine((data) => data.text || data.transcript || (data.mediaUrls && data.mediaUrls.length > 0), {
+    message: 'At least one of text, transcript, or media must be provided',
+  });
 
 // Cross-platform voice analysis request
 export const CrossPlatformVoiceAnalysisRequestSchema = z.object({
@@ -86,13 +87,12 @@ export const PrePublishCheckRequestSchema = z.object({
 });
 
 // Transcript extraction request
-export const TranscriptRequestSchema = z.object({
-  videoUrl: z.string().url().optional(),
-  platform: SocialPlatformSchema.optional(),
-}).refine(
-  (data) => data.videoUrl,
-  { message: 'A video URL is required' }
-);
+export const TranscriptRequestSchema = z
+  .object({
+    videoUrl: z.string().url().optional(),
+    platform: SocialPlatformSchema.optional(),
+  })
+  .refine((data) => data.videoUrl, { message: 'A video URL is required' });
 
 // Visual consistency check request
 export const VisualConsistencyRequestSchema = z.object({

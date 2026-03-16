@@ -20,10 +20,7 @@ export async function POST(request: Request) {
     const body: ExtractionRequest = await request.json();
 
     if (!body.sources || body.sources.length === 0) {
-      return NextResponse.json(
-        { error: 'At least one source is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'At least one source is required' }, { status: 400 });
     }
 
     // Merge data from multiple sources with conflict resolution
@@ -38,10 +35,7 @@ export async function POST(request: Request) {
     return NextResponse.json(mergedResult);
   } catch (error) {
     console.error('Brand extraction error:', error);
-    return NextResponse.json(
-      { error: 'Failed to extract brand data' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to extract brand data' }, { status: 500 });
   }
 }
 
@@ -51,9 +45,9 @@ function mergeExtractedData(
 ) {
   // Source priority (higher index = higher priority)
   const sourcePriority: Record<string, number> = {
-    pdf: 4,    // Brand guidelines are most authoritative
+    pdf: 4, // Brand guidelines are most authoritative
     images: 2, // Visual elements
-    url: 3,    // Website data
+    url: 3, // Website data
     social: 1, // Social media
   };
 
@@ -103,7 +97,7 @@ function mergeExtractedData(
       // Average tone values if both exist
       const existingTone = result.tone as Record<string, number>;
       const newTone = data.tone as Record<string, number>;
-      
+
       for (const [key, value] of Object.entries(newTone)) {
         if (existingTone[key] !== undefined) {
           // Average the values
@@ -142,9 +136,7 @@ function mergeExtractedData(
   }
 
   // Calculate overall confidence as weighted average
-  result.overallConfidence = sourceCount > 0 
-    ? Math.round(confidenceSum / sourceCount)
-    : 50;
+  result.overallConfidence = sourceCount > 0 ? Math.round(confidenceSum / sourceCount) : 50;
 
   // Apply preferences to boost certain aspects
   if (preferences?.prioritizeColors && (result.colors as Record<string, unknown>)['primary']) {
@@ -167,19 +159,3 @@ function mergeExtractedData(
 
   return result;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

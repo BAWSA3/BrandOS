@@ -3,6 +3,7 @@
 > 21 days. every post written. every CTA intentional. built from your gap analysis data.
 
 **gap priorities this month:**
+
 - CTA effectiveness: 45 → target 65 (every post has an explicit ask)
 - format match: 68 → target 75 (6 threads this month, 0 last month)
 - engagement velocity: 58 → target 65 (shareable formats + reply triggers)
@@ -554,11 +555,11 @@ save this for your monthly reviews 📌
 
 ## Calendar Summary
 
-| week | threads | single tweets | total posts | CTA types used |
-|------|---------|---------------|-------------|----------------|
-| 1 (Mar 11-16) | 2 | 4 | 6 | RT+follow, agree/disagree, reply, tag, drop handle, quote RT |
-| 2 (Mar 17-23) | 2 | 5 | 7 | save, RT+follow, agree/disagree, reply, tag, drop below, quote RT |
-| 3 (Mar 24-31) | 2 | 6 | 8 | save, RT+follow, agree/disagree, reply, tag, drop below, quote RT, save |
+| week          | threads | single tweets | total posts | CTA types used                                                          |
+| ------------- | ------- | ------------- | ----------- | ----------------------------------------------------------------------- |
+| 1 (Mar 11-16) | 2       | 4             | 6           | RT+follow, agree/disagree, reply, tag, drop handle, quote RT            |
+| 2 (Mar 17-23) | 2       | 5             | 7           | save, RT+follow, agree/disagree, reply, tag, drop below, quote RT       |
+| 3 (Mar 24-31) | 2       | 6             | 8           | save, RT+follow, agree/disagree, reply, tag, drop below, quote RT, save |
 
 **totals:** 6 threads + 15 single tweets = 21 primary posts (+ 2-3 shorter daily tweets not calendared)
 

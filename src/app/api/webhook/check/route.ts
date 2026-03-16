@@ -12,10 +12,17 @@ function isCallbackUrlSafe(urlString: string): boolean {
 
     const hostname = url.hostname.toLowerCase();
     const blockedPatterns = [
-      /^127\./, /^10\./, /^172\.(1[6-9]|2[0-9]|3[0-1])\./, /^192\.168\./,
-      /^169\.254\./, /^0\./, /^localhost$/i, /^.*\.local$/i, /^.*\.internal$/i,
+      /^127\./,
+      /^10\./,
+      /^172\.(1[6-9]|2[0-9]|3[0-1])\./,
+      /^192\.168\./,
+      /^169\.254\./,
+      /^0\./,
+      /^localhost$/i,
+      /^.*\.local$/i,
+      /^.*\.internal$/i,
     ];
-    return !blockedPatterns.some(p => p.test(hostname));
+    return !blockedPatterns.some((p) => p.test(hostname));
   } catch {
     return false;
   }
@@ -55,34 +62,25 @@ export async function POST(request: NextRequest) {
 
     // Validate API key
     if (!validateApiKey(request)) {
-      return NextResponse.json(
-        { error: 'Invalid or missing API key' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Invalid or missing API key' }, { status: 401 });
     }
 
     const anthropicKey = process.env.ANTHROPIC_API_KEY;
-    
+
     if (!anthropicKey) {
-      return NextResponse.json(
-        { error: 'API key not configured' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'API key not configured' }, { status: 500 });
     }
 
     const anthropic = new Anthropic({ apiKey: anthropicKey });
 
-    const { brandDNA, content, callbackUrl } = await request.json() as {
+    const { brandDNA, content, callbackUrl } = (await request.json()) as {
       brandDNA: BrandDNA;
       content: string;
       callbackUrl?: string;
     };
 
     if (!brandDNA?.name || !content) {
-      return NextResponse.json(
-        { error: 'Missing brand DNA or content' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Missing brand DNA or content' }, { status: 400 });
     }
 
     const message = await anthropic.messages.create({
@@ -96,16 +94,14 @@ export async function POST(request: NextRequest) {
       ],
     });
 
-    const responseText = message.content[0].type === 'text' 
-      ? message.content[0].text 
-      : '';
-    
+    const responseText = message.content[0].type === 'text' ? message.content[0].text : '';
+
     // Parse JSON from response
     const jsonMatch = responseText.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
       throw new Error('Invalid response format');
     }
-    
+
     const result = JSON.parse(jsonMatch[0]);
 
     // If callback URL provided, validate and send result there
@@ -135,10 +131,9 @@ export async function POST(request: NextRequest) {
       brandName: brandDNA.name,
       timestamp: new Date().toISOString(),
     });
-    
   } catch (error: unknown) {
     console.error('Webhook check error:', error);
-    
+
     let message = 'Analysis failed';
     if (error instanceof Error) {
       if (error.message.includes('credit balance is too low')) {
@@ -147,11 +142,8 @@ export async function POST(request: NextRequest) {
         message = error.message;
       }
     }
-    
-    return NextResponse.json(
-      { error: message },
-      { status: 500 }
-    );
+
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 
@@ -162,7 +154,7 @@ export async function OPTIONS() {
   const isDev = process.env.NODE_ENV === 'development';
 
   // In development, allow all origins. In production, require explicit config.
-  const corsOrigin = isDev ? '*' : (allowedOrigins[0] || 'https://brandos.app');
+  const corsOrigin = isDev ? '*' : allowedOrigins[0] || 'https://brandos.app';
 
   return new NextResponse(null, {
     status: 200,
@@ -173,4 +165,3 @@ export async function OPTIONS() {
     },
   });
 }
-

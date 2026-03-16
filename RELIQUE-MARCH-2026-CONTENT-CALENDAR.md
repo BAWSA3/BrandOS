@@ -9,7 +9,7 @@
 
 ## Week 1: SECURITY (Mar 2-6)
 
-*"Your cards are safer here"* — Drive trust for new depositors
+_"Your cards are safer here"_ — Drive trust for new depositors
 
 ---
 
@@ -103,7 +103,7 @@
 
 ## Week 2: TRANSPARENCY (Mar 9-13)
 
-*"See everything on-chain"* — Build confidence to trade
+_"See everything on-chain"_ — Build confidence to trade
 
 ---
 
@@ -177,7 +177,7 @@
 
 ## Week 3: LIQUIDITY (Mar 16-20)
 
-*"Trade 24/7, settle instantly"* — Direct trading volume push
+_"Trade 24/7, settle instantly"_ — Direct trading volume push
 
 ---
 
@@ -251,7 +251,7 @@
 
 ## Week 4: AUTHENTICITY (Mar 23-27)
 
-*"Real cards, real ownership"* — Convert skeptics into users
+_"Real cards, real ownership"_ — Convert skeptics into users
 
 ---
 
@@ -321,7 +321,7 @@
 
 ## Week 5: RECAP (Mar 30-31)
 
-*Best-of + strongest CTA* — Reinforce top performer
+_Best-of + strongest CTA_ — Reinforce top performer
 
 ---
 
@@ -360,15 +360,15 @@
 
 ## Summary
 
-| Metric | Value |
-|--------|-------|
-| Total posts | 22 |
-| Single tweets | 14 |
-| Threads | 4 (8, 6, 6, 6 tweets) |
-| Posts needing real data | 5 (#3, #8, #13, #18, #21) |
-| Avg brand alignment | 92/100 |
-| Pillars covered | Security, Transparency, Liquidity, Authenticity, Recap |
-| Primary competitor targeted | eBay |
+| Metric                      | Value                                                  |
+| --------------------------- | ------------------------------------------------------ |
+| Total posts                 | 22                                                     |
+| Single tweets               | 14                                                     |
+| Threads                     | 4 (8, 6, 6, 6 tweets)                                  |
+| Posts needing real data     | 5 (#3, #8, #13, #18, #21)                              |
+| Avg brand alignment         | 92/100                                                 |
+| Pillars covered             | Security, Transparency, Liquidity, Authenticity, Recap |
+| Primary competitor targeted | eBay                                                   |
 
 ## Research Hooks Used
 

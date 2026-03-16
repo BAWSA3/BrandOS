@@ -9,9 +9,11 @@ identities that inform content strategy.
 ---
 
 ### 🎓 SIGNAL_SAGE
+
 **Tagline:** "the one who makes you smarter"
 
 **Signals:**
+
 - Educational threads and breakdowns
 - Framework reveals and mental models
 - Data-backed insights and analysis
@@ -26,9 +28,11 @@ identities that inform content strategy.
 ---
 
 ### 🔌 RELAY
+
 **Tagline:** "the one who connects everyone"
 
 **Signals:**
+
 - Curates and amplifies others' work
 - Community-first approach
 - "You should follow @..." or "underrated account" posts
@@ -43,9 +47,11 @@ identities that inform content strategy.
 ---
 
 ### 🎪 FREQ
+
 **Tagline:** "the one who makes the timeline fun"
 
 **Signals:**
+
 - Entertainment-first content
 - Memes, shitposts, cultural commentary
 - Personality-driven (you follow for THEM, not the topic)
@@ -60,9 +66,11 @@ identities that inform content strategy.
 ---
 
 ### 🔮 FORESIGHT
+
 **Tagline:** "the one who sees what's coming"
 
 **Signals:**
+
 - Strong, opinionated takes on the future
 - Philosophical and visionary content
 - "Mark my words" energy
@@ -77,9 +85,11 @@ identities that inform content strategy.
 ---
 
 ### 🚢 BUILD.EXE
+
 **Tagline:** "the one who builds in public"
 
 **Signals:**
+
 - Constant shipping updates
 - Build logs, progress screenshots, metrics sharing
 - Product-focused (always talking about what they're making)
@@ -94,9 +104,11 @@ identities that inform content strategy.
 ---
 
 ### 🐕 ARC
+
 **Tagline:** "the one on the come-up"
 
 **Signals:**
+
 - Raw energy, growing fast
 - Documenting the journey (not the destination)
 - "Started from zero" narrative
@@ -111,9 +123,11 @@ identities that inform content strategy.
 ---
 
 ### 🎰 ENTROPY
+
 **Tagline:** "the one who bets big"
 
 **Signals:**
+
 - High-risk takes and positions
 - Crypto/trading/speculation energy
 - YOLO vibes, unapologetic
@@ -128,9 +142,11 @@ identities that inform content strategy.
 ---
 
 ### 👻 NULL
+
 **Tagline:** "the one you can't identify but can't ignore"
 
 **Signals:**
+
 - Pseudonymous identity (anime PFP, abstract avatar)
 - Authority without personal brand
 - Content speaks for itself — no personal story needed

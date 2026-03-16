@@ -4,7 +4,7 @@
 
 ### What is the Voice Fingerprint?
 
-The Voice Fingerprint is a detailed model of **how a creator actually writes**. Not just "professional" or "casual" — it captures the specific habits, quirks, and patterns that make their writing recognizably *theirs*. Think of it like a writing DNA test.
+The Voice Fingerprint is a detailed model of **how a creator actually writes**. Not just "professional" or "casual" — it captures the specific habits, quirks, and patterns that make their writing recognizably _theirs_. Think of it like a writing DNA test.
 
 ### Step-by-Step: How a Creator Sets It Up
 
@@ -34,7 +34,7 @@ The Voice Fingerprint is a detailed model of **how a creator actually writes**. 
 5. If authenticity is low, **specific flags** appear:
    - Each flag highlights the exact phrase that sounds generic/AI-written
    - Shows the severity (low/medium/high)
-   - Explains *why* it was flagged (e.g., "This creator never uses corporate filler like 'leverage'")
+   - Explains _why_ it was flagged (e.g., "This creator never uses corporate filler like 'leverage'")
    - Suggests a rewrite in the creator's actual voice
 6. Creator can click **"Rewrite All Flagged"** — BrandOS rewrites every flagged phrase to match their voice, then re-scores
 
@@ -239,13 +239,13 @@ src/
 
 ## Data Flow Summary
 
-| Action | Input | AI Model | Output |
-|--------|-------|----------|--------|
-| Extract fingerprint | 5+ writing samples | Claude Sonnet 4 | VoiceFingerprint JSON |
-| Refine fingerprint | existing FP + new samples | Claude Sonnet 4 | Updated VoiceFingerprint |
-| Check authenticity | content + fingerprint | Claude Sonnet 4 | 0-100 score + flags |
-| Rewrite flagged | content + FP + flags | Claude Sonnet 4 | Rewritten content |
-| Generate with FP | prompt + brand DNA + FP summary | Claude Sonnet 4 | Fingerprinted content |
+| Action              | Input                           | AI Model        | Output                   |
+| ------------------- | ------------------------------- | --------------- | ------------------------ |
+| Extract fingerprint | 5+ writing samples              | Claude Sonnet 4 | VoiceFingerprint JSON    |
+| Refine fingerprint  | existing FP + new samples       | Claude Sonnet 4 | Updated VoiceFingerprint |
+| Check authenticity  | content + fingerprint           | Claude Sonnet 4 | 0-100 score + flags      |
+| Rewrite flagged     | content + FP + flags            | Claude Sonnet 4 | Rewritten content        |
+| Generate with FP    | prompt + brand DNA + FP summary | Claude Sonnet 4 | Fingerprinted content    |
 
 ## Why This Matters
 

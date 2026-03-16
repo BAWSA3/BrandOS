@@ -1,9 +1,9 @@
 /**
  * BrandOS Email Sequence Templates
  * Post X Brand Score Signup Flow
- * 
+ *
  * Based on Messaging Framework - Pain Points #1, #3, #4, #6
- * 
+ *
  * Variables to pass:
  * - name: User's name from signup
  * - username: X handle
@@ -71,13 +71,14 @@ export interface SegmentIndicators {
 }
 
 export function detectSegment(indicators: SegmentIndicators): Segment {
-  if (indicators.role === 'agency' || indicators.industry === 'agency')
-    return 'agency';
-  if (indicators.industry === 'ecommerce')
-    return 'dtc';
-  if (indicators.industry === 'saas' && indicators.companySize !== '1-10')
-    return 'b2b-saas';
-  if (indicators.role === 'founder' || indicators.companySize === '1-10' || indicators.companySize === '11-50')
+  if (indicators.role === 'agency' || indicators.industry === 'agency') return 'agency';
+  if (indicators.industry === 'ecommerce') return 'dtc';
+  if (indicators.industry === 'saas' && indicators.companySize !== '1-10') return 'b2b-saas';
+  if (
+    indicators.role === 'founder' ||
+    indicators.companySize === '1-10' ||
+    indicators.companySize === '11-50'
+  )
     return 'startup';
   return 'general';
 }
@@ -100,20 +101,20 @@ function getScoreMessage(score: number): { intro: string; advice: string } {
       intro: `That's EXCELLENT. You're in the top 15% of creators we've analyzed. Your brand is already working for you.
 
 But even strong brands have room to grow.`,
-      advice: `Here's your biggest opportunity:`
+      advice: `Here's your biggest opportunity:`,
     };
   }
   if (score >= 60) {
     return {
       intro: `That's SOLID—you're doing better than most. But here's the thing: the difference between a 70 and an 85 isn't just 15 points. It's the difference between "I think I've seen them before" and "I need to follow this person."`,
-      advice: `Your biggest opportunity right now:`
+      advice: `Your biggest opportunity right now:`,
     };
   }
   return {
     intro: `Real talk: there's work to do. But that's not a bad thing—it means there's upside.
 
 81% of people need to trust a brand before engaging with it. Right now, your profile might be creating friction you don't even know about.`,
-    advice: `The good news? Your biggest fix is simple:`
+    advice: `The good news? Your biggest fix is simple:`,
   };
 }
 
@@ -155,7 +156,7 @@ Thanks for being early.
 
 "brick by brick"
 
-P.S. Know someone who needs to discover their Brand DNA? Send them to mybrandos.app`
+P.S. Know someone who needs to discover their Brand DNA? Send them to mybrandos.app`,
 };
 
 // =============================================================================
@@ -172,28 +173,31 @@ export const email1ScoreExplainer: EmailTemplate = {
     'Your brand breakdown — {{score}}/100',
   ],
   body: (data) => {
-    const defineInsights = (data.defineInsights || []).map(i => `→ ${i}`).join('\n');
-    const checkInsights = (data.checkInsights || []).map(i => `→ ${i}`).join('\n');
-    const generateInsights = (data.generateInsights || []).map(i => `→ ${i}`).join('\n');
-    const scaleInsights = (data.scaleInsights || []).map(i => `→ ${i}`).join('\n');
+    const defineInsights = (data.defineInsights || []).map((i) => `→ ${i}`).join('\n');
+    const checkInsights = (data.checkInsights || []).map((i) => `→ ${i}`).join('\n');
+    const generateInsights = (data.generateInsights || []).map((i) => `→ ${i}`).join('\n');
+    const scaleInsights = (data.scaleInsights || []).map((i) => `→ ${i}`).join('\n');
 
-    const voiceLine = data.voiceConsistency != null
-      ? `\n→ Voice Consistency Score: ${data.voiceConsistency}%`
-      : '';
+    const voiceLine =
+      data.voiceConsistency != null ? `\n→ Voice Consistency Score: ${data.voiceConsistency}%` : '';
 
     const contentExtras: string[] = [];
     if (data.bestContentFormat) {
       contentExtras.push(`→ Best Performing Format: ${data.bestContentFormat}`);
     }
     if (data.contentPillars && data.contentPillars.length > 0) {
-      contentExtras.push(`→ Content Pillars: ${data.contentPillars.map(p => p.name).join(', ')}`);
+      contentExtras.push(`→ Content Pillars: ${data.contentPillars.map((p) => p.name).join(', ')}`);
     }
     const contentExtrasStr = contentExtras.length > 0 ? '\n' + contentExtras.join('\n') : '';
 
     const strengths = (data.topStrengths || (data.topStrength ? [data.topStrength] : []))
-      .map(s => `→ ${s}`).join('\n');
-    const improvements = (data.topImprovements || (data.topImprovement ? [data.topImprovement] : []))
-      .map(i => `→ ${i}`).join('\n');
+      .map((s) => `→ ${s}`)
+      .join('\n');
+    const improvements = (
+      data.topImprovements || (data.topImprovement ? [data.topImprovement] : [])
+    )
+      .map((i) => `→ ${i}`)
+      .join('\n');
 
     const summaryBlock = data.summary ? `\n${data.summary}\n` : '';
 
@@ -211,12 +215,16 @@ Your Brand Score of ${data.score}/100 is based on 4 key dimensions we analyze fr
 
 **IDENTITY (${data.defineScore}/100)**
 ${[
-      data.identitySignature ? `→ You're known for: ${data.identitySignature}` : '',
-      data.contentPillarNames?.length ? `→ Content pillars: ${data.contentPillarNames.join(', ')}` : '',
-      data.topicConcentration != null ? `→ Topic focus: ${data.topicConcentration >= 70 ? 'Laser focused' : data.topicConcentration >= 40 ? 'Moderately focused' : 'Scattered across topics'}` : '',
-      data.audienceSignal ? `→ Natural audience: ${data.audienceSignal}` : '',
-      defineInsights || '→ No identity insights available yet',
-    ].filter(Boolean).join('\n')}
+  data.identitySignature ? `→ You're known for: ${data.identitySignature}` : '',
+  data.contentPillarNames?.length ? `→ Content pillars: ${data.contentPillarNames.join(', ')}` : '',
+  data.topicConcentration != null
+    ? `→ Topic focus: ${data.topicConcentration >= 70 ? 'Laser focused' : data.topicConcentration >= 40 ? 'Moderately focused' : 'Scattered across topics'}`
+    : '',
+  data.audienceSignal ? `→ Natural audience: ${data.audienceSignal}` : '',
+  defineInsights || '→ No identity insights available yet',
+]
+  .filter(Boolean)
+  .join('\n')}
 
 **CONSISTENCY (${data.checkScore}/100)**
 ${checkInsights || '→ No consistency insights available yet'}${voiceLine}
@@ -231,7 +239,7 @@ ${scaleInsights || '→ No growth insights available yet'}
 ${strengths || '→ Keep building — strengths are emerging'}
 
 **YOUR BIGGEST OPPORTUNITIES**
-${improvements || '→ Keep creating — we\'ll identify opportunities as your brand grows'}
+${improvements || "→ Keep creating — we'll identify opportunities as your brand grows"}
 
 ${data.archetypeIconUrl ? `{{ARCHETYPE_IMAGE:${data.archetypeIconUrl}}}` : ''}
 
@@ -246,7 +254,7 @@ This is just the start — BrandOS is building something much bigger. Expect upd
 "brick by brick"
 
 P.S. Want to check another handle? Head back to mybrandos.app`;
-  }
+  },
 };
 
 // =============================================================================
@@ -279,7 +287,7 @@ Anyway, I'm working on some new features for BrandOS that I think you'll love. S
 
 - Bawsa
 
-"brick by brick"`
+"brick by brick"`,
 };
 
 // =============================================================================
@@ -288,12 +296,12 @@ Anyway, I'm working on some new features for BrandOS that I think you'll love. S
 
 export const email3TimeSaver: EmailTemplate = {
   id: 'time-saver',
-  name: 'What I\'m building next',
+  name: "What I'm building next",
   sendDelay: '48h',
   subjectLines: [
-    'What I\'m working on next, {{username}}',
-    'Sneak peek at what\'s coming',
-    'You\'re gonna love this, {{username}}',
+    "What I'm working on next, {{username}}",
+    "Sneak peek at what's coming",
+    "You're gonna love this, {{username}}",
   ],
   body: (data) => `Hey ${data.name}!
 
@@ -313,7 +321,7 @@ Thanks for being here!
 
 - Bawsa
 
-"brick by brick"`
+"brick by brick"`,
 };
 
 // =============================================================================
@@ -325,7 +333,7 @@ export const email4UpgradeCTA: EmailTemplate = {
   name: 'Stay connected',
   sendDelay: '72h',
   subjectLines: [
-    'Let\'s stay connected, {{username}}',
+    "Let's stay connected, {{username}}",
     'One last thing from me',
     'Thanks again, {{username}}!',
   ],
@@ -347,7 +355,7 @@ Alright, that's it from me. Go build something great!
 "brick by brick"
 
 P.S. You can always check your brand score again at mybrandos.app`;
-  }
+  },
 };
 
 // =============================================================================
@@ -364,7 +372,7 @@ export const startupEmail1FounderBottleneck: EmailTemplate = {
   sendDelay: 'immediate',
   subjectLines: [
     "You're probably the brand police right now, {{name}}",
-    "The thing killing your productivity, {{name}}",
+    'The thing killing your productivity, {{name}}',
     "10 hours/week on brand reviews? Let's fix that",
   ],
   body: (data) => `Hey ${data.name}!
@@ -385,7 +393,7 @@ More on that tomorrow.
 
 - Bawsa
 
-"brick by brick"`
+"brick by brick"`,
 };
 
 export const startupEmail2BrandDrift: EmailTemplate = {
@@ -393,9 +401,9 @@ export const startupEmail2BrandDrift: EmailTemplate = {
   name: 'How a Series B fixed brand drift',
   sendDelay: '24h',
   subjectLines: [
-    "The 12-marketer problem, {{name}}",
-    "Brand drift is killing your fundraise",
-    "Why your content looks like 12 different companies",
+    'The 12-marketer problem, {{name}}',
+    'Brand drift is killing your fundraise',
+    'Why your content looks like 12 different companies',
   ],
   body: (data) => `Hey ${data.name}!
 
@@ -418,7 +426,7 @@ Want to see how it works? Reply to this email. Happy to walk you through it.
 
 - Bawsa
 
-"brick by brick"`
+"brick by brick"`,
 };
 
 export const startupEmail3HeadToSystem: EmailTemplate = {
@@ -427,8 +435,8 @@ export const startupEmail3HeadToSystem: EmailTemplate = {
   sendDelay: '48h',
   subjectLines: [
     "Your brand doesn't need a 6-week project",
-    "48 hours to brand clarity, {{name}}",
-    "Skip the brand book nobody reads",
+    '48 hours to brand clarity, {{name}}',
+    'Skip the brand book nobody reads',
   ],
   body: (data) => `Hey ${data.name}!
 
@@ -450,7 +458,7 @@ You're already at ${data.score}/100. Let's get your whole team there.
 
 - Bawsa
 
-"brick by brick"`
+"brick by brick"`,
 };
 
 export const startupEmail4ScaleWithoutDiluting: EmailTemplate = {
@@ -458,9 +466,9 @@ export const startupEmail4ScaleWithoutDiluting: EmailTemplate = {
   name: 'Scale without diluting',
   sendDelay: '72h',
   subjectLines: [
-    "The hiring problem nobody talks about",
-    "Every new hire = potential brand drift",
-    "Scale your team, keep your brand, {{name}}",
+    'The hiring problem nobody talks about',
+    'Every new hire = potential brand drift',
+    'Scale your team, keep your brand, {{name}}',
   ],
   body: (data) => `Hey ${data.name}!
 
@@ -482,7 +490,7 @@ Go build something great.
 
 "brick by brick"
 
-P.S. Your archetype is ${data.archetype} ${data.archetypeEmoji} — that's a strong foundation to build on.`
+P.S. Your archetype is ${data.archetype} ${data.archetypeEmoji} — that's a strong foundation to build on.`,
 };
 
 // =============================================================================
@@ -494,9 +502,9 @@ export const dtcEmail1OmnichannelGrind: EmailTemplate = {
   name: 'Same message, 6 platforms, every day',
   sendDelay: 'immediate',
   subjectLines: [
-    "The omnichannel content grind, {{name}}",
-    "Email, SMS, IG, TikTok, FB... every. single. day.",
-    "Your content team is drowning, {{name}}",
+    'The omnichannel content grind, {{name}}',
+    'Email, SMS, IG, TikTok, FB... every. single. day.',
+    'Your content team is drowning, {{name}}',
   ],
   body: (data) => `Hey ${data.name}!
 
@@ -521,7 +529,7 @@ More tomorrow.
 
 - Bawsa
 
-"brick by brick"`
+"brick by brick"`,
 };
 
 export const dtcEmail2RevisionNightmare: EmailTemplate = {
@@ -529,9 +537,9 @@ export const dtcEmail2RevisionNightmare: EmailTemplate = {
   name: 'Agencies, freelancers, and the revision nightmare',
   sendDelay: '24h',
   subjectLines: [
-    "3.2 rounds of revisions per piece, {{name}}",
+    '3.2 rounds of revisions per piece, {{name}}',
     "Your agencies don't get your brand",
-    "The $450 revision problem",
+    'The $450 revision problem',
   ],
   body: (data) => `Hey ${data.name}!
 
@@ -553,7 +561,7 @@ Your brand is already strong at ${data.score}/100. Now imagine every external pa
 
 - Bawsa
 
-"brick by brick"`
+"brick by brick"`,
 };
 
 export const dtcEmail3BlackFridayPrep: EmailTemplate = {
@@ -561,9 +569,9 @@ export const dtcEmail3BlackFridayPrep: EmailTemplate = {
   name: 'Black Friday prep without the chaos',
   sendDelay: '48h',
   subjectLines: [
-    "200 pieces of content. One consistent brand.",
-    "Seasonal content velocity without sacrificing quality",
-    "How to win Q4 without burning out your team",
+    '200 pieces of content. One consistent brand.',
+    'Seasonal content velocity without sacrificing quality',
+    'How to win Q4 without burning out your team',
   ],
   body: (data) => `Hey ${data.name}!
 
@@ -586,7 +594,7 @@ You're at ${data.score}/100. Let's keep that bar even during the chaos of peak s
 
 - Bawsa
 
-"brick by brick"`
+"brick by brick"`,
 };
 
 export const dtcEmail4CreatorBriefing: EmailTemplate = {
@@ -594,9 +602,9 @@ export const dtcEmail4CreatorBriefing: EmailTemplate = {
   name: 'Brief creators with precision',
   sendDelay: '72h',
   subjectLines: [
-    "UGC that actually matches your brand",
-    "The creator briefing problem, {{name}}",
-    "Stop hoping influencers get your vibe",
+    'UGC that actually matches your brand',
+    'The creator briefing problem, {{name}}',
+    'Stop hoping influencers get your vibe',
   ],
   body: (data) => `Hey ${data.name}!
 
@@ -621,7 +629,7 @@ Go crush it.
 
 "brick by brick"
 
-P.S. Turn 1 piece of content into 10 platform-optimized versions. That's the dream, right?`
+P.S. Turn 1 piece of content into 10 platform-optimized versions. That's the dream, right?`,
 };
 
 // =============================================================================
@@ -633,9 +641,9 @@ export const b2bEmail1TouchpointConfusion: EmailTemplate = {
   name: '15 touchpoints. One confused prospect.',
   sendDelay: 'immediate',
   subjectLines: [
-    "Your prospect sees 15 pieces before buying, {{name}}",
-    "The long sales cycle consistency problem",
-    "Content-to-demo disconnect is killing your pipeline",
+    'Your prospect sees 15 pieces before buying, {{name}}',
+    'The long sales cycle consistency problem',
+    'Content-to-demo disconnect is killing your pipeline',
   ],
   body: (data) => `Hey ${data.name}!
 
@@ -653,7 +661,7 @@ That's the game.
 
 - Bawsa
 
-"brick by brick"`
+"brick by brick"`,
 };
 
 export const b2bEmail2AIQuality: EmailTemplate = {
@@ -661,9 +669,9 @@ export const b2bEmail2AIQuality: EmailTemplate = {
   name: 'The CEO wants AI. Your team is scared.',
   sendDelay: '24h',
   subjectLines: [
-    "AI content your sales team will actually use",
-    "The AI quality problem in B2B, {{name}}",
-    "Why your team is scared of AI content",
+    'AI content your sales team will actually use',
+    'The AI quality problem in B2B, {{name}}',
+    'Why your team is scared of AI content',
   ],
   body: (data) => `Hey ${data.name}!
 
@@ -683,7 +691,7 @@ Your brand is at ${data.score}/100. Let's make sure your AI content hits that ba
 
 - Bawsa
 
-"brick by brick"`
+"brick by brick"`,
 };
 
 export const b2bEmail3GlobalConsistency: EmailTemplate = {
@@ -691,9 +699,9 @@ export const b2bEmail3GlobalConsistency: EmailTemplate = {
   name: 'Global consistency without global bottlenecks',
   sendDelay: '48h',
   subjectLines: [
-    "EMEA thinks your brand means something different",
-    "Same brand. Different continents. Different interpretations.",
-    "Regional teams need guardrails, not gatekeepers",
+    'EMEA thinks your brand means something different',
+    'Same brand. Different continents. Different interpretations.',
+    'Regional teams need guardrails, not gatekeepers',
   ],
   body: (data) => `Hey ${data.name}!
 
@@ -714,7 +722,7 @@ One brand brain for every region.
 
 - Bawsa
 
-"brick by brick"`
+"brick by brick"`,
 };
 
 export const b2bEmail4SourceOfTruth: EmailTemplate = {
@@ -722,9 +730,9 @@ export const b2bEmail4SourceOfTruth: EmailTemplate = {
   name: 'Product marketing + content marketing = one voice',
   sendDelay: '72h',
   subjectLines: [
-    "Is your blog contradicting your product page?",
-    "The source of truth problem, {{name}}",
-    "One brand brain for every department",
+    'Is your blog contradicting your product page?',
+    'The source of truth problem, {{name}}',
+    'One brand brain for every department',
   ],
   body: (data) => `Hey ${data.name}!
 
@@ -746,7 +754,7 @@ Reply if you want to see how this works for multi-team orgs.
 
 "brick by brick"
 
-P.S. The difference between "I think I've seen them before" and "I need to follow this company" is consistency.`
+P.S. The difference between "I think I've seen them before" and "I need to follow this company" is consistency.`,
 };
 
 // =============================================================================
@@ -758,9 +766,9 @@ export const agencyEmail1VoiceSwitching: EmailTemplate = {
   name: '5 clients. 5 voices. 1 exhausted team.',
   sendDelay: 'immediate',
   subjectLines: [
-    "Voice switching fatigue is killing your margins",
-    "5 clients. 5 voices. Every single day.",
-    "The multi-client burnout problem, {{name}}",
+    'Voice switching fatigue is killing your margins',
+    '5 clients. 5 voices. Every single day.',
+    'The multi-client burnout problem, {{name}}',
   ],
   body: (data) => `Hey ${data.name}!
 
@@ -778,7 +786,7 @@ Your own brand scores ${data.score}/100. Imagine every client hitting that bar t
 
 - Bawsa
 
-"brick by brick"`
+"brick by brick"`,
 };
 
 export const agencyEmail2RevisionProblem: EmailTemplate = {
@@ -786,9 +794,9 @@ export const agencyEmail2RevisionProblem: EmailTemplate = {
   name: 'The $450 revision problem',
   sendDelay: '24h',
   subjectLines: [
-    "3.2 rounds of revisions = 75% wasted on rework",
-    "Your margins are dying in revision cycles",
-    "What if clients approved on the first try, {{name}}",
+    '3.2 rounds of revisions = 75% wasted on rework',
+    'Your margins are dying in revision cycles',
+    'What if clients approved on the first try, {{name}}',
   ],
   body: (data) => `Hey ${data.name}!
 
@@ -811,7 +819,7 @@ Cut revision cycles by 60%. Get first-draft approvals. Protect your margins.
 
 - Bawsa
 
-"brick by brick"`
+"brick by brick"`,
 };
 
 export const agencyEmail3ScaleWithoutHeadcount: EmailTemplate = {
@@ -819,9 +827,9 @@ export const agencyEmail3ScaleWithoutHeadcount: EmailTemplate = {
   name: 'Scale without scaling headcount',
   sendDelay: '48h',
   subjectLines: [
-    "40% more revenue. 0% more headcount.",
-    "The agency scaling problem, {{name}}",
-    "AI that actually maintains client quality standards",
+    '40% more revenue. 0% more headcount.',
+    'The agency scaling problem, {{name}}',
+    'AI that actually maintains client quality standards',
   ],
   body: (data) => `Hey ${data.name}!
 
@@ -837,7 +845,7 @@ Scale without sacrificing quality. Grow without proportional headcount.
 
 - Bawsa
 
-"brick by brick"`
+"brick by brick"`,
 };
 
 export const agencyEmail4WinPitches: EmailTemplate = {
@@ -846,8 +854,8 @@ export const agencyEmail4WinPitches: EmailTemplate = {
   sendDelay: '72h',
   subjectLines: [
     "We went with the agency who 'got' us",
-    "The pitch you lost last month, {{name}}",
-    "Win pitches with brand intelligence",
+    'The pitch you lost last month, {{name}}',
+    'Win pitches with brand intelligence',
   ],
   body: (data) => `Hey ${data.name}!
 
@@ -871,7 +879,7 @@ Go win some pitches.
 
 "brick by brick"
 
-P.S. You can white-label this for clients too. Just saying.`
+P.S. You can white-label this for clients too. Just saying.`,
 };
 
 // =============================================================================
@@ -920,11 +928,11 @@ export const agencySequence: EmailTemplate[] = [
 
 // All sequences by segment
 export const emailSequencesBySegment: Record<Segment, EmailTemplate[]> = {
-  'general': emailSequence,
-  'startup': startupSequence,
-  'dtc': dtcSequence,
+  general: emailSequence,
+  startup: startupSequence,
+  dtc: dtcSequence,
   'b2b-saas': b2bSaasSequence,
-  'agency': agencySequence,
+  agency: agencySequence,
 };
 
 // Get sequence for a segment
@@ -933,9 +941,7 @@ export function getEmailSequenceForSegment(segment: Segment): EmailTemplate[] {
 }
 
 // Manual/one-off email templates (not in auto sequences)
-export const manualEmailTemplates: EmailTemplate[] = [
-  launchAnnouncementEmail,
-];
+export const manualEmailTemplates: EmailTemplate[] = [launchAnnouncementEmail];
 
 // All templates combined (for lookup by ID)
 export const allEmailTemplates: EmailTemplate[] = [
@@ -955,7 +961,7 @@ export function generateEmailContent(
   templateId: string,
   data: EmailTemplateData
 ): { subject: string; body: string } | null {
-  const template = allEmailTemplates.find(t => t.id === templateId);
+  const template = allEmailTemplates.find((t) => t.id === templateId);
   if (!template) return null;
 
   // Pick first subject line (or randomize for A/B testing)
@@ -985,7 +991,7 @@ export function generateAllEmails(
 }> {
   const sequence = getEmailSequenceForSegment(segment);
 
-  return sequence.map(template => {
+  return sequence.map((template) => {
     const subject = template.subjectLines[0]
       .replace('{{score}}', String(data.score))
       .replace('{{username}}', data.username)
@@ -1000,7 +1006,3 @@ export function generateAllEmails(
     };
   });
 }
-
-
-
-

@@ -57,34 +57,34 @@ interface BrandStore {
   theme: Theme;
   setTheme: (theme: Theme) => void;
   toggleTheme: () => void;
-  
+
   // Multiple brands
   brands: BrandDNA[];
   currentBrandId: string | null;
-  
+
   // Brand management
   setBrandDNA: (dna: Partial<BrandDNA>) => void;
   createBrand: (name?: string) => void;
   deleteBrand: (id: string) => void;
   switchBrand: (id: string) => void;
   importBrandFromDNA: (dna: ImportableBrandDNA, twitterUsername: string) => string;
-  
+
   // History
   history: HistoryItem[];
   addHistoryItem: (item: Omit<HistoryItem, 'id' | 'timestamp'>) => void;
   clearHistory: () => void;
-  
+
   // Safe Zones (per brand)
   safeZones: Record<string, SafeZone[]>;
   addSafeZone: (zone: Omit<SafeZone, 'id'>) => void;
   updateSafeZone: (id: string, zone: Partial<SafeZone>) => void;
   deleteSafeZone: (id: string) => void;
-  
+
   // Brand Memory (per brand)
   brandMemory: Record<string, MemoryEvent[]>;
   addMemoryEvent: (event: Omit<MemoryEvent, 'id' | 'createdAt'>) => void;
   deleteMemoryEvent: (id: string) => void;
-  
+
   // Design Intent Blocks (per brand)
   designIntents: Record<string, DesignIntentBlock[]>;
   addDesignIntent: (intent: DesignIntentBlock) => void;
@@ -158,7 +158,7 @@ export const useBrandStore = create<BrandStore>()(
       theme: 'dark' as Theme,
       setTheme: (theme) => set({ theme }),
       toggleTheme: () => set((state) => ({ theme: state.theme === 'dark' ? 'light' : 'dark' })),
-      
+
       brands: [initialBrand],
       currentBrandId: initialBrand.id,
       history: [],
@@ -190,16 +190,14 @@ export const useBrandStore = create<BrandStore>()(
         currentMoment: null,
         captureCount: 0,
       },
-      
+
       setBrandDNA: (dna) =>
         set((state) => ({
-          brands: state.brands.map(brand =>
-            brand.id === state.currentBrandId
-              ? { ...brand, ...dna, updatedAt: new Date() }
-              : brand
+          brands: state.brands.map((brand) =>
+            brand.id === state.currentBrandId ? { ...brand, ...dna, updatedAt: new Date() } : brand
           ),
         })),
-      
+
       createBrand: (name = 'New Brand') =>
         set((state) => {
           const newBrand = createDefaultBrandDNA(name);
@@ -208,11 +206,11 @@ export const useBrandStore = create<BrandStore>()(
             currentBrandId: newBrand.id,
           };
         }),
-      
+
       deleteBrand: (id) =>
         set((state) => {
           if (state.brands.length <= 1) return state;
-          const newBrands = state.brands.filter(b => b.id !== id);
+          const newBrands = state.brands.filter((b) => b.id !== id);
           // Clean up associated data
           const { [id]: _sz, ...restSafeZones } = state.safeZones;
           const { [id]: _mem, ...restMemory } = state.brandMemory;
@@ -221,9 +219,8 @@ export const useBrandStore = create<BrandStore>()(
           const { [id]: _ce, ...restEngineConfigs } = state.contentEngineConfigs;
           return {
             brands: newBrands,
-            currentBrandId: state.currentBrandId === id
-              ? newBrands[0]?.id || null
-              : state.currentBrandId,
+            currentBrandId:
+              state.currentBrandId === id ? newBrands[0]?.id || null : state.currentBrandId,
             safeZones: restSafeZones,
             brandMemory: restMemory,
             designIntents: restIntents,
@@ -231,10 +228,9 @@ export const useBrandStore = create<BrandStore>()(
             contentEngineConfigs: restEngineConfigs,
           };
         }),
-      
-      switchBrand: (id) =>
-        set({ currentBrandId: id }),
-      
+
+      switchBrand: (id) => set({ currentBrandId: id }),
+
       importBrandFromDNA: (dna, twitterUsername) => {
         const newBrand: BrandDNA = {
           id: uuidv4(),
@@ -257,7 +253,7 @@ export const useBrandStore = create<BrandStore>()(
           createdAt: new Date(),
           updatedAt: new Date(),
         };
-        
+
         set((state) => ({
           brands: [...state.brands, newBrand],
           currentBrandId: newBrand.id,
@@ -267,10 +263,10 @@ export const useBrandStore = create<BrandStore>()(
             hasCompletedOnboarding: true,
           },
         }));
-        
+
         return newBrand.id;
       },
-      
+
       addHistoryItem: (item) =>
         set((state) => ({
           history: [
@@ -282,10 +278,9 @@ export const useBrandStore = create<BrandStore>()(
             ...state.history,
           ].slice(0, 50), // Keep last 50 items
         })),
-      
-      clearHistory: () =>
-        set({ history: [] }),
-      
+
+      clearHistory: () => set({ history: [] }),
+
       // Safe Zones
       addSafeZone: (zone) =>
         set((state) => {
@@ -299,7 +294,7 @@ export const useBrandStore = create<BrandStore>()(
             },
           };
         }),
-      
+
       updateSafeZone: (id, updates) =>
         set((state) => {
           const brandId = state.currentBrandId;
@@ -308,11 +303,11 @@ export const useBrandStore = create<BrandStore>()(
           return {
             safeZones: {
               ...state.safeZones,
-              [brandId]: existing.map(sz => sz.id === id ? { ...sz, ...updates } : sz),
+              [brandId]: existing.map((sz) => (sz.id === id ? { ...sz, ...updates } : sz)),
             },
           };
         }),
-      
+
       deleteSafeZone: (id) =>
         set((state) => {
           const brandId = state.currentBrandId;
@@ -321,11 +316,11 @@ export const useBrandStore = create<BrandStore>()(
           return {
             safeZones: {
               ...state.safeZones,
-              [brandId]: existing.filter(sz => sz.id !== id),
+              [brandId]: existing.filter((sz) => sz.id !== id),
             },
           };
         }),
-      
+
       // Brand Memory
       addMemoryEvent: (event) =>
         set((state) => {
@@ -335,11 +330,14 @@ export const useBrandStore = create<BrandStore>()(
           return {
             brandMemory: {
               ...state.brandMemory,
-              [brandId]: [{ ...event, id: uuidv4(), createdAt: new Date() }, ...existing].slice(0, 100),
+              [brandId]: [{ ...event, id: uuidv4(), createdAt: new Date() }, ...existing].slice(
+                0,
+                100
+              ),
             },
           };
         }),
-      
+
       deleteMemoryEvent: (id) =>
         set((state) => {
           const brandId = state.currentBrandId;
@@ -348,11 +346,11 @@ export const useBrandStore = create<BrandStore>()(
           return {
             brandMemory: {
               ...state.brandMemory,
-              [brandId]: existing.filter(e => e.id !== id),
+              [brandId]: existing.filter((e) => e.id !== id),
             },
           };
         }),
-      
+
       // Design Intents
       addDesignIntent: (intent) =>
         set((state) => {
@@ -366,7 +364,7 @@ export const useBrandStore = create<BrandStore>()(
             },
           };
         }),
-      
+
       deleteDesignIntent: (id) =>
         set((state) => {
           const brandId = state.currentBrandId;
@@ -375,7 +373,7 @@ export const useBrandStore = create<BrandStore>()(
           return {
             designIntents: {
               ...state.designIntents,
-              [brandId]: existing.filter(di => di.id !== id),
+              [brandId]: existing.filter((di) => di.id !== id),
             },
           };
         }),
@@ -422,14 +420,11 @@ export const useBrandStore = create<BrandStore>()(
         }),
 
       // Generation tracking & referral
-      incrementGeneration: () =>
-        set((state) => ({ generationsUsed: state.generationsUsed + 1 })),
+      incrementGeneration: () => set((state) => ({ generationsUsed: state.generationsUsed + 1 })),
 
-      unlockUnlimited: () =>
-        set({ isUnlocked: true }),
+      unlockUnlimited: () => set({ isUnlocked: true }),
 
-      grantBonusGeneration: () =>
-        set((state) => ({ generationLimit: state.generationLimit + 1 })),
+      grantBonusGeneration: () => set((state) => ({ generationLimit: state.generationLimit + 1 })),
 
       initReferralCode: () => {
         const state = get();
@@ -444,22 +439,22 @@ export const useBrandStore = create<BrandStore>()(
         set((state) => ({
           phaseProgress: { ...state.phaseProgress, hasCompletedOnboarding: true },
         })),
-      
+
       markFirstCheck: () =>
         set((state) => ({
           phaseProgress: { ...state.phaseProgress, hasCompletedFirstCheck: true },
         })),
-      
+
       markFirstGeneration: () =>
         set((state) => ({
           phaseProgress: { ...state.phaseProgress, hasCompletedFirstGeneration: true },
         })),
-      
+
       setLastActivePhase: (phase) =>
         set((state) => ({
           phaseProgress: { ...state.phaseProgress, lastActivePhase: phase },
         })),
-      
+
       resetOnboarding: () =>
         set((state) => ({
           phaseProgress: {
@@ -560,5 +555,5 @@ export const useHasHydrated = () => {
 // Helper hook to get current brand
 export const useCurrentBrand = () => {
   const { brands, currentBrandId } = useBrandStore();
-  return brands.find(b => b.id === currentBrandId) || null;
+  return brands.find((b) => b.id === currentBrandId) || null;
 };

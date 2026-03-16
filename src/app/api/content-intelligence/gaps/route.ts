@@ -17,7 +17,9 @@ export async function GET(request: NextRequest) {
     if (!accessToken) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
 
     const supabase = createClient(supabaseUrl, supabaseAnonKey);
-    const { data: { user } } = await supabase.auth.getUser(accessToken);
+    const {
+      data: { user },
+    } = await supabase.auth.getUser(accessToken);
     if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
 
     const dbUser = await prisma.user.findUnique({ where: { supabaseId: user.id } });
@@ -54,12 +56,14 @@ export async function GET(request: NextRequest) {
     });
 
     // Parse JSON fields
-    const parsed = latest ? {
-      ...latest,
-      strengths: JSON.parse(latest.strengths),
-      gaps: JSON.parse(latest.gaps),
-      actionItems: JSON.parse(latest.actionItems),
-    } : null;
+    const parsed = latest
+      ? {
+          ...latest,
+          strengths: JSON.parse(latest.strengths),
+          gaps: JSON.parse(latest.gaps),
+          actionItems: JSON.parse(latest.actionItems),
+        }
+      : null;
 
     return NextResponse.json({ analysis: parsed, history });
   } catch (error) {

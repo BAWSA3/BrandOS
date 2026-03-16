@@ -21,7 +21,7 @@ export default function CreatorGuardrails() {
   const brandDNA = useCurrentBrand();
   const { safeZones, currentBrandId } = useBrandStore();
   const currentSafeZones = currentBrandId ? safeZones[currentBrandId] || [] : [];
-  
+
   const [draft, setDraft] = useState('');
   const [contentType, setContentType] = useState<ContentType>('general');
   const [creatorName, setCreatorName] = useState('');
@@ -31,7 +31,7 @@ export default function CreatorGuardrails() {
 
   const evaluateDraft = async () => {
     if (!draft.trim() || !brandDNA) return;
-    
+
     setIsEvaluating(true);
     setError('');
     setResult(null);
@@ -53,9 +53,9 @@ export default function CreatorGuardrails() {
       });
 
       const data = await response.json();
-      
+
       if (!response.ok) throw new Error(data.error);
-      
+
       setResult(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to evaluate draft');
@@ -84,7 +84,8 @@ export default function CreatorGuardrails() {
           Creator Draft
         </label>
         <p className="text-sm text-muted mb-4">
-          Submit content for brand alignment review. Great for reviewing work from creators, agencies, or team members.
+          Submit content for brand alignment review. Great for reviewing work from creators,
+          agencies, or team members.
         </p>
         <textarea
           value={draft}
@@ -105,8 +106,10 @@ export default function CreatorGuardrails() {
             onChange={(e) => setContentType(e.target.value as ContentType)}
             className="w-full bg-surface border border-border rounded-lg px-4 py-3 outline-none"
           >
-            {CONTENT_TYPES.map(t => (
-              <option key={t.id} value={t.id}>{t.name}</option>
+            {CONTENT_TYPES.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.name}
+              </option>
             ))}
           </select>
         </div>
@@ -147,8 +150,12 @@ export default function CreatorGuardrails() {
               <div className="text-5xl font-light">{result.alignmentScore}</div>
               <div>
                 <p className="text-sm text-muted">Alignment Score</p>
-                <span className={`inline-block mt-1 px-3 py-1 rounded-full text-xs font-medium border ${statusColors[result.status]}`}>
-                  {result.status === 'needs-revision' ? 'Needs Revision' : result.status.charAt(0).toUpperCase() + result.status.slice(1)}
+                <span
+                  className={`inline-block mt-1 px-3 py-1 rounded-full text-xs font-medium border ${statusColors[result.status]}`}
+                >
+                  {result.status === 'needs-revision'
+                    ? 'Needs Revision'
+                    : result.status.charAt(0).toUpperCase() + result.status.slice(1)}
                 </span>
               </div>
             </div>
@@ -165,9 +172,7 @@ export default function CreatorGuardrails() {
                   <div key={i} className="p-4 bg-surface rounded-lg">
                     <div className="flex items-start justify-between mb-2">
                       <span className="text-sm font-medium">{v.rule}</span>
-                      <span className={`text-xs ${severityColors[v.severity]}`}>
-                        {v.severity}
-                      </span>
+                      <span className={`text-xs ${severityColors[v.severity]}`}>{v.severity}</span>
                     </div>
                     <p className="text-sm text-muted">💡 {v.suggestion}</p>
                   </div>
@@ -196,9 +201,7 @@ export default function CreatorGuardrails() {
           {result.revisedVersion && result.status !== 'approved' && (
             <div className="border border-border rounded-lg p-6">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xs uppercase tracking-widest text-muted">
-                  Suggested Revision
-                </h3>
+                <h3 className="text-xs uppercase tracking-widest text-muted">Suggested Revision</h3>
                 <button
                   onClick={() => navigator.clipboard.writeText(result.revisedVersion!)}
                   className="text-xs text-muted hover:text-foreground transition-colors"
@@ -216,4 +219,3 @@ export default function CreatorGuardrails() {
     </div>
   );
 }
-

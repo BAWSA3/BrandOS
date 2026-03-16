@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import * as Sentry from "@sentry/nextjs";
-import { useEffect } from "react";
+import * as Sentry from '@sentry/nextjs';
+import { useEffect } from 'react';
 
 export default function GlobalError({
   error,
@@ -17,18 +17,22 @@ export default function GlobalError({
   return (
     <html>
       <body>
-        <div style={{
-          minHeight: '100vh',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          backgroundColor: '#0a0a0a',
-          color: '#ffffff',
-          fontFamily: 'system-ui, sans-serif',
-        }}>
+        <div
+          style={{
+            minHeight: '100vh',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: '#0a0a0a',
+            color: '#ffffff',
+            fontFamily: 'system-ui, sans-serif',
+          }}
+        >
           <h1 style={{ fontSize: '2rem', marginBottom: '1rem' }}>Something went wrong</h1>
-          <p style={{ color: '#888', marginBottom: '2rem' }}>We've been notified and are working on it.</p>
+          <p style={{ color: '#888', marginBottom: '2rem' }}>
+            We've been notified and are working on it.
+          </p>
           <button
             onClick={reset}
             style={{

@@ -53,9 +53,7 @@ function AlertItem({ alert, onDismiss }: { alert: DriftAlert; onDismiss: (id: st
       </div>
 
       <div className="flex-1 min-w-0">
-        <p className="text-sm text-white/90 font-medium truncate">
-          {alert.message}
-        </p>
+        <p className="text-sm text-white/90 font-medium truncate">{alert.message}</p>
         <p className="text-[11px] text-white/40 mt-0.5 uppercase tracking-wide">
           {alert.severity} &middot; {alert.type.replace(/_/g, ' ')}
         </p>
@@ -67,7 +65,15 @@ function AlertItem({ alert, onDismiss }: { alert: DriftAlert; onDismiss: (id: st
         aria-label="Dismiss alert"
         title="Dismiss"
       >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeOpacity="0.4">
+        <svg
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="white"
+          strokeWidth="2"
+          strokeOpacity="0.4"
+        >
           <line x1="18" y1="6" x2="6" y2="18" />
           <line x1="6" y1="6" x2="18" y2="18" />
         </svg>
@@ -87,10 +93,7 @@ export default function DriftAlertsBar() {
     if (alerts.length > prevCountRef.current && prevCountRef.current >= 0) {
       const newAlerts = alerts.slice(0, alerts.length - prevCountRef.current);
       for (const alert of newAlerts) {
-        toast.warning(
-          'Brand Drift Detected',
-          alert.message,
-        );
+        toast.warning('Brand Drift Detected', alert.message);
       }
     }
     prevCountRef.current = alerts.length;
@@ -102,7 +105,7 @@ export default function DriftAlertsBar() {
   const visibleAlerts = shouldCollapse ? alerts.slice(0, COLLAPSE_THRESHOLD) : alerts;
   const hiddenCount = alerts.length - COLLAPSE_THRESHOLD;
 
-  const hasCritical = alerts.some(a => a.severity === 'critical');
+  const hasCritical = alerts.some((a) => a.severity === 'critical');
   const headerColor = hasCritical ? '#ef4444' : '#f59e0b';
 
   return (
@@ -116,12 +119,22 @@ export default function DriftAlertsBar() {
     >
       {/* Header */}
       <div className="flex items-center gap-2 px-4 py-2.5 border-b border-white/5">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={headerColor} strokeWidth="2">
+        <svg
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke={headerColor}
+          strokeWidth="2"
+        >
           <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
           <line x1="12" y1="9" x2="12" y2="13" />
           <line x1="12" y1="17" x2="12.01" y2="17" />
         </svg>
-        <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: headerColor }}>
+        <span
+          className="text-xs font-semibold uppercase tracking-wider"
+          style={{ color: headerColor }}
+        >
           Brand Drift Alerts
         </span>
         <span
@@ -137,7 +150,7 @@ export default function DriftAlertsBar() {
 
       {/* Alert list */}
       <div className="p-2 space-y-1.5">
-        {visibleAlerts.map(alert => (
+        {visibleAlerts.map((alert) => (
           <AlertItem key={alert.id} alert={alert} onDismiss={dismiss} />
         ))}
 

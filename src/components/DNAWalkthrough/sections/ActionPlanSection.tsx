@@ -55,7 +55,7 @@ function generateActions(
   profile: XProfileData,
   brandScore: BrandScoreResult,
   doPatterns: string[],
-  voiceConsistencyScore?: number | null,
+  voiceConsistencyScore?: number | null
 ): ActionItem[] {
   const actions: ActionItem[] = [];
 
@@ -93,7 +93,7 @@ function generateActions(
   }
 
   brandScore.topImprovements.slice(0, 2).forEach((improvement) => {
-    if (!actions.some(a => a.title.includes(improvement))) {
+    if (!actions.some((a) => a.title.includes(improvement))) {
       actions.push({
         priority: 'medium',
         title: improvement,
@@ -123,10 +123,7 @@ export default function ActionPlanSection({
   const accentColor = '#0047FF';
 
   return (
-    <section
-      className="min-h-screen"
-      style={{ background: '#ffffff', position: 'relative' }}
-    >
+    <section className="min-h-screen" style={{ background: '#ffffff', position: 'relative' }}>
       <AnimatePresence mode="wait">
         {/* Stage 1: Intro */}
         {stage === 'intro' && (
@@ -241,7 +238,14 @@ export default function ActionPlanSection({
                       {isRevealed ? i + 1 : '?'}
                     </div>
                     <div style={{ flex: 1 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          marginBottom: '6px',
+                        }}
+                      >
                         <span
                           style={{
                             fontSize: '15px',
@@ -288,7 +292,7 @@ export default function ActionPlanSection({
               <motion.button
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                onClick={() => setRevealedActions(prev => prev + 1)}
+                onClick={() => setRevealedActions((prev) => prev + 1)}
                 style={{
                   padding: '14px 28px',
                   background: accentColor,
@@ -297,8 +301,8 @@ export default function ActionPlanSection({
                   cursor: 'pointer',
                   transition: 'background 0.2s ease',
                 }}
-                onMouseEnter={(e) => e.currentTarget.style.background = '#0038CC'}
-                onMouseLeave={(e) => e.currentTarget.style.background = accentColor}
+                onMouseEnter={(e) => (e.currentTarget.style.background = '#0038CC')}
+                onMouseLeave={(e) => (e.currentTarget.style.background = accentColor)}
               >
                 <span
                   style={{

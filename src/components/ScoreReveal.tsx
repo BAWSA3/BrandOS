@@ -83,21 +83,21 @@ function formatFollowers(count: number): string {
 
 function getPersonalityType(archetype?: string): string {
   const typeMap: Record<string, string> = {
-    'FORESIGHT': 'INTJ',
+    FORESIGHT: 'INTJ',
     'The Alpha': 'ENTJ',
     'The Builder': 'ISTP',
     'The Educator': 'ENFJ',
-    'ENTROPY': 'ESTP',
+    ENTROPY: 'ESTP',
     'The Analyst': 'INTP',
     'The Philosopher': 'INFJ',
     'The Networker': 'ESFJ',
     'The Contrarian': 'ENTP',
-    'ARC': 'ESTP',
-    'NULL': 'INTJ',
-    'FREQ': 'ESFJ',
-    'RELAY': 'ESFJ',
+    ARC: 'ESTP',
+    NULL: 'INTJ',
+    FREQ: 'ESFJ',
+    RELAY: 'ESFJ',
     'BUILD.EXE': 'ISTP',
-    'SIGNAL_SAGE': 'ENFJ',
+    SIGNAL_SAGE: 'ENFJ',
   };
   return typeMap[archetype || ''] || 'INTJ';
 }
@@ -107,14 +107,14 @@ function getArchetypeEmoji(archetype?: CreatorArchetype): string {
   if (!archetype) return '/archetypes/SIGNAL_SAGE.svg';
 
   const emojiMap: Record<string, string> = {
-    'ARC': '/archetypes/ARC.svg',
-    'ENTROPY': '/archetypes/ENTROPY.svg',
-    'NULL': '/archetypes/NULL.svg',
-    'FREQ': '/archetypes/FREQ.svg',
-    'RELAY': '/archetypes/RELAY.svg',
+    ARC: '/archetypes/ARC.svg',
+    ENTROPY: '/archetypes/ENTROPY.svg',
+    NULL: '/archetypes/NULL.svg',
+    FREQ: '/archetypes/FREQ.svg',
+    RELAY: '/archetypes/RELAY.svg',
     'BUILD.EXE': '/archetypes/BUILD.EXE.svg',
-    'SIGNAL_SAGE': '/archetypes/SIGNAL_SAGE.svg',
-    'FORESIGHT': '/archetypes/FORESIGHT.svg',
+    SIGNAL_SAGE: '/archetypes/SIGNAL_SAGE.svg',
+    FORESIGHT: '/archetypes/FORESIGHT.svg',
   };
 
   return emojiMap[archetype.primary] || archetype.emoji || '/archetypes/SIGNAL_SAGE.svg';
@@ -136,9 +136,10 @@ function transformToDashboardData(
     { label: 'Content', value: brandScore.phases.generate.score },
   ];
 
-  const keywords = brandScore.brandKeywords ||
-    brandScore.topStrengths.slice(0, 5).map(s => {
-      const words = s.split(' ').filter(w => w.length > 4);
+  const keywords =
+    brandScore.brandKeywords ||
+    brandScore.topStrengths.slice(0, 5).map((s) => {
+      const words = s.split(' ').filter((w) => w.length > 4);
       return words[0] || s.split(' ')[0];
     });
 
@@ -161,13 +162,17 @@ function transformToDashboardData(
       type: getPersonalityType(brandScore.archetype?.primary),
     },
     tone: brandScore.toneAnalysis || defaultTone,
-    pillars: brandScore.contentPillars?.slice(0, 3).map(p => ({
-      label: p.name,
-      value: p.frequency,
-    })) || defaultPillars,
+    pillars:
+      brandScore.contentPillars?.slice(0, 3).map((p) => ({
+        label: p.name,
+        value: p.frequency,
+      })) || defaultPillars,
     dna: {
       keywords: keywords.slice(0, 5),
-      voice: brandScore.archetype?.description || brandScore.summary || 'Authentic voice that resonates with your audience.',
+      voice:
+        brandScore.archetype?.description ||
+        brandScore.summary ||
+        'Authentic voice that resonates with your audience.',
     },
   };
 }
@@ -180,7 +185,7 @@ function ShareButtons({
   score,
   username,
   topStrength,
-  theme
+  theme,
 }: {
   score: number;
   username: string;
@@ -260,14 +265,28 @@ Check yours  brandos.xyz`;
       >
         {copied ? (
           <>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="3"
+            >
               <polyline points="20,6 9,17 4,12" />
             </svg>
             COPIED!
           </>
         ) : (
           <>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
               <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
               <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
             </svg>
@@ -297,13 +316,15 @@ export default function ScoreReveal({ profile, brandScore, isVisible, theme }: S
 
   if (!showDashboard) {
     return (
-      <div style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: '#050505',
-      }}>
+      <div
+        style={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: '#050505',
+        }}
+      >
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}

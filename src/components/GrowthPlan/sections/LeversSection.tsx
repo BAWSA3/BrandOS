@@ -12,11 +12,16 @@ interface LeversSectionProps {
 
 function getImpactColor(impact: string): string {
   switch (impact) {
-    case 'highest': return '#EF4444';
-    case 'high': return '#F59E0B';
-    case 'medium-high': return '#0047FF';
-    case 'medium': return '#6B7280';
-    default: return '#6B7280';
+    case 'highest':
+      return '#EF4444';
+    case 'high':
+      return '#F59E0B';
+    case 'medium-high':
+      return '#0047FF';
+    case 'medium':
+      return '#6B7280';
+    default:
+      return '#6B7280';
   }
 }
 
@@ -33,7 +38,7 @@ export default function LeversSection({ plan, onComplete }: LeversSectionProps) 
     if (isLastLever) {
       onComplete();
     } else {
-      setActiveLever(prev => prev + 1);
+      setActiveLever((prev) => prev + 1);
       setRevealedActions(0);
     }
   }
@@ -60,11 +65,13 @@ export default function LeversSection({ plan, onComplete }: LeversSectionProps) 
             style={{ padding: '60px 24px', maxWidth: '640px', margin: '0 auto' }}
           >
             {/* Lever counter */}
-            <div style={{
-              display: 'flex',
-              gap: '8px',
-              marginBottom: '24px',
-            }}>
+            <div
+              style={{
+                display: 'flex',
+                gap: '8px',
+                marginBottom: '24px',
+              }}
+            >
               {plan.levers.map((_, i) => (
                 <div
                   key={i}
@@ -80,13 +87,15 @@ export default function LeversSection({ plan, onComplete }: LeversSectionProps) 
             </div>
 
             {/* Terminal header */}
-            <div style={{
-              fontFamily: "'VCR OSD Mono', monospace",
-              fontSize: '10px',
-              letterSpacing: '0.1em',
-              color: 'rgba(0,0,0,0.4)',
-              marginBottom: '24px',
-            }}>
+            <div
+              style={{
+                fontFamily: "'VCR OSD Mono', monospace",
+                fontSize: '10px',
+                letterSpacing: '0.1em',
+                color: 'rgba(0,0,0,0.4)',
+                marginBottom: '24px',
+              }}
+            >
               LEVER {activeLever + 1} OF {plan.levers.length}
             </div>
 
@@ -104,50 +113,69 @@ export default function LeversSection({ plan, onComplete }: LeversSectionProps) 
               }}
             >
               {/* Title + impact */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
-                <h3 style={{
-                  fontFamily: "'Helvetica Neue', sans-serif",
-                  fontSize: '22px',
-                  fontWeight: 600,
-                  color: '#000',
-                  margin: 0,
-                }}>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'flex-start',
+                  marginBottom: '16px',
+                }}
+              >
+                <h3
+                  style={{
+                    fontFamily: "'Helvetica Neue', sans-serif",
+                    fontSize: '22px',
+                    fontWeight: 600,
+                    color: '#000',
+                    margin: 0,
+                  }}
+                >
                   {currentLever.title}
                 </h3>
-                <span style={{
-                  fontFamily: "'VCR OSD Mono', monospace",
-                  fontSize: '9px',
-                  letterSpacing: '0.1em',
-                  padding: '4px 10px',
-                  borderRadius: '4px',
-                  background: `${getImpactColor(currentLever.impact)}12`,
-                  color: getImpactColor(currentLever.impact),
-                  fontWeight: 600,
-                  whiteSpace: 'nowrap',
-                }}>
+                <span
+                  style={{
+                    fontFamily: "'VCR OSD Mono', monospace",
+                    fontSize: '9px',
+                    letterSpacing: '0.1em',
+                    padding: '4px 10px',
+                    borderRadius: '4px',
+                    background: `${getImpactColor(currentLever.impact)}12`,
+                    color: getImpactColor(currentLever.impact),
+                    fontWeight: 600,
+                    whiteSpace: 'nowrap',
+                  }}
+                >
                   IMPACT: {currentLever.impact.toUpperCase()}
                 </span>
               </div>
 
               {/* Score bar */}
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                marginBottom: '16px',
-              }}>
-                <span style={{
-                  fontFamily: "'VCR OSD Mono', monospace",
-                  fontSize: '10px',
-                  color: 'rgba(0,0,0,0.4)',
-                }}>YOUR SCORE:</span>
-                <div style={{
-                  flex: 1,
-                  height: '6px',
-                  background: 'rgba(0,0,0,0.04)',
-                  borderRadius: '3px',
-                  overflow: 'hidden',
-                }}>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  marginBottom: '16px',
+                }}
+              >
+                <span
+                  style={{
+                    fontFamily: "'VCR OSD Mono', monospace",
+                    fontSize: '10px',
+                    color: 'rgba(0,0,0,0.4)',
+                  }}
+                >
+                  YOUR SCORE:
+                </span>
+                <div
+                  style={{
+                    flex: 1,
+                    height: '6px',
+                    background: 'rgba(0,0,0,0.04)',
+                    borderRadius: '3px',
+                    overflow: 'hidden',
+                  }}
+                >
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${currentLever.score}%` }}
@@ -155,43 +183,55 @@ export default function LeversSection({ plan, onComplete }: LeversSectionProps) 
                     style={{
                       height: '100%',
                       borderRadius: '3px',
-                      background: currentLever.score >= 70 ? '#10B981'
-                        : currentLever.score >= 50 ? '#F59E0B'
-                        : '#EF4444',
+                      background:
+                        currentLever.score >= 70
+                          ? '#10B981'
+                          : currentLever.score >= 50
+                            ? '#F59E0B'
+                            : '#EF4444',
                     }}
                   />
                 </div>
-                <span style={{
-                  fontFamily: "'VCR OSD Mono', monospace",
-                  fontSize: '12px',
-                  fontWeight: 600,
-                  color: currentLever.score >= 70 ? '#10B981'
-                    : currentLever.score >= 50 ? '#F59E0B'
-                    : '#EF4444',
-                }}>
+                <span
+                  style={{
+                    fontFamily: "'VCR OSD Mono', monospace",
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    color:
+                      currentLever.score >= 70
+                        ? '#10B981'
+                        : currentLever.score >= 50
+                          ? '#F59E0B'
+                          : '#EF4444',
+                  }}
+                >
                   {currentLever.score}/100
                 </span>
               </div>
 
               {/* Description */}
-              <p style={{
-                fontFamily: "'Helvetica Neue', sans-serif",
-                fontSize: '14px',
-                color: 'rgba(0,0,0,0.6)',
-                lineHeight: 1.7,
-                margin: '0 0 20px 0',
-              }}>
+              <p
+                style={{
+                  fontFamily: "'Helvetica Neue', sans-serif",
+                  fontSize: '14px',
+                  color: 'rgba(0,0,0,0.6)',
+                  lineHeight: 1.7,
+                  margin: '0 0 20px 0',
+                }}
+              >
                 {currentLever.description}
               </p>
 
               {/* Action items */}
-              <div style={{
-                fontFamily: "'VCR OSD Mono', monospace",
-                fontSize: '10px',
-                letterSpacing: '0.05em',
-                color: 'rgba(0,0,0,0.4)',
-                marginBottom: '12px',
-              }}>
+              <div
+                style={{
+                  fontFamily: "'VCR OSD Mono', monospace",
+                  fontSize: '10px',
+                  letterSpacing: '0.05em',
+                  color: 'rgba(0,0,0,0.4)',
+                  marginBottom: '12px',
+                }}
+              >
                 ACTION ITEMS:
               </div>
 
@@ -216,21 +256,25 @@ export default function LeversSection({ plan, onComplete }: LeversSectionProps) 
                         alignItems: 'flex-start',
                       }}
                     >
-                      <span style={{
-                        fontFamily: "'VCR OSD Mono', monospace",
-                        fontSize: '11px',
-                        fontWeight: 600,
-                        color: isRevealed ? '#0047FF' : 'rgba(0,0,0,0.2)',
-                        minWidth: '20px',
-                      }}>
+                      <span
+                        style={{
+                          fontFamily: "'VCR OSD Mono', monospace",
+                          fontSize: '11px',
+                          fontWeight: 600,
+                          color: isRevealed ? '#0047FF' : 'rgba(0,0,0,0.2)',
+                          minWidth: '20px',
+                        }}
+                      >
                         {i + 1}.
                       </span>
-                      <span style={{
-                        fontFamily: "'Helvetica Neue', sans-serif",
-                        fontSize: '13px',
-                        color: isRevealed ? 'rgba(0,0,0,0.7)' : 'rgba(0,0,0,0.2)',
-                        lineHeight: 1.5,
-                      }}>
+                      <span
+                        style={{
+                          fontFamily: "'Helvetica Neue', sans-serif",
+                          fontSize: '13px',
+                          color: isRevealed ? 'rgba(0,0,0,0.7)' : 'rgba(0,0,0,0.2)',
+                          lineHeight: 1.5,
+                        }}
+                      >
                         {isRevealed ? action : '???'}
                       </span>
                     </motion.div>
@@ -251,19 +295,23 @@ export default function LeversSection({ plan, onComplete }: LeversSectionProps) 
                     borderRadius: '6px',
                   }}
                 >
-                  <span style={{
-                    fontFamily: "'VCR OSD Mono', monospace",
-                    fontSize: '10px',
-                    color: '#10B981',
-                    letterSpacing: '0.05em',
-                  }}>
+                  <span
+                    style={{
+                      fontFamily: "'VCR OSD Mono', monospace",
+                      fontSize: '10px',
+                      color: '#10B981',
+                      letterSpacing: '0.05em',
+                    }}
+                  >
                     TARGET:
                   </span>{' '}
-                  <span style={{
-                    fontFamily: "'Helvetica Neue', sans-serif",
-                    fontSize: '13px',
-                    color: 'rgba(0,0,0,0.7)',
-                  }}>
+                  <span
+                    style={{
+                      fontFamily: "'Helvetica Neue', sans-serif",
+                      fontSize: '13px',
+                      color: 'rgba(0,0,0,0.7)',
+                    }}
+                  >
                     {currentLever.target}
                   </span>
                 </motion.div>
@@ -275,7 +323,7 @@ export default function LeversSection({ plan, onComplete }: LeversSectionProps) 
               <button
                 onClick={() => {
                   if (!allActionsRevealed) {
-                    setRevealedActions(prev => prev + 1);
+                    setRevealedActions((prev) => prev + 1);
                   } else {
                     nextLever();
                   }
@@ -288,17 +336,21 @@ export default function LeversSection({ plan, onComplete }: LeversSectionProps) 
                   cursor: 'pointer',
                   transition: 'all 0.2s',
                 }}
-                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
-                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.02)')}
+                onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}
               >
-                <span style={{
-                  fontFamily: "'VCR OSD Mono', monospace",
-                  fontSize: '11px',
-                  letterSpacing: '0.12em',
-                  color: '#fff',
-                }}>
+                <span
+                  style={{
+                    fontFamily: "'VCR OSD Mono', monospace",
+                    fontSize: '11px',
+                    letterSpacing: '0.12em',
+                    color: '#fff',
+                  }}
+                >
                   {allActionsRevealed
-                    ? (isLastLever ? 'SHOW MY EXECUTION PLAN' : `NEXT LEVER →`)
+                    ? isLastLever
+                      ? 'SHOW MY EXECUTION PLAN'
+                      : `NEXT LEVER →`
                     : `REVEAL ACTION ${revealedActions + 1}`}
                 </span>
               </button>
