@@ -146,6 +146,12 @@ function transformToDashboardData(
       brandScore: brandScore.overallScore,
       voiceConsistency: brandScore.phases.check.score,
       engagementScore: brandScore.phases.scale.score,
+      phaseScores: {
+        identity: brandScore.phases.define.score,
+        consistency: brandScore.phases.check.score,
+        content: brandScore.phases.generate.score,
+        growth: brandScore.phases.scale.score,
+      },
     },
     personality: {
       archetype: normalizeArchetypeName(brandScore.archetype?.primary || 'BUILD.EXE'),

@@ -15,6 +15,12 @@ const mockData: BrandOSDashboardData = {
     brandScore: 87,
     voiceConsistency: 92,
     engagementScore: 78,
+    phaseScores: {
+      identity: 22,
+      consistency: 23,
+      content: 22,
+      growth: 20,
+    },
   },
   personality: {
     archetype: 'FORESIGHT',
