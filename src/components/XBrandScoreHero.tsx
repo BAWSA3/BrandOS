@@ -1657,7 +1657,7 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
                       console.error('Failed to capture score card:', err);
                     }
                   }
-                  setFlowState('walkthrough');
+                  setFlowState('signup');
                 }}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
