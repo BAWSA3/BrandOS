@@ -825,8 +825,9 @@ export default function XBrandScoreHero({
       const profileData = await profileResponse.json();
 
       if (!profileResponse.ok || !profileData.profile) {
-        // Profile doesn't exist - show error immediately
-        setError(`@${username.trim()} not found on X`);
+        // Show the actual error from the API, or fall back to "not found"
+        const errorMsg = profileData?.error || `@${username.trim()} not found on X`;
+        setError(errorMsg);
         setIsValidating(false);
         return;
       }

@@ -58,8 +58,11 @@ class MemoryCache {
   }
 }
 
-// X Profile cache - 30 minute TTL (profiles don't change often)
-export const profileCache = new MemoryCache(30);
+// X Profile cache - 24 hour TTL (profiles rarely change, and Basic tier only allows 100 lookups/day)
+export const profileCache = new MemoryCache(1440);
 
 // X Tweets cache - 15 minute TTL (tweets are more dynamic)
 export const tweetsCache = new MemoryCache(15);
+
+// Negative cache - remember "not found" usernames for 1 hour to avoid wasting lookups
+export const notFoundCache = new MemoryCache(60);

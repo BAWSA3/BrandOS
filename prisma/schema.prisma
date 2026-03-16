@@ -640,6 +640,22 @@ model UserSession {
   @@index([feature])
 }
 
+// ===== X PROFILE CACHE (persistent across deploys) =====
+
+model XProfileCache {
+  id               String   @id @default(cuid())
+  username         String   @unique // lowercase X username
+  profileData      String   // JSON: full XProfile object
+  followersCount   Int      @default(0)
+  tweetCount       Int      @default(0)
+  fetchedAt        DateTime @default(now()) // when we last hit X API
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([username])
+  @@index([fetchedAt])
+}
+
 // ===== ONCHAIN ATTESTATIONS =====
 
 model OnchainAttestation {
