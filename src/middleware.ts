@@ -1,57 +1,44 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-// Routes that require authentication
-const protectedRoutes: string[] = [
-  '/app',
-  '/growth-plan',
-];
-
-// Routes that are always public
-const publicRoutes = [
-  '/',
-  '/score',
-  '/shared',
-  '/leaderboard',
-  '/admin',
-  '/api/auth',
-  '/article',
+// ============================================================================
+// ALLOWED PAGES — only these pages are publicly accessible.
+// Everything else returns 404. Add routes here as you launch them.
+// ============================================================================
+const allowedPages = [
+  '/',           // Homepage / lead magnet
+  '/score',      // Score flow
+  '/scan',       // Scan results (/scan/[username])
+  '/shared',     // Shared brand profiles (/shared/[token])
+  '/thanks',     // Post-signup thank you
+  '/article',    // UTM tracking for article referrals
+  '/privacy',    // Legal: privacy policy
+  '/terms',      // Legal: terms of service
 ];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Check if route requires authentication
-  const isProtectedRoute = protectedRoutes.some(route =>
-    pathname.startsWith(route) && !pathname.startsWith('/api')
-  );
-
-  // Skip middleware for public routes and API routes
-  const isPublicRoute = publicRoutes.some(route =>
-    pathname === route || pathname.startsWith(`${route}/`)
-  );
-
-  // Also skip for static files and Next.js internals
+  // Always allow: static files, Next.js internals, API routes
   if (
     pathname.startsWith('/_next') ||
     pathname.startsWith('/static') ||
-    pathname.includes('.') // Static files like .ico, .svg, etc.
+    pathname.startsWith('/api') ||
+    pathname.includes('.') // .ico, .svg, .png, etc.
   ) {
     return NextResponse.next();
   }
 
-  if (isProtectedRoute && !isPublicRoute) {
-    // Check for auth tokens in cookies
-    const accessToken = request.cookies.get('sb-access-token')?.value;
+  // Check if page is in the allowed list
+  const isAllowed = allowedPages.some(route =>
+    pathname === route || pathname.startsWith(`${route}/`)
+  );
 
-    if (!accessToken) {
-      // Store the attempted URL to redirect back after login
-      const redirectUrl = new URL('/', request.url);
-      redirectUrl.searchParams.set('redirect', pathname);
-      redirectUrl.searchParams.set('authRequired', 'true');
-
-      return NextResponse.redirect(redirectUrl);
-    }
+  if (!isAllowed) {
+    // Return 404 for all non-allowed pages
+    const url = request.nextUrl.clone();
+    url.pathname = '/';
+    return NextResponse.redirect(url);
   }
 
   return NextResponse.next();
