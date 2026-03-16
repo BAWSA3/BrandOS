@@ -225,7 +225,7 @@ Check yours  brandos.xyz`;
           display: 'flex',
           alignItems: 'center',
           gap: '8px',
-          padding: '14px 28px',
+          padding: 'clamp(10px, 2.5vw, 14px) clamp(16px, 5vw, 28px)',
           background: '#2E6AFF',
           border: 'none',
           borderRadius: '4px',
@@ -251,7 +251,7 @@ Check yours  brandos.xyz`;
           display: 'flex',
           alignItems: 'center',
           gap: '8px',
-          padding: '14px 28px',
+          padding: 'clamp(10px, 2.5vw, 14px) clamp(16px, 5vw, 28px)',
           background: copied ? 'rgba(0, 255, 65, 0.2)' : theme === 'dark' ? '#1A1A1A' : '#F0F0F0',
           border: `2px solid ${copied ? '#00FF41' : theme === 'dark' ? '#333' : '#DDD'}`,
           borderRadius: '4px',
@@ -366,7 +366,7 @@ export default function ScoreReveal({ profile, brandScore, isVisible, theme }: S
           flexDirection: 'column',
           alignItems: 'center',
           gap: '24px',
-          padding: '48px 24px',
+          padding: 'clamp(24px, 6vw, 48px) clamp(16px, 4vw, 24px)',
           background: '#050505',
           borderTop: '1px solid #222',
         }}
@@ -387,7 +387,7 @@ export default function ScoreReveal({ profile, brandScore, isVisible, theme }: S
           <h3
             style={{
               fontFamily: "'Inter', sans-serif",
-              fontSize: '24px',
+              fontSize: 'clamp(18px, 5vw, 24px)',
               fontWeight: 900,
               fontStyle: 'italic',
               color: '#FFFFFF',
@@ -406,7 +406,7 @@ export default function ScoreReveal({ profile, brandScore, isVisible, theme }: S
         />
 
         {/* Action Buttons */}
-        <div style={{ display: 'flex', gap: '16px', marginTop: '16px' }}>
+        <div style={{ display: 'flex', gap: '12px', marginTop: '16px', flexWrap: 'wrap', justifyContent: 'center' }}>
           <motion.button
             onClick={() => window.location.reload()}
             whileHover={{ scale: 1.02 }}

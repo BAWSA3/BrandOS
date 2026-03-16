@@ -32,153 +32,201 @@ export default function TerminalProgressBar({
   const currentCommand = PHASE_COMMANDS[currentPhase - 1] || PHASE_COMMANDS[0];
 
   return (
-    <motion.div
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -20 }}
-      transition={{ duration: 0.5 }}
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        bottom: 0,
-        zIndex: 100,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: '8px',
-        padding: '24px',
-      }}
-    >
-      {/* Terminal window container */}
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '6px',
-          padding: '12px 20px',
-          background: 'rgba(255, 255, 255, 0.95)',
-          border: '1px solid rgba(0, 0, 0, 0.15)',
-          borderRadius: '4px',
-          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
-          backdropFilter: 'blur(8px)',
-        }}
+    <>
+      <style jsx>{`
+        .terminal-progress-container {
+          position: fixed;
+          top: 0;
+          left: 0;
+          bottom: 0;
+          z-index: 100;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          padding: 24px;
+        }
+        @media (max-width: 768px) {
+          .terminal-progress-container {
+            bottom: auto;
+            right: 0;
+            padding: 12px 16px;
+            flex-direction: row;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+          }
+        }
+        .terminal-progress-window {
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+          padding: 12px 20px;
+          background: rgba(255, 255, 255, 0.95);
+          border: 1px solid rgba(0, 0, 0, 0.15);
+          border-radius: 4px;
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+          backdrop-filter: blur(8px);
+        }
+        @media (max-width: 768px) {
+          .terminal-progress-window {
+            padding: 6px 12px;
+            gap: 4px;
+            box-shadow: none;
+            border: none;
+            background: transparent;
+            backdrop-filter: none;
+            flex-direction: row;
+            align-items: center;
+          }
+        }
+        .terminal-phase-list {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+        }
+        @media (max-width: 768px) {
+          .terminal-phase-list {
+            flex-direction: row;
+            gap: 6px;
+          }
+        }
+        .terminal-phase-item {
+          padding: 4px 10px;
+          border-radius: 2px;
+        }
+        @media (max-width: 768px) {
+          .terminal-phase-item {
+            padding: 2px 6px;
+          }
+        }
+        .terminal-ascii-bar {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 12px;
+        }
+        @media (max-width: 768px) {
+          .terminal-ascii-bar {
+            gap: 6px;
+          }
+        }
+        .terminal-command-line {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 4px;
+        }
+        @media (max-width: 768px) {
+          .terminal-command-line {
+            display: none;
+          }
+        }
+      `}</style>
+      <motion.div
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: -20 }}
+        transition={{ duration: 0.5 }}
+        className="terminal-progress-container"
       >
-        {/* Phase indicators - stacked vertically */}
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '4px',
-          }}
-        >
-          {PHASE_LABELS.map((label, index) => {
-            const phaseNum = index + 1;
-            const isActive = currentPhase === phaseNum;
-            const isCompleted = currentPhase > phaseNum;
+        <div className="terminal-progress-window">
+          {/* Phase indicators */}
+          <div className="terminal-phase-list">
+            {PHASE_LABELS.map((label, index) => {
+              const phaseNum = index + 1;
+              const isActive = currentPhase === phaseNum;
+              const isCompleted = currentPhase > phaseNum;
 
-            return (
-              <motion.div
-                key={label}
-                animate={{
-                  opacity: isActive || isCompleted ? 1 : 0.4,
-                }}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  padding: '4px 10px',
-                  background: isActive
-                    ? 'rgba(0, 71, 255, 0.08)'
-                    : isCompleted
-                      ? 'rgba(16, 185, 129, 0.08)'
-                      : 'transparent',
-                  border: isActive
-                    ? '1px solid rgba(0, 71, 255, 0.3)'
-                    : isCompleted
-                      ? '1px solid rgba(16, 185, 129, 0.3)'
-                      : '1px solid transparent',
-                  borderRadius: '2px',
-                }}
-              >
-                <span
+              return (
+                <motion.div
+                  key={label}
+                  animate={{
+                    opacity: isActive || isCompleted ? 1 : 0.4,
+                  }}
+                  className="terminal-phase-item"
                   style={{
-                    fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace",
-                    fontSize: '10px',
-                    letterSpacing: '0.1em',
-                    color: isCompleted ? '#10B981' : isActive ? '#0047FF' : 'rgba(0, 0, 0, 0.4)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    background: isActive
+                      ? 'rgba(0, 71, 255, 0.08)'
+                      : isCompleted
+                        ? 'rgba(16, 185, 129, 0.08)'
+                        : 'transparent',
+                    border: isActive
+                      ? '1px solid rgba(0, 71, 255, 0.3)'
+                      : isCompleted
+                        ? '1px solid rgba(16, 185, 129, 0.3)'
+                        : '1px solid transparent',
                   }}
                 >
-                  {isCompleted ? '✓' : `${phaseNum}.`} {label}
-                </span>
-              </motion.div>
-            );
-          })}
-        </div>
+                  <span
+                    style={{
+                      fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace",
+                      fontSize: '10px',
+                      letterSpacing: '0.1em',
+                      color: isCompleted ? '#10B981' : isActive ? '#0047FF' : 'rgba(0, 0, 0, 0.4)',
+                    }}
+                  >
+                    {isCompleted ? '✓' : `${phaseNum}.`} {label}
+                  </span>
+                </motion.div>
+              );
+            })}
+          </div>
 
-        {/* ASCII Progress bar and command - centered */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '12px',
-          }}
-        >
-          <span
-            style={{
-              fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace",
-              fontSize: '11px',
-              color: 'rgba(0, 0, 0, 0.6)',
-              whiteSpace: 'pre',
-            }}
-          >
-            {AsciiProgressBar({ progress: overallPercent, width: 16 })}
-          </span>
-          <span
-            style={{
-              fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace",
-              fontSize: '11px',
-              color: '#0047FF',
-              minWidth: '36px',
-            }}
-          >
-            {overallPercent}%
-          </span>
-        </div>
+          {/* ASCII Progress bar and command */}
+          <div className="terminal-ascii-bar">
+            <span
+              style={{
+                fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace",
+                fontSize: '11px',
+                color: 'rgba(0, 0, 0, 0.6)',
+                whiteSpace: 'pre',
+              }}
+            >
+              {AsciiProgressBar({ progress: overallPercent, width: 16 })}
+            </span>
+            <span
+              style={{
+                fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace",
+                fontSize: '11px',
+                color: '#0047FF',
+                minWidth: '36px',
+              }}
+            >
+              {overallPercent}%
+            </span>
+          </div>
 
-        {/* Current command with blinking cursor - centered */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '4px',
-          }}
-        >
-          <span
-            style={{
-              fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace",
-              fontSize: '10px',
-              color: 'rgba(0, 0, 0, 0.5)',
-            }}
-          >
-            {currentCommand}
-          </span>
-          <motion.span
-            animate={{ opacity: [1, 0] }}
-            transition={{ duration: 0.5, repeat: Infinity }}
-            style={{
-              fontFamily: "'VCR OSD Mono', monospace",
-              fontSize: '10px',
-              color: '#0047FF',
-            }}
-          >
-            █
-          </motion.span>
+          {/* Current command with blinking cursor */}
+          <div className="terminal-command-line">
+            <span
+              style={{
+                fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace",
+                fontSize: '10px',
+                color: 'rgba(0, 0, 0, 0.5)',
+              }}
+            >
+              {currentCommand}
+            </span>
+            <motion.span
+              animate={{ opacity: [1, 0] }}
+              transition={{ duration: 0.5, repeat: Infinity }}
+              style={{
+                fontFamily: "'VCR OSD Mono', monospace",
+                fontSize: '10px',
+                color: '#0047FF',
+              }}
+            >
+              █
+            </motion.span>
+          </div>
         </div>
-      </div>
-    </motion.div>
+      </motion.div>
+    </>
   );
 }

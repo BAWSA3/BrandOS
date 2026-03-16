@@ -1128,7 +1128,7 @@ export default function XBrandScoreHero({
         flexDirection: 'column',
         justifyContent: 'center',
         alignItems: 'center',
-        padding: flowState === 'input' ? '0' : flowState === 'journey' ? '0' : '48px 24px',
+        padding: flowState === 'input' ? '0' : flowState === 'journey' ? '0' : 'clamp(16px, 5vw, 48px) clamp(12px, 3vw, 24px)',
         position: 'relative',
         overflow:
           flowState === 'input'
@@ -1396,7 +1396,7 @@ export default function XBrandScoreHero({
                   alignItems: 'center',
                   gap: '12px',
                   width: '100%',
-                  maxWidth: '420px',
+                  maxWidth: 'min(420px, 90vw)',
                 }}
               >
                 {/* Terminal Input with > prefix */}
@@ -1433,8 +1433,8 @@ export default function XBrandScoreHero({
                     className="terminal-input"
                     style={{
                       width: '100%',
-                      fontSize: '1.125rem',
-                      padding: '1rem 1rem 1rem 32px',
+                      fontSize: 'clamp(16px, 4vw, 1.125rem)',
+                      padding: 'clamp(0.75rem, 2.5vw, 1rem) clamp(0.75rem, 2.5vw, 1rem) clamp(0.75rem, 2.5vw, 1rem) 32px',
                       textAlign: 'left',
                       borderRadius: '10px',
                       border: `1px solid ${error ? '#EF4444' : 'rgba(0,0,0,0.15)'}`,

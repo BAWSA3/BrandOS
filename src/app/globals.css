@@ -1631,7 +1631,7 @@ code {
   margin-bottom: -120px;
 }
 .hero-logo-img {
-  width: clamp(1500px, 250vw, 3500px);
+  width: clamp(300px, 250vw, 3500px);
   max-height: 55vh;
 }
 
@@ -1650,7 +1650,7 @@ code {
     margin-bottom: -30px;
   }
   .hero-logo-img {
-    width: clamp(600px, 180vw, 1200px);
+    width: clamp(280px, 180vw, 1200px);
     max-height: 30vh;
   }
 
@@ -1679,7 +1679,7 @@ code {
     margin-bottom: -20px;
   }
   .hero-logo-img {
-    width: clamp(400px, 160vw, 800px);
+    width: clamp(250px, 160vw, 800px);
     max-height: 25vh;
   }
 

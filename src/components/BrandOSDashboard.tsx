@@ -158,7 +158,7 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({
             <Activity className="text-white/80 w-6 h-6 animate-pulse" />
           </div>
           <div className="relative z-10 my-auto">
-            <h1 className="font-brand font-black italic text-[120px] md:text-[180px] leading-none tracking-tighter text-white drop-shadow-xl">
+            <h1 className="font-brand font-black italic text-[72px] sm:text-[120px] md:text-[180px] leading-none tracking-tighter text-white drop-shadow-xl">
               <AnimateNumber
                 transition={{
                   y: { type: 'spring', duration: 0.8, bounce: 0 },
