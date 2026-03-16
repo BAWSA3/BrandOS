@@ -2209,6 +2209,34 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
             >
               ← BACK TO RESULTS
             </motion.button>
+            <motion.button
+              onClick={() => {
+                setFlowState('input');
+                setUsername('');
+                setProfile(null);
+                setBrandScore(null);
+                setGeneratedBrandDNA(null);
+                setShowConfetti(false);
+                setSignupStatus('idle');
+                setEmail('');
+              }}
+              style={{
+                fontFamily: "'VCR OSD Mono', monospace",
+                fontSize: '11px',
+                letterSpacing: '0.1em',
+                color: 'rgba(255,255,255,0.3)',
+                background: 'transparent',
+                border: 'none',
+                cursor: 'pointer',
+                padding: '8px 16px',
+                marginTop: '0px',
+                transition: 'color 0.3s ease',
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = 'rgba(255,255,255,0.6)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = 'rgba(255,255,255,0.3)'; }}
+            >
+              ← TRY ANOTHER USERNAME
+            </motion.button>
             </motion.div>
           </motion.div>
         )}
