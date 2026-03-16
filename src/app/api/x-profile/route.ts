@@ -267,8 +267,8 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: msg }, { status: 404 });
       }
       return NextResponse.json(
-        { error: result.error || 'Failed to fetch X profile. Please try again.' },
-        { status: result.status },
+        { error: 'We\'re experiencing high demand right now. Please try again in a few minutes.' },
+        { status: 503 },
       );
     }
 
