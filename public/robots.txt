@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://mybrandos.app/sitemap.xml
