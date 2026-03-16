@@ -44,6 +44,12 @@ export interface BrandOSDashboardData {
     brandScore: number;
     voiceConsistency: number;
     engagementScore: number;
+    phaseScores?: {
+      identity: number;
+      consistency: number;
+      content: number;
+      growth: number;
+    };
   };
   personality: {
     archetype: string;
@@ -147,6 +153,8 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({
           className="md:col-span-2 md:row-span-2 bg-[#2E6AFF] rounded-[4px] relative p-6 md:p-10 flex flex-col justify-between overflow-visible group hover:brightness-110 transition-all duration-500"
         >
           <div className="absolute inset-0 bg-grid-pattern opacity-30 pointer-events-none" />
+
+          {/* Top row: BRAND_SCORE badge left, Profile right */}
           <div className="flex justify-between items-start z-10">
             <span className="font-os text-xs md:text-sm text-white/90 tracking-widest border border-white/40 px-2 py-1 rounded-[2px] bg-[#2E6AFF] relative group/info inline-flex items-center gap-1.5">
               BRAND_SCORE
@@ -155,9 +163,19 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({
                 Your brand strength (0-100)
               </span>
             </span>
-            <Activity className="text-white/80 w-6 h-6 animate-pulse" />
+            <div className="flex items-center gap-3">
+              <div className="text-right">
+                <h2 className="font-brand font-black italic text-white text-lg md:text-xl leading-tight">{data.profile.displayName}</h2>
+                <p className="font-os text-[10px] md:text-xs text-white/60">@{data.profile.username}</p>
+              </div>
+              <div className="w-12 h-12 md:w-14 md:h-14 rounded-full overflow-hidden border-2 border-white/30 shrink-0">
+                <img src={data.profile.profileImageUrl} alt={data.profile.displayName} className="w-full h-full object-cover" />
+              </div>
+            </div>
           </div>
-          <div className="relative z-10 my-auto">
+
+          {/* Middle: Giant score left, Phase scores right */}
+          <div className="relative z-10 flex items-center justify-between my-auto">
             <h1 className="font-brand font-black italic text-[120px] md:text-[180px] leading-none tracking-tighter text-white drop-shadow-xl">
               <AnimateNumber
                 transition={{
@@ -170,19 +188,38 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({
                 {data.scores.brandScore}
               </AnimateNumber>
             </h1>
+            {data.scores.phaseScores && (
+              <div className="hidden md:flex flex-col gap-3 text-right">
+                {[
+                  { label: 'IDENTITY', value: data.scores.phaseScores.identity },
+                  { label: 'CONSISTENCY', value: data.scores.phaseScores.consistency },
+                  { label: 'CONTENT', value: data.scores.phaseScores.content },
+                  { label: 'GROWTH', value: data.scores.phaseScores.growth },
+                ].map((phase) => (
+                  <div key={phase.label} className="flex items-center gap-3 justify-end">
+                    <span className="font-os text-[10px] md:text-xs text-white/50 tracking-widest">{phase.label}</span>
+                    <span className="font-brand font-black italic text-white text-lg md:text-xl">
+                      +<AnimateNumber trend={1}>{phase.value}</AnimateNumber>
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
+
+          {/* Bottom row: Voice Consistency | Archetype | Engagement */}
           <div className="z-10 grid grid-cols-3 gap-4 md:gap-6 border-t border-white/20 pt-6 items-end">
             <div>
               <span className="font-os text-[10px] md:text-xs text-white/70 block mb-1 uppercase tracking-wider">
                 Voice Consistency
               </span>
               <div className="flex items-center gap-2">
-                <span className="text-2xl font-brand font-bold italic text-white">
+                <span className="text-xl md:text-2xl font-brand font-bold italic text-white">
                   <AnimateNumber suffix="%" trend={1}>
                     {data.scores.voiceConsistency}
                   </AnimateNumber>
                 </span>
-                <div className="h-1.5 w-12 bg-white/30 rounded-full overflow-hidden">
+                <div className="h-1.5 w-10 md:w-12 bg-white/30 rounded-full overflow-hidden">
                   <div
                     style={{ width: `${data.scores.voiceConsistency}%` }}
                     className="h-full bg-white transition-all duration-700"
@@ -197,10 +234,10 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({
                 alt={data.personality.archetype}
                 size={48}
               />
-              <span className="font-os text-[10px] md:text-xs text-white font-bold tracking-widest">
+              <span className="font-os text-[9px] md:text-[10px] text-white font-bold tracking-widest">
                 {data.personality.archetype}
               </span>
-              <span className="font-os text-[8px] md:text-[9px] text-white/60 tracking-wide text-center leading-tight">
+              <span className="font-os text-[7px] md:text-[8px] text-white/50 tracking-wide text-center leading-tight">
                 {ARCHETYPE_META[data.personality.archetype]?.tagline || ''}
               </span>
             </div>
@@ -208,7 +245,7 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({
               <span className="font-os text-[10px] md:text-xs text-white/70 block mb-1 uppercase tracking-wider">
                 Engagement
               </span>
-              <span className="text-2xl font-brand font-bold italic text-white">
+              <span className="text-xl md:text-2xl font-brand font-bold italic text-white">
                 <AnimateNumber suffix="/100" trend={1}>
                   {data.scores.engagementScore}
                 </AnimateNumber>
