@@ -5,7 +5,7 @@ import { sendWelcomeSequence, SegmentIndicators } from '@/lib/email';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { email, source = 'landing', xUsername, brandData, segmentData } = body;
+    const { email, source = 'landing', xUsername, brandData, segmentData, scoreCardImage } = body;
 
     // Validate email
     if (!email || typeof email !== 'string') {
@@ -24,15 +24,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Add signup
-    const result = await addEmailSignup(email, source);
-
-    if (!result.success) {
-      return NextResponse.json(
-        { error: result.error },
-        { status: 409 } // Conflict - already exists
-      );
-    }
+    // Add signup (continue even if already exists — we still want to send the email)
+    const result = await addEmailSignup(email, source, xUsername);
+    const isExisting = !result.success;
 
     // Build segment indicators from signup data
     const segmentIndicators: SegmentIndicators | undefined = segmentData ? {
@@ -60,6 +54,23 @@ export async function POST(request: NextRequest) {
           archetypeStrengths: brandData?.archetypeStrengths || [],
           topImprovement: brandData?.topImprovement || '',
           topStrength: brandData?.topStrength || '',
+          scoreCardImage: scoreCardImage || undefined,
+          // Data-driven analysis fields
+          defineInsights: brandData?.defineInsights || [],
+          checkInsights: brandData?.checkInsights || [],
+          generateInsights: brandData?.generateInsights || [],
+          scaleInsights: brandData?.scaleInsights || [],
+          summary: brandData?.summary || '',
+          topImprovements: brandData?.topImprovements || [],
+          topStrengths: brandData?.topStrengths || [],
+          voiceConsistency: brandData?.voiceConsistency,
+          bestContentFormat: brandData?.bestContentFormat,
+          contentPillars: brandData?.contentPillars,
+          identitySignature: brandData?.identitySignature,
+          contentPillarNames: brandData?.contentPillarNames,
+          topicConcentration: brandData?.topicConcentration,
+          audienceSignal: brandData?.audienceSignal,
+          archetypeIconUrl: brandData?.archetypeIconUrl,
         },
         segmentIndicators
       );
@@ -70,13 +81,14 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(
-      { success: true, message: 'Successfully signed up!' },
-      { status: 201 }
+      { success: true, message: isExisting ? 'Email sent!' : 'Successfully signed up!' },
+      { status: isExisting ? 200 : 201 }
     );
   } catch (error) {
-    console.error('Signup error:', error);
+    console.error('Signup error:', error instanceof Error ? error.message : error);
+    console.error('Signup stack:', error instanceof Error ? error.stack : 'no stack');
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Internal server error', details: error instanceof Error ? error.message : String(error) },
       { status: 500 }
     );
   }

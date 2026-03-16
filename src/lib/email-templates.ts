@@ -9,7 +9,7 @@
  * - username: X handle
  * - score: Overall score (0-100)
  * - defineScore, checkScore, generateScore, scaleScore: Phase scores
- * - archetype: "The Professor", "The Plug", etc.
+ * - archetype: "SIGNAL_SAGE", "RELAY", etc.
  * - archetypeEmoji: 🎓, 🔌, etc.
  * - archetypeTagline: From the archetype
  * - archetypeDescription: Why it fits
@@ -37,6 +37,25 @@ export interface EmailTemplateData {
   archetypeStrengths: string[];
   topImprovement: string;
   topStrength: string;
+  scoreCardImage?: string;
+  // Data-driven analysis fields
+  defineInsights: string[];
+  checkInsights: string[];
+  generateInsights: string[];
+  scaleInsights: string[];
+  summary: string;
+  topImprovements: string[];
+  topStrengths: string[];
+  voiceConsistency?: number;
+  bestContentFormat?: string;
+  contentPillars?: { name: string; frequency: number }[];
+  // Content-derived identity fields
+  identitySignature?: string;
+  contentPillarNames?: string[];
+  topicConcentration?: number;
+  audienceSignal?: string;
+  // Archetype visual
+  archetypeIconUrl?: string;
 }
 
 // =============================================================================
@@ -145,27 +164,88 @@ P.S. Know someone who needs to discover their Brand DNA? Send them to mybrandos.
 
 export const email1ScoreExplainer: EmailTemplate = {
   id: 'score-explainer',
-  name: 'Thanks for trying BrandOS',
+  name: 'Your Brand Breakdown',
   sendDelay: 'immediate',
   subjectLines: [
-    'Thanks for trying BrandOS, {{username}}!',
-    'You scored {{score}}/100 — here\'s what\'s next',
-    'Hey {{username}}, thanks for checking out BrandOS',
+    'Your brand breakdown is here, @{{username}}',
+    '@{{username}}, your Brand Score: {{score}}/100',
+    'Your brand breakdown — {{score}}/100',
   ],
   body: (data) => {
-    return `Hey ${data.name}!
+    const defineInsights = (data.defineInsights || []).map(i => `→ ${i}`).join('\n');
+    const checkInsights = (data.checkInsights || []).map(i => `→ ${i}`).join('\n');
+    const generateInsights = (data.generateInsights || []).map(i => `→ ${i}`).join('\n');
+    const scaleInsights = (data.scaleInsights || []).map(i => `→ ${i}`).join('\n');
 
-This is Bawsa, the man behind BrandOS. I just wanted to say thank you for trying my first ever vibe coded product. What you just experienced is simply the tip of the iceberg. I have a ton of new ideas I already wanted to implement, but it's important for me to gauge interest at first right?
+    const voiceLine = data.voiceConsistency != null
+      ? `\n→ Voice Consistency Score: ${data.voiceConsistency}%`
+      : '';
 
-By the way, you scored ${data.score}/100 on your Brand Score — not bad! Your archetype is ${data.archetype} ${data.archetypeEmoji}
+    const contentExtras: string[] = [];
+    if (data.bestContentFormat) {
+      contentExtras.push(`→ Best Performing Format: ${data.bestContentFormat}`);
+    }
+    if (data.contentPillars && data.contentPillars.length > 0) {
+      contentExtras.push(`→ Content Pillars: ${data.contentPillars.map(p => p.name).join(', ')}`);
+    }
+    const contentExtrasStr = contentExtras.length > 0 ? '\n' + contentExtras.join('\n') : '';
 
-Anyways, expect updates from me and how we can better and improve your brand.
+    const strengths = (data.topStrengths || (data.topStrength ? [data.topStrength] : []))
+      .map(s => `→ ${s}`).join('\n');
+    const improvements = (data.topImprovements || (data.topImprovement ? [data.topImprovement] : []))
+      .map(i => `→ ${i}`).join('\n');
 
-Have a good one!
+    const summaryBlock = data.summary ? `\n${data.summary}\n` : '';
+
+    return `Hey @${data.username}!
+
+Bawsa here. Just wanted to say thank you for signing up for early access on BrandOS. My goal with this is just to help creators, builders, founders and new startups build and scale their brand presence. This is just the start of something big and I'm grateful to have you be a part of it.
+
+Alright, let's have a look at your brand breakdown.
+
+{{SCORE_CARD_IMAGE}}
+
+**HOW WE SCORED YOUR BRAND**
+
+Your Brand Score of ${data.score}/100 is based on 4 key dimensions we analyze from your profile and content. Here's exactly what we found:
+
+**IDENTITY (${data.defineScore}/100)**
+${[
+      data.identitySignature ? `→ You're known for: ${data.identitySignature}` : '',
+      data.contentPillarNames?.length ? `→ Content pillars: ${data.contentPillarNames.join(', ')}` : '',
+      data.topicConcentration != null ? `→ Topic focus: ${data.topicConcentration >= 70 ? 'Laser focused' : data.topicConcentration >= 40 ? 'Moderately focused' : 'Scattered across topics'}` : '',
+      data.audienceSignal ? `→ Natural audience: ${data.audienceSignal}` : '',
+      defineInsights || '→ No identity insights available yet',
+    ].filter(Boolean).join('\n')}
+
+**CONSISTENCY (${data.checkScore}/100)**
+${checkInsights || '→ No consistency insights available yet'}${voiceLine}
+
+**CONTENT (${data.generateScore}/100)**
+${generateInsights || '→ No content insights available yet'}${contentExtrasStr}
+
+**GROWTH (${data.scaleScore}/100)**
+${scaleInsights || '→ No growth insights available yet'}
+
+**WHERE YOU'RE STRONGEST**
+${strengths || '→ Keep building — strengths are emerging'}
+
+**YOUR BIGGEST OPPORTUNITIES**
+${improvements || '→ Keep creating — we\'ll identify opportunities as your brand grows'}
+
+${data.archetypeIconUrl ? `{{ARCHETYPE_IMAGE:${data.archetypeIconUrl}}}` : ''}
+
+**YOUR ARCHETYPE: ${data.archetype}**
+${data.archetypeTagline ? `"${data.archetypeTagline}"` : ''}
+${data.archetypeDescription || 'A unique brand identity we detected from your content.'}
+${summaryBlock}
+This is just the start — BrandOS is building something much bigger. Expect updates from me on how we can better improve your brand.
 
 - Bawsa
 
-"brick by brick"`;
+"brick by brick"
+
+P.S. Want to check another handle? Head back to mybrandos.app`;
   }
 };
 

@@ -4,6 +4,7 @@ import { motion } from 'motion/react';
 import { GeneratedBrandDNA } from './BrandDNAPreview';
 import type { RawTweet } from './DNAWalkthrough/TweetExcerpt';
 import MetalArchetypeIcon from '@/components/MetalArchetypeIcon';
+import type { ContentIdentitySignals } from '@/lib/gemini';
 
 // ============================================================================
 // Types
@@ -25,7 +26,7 @@ interface XProfileData {
 interface BrandScoreResult {
   overallScore: number;
   phases: {
-    define: { score: number; insights: string[] };
+    define: { score: number; insights: string[]; contentIdentity?: ContentIdentitySignals };
     check: { score: number; insights: string[] };
     generate: { score: number; insights: string[] };
     scale: { score: number; insights: string[] };
@@ -323,6 +324,110 @@ export default function BrandBreakdown({
             </span>
           </div>
         </motion.div>
+
+        {/* ═══════ CONTENT IDENTITY ═══════ */}
+        {brandScore.phases.define.contentIdentity && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.17 }}
+            className="mb-14"
+          >
+            <SectionLabel>Content Identity</SectionLabel>
+
+            {/* Identity Signature */}
+            <div className="border-l-2 border-[#0047FF] pl-4 mb-6">
+              <div className="font-mono text-[9px] tracking-[0.15em] text-black/30 mb-1">// IDENTITY_SIGNATURE</div>
+              <p className="text-[15px] leading-relaxed text-black/70" style={{ fontFamily: 'var(--font-vcr, "VCR OSD Mono", monospace)' }}>
+                {brandScore.phases.define.contentIdentity.identitySignature}
+              </p>
+            </div>
+
+            {/* Content Pillars */}
+            {brandScore.phases.define.contentIdentity.contentPillars.length > 0 && (
+              <div className="mb-6">
+                <div className="font-mono text-[10px] tracking-[0.15em] text-black/30 mb-3 uppercase">Content Pillars</div>
+                <div className="space-y-3">
+                  {brandScore.phases.define.contentIdentity.contentPillars.map((pillar, i) => (
+                    <div key={i}>
+                      <div className="flex items-center gap-3 mb-1">
+                        <span className="font-mono text-[11px] text-black/60 w-[140px] shrink-0 truncate">{pillar.topic}</span>
+                        <div className="flex-1 h-[4px] bg-black/5 rounded-full overflow-hidden">
+                          <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: `${pillar.confidence}%` }}
+                            transition={{ duration: 0.8, delay: 0.3 + i * 0.1 }}
+                            className="h-full rounded-full bg-[#0047FF]/60"
+                          />
+                        </div>
+                        <span className="font-mono text-[10px] text-black/35 w-[28px] text-right">{pillar.confidence}</span>
+                        <span className="font-mono text-[9px] bg-black/5 text-black/40 px-1.5 py-0.5 rounded">{pillar.tweetCount} tweets</span>
+                      </div>
+                      <div className="font-mono text-[10px] text-black/35 italic pl-[140px] ml-3 truncate">
+                        &ldquo;{pillar.sampleEvidence}&rdquo;
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Topic Concentration */}
+            <div className="mb-6 p-3 rounded-lg bg-black/[0.02] border border-black/5">
+              <div className="flex items-center justify-between mb-2">
+                <span className="font-mono text-[10px] tracking-[0.1em] text-black/40 uppercase">Topic Concentration</span>
+                <span className="font-mono text-sm font-bold text-black/60">{brandScore.phases.define.contentIdentity.topicConcentration}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-[9px] text-black/30">SCATTERED</span>
+                <div className="flex-1 h-[6px] bg-black/5 rounded-full overflow-hidden">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${brandScore.phases.define.contentIdentity.topicConcentration}%` }}
+                    transition={{ duration: 1, delay: 0.4 }}
+                    className="h-full rounded-full bg-[#0047FF]"
+                  />
+                </div>
+                <span className="font-mono text-[9px] text-black/30">LASER FOCUSED</span>
+              </div>
+            </div>
+
+            {/* Recurring Themes */}
+            {brandScore.phases.define.contentIdentity.recurringThemes.length > 0 && (
+              <div className="mb-6">
+                <div className="font-mono text-[10px] tracking-[0.15em] text-black/30 mb-3 uppercase">Recurring Themes</div>
+                <div className="space-y-2">
+                  {brandScore.phases.define.contentIdentity.recurringThemes.map((t, i) => (
+                    <div key={i} className="flex items-start gap-2">
+                      <span className="font-mono text-[9px] text-black/30 mt-0.5">//</span>
+                      <span className="font-mono text-[11px] text-black/60 leading-relaxed">
+                        &ldquo;{t.theme}&rdquo;
+                      </span>
+                      <span className={`font-mono text-[9px] px-1.5 py-0.5 rounded shrink-0 ${
+                        t.frequency === 'high' ? 'bg-[#00C853]/10 text-[#00C853]' :
+                        t.frequency === 'medium' ? 'bg-[#E8A838]/10 text-[#E8A838]' :
+                        'bg-black/5 text-black/40'
+                      }`}>
+                        {t.frequency.toUpperCase()}
+                      </span>
+                      <span className="font-mono text-[10px] text-black/35 italic truncate">{t.evidence}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Natural Audience */}
+            {brandScore.phases.define.contentIdentity.audienceSignal && (
+              <div className="p-3 rounded-lg bg-black/[0.02] border border-black/5">
+                <div className="font-mono text-[9px] tracking-[0.15em] text-black/30 mb-1 uppercase">TARGET_AUDIENCE</div>
+                <p className="font-mono text-[12px] text-black/60 leading-relaxed">
+                  {brandScore.phases.define.contentIdentity.audienceSignal}
+                </p>
+              </div>
+            )}
+          </motion.div>
+        )}
 
         {/* ═══════ TONE PROFILE ═══════ */}
         <motion.div

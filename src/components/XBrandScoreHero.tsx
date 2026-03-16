@@ -24,7 +24,7 @@ import SystemLogsBg from '@/components/backgrounds/SystemLogsBg';
 import HybridCodeBg from '@/components/backgrounds/HybridCodeBg';
 import { PixelConfetti } from '@/components/pixel-world';
 import { TerminalProgressBar, TerminalPhaseCard } from '@/components/terminal';
-import { normalizeArchetypeName } from '@/lib/archetype-engine';
+import { normalizeArchetypeName } from '@/lib/archetype-names';
 
 // Background style options for easy switching
 type BgStyle = 'ascii-dna' | 'typescript' | 'system-logs' | 'hybrid';
@@ -733,6 +733,7 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
   const [showConfetti, setShowConfetti] = useState(false);
   const [email, setEmail] = useState('');
   const [signupStatus, setSignupStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [copyStatus, setCopyStatus] = useState<'idle' | 'copying' | 'copied' | 'failed'>('idle');
   const [scoreCardImage, setScoreCardImage] = useState<string | null>(null);
   const [showAdvisorChat, setShowAdvisorChat] = useState(false);
 
@@ -1012,9 +1013,21 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
         archetypeEmoji: '✨',
         archetypeTagline: generatedBrandDNA.personalitySummary?.split('.')[0] || '',
         archetypeDescription: generatedBrandDNA.personalitySummary || '',
+        archetypeIconUrl: `https://mybrandos.app/archetypes/${encodeURIComponent(normalizeArchetypeName(generatedBrandDNA.archetype || 'BUILD.EXE'))}.png`,
         archetypeStrengths: brandScore.topStrengths?.slice(0, 3) || [],
         topImprovement: brandScore.topImprovements?.[0] || '',
         topStrength: brandScore.topStrengths?.[0] || '',
+        // Data-driven analysis fields
+        defineInsights: brandScore.phases.define.insights || [],
+        checkInsights: brandScore.phases.check.insights || [],
+        generateInsights: brandScore.phases.generate.insights || [],
+        scaleInsights: brandScore.phases.scale.insights || [],
+        summary: brandScore.summary || '',
+        topImprovements: brandScore.topImprovements || [],
+        topStrengths: brandScore.topStrengths || [],
+        voiceConsistency: generatedBrandDNA.performanceInsights?.voiceConsistency,
+        bestContentFormat: generatedBrandDNA.performanceInsights?.bestFormats?.[0],
+        contentPillars: generatedBrandDNA.contentPillars?.map(p => ({ name: p.name, frequency: p.frequency })),
       } : undefined;
 
       const response = await fetch('/api/signup', {
@@ -1529,11 +1542,11 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
                 </span>
                 <div className="flex gap-2">
                   <button
-                    onClick={() => {
+                    onClick={async () => {
                       const scoreCard = document.getElementById('brandos-score-card');
                       if (!scoreCard) return;
-                      // Use ClipboardItem with a lazy blob promise to preserve user-gesture context
-                      const blobPromise = (async () => {
+                      setCopyStatus('copying');
+                      try {
                         const pfpImg = scoreCard.querySelector(`img[alt="${profile.name}"]`) as HTMLImageElement | null;
                         const originalSrc = pfpImg?.src || '';
                         try {
@@ -1545,22 +1558,44 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
                             await new Promise(r => setTimeout(r, 50));
                           }
                         } catch {}
-                        const dataUrl = await domToPng(scoreCard, { scale: 2, quality: 1 });
+                        const dataUrl = await domToPng(scoreCard, { scale: 2, quality: 1, timeout: 30000 });
                         if (pfpImg) pfpImg.src = originalSrc;
-                        const response = await fetch(dataUrl);
-                        return await response.blob();
-                      })();
-                      navigator.clipboard.write([
-                        new ClipboardItem({ 'image/png': blobPromise })
-                      ]);
+                        // Convert data URL to blob directly (fetch can fail on large data URLs)
+                        const byteString = atob(dataUrl.split(',')[1]);
+                        const mimeString = dataUrl.split(',')[0].split(':')[1].split(';')[0];
+                        const ab = new ArrayBuffer(byteString.length);
+                        const ia = new Uint8Array(ab);
+                        for (let i = 0; i < byteString.length; i++) ia[i] = byteString.charCodeAt(i);
+                        const blob = new Blob([ab], { type: mimeString });
+                        try {
+                          await navigator.clipboard.write([
+                            new ClipboardItem({ 'image/png': blob })
+                          ]);
+                          setCopyStatus('copied');
+                        } catch {
+                          // Clipboard write failed — fallback to download
+                          const a = document.createElement('a');
+                          a.href = URL.createObjectURL(blob);
+                          a.download = `brandos-${profile.username || 'score'}.png`;
+                          a.click();
+                          URL.revokeObjectURL(a.href);
+                          setCopyStatus('copied');
+                        }
+                        setTimeout(() => setCopyStatus('idle'), 2000);
+                      } catch (err) {
+                        console.error('[Copy] Failed:', err);
+                        setCopyStatus('failed');
+                        setTimeout(() => setCopyStatus('idle'), 2000);
+                      }
                     }}
-                    className="flex items-center gap-2 px-4 py-2.5 bg-[#1A1A1A] hover:bg-[#2E6AFF] border border-[#333] hover:border-[#2E6AFF] rounded-[4px] text-white font-os text-[11px] tracking-wider transition-all duration-300"
+                    disabled={copyStatus === 'copying'}
+                    className="flex items-center gap-2 px-4 py-2.5 bg-[#1A1A1A] hover:bg-[#2E6AFF] border border-[#333] hover:border-[#2E6AFF] rounded-[4px] text-white font-os text-[11px] tracking-wider transition-all duration-300 disabled:opacity-50"
                   >
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
                       <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
                     </svg>
-                    COPY
+                    {copyStatus === 'copying' ? 'COPYING...' : copyStatus === 'copied' ? 'COPIED ✓' : copyStatus === 'failed' ? 'FAILED' : 'COPY'}
                   </button>
                   <button
                     onClick={async () => {
@@ -1579,7 +1614,7 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
                         }
                       } catch {}
                       // Capture the actual on-screen element directly
-                      const dataUrl = await domToPng(scoreCard, { scale: 2, quality: 1 });
+                      const dataUrl = await domToPng(scoreCard, { scale: 2, quality: 1, timeout: 30000 });
                       // Restore original PFP src
                       if (pfpImg) pfpImg.src = originalSrc;
                       const a = document.createElement('a');
@@ -1615,7 +1650,7 @@ export default function XBrandScoreHero({ theme, initialUsername, autoStart }: X
                           await new Promise(r => setTimeout(r, 50));
                         }
                       } catch {}
-                      const dataUrl = await domToPng(scoreCard, { scale: 2, quality: 1 });
+                      const dataUrl = await domToPng(scoreCard, { scale: 2, quality: 1, timeout: 30000 });
                       if (pfpImg) pfpImg.src = originalSrc;
                       setScoreCardImage(dataUrl);
                     } catch (err) {

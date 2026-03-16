@@ -990,18 +990,18 @@ Cap at 100.
 REMEMBER: Do NOT factor in bio, username alignment, profile picture, banner, location, or links. Only content and reputation.
 
 CREATOR ARCHETYPE (Choose ONE that best fits):
-1. 🎓 THE PROFESSOR - Deep knowledge authority, niche expert, educational content
-2. 🔌 THE PLUG - Super connector, everyone's mutual, "DMs open" energy, networker  
-3. 🎪 CHIEF VIBES OFFICER - Timeline entertainer, shitposter, meme-friendly, playful
-4. 🔮 THE PROPHET - Visionary thought leader, strong opinions, called it before everyone
-5. 🚢 SHIP OR DIE - Builder, maker, "less talk more shipping", product-focused
-6. 🐕 UNDERDOG ARC - Rising star, up-only trajectory, main character loading
-7. 🎰 THE DEGEN - High-risk high-reward energy, crypto trader, ape-first mentality
-8. 👻 THE ANON - Pseudonymous legend, influence without identity, mysterious authority
+1. 🎓 SIGNAL_SAGE - Deep knowledge authority, niche expert, educational content
+2. 🔌 RELAY - Super connector, everyone's mutual, "DMs open" energy, networker
+3. 🎪 FREQ - Timeline entertainer, shitposter, meme-friendly, playful
+4. 🔮 FORESIGHT - Visionary thought leader, strong opinions, called it before everyone
+5. 🚢 BUILD.EXE - Builder, maker, "less talk more shipping", product-focused
+6. 🐕 ARC - Rising star, up-only trajectory, main character loading
+7. 🎰 ENTROPY - High-risk high-reward energy, crypto trader, ape-first mentality
+8. 👻 NULL - Pseudonymous legend, influence without identity, mysterious authority
 
-For ${influenceAnalysis.tier} tier accounts: THE PROPHET or THE PROFESSOR are common fits.
-For crypto/web3 profiles: THE DEGEN or THE ANON may be more appropriate.
-For pseudonymous accounts with high influence: THE ANON is ideal.
+For ${influenceAnalysis.tier} tier accounts: FORESIGHT or SIGNAL_SAGE are common fits.
+For crypto/web3 profiles: ENTROPY or NULL may be more appropriate.
+For pseudonymous accounts with high influence: NULL is ideal.
 
 Return ONLY valid JSON:
 {
@@ -1016,7 +1016,7 @@ Return ONLY valid JSON:
   "topImprovements": ["Improvement 1", "Improvement 2", "Improvement 3"],
   "summary": "2-3 sentence assessment acknowledging their influence tier and brand effectiveness.",
   "archetype": {
-    "primary": "The Professor|The Plug|Chief Vibes Officer|The Prophet|Ship or Die|Underdog Arc|The Degen|The Anon",
+    "primary": "SIGNAL_SAGE|RELAY|FREQ|FORESIGHT|BUILD.EXE|ARC|ENTROPY|NULL",
     "emoji": "🎓|🔌|🎪|🔮|🚢|🐕|🎰|👻",
     "tagline": "3-5 word identity label that's shareable",
     "description": "Why this archetype fits their vibe and influence level",
@@ -1039,6 +1039,23 @@ export interface TweetAnalysisInput {
   tweets: TweetData[];
   stats: TweetAnalysisStats;
   contentPatterns: ContentPatterns;
+}
+
+export interface ContentIdentitySignals {
+  contentPillars: {
+    topic: string;
+    confidence: number;
+    tweetCount: number;
+    sampleEvidence: string;
+  }[];
+  identitySignature: string;
+  recurringThemes: {
+    theme: string;
+    frequency: 'high' | 'medium' | 'low';
+    evidence: string;
+  }[];
+  topicConcentration: number;
+  audienceSignal: string;
 }
 
 export const enhancedBrandScorePrompt = (input: TweetAnalysisInput) => {
@@ -1097,6 +1114,13 @@ Perform a DEEP ANALYSIS — brand = reputation, built entirely through content:
    - Who is their target audience based on what they post?
    Score 0-100 with specific insights from their ACTUAL CONTENT.
 
+   REQUIRED: For DEFINE, produce a structured content identity analysis:
+   - Identify 2-4 content pillars (topics they repeatedly post about). For each, estimate how many of the sample tweets relate to it and provide a short evidence quote.
+   - Write a one-sentence "identity signature": what this person is known for based on their content alone.
+   - List 2-4 recurring themes — patterns in HOW they communicate, not just what about.
+   - Rate topic concentration 0-100 (100 = single focused niche, 0 = scattered random topics).
+   - Describe their natural audience in one sentence.
+
 2. CHECK (25%) - Content Voice Consistency
    - Is their voice consistent across tweets or does it drift?
    - Do they stay on-topic or scatter across unrelated subjects?
@@ -1134,7 +1158,7 @@ Return ONLY valid JSON:
 {
   "overallScore": <0-100>,
   "phases": {
-    "define": { "score": <0-100>, "insights": ["insight1", "insight2", "insight3"] },
+    "define": { "score": <0-100>, "insights": ["insight1", "insight2", "insight3"], "contentIdentity": { "contentPillars": [{ "topic": "topic name", "confidence": <0-100>, "tweetCount": <number>, "sampleEvidence": "short quote" }], "identitySignature": "one sentence describing what they are known for", "recurringThemes": [{ "theme": "theme name", "frequency": "high|medium|low", "evidence": "pattern description or excerpt" }], "topicConcentration": <0-100>, "audienceSignal": "one sentence describing natural audience" } },
     "check": { "score": <0-100>, "insights": ["insight1", "insight2", "insight3"] },
     "generate": { "score": <0-100>, "insights": ["insight1", "insight2", "insight3"] },
     "scale": { "score": <0-100>, "insights": ["insight1", "insight2", "insight3"] }
@@ -1143,7 +1167,7 @@ Return ONLY valid JSON:
   "topImprovements": ["improvement1", "improvement2", "improvement3"],
   "summary": "3-4 sentence comprehensive assessment with specific observations from their content",
   "archetype": {
-    "primary": "The Professor|The Plug|Chief Vibes Officer|The Prophet|Ship or Die|Underdog Arc|The Degen|The Anon",
+    "primary": "SIGNAL_SAGE|RELAY|FREQ|FORESIGHT|BUILD.EXE|ARC|ENTROPY|NULL",
     "emoji": "🎓|🔌|🎪|🔮|🚢|🐕|🎰|👻",
     "tagline": "3-5 word shareable identity label",
     "description": "2-3 sentences explaining archetype fit with EVIDENCE from their tweets",
@@ -1678,14 +1702,14 @@ Generate a comprehensive Brand DNA profile based on CONTENT and REPUTATION only:
 
 1. COLORS - Infer from content tone and energy (NOT from profile image)
 2. ARCHETYPE - Best fit from these 8 archetypes:
-   - 🎓 The Professor (knowledge authority)
-   - 🔌 The Plug (super connector)
-   - 🎪 Chief Vibes Officer (entertainer/shitposter)
-   - 🔮 The Prophet (thought leader/visionary)
-   - 🚢 Ship or Die (builder/maker)
-   - 🐕 Underdog Arc (rising star)
-   - 🎰 The Degen (crypto trader/risk-taker)
-   - 👻 The Anon (pseudonymous influencer)
+   - 🎓 SIGNAL_SAGE (knowledge authority)
+   - 🔌 RELAY (super connector)
+   - 🎪 FREQ (entertainer/shitposter)
+   - 🔮 FORESIGHT (thought leader/visionary)
+   - 🚢 BUILD.EXE (builder/maker)
+   - 🐕 ARC (rising star)
+   - 🎰 ENTROPY (crypto trader/risk-taker)
+   - 👻 NULL (pseudonymous influencer)
 3. VOICE PROFILE - Primary voice style, tone description, energy level
 4. POSITIONING - Mission, target audience, unique differentiator, content pillars
 5. SCORES - Coherence, Differentiation, Memorability, Trust (0-100 each)
@@ -1695,7 +1719,7 @@ Return ONLY valid JSON:
 {
   "primaryColor": { "hex": "#XXXXXX", "name": "Color Name" },
   "secondaryColor": { "hex": "#XXXXXX", "name": "Color Name" },
-  "archetype": "The Professor|The Plug|Chief Vibes Officer|The Prophet|Ship or Die|Underdog Arc|The Degen|The Anon",
+  "archetype": "SIGNAL_SAGE|RELAY|FREQ|FORESIGHT|BUILD.EXE|ARC|ENTROPY|NULL",
   "archetypeEmoji": "🎓|🔌|🎪|🔮|🚢|🐕|🎰|👻",
   "voiceProfile": {
     "primary": "e.g., Knowledge Authority, Timeline Entertainer, etc.",

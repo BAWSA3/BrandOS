@@ -3,6 +3,7 @@ import { geminiFlash, xBrandScorePrompt, enhancedBrandScorePrompt, XProfileData 
 import { features, getTierInfo } from '@/lib/features';
 import { analyzeVoiceConsistency } from '@/lib/voice-consistency';
 import type { VoiceConsistencyReport } from '@/lib/schemas/voice-consistency.schema';
+import { recordScan } from '@/lib/scan-tracking';
 
 /**
  * Enhanced Brand Score API
@@ -178,6 +179,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Validate contentIdentity if present
+    if (brandScore.phases?.define?.contentIdentity) {
+      const ci = brandScore.phases.define.contentIdentity;
+      if (!Array.isArray(ci.contentPillars)) ci.contentPillars = [];
+      if (!Array.isArray(ci.recurringThemes)) ci.recurringThemes = [];
+      if (typeof ci.topicConcentration !== 'number') ci.topicConcentration = 50;
+    }
+
     // Blend voice consistency into CHECK phase:
     // CHECK phase score = (existing * 0.5) + (voice_consistency * 0.5)
     if (voiceConsistency && brandScore.phases?.check) {
@@ -202,7 +211,7 @@ export async function POST(request: NextRequest) {
       console.log(`Recalculated overall: ${brandScore.overallScore}`);
     }
 
-    // Save to leaderboard
+    // Save to leaderboard (local JSON)
     try {
       await fetch(`${origin}/api/leaderboard`, {
         method: 'POST',
@@ -218,6 +227,14 @@ export async function POST(request: NextRequest) {
     } catch (leaderboardError) {
       console.error('Leaderboard save error:', leaderboardError);
     }
+
+    // Record scan to Supabase (non-blocking)
+    recordScan({
+      username: profile.username,
+      score: brandScore.overallScore,
+      archetype: brandScore.archetype?.primary || '',
+      enhanced: isEnhanced,
+    }).catch(err => console.error('Scan tracking error:', err));
 
     return NextResponse.json({
       profile,

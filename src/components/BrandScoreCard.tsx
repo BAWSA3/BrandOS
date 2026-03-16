@@ -28,7 +28,6 @@ const BrandScoreCard: React.FC<BrandScoreCardProps> = ({
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,600;0,900;1,900&family=JetBrains+Mono:wght@400;700&display=swap');
         .font-brand { font-family: 'Inter', sans-serif; }
         .font-os { font-family: 'JetBrains Mono', monospace; }
         .bg-grid-pattern {

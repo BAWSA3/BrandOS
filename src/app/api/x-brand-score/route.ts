@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { geminiFlash, xBrandScorePrompt, XProfileData } from '@/lib/gemini';
 import { resolveArchetype, getEvolutionInfo } from '@/lib/archetype-engine';
 import { withRateLimit, rateLimiters } from '@/lib/rate-limit';
+import { recordScan } from '@/lib/scan-tracking';
 
 /**
  * Brand Score API - Profile-only analysis
@@ -199,6 +200,14 @@ async function handlePost(request: NextRequest) {
     } catch (leaderboardError) {
       console.error('Leaderboard save error:', leaderboardError);
     }
+
+    // Record scan to Supabase (non-blocking)
+    recordScan({
+      username: profile.username,
+      score: brandScore.overallScore,
+      archetype: brandScore.archetype?.primary || '',
+      enhanced: false,
+    }).catch(err => console.error('Scan tracking error:', err));
 
     return NextResponse.json({
       profile,

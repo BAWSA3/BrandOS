@@ -6,11 +6,13 @@ export interface EmailSignup {
   email: string;
   source: string;
   createdAt: string;
+  xUsername?: string;
 }
 
 export async function addEmailSignup(
   email: string,
-  source: string = 'landing'
+  source: string = 'landing',
+  xUsername?: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const normalizedEmail = email.toLowerCase().trim();
@@ -23,6 +25,13 @@ export async function addEmailSignup(
       .single();
 
     if (existing) {
+      // Update xUsername if we have it now and didn't before
+      if (xUsername) {
+        await supabase
+          .from('EmailSignup')
+          .update({ xUsername: xUsername.toLowerCase() })
+          .eq('id', existing.id);
+      }
       return { success: false, error: 'Email already registered' };
     }
 
@@ -37,6 +46,7 @@ export async function addEmailSignup(
         email: normalizedEmail,
         source,
         createdAt: new Date().toISOString(),
+        ...(xUsername ? { xUsername: xUsername.toLowerCase() } : {}),
       });
 
     if (error) {

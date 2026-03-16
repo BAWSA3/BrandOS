@@ -85,7 +85,8 @@ async function writePendingEmails(emails: PendingEmail[]) {
 export async function sendEmail(
   to: string,
   subject: string,
-  body: string
+  body: string,
+  scoreCardImage?: string
 ): Promise<{ success: boolean; id?: string; error?: string }> {
   const resend = getResendClient();
 
@@ -99,9 +100,21 @@ export async function sendEmail(
 
   try {
     // Convert plain text to HTML (preserve line breaks)
-    const html = body
+    let html = body
       .split('\n')
       .map(line => {
+        // Replace score card image placeholder
+        if (line.includes('{{SCORE_CARD_IMAGE}}')) {
+          if (scoreCardImage) {
+            return `<div style="text-align: center; margin: 24px 0;"><img src="cid:scorecard" alt="Your BrandOS Score Card" style="max-width: 100%; width: 600px; border-radius: 8px;" /></div>`;
+          }
+          return ''; // Remove placeholder if no image
+        }
+        // Replace archetype image placeholder
+        const archetypeMatch = line.match(/\{\{ARCHETYPE_IMAGE:(.*?)\}\}/);
+        if (archetypeMatch) {
+          return `<div style="text-align: center; margin: 32px 0 16px 0;"><img src="cid:archetype-icon" alt="Your Archetype" style="width: 120px; height: 120px;" /></div>`;
+        }
         if (line.startsWith('**') && line.endsWith('**')) {
           return `<p><strong>${line.slice(2, -2)}</strong></p>`;
         }
@@ -115,12 +128,49 @@ export async function sendEmail(
       })
       .join('\n');
 
+    // Build attachments array for inline images
+    const attachments: Array<{ filename: string; content: Buffer; contentType: string; contentId: string }> = [];
+    if (scoreCardImage) {
+      // Extract base64 data from data URL (data:image/png;base64,...)
+      const base64Data = scoreCardImage.replace(/^data:image\/\w+;base64,/, '');
+      attachments.push({
+        filename: 'scorecard.png',
+        content: Buffer.from(base64Data, 'base64'),
+        contentType: 'image/png',
+        contentId: 'scorecard',
+      });
+    }
+
+    // Attach archetype icon if referenced in the email
+    const archetypeUrlMatch = body.match(/\{\{ARCHETYPE_IMAGE:(.*?)\}\}/);
+    if (archetypeUrlMatch) {
+      try {
+        // Extract archetype name from URL (e.g. "https://mybrandos.app/archetypes/SIGNAL_SAGE.png" -> "SIGNAL_SAGE")
+        const urlPath = archetypeUrlMatch[1];
+        const archetypeName = decodeURIComponent(urlPath.split('/').pop()?.replace('.png', '') || '');
+        const fs = await import('fs');
+        const path = await import('path');
+        const iconPath = path.join(process.cwd(), 'public', 'archetypes', `${archetypeName}.png`);
+        if (fs.existsSync(iconPath)) {
+          attachments.push({
+            filename: `${archetypeName}.png`,
+            content: fs.readFileSync(iconPath) as Buffer,
+            contentType: 'image/png',
+            contentId: 'archetype-icon',
+          });
+        }
+      } catch (iconErr) {
+        console.warn('[Email] Failed to attach archetype icon:', iconErr);
+      }
+    }
+
     const result = await resend.emails.send({
       from: FROM_EMAIL,
       to,
       subject,
       html,
-      text: body, // Plain text fallback
+      text: body.replace('{{SCORE_CARD_IMAGE}}', '').replace(/\{\{ARCHETYPE_IMAGE:.*?\}\}/g, ''), // Plain text fallback
+      ...(attachments.length > 0 ? { attachments } : {}),
     });
 
     if (result.error) {
@@ -204,6 +254,21 @@ export async function sendWelcomeSequence(
     archetypeStrengths: data.archetypeStrengths || ['creativity', 'authenticity'],
     topImprovement: data.topImprovement || 'Optimize your bio for clarity',
     topStrength: data.topStrength || 'Your authentic voice',
+    defineInsights: data.defineInsights || [],
+    checkInsights: data.checkInsights || [],
+    generateInsights: data.generateInsights || [],
+    scaleInsights: data.scaleInsights || [],
+    summary: data.summary || '',
+    topImprovements: data.topImprovements || [],
+    topStrengths: data.topStrengths || [],
+    voiceConsistency: data.voiceConsistency,
+    bestContentFormat: data.bestContentFormat,
+    contentPillars: data.contentPillars,
+    identitySignature: data.identitySignature,
+    contentPillarNames: data.contentPillarNames,
+    topicConcentration: data.topicConcentration,
+    audienceSignal: data.audienceSignal,
+    archetypeIconUrl: data.archetypeIconUrl,
     ...data,
   };
 
@@ -217,8 +282,8 @@ export async function sendWelcomeSequence(
     if (!content) continue;
 
     if (template.sendDelay === 'immediate') {
-      // Send immediately
-      const result = await sendEmail(email, content.subject, content.body);
+      // Send immediately (pass score card image for the first email)
+      const result = await sendEmail(email, content.subject, content.body, templateData.scoreCardImage);
       if (result.success) {
         emailsSent++;
       }
