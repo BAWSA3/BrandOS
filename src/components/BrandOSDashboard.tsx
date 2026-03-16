@@ -118,7 +118,7 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({
 
   return (
     <div
-      className="p-3 sm:p-4 md:p-8 font-sans selection:bg-[#2E6AFF] flex items-center justify-center"
+      className="p-4 md:p-8 font-sans selection:bg-[#2E6AFF] flex items-center justify-center"
       style={{
         color: textPrimary,
         background: bgPrimary,
@@ -140,11 +140,11 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({
       `}</style>
 
       {/* BENTO GRID LAYOUT */}
-      <div className="w-full max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-2 md:gap-4 auto-rows-auto md:auto-rows-[minmax(180px,auto)]">
+      <div className="w-full max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-3 md:gap-4 auto-rows-[minmax(140px,auto)] md:auto-rows-[minmax(180px,auto)]">
         {/* --- CARD 1: HERO SCORE --- */}
         <div
           id="brandos-score-card"
-          className="md:col-span-2 md:row-span-2 bg-[#2E6AFF] rounded-[4px] relative p-4 sm:p-6 md:p-10 flex flex-col justify-between overflow-visible group hover:brightness-110 transition-all duration-500"
+          className="md:col-span-2 md:row-span-2 bg-[#2E6AFF] rounded-[4px] relative p-6 md:p-10 flex flex-col justify-between overflow-visible group hover:brightness-110 transition-all duration-500"
         >
           <div className="absolute inset-0 bg-grid-pattern opacity-30 pointer-events-none" />
           <div className="flex justify-between items-start z-10">
@@ -157,8 +157,8 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({
             </span>
             <Activity className="text-white/80 w-6 h-6 animate-pulse" />
           </div>
-          <div className="relative z-10 my-2 sm:my-auto">
-            <h1 className="font-brand font-black italic text-[64px] sm:text-[120px] md:text-[180px] leading-none tracking-tighter text-white drop-shadow-xl">
+          <div className="relative z-10 my-auto">
+            <h1 className="font-brand font-black italic text-[120px] md:text-[180px] leading-none tracking-tighter text-white drop-shadow-xl">
               <AnimateNumber
                 transition={{
                   y: { type: 'spring', duration: 0.8, bounce: 0 },
@@ -171,18 +171,18 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({
               </AnimateNumber>
             </h1>
           </div>
-          <div className="z-10 grid grid-cols-3 gap-2 sm:gap-4 md:gap-6 border-t border-white/20 pt-3 sm:pt-6 items-end">
+          <div className="z-10 grid grid-cols-3 gap-4 md:gap-6 border-t border-white/20 pt-6 items-end">
             <div>
               <span className="font-os text-[10px] md:text-xs text-white/70 block mb-1 uppercase tracking-wider">
                 Voice Consistency
               </span>
-              <div className="flex items-center gap-1.5 sm:gap-2">
-                <span className="text-lg sm:text-2xl font-brand font-bold italic text-white">
+              <div className="flex items-center gap-2">
+                <span className="text-2xl font-brand font-bold italic text-white">
                   <AnimateNumber suffix="%" trend={1}>
                     {data.scores.voiceConsistency}
                   </AnimateNumber>
                 </span>
-                <div className="h-1.5 w-8 sm:w-12 bg-white/30 rounded-full overflow-hidden">
+                <div className="h-1.5 w-12 bg-white/30 rounded-full overflow-hidden">
                   <div
                     style={{ width: `${data.scores.voiceConsistency}%` }}
                     className="h-full bg-white transition-all duration-700"
@@ -191,22 +191,13 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({
               </div>
             </div>
             {/* Archetype badge — center bottom */}
-            <div className="flex flex-col items-center gap-1 sm:gap-1.5">
-              <div className="hidden sm:block">
-                <MetalArchetypeIcon
-                  src={data.personality.emoji}
-                  alt={data.personality.archetype}
-                  size={48}
-                />
-              </div>
-              <div className="block sm:hidden">
-                <MetalArchetypeIcon
-                  src={data.personality.emoji}
-                  alt={data.personality.archetype}
-                  size={32}
-                />
-              </div>
-              <span className="font-os text-[8px] sm:text-[10px] md:text-xs text-white font-bold tracking-widest">
+            <div className="flex flex-col items-center gap-1.5">
+              <MetalArchetypeIcon
+                src={data.personality.emoji}
+                alt={data.personality.archetype}
+                size={48}
+              />
+              <span className="font-os text-[10px] md:text-xs text-white font-bold tracking-widest">
                 {data.personality.archetype}
               </span>
               <span className="font-os text-[8px] md:text-[9px] text-white/60 tracking-wide text-center leading-tight">
@@ -217,7 +208,7 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({
               <span className="font-os text-[10px] md:text-xs text-white/70 block mb-1 uppercase tracking-wider">
                 Engagement
               </span>
-              <span className="text-lg sm:text-2xl font-brand font-bold italic text-white">
+              <span className="text-2xl font-brand font-bold italic text-white">
                 <AnimateNumber suffix="/100" trend={1}>
                   {data.scores.engagementScore}
                 </AnimateNumber>
@@ -227,7 +218,7 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({
         </div>
 
         {/* --- CARD 2: IDENTITY --- */}
-        <div className="md:col-span-2 bg-white rounded-[4px] p-4 sm:p-6 flex flex-col sm:flex-row items-center justify-between relative group overflow-visible">
+        <div className="md:col-span-2 bg-white rounded-[4px] p-6 flex flex-col sm:flex-row items-center justify-between relative group overflow-visible">
           {/* Authenticity Warning Banner */}
           {authenticity?.isWarning && (
             <div className="absolute top-0 left-0 right-0 bg-amber-500 text-black px-3 py-1.5 rounded-t-[4px] flex items-center gap-2 z-20">
@@ -243,7 +234,7 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({
             className={`flex items-center gap-5 z-10 w-full sm:w-auto ${authenticity?.isWarning ? 'mt-6' : ''}`}
           >
             <div className="relative shrink-0">
-              <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-full bg-gray-100 border-[3px] border-black p-0.5">
+              <div className="w-20 h-20 rounded-full bg-gray-100 border-[3px] border-black p-0.5">
                 <img
                   src={data.profile.profileImageUrl}
                   alt={data.profile.displayName}
@@ -257,7 +248,7 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({
               )}
             </div>
             <div className="text-center sm:text-left">
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-brand font-black italic text-black tracking-tight leading-none">
+              <h2 className="text-3xl md:text-4xl font-brand font-black italic text-black tracking-tight leading-none">
                 {data.profile.displayName}
               </h2>
               <div className="flex items-center gap-2 mt-1 flex-wrap">
@@ -289,14 +280,14 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({
             <span className="font-os text-[10px] text-gray-400 block uppercase tracking-widest mb-1">
               Audience
             </span>
-            <span className="text-3xl sm:text-4xl md:text-5xl font-brand font-black italic text-black tracking-tighter">
+            <span className="text-4xl md:text-5xl font-brand font-black italic text-black tracking-tighter">
               <AnimateNumber trend={1}>{data.profile.followersCount}</AnimateNumber>
             </span>
           </div>
         </div>
 
         {/* --- CARD 3: TONE ANALYZER --- */}
-        <div className="md:col-span-1 bg-[#1A1A1A] rounded-[4px] p-3 sm:p-4 md:p-5 flex flex-col relative overflow-visible border border-white/5">
+        <div className="md:col-span-1 bg-[#1A1A1A] rounded-[4px] p-4 md:p-5 flex flex-col relative overflow-visible border border-white/5">
           <span className="font-os text-[10px] text-[#666] mb-3 md:mb-4 border-b border-[#333] pb-2 tracking-widest relative group/info inline-flex items-center gap-1.5">
             TONE_MIXER
             <Info className="w-3 h-3 text-[#666] hover:text-white cursor-help" />
@@ -304,7 +295,7 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({
               Your voice balance
             </span>
           </span>
-          <div className="flex-1 flex justify-between items-end gap-2 md:gap-3 px-1 min-h-[80px] sm:min-h-0">
+          <div className="flex-1 flex justify-between items-end gap-2 md:gap-3 px-1">
             <div className="w-full h-full flex flex-col justify-end group">
               <div
                 style={{ height: `${data.tone.formality}%` }}
@@ -345,7 +336,7 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({
         </div>
 
         {/* --- CARD 4: ARCHETYPE --- */}
-        <div className="md:col-span-1 bg-[#FFD700] rounded-[4px] p-3 sm:p-4 flex flex-col justify-between relative overflow-visible hover:bg-[#FFC000] transition-colors cursor-default min-h-[120px] md:min-h-0">
+        <div className="md:col-span-1 bg-[#FFD700] rounded-[4px] p-4 flex flex-col justify-between relative overflow-visible hover:bg-[#FFC000] transition-colors cursor-default">
           <div className="flex justify-between items-start z-10">
             <span className="font-os text-[10px] text-black/70 font-bold border border-black/10 px-1.5 py-0.5 rounded-[2px] relative group/info inline-flex items-center gap-1">
               ARCHETYPE
@@ -373,7 +364,7 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({
         </div>
 
         {/* --- CARD 5: DNA TERMINAL --- */}
-        <div className="md:col-span-2 bg-[#F0F0F0] rounded-[4px] p-3 sm:p-4 md:p-5 flex flex-col justify-between border-l-[4px] md:border-l-[6px] border-[#2E6AFF]">
+        <div className="md:col-span-2 bg-[#F0F0F0] rounded-[4px] p-4 md:p-5 flex flex-col justify-between border-l-[4px] md:border-l-[6px] border-[#2E6AFF]">
           <div className="flex items-center gap-2 mb-2 md:mb-3">
             <Terminal size={12} className="text-black md:w-[14px] md:h-[14px]" strokeWidth={3} />
             <span className="font-os text-[10px] md:text-xs text-black font-bold tracking-wider relative group/info inline-flex items-center gap-1">
@@ -403,7 +394,7 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({
               </span>
             ))}
           </div>
-          <div className="bg-white border border-black/20 p-2 sm:p-3 md:p-4 rounded-[2px] h-[100px] sm:h-[140px] md:h-[160px] overflow-y-auto">
+          <div className="bg-white border border-black/20 p-3 md:p-4 rounded-[2px] h-[140px] md:h-[160px] overflow-y-auto">
             <Typewriter
               as="pre"
               className="font-os text-xs md:text-sm leading-relaxed whitespace-pre-wrap"
@@ -423,7 +414,7 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({
         </div>
 
         {/* --- CARD 6: CONTENT PILLARS --- */}
-        <div className="md:col-span-2 bg-black border border-[#333] rounded-[4px] p-3 sm:p-4 md:p-6 flex flex-col justify-center relative overflow-visible">
+        <div className="md:col-span-2 bg-black border border-[#333] rounded-[4px] p-4 md:p-6 flex flex-col justify-center relative overflow-visible">
           <div
             className="absolute inset-0 opacity-20 pointer-events-none"
             style={{
@@ -453,7 +444,7 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({
                     </AnimateNumber>
                   </div>
                   {/* Bar container with fixed height */}
-                  <div className="h-[50px] sm:h-[60px] md:h-[80px] relative">
+                  <div className="h-[60px] md:h-[80px] relative">
                     <div className="absolute inset-0 bg-[#111] rounded-[2px] border border-[#333] overflow-hidden">
                       <div
                         style={{ height: `${pillar.value}%` }}
@@ -498,7 +489,7 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({
           const meta = ARCHETYPE_META[data.personality.archetype] || ARCHETYPE_META['SIGNAL_SAGE'];
           return (
             <div
-              className="md:col-span-4 rounded-[4px] p-4 sm:p-5 md:p-6 flex items-center gap-3 sm:gap-6 relative overflow-hidden"
+              className="md:col-span-4 rounded-[4px] p-5 md:p-6 flex items-center gap-6 relative overflow-hidden"
               style={{
                 background: isLight ? '#f8f8f8' : '#111111',
                 border: `1px solid ${isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)'}`,
@@ -514,20 +505,11 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({
 
               {/* Icon */}
               <div className="relative z-10 shrink-0">
-                <div className="hidden sm:block">
-                  <MetalArchetypeIcon
-                    src={data.personality.emoji}
-                    alt={data.personality.archetype}
-                    size={100}
-                  />
-                </div>
-                <div className="block sm:hidden">
-                  <MetalArchetypeIcon
-                    src={data.personality.emoji}
-                    alt={data.personality.archetype}
-                    size={60}
-                  />
-                </div>
+                <MetalArchetypeIcon
+                  src={data.personality.emoji}
+                  alt={data.personality.archetype}
+                  size={100}
+                />
               </div>
 
               {/* Info */}

@@ -402,9 +402,9 @@ export default function ShareableBadge({ data, onShare }: ShareableBadgeProps) {
         style={{
           background: '#0a0a0a',
           borderRadius: '16px',
-          padding: 'clamp(16px, 5vw, 32px)',
+          padding: '32px',
           border: '1px solid #222',
-          maxWidth: 'min(500px, 95vw)',
+          maxWidth: '500px',
           margin: '0 auto',
         }}
       >

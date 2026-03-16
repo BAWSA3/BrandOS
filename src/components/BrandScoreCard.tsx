@@ -37,10 +37,10 @@ const BrandScoreCard: React.FC<BrandScoreCardProps> = ({
       `}</style>
       <div
         id="brandos-score-card"
-        className="w-full max-w-[1100px] bg-[#2E6AFF] rounded-[8px] relative p-5 sm:p-8 md:p-14 flex flex-col justify-between overflow-visible"
+        className="w-full max-w-[1100px] bg-[#2E6AFF] rounded-[8px] relative p-8 md:p-14 flex flex-col justify-between overflow-visible"
         style={{
-          minHeight: 'min(480px, 85vh)',
-          aspectRatio: undefined,
+          minHeight: '480px',
+          aspectRatio: '16 / 10',
           boxShadow: '0 8px 40px rgba(46, 106, 255, 0.35), 0 2px 20px rgba(0, 0, 0, 0.15)',
         }}
       >
@@ -66,7 +66,7 @@ const BrandScoreCard: React.FC<BrandScoreCardProps> = ({
               </span>
               <span className="font-os text-sm text-white/70 block mt-1 truncate">@{username}</span>
             </div>
-            <div className="w-[48px] h-[48px] sm:w-[72px] sm:h-[72px] rounded-full border-2 border-white/40 overflow-hidden shrink-0">
+            <div className="w-[72px] h-[72px] rounded-full border-2 border-white/40 overflow-hidden shrink-0">
               <img src={profileImageUrl} alt={displayName} className="w-full h-full object-cover" />
             </div>
           </div>
@@ -74,7 +74,7 @@ const BrandScoreCard: React.FC<BrandScoreCardProps> = ({
 
         {/* Score number + summary */}
         <div className="relative z-10 my-auto flex items-center justify-between">
-          <h1 className="font-brand font-black italic text-[80px] sm:text-[120px] md:text-[240px] leading-none tracking-tighter text-white drop-shadow-xl shrink-0">
+          <h1 className="font-brand font-black italic text-[160px] md:text-[240px] leading-none tracking-tighter text-white drop-shadow-xl shrink-0">
             <AnimateNumber
               transition={{
                 y: { type: 'spring', duration: 0.8, bounce: 0 },
@@ -87,7 +87,7 @@ const BrandScoreCard: React.FC<BrandScoreCardProps> = ({
             </AnimateNumber>
           </h1>
           {phaseScores ? (
-            <div className="flex flex-col gap-1.5 sm:gap-2.5 text-right max-w-[140px] sm:max-w-[240px]">
+            <div className="flex flex-col gap-2.5 text-right max-w-[240px]">
               {(() => {
                 const phases = [
                   { label: 'IDENTITY', value: phaseScores.define },
@@ -119,7 +119,7 @@ const BrandScoreCard: React.FC<BrandScoreCardProps> = ({
         </div>
 
         {/* Bottom stats */}
-        <div className="z-10 grid grid-cols-2 gap-4 sm:gap-8 border-t border-white/20 pt-4 sm:pt-6">
+        <div className="z-10 grid grid-cols-2 gap-8 border-t border-white/20 pt-6">
           <div>
             <span className="font-os text-[10px] md:text-xs text-white/70 block mb-1 uppercase tracking-wider">
               Voice Consistency

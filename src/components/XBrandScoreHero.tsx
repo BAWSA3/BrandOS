@@ -1128,7 +1128,7 @@ export default function XBrandScoreHero({
         flexDirection: 'column',
         justifyContent: 'center',
         alignItems: 'center',
-        padding: flowState === 'input' ? '0' : flowState === 'journey' ? '0' : 'clamp(16px, 5vw, 48px) clamp(12px, 3vw, 24px)',
+        padding: flowState === 'input' ? '0' : flowState === 'journey' ? '0' : '48px 24px',
         position: 'relative',
         overflow:
           flowState === 'input'
@@ -1293,7 +1293,6 @@ export default function XBrandScoreHero({
 
             {/* Bottom-center — POWERED BY AI */}
             <motion.span
-              className="hero-powered-label"
               initial={{ opacity: 0 }}
               animate={{ opacity: 0.25 }}
               exit={{ opacity: 0 }}
@@ -1397,7 +1396,7 @@ export default function XBrandScoreHero({
                   alignItems: 'center',
                   gap: '12px',
                   width: '100%',
-                  maxWidth: 'min(420px, 90vw)',
+                  maxWidth: '420px',
                 }}
               >
                 {/* Terminal Input with > prefix */}
@@ -1434,8 +1433,8 @@ export default function XBrandScoreHero({
                     className="terminal-input"
                     style={{
                       width: '100%',
-                      fontSize: 'clamp(16px, 4vw, 1.125rem)',
-                      padding: 'clamp(0.75rem, 2.5vw, 1rem) clamp(0.75rem, 2.5vw, 1rem) clamp(0.75rem, 2.5vw, 1rem) 32px',
+                      fontSize: '1.125rem',
+                      padding: '1rem 1rem 1rem 32px',
                       textAlign: 'left',
                       borderRadius: '10px',
                       border: `1px solid ${error ? '#EF4444' : 'rgba(0,0,0,0.15)'}`,
@@ -1503,7 +1502,6 @@ export default function XBrandScoreHero({
 
             {/* Footer hint — retro terminal style */}
             <motion.p
-              className="hero-footer-hint"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 1.4, duration: 0.4 }}
