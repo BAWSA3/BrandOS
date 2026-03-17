@@ -764,6 +764,11 @@ export default function XBrandScoreHero({
   const [generatedBrandDNA, setGeneratedBrandDNA] = useState<GeneratedBrandDNA | null>(null);
   const [accountAuthenticity, setAccountAuthenticity] = useState<AuthenticityAnalysis | null>(null);
   const [accountActivity, setAccountActivity] = useState<ActivityAnalysis | null>(null);
+  const [postDiagnosis, setPostDiagnosis] = useState<{
+    strongPosts: { text: string; metrics: { likes: number; retweets: number; replies: number }; why: string }[];
+    weakPosts: { text: string; metrics: { likes: number; retweets: number; replies: number }; why: string; fix: string }[];
+    overallDiagnosis: string;
+  } | null>(null);
   const [rawTweets, setRawTweets] = useState<
     {
       id: string;
@@ -913,6 +918,9 @@ export default function XBrandScoreHero({
                 }
                 if (identityData.analysis.activity) {
                   setAccountActivity(identityData.analysis.activity);
+                }
+                if (identityData.analysis.postDiagnosis) {
+                  setPostDiagnosis(identityData.analysis.postDiagnosis);
                 }
 
                 // Generate store-ready Brand DNA
@@ -1093,6 +1101,7 @@ export default function XBrandScoreHero({
                 name: p.name,
                 frequency: p.frequency,
               })),
+              postDiagnosis: postDiagnosis || undefined,
             }
           : undefined;
 

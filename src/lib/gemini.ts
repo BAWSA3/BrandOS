@@ -2264,6 +2264,101 @@ export async function analyzeTweetVoice(
 }
 
 // =============================================================================
+// POST DIAGNOSIS - Best & Worst Posts With Explanations (for emails)
+// =============================================================================
+
+export interface PostDiagnosis {
+  strongPosts: {
+    text: string;
+    metrics: { likes: number; retweets: number; replies: number };
+    why: string;
+  }[];
+  weakPosts: {
+    text: string;
+    metrics: { likes: number; retweets: number; replies: number };
+    why: string;
+    fix: string;
+  }[];
+  overallDiagnosis: string;
+}
+
+/**
+ * Analyze tweets to find the best and worst posts with specific explanations.
+ * Used to make email breakdowns feel personalized and diagnostic.
+ */
+export async function diagnosePostPerformance(
+  tweets: {
+    text: string;
+    public_metrics: {
+      like_count: number;
+      retweet_count: number;
+      reply_count: number;
+      impression_count?: number;
+    };
+  }[],
+  username: string
+): Promise<PostDiagnosis | null> {
+  if (tweets.length < 5) return null;
+
+  try {
+    const tweetList = tweets
+      .slice(0, 40)
+      .map(
+        (t, i) =>
+          `[${i + 1}] "${t.text.substring(0, 280)}"
+    Likes: ${t.public_metrics.like_count} | RTs: ${t.public_metrics.retweet_count} | Replies: ${t.public_metrics.reply_count}`
+      )
+      .join('\n\n');
+
+    const prompt = `You are a brutally honest brand strategist reviewing @${username}'s recent posts.
+
+POSTS:
+${tweetList}
+
+Your job: find the 2 STRONGEST posts and the 3 WEAKEST posts. Be specific and direct.
+
+For STRONG posts: explain exactly WHY this post worked — what made it resonate (hook, specificity, emotion, format, timing, etc.)
+
+For WEAK posts: explain exactly WHY this post underperformed and give ONE specific rewrite tip. Be blunt — "this is generic", "no hook", "too self-promotional", "no clear takeaway", etc.
+
+Also write a 2-sentence overall diagnosis: what pattern is holding their content back, and what one shift would have the biggest impact.
+
+Return ONLY valid JSON:
+{
+  "strongPosts": [
+    {
+      "text": "exact tweet text",
+      "metrics": { "likes": N, "retweets": N, "replies": N },
+      "why": "1-2 sentences explaining why this worked"
+    }
+  ],
+  "weakPosts": [
+    {
+      "text": "exact tweet text",
+      "metrics": { "likes": N, "retweets": N, "replies": N },
+      "why": "1-2 sentences on why this flopped",
+      "fix": "One specific actionable fix"
+    }
+  ],
+  "overallDiagnosis": "2 sentences: the core pattern holding them back + the one shift that would help most"
+}`;
+
+    const result = await geminiFlash.generateContent(prompt);
+    const text = result.response.text();
+
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) return null;
+
+    const diagnosis = JSON.parse(jsonMatch[0]) as PostDiagnosis;
+    console.log(`[PostDiagnosis] @${username}: ${diagnosis.strongPosts.length} strong, ${diagnosis.weakPosts.length} weak posts identified`);
+    return diagnosis;
+  } catch (error) {
+    console.error('Post diagnosis error:', error);
+    return null;
+  }
+}
+
+// =============================================================================
 // VOICE CONSISTENCY ANALYSIS (Per-Post Scoring Against Fingerprint)
 // =============================================================================
 

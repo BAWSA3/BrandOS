@@ -56,6 +56,12 @@ export interface EmailTemplateData {
   audienceSignal?: string;
   // Archetype visual
   archetypeIconUrl?: string;
+  // Post diagnosis - specific examples of good/bad posts
+  postDiagnosis?: {
+    strongPosts: { text: string; metrics: { likes: number; retweets: number; replies: number }; why: string }[];
+    weakPosts: { text: string; metrics: { likes: number; retweets: number; replies: number }; why: string; fix: string }[];
+    overallDiagnosis: string;
+  } | null;
 }
 
 // =============================================================================
@@ -222,44 +228,72 @@ export const email1ScoreExplainer: EmailTemplate = {
 
     const summaryBlock = data.summary ? `\n${sanitizeAIText(data.summary)}\n` : '';
 
+    // Build post diagnosis section (the new personalized content)
+    const diagnosis = data.postDiagnosis;
+    let postDiagnosisBlock = '';
+
+    if (diagnosis && (diagnosis.weakPosts?.length || diagnosis.strongPosts?.length)) {
+      const weakPostsSection = (diagnosis.weakPosts || [])
+        .slice(0, 3)
+        .map(
+          (p) =>
+            `"${p.text.length > 140 ? p.text.substring(0, 140) + '...' : p.text}"
+→ ${p.metrics.likes} likes | ${p.metrics.retweets} RTs | ${p.metrics.replies} replies
+→ Why it underperformed: ${sanitizeAIText(p.why)}
+→ How to fix it: ${sanitizeAIText(p.fix)}`
+        )
+        .join('\n\n');
+
+      const strongPostsSection = (diagnosis.strongPosts || [])
+        .slice(0, 2)
+        .map(
+          (p) =>
+            `"${p.text.length > 140 ? p.text.substring(0, 140) + '...' : p.text}"
+→ ${p.metrics.likes} likes | ${p.metrics.retweets} RTs | ${p.metrics.replies} replies
+→ Why it worked: ${sanitizeAIText(p.why)}`
+        )
+        .join('\n\n');
+
+      postDiagnosisBlock = `
+**POSTS THAT ARE HURTING YOUR BRAND**
+
+We analyzed your recent content and found specific posts that are holding you back. Here's what's not working and exactly how to fix it:
+
+${weakPostsSection}
+
+**POSTS THAT ARE WORKING**
+
+These posts show what you're capable of. Do more of this:
+
+${strongPostsSection}
+
+**THE BOTTOM LINE**
+
+${sanitizeAIText(diagnosis.overallDiagnosis)}
+`;
+    }
+
     return `Hey @${data.username}!
 
-Bawsa here. Just wanted to say thank you for signing up for early access on BrandOS. My goal with this is just to help creators, builders, founders and new startups build and scale their brand presence. This is just the start of something big and I'm grateful to have you be a part of it.
+Bawsa here. Thanks for signing up for early access on BrandOS. I don't just want to give you a score — I want to show you exactly what's working, what's not, and what to do about it.
 
-Alright, let's have a look at your brand breakdown.
+Let's get into it.
 
 {{SCORE_CARD_IMAGE}}
 
-**HOW WE SCORED YOUR BRAND**
+**YOUR BRAND SCORE: ${data.score}/100**
+${postDiagnosisBlock || `
+We analyzed your profile and content across 4 dimensions. Here's what we found:
+`}
+**YOUR SCORES BY DIMENSION**
 
-Your Brand Score of ${data.score}/100 is based on 4 key dimensions we analyze from your profile and content. Here's exactly what we found:
+→ Identity: ${data.defineScore}/100${data.identitySignature ? ` — Known for: ${data.identitySignature}` : ''}
+→ Consistency: ${data.checkScore}/100${data.voiceConsistency != null ? ` — Voice consistency: ${data.voiceConsistency}%` : ''}
+→ Content: ${data.generateScore}/100${data.bestContentFormat ? ` — Best format: ${data.bestContentFormat}` : ''}
+→ Growth: ${data.scaleScore}/100
+${data.contentPillarNames?.length ? `→ Content pillars: ${data.contentPillarNames.join(', ')}` : ''}
 
-**IDENTITY (${data.defineScore}/100)**
-${[
-  data.identitySignature ? `→ You're known for: ${data.identitySignature}` : '',
-  data.contentPillarNames?.length ? `→ Content pillars: ${data.contentPillarNames.join(', ')}` : '',
-  data.topicConcentration != null
-    ? `→ Topic focus: ${data.topicConcentration >= 70 ? 'Laser focused' : data.topicConcentration >= 40 ? 'Moderately focused' : 'Scattered across topics'}`
-    : '',
-  data.audienceSignal ? `→ Natural audience: ${data.audienceSignal}` : '',
-  defineInsights || '→ No identity insights available yet',
-]
-  .filter(Boolean)
-  .join('\n')}
-
-**CONSISTENCY (${data.checkScore}/100)**
-${checkInsights || '→ No consistency insights available yet'}${voiceLine}
-
-**CONTENT (${data.generateScore}/100)**
-${generateInsights || '→ No content insights available yet'}${contentExtrasStr}
-
-**GROWTH (${data.scaleScore}/100)**
-${scaleInsights || '→ No growth insights available yet'}
-
-**WHERE YOU'RE STRONGEST**
-${strengths || '→ Keep building — strengths are emerging'}
-
-**YOUR BIGGEST OPPORTUNITIES**
+**WHAT TO FIX FIRST**
 ${improvements || "→ Keep creating — we'll identify opportunities as your brand grows"}
 
 ${data.archetypeIconUrl ? `{{ARCHETYPE_IMAGE:${data.archetypeIconUrl}}}` : ''}

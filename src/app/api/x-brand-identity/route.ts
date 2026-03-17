@@ -11,10 +11,12 @@ import {
   analyzeTweetVoice,
   analyzeAccountAuthenticity,
   analyzeActivityLevel,
+  diagnosePostPerformance,
   ProfileImageAnalysis,
   BrandDNA,
   BrandImprovements,
   TweetVoiceAnalysis,
+  PostDiagnosis,
   AuthenticityAnalysis,
   ActivityAnalysis,
 } from '@/lib/gemini';
@@ -47,6 +49,7 @@ export interface BrandIdentityResponse {
     brandDNA: BrandDNA | null;
     improvements: BrandImprovements | null;
     tweetVoice: TweetVoiceAnalysis | null;
+    postDiagnosis: PostDiagnosis | null;
     authenticity: AuthenticityAnalysis | null;
     activity: ActivityAnalysis | null;
   };
@@ -87,6 +90,10 @@ async function handlePost(request: NextRequest) {
     let tweetVoiceAnalysis: TweetVoiceAnalysis | null = null;
     let tweetCount = 0;
     let analysisMode: AnalysisMode = 'profile-only';
+    let rawTweetsForDiagnosis: {
+      text: string;
+      public_metrics: { like_count: number; retweet_count: number; reply_count: number; impression_count?: number };
+    }[] = [];
 
     if (features.tweetAnalysis) {
       try {
@@ -104,6 +111,7 @@ async function handlePost(request: NextRequest) {
         if (tweetsResponse.ok) {
           const tweetsData = await tweetsResponse.json();
           tweetCount = tweetsData.tweets?.length || 0;
+          rawTweetsForDiagnosis = tweetsData.tweets || [];
           console.log(`=== TWEETS RECEIVED: ${tweetCount} tweets ===`);
 
           if (tweetCount >= MINIMUM_TWEETS_FOR_CONTENT_ANALYSIS) {
@@ -148,9 +156,9 @@ async function handlePost(request: NextRequest) {
       console.log('=== TWEET ANALYSIS DISABLED - PROFILE-ONLY MODE ===');
     }
 
-    // Run image analysis, color extraction, and brand DNA generation in parallel
+    // Run image analysis, color extraction, brand DNA generation, and post diagnosis in parallel
     // CONTENT-PRIMARY: Pass tweet voice to brand DNA generation
-    const [profileImageAnalysis, extractedColors, brandDNA] = await Promise.all([
+    const [profileImageAnalysis, extractedColors, brandDNA, postDiagnosis] = await Promise.all([
       profile.profile_image_url
         ? analyzeProfileImageWithVision(profile.profile_image_url, profileContext)
         : Promise.resolve(null),
@@ -158,6 +166,9 @@ async function handlePost(request: NextRequest) {
         ? extractColorsFromImage(profile.profile_image_url)
         : Promise.resolve(null),
       generateBrandDNA(profile, undefined, tweetVoiceAnalysis),
+      rawTweetsForDiagnosis.length >= 5
+        ? diagnosePostPerformance(rawTweetsForDiagnosis, profile.username)
+        : Promise.resolve(null),
     ]);
 
     // Step 3: Generate improvements (needs brand DNA first)
@@ -198,6 +209,7 @@ async function handlePost(request: NextRequest) {
         brandDNA,
         improvements,
         tweetVoice: tweetVoiceAnalysis,
+        postDiagnosis,
         authenticity: authenticityAnalysis,
         activity: activityAnalysis,
       },

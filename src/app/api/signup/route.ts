@@ -67,6 +67,7 @@ export async function POST(request: NextRequest) {
           topicConcentration: brandData?.topicConcentration,
           audienceSignal: brandData?.audienceSignal,
           archetypeIconUrl: brandData?.archetypeIconUrl,
+          postDiagnosis: brandData?.postDiagnosis || null,
         },
         segmentIndicators
       );
