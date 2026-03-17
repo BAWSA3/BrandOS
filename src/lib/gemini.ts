@@ -2281,6 +2281,16 @@ export interface PostDiagnosis {
     fix: string;
     dimension: 'identity' | 'consistency' | 'content' | 'growth';
   }[];
+  brandStrengths: {
+    strength: string;
+    why: string;
+    evidence: string;
+  }[];
+  brandWeaknesses: {
+    weakness: string;
+    why: string;
+    steps: string[];
+  }[];
   overallDiagnosis: string;
 }
 
@@ -2312,7 +2322,7 @@ export async function diagnosePostPerformance(
       )
       .join('\n\n');
 
-    const prompt = `You are a brutally honest brand strategist reviewing @${username}'s recent posts. Your job is to show them exactly how we scored their brand by pointing to specific posts as evidence.
+    const prompt = `You are a brutally honest brand strategist reviewing @${username}'s recent posts. Your job is to diagnose their brand — what's strong, what's weak, and exactly how to fix it. Back everything up with their actual posts as evidence.
 
 POSTS:
 ${tweetList}
@@ -2323,10 +2333,17 @@ We score brands on 4 dimensions:
 - CONTENT: Is this post high-quality, well-structured, with a clear hook and takeaway? Or is it lazy/low-effort?
 - GROWTH: Did this post drive engagement, shares, and reach? Or did it fall flat?
 
-Find the 4 STRONGEST posts and 4 WEAKEST posts. Spread them across different dimensions — don't cluster them all under one.
+Do TWO things:
 
-For STRONG posts: explain exactly WHY this post worked and which dimension it boosted.
-For WEAK posts: explain exactly WHY it underperformed, which dimension it hurt, and give ONE specific fix. Be blunt.
+PART 1 — POST EXAMPLES
+Find 4 STRONGEST posts and 4 WEAKEST posts. Spread them across different dimensions.
+For strong: explain WHY it worked and which dimension it boosted.
+For weak: explain WHY it underperformed, which dimension it hurt, and give ONE specific fix. Be blunt.
+
+PART 2 — BRAND DIAGNOSIS
+Identify 2-3 things that are STRONG about their overall brand/account (not individual posts — patterns across posts). For each, explain WHY it's a strength and cite a brief example from their content as evidence.
+
+Then identify 2-3 things that are WEAK about their overall brand/account. For each, explain WHY it's hurting them and give 2-3 specific actionable steps they can take THIS WEEK to fix it. Be direct — "your hook game is weak" not "consider improving your opening lines".
 
 Write a 2-sentence overall diagnosis: the core pattern holding their content back + the one shift that would help most.
 
@@ -2347,6 +2364,20 @@ Return ONLY valid JSON:
       "why": "1-2 sentences on why this underperformed",
       "fix": "One specific actionable fix",
       "dimension": "identity|consistency|content|growth"
+    }
+  ],
+  "brandStrengths": [
+    {
+      "strength": "What's strong (e.g. 'Distinctive voice')",
+      "why": "Why this matters for their brand",
+      "evidence": "Brief example from their content that proves it"
+    }
+  ],
+  "brandWeaknesses": [
+    {
+      "weakness": "What's weak (e.g. 'No clear hook pattern')",
+      "why": "Why this is hurting their brand",
+      "steps": ["Step 1 to fix it this week", "Step 2", "Step 3"]
     }
   ],
   "overallDiagnosis": "2 sentences"

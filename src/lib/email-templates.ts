@@ -60,6 +60,8 @@ export interface EmailTemplateData {
   postDiagnosis?: {
     strongPosts: { text: string; metrics: { likes: number; retweets: number; replies: number }; why: string; dimension: string }[];
     weakPosts: { text: string; metrics: { likes: number; retweets: number; replies: number }; why: string; fix: string; dimension: string }[];
+    brandStrengths: { strength: string; why: string; evidence: string }[];
+    brandWeaknesses: { weakness: string; why: string; steps: string[] }[];
     overallDiagnosis: string;
   } | null;
 }
@@ -272,11 +274,42 @@ export const email1ScoreExplainer: EmailTemplate = {
         return section;
       }).filter(Boolean).join('\n');
 
+      // Brand strengths section
+      const brandStrengthsSection = (diagnosis.brandStrengths || [])
+        .slice(0, 3)
+        .map(
+          (s) =>
+            `✓ ${sanitizeAIText(s.strength)}
+→ Why it matters: ${sanitizeAIText(s.why)}
+→ Evidence: ${sanitizeAIText(s.evidence)}`
+        )
+        .join('\n\n');
+
+      // Brand weaknesses section with action steps
+      const brandWeaknessesSection = (diagnosis.brandWeaknesses || [])
+        .slice(0, 3)
+        .map(
+          (w) =>
+            `✗ ${sanitizeAIText(w.weakness)}
+→ Why it's hurting you: ${sanitizeAIText(w.why)}
+→ How to fix it:
+${(w.steps || []).map((step) => `  ${step}`).join('\n')}`
+        )
+        .join('\n\n');
+
       postDiagnosisBlock = `
 We analyzed your recent posts to show you exactly how we got to your score. Here's the evidence:
 
 ${dimensionSections}
+${brandStrengthsSection ? `
+**WHAT'S STRONG ABOUT YOUR BRAND**
 
+${brandStrengthsSection}
+` : ''}${brandWeaknessesSection ? `
+**WHAT'S WEAK ABOUT YOUR BRAND**
+
+${brandWeaknessesSection}
+` : ''}
 **THE BOTTOM LINE**
 
 ${sanitizeAIText(diagnosis.overallDiagnosis)}
@@ -285,7 +318,7 @@ ${sanitizeAIText(diagnosis.overallDiagnosis)}
 
     return `Hey @${data.username}!
 
-Bawsa here. Thanks for signing up for early access on BrandOS. I don't just want to give you a score — I want to show you exactly which posts helped, which ones hurt, and what to do about it.
+Bawsa here. Thanks for signing up for early access on BrandOS. I don't just want to give you a score — I want to show you exactly what's strong, what's weak, and how to fix it. Everything below is backed by your actual posts.
 
 Let's get into it.
 
