@@ -17,6 +17,51 @@ export default function ApiDocs() {
 
   const endpoints = [
     {
+      id: 'score',
+      method: 'POST',
+      path: '/api/v1/score',
+      description: 'Get a brand score, archetype, and breakdown for any X/Twitter handle',
+      body: `{
+  "username": "elonmusk"
+}`,
+      response: `{
+  "success": true,
+  "data": {
+    "username": "elonmusk",
+    "displayName": "Elon Musk",
+    "profileImageUrl": "https://pbs.twimg.com/...",
+    "verified": true,
+    "followers": 200000000,
+    "score": {
+      "overall": 91,
+      "identity": 95,
+      "consistency": 88,
+      "content": 85,
+      "growth": 97
+    },
+    "archetype": {
+      "name": "FORESIGHT",
+      "tagline": "Shapes the narrative.",
+      "description": "A visionary who..."
+    },
+    "insights": {
+      "identity": ["Strong personal brand identity..."],
+      "consistency": ["Consistent voice across posts..."],
+      "content": ["High engagement content..."],
+      "growth": ["Elite tier influence..."]
+    },
+    "strengths": ["Massive reach", "Iconic brand"],
+    "improvements": ["More structured threads"],
+    "influenceTier": "elite"
+  },
+  "meta": {
+    "analyzedAt": "2026-03-17T12:00:00.000Z",
+    "cached": false,
+    "apiVersion": "v1"
+  }
+}`,
+    },
+    {
       id: 'check',
       method: 'POST',
       path: '/api/webhook/check',
@@ -233,20 +278,10 @@ export default function ApiDocs() {
           <div>
             <h2 className="text-2xl font-light tracking-tight mb-4">Example (cURL)</h2>
             <pre className="p-4 bg-surface rounded-lg text-sm font-mono overflow-x-auto whitespace-pre-wrap">
-              {`curl -X POST ${baseUrl}/api/webhook/check \\
+              {`curl -X POST ${baseUrl}/api/v1/score \\
   -H "Content-Type: application/json" \\
   -H "x-api-key: your-api-key" \\
-  -d '{
-    "brandDNA": {
-      "name": "My Brand",
-      "tone": {"minimal": 50, "playful": 50, "bold": 50, "experimental": 30},
-      "keywords": ["innovative"],
-      "doPatterns": [],
-      "dontPatterns": [],
-      "voiceSamples": []
-    },
-    "content": "Check this content"
-  }'`}
+  -d '{"username": "naval"}'`}
             </pre>
           </div>
         </section>
