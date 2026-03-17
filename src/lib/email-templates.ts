@@ -56,10 +56,10 @@ export interface EmailTemplateData {
   audienceSignal?: string;
   // Archetype visual
   archetypeIconUrl?: string;
-  // Post diagnosis - specific examples of good/bad posts
+  // Post diagnosis - specific examples of good/bad posts tied to score dimensions
   postDiagnosis?: {
-    strongPosts: { text: string; metrics: { likes: number; retweets: number; replies: number }; why: string }[];
-    weakPosts: { text: string; metrics: { likes: number; retweets: number; replies: number }; why: string; fix: string }[];
+    strongPosts: { text: string; metrics: { likes: number; retweets: number; replies: number }; why: string; dimension: string }[];
+    weakPosts: { text: string; metrics: { likes: number; retweets: number; replies: number }; why: string; fix: string; dimension: string }[];
     overallDiagnosis: string;
   } | null;
 }
@@ -232,40 +232,50 @@ export const email1ScoreExplainer: EmailTemplate = {
     const diagnosis = data.postDiagnosis;
     let postDiagnosisBlock = '';
 
-    if (diagnosis && (diagnosis.weakPosts?.length || diagnosis.strongPosts?.length)) {
-      const weakPostsSection = (diagnosis.weakPosts || [])
-        .slice(0, 3)
-        .map(
-          (p) =>
-            `"${p.text.length > 140 ? p.text.substring(0, 140) + '...' : p.text}"
-→ ${p.metrics.likes} likes | ${p.metrics.retweets} RTs | ${p.metrics.replies} replies
-→ Why it underperformed: ${sanitizeAIText(p.why)}
-→ How to fix it: ${sanitizeAIText(p.fix)}`
-        )
-        .join('\n\n');
+    const dimensionLabels: Record<string, string> = {
+      identity: 'IDENTITY',
+      consistency: 'CONSISTENCY',
+      content: 'CONTENT',
+      growth: 'GROWTH',
+    };
 
-      const strongPostsSection = (diagnosis.strongPosts || [])
-        .slice(0, 2)
-        .map(
-          (p) =>
-            `"${p.text.length > 140 ? p.text.substring(0, 140) + '...' : p.text}"
-→ ${p.metrics.likes} likes | ${p.metrics.retweets} RTs | ${p.metrics.replies} replies
-→ Why it worked: ${sanitizeAIText(p.why)}`
-        )
-        .join('\n\n');
+    const dimensionScores: Record<string, number> = {
+      identity: data.defineScore,
+      consistency: data.checkScore,
+      content: data.generateScore,
+      growth: data.scaleScore,
+    };
+
+    if (diagnosis && (diagnosis.weakPosts?.length || diagnosis.strongPosts?.length)) {
+      const formatPost = (p: { text: string; metrics: { likes: number; retweets: number; replies: number }; dimension?: string }) => {
+        const truncated = p.text.length > 180 ? p.text.substring(0, 180) + '...' : p.text;
+        return `"${truncated}"
+→ ${p.metrics.likes} likes | ${p.metrics.retweets} RTs | ${p.metrics.replies} replies`;
+      };
+
+      // Group posts by dimension for the score breakdown
+      const dimensions = ['identity', 'consistency', 'content', 'growth'] as const;
+      const dimensionSections = dimensions.map((dim) => {
+        const strong = (diagnosis.strongPosts || []).filter((p) => p.dimension === dim);
+        const weak = (diagnosis.weakPosts || []).filter((p) => p.dimension === dim);
+        if (strong.length === 0 && weak.length === 0) return '';
+
+        let section = `**${dimensionLabels[dim]} (${dimensionScores[dim]}/100)**\n`;
+
+        for (const p of strong.slice(0, 2)) {
+          section += `\n✓ This post HELPED your score:\n${formatPost(p)}\n→ ${sanitizeAIText(p.why)}\n`;
+        }
+        for (const p of weak.slice(0, 2)) {
+          section += `\n✗ This post HURT your score:\n${formatPost(p)}\n→ ${sanitizeAIText(p.why)}\n→ Fix: ${sanitizeAIText(p.fix)}\n`;
+        }
+
+        return section;
+      }).filter(Boolean).join('\n');
 
       postDiagnosisBlock = `
-**POSTS THAT ARE HURTING YOUR BRAND**
+We analyzed your recent posts to show you exactly how we got to your score. Here's the evidence:
 
-We analyzed your recent content and found specific posts that are holding you back. Here's what's not working and exactly how to fix it:
-
-${weakPostsSection}
-
-**POSTS THAT ARE WORKING**
-
-These posts show what you're capable of. Do more of this:
-
-${strongPostsSection}
+${dimensionSections}
 
 **THE BOTTOM LINE**
 
@@ -275,7 +285,7 @@ ${sanitizeAIText(diagnosis.overallDiagnosis)}
 
     return `Hey @${data.username}!
 
-Bawsa here. Thanks for signing up for early access on BrandOS. I don't just want to give you a score — I want to show you exactly what's working, what's not, and what to do about it.
+Bawsa here. Thanks for signing up for early access on BrandOS. I don't just want to give you a score — I want to show you exactly which posts helped, which ones hurt, and what to do about it.
 
 Let's get into it.
 
@@ -284,15 +294,12 @@ Let's get into it.
 **YOUR BRAND SCORE: ${data.score}/100**
 ${postDiagnosisBlock || `
 We analyzed your profile and content across 4 dimensions. Here's what we found:
-`}
-**YOUR SCORES BY DIMENSION**
 
 → Identity: ${data.defineScore}/100${data.identitySignature ? ` — Known for: ${data.identitySignature}` : ''}
 → Consistency: ${data.checkScore}/100${data.voiceConsistency != null ? ` — Voice consistency: ${data.voiceConsistency}%` : ''}
 → Content: ${data.generateScore}/100${data.bestContentFormat ? ` — Best format: ${data.bestContentFormat}` : ''}
 → Growth: ${data.scaleScore}/100
-${data.contentPillarNames?.length ? `→ Content pillars: ${data.contentPillarNames.join(', ')}` : ''}
-
+`}
 **WHAT TO FIX FIRST**
 ${improvements || "→ Keep creating — we'll identify opportunities as your brand grows"}
 

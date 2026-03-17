@@ -2272,12 +2272,14 @@ export interface PostDiagnosis {
     text: string;
     metrics: { likes: number; retweets: number; replies: number };
     why: string;
+    dimension: 'identity' | 'consistency' | 'content' | 'growth';
   }[];
   weakPosts: {
     text: string;
     metrics: { likes: number; retweets: number; replies: number };
     why: string;
     fix: string;
+    dimension: 'identity' | 'consistency' | 'content' | 'growth';
   }[];
   overallDiagnosis: string;
 }
@@ -2310,18 +2312,23 @@ export async function diagnosePostPerformance(
       )
       .join('\n\n');
 
-    const prompt = `You are a brutally honest brand strategist reviewing @${username}'s recent posts.
+    const prompt = `You are a brutally honest brand strategist reviewing @${username}'s recent posts. Your job is to show them exactly how we scored their brand by pointing to specific posts as evidence.
 
 POSTS:
 ${tweetList}
 
-Your job: find the 2 STRONGEST posts and the 3 WEAKEST posts. Be specific and direct.
+We score brands on 4 dimensions:
+- IDENTITY: Does this post reinforce who they are and what they're known for? Or is it off-brand/generic?
+- CONSISTENCY: Does this post match their usual voice, tone, and style? Or is it a jarring departure?
+- CONTENT: Is this post high-quality, well-structured, with a clear hook and takeaway? Or is it lazy/low-effort?
+- GROWTH: Did this post drive engagement, shares, and reach? Or did it fall flat?
 
-For STRONG posts: explain exactly WHY this post worked — what made it resonate (hook, specificity, emotion, format, timing, etc.)
+Find the 4 STRONGEST posts and 4 WEAKEST posts. Spread them across different dimensions — don't cluster them all under one.
 
-For WEAK posts: explain exactly WHY this post underperformed and give ONE specific rewrite tip. Be blunt — "this is generic", "no hook", "too self-promotional", "no clear takeaway", etc.
+For STRONG posts: explain exactly WHY this post worked and which dimension it boosted.
+For WEAK posts: explain exactly WHY it underperformed, which dimension it hurt, and give ONE specific fix. Be blunt.
 
-Also write a 2-sentence overall diagnosis: what pattern is holding their content back, and what one shift would have the biggest impact.
+Write a 2-sentence overall diagnosis: the core pattern holding their content back + the one shift that would help most.
 
 Return ONLY valid JSON:
 {
@@ -2329,18 +2336,20 @@ Return ONLY valid JSON:
     {
       "text": "exact tweet text",
       "metrics": { "likes": N, "retweets": N, "replies": N },
-      "why": "1-2 sentences explaining why this worked"
+      "why": "1-2 sentences explaining why this worked",
+      "dimension": "identity|consistency|content|growth"
     }
   ],
   "weakPosts": [
     {
       "text": "exact tweet text",
       "metrics": { "likes": N, "retweets": N, "replies": N },
-      "why": "1-2 sentences on why this flopped",
-      "fix": "One specific actionable fix"
+      "why": "1-2 sentences on why this underperformed",
+      "fix": "One specific actionable fix",
+      "dimension": "identity|consistency|content|growth"
     }
   ],
-  "overallDiagnosis": "2 sentences: the core pattern holding them back + the one shift that would help most"
+  "overallDiagnosis": "2 sentences"
 }`;
 
     const result = await geminiFlash.generateContent(prompt);
