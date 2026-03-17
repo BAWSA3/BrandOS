@@ -64,7 +64,10 @@ export interface BrandIdentityResponse {
 
 async function handlePost(request: NextRequest) {
   try {
-    const { profile }: { profile: XProfileData } = await request.json();
+    const { profile, tweets: clientTweets }: {
+      profile: XProfileData;
+      tweets?: { text: string; public_metrics: { like_count: number; retweet_count: number; reply_count: number; impression_count?: number } }[];
+    } = await request.json();
 
     if (!profile || !profile.username) {
       return NextResponse.json(
@@ -112,7 +115,7 @@ async function handlePost(request: NextRequest) {
           const tweetsData = await tweetsResponse.json();
           tweetCount = tweetsData.tweets?.length || 0;
           rawTweetsForDiagnosis = tweetsData.tweets || [];
-          console.log(`=== TWEETS RECEIVED: ${tweetCount} tweets ===`);
+          console.log(`=== TWEETS RECEIVED (API): ${tweetCount} tweets ===`);
 
           if (tweetCount >= MINIMUM_TWEETS_FOR_CONTENT_ANALYSIS) {
             // Enough tweets for content-primary analysis
@@ -154,6 +157,12 @@ async function handlePost(request: NextRequest) {
       }
     } else {
       console.log('=== TWEET ANALYSIS DISABLED - PROFILE-ONLY MODE ===');
+    }
+
+    // Use client-provided tweets as fallback for post diagnosis if API fetch failed
+    if (rawTweetsForDiagnosis.length === 0 && clientTweets?.length) {
+      rawTweetsForDiagnosis = clientTweets;
+      console.log(`=== USING CLIENT TWEETS FOR DIAGNOSIS: ${clientTweets.length} tweets ===`);
     }
 
     // Run image analysis, color extraction, brand DNA generation, and post diagnosis in parallel

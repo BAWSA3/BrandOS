@@ -800,6 +800,7 @@ export default function XBrandScoreHero({
   const apiResultRef = useRef<{ profile: XProfileData; brandScore: BrandScoreResult; meta?: Record<string, unknown> } | null>(null);
   const apiCompleteRef = useRef(false);
   const apiErrorRef = useRef<string | null>(null);
+  const rawTweetsRef = useRef<typeof rawTweets>([]);
   const autoStartTriggered = useRef(false);
 
   const [isValidating, setIsValidating] = useState(false);
@@ -881,7 +882,10 @@ export default function XBrandScoreHero({
         .then(async (res) => {
           if (!res.ok) return;
           const data = await res.json();
-          if (data.tweets?.length) setRawTweets(data.tweets);
+          if (data.tweets?.length) {
+            setRawTweets(data.tweets);
+            rawTweetsRef.current = data.tweets;
+          }
         })
         .catch(() => {});
 
@@ -907,6 +911,7 @@ export default function XBrandScoreHero({
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                   profile: data.profile,
+                  tweets: rawTweetsRef.current.length > 0 ? rawTweetsRef.current.slice(0, 40) : undefined,
                 }),
               });
               const identityData = await identityResponse.json();
