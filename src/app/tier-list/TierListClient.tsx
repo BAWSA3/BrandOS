@@ -637,11 +637,20 @@ export default function TierListClient({ tiers }: { tiers: Tiers }) {
                 className="mt-3 text-center"
               >
                 <p
-                  className="text-[#10B981] text-[11px]"
+                  className="text-[#10B981] text-[11px] mb-2"
                   style={{ fontFamily: "'VCR OSD Mono', monospace" }}
                 >
                   {'>'} MATCH FOUND — scrolling to position...
                 </p>
+                <div className="flex gap-2 justify-center">
+                  <a
+                    href={`/tier-list/${searchResult}`}
+                    className="text-[#0047FF] text-[11px] hover:underline"
+                    style={{ fontFamily: "'VCR OSD Mono', monospace" }}
+                  >
+                    {'>'} SHARE_YOUR_RANK
+                  </a>
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
