@@ -199,6 +199,24 @@ async function handlePost(request: NextRequest) {
       }
     }
 
+    // === SCORE SMOOTHING: prevent jarring score swings for returning users ===
+    // Gemini is non-deterministic — same profile can produce ±10 point variance.
+    // For returning users, clamp the new score within ±5 of their stored score
+    // so the number feels stable while still allowing real growth/decline over time.
+    const MAX_SCORE_DRIFT = 5;
+    if (userProfile && !forceReevaluate) {
+      const storedScore = userProfile.currentScore;
+      const rawScore = brandScore.overallScore;
+      if (Math.abs(rawScore - storedScore) > MAX_SCORE_DRIFT) {
+        brandScore.overallScore = rawScore > storedScore
+          ? storedScore + MAX_SCORE_DRIFT
+          : storedScore - MAX_SCORE_DRIFT;
+        console.log(
+          `[BrandScore] Smoothed score for @${cleanUsername}: ${rawScore} → ${brandScore.overallScore} (stored: ${storedScore})`
+        );
+      }
+    }
+
     // === ARCHETYPE CONSISTENCY ENGINE ===
     // Resolve archetype: new users get Gemini result, returning users get cached
     let archetypeDecision;

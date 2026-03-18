@@ -9,6 +9,7 @@ import { features, getTierInfo } from '@/lib/features';
 import { analyzeVoiceConsistency } from '@/lib/voice-consistency';
 import type { VoiceConsistencyReport } from '@/lib/schemas/voice-consistency.schema';
 import { recordScan } from '@/lib/scan-tracking';
+import { getUserProfile } from '@/lib/user-profiles';
 
 /**
  * Enhanced Brand Score API
@@ -216,6 +217,22 @@ export async function POST(request: NextRequest) {
 
       console.log(`Voice consistency blended into CHECK: ${originalCheck} -> ${blended}`);
       console.log(`Recalculated overall: ${brandScore.overallScore}`);
+    }
+
+    // === SCORE SMOOTHING: clamp within ±5 of stored score for returning users ===
+    const MAX_SCORE_DRIFT = 5;
+    const existingProfile = getUserProfile(cleanUsername);
+    if (existingProfile) {
+      const storedScore = existingProfile.currentScore;
+      const rawScore = brandScore.overallScore;
+      if (Math.abs(rawScore - storedScore) > MAX_SCORE_DRIFT) {
+        brandScore.overallScore = rawScore > storedScore
+          ? storedScore + MAX_SCORE_DRIFT
+          : storedScore - MAX_SCORE_DRIFT;
+        console.log(
+          `[EnhancedScore] Smoothed score for @${cleanUsername}: ${rawScore} → ${brandScore.overallScore} (stored: ${storedScore})`
+        );
+      }
     }
 
     // Save to leaderboard (local JSON)
