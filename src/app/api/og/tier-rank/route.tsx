@@ -10,7 +10,11 @@ export async function GET(request: NextRequest) {
   const archetype = searchParams.get('a') || 'Unknown';
   const rank = parseInt(searchParams.get('r') || '0');
   const total = parseInt(searchParams.get('t') || '0');
-  const pfp = searchParams.get('pfp') || '';
+  let pfp = searchParams.get('pfp') || '';
+  // Normalize PFP to _200x200 — more reliably available than _400x400
+  if (pfp) {
+    pfp = pfp.replace(/_(?:normal|bigger|mini|400x400)\./i, '_200x200.');
+  }
 
   const tierName =
     score >= 80 ? 'ELITE' : score >= 60 ? 'STRONG' : 'RISING';

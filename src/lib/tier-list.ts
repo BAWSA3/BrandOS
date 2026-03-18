@@ -44,9 +44,12 @@ export async function getTierListData() {
         data.avatar ||
         null;
       if (pfp) {
+        // Use _200x200 instead of _400x400 — more reliably available on Twitter CDN
+        // Also strip any existing size suffix first to normalize
+        const normalized = pfp.replace(/_(?:normal|bigger|mini|200x200|400x400)\./i, '_200x200.');
         profileMap.set(
           profile.username.toLowerCase(),
-          pfp.replace('_normal', '_400x400')
+          normalized
         );
       }
     } catch {

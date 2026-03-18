@@ -11,6 +11,22 @@ interface TierUser {
   profileImageUrl: string | null;
 }
 
+const PFP_FALLBACK_SVG =
+  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect fill='%23222' width='100' height='100'/%3E%3Ctext x='50' y='55' text-anchor='middle' fill='%23555' font-size='40'%3E%3F%3C/text%3E%3C/svg%3E";
+
+/** Try falling back to _normal size, then to placeholder SVG */
+function handlePfpError(e: React.SyntheticEvent<HTMLImageElement>) {
+  const img = e.target as HTMLImageElement;
+  const src = img.src;
+  // If we're on a sized variant, try _normal first
+  if (src.includes('_200x200') || src.includes('_400x400')) {
+    img.src = src.replace(/_(?:200x200|400x400)\./i, '_normal.');
+    return;
+  }
+  // Final fallback
+  img.src = PFP_FALLBACK_SVG;
+}
+
 interface Tiers {
   elite: TierUser[];
   strong: TierUser[];
@@ -284,10 +300,7 @@ function UserCard({
             alt={`@${user.username}`}
             className="w-full h-full object-cover"
             loading="lazy"
-            onError={(e) => {
-              (e.target as HTMLImageElement).src =
-                "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect fill='%23222' width='100' height='100'/%3E%3Ctext x='50' y='55' text-anchor='middle' fill='%23555' font-size='40'%3E%3F%3C/text%3E%3C/svg%3E";
-            }}
+            onError={handlePfpError}
           />
         ) : (
           <div className="w-full h-full bg-[#222] flex items-center justify-center text-[#666] text-lg">

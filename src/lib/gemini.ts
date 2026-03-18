@@ -952,7 +952,15 @@ export const xBrandScorePrompt = (profile: XProfileData) => {
   // Base prompt with influence tier context
   let prompt = `You are an expert brand strategist analyzing an X (Twitter) creator. A brand is a REPUTATION — what someone is known for, how they demonstrate it through content, and why they should be remembered. Your goal is to evaluate brand effectiveness based entirely on CONTENT and its impact on reputation.
 
-DO NOT evaluate: bio text, username/name alignment, profile picture, banner, location, links, or any other visual/profile elements. These are personal expression, NOT brand signals. Brand = what you post and how the audience responds.
+CRITICAL — DO NOT evaluate any of the following. They are personal expression, NOT brand signals:
+- Username or handle (people pick fun names, real names, random names — irrelevant to brand)
+- Display name (may contain emojis, symbols, jokes — ignore completely)
+- Bio text
+- Profile picture or banner
+- Location, links, or any visual/profile element
+- Whether the name "matches" their content — this is NOT a signal
+
+A person's handle and display name have ZERO bearing on their brand identity. Brand = what you post and how the audience responds. Nothing else.
 
 CREATOR DATA:
 - Name: ${profile.name}
@@ -1033,7 +1041,7 @@ Base Score = (DEFINE × 0.30) + (CHECK × 0.25) + (GENERATE × 0.25) + (SCALE ×
 Final Score = Base Score + Tier Bonus (${influenceAnalysis.followerTierBonus}) + Authority Bonus (${influenceAnalysis.authorityScore})
 Cap at 100.
 
-REMEMBER: Do NOT factor in bio, username alignment, profile picture, banner, location, or links. Only content and reputation.
+REMEMBER: Do NOT factor in bio, username/handle, display name, profile picture, banner, location, or links. A person's name has NOTHING to do with their brand identity. Only evaluate content and reputation.
 
 CREATOR ARCHETYPE (Choose ONE that best fits):
 1. 🎓 SIGNAL_SAGE - Deep knowledge authority, niche expert, educational content
@@ -1123,7 +1131,15 @@ export const enhancedBrandScorePrompt = (input: TweetAnalysisInput) => {
 
   return `You are an expert brand strategist analyzing an X (Twitter) creator's CONTENT to evaluate their brand (reputation). A brand is what someone is known for, how they demonstrate it through content, and why they should be remembered.
 
-DO NOT evaluate: bio, username/name alignment, profile picture, banner, location, links, or any visual/profile elements. ONLY evaluate content and reputation signals.
+CRITICAL — DO NOT evaluate any of the following. They are personal expression, NOT brand signals:
+- Username or handle (people pick fun names, real names, random names — irrelevant to brand)
+- Display name (may contain emojis, symbols, jokes — ignore completely)
+- Bio text
+- Profile picture or banner
+- Location, links, or any visual/profile element
+- Whether the name "matches" their content — this is NOT a signal
+
+ONLY evaluate content and reputation signals.
 
 CREATOR DATA:
 - Name: ${profile.name}
@@ -1855,7 +1871,7 @@ CONTENT ANALYSIS (PRIMARY - Base your analysis on this):
     : '';
 
   const contentPrimaryNote = `
-IMPORTANT: A brand is a REPUTATION — what someone is known for, demonstrated through their content. Do NOT evaluate bio, username alignment, profile picture, or any visual/profile elements. Only analyze content and reputation.`;
+IMPORTANT: A brand is a REPUTATION — what someone is known for, demonstrated through their content. Do NOT evaluate bio, username/handle, display name (emojis, symbols, real names are all irrelevant), profile picture, or any visual/profile elements. Only analyze content and reputation.`;
 
   return `You are an expert brand strategist creating a comprehensive Brand DNA profile.
 ${contentPrimaryNote}
