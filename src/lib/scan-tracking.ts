@@ -1,6 +1,18 @@
 import supabase from './supabase';
 
 /**
+ * Trigger on-demand revalidation of the tier list pages
+ */
+async function revalidateTierList() {
+  try {
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://mybrandos.app';
+    await fetch(`${appUrl}/api/revalidate?path=/tier-list`, { method: 'GET' });
+  } catch (e) {
+    console.error('[ScanTracking] Revalidation failed:', e);
+  }
+}
+
+/**
  * BrandOS Scan Tracking
  *
  * Tracks every brand score scan in Supabase for analytics.
@@ -38,6 +50,9 @@ export async function recordScan(scan: {
       console.error('[ScanTracking] Supabase error:', error);
       return { success: false, error: error.message };
     }
+
+    // Revalidate tier list so new scans appear immediately
+    revalidateTierList().catch(() => {});
 
     return { success: true };
   } catch (error) {

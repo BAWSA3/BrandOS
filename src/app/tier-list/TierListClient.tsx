@@ -263,6 +263,7 @@ function UserCard({
 
   return (
     <div ref={cardRef}>
+    <a href={`/tier-list/${user.username}`} className="block cursor-pointer">
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{
@@ -271,6 +272,7 @@ function UserCard({
         scale: isHighlighted ? 1.2 : 1,
       }}
       transition={{ duration: 0.3 }}
+      whileHover={{ scale: 1.08 }}
       className={`flex flex-col items-center w-[72px] md:w-[80px] gap-1 relative ${isHighlighted ? 'z-10' : ''}`}
     >
       <div
@@ -314,6 +316,7 @@ function UserCard({
         </span>
       )}
     </motion.div>
+    </a>
     </div>
   );
 }
@@ -479,7 +482,7 @@ export default function TierListClient({ tiers }: { tiers: Tiers }) {
             className="text-[11px] md:text-[12px] text-white/60 tracking-wide"
             style={{ fontFamily: "'VCR OSD Mono', monospace" }}
           >
-            {totalCreators.toLocaleString()} creators ranked by Brand DNA Score
+            What&apos;s your brand rank?
           </p>
         </motion.div>
 
