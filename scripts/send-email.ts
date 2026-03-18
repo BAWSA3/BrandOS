@@ -15,6 +15,7 @@ import * as readline from 'readline';
 import { promises as fs, readFileSync } from 'fs';
 import path from 'path';
 import { Resend } from 'resend';
+import { PrismaClient } from '@prisma/client';
 
 // Load .env.local
 try {
@@ -141,12 +142,23 @@ function promptMultiline(instruction: string): Promise<string> {
 }
 
 async function loadSignups(): Promise<Signup[]> {
+  const prisma = new PrismaClient();
   try {
-    const data = await fs.readFile(SIGNUPS_FILE, 'utf-8');
-    return JSON.parse(data);
-  } catch {
-    console.log('No signups found in local file. Checking Supabase...');
+    const dbSignups = await prisma.emailSignup.findMany({
+      orderBy: { createdAt: 'desc' },
+    });
+    return dbSignups.map(s => ({
+      id: s.id,
+      email: s.email,
+      source: s.source,
+      createdAt: s.createdAt.toISOString(),
+      username: s.xUsername || undefined,
+    }));
+  } catch (err) {
+    console.log('Failed to load signups from database:', err);
     return [];
+  } finally {
+    await prisma.$disconnect();
   }
 }
 
