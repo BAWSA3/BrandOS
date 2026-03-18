@@ -15,6 +15,7 @@ const allowedPages = [
   '/early-access', // Email signup / early access
   '/privacy', // Legal: privacy policy
   '/terms', // Legal: terms of service
+  '/tier-list', // Public tier list
 ];
 
 export function middleware(request: NextRequest) {
