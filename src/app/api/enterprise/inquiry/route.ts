@@ -4,7 +4,7 @@ import { sendEmail } from '@/lib/email';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, email, company, role, teamSize, brandsManaged, message } = body;
+    const { name, email, company, role, teamSize, brandsManaged, interest, message } = body;
 
     if (!name || !email || !company) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -25,6 +25,7 @@ export async function POST(request: NextRequest) {
         `Role: ${role || 'Not specified'}`,
         `Team Size: ${teamSize || 'Not specified'}`,
         `Brands Managed: ${brandsManaged || 'Not specified'}`,
+        `Interest: ${interest || 'Not specified'}`,
         ``,
         `**Message:**`,
         message || '(No message provided)',
