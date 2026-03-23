@@ -16,6 +16,9 @@ const allowedPages = [
   '/privacy', // Legal: privacy policy
   '/terms', // Legal: terms of service
   '/tier-list', // Public tier list
+  '/archetype', // Archetype scanner
+  '/archetypes', // Archetype showcase
+  '/test-cards', // Archetype card previews (dev)
 ];
 
 export function middleware(request: NextRequest) {
@@ -55,6 +58,6 @@ export const config = {
      * - favicon.ico (favicon file)
      * - public folder
      */
-    '/((?!_next/static|_next/image|favicon.ico|public/).*)',
+    '/((?!_next/static|_next/image|favicon.ico|public/|archetypes/).*)',
   ],
 };

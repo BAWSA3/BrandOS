@@ -1044,7 +1044,7 @@ Cap at 100.
 REMEMBER: Do NOT factor in bio, username/handle, display name, profile picture, banner, location, or links. A person's name has NOTHING to do with their brand identity. Only evaluate content and reputation.
 
 CREATOR ARCHETYPE (Choose ONE that best fits):
-1. 🎓 SIGNAL_SAGE - Deep knowledge authority, niche expert, educational content
+1. 🎓 SOURCE - Deep knowledge authority, niche expert, educational content
 2. 🔌 RELAY - Super connector, everyone's mutual, "DMs open" energy, networker
 3. 🎪 FREQ - Timeline entertainer, shitposter, meme-friendly, playful
 4. 🔮 FORESIGHT - Visionary thought leader, strong opinions, called it before everyone
@@ -1053,7 +1053,7 @@ CREATOR ARCHETYPE (Choose ONE that best fits):
 7. 🎰 ENTROPY - High-risk high-reward energy, crypto trader, ape-first mentality
 8. 👻 NULL - Pseudonymous legend, influence without identity, mysterious authority
 
-For ${influenceAnalysis.tier} tier accounts: FORESIGHT or SIGNAL_SAGE are common fits.
+For ${influenceAnalysis.tier} tier accounts: FORESIGHT or SOURCE are common fits.
 For crypto/web3 profiles: ENTROPY or NULL may be more appropriate.
 For pseudonymous accounts with high influence: NULL is ideal.
 
@@ -1070,7 +1070,7 @@ Return ONLY valid JSON:
   "topImprovements": ["Improvement 1", "Improvement 2", "Improvement 3"],
   "summary": "2-3 sentence assessment acknowledging their influence tier and brand effectiveness.",
   "archetype": {
-    "primary": "SIGNAL_SAGE|RELAY|FREQ|FORESIGHT|BUILD.EXE|ARC|ENTROPY|NULL",
+    "primary": "SOURCE|RELAY|FREQ|FORESIGHT|BUILD.EXE|ARC|ENTROPY|NULL",
     "emoji": "🎓|🔌|🎪|🔮|🚢|🐕|🎰|👻",
     "tagline": "3-5 word identity label that's shareable",
     "description": "Why this archetype fits their vibe and influence level",
@@ -1241,7 +1241,7 @@ Return ONLY valid JSON:
   "topImprovements": ["improvement1", "improvement2", "improvement3"],
   "summary": "3-4 sentence comprehensive assessment with specific observations from their content",
   "archetype": {
-    "primary": "SIGNAL_SAGE|RELAY|FREQ|FORESIGHT|BUILD.EXE|ARC|ENTROPY|NULL",
+    "primary": "SOURCE|RELAY|FREQ|FORESIGHT|BUILD.EXE|ARC|ENTROPY|NULL",
     "emoji": "🎓|🔌|🎪|🔮|🚢|🐕|🎰|👻",
     "tagline": "3-5 word shareable identity label",
     "description": "2-3 sentences explaining archetype fit with EVIDENCE from their tweets",
@@ -1886,7 +1886,7 @@ Generate a comprehensive Brand DNA profile based on CONTENT and REPUTATION only:
 
 1. COLORS - Infer from content tone and energy (NOT from profile image)
 2. ARCHETYPE - Best fit from these 8 archetypes:
-   - 🎓 SIGNAL_SAGE (knowledge authority)
+   - 🎓 SOURCE (knowledge authority)
    - 🔌 RELAY (super connector)
    - 🎪 FREQ (entertainer/shitposter)
    - 🔮 FORESIGHT (thought leader/visionary)
@@ -1903,7 +1903,7 @@ Return ONLY valid JSON:
 {
   "primaryColor": { "hex": "#XXXXXX", "name": "Color Name" },
   "secondaryColor": { "hex": "#XXXXXX", "name": "Color Name" },
-  "archetype": "SIGNAL_SAGE|RELAY|FREQ|FORESIGHT|BUILD.EXE|ARC|ENTROPY|NULL",
+  "archetype": "SOURCE|RELAY|FREQ|FORESIGHT|BUILD.EXE|ARC|ENTROPY|NULL",
   "archetypeEmoji": "🎓|🔌|🎪|🔮|🚢|🐕|🎰|👻",
   "voiceProfile": {
     "primary": "e.g., Knowledge Authority, Timeline Entertainer, etc.",
@@ -2548,6 +2548,90 @@ export async function analyzeVoiceConsistency(
     return analysis;
   } catch (error) {
     console.error('Voice consistency analysis error:', error);
+    return null;
+  }
+}
+
+// =============================================================================
+// ARCHETYPE-ONLY ANALYSIS (Lightweight — for /archetype scan)
+// =============================================================================
+
+export interface ArchetypeScanResult {
+  primary: string;
+  emoji: string;
+  tagline: string;
+  description: string;
+  strengths: string[];
+  growthTip: string;
+}
+
+/**
+ * Lightweight archetype classification — much faster than full brand score.
+ * Only asks Gemini for archetype selection, not scoring.
+ */
+export async function analyzeArchetypeOnly(
+  profile: XProfileData
+): Promise<ArchetypeScanResult | null> {
+  try {
+    const cryptoAnalysis = detectCryptoSignals(profile);
+    const influenceAnalysis = analyzeInfluence(profile);
+
+    const prompt = `You are an expert brand strategist. Classify this X (Twitter) creator into ONE of 8 archetypes based on their profile signals and likely content style.
+
+CREATOR DATA:
+- Name: ${profile.name}
+- Handle: @${profile.username}
+- Followers: ${profile.public_metrics.followers_count.toLocaleString()}
+- Following: ${profile.public_metrics.following_count.toLocaleString()}
+- Total Posts: ${profile.public_metrics.tweet_count.toLocaleString()}
+- Listed Count: ${profile.public_metrics.listed_count.toLocaleString()}
+- Verified: ${profile.verified ? 'YES' : 'NO'}
+- Influence Tier: ${influenceAnalysis.tierLabel}
+${cryptoAnalysis.isCrypto ? `\nCRYPTO/WEB3 SIGNALS: ${cryptoAnalysis.signals.join(', ')}` : ''}
+
+THE 8 ARCHETYPES (choose ONE):
+
+1. ARC (Tier 1 — ENTRY) — Rising star, growth story, underdog trajectory. 22% of creators.
+2. ENTROPY (Tier 2 — RISING) — Risk-taker, cult builder, bold calls, chaos agent. 14% of creators.
+3. NULL (Tier 2 — RISING) — Ideas over identity, pseudonymous, faceless authority. 11% of creators.
+4. FREQ (Tier 2 — RISING) — Entertainer, community builder, memes, hot takes. 16% of creators.
+5. RELAY (Tier 3 — ADVANCED) — Super connector, curator, everyone's mutual. 13% of creators.
+6. BUILD.EXE (Tier 3 — ADVANCED) — Builder, shipper, proof of work, launches. 12% of creators.
+7. SOURCE (Tier 4 — EXPERT) — Knowledge authority, educator, threads. 8% of creators.
+8. FORESIGHT (Tier 5 — PEAK) — Shapes the narrative, visionary, contrarian. 4% of creators.
+
+SELECTION GUIDANCE:
+- For ${influenceAnalysis.tier} tier: FORESIGHT or SOURCE are common fits for high influence.
+- For crypto/web3: ENTROPY or NULL may be more appropriate.
+- For pseudonymous accounts with high influence: NULL is ideal.
+- Low follower count with growing trajectory: ARC is likely.
+- High posting frequency with entertainment style: FREQ.
+- Builder/founder signals in bio: BUILD.EXE.
+
+CRITICAL: Do NOT evaluate username, display name, bio text, or profile picture for classification. Only use follower metrics, posting patterns, and influence signals.
+
+Return ONLY valid JSON:
+{
+  "primary": "ARC|ENTROPY|NULL|FREQ|RELAY|BUILD.EXE|SOURCE|FORESIGHT",
+  "emoji": "🐕|🎰|👻|🎪|🔌|🚢|🎓|🔮",
+  "tagline": "3-5 word identity label that's shareable and punchy",
+  "description": "1-2 sentence explanation of why this archetype fits them specifically. Make it personal and compelling.",
+  "strengths": ["strength 1", "strength 2", "strength 3"],
+  "growthTip": "One specific actionable tip for this creator based on their archetype"
+}`;
+
+    const result = await geminiFlash.generateContent(prompt);
+    const responseText = result.response.text();
+
+    const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      console.error('[ArchetypeScan] No JSON found in Gemini response');
+      return null;
+    }
+
+    return JSON.parse(jsonMatch[0]) as ArchetypeScanResult;
+  } catch (error) {
+    console.error('[ArchetypeScan] Gemini analysis error:', error);
     return null;
   }
 }
