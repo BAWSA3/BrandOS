@@ -59,8 +59,12 @@ const MAX_SCORE_HISTORY = 20;
  * Ensure data directory exists
  */
 function ensureDataDir(): void {
-  if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
+  try {
+    if (!fs.existsSync(DATA_DIR)) {
+      fs.mkdirSync(DATA_DIR, { recursive: true });
+    }
+  } catch {
+    // Read-only filesystem (e.g. Vercel serverless)
   }
 }
 
@@ -87,9 +91,13 @@ export function readProfiles(): ProfileStorage {
  * Write all profiles to storage
  */
 function writeProfiles(storage: ProfileStorage): void {
-  ensureDataDir();
-  storage.lastUpdated = Date.now();
-  fs.writeFileSync(PROFILES_FILE, JSON.stringify(storage, null, 2));
+  try {
+    ensureDataDir();
+    storage.lastUpdated = Date.now();
+    fs.writeFileSync(PROFILES_FILE, JSON.stringify(storage, null, 2));
+  } catch {
+    // Vercel serverless has a read-only filesystem — silently skip writes
+  }
 }
 
 // Security: Keys that could cause prototype pollution
