@@ -97,14 +97,14 @@ function getPersonalityType(archetype?: string): string {
     FREQ: 'ESFJ',
     RELAY: 'ESFJ',
     'BUILD.EXE': 'ISTP',
-    SIGNAL_SAGE: 'ENFJ',
+    SOURCE: 'ENFJ',
   };
   return typeMap[archetype || ''] || 'INTJ';
 }
 
 // Map archetype to pixel emoji path
 function getArchetypeEmoji(archetype?: CreatorArchetype): string {
-  if (!archetype) return '/archetypes/SIGNAL_SAGE.svg';
+  if (!archetype) return '/archetypes/SOURCE.svg';
 
   const emojiMap: Record<string, string> = {
     ARC: '/archetypes/ARC.svg',
@@ -113,11 +113,11 @@ function getArchetypeEmoji(archetype?: CreatorArchetype): string {
     FREQ: '/archetypes/FREQ.svg',
     RELAY: '/archetypes/RELAY.svg',
     'BUILD.EXE': '/archetypes/BUILD.EXE.svg',
-    SIGNAL_SAGE: '/archetypes/SIGNAL_SAGE.svg',
+    SOURCE: '/archetypes/SOURCE.svg',
     FORESIGHT: '/archetypes/FORESIGHT.svg',
   };
 
-  return emojiMap[archetype.primary] || archetype.emoji || '/archetypes/SIGNAL_SAGE.svg';
+  return emojiMap[archetype.primary] || archetype.emoji || '/archetypes/SOURCE.svg';
 }
 
 function transformToDashboardData(

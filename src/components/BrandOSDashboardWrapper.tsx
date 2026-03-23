@@ -98,7 +98,7 @@ function getPersonalityType(archetype?: string): string {
     FREQ: 'ESFJ',
     RELAY: 'ESFJ',
     'BUILD.EXE': 'ISTP',
-    SIGNAL_SAGE: 'ENFJ',
+    SOURCE: 'ENFJ',
   };
   return typeMap[archetype || ''] || 'INTJ';
 }
@@ -155,7 +155,7 @@ function transformToDashboardData(
     },
     personality: {
       archetype: normalizeArchetypeName(brandScore.archetype?.primary || 'BUILD.EXE'),
-      emoji: brandScore.archetype?.emoji || '/archetypes/SIGNAL_SAGE.svg',
+      emoji: brandScore.archetype?.emoji || '/archetypes/SOURCE.svg',
       type: getPersonalityType(brandScore.archetype?.primary),
     },
     tone: brandScore.toneAnalysis || defaultTone,

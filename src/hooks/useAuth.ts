@@ -26,6 +26,8 @@ export interface AuthUser {
   subscriptionStatus: SubscriptionStatus;
   billingInterval: string | null;
   currentPeriodEnd: string | null;
+  checksUsedThisMonth: number;
+  generationsUsedThisMonth: number;
 }
 
 interface UseAuthReturn {

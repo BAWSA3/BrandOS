@@ -165,6 +165,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
     }
 
+    // Feature gate: AI Agents requires PRO+
+    const { enforceFeatureAccess } = await import('@/lib/gate');
+    const gate = enforceFeatureAccess(user.subscriptionTier as any, 'aiAgents');
+    if (!gate.allowed) return gate.response;
+
     const body = await request.json();
     const { agentName, brandId, brandDNA, message, history = [] } = body as ChatRequest;
 

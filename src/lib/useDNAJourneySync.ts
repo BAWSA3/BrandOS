@@ -7,6 +7,7 @@ export type FlowState =
   | 'input'
   | 'journey'
   | 'walkthrough'
+  | 'roadmap'
   | 'reveal'
   | 'signup'
   | 'insufficient_data';

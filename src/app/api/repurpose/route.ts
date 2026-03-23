@@ -23,6 +23,9 @@ const formatInstructions: Record<string, string> = {
 
 export async function POST(request: NextRequest) {
   try {
+    // Feature gate: Content Calendar/Repurpose requires PRO+
+    const { enforceFeatureAccess } = await import('@/lib/gate');
+    // Auth is handled below via supabase — get tier after auth check
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) {
       return NextResponse.json({ error: 'API key not configured' }, { status: 500 });
@@ -54,6 +57,10 @@ export async function POST(request: NextRequest) {
     if (!dbUser) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
+
+    // Feature gate: Repurpose requires PRO+ (contentCalendar feature)
+    const gateCheck = enforceFeatureAccess(dbUser.subscriptionTier as any, 'contentCalendar');
+    if (!gateCheck.allowed) return gateCheck.response;
 
     const { brandId, sourceContent, formats } = (await request.json()) as {
       brandId: string;

@@ -21,6 +21,16 @@ export async function POST(request: NextRequest) {
   const startTime = Date.now();
 
   try {
+    // Auth + feature gate
+    const { getUser } = await import('@/lib/auth');
+    const user = await getUser();
+    if (!user) {
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+    }
+    const { enforceFeatureAccess } = await import('@/lib/gate');
+    const gate = enforceFeatureAccess(user.subscriptionTier as any, 'aiAgents');
+    if (!gate.allowed) return gate.response;
+
     const body = await request.json();
     const { brandDNA, brandId, message, history = [], currentAgent } = body as UnifiedChatRequest;
 

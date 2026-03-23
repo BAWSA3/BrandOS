@@ -45,6 +45,7 @@ export default function UpgradeModal({
 
   const tierOrder: SubscriptionTier[] = ['FREE', 'CREATOR', 'PRO', 'AGENCY', 'ENTERPRISE'];
   const currentIndex = tierOrder.indexOf(currentTier);
+  // Only show PRO and AGENCY as upgrade options (CREATOR is legacy)
   const upgradeTiers = SELF_SERVE_TIERS.filter((t) => tierOrder.indexOf(t) > currentIndex);
 
   return (

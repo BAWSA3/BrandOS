@@ -380,7 +380,7 @@ export default function ApiDocs() {
                 },
                 {
                   title: 'Archetype Classification',
-                  desc: '1 of 8 archetypes (FORESIGHT, SIGNAL_SAGE, BUILD.EXE, RELAY, FREQ, ENTROPY, NULL, ARC) with tier level, description, and evolution paths.',
+                  desc: '1 of 8 archetypes (FORESIGHT, SOURCE, BUILD.EXE, RELAY, FREQ, ENTROPY, NULL, ARC) with tier level, description, and evolution paths.',
                 },
                 {
                   title: 'AI Insights',

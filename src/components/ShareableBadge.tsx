@@ -44,7 +44,7 @@ const ARCHETYPE_COLORS: Record<string, { primary: string; secondary: string; glo
   FREQ: { primary: '#EC4899', secondary: '#DB2777', glow: 'rgba(236, 72, 153, 0.5)' },
   RELAY: { primary: '#06B6D4', secondary: '#0891B2', glow: 'rgba(6, 182, 212, 0.5)' },
   'BUILD.EXE': { primary: '#EF4444', secondary: '#DC2626', glow: 'rgba(239, 68, 68, 0.5)' },
-  SIGNAL_SAGE: { primary: '#3B82F6', secondary: '#2563EB', glow: 'rgba(59, 130, 246, 0.5)' },
+  SOURCE: { primary: '#3B82F6', secondary: '#2563EB', glow: 'rgba(59, 130, 246, 0.5)' },
 };
 
 const DEFAULT_COLORS = {

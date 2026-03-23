@@ -36,136 +36,28 @@ const TIER_GRADIENTS: Record<SubscriptionTier, string> = {
 interface FeatureRow {
   label: string;
   free: string | boolean;
-  creator: string | boolean;
   pro: string | boolean;
   agency: string | boolean;
-  enterprise: string | boolean;
 }
 
 const COMPARISON_FEATURES: FeatureRow[] = [
-  {
-    label: 'brand profiles',
-    free: '1',
-    creator: '1',
-    pro: '3',
-    agency: '15',
-    enterprise: 'unlimited',
-  },
-  {
-    label: 'content checks / month',
-    free: '5',
-    creator: '50',
-    pro: '200',
-    agency: '1,000',
-    enterprise: 'unlimited',
-  },
-  {
-    label: 'ai generations / month',
-    free: '3',
-    creator: '25',
-    pro: '100',
-    agency: '500',
-    enterprise: 'unlimited',
-  },
-  {
-    label: 'history retention',
-    free: '7 days',
-    creator: '30 days',
-    pro: 'unlimited',
-    agency: 'unlimited',
-    enterprise: 'unlimited',
-  },
-  {
-    label: 'team members',
-    free: '1',
-    creator: '1',
-    pro: '3',
-    agency: '10',
-    enterprise: 'unlimited',
-  },
-  {
-    label: 'social platforms',
-    free: '1',
-    creator: '1',
-    pro: '3',
-    agency: '5',
-    enterprise: 'unlimited',
-  },
-  {
-    label: 'brand score tracking',
-    free: true,
-    creator: true,
-    pro: true,
-    agency: true,
-    enterprise: true,
-  },
-  {
-    label: 'brand dna report',
-    free: 'basic',
-    creator: 'full + pdf',
-    pro: 'full + pdf',
-    agency: 'full + pdf',
-    enterprise: 'custom',
-  },
-  {
-    label: 'voice fingerprint',
-    free: false,
-    creator: false,
-    pro: true,
-    agency: true,
-    enterprise: true,
-  },
-  {
-    label: 'content calendar',
-    free: false,
-    creator: false,
-    pro: true,
-    agency: true,
-    enterprise: true,
-  },
-  { label: 'ai agents', free: false, creator: false, pro: true, agency: true, enterprise: true },
-  {
-    label: 'brand sharing',
-    free: false,
-    creator: false,
-    pro: 'read-only',
-    agency: 'full',
-    enterprise: 'full',
-  },
-  {
-    label: 'advanced analytics',
-    free: false,
-    creator: false,
-    pro: false,
-    agency: true,
-    enterprise: true,
-  },
-  { label: 'api access', free: false, creator: false, pro: false, agency: true, enterprise: true },
-  {
-    label: 'white-label reports',
-    free: false,
-    creator: false,
-    pro: false,
-    agency: true,
-    enterprise: true,
-  },
-  { label: 'sso / saml', free: false, creator: false, pro: false, agency: false, enterprise: true },
-  {
-    label: 'priority support',
-    free: false,
-    creator: false,
-    pro: false,
-    agency: true,
-    enterprise: true,
-  },
-  {
-    label: 'custom ai training',
-    free: false,
-    creator: false,
-    pro: false,
-    agency: false,
-    enterprise: true,
-  },
+  { label: 'scans', free: 'unlimited', pro: 'unlimited', agency: 'unlimited' },
+  { label: 'content checks / month', free: '10', pro: '200', agency: '1,000' },
+  { label: 'ai generations / month', free: '5', pro: '100', agency: '500' },
+  { label: 'brand profiles', free: '1', pro: '3', agency: '15' },
+  { label: 'history retention', free: '30 days', pro: 'unlimited', agency: 'unlimited' },
+  { label: 'dashboard access', free: 'home + define', pro: 'full', agency: 'full' },
+  { label: 'voice fingerprint', free: false, pro: true, agency: true },
+  { label: 'content calendar', free: false, pro: true, agency: true },
+  { label: 'ai agents', free: false, pro: true, agency: true },
+  { label: 'content engine', free: false, pro: true, agency: true },
+  { label: 'conductor', free: false, pro: true, agency: true },
+  { label: 'growth plan', free: false, pro: true, agency: true },
+  { label: 'team members', free: '1', pro: '3', agency: '10' },
+  { label: 'social platforms', free: '1', pro: '3', agency: '5' },
+  { label: 'api access', free: false, pro: false, agency: true },
+  { label: 'advanced analytics', free: false, pro: false, agency: true },
+  { label: 'white-label reports', free: false, pro: false, agency: true },
 ];
 
 export default function PricingPage() {
@@ -272,8 +164,8 @@ export default function PricingPage() {
 
       {/* Plan Cards */}
       <div className="mx-auto max-w-6xl px-6 pb-12">
-        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
-          {(['FREE', 'CREATOR', 'PRO', 'AGENCY'] as SubscriptionTier[]).map((tier) => {
+        <div className="grid gap-5 md:grid-cols-3">
+          {(['FREE', 'PRO', 'AGENCY'] as SubscriptionTier[]).map((tier) => {
             const plan = PLAN_CONFIGS[tier];
             const price = interval === 'annual' ? plan.annualPrice : plan.monthlyPrice;
             const isCurrent = tier === currentTier;
@@ -432,17 +324,11 @@ export default function PricingPage() {
                 <tr className="border-b border-white/10">
                   <th className="px-6 py-4 text-sm font-medium text-white/50">Feature</th>
                   <th className="px-4 py-4 text-center text-sm font-semibold text-white">Free</th>
-                  <th className="px-4 py-4 text-center text-sm font-semibold text-blue-400">
-                    Creator
-                  </th>
                   <th className="px-4 py-4 text-center text-sm font-semibold text-purple-400">
                     Pro
                   </th>
                   <th className="px-4 py-4 text-center text-sm font-semibold text-pink-400">
                     Agency
-                  </th>
-                  <th className="px-4 py-4 text-center text-sm font-semibold text-amber-400">
-                    Enterprise
                   </th>
                 </tr>
               </thead>
@@ -451,10 +337,8 @@ export default function PricingPage() {
                   <tr key={row.label} className={i % 2 === 0 ? 'bg-white/[0.01]' : ''}>
                     <td className="px-6 py-3 text-sm text-white/70">{row.label}</td>
                     <ComparisonCell value={row.free} />
-                    <ComparisonCell value={row.creator} />
                     <ComparisonCell value={row.pro} />
                     <ComparisonCell value={row.agency} />
-                    <ComparisonCell value={row.enterprise} />
                   </tr>
                 ))}
               </tbody>

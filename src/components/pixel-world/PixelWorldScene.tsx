@@ -6,7 +6,7 @@ import SummerBiome from './biomes/SummerBiome';
 import AutumnBiome from './biomes/AutumnBiome';
 import WinterBiome from './biomes/WinterBiome';
 
-type FlowState = 'input' | 'journey' | 'walkthrough' | 'reveal' | 'signup' | 'insufficient_data';
+type FlowState = 'input' | 'journey' | 'walkthrough' | 'roadmap' | 'reveal' | 'signup' | 'insufficient_data';
 
 interface PixelWorldSceneProps {
   flowState: FlowState;

@@ -23,7 +23,7 @@ const ARCHETYPE_EMOJI_MAP: Record<string, string> = {
   FREQ: '/archetypes/FREQ.svg',
   RELAY: '/archetypes/RELAY.svg',
   'BUILD.EXE': '/archetypes/BUILD.EXE.svg',
-  SIGNAL_SAGE: '/archetypes/SIGNAL_SAGE.svg',
+  SOURCE: '/archetypes/SOURCE.svg',
   FORESIGHT: '/archetypes/FORESIGHT.svg',
 };
 
@@ -44,7 +44,7 @@ interface ArchetypeData {
 }
 
 const ARCHETYPE_DESCRIPTIONS: Record<string, ArchetypeData> = {
-  SIGNAL_SAGE: {
+  SOURCE: {
     short: 'a knowledge authority who builds trust through education and deep expertise',
     strengths: ['Educational threads', 'How-to guides', 'Industry analysis'],
     contentTypes: ['Long-form threads', 'Breakdown posts', 'Case studies'],

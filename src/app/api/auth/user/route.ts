@@ -81,6 +81,8 @@ export async function GET(request: NextRequest) {
             subscriptionStatus: user.subscriptionStatus,
             billingInterval: user.billingInterval,
             currentPeriodEnd: user.currentPeriodEnd,
+            checksUsedThisMonth: user.checksUsedThisMonth,
+            generationsUsedThisMonth: user.generationsUsedThisMonth,
           },
         });
       }
@@ -112,6 +114,8 @@ export async function GET(request: NextRequest) {
         subscriptionStatus: user.subscriptionStatus,
         billingInterval: user.billingInterval,
         currentPeriodEnd: user.currentPeriodEnd,
+        checksUsedThisMonth: user.checksUsedThisMonth,
+        generationsUsedThisMonth: user.generationsUsedThisMonth,
       },
     });
   } catch (error) {

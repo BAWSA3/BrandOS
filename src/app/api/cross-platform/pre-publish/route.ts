@@ -10,6 +10,16 @@ import type { VoiceFingerprint } from '@/lib/voice-fingerprint';
  */
 export async function POST(request: NextRequest) {
   try {
+    // Auth + feature gate
+    const { getUser } = await import('@/lib/auth');
+    const user = await getUser();
+    if (!user) {
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+    }
+    const { enforceFeatureAccess } = await import('@/lib/gate');
+    const gate = enforceFeatureAccess(user.subscriptionTier as any, 'contentCalendar');
+    if (!gate.allowed) return gate.response;
+
     const body = await request.json();
     const parsed = PrePublishCheckRequestSchema.safeParse(body);
 

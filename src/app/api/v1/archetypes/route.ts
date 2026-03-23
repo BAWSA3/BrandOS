@@ -21,7 +21,7 @@ const ARCHETYPES = [
     description:
       'An emerging presence with upward trajectory. Main character energy, growing fast, and building momentum.',
     strengths: ['Growth trajectory', 'Authentic engagement', 'High energy'],
-    evolvesTo: ['ENTROPY', 'NULL', 'FREQ', 'RELAY', 'BUILD.EXE', 'SIGNAL_SAGE', 'FORESIGHT'],
+    evolvesTo: ['ENTROPY', 'NULL', 'FREQ', 'RELAY', 'BUILD.EXE', 'SOURCE', 'FORESIGHT'],
   },
   {
     id: 'ENTROPY',
@@ -43,7 +43,7 @@ const ARCHETYPES = [
     description:
       'Influence without identity. The anon account with real pull — lets the content speak louder than the persona.',
     strengths: ['Content-first approach', 'Mystery and intrigue', 'Idea-driven influence'],
-    evolvesTo: ['FORESIGHT', 'SIGNAL_SAGE'],
+    evolvesTo: ['FORESIGHT', 'SOURCE'],
   },
   {
     id: 'FREQ',
@@ -65,7 +65,7 @@ const ARCHETYPES = [
     description:
       'The network node. Connects people, amplifies others, and builds ecosystems. DMs-open energy with real follow-through.',
     strengths: ['Network effects', 'Community curation', 'Cross-pollination'],
-    evolvesTo: ['FORESIGHT', 'SIGNAL_SAGE'],
+    evolvesTo: ['FORESIGHT', 'SOURCE'],
   },
   {
     id: 'BUILD.EXE',
@@ -76,11 +76,11 @@ const ARCHETYPES = [
     description:
       'Ships products, shares progress, builds in public. The "show your work" archetype — credibility through creation.',
     strengths: ['Proof of work', 'Technical credibility', 'Building in public'],
-    evolvesTo: ['SIGNAL_SAGE', 'FORESIGHT'],
+    evolvesTo: ['SOURCE', 'FORESIGHT'],
   },
   {
-    id: 'SIGNAL_SAGE',
-    name: 'SIGNAL_SAGE',
+    id: 'SOURCE',
+    name: 'SOURCE',
     emoji: '🎓',
     tier: 4,
     tagline: 'Knowledge Authority',

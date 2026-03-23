@@ -228,6 +228,23 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to analyze profile' }, { status: 500, headers });
   }
 
+  // === SCORE SMOOTHING: prevent jarring score swings for returning users ===
+  // Gemini is non-deterministic — same profile can produce ±10 point variance.
+  // For returning users, clamp the new score within ±5 of their stored score.
+  const MAX_SCORE_DRIFT = 5;
+  if (cachedProfile) {
+    const storedScore = cachedProfile.currentScore;
+    const rawScore = brandScore.overallScore;
+    if (Math.abs(rawScore - storedScore) > MAX_SCORE_DRIFT) {
+      brandScore.overallScore = rawScore > storedScore
+        ? storedScore + MAX_SCORE_DRIFT
+        : storedScore - MAX_SCORE_DRIFT;
+      console.log(
+        `[Extension] Smoothed score for @${cleanUsername}: ${rawScore} → ${brandScore.overallScore} (stored: ${storedScore})`
+      );
+    }
+  }
+
   // Resolve archetype consistency
   try {
     const decision = await resolveArchetype(

@@ -52,7 +52,7 @@ const archetypes = [
     rarity: 15,
   },
   {
-    name: 'SIGNAL_SAGE',
+    name: 'SOURCE',
     tier: 4,
     tierLabel: 'EXPERT',
     tagline: 'Knowledge authority.',

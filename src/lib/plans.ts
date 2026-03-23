@@ -1,5 +1,8 @@
 export type SubscriptionTier = 'FREE' | 'CREATOR' | 'PRO' | 'AGENCY' | 'ENTERPRISE';
 
+// Active tiers for new signups (CREATOR is legacy, mapped to FREE)
+export type ActiveTier = 'FREE' | 'PRO' | 'AGENCY' | 'ENTERPRISE';
+
 export interface PlanLimits {
   brands: number;
   checksPerMonth: number;
@@ -42,9 +45,9 @@ export const PLAN_CONFIGS: Record<SubscriptionTier, PlanConfig> = {
     stripePriceIdAnnual: '',
     limits: {
       brands: 1,
-      checksPerMonth: 5,
-      generationsPerMonth: 3,
-      historyDays: 7,
+      checksPerMonth: 10,
+      generationsPerMonth: 5,
+      historyDays: 30,
       teamMembers: 1,
       apiAccess: false,
       voiceFingerprint: false,
@@ -58,18 +61,20 @@ export const PLAN_CONFIGS: Record<SubscriptionTier, PlanConfig> = {
       platforms: 1,
     },
   },
+  // Legacy tier — existing CREATOR subscribers get mapped to FREE limits
+  // Kept for backwards compatibility with DB records
   CREATOR: {
     tier: 'CREATOR',
     name: 'Creator',
-    description: 'For individual creators and solopreneurs',
-    monthlyPrice: 19,
-    annualPrice: 15,
-    stripePriceIdMonthly: process.env.STRIPE_PRICE_CREATOR_MONTHLY || '',
-    stripePriceIdAnnual: process.env.STRIPE_PRICE_CREATOR_ANNUAL || '',
+    description: 'Legacy plan — mapped to Free',
+    monthlyPrice: 0,
+    annualPrice: 0,
+    stripePriceIdMonthly: '',
+    stripePriceIdAnnual: '',
     limits: {
       brands: 1,
-      checksPerMonth: 50,
-      generationsPerMonth: 25,
+      checksPerMonth: 10,
+      generationsPerMonth: 5,
       historyDays: 30,
       teamMembers: 1,
       apiAccess: false,
@@ -87,9 +92,9 @@ export const PLAN_CONFIGS: Record<SubscriptionTier, PlanConfig> = {
   PRO: {
     tier: 'PRO',
     name: 'Pro',
-    description: 'For serious creators and small teams',
-    monthlyPrice: 49,
-    annualPrice: 39,
+    description: 'Everything you need to build a standout brand',
+    monthlyPrice: 29,
+    annualPrice: 23,
     stripePriceIdMonthly: process.env.STRIPE_PRICE_PRO_MONTHLY || '',
     stripePriceIdAnnual: process.env.STRIPE_PRICE_PRO_ANNUAL || '',
     popular: true,
@@ -185,8 +190,13 @@ export function canAccessFeature(tier: SubscriptionTier, feature: keyof PlanLimi
   return value !== 0;
 }
 
-export const PAID_TIERS: SubscriptionTier[] = ['CREATOR', 'PRO', 'AGENCY', 'ENTERPRISE'];
-export const SELF_SERVE_TIERS: SubscriptionTier[] = ['CREATOR', 'PRO', 'AGENCY'];
+export const PAID_TIERS: SubscriptionTier[] = ['PRO', 'AGENCY', 'ENTERPRISE'];
+export const SELF_SERVE_TIERS: SubscriptionTier[] = ['PRO', 'AGENCY'];
+
+// Normalize legacy CREATOR tier to FREE for feature access checks
+export function normalizeTier(tier: SubscriptionTier): SubscriptionTier {
+  return tier === 'CREATOR' ? 'FREE' : tier;
+}
 
 export const ONE_TIME_PRODUCTS = {
   BRAND_DNA_REPORT: {
@@ -195,5 +205,19 @@ export const ONE_TIME_PRODUCTS = {
       'A comprehensive AI-generated analysis of your brand identity, voice, and strategy — delivered as a premium PDF.',
     price: 39,
     stripePriceId: process.env.STRIPE_PRICE_DNA_REPORT || '',
+  },
+  SCORE_BOOST_AUDIT: {
+    name: 'Score Boost Audit',
+    description:
+      'Analyze your last 50 tweets with AI-powered rewrite suggestions to boost your brand score.',
+    price: 19,
+    stripePriceId: process.env.STRIPE_PRICE_SCORE_BOOST || '',
+  },
+  ARCHETYPE_DEEP_DIVE: {
+    name: 'Archetype Deep-Dive',
+    description:
+      'Extended archetype analysis with collaboration compatibility, content templates, and growth playbook.',
+    price: 9,
+    stripePriceId: process.env.STRIPE_PRICE_ARCHETYPE_DEEP_DIVE || '',
   },
 };

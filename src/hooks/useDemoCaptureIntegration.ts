@@ -3,7 +3,7 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { useDemoCapture } from './useDemoCapture';
 
-type FlowState = 'input' | 'journey' | 'walkthrough' | 'reveal' | 'signup' | 'insufficient_data';
+type FlowState = 'input' | 'journey' | 'walkthrough' | 'roadmap' | 'reveal' | 'signup' | 'insufficient_data';
 
 /**
  * Integration hook for X Brand Score journey capture triggers

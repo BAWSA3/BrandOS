@@ -3,7 +3,7 @@ import { VoiceFingerprintSummary, formatSummaryForPrompt } from '@/lib/voice-fin
 
 // Archetype descriptions for the welcome message
 const ARCHETYPE_DESCRIPTIONS: Record<string, string> = {
-  SIGNAL_SAGE: 'a knowledge authority who builds trust through education and deep expertise',
+  SOURCE: 'a knowledge authority who builds trust through education and deep expertise',
   RELAY: 'a super connector who brings people and opportunities together',
   FREQ: 'an entertainer who builds community through personality and relatability',
   FORESIGHT: 'a thought leader who shapes narratives and sees what others miss',

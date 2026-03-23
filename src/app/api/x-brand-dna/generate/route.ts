@@ -33,8 +33,8 @@ const PERSONALITY_TYPES = {
     emoji: '🚢',
     traits: ['ships products', 'technical', 'creation focused', 'pragmatic'],
   },
-  signal_sage: {
-    name: 'SIGNAL_SAGE',
+  source: {
+    name: 'SOURCE',
     mbti: 'ENFJ',
     emoji: '🎓',
     traits: ['breaks down complex topics', 'thread master', 'helpful', 'knowledge authority'],
@@ -96,13 +96,14 @@ function mapArchetypeToPersonalityType(archetype: string | undefined): Personali
   )
     return 'buildexe';
   if (
+    lower.includes('source') ||
     lower.includes('signal_sage') ||
     lower.includes('educator') ||
     lower.includes('teacher') ||
     lower.includes('mentor') ||
     lower.includes('professor')
   )
-    return 'signal_sage';
+    return 'source';
   if (
     lower.includes('entropy') ||
     lower.includes('degen') ||
@@ -227,7 +228,7 @@ function detectPersonalityType(
   const scores: Record<PersonalityType, number> = {
     foresight: 0,
     buildexe: 0,
-    signal_sage: 0,
+    source: 0,
     entropy: 0,
     null_type: 0,
     freq: 0,
@@ -247,8 +248,8 @@ function detectPersonalityType(
     (100 - tv.casual) * 0.3 +
     (geminiBrandDNA?.differentiationScore || 50) * 0.2;
 
-  // SIGNAL_SAGE: Educational content, helpful, clear explanations
-  scores.signal_sage =
+  // SOURCE: Educational content, helpful, clear explanations
+  scores.source =
     tv.educational * 0.6 + tv.approachable * 0.25 + (100 - tv.promotional) * 0.15;
 
   // ENTROPY: Playful, casual, high energy, risk-taking content
@@ -442,7 +443,7 @@ function generateFallbackSummary(
   const templates: Record<PersonalityType, string> = {
     foresight: `You are ${archetypeName}—you see the forest while others argue about trees, your macro perspective and strategic vision set you apart. But ${consistencyIssue}. Fix this: Turn your biggest idea into a 10-tweet thread with one clear takeaway. Repeat it weekly until it sticks.`,
     buildexe: `You are ${archetypeName}—you ship while others talk, and your technical depth has built real credibility. But ${consistencyIssue}. Fix this: Create a pinned thread showcasing your 3 best builds with clear before/after results.`,
-    signal_sage: `You are ${archetypeName}—you turn complexity into clarity, and people trust you to break things down. But ${consistencyIssue}. Fix this: Batch your educational threads into a series with consistent formatting—same hook style, same structure, same CTA.`,
+    source: `You are ${archetypeName}—you turn complexity into clarity, and people trust you to break things down. But ${consistencyIssue}. Fix this: Batch your educational threads into a series with consistent formatting—same hook style, same structure, same CTA.`,
     entropy: `You are ${archetypeName}—you embrace the chaos and your community loves the energy. But ${consistencyIssue}. Fix this: Pick ONE chain or protocol to be known for this month. Go deep, not wide.`,
     null_type: `You are ${archetypeName}—your ideas speak louder than identity, and your mysterious presence creates intrigue. But ${consistencyIssue}. Fix this: Write down your 3 non-negotiable topics and delete any draft that doesn't hit one of them.`,
     freq: `You are ${archetypeName}—your personality is your brand, and your community vibes with your energy. But ${consistencyIssue}. Fix this: Create a recurring format (daily take, weekly roundup) that your audience can count on showing up.`,

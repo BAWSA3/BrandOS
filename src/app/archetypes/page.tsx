@@ -44,7 +44,7 @@ const ARCHETYPES = [
     color: '#EF4444',
   },
   {
-    name: 'SIGNAL_SAGE',
+    name: 'SOURCE',
     tier: 4,
     tierLabel: 'EXPERT',
     tagline: 'Knowledge authority.',

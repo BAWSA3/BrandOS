@@ -27,7 +27,7 @@ const ARCHETYPE_META: Record<
     tagline: 'Builder. Shipper. Doer.',
     color: '#EF4444',
   },
-  SIGNAL_SAGE: { tier: 4, tierLabel: 'EXPERT', tagline: 'Knowledge authority.', color: '#3B82F6' },
+  SOURCE: { tier: 4, tierLabel: 'EXPERT', tagline: 'Knowledge authority.', color: '#3B82F6' },
   FORESIGHT: { tier: 5, tierLabel: 'PEAK', tagline: 'Shapes the narrative.', color: '#9D4EDD' },
 };
 
@@ -523,7 +523,7 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({
 
         {/* --- CARD 7: ARCHETYPE SHOWCASE --- */}
         {(() => {
-          const meta = ARCHETYPE_META[data.personality.archetype] || ARCHETYPE_META['SIGNAL_SAGE'];
+          const meta = ARCHETYPE_META[data.personality.archetype] || ARCHETYPE_META['SOURCE'];
           return (
             <div
               className="md:col-span-4 rounded-[4px] p-5 md:p-6 flex items-center gap-6 relative overflow-hidden"
