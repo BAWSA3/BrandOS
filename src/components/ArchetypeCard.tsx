@@ -1,0 +1,237 @@
+'use client';
+
+/**
+ * ArchetypeCard — Uses pre-made template images as backgrounds,
+ * overlays dynamic text (description, traits, rarity, strengths, PFP, handle).
+ *
+ * The template PNGs contain: background, 3D icon, archetype name,
+ * MYBRANDOS.APP branding, and BrandOS logo.
+ *
+ * We overlay: User PFP, @handle, description text, trait values, rarity %, strength values.
+ *
+ * Each archetype has individual positioning so overlays align perfectly
+ * with the baked-in archetype name on each template.
+ *
+ * Renders at 600x315 in DOM, captured at scale: 2 = 1200x630 output.
+ */
+
+interface ArchetypeCardProps {
+  username: string;
+  displayName: string;
+  profileImageUrl?: string;
+  archetype: string;
+  description: string;
+  traits: string[];
+  rarity: number;
+  strengths: string[];
+}
+
+// Archetype accent colors (matches archetype-descriptions.ts)
+const ARCHETYPE_COLORS: Record<string, string> = {
+  ARC: '#10B981',
+  'BUILD.EXE': '#EF4444',
+  ENTROPY: '#F59E0B',
+  FORESIGHT: '#9D4EDD',
+  FREQ: '#EC4899',
+  NULL: '#8B5CF6',
+  RELAY: '#06B6D4',
+  SOURCE: '#3B82F6',
+};
+
+// Per-archetype layout config (px at 600x315 DOM scale)
+interface CardLayout {
+  left: number;       // left edge of description + pills (aligns with name)
+  descTop: number;    // top of description text (clears below name)
+  pillsBottom: number; // bottom offset for traits/rarity/strengths
+}
+
+const CARD_LAYOUTS: Record<string, CardLayout> = {
+  ARC: {
+    left: 270,
+    descTop: 130,
+    pillsBottom: 50,
+  },
+  'BUILD.EXE': {
+    left: 250,
+    descTop: 140,
+    pillsBottom: 50,
+  },
+  ENTROPY: {
+    left: 250,
+    descTop: 140,
+    pillsBottom: 50,
+  },
+  FORESIGHT: {
+    left: 245,
+    descTop: 140,
+    pillsBottom: 50,
+  },
+  FREQ: {
+    left: 250,
+    descTop: 140,
+    pillsBottom: 50,
+  },
+  NULL: {
+    left: 270,
+    descTop: 140,
+    pillsBottom: 50,
+  },
+  RELAY: {
+    left: 245,
+    descTop: 135,
+    pillsBottom: 50,
+  },
+  SOURCE: {
+    left: 245,
+    descTop: 135,
+    pillsBottom: 50,
+  },
+};
+
+const DEFAULT_LAYOUT: CardLayout = {
+  left: 265,
+  descTop: 135,
+  pillsBottom: 50,
+};
+
+export default function ArchetypeCard({
+  username,
+  profileImageUrl,
+  archetype,
+  description,
+  traits,
+  rarity,
+  strengths,
+}: ArchetypeCardProps) {
+  const font = "'VCR OSD Mono', 'Courier New', monospace";
+  const layout = CARD_LAYOUTS[archetype] ?? DEFAULT_LAYOUT;
+  const accentColor = ARCHETYPE_COLORS[archetype] ?? '#555';
+
+  return (
+    <div
+      id="archetype-card"
+      style={{
+        width: '600px',
+        height: '315px',
+        position: 'relative',
+        overflow: 'hidden',
+        fontFamily: font,
+        textTransform: 'uppercase',
+        backgroundImage: `url(/archetype-cards/${archetype}.png)`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }}
+    >
+      {/* ── Top-right: Handle + PFP (horizontal) ── */}
+      <div
+        style={{
+          position: 'absolute',
+          top: '16px',
+          right: '20px',
+          display: 'flex',
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: '6px',
+        }}
+      >
+        <span style={{ fontSize: '8px', color: '#555', letterSpacing: '0.02em' }}>
+          @{username}
+        </span>
+        {profileImageUrl ? (
+          /* eslint-disable-next-line @next/next/no-img-element */
+          <img
+            src={profileImageUrl.replace('_normal', '_200x200')}
+            alt={username}
+            width={24}
+            height={24}
+            style={{ borderRadius: '50%', objectFit: 'cover' }}
+          />
+        ) : (
+          <div
+            style={{
+              width: '24px',
+              height: '24px',
+              borderRadius: '50%',
+              background: '#ccc',
+            }}
+          />
+        )}
+      </div>
+
+      {/* ── Description ── */}
+      <div
+        style={{
+          position: 'absolute',
+          left: `${layout.left}px`,
+          top: `${layout.descTop}px`,
+          right: '20px',
+          fontSize: '8px',
+          color: '#555',
+          lineHeight: 1.6,
+          letterSpacing: '0.03em',
+        }}
+      >
+        {description}
+      </div>
+
+      {/* ── Bottom: Trait values + Rarity value + Strength values ── */}
+      <div
+        style={{
+          position: 'absolute',
+          bottom: `${layout.pillsBottom}px`,
+          left: `${layout.left}px`,
+          right: '80px',
+        }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: '5px',
+            fontSize: '8px',
+            color: '#555',
+            letterSpacing: '0.03em',
+          }}
+        >
+          {traits.slice(0, 2).map((t) => (
+            <span
+              key={t}
+              style={{
+                border: '1px solid rgba(0, 0, 0, 0.15)',
+                padding: '2px 7px',
+                borderRadius: '3px',
+                color: '#444',
+              }}
+            >
+              {t}
+            </span>
+          ))}
+          <span
+            style={{
+              background: accentColor,
+              padding: '2px 7px',
+              borderRadius: '3px',
+              color: '#fff',
+              fontWeight: 700,
+            }}
+          >
+            TOP {rarity}%
+          </span>
+          {strengths.slice(0, 1).map((s) => (
+            <span
+              key={s}
+              style={{
+                border: '1px solid rgba(0, 0, 0, 0.15)',
+                padding: '2px 7px',
+                borderRadius: '3px',
+                color: '#444',
+              }}
+            >
+              {s}
+            </span>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}

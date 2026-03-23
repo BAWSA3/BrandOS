@@ -9,7 +9,7 @@
  * - username: X handle
  * - score: Overall score (0-100)
  * - defineScore, checkScore, generateScore, scaleScore: Phase scores
- * - archetype: "SIGNAL_SAGE", "RELAY", etc.
+ * - archetype: "SOURCE", "RELAY", etc.
  * - archetypeEmoji: 🎓, 🔌, etc.
  * - archetypeTagline: From the archetype
  * - archetypeDescription: Why it fits
@@ -425,31 +425,54 @@ Thanks for being here!
 
 export const email4UpgradeCTA: EmailTemplate = {
   id: 'upgrade-cta',
-  name: 'Stay connected',
+  name: 'Your brand deserves more than a free scan',
   sendDelay: '72h',
   subjectLines: [
-    "Let's stay connected, {{username}}",
-    'One last thing from me',
-    'Thanks again, {{username}}!',
+    'your ${data.phases?.define?.score || "brand"} score doesn\'t have to stay there',
+    "here's the tool that fixes what your scan found",
+    '${data.name}, ready to fix what we found?',
   ],
   body: (data) => {
+    const weakestPhase = ['define', 'check', 'generate', 'scale'].reduce((a, b) => {
+      const phases = data as any;
+      return (phases[a + 'Score'] || 50) < (phases[b + 'Score'] || 50) ? a : b;
+    });
+
+    const featureMap: Record<string, string> = {
+      define: 'Voice Fingerprint — maps your unique voice DNA and catches drift',
+      check: 'AI Agents — audit every post against your brand DNA before publishing',
+      generate: 'Content Engine — generates on-brand posts, threads, and campaigns at scale',
+      scale: 'Growth Plan — expand your reach while keeping your voice intact',
+    };
+
     return `Hey ${data.name}!
 
-Last email from me for now, I promise haha.
+Remember your Brand Score of ${data.score}? Here's something most people miss:
 
-I just wanted to say thanks again for checking out BrandOS. It means a lot that you took the time to try something I built.
+The scan shows you *what's wrong*. But fixing it requires the right tools.
 
-If you want to stay in the loop on updates, new features, or just see what I'm building next, feel free to follow me on X: @baborismus
+Your weakest area was ${weakestPhase.toUpperCase()} — and the tool built specifically for that is:
 
-And hey, if you ever have feedback or ideas for BrandOS, just reply to this email. I read everything and I'm always looking to make this better.
+→ ${featureMap[weakestPhase] || featureMap.define}
 
-Alright, that's it from me. Go build something great!
+This is part of BrandOS Pro ($29/mo), which also includes:
+• Voice Fingerprint
+• AI Agents
+• Content Engine & Calendar
+• Conductor (AI orchestration)
+• Growth Plan
+
+Every feature is designed to move the specific scores we showed you in your scan.
+
+🔗 Upgrade to Pro: https://mybrandos.app/pricing
+
+14-day money-back guarantee. Cancel anytime.
+
+If you have any questions, just reply to this email — I read everything.
 
 - Bawsa
 
-"brick by brick"
-
-P.S. You can always check your brand score again at mybrandos.app`;
+P.S. Early adopters lock in their rate forever, even as we add features and raise prices.`;
   },
 };
 
@@ -1035,8 +1058,147 @@ export function getEmailSequenceForSegment(segment: Segment): EmailTemplate[] {
   return emailSequencesBySegment[segment] || emailSequence;
 }
 
+// =============================================================================
+// Evolution Path Email (Archetype Scan — "What can I evolve to?" hook)
+// =============================================================================
+
+const EVOLUTION_ARCHETYPE_DATA: Record<string, { emoji: string; tagline: string; tier: number; tierLabel: string; color: string }> = {
+  ARC: { emoji: '🐕', tagline: 'Rising star. Growth story.', tier: 1, tierLabel: 'ENTRY', color: '#10B981' },
+  ENTROPY: { emoji: '🎰', tagline: 'Risk-taker. Cult builder.', tier: 2, tierLabel: 'RISING', color: '#F59E0B' },
+  NULL: { emoji: '👻', tagline: 'Ideas over identity.', tier: 2, tierLabel: 'RISING', color: '#8B5CF6' },
+  FREQ: { emoji: '🎪', tagline: 'Entertainer. Community builder.', tier: 2, tierLabel: 'RISING', color: '#EC4899' },
+  RELAY: { emoji: '🔌', tagline: 'Super connector.', tier: 3, tierLabel: 'ADVANCED', color: '#06B6D4' },
+  'BUILD.EXE': { emoji: '🚢', tagline: 'Builder. Shipper. Doer.', tier: 3, tierLabel: 'ADVANCED', color: '#EF4444' },
+  SOURCE: { emoji: '🎓', tagline: 'Knowledge authority.', tier: 4, tierLabel: 'EXPERT', color: '#3B82F6' },
+  FORESIGHT: { emoji: '🔮', tagline: 'Shapes the narrative.', tier: 5, tierLabel: 'PEAK', color: '#9D4EDD' },
+};
+
+const EVOLUTION_PATHS: Record<string, string[]> = {
+  ARC: ['ENTROPY', 'NULL', 'FREQ', 'RELAY', 'BUILD.EXE', 'SOURCE', 'FORESIGHT'],
+  ENTROPY: ['BUILD.EXE', 'FORESIGHT'],
+  NULL: ['FORESIGHT', 'SOURCE'],
+  FREQ: ['RELAY', 'FORESIGHT'],
+  RELAY: ['FORESIGHT', 'SOURCE'],
+  'BUILD.EXE': ['SOURCE', 'FORESIGHT'],
+  SOURCE: [],
+  FORESIGHT: [],
+};
+
+export const evolutionPathEmail: EmailTemplate = {
+  id: 'evolution-path',
+  name: 'Your Evolution Path',
+  sendDelay: 'immediate',
+  subjectLines: [
+    "Here's your evolution path, @{{username}} →",
+    'Your archetype can evolve. Here\'s how.',
+  ],
+  body: (data: EmailTemplateData) => {
+    const archetype = data.archetype || 'ARC';
+    const currentData = EVOLUTION_ARCHETYPE_DATA[archetype] || EVOLUTION_ARCHETYPE_DATA['ARC'];
+    const paths = EVOLUTION_PATHS[archetype] || [];
+    const isTerminal = paths.length === 0;
+
+    const evolutionRows = paths
+      .slice(0, 4)
+      .map((p) => {
+        const d = EVOLUTION_ARCHETYPE_DATA[p];
+        if (!d) return '';
+        return `
+          <tr>
+            <td style="padding: 12px 16px; border-bottom: 1px solid #1a1a1a;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 18px;">${d.emoji}</span>
+                <div>
+                  <div style="font-family: 'Inter', sans-serif; font-weight: 800; font-style: italic; color: ${d.color}; font-size: 14px;">${p}</div>
+                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #666; letter-spacing: 0.1em;">TIER ${d.tier} — ${d.tierLabel}</div>
+                </div>
+              </div>
+              <div style="font-family: 'Inter', sans-serif; font-size: 12px; color: #888; margin-top: 4px;">${d.tagline}</div>
+            </td>
+          </tr>`;
+      })
+      .join('');
+
+    return `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="margin: 0; padding: 0; background-color: #050505; font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;">
+  <div style="max-width: 560px; margin: 0 auto; padding: 40px 24px;">
+
+    <!-- Header -->
+    <div style="text-align: center; margin-bottom: 32px;">
+      <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.2em; color: #444; margin-bottom: 8px;">BRANDOS // EVOLUTION PATH</div>
+      <div style="width: 40px; height: 1px; background: #333; margin: 0 auto;"></div>
+    </div>
+
+    <!-- Current Archetype -->
+    <div style="text-align: center; margin-bottom: 32px;">
+      <div style="font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.15em; color: ${currentData.color}; border: 1px solid ${currentData.color}40; display: inline-block; padding: 3px 10px; margin-bottom: 16px;">TIER ${currentData.tier} — ${currentData.tierLabel}</div>
+      ${data.archetypeIconUrl ? `<div style="margin: 16px auto;"><img src="${data.archetypeIconUrl}" alt="${archetype}" width="100" height="100" style="display: block; margin: 0 auto;" /></div>` : ''}
+      <div style="font-family: 'Inter', sans-serif; font-size: 28px; font-weight: 900; font-style: italic; color: ${currentData.color}; margin-bottom: 4px;">${archetype}</div>
+      <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #888;">"${data.archetypeTagline || currentData.tagline}"</div>
+    </div>
+
+    <!-- Your Strengths -->
+    ${data.archetypeStrengths && data.archetypeStrengths.length > 0 ? `
+    <div style="margin-bottom: 32px;">
+      <div style="font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.15em; color: #555; margin-bottom: 12px;">YOUR STRENGTHS</div>
+      ${data.archetypeStrengths.map((s) => `<div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #888; margin-bottom: 6px;"><span style="color: ${currentData.color};">▸</span> ${s}</div>`).join('')}
+    </div>
+    ` : ''}
+
+    <!-- Divider -->
+    <div style="width: 60px; height: 1px; background: #222; margin: 0 auto 32px;"></div>
+
+    ${isTerminal ? `
+    <!-- Terminal Archetype Message -->
+    <div style="background: #111; border: 1px solid #222; border-radius: 8px; padding: 24px; text-align: center; margin-bottom: 32px;">
+      <div style="font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.15em; color: ${currentData.color}; margin-bottom: 12px;">PEAK ARCHETYPE</div>
+      <div style="font-family: 'Inter', sans-serif; font-size: 14px; color: #aaa; line-height: 1.6;">
+        You've reached ${archetype} — a terminal archetype. This is the peak of the evolution tree. You don't evolve further — you set the standard others evolve toward.
+      </div>
+    </div>
+    ` : `
+    <!-- Evolution Paths -->
+    <div style="margin-bottom: 32px;">
+      <div style="font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.15em; color: #555; margin-bottom: 16px; text-align: center;">YOUR POSSIBLE EVOLUTIONS</div>
+      <table style="width: 100%; border-collapse: collapse; background: #0a0a0a; border: 1px solid #1a1a1a; border-radius: 8px; overflow: hidden;">
+        ${evolutionRows}
+      </table>
+    </div>
+
+    <!-- How Evolution Works -->
+    <div style="background: #111; border: 1px solid #222; border-radius: 8px; padding: 24px; margin-bottom: 32px;">
+      <div style="font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.15em; color: #555; margin-bottom: 12px;">HOW EVOLUTION WORKS</div>
+      <div style="font-family: 'Inter', sans-serif; font-size: 12px; color: #888; line-height: 1.6;">
+        <div style="margin-bottom: 8px;"><span style="color: ${currentData.color};">01.</span> Keep scanning your brand regularly</div>
+        <div style="margin-bottom: 8px;"><span style="color: ${currentData.color};">02.</span> Improve your brand score by 15+ points</div>
+        <div style="margin-bottom: 8px;"><span style="color: ${currentData.color};">03.</span> Let your content evolve naturally over 30+ days</div>
+        <div><span style="color: ${currentData.color};">04.</span> Your archetype upgrades when you earn it</div>
+      </div>
+    </div>
+    `}
+
+    <!-- CTA -->
+    <div style="text-align: center; margin-bottom: 40px;">
+      <a href="https://mybrandos.app/archetype" style="display: inline-block; padding: 14px 28px; background: ${currentData.color}; color: #fff; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-decoration: none; border-radius: 4px;">TRACK YOUR EVOLUTION →</a>
+    </div>
+
+    <!-- Footer -->
+    <div style="text-align: center; border-top: 1px solid #1a1a1a; padding-top: 24px;">
+      <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #333;">BRANDOS — Your brand, quantified.</div>
+      <div style="font-family: 'JetBrains Mono', monospace; font-size: 9px; color: #222; margin-top: 8px;">mybrandos.app</div>
+    </div>
+
+  </div>
+</body>
+</html>`;
+  },
+};
+
 // Manual/one-off email templates (not in auto sequences)
-export const manualEmailTemplates: EmailTemplate[] = [launchAnnouncementEmail];
+export const manualEmailTemplates: EmailTemplate[] = [launchAnnouncementEmail, evolutionPathEmail];
 
 // All templates combined (for lookup by ID)
 export const allEmailTemplates: EmailTemplate[] = [

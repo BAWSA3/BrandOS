@@ -29,13 +29,13 @@ export { normalizeArchetypeName } from './archetype-names';
 // Archetype evolution paths (directional progression)
 // Key = current archetype, Value = array of valid next archetypes
 const EVOLUTION_PATHS: Record<string, string[]> = {
-  ARC: ['ENTROPY', 'NULL', 'FREQ', 'RELAY', 'BUILD.EXE', 'SIGNAL_SAGE', 'FORESIGHT'],
+  ARC: ['ENTROPY', 'NULL', 'FREQ', 'RELAY', 'BUILD.EXE', 'SOURCE', 'FORESIGHT'],
   ENTROPY: ['BUILD.EXE', 'FORESIGHT'],
-  NULL: ['FORESIGHT', 'SIGNAL_SAGE'],
+  NULL: ['FORESIGHT', 'SOURCE'],
   FREQ: ['RELAY', 'FORESIGHT'],
-  RELAY: ['FORESIGHT', 'SIGNAL_SAGE'],
-  'BUILD.EXE': ['SIGNAL_SAGE', 'FORESIGHT'],
-  SIGNAL_SAGE: [], // Terminal - doesn't evolve
+  RELAY: ['FORESIGHT', 'SOURCE'],
+  'BUILD.EXE': ['SOURCE', 'FORESIGHT'],
+  SOURCE: [], // Terminal - doesn't evolve
   FORESIGHT: [], // Terminal - peak archetype
 };
 
@@ -47,7 +47,7 @@ const ARCHETYPE_TIERS: Record<string, number> = {
   FREQ: 2,
   RELAY: 3,
   'BUILD.EXE': 3,
-  SIGNAL_SAGE: 4,
+  SOURCE: 4,
   FORESIGHT: 5, // Peak
 };
 

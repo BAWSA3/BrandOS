@@ -8,6 +8,7 @@ import {
   detectSegment,
   getEmailSequenceForSegment,
   generateEmailContent,
+  evolutionPathEmail,
 } from './email-templates';
 
 // Re-export segment types for convenience
@@ -149,7 +150,7 @@ export async function sendEmail(
     const archetypeUrlMatch = body.match(/\{\{ARCHETYPE_IMAGE:(.*?)\}\}/);
     if (archetypeUrlMatch) {
       try {
-        // Extract archetype name from URL (e.g. "https://mybrandos.app/archetypes/SIGNAL_SAGE.png" -> "SIGNAL_SAGE")
+        // Extract archetype name from URL (e.g. "https://mybrandos.app/archetypes/SOURCE.png" -> "SOURCE")
         const urlPath = archetypeUrlMatch[1];
         const archetypeName = decodeURIComponent(
           urlPath.split('/').pop()?.replace('.png', '') || ''
@@ -311,6 +312,40 @@ export async function sendWelcomeSequence(
   }
 
   return { success: true, emailsSent, emailsScheduled, segment };
+}
+
+/**
+ * Send the archetype breakdown email (used from archetype scan flow)
+ */
+export async function sendArchetypeBreakdownEmail(
+  email: string,
+  data: Partial<EmailTemplateData>
+): Promise<{ success: boolean; error?: string }> {
+  const templateData: EmailTemplateData = {
+    name: data.name || data.username || 'there',
+    username: data.username || 'user',
+    score: data.score || 0,
+    defineScore: 0,
+    checkScore: 0,
+    generateScore: 0,
+    scaleScore: 0,
+    archetype: data.archetype || 'ARC',
+    archetypeEmoji: data.archetypeEmoji || '✨',
+    archetypeTagline: data.archetypeTagline || '',
+    archetypeDescription: data.archetypeDescription || '',
+    archetypeStrengths: data.archetypeStrengths || [],
+    topImprovement: '',
+    topStrength: '',
+    archetypeIconUrl: data.archetypeIconUrl,
+    ...data,
+  } as EmailTemplateData;
+
+  const subject = evolutionPathEmail.subjectLines[0]
+    .replace('{{username}}', templateData.username)
+    .replace('{{name}}', templateData.name);
+  const body = evolutionPathEmail.body(templateData);
+
+  return sendEmail(email, subject, body);
 }
 
 /**

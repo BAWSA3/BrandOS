@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { addEmailSignup } from '@/lib/newsletter';
-import { sendWelcomeSequence, SegmentIndicators } from '@/lib/email';
+import { sendWelcomeSequence, sendArchetypeBreakdownEmail, SegmentIndicators } from '@/lib/email';
 
 export async function POST(request: NextRequest) {
   try {
@@ -22,7 +22,16 @@ export async function POST(request: NextRequest) {
     const result = await addEmailSignup(email, source, xUsername);
     const isExisting = !result.success;
 
-    // Build segment indicators from signup data
+    // Archetype scan flow: just collect email, don't send anything yet
+    if (source === 'archetype-scan') {
+      console.log('[Signup] Archetype scan email collected:', email, xUsername);
+      return NextResponse.json(
+        { success: true, message: isExisting ? 'Email collected!' : 'Successfully signed up!' },
+        { status: isExisting ? 200 : 201 }
+      );
+    }
+
+    // Standard flow: send welcome sequence
     const segmentIndicators: SegmentIndicators | undefined = segmentData
       ? {
           role: segmentData.role || 'other',
@@ -31,7 +40,6 @@ export async function POST(request: NextRequest) {
         }
       : undefined;
 
-    // Trigger welcome email sequence
     try {
       const emailResult = await sendWelcomeSequence(
         email,
@@ -51,7 +59,6 @@ export async function POST(request: NextRequest) {
           topImprovement: brandData?.topImprovement || '',
           topStrength: brandData?.topStrength || '',
           scoreCardImage: scoreCardImage || undefined,
-          // Data-driven analysis fields
           defineInsights: brandData?.defineInsights || [],
           checkInsights: brandData?.checkInsights || [],
           generateInsights: brandData?.generateInsights || [],
@@ -73,7 +80,6 @@ export async function POST(request: NextRequest) {
       );
       console.log('[Signup] Email sequence triggered:', emailResult);
     } catch (emailError) {
-      // Log but don't fail the signup if email fails
       console.error('[Signup] Email sequence error:', emailError);
     }
 
