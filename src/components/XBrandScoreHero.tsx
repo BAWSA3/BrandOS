@@ -98,10 +98,10 @@ function getArchetypePixelEmoji(archetype?: string): string {
     FREQ: '/archetypes/FREQ.svg',
     RELAY: '/archetypes/RELAY.svg',
     'BUILD.EXE': '/archetypes/BUILD.EXE.svg',
-    SIGNAL_SAGE: '/archetypes/SIGNAL_SAGE.svg',
+    SOURCE: '/archetypes/SOURCE.svg',
     FORESIGHT: '/archetypes/FORESIGHT.svg',
   };
-  return emojiMap[archetype || ''] || '/archetypes/SIGNAL_SAGE.svg';
+  return emojiMap[archetype || ''] || '/archetypes/SOURCE.svg';
 }
 
 function getPersonalityTypeCode(archetype?: string): string {
@@ -121,7 +121,7 @@ function getPersonalityTypeCode(archetype?: string): string {
     FREQ: 'ESFJ',
     RELAY: 'ESFJ',
     'BUILD.EXE': 'ISTP',
-    SIGNAL_SAGE: 'ENFJ',
+    SOURCE: 'ENFJ',
   };
   return typeMap[archetype || ''] || 'INTJ';
 }
