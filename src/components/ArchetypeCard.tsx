@@ -196,23 +196,29 @@ export default function ArchetypeCard({
           {traits.slice(0, 2).map((t) => (
             <span
               key={t}
+              className="card-pill"
               style={{
                 border: '1px solid rgba(0, 0, 0, 0.15)',
                 padding: '2px 7px',
                 borderRadius: '3px',
                 color: '#444',
+                transition: 'all 0.2s ease',
+                cursor: 'default',
               }}
             >
               {t}
             </span>
           ))}
           <span
+            className="card-pill-rarity"
             style={{
               background: accentColor,
               padding: '2px 7px',
               borderRadius: '3px',
               color: '#fff',
               fontWeight: 700,
+              transition: 'all 0.2s ease',
+              cursor: 'default',
             }}
           >
             TOP {rarity}%
@@ -220,16 +226,32 @@ export default function ArchetypeCard({
           {strengths.slice(0, 1).map((s) => (
             <span
               key={s}
+              className="card-pill"
               style={{
                 border: '1px solid rgba(0, 0, 0, 0.15)',
                 padding: '2px 7px',
                 borderRadius: '3px',
                 color: '#444',
+                transition: 'all 0.2s ease',
+                cursor: 'default',
               }}
             >
               {s}
             </span>
           ))}
+          <style>{`
+            .card-pill:hover {
+              transform: translateY(-1px) scale(1.05);
+              border-color: ${accentColor} !important;
+              color: ${accentColor} !important;
+              box-shadow: 0 2px 8px ${accentColor}20;
+            }
+            .card-pill-rarity:hover {
+              transform: translateY(-1px) scale(1.08);
+              box-shadow: 0 2px 12px ${accentColor}40;
+              filter: brightness(1.15);
+            }
+          `}</style>
         </div>
       </div>
     </div>

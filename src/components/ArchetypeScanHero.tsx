@@ -512,6 +512,8 @@ function PremiumCardWrapper({ children, color }: { children: React.ReactNode; co
   const springX = useSpring(tiltX, { stiffness: 60, damping: 30, mass: 1.2 });
   const springY = useSpring(tiltY, { stiffness: 60, damping: 30, mass: 1.2 });
 
+  const [parallax, setParallax] = useState({ x: 0, y: 0 });
+
   const handleMouseMove = useCallback((e: ReactMouseEvent<HTMLDivElement>) => {
     if (!wrapperRef.current) return;
     const rect = wrapperRef.current.getBoundingClientRect();
@@ -520,6 +522,7 @@ function PremiumCardWrapper({ children, color }: { children: React.ReactNode; co
     tiltX.set((y - 0.5) * -16);
     tiltY.set((x - 0.5) * 16);
     setGlare({ x: x * 100, y: y * 100 });
+    setParallax({ x: (x - 0.5) * 2, y: (y - 0.5) * 2 });
   }, [tiltX, tiltY]);
 
   const handleMouseLeave = useCallback(() => {
@@ -527,6 +530,7 @@ function PremiumCardWrapper({ children, color }: { children: React.ReactNode; co
     tiltY.set(0);
     setGlare({ x: 50, y: 50 });
     setIsHovered(false);
+    setParallax({ x: 0, y: 0 });
   }, [tiltX, tiltY]);
 
   return (
@@ -623,6 +627,7 @@ export default function ArchetypeScanHero({ initialUsername, autoStart }: Archet
   const [email, setEmail] = useState('');
   const [emailStatus, setEmailStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
   const [shareStatus, setShareStatus] = useState<'idle' | 'copied'>('idle');
+  const [journeyPfp, setJourneyPfp] = useState<string | null>(null);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const [apiComplete, setApiComplete] = useState(false);
   const apiCompleteRef = useRef(false);
@@ -670,6 +675,7 @@ export default function ArchetypeScanHero({ initialUsername, autoStart }: Archet
       const profileResponse = await fetch('/api/x-profile', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: username.trim() }) });
       const profileData = await profileResponse.json();
       if (!profileResponse.ok || !profileData.profile) { setError(profileData?.error || `@${username.trim()} not found`); setIsValidating(false); return; }
+      setJourneyPfp(profileData.profile.profile_image_url?.replace('_normal', '_200x200') || null);
       setIsValidating(false);
       setFlowState('journey');
       setCurrentPhase(0);
@@ -991,6 +997,12 @@ export default function ArchetypeScanHero({ initialUsername, autoStart }: Archet
         {flowState === 'journey' && (
           <motion.div key="journey" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', maxWidth: '500px', padding: '0 24px' }}>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ textAlign: 'center', marginBottom: '32px' }}>
+              {journeyPfp && (
+                <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2, type: 'spring', damping: 15 }} style={{ marginBottom: '16px' }}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={journeyPfp} alt={username} width={48} height={48} style={{ borderRadius: '50%', objectFit: 'cover', border: '2px solid #222', boxShadow: '0 0 20px rgba(255,255,255,0.05)' }} />
+                </motion.div>
+              )}
               <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '10px', letterSpacing: '0.2em', color: '#555', marginBottom: '4px' }}>{'>'} IDENTITY_PROTOCOL INITIATED</p>
               <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '10px', letterSpacing: '0.15em', color: '#333' }}>{'>'} SUBJECT: @{username}</p>
             </motion.div>
