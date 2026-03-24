@@ -208,7 +208,7 @@ export default function ArchetypeCard({
           position: 'absolute',
           bottom: `${layout.pillsBottom}px`,
           left: `${layout.left}px`,
-          right: '80px',
+          right: '20px',
         }}
       >
         <div
@@ -232,6 +232,7 @@ export default function ArchetypeCard({
                 color: '#444',
                 transition: 'all 0.2s ease',
                 cursor: 'default',
+                whiteSpace: 'nowrap',
               }}
             >
               {t}
@@ -262,6 +263,7 @@ export default function ArchetypeCard({
                 color: '#444',
                 transition: 'all 0.2s ease',
                 cursor: 'default',
+                whiteSpace: 'nowrap',
               }}
             >
               {s}
