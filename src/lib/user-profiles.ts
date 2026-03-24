@@ -136,33 +136,66 @@ export function userExists(username: string): boolean {
 }
 
 /**
- * Save/upsert a profile to Supabase
+ * Insert a NEW profile to Supabase (ignores if already exists — never overwrites)
  */
-async function saveProfile(profile: UserProfile): Promise<void> {
+async function insertProfile(profile: UserProfile): Promise<void> {
+  const normalized = normalizeUsername(profile.username);
+  profileCache[normalized] = profile;
+
+  try {
+    const row = {
+      username: normalized,
+      display_name: profile.displayName,
+      archetype: JSON.stringify(profile.archetype),
+      archetype_history: JSON.stringify(profile.archetypeHistory),
+      scores: JSON.stringify(profile.scores),
+      highest_score: profile.highestScore,
+      current_score: profile.currentScore,
+      first_scanned_at: profile.firstScannedAt,
+      last_scanned_at: profile.lastScannedAt,
+      total_scans: profile.totalScans,
+    };
+
+    // Insert only — if username already exists, do nothing (preserve existing archetype)
+    const { error } = await supabase
+      .from('user_profiles')
+      .insert(row);
+
+    if (error && error.code !== '23505') {
+      // 23505 = unique violation (already exists) — that's fine, skip it
+      console.error('[UserProfiles] Supabase insert error:', error);
+    }
+  } catch (err) {
+    console.error('[UserProfiles] Error inserting profile:', err);
+  }
+}
+
+/**
+ * Update an existing profile in Supabase
+ */
+async function updateProfileInDB(profile: UserProfile): Promise<void> {
   const normalized = normalizeUsername(profile.username);
   profileCache[normalized] = profile;
 
   try {
     const { error } = await supabase
       .from('user_profiles')
-      .upsert({
-        username: normalized,
-        display_name: profile.displayName,
+      .update({
         archetype: JSON.stringify(profile.archetype),
         archetype_history: JSON.stringify(profile.archetypeHistory),
         scores: JSON.stringify(profile.scores),
         highest_score: profile.highestScore,
         current_score: profile.currentScore,
-        first_scanned_at: profile.firstScannedAt,
         last_scanned_at: profile.lastScannedAt,
         total_scans: profile.totalScans,
-      }, { onConflict: 'username' });
+      })
+      .eq('username', normalized);
 
     if (error) {
-      console.error('[UserProfiles] Supabase upsert error:', error);
+      console.error('[UserProfiles] Supabase update error:', error);
     }
   } catch (err) {
-    console.error('[UserProfiles] Error saving profile:', err);
+    console.error('[UserProfiles] Error updating profile:', err);
   }
 }
 
@@ -204,8 +237,9 @@ export function createUserProfile(
   };
 
   // Cache immediately (sync) + persist to DB (async, non-blocking)
+  // Uses INSERT (not upsert) — never overwrites an existing profile
   profileCache[normalized] = profile;
-  saveProfile(profile).catch((err) => console.error('[UserProfiles] Save error:', err));
+  insertProfile(profile).catch((err) => console.error('[UserProfiles] Insert error:', err));
 
   console.log(`[UserProfiles] Created new profile for @${displayName}`);
   return profile;
@@ -259,7 +293,7 @@ export function updateUserScan(
   }
 
   profileCache[normalized] = profile;
-  saveProfile(profile).catch((err) => console.error('[UserProfiles] Save error:', err));
+  updateProfileInDB(profile).catch((err) => console.error('[UserProfiles] Update error:', err));
 
   return profile;
 }

@@ -63,8 +63,13 @@ async function handlePost(request: NextRequest) {
     console.log(`[ArchetypeScan] Scanning @${cleanUsername}`);
 
     // Check DB FIRST — returning users get instant response (no profile fetch needed)
-    let existingProfile = await getUserProfileAsync(cleanUsername);
-    console.log(`[ArchetypeScan] DB lookup result: ${existingProfile ? existingProfile.archetype.primary : 'NOT FOUND'}`);
+    let existingProfile: Awaited<ReturnType<typeof getUserProfileAsync>> = null;
+    try {
+      existingProfile = await getUserProfileAsync(cleanUsername);
+      console.log(`[ArchetypeScan] DB lookup: ${existingProfile ? existingProfile.archetype.primary : 'NOT FOUND'}`);
+    } catch (dbErr) {
+      console.error(`[ArchetypeScan] DB lookup failed:`, dbErr);
+    }
 
     if (existingProfile) {
       console.log(
