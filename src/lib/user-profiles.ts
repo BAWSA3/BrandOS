@@ -90,7 +90,7 @@ export async function getUserProfileAsync(username: string): Promise<UserProfile
 
   try {
     const { data, error } = await supabase
-      .from('UserProfiles')
+      .from('user_profiles')
       .select('*')
       .eq('username', normalized)
       .single();
@@ -135,7 +135,7 @@ async function saveProfile(profile: UserProfile): Promise<void> {
 
   try {
     const { error } = await supabase
-      .from('UserProfiles')
+      .from('user_profiles')
       .upsert({
         username: normalized,
         display_name: profile.displayName,
