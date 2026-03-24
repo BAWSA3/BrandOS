@@ -2570,17 +2570,26 @@ export interface ArchetypeScanResult {
  * Only asks Gemini for archetype selection, not scoring.
  */
 export async function analyzeArchetypeOnly(
-  profile: XProfileData
+  profile: XProfileData,
+  tweets?: string[]
 ): Promise<ArchetypeScanResult | null> {
   try {
     const cryptoAnalysis = detectCryptoSignals(profile);
     const influenceAnalysis = analyzeInfluence(profile);
 
-    const prompt = `You are an expert brand strategist. Classify this X (Twitter) creator into ONE of 8 archetypes based on their profile signals and likely content style.
+    const tweetSection = tweets && tweets.length > 0
+      ? `\nRECENT CONTENT (${tweets.length} posts — THIS IS THE PRIMARY SIGNAL FOR CLASSIFICATION):
+${tweets.slice(0, 30).map((t, i) => `${i + 1}. "${t}"`).join('\n')}
+
+IMPORTANT: Classify based primarily on the CONTENT of their posts above, not just metrics. What do they actually talk about? How do they engage? What's their voice?`
+      : '';
+
+    const prompt = `You are an expert brand strategist. Classify this X (Twitter) creator into ONE of 8 archetypes based on their content and profile signals.
 
 CREATOR DATA:
 - Name: ${profile.name}
 - Handle: @${profile.username}
+- Bio: ${profile.description || 'No bio'}
 - Followers: ${profile.public_metrics.followers_count.toLocaleString()}
 - Following: ${profile.public_metrics.following_count.toLocaleString()}
 - Total Posts: ${profile.public_metrics.tweet_count.toLocaleString()}
@@ -2588,27 +2597,28 @@ CREATOR DATA:
 - Verified: ${profile.verified ? 'YES' : 'NO'}
 - Influence Tier: ${influenceAnalysis.tierLabel}
 ${cryptoAnalysis.isCrypto ? `\nCRYPTO/WEB3 SIGNALS: ${cryptoAnalysis.signals.join(', ')}` : ''}
+${tweetSection}
 
 THE 8 ARCHETYPES (choose ONE):
 
-1. ARC (Tier 1 — ENTRY) — Rising star, growth story, underdog trajectory. 22% of creators.
-2. ENTROPY (Tier 2 — RISING) — Risk-taker, cult builder, bold calls, chaos agent. 14% of creators.
-3. NULL (Tier 2 — RISING) — Ideas over identity, pseudonymous, faceless authority. 11% of creators.
-4. FREQ (Tier 2 — RISING) — Entertainer, community builder, memes, hot takes. 16% of creators.
-5. RELAY (Tier 3 — ADVANCED) — Super connector, curator, everyone's mutual. 13% of creators.
-6. BUILD.EXE (Tier 3 — ADVANCED) — Builder, shipper, proof of work, launches. 12% of creators.
-7. SOURCE (Tier 4 — EXPERT) — Knowledge authority, educator, threads. 8% of creators.
-8. FORESIGHT (Tier 5 — PEAK) — Shapes the narrative, visionary, contrarian. 4% of creators.
+1. ARC (Tier 1 — ENTRY) — Rising star, growth story, underdog trajectory. Early in their journey. 22% of creators.
+2. ENTROPY (Tier 2 — RISING) — Risk-taker, cult builder, bold calls, chaos agent. Thrives in volatility. 14% of creators.
+3. NULL (Tier 2 — RISING) — Ideas over identity, pseudonymous, faceless authority. Content IS the identity. 11% of creators.
+4. FREQ (Tier 2 — RISING) — Entertainer, community builder, memes, hot takes, shitposts, engagement bait. 16% of creators.
+5. RELAY (Tier 3 — ADVANCED) — Super connector, curator, everyone's mutual, amplifies others. 13% of creators.
+6. BUILD.EXE (Tier 3 — ADVANCED) — Builder, shipper, proof of work, launches, demos, progress updates. Posts about what they're BUILDING. 12% of creators.
+7. SOURCE (Tier 4 — EXPERT) — Knowledge authority, educator, deep dives, threads, how-to guides. 8% of creators.
+8. FORESIGHT (Tier 5 — PEAK) — Shapes the narrative, visionary, contrarian predictions, big-picture thinker. 4% of creators.
 
 SELECTION GUIDANCE:
-- For ${influenceAnalysis.tier} tier: FORESIGHT or SOURCE are common fits for high influence.
-- For crypto/web3: ENTROPY or NULL may be more appropriate.
-- For pseudonymous accounts with high influence: NULL is ideal.
-- Low follower count with growing trajectory: ARC is likely.
-- High posting frequency with entertainment style: FREQ.
-- Builder/founder signals in bio: BUILD.EXE.
-
-CRITICAL: Do NOT evaluate username, display name, bio text, or profile picture for classification. Only use follower metrics, posting patterns, and influence signals.
+- If their posts show them BUILDING products/projects → BUILD.EXE
+- If their posts are entertaining/memes/engagement-focused → FREQ
+- If their posts are educational/threads/deep knowledge → SOURCE
+- If their posts amplify others and connect people → RELAY
+- If their posts are bold predictions and market calls → ENTROPY or FORESIGHT
+- If they're pseudonymous with idea-driven content → NULL
+- If they're early-stage documenting their journey → ARC
+- For ${influenceAnalysis.tier} tier with thought leadership → FORESIGHT or SOURCE
 
 Return ONLY valid JSON:
 {

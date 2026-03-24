@@ -148,17 +148,36 @@ async function handlePost(request: NextRequest) {
       });
     }
 
-    // New user — fetch profile first, then run Gemini
-    console.log(`[ArchetypeScan] New user @${cleanUsername} — fetching profile`);
+    // New user — fetch profile + tweets, then run Gemini
+    console.log(`[ArchetypeScan] New user @${cleanUsername} — fetching profile + tweets`);
 
     const profile = await fetchProfile(cleanUsername, origin);
     if (!profile) {
       return NextResponse.json({ error: 'Could not fetch profile' }, { status: 404 });
     }
 
-    console.log(`[ArchetypeScan] Running Gemini analysis for @${cleanUsername}`);
+    // Fetch tweets for better classification (non-blocking fallback to profile-only)
+    let tweets: string[] | undefined;
+    try {
+      const tweetsResponse = await fetch(`${origin}/api/x-tweets`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: cleanUsername, maxResults: 50 }),
+      });
+      if (tweetsResponse.ok) {
+        const tweetsData = await tweetsResponse.json();
+        if (tweetsData.tweets?.length) {
+          tweets = tweetsData.tweets.map((t: { text: string }) => t.text);
+          console.log(`[ArchetypeScan] Fetched ${tweets?.length} tweets for @${cleanUsername}`);
+        }
+      }
+    } catch {
+      console.log(`[ArchetypeScan] Tweet fetch failed for @${cleanUsername} — using profile only`);
+    }
 
-    const geminiResult = await analyzeArchetypeOnly(profile);
+    console.log(`[ArchetypeScan] Running Gemini analysis for @${cleanUsername} (${tweets ? 'with tweets' : 'profile only'})`);
+
+    const geminiResult = await analyzeArchetypeOnly(profile, tweets);
 
     if (!geminiResult) {
       // Fallback: assign ARC (entry-level) if Gemini fails
