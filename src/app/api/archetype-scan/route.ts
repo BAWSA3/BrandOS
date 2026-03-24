@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { analyzeArchetypeOnly, XProfileData } from '@/lib/gemini';
 import { resolveArchetype } from '@/lib/archetype-engine';
 import { normalizeArchetypeName } from '@/lib/archetype-names';
-import { getUserProfile } from '@/lib/user-profiles';
+import { getUserProfileAsync } from '@/lib/user-profiles';
 import { withRateLimit, rateLimiters } from '@/lib/rate-limit';
 import { recordScan } from '@/lib/scan-tracking';
 import { ARCHETYPE_DATA, getArchetypeInfo } from '@/lib/archetype-descriptions';
@@ -62,8 +62,8 @@ async function handlePost(request: NextRequest) {
 
     console.log(`[ArchetypeScan] Scanning @${cleanUsername}`);
 
-    // Check cache FIRST — returning users get instant response (no profile fetch needed)
-    const existingProfile = getUserProfile(cleanUsername);
+    // Check DB FIRST — returning users get instant response (no profile fetch needed)
+    const existingProfile = await getUserProfileAsync(cleanUsername);
 
     if (existingProfile) {
       console.log(

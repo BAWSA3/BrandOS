@@ -1,11 +1,12 @@
-import fs from 'fs';
-import path from 'path';
+import supabase from './supabase';
 
 /**
  * User Profile Storage System
  *
- * Persists user data including archetypes to enable consistency
+ * Persists user archetype data in Supabase to enable consistency
  * across scans and track evolution over time.
+ *
+ * Table: UserProfiles (created via Supabase)
  */
 
 // Types
@@ -45,60 +46,7 @@ export interface UserProfile {
   totalScans: number;
 }
 
-interface ProfileStorage {
-  profiles: Record<string, UserProfile>;
-  lastUpdated: number;
-}
-
-// File path for storage
-const DATA_DIR = path.join(process.cwd(), 'data');
-const PROFILES_FILE = path.join(DATA_DIR, 'user-profiles.json');
 const MAX_SCORE_HISTORY = 20;
-
-/**
- * Ensure data directory exists
- */
-function ensureDataDir(): void {
-  try {
-    if (!fs.existsSync(DATA_DIR)) {
-      fs.mkdirSync(DATA_DIR, { recursive: true });
-    }
-  } catch {
-    // Read-only filesystem (e.g. Vercel serverless)
-  }
-}
-
-/**
- * Read all profiles from storage
- */
-export function readProfiles(): ProfileStorage {
-  ensureDataDir();
-
-  if (!fs.existsSync(PROFILES_FILE)) {
-    return { profiles: {}, lastUpdated: Date.now() };
-  }
-
-  try {
-    const data = fs.readFileSync(PROFILES_FILE, 'utf-8');
-    return JSON.parse(data);
-  } catch (error) {
-    console.error('Error reading user profiles:', error);
-    return { profiles: {}, lastUpdated: Date.now() };
-  }
-}
-
-/**
- * Write all profiles to storage
- */
-function writeProfiles(storage: ProfileStorage): void {
-  try {
-    ensureDataDir();
-    storage.lastUpdated = Date.now();
-    fs.writeFileSync(PROFILES_FILE, JSON.stringify(storage, null, 2));
-  } catch {
-    // Vercel serverless has a read-only filesystem — silently skip writes
-  }
-}
 
 // Security: Keys that could cause prototype pollution
 const DANGEROUS_KEYS = ['__proto__', 'constructor', 'prototype'];
@@ -109,7 +57,6 @@ const DANGEROUS_KEYS = ['__proto__', 'constructor', 'prototype'];
 export function normalizeUsername(username: string): string {
   const normalized = username.toLowerCase().replace(/^@/, '').trim();
 
-  // Prevent prototype pollution attacks
   if (DANGEROUS_KEYS.includes(normalized)) {
     throw new Error('Invalid username');
   }
@@ -118,12 +65,58 @@ export function normalizeUsername(username: string): string {
 }
 
 /**
- * Get a user profile by username
+ * Get a user profile by username from Supabase
  */
 export function getUserProfile(username: string): UserProfile | null {
+  // This is called synchronously by the archetype engine, but we need async DB access.
+  // We use a cache that gets populated by the async versions below.
   const normalized = normalizeUsername(username);
-  const storage = readProfiles();
-  return storage.profiles[normalized] || null;
+  return profileCache[normalized] || null;
+}
+
+// In-memory cache populated by async calls (lives for the duration of the serverless invocation)
+const profileCache: Record<string, UserProfile> = {};
+
+/**
+ * Async: Get a user profile from Supabase
+ */
+export async function getUserProfileAsync(username: string): Promise<UserProfile | null> {
+  const normalized = normalizeUsername(username);
+
+  // Check in-memory cache first
+  if (profileCache[normalized]) {
+    return profileCache[normalized];
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('UserProfiles')
+      .select('*')
+      .eq('username', normalized)
+      .single();
+
+    if (error || !data) return null;
+
+    const profile: UserProfile = {
+      username: data.username,
+      displayName: data.display_name,
+      archetype: JSON.parse(data.archetype),
+      archetypeHistory: JSON.parse(data.archetype_history || '[]'),
+      scores: JSON.parse(data.scores || '[]'),
+      highestScore: data.highest_score,
+      currentScore: data.current_score,
+      firstScannedAt: data.first_scanned_at,
+      lastScannedAt: data.last_scanned_at,
+      totalScans: data.total_scans,
+    };
+
+    // Cache it for the duration of this request
+    profileCache[normalized] = profile;
+    return profile;
+  } catch (err) {
+    console.error('[UserProfiles] Error fetching profile:', err);
+    return null;
+  }
 }
 
 /**
@@ -131,6 +124,37 @@ export function getUserProfile(username: string): UserProfile | null {
  */
 export function userExists(username: string): boolean {
   return getUserProfile(username) !== null;
+}
+
+/**
+ * Save/upsert a profile to Supabase
+ */
+async function saveProfile(profile: UserProfile): Promise<void> {
+  const normalized = normalizeUsername(profile.username);
+  profileCache[normalized] = profile;
+
+  try {
+    const { error } = await supabase
+      .from('UserProfiles')
+      .upsert({
+        username: normalized,
+        display_name: profile.displayName,
+        archetype: JSON.stringify(profile.archetype),
+        archetype_history: JSON.stringify(profile.archetypeHistory),
+        scores: JSON.stringify(profile.scores),
+        highest_score: profile.highestScore,
+        current_score: profile.currentScore,
+        first_scanned_at: profile.firstScannedAt,
+        last_scanned_at: profile.lastScannedAt,
+        total_scans: profile.totalScans,
+      }, { onConflict: 'username' });
+
+    if (error) {
+      console.error('[UserProfiles] Supabase upsert error:', error);
+    }
+  } catch (err) {
+    console.error('[UserProfiles] Error saving profile:', err);
+  }
 }
 
 /**
@@ -170,9 +194,9 @@ export function createUserProfile(
     totalScans: 1,
   };
 
-  const storage = readProfiles();
-  storage.profiles[normalized] = profile;
-  writeProfiles(storage);
+  // Cache immediately (sync) + persist to DB (async, non-blocking)
+  profileCache[normalized] = profile;
+  saveProfile(profile).catch((err) => console.error('[UserProfiles] Save error:', err));
 
   console.log(`[UserProfiles] Created new profile for @${displayName}`);
   return profile;
@@ -188,17 +212,15 @@ export function updateUserScan(
   evolutionReason?: 'evolution' | 'manual_reevaluate'
 ): UserProfile | null {
   const normalized = normalizeUsername(username);
-  const storage = readProfiles();
-  const profile = storage.profiles[normalized];
+  const profile = profileCache[normalized];
 
   if (!profile) {
-    console.error(`[UserProfiles] Cannot update - user @${username} not found`);
+    console.error(`[UserProfiles] Cannot update - user @${username} not found in cache`);
     return null;
   }
 
   const now = Date.now();
 
-  // Update scan stats
   profile.lastScannedAt = now;
   profile.totalScans += 1;
   profile.currentScore = score;
@@ -207,13 +229,11 @@ export function updateUserScan(
     profile.highestScore = score;
   }
 
-  // Add to score history (keep last 20)
   profile.scores.push({ value: score, scannedAt: now });
   if (profile.scores.length > MAX_SCORE_HISTORY) {
     profile.scores = profile.scores.slice(-MAX_SCORE_HISTORY);
   }
 
-  // Update archetype if evolution occurred
   if (newArchetype && evolutionReason) {
     const historyEntry: ArchetypeHistoryEntry = {
       archetype: newArchetype,
@@ -229,8 +249,8 @@ export function updateUserScan(
     );
   }
 
-  storage.profiles[normalized] = profile;
-  writeProfiles(storage);
+  profileCache[normalized] = profile;
+  saveProfile(profile).catch((err) => console.error('[UserProfiles] Save error:', err));
 
   return profile;
 }
@@ -261,7 +281,6 @@ export function getArchetypeHistory(username: string): ArchetypeHistoryEntry[] {
 
 /**
  * Get a recent score for a user (within maxAge ms, default 24h)
- * Used by the extension API to serve cached scores without re-scoring.
  */
 export function getRecentScore(
   username: string,
@@ -279,8 +298,7 @@ export function getRecentScore(
  * Get all profiles (for admin/debugging)
  */
 export function getAllProfiles(): UserProfile[] {
-  const storage = readProfiles();
-  return Object.values(storage.profiles);
+  return Object.values(profileCache);
 }
 
 /**
@@ -305,7 +323,6 @@ export function getUserStats(username: string): {
   const scoreSum = profile.scores.reduce((sum, s) => sum + s.value, 0);
   const averageScore = profile.scores.length > 0 ? Math.round(scoreSum / profile.scores.length) : 0;
 
-  // Score change from first to current
   const firstScore = profile.scores[0]?.value || profile.currentScore;
   const scoreChange = profile.currentScore - firstScore;
 
@@ -316,4 +333,9 @@ export function getUserStats(username: string): {
     scoreChange,
     averageScore,
   };
+}
+
+// Re-export for backwards compat (no longer used but prevents import errors)
+export function readProfiles(): { profiles: Record<string, UserProfile>; lastUpdated: number } {
+  return { profiles: profileCache, lastUpdated: Date.now() };
 }

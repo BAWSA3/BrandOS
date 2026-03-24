@@ -1,5 +1,6 @@
 import {
   getUserProfile,
+  getUserProfileAsync,
   createUserProfile,
   updateUserScan,
   updateUserArchetype,
@@ -147,7 +148,8 @@ export async function resolveArchetype(
   newScore: number,
   forceReevaluate: boolean = false
 ): Promise<ArchetypeDecision> {
-  const existingProfile = getUserProfile(username);
+  // Load profile from DB (populates in-memory cache for sync calls below)
+  const existingProfile = await getUserProfileAsync(username) || getUserProfile(username);
 
   // === CASE 1: New User ===
   if (!existingProfile) {
