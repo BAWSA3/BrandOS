@@ -62,13 +62,47 @@ async function handlePost(request: NextRequest) {
 
     console.log(`[ArchetypeScan] Scanning @${cleanUsername}`);
 
-    // Check DB FIRST — returning users get instant response (no profile fetch needed)
+    // Check user_profiles DB FIRST — returning users get instant response
     let existingProfile: Awaited<ReturnType<typeof getUserProfileAsync>> = null;
     try {
       existingProfile = await getUserProfileAsync(cleanUsername);
-      console.log(`[ArchetypeScan] DB lookup: ${existingProfile ? existingProfile.archetype.primary : 'NOT FOUND'}`);
+      console.log(`[ArchetypeScan] user_profiles lookup: ${existingProfile ? existingProfile.archetype.primary : 'NOT FOUND'}`);
     } catch (dbErr) {
-      console.error(`[ArchetypeScan] DB lookup failed:`, dbErr);
+      console.error(`[ArchetypeScan] user_profiles lookup failed:`, dbErr);
+    }
+
+    // If no user_profiles row, check BrandScans for a previous archetype (week 1 users)
+    if (!existingProfile) {
+      try {
+        const { data: prevScan } = await (await import('@/lib/supabase')).default
+          .from('BrandScans')
+          .select('archetype, score')
+          .eq('username', cleanUsername)
+          .not('archetype', 'is', null)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .single();
+
+        if (prevScan?.archetype) {
+          const prevArchetype = normalizeArchetypeName(prevScan.archetype);
+          const info = getArchetypeInfo(prevArchetype);
+          if (info) {
+            console.log(`[ArchetypeScan] Found previous BrandScan archetype for @${cleanUsername}: ${prevArchetype}`);
+            // Create a profile from the previous scan so it's locked in
+            const { createUserProfile } = await import('@/lib/user-profiles');
+            createUserProfile(cleanUsername, cleanUsername, {
+              primary: prevArchetype,
+              emoji: info.emoji,
+              tagline: info.tagline,
+              strengths: info.strengths,
+            }, prevScan.score || 50);
+
+            existingProfile = await getUserProfileAsync(cleanUsername);
+          }
+        }
+      } catch {
+        // No previous scan found — continue to Gemini
+      }
     }
 
     if (existingProfile) {
