@@ -6,6 +6,7 @@ import { getUserProfileAsync } from '@/lib/user-profiles';
 import { withRateLimit, rateLimiters } from '@/lib/rate-limit';
 import { recordScan } from '@/lib/scan-tracking';
 import { ARCHETYPE_DATA, getArchetypeInfo } from '@/lib/archetype-descriptions';
+import { detectArchetypeSignals } from '@/lib/archetype-signals';
 
 /**
  * Archetype Scan API — Lightweight archetype classification
@@ -175,9 +176,15 @@ async function handlePost(request: NextRequest) {
       console.log(`[ArchetypeScan] Tweet fetch failed for @${cleanUsername} — using profile only`);
     }
 
+    // Run signal detection on tweets + profile
+    const signalScores = tweets ? detectArchetypeSignals(tweets, profile) : undefined;
+    if (signalScores) {
+      console.log(`[ArchetypeScan] Signal scores for @${cleanUsername}: ${signalScores.filter(s => s.score > 0).map(s => `${s.archetype}:${s.score}`).join(', ')}`);
+    }
+
     console.log(`[ArchetypeScan] Running Gemini analysis for @${cleanUsername} (${tweets ? 'with tweets' : 'profile only'})`);
 
-    const geminiResult = await analyzeArchetypeOnly(profile, tweets);
+    const geminiResult = await analyzeArchetypeOnly(profile, tweets, signalScores);
 
     if (!geminiResult) {
       // Fallback: assign ARC (entry-level) if Gemini fails

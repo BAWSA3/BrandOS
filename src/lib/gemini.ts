@@ -2571,11 +2571,20 @@ export interface ArchetypeScanResult {
  */
 export async function analyzeArchetypeOnly(
   profile: XProfileData,
-  tweets?: string[]
+  tweets?: string[],
+  signalScores?: import('./archetype-signals').SignalScore[]
 ): Promise<ArchetypeScanResult | null> {
   try {
     const cryptoAnalysis = detectCryptoSignals(profile);
     const influenceAnalysis = analyzeInfluence(profile);
+
+    // Build signal evidence section for the prompt
+    const signalSection = signalScores && signalScores.length > 0
+      ? `\nSIGNAL ANALYSIS (from content pattern detection — use this as strong evidence):
+${signalScores.filter(s => s.score > 0).map(s => `- ${s.archetype}: score ${s.score}/100 (${s.confidence}) — ${s.signals.join(', ')}`).join('\n')}
+
+IMPORTANT: The signal analysis above is based on keyword/pattern matching of their actual tweets. If an archetype has a HIGH confidence score (60+), strongly prefer that classification unless you see compelling evidence otherwise.`
+      : '';
 
     const tweetSection = tweets && tweets.length > 0
       ? `\nRECENT CONTENT (${tweets.length} posts — THIS IS THE PRIMARY SIGNAL FOR CLASSIFICATION):
@@ -2585,6 +2594,7 @@ IMPORTANT: Classify based primarily on the CONTENT of their posts above, not jus
       : '';
 
     const prompt = `You are an expert brand strategist. Classify this X (Twitter) creator into ONE of 8 archetypes based on their content and profile signals.
+${signalSection}
 
 CREATOR DATA:
 - Name: ${profile.name}
@@ -2639,7 +2649,32 @@ Return ONLY valid JSON:
       return null;
     }
 
-    return JSON.parse(jsonMatch[0]) as ArchetypeScanResult;
+    const geminiResult = JSON.parse(jsonMatch[0]) as ArchetypeScanResult;
+
+    // Validate against signal scores — override if clear mismatch
+    if (signalScores && signalScores.length > 0) {
+      const topSignal = signalScores[0];
+      const geminiSignal = signalScores.find(s => s.archetype === geminiResult.primary);
+      const geminiScore = geminiSignal?.score ?? 0;
+
+      console.log(`[ArchetypeScan] Gemini chose: ${geminiResult.primary} (signal: ${geminiScore}), Top signal: ${topSignal.archetype} (score: ${topSignal.score}, ${topSignal.confidence})`);
+
+      // Override if: top signal is high confidence AND Gemini's pick scored very low
+      if (
+        topSignal.confidence === 'high' &&
+        topSignal.score >= 65 &&
+        geminiScore < 30 &&
+        topSignal.archetype !== geminiResult.primary
+      ) {
+        console.log(`[ArchetypeScan] OVERRIDE: ${geminiResult.primary} → ${topSignal.archetype} (signal ${topSignal.score} vs ${geminiScore})`);
+        geminiResult.primary = topSignal.archetype;
+        // Update emoji to match
+        const emojiMap: Record<string, string> = { ARC: '🐕', ENTROPY: '🎰', NULL: '👻', FREQ: '🎪', RELAY: '🔌', 'BUILD.EXE': '🚢', SOURCE: '🎓', FORESIGHT: '🔮' };
+        geminiResult.emoji = emojiMap[topSignal.archetype] || geminiResult.emoji;
+      }
+    }
+
+    return geminiResult;
   } catch (error) {
     console.error('[ArchetypeScan] Gemini analysis error:', error);
     return null;
