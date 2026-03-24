@@ -1,5 +1,7 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+
 /**
  * ArchetypeCard — Uses pre-made template images as backgrounds,
  * overlays dynamic text (description, traits, rarity, strengths, PFP, handle).
@@ -107,6 +109,32 @@ export default function ArchetypeCard({
   const layout = CARD_LAYOUTS[archetype] ?? DEFAULT_LAYOUT;
   const accentColor = ARCHETYPE_COLORS[archetype] ?? '#555';
 
+  // Convert PFP to base64 data URL via proxy so it survives domToPng cloning
+  const [pfpDataUrl, setPfpDataUrl] = useState<string | null>(null);
+  useEffect(() => {
+    if (!profileImageUrl) return;
+    const originalUrl = profileImageUrl.replace('_normal', '_200x200');
+    const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(originalUrl)}`;
+
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(img, 0, 0);
+          setPfpDataUrl(canvas.toDataURL('image/png'));
+        }
+      } catch {
+        // Fall back to original URL
+      }
+    };
+    img.src = proxyUrl;
+  }, [profileImageUrl]);
+
   return (
     <div
       id="archetype-card"
@@ -137,10 +165,10 @@ export default function ArchetypeCard({
         <span style={{ fontSize: '8px', color: '#555', letterSpacing: '0.02em' }}>
           @{username}
         </span>
-        {profileImageUrl ? (
+        {(pfpDataUrl || profileImageUrl) ? (
           /* eslint-disable-next-line @next/next/no-img-element */
           <img
-            src={profileImageUrl.replace('_normal', '_200x200')}
+            src={pfpDataUrl || profileImageUrl?.replace('_normal', '_200x200') || ''}
             alt={username}
             width={24}
             height={24}
