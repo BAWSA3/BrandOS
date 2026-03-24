@@ -517,8 +517,8 @@ function PremiumCardWrapper({ children, color }: { children: React.ReactNode; co
     const rect = wrapperRef.current.getBoundingClientRect();
     const x = (e.clientX - rect.left) / rect.width;
     const y = (e.clientY - rect.top) / rect.height;
-    tiltX.set((y - 0.5) * -10);
-    tiltY.set((x - 0.5) * 10);
+    tiltX.set((y - 0.5) * -16);
+    tiltY.set((x - 0.5) * 16);
     setGlare({ x: x * 100, y: y * 100 });
   }, [tiltX, tiltY]);
 
