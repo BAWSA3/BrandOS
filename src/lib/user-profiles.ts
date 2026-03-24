@@ -97,18 +97,27 @@ export async function getUserProfileAsync(username: string): Promise<UserProfile
 
     if (error || !data) return null;
 
+    // Supabase may return JSON fields as strings or already-parsed objects
+    const parseField = (val: unknown, fallback: string = '[]') => {
+      if (!val) return JSON.parse(fallback);
+      if (typeof val === 'string') return JSON.parse(val);
+      return val; // already parsed
+    };
+
     const profile: UserProfile = {
       username: data.username,
       displayName: data.display_name,
-      archetype: JSON.parse(data.archetype),
-      archetypeHistory: JSON.parse(data.archetype_history || '[]'),
-      scores: JSON.parse(data.scores || '[]'),
+      archetype: parseField(data.archetype, '{}'),
+      archetypeHistory: parseField(data.archetype_history, '[]'),
+      scores: parseField(data.scores, '[]'),
       highestScore: data.highest_score,
       currentScore: data.current_score,
       firstScannedAt: data.first_scanned_at,
       lastScannedAt: data.last_scanned_at,
       totalScans: data.total_scans,
     };
+
+    console.log(`[UserProfiles] Loaded @${data.username} from DB: ${profile.archetype.primary}`);
 
     // Cache it for the duration of this request
     profileCache[normalized] = profile;
