@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { geminiFlash, xBrandScorePrompt, XProfileData } from '@/lib/gemini';
+import Anthropic from '@anthropic-ai/sdk';
+import { xBrandScorePrompt, XProfileData } from '@/lib/gemini';
 import { resolveArchetype, getEvolutionInfo } from '@/lib/archetype-engine';
 import { withRateLimit, rateLimiters } from '@/lib/rate-limit';
-import { recordScan } from '@/lib/scan-tracking';
+import { recordScan, extractIntelligence } from '@/lib/scan-tracking';
 import { brandScoreCache } from '@/lib/cache';
 import { getUserProfile } from '@/lib/user-profiles';
 
@@ -13,65 +14,26 @@ const SCORE_CACHE_TTL_MINUTES = 360;
  * Brand Score API - Profile-only analysis
  */
 
-// Mock response for testing when Gemini quota is exceeded
-const getMockBrandScore = (profile: XProfileData) => ({
-  overallScore: 87,
-  phases: {
-    define: {
-      score: 92,
-      insights: [
-        'Strong personal brand identity with memorable name',
-        'Content consistently reflects philosophical approach',
-        'Clear positioning as a thought leader through posts',
-      ],
-    },
-    check: {
-      score: 88,
-      insights: [
-        'Username and display name are perfectly aligned',
-        'Consistent minimalist brand voice across content',
-        'High credibility through follower ratio',
-      ],
-    },
-    generate: {
-      score: 82,
-      insights: [
-        'Content output demonstrates brand confidence',
-        'Profile image present and professional',
-        'No CTA needed at this influence level',
-      ],
-    },
-    scale: {
-      score: 95,
-      insights: [
-        `Exceptional follower count: ${profile.public_metrics.followers_count.toLocaleString()}`,
-        'Elite tier influence with massive reach',
-        `Listed on ${profile.public_metrics.listed_count.toLocaleString()} curated lists`,
-      ],
-    },
-  },
-  topStrengths: [
-    'Elite-tier influence with 2.9M+ followers',
-    'Strong authority ratio showing thought leadership',
-    'Highly curated by others (50K+ lists)',
-  ],
-  topImprovements: [
-    'Consider adding a link to latest project',
-    'Verification badge would add extra credibility',
-    'Experiment with thread-based content for deeper engagement',
-  ],
-  summary: `@${profile.username} represents an elite-tier personal brand with exceptional reach and influence. Their content consistently reflects strong brand positioning. Their follower-to-following ratio signals strong thought leadership authority.`,
-  archetype: {
-    primary: 'The Prophet',
-    emoji: '🔮',
-    tagline: 'Wisdom Dealer',
-    description:
-      'A visionary thought leader who shares philosophical insights and unconventional wisdom. Known for memorable one-liners and contrarian takes that challenge conventional thinking.',
-    strengths: ['Memorable philosophical insights', 'Strong conviction in ideas'],
-    growthTip: 'Continue sharing timeless wisdom - your archive is your legacy.',
-  },
-  influenceTier: 'elite',
-});
+/** Score profiles via Claude Haiku (fast, cheap, reliable) */
+async function scoreWithClaude(prompt: string): Promise<string> {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) throw new Error('ANTHROPIC_API_KEY not configured');
+
+  const anthropic = new Anthropic({ apiKey });
+  const message = await anthropic.messages.create({
+    model: 'claude-haiku-4-5-20251001',
+    max_tokens: 4096,
+    messages: [{ role: 'user', content: prompt }],
+  });
+
+  const text = message.content[0].type === 'text' ? message.content[0].text : '';
+
+  if (message.stop_reason === 'max_tokens') {
+    console.warn('[BrandScore] Response truncated — may fail to parse');
+  }
+
+  return text;
+}
 
 async function fetchProfile(username: string, origin: string): Promise<XProfileData | null> {
   try {
@@ -174,12 +136,11 @@ async function handlePost(request: NextRequest) {
       });
     }
 
-    // Generate prompt and call Gemini (with fallback to mock)
+    // Generate prompt and call Claude
     let brandScore;
     try {
       const prompt = xBrandScorePrompt(profile);
-      const result = await geminiFlash.generateContent(prompt);
-      const responseText = result.response.text();
+      const responseText = await scoreWithClaude(prompt);
 
       // Parse JSON response
       const jsonMatch = responseText.match(/\{[\s\S]*\}/);
@@ -187,20 +148,13 @@ async function handlePost(request: NextRequest) {
         throw new Error('No JSON found in response');
       }
       brandScore = JSON.parse(jsonMatch[0]);
-    } catch (geminiError) {
-      // Check if it's a quota error (429) - use mock data for testing
-      const errorMessage = geminiError instanceof Error ? geminiError.message : '';
-      if (errorMessage.includes('429') || errorMessage.includes('quota')) {
-        console.log('Gemini quota exceeded - using mock data for testing');
-        brandScore = getMockBrandScore(profile);
-      } else {
-        console.error('Failed to get Gemini response:', geminiError);
-        return NextResponse.json({ error: 'Failed to analyze profile' }, { status: 500 });
-      }
+    } catch (scoreError) {
+      console.error(`[BrandScore] Failed to score @${cleanUsername}:`, scoreError);
+      return NextResponse.json({ error: 'Failed to analyze profile' }, { status: 500 });
     }
 
     // === SCORE SMOOTHING: prevent jarring score swings for returning users ===
-    // Gemini is non-deterministic — same profile can produce ±10 point variance.
+    // LLMs are non-deterministic — same profile can produce ±10 point variance.
     // For returning users, clamp the new score within ±5 of their stored score
     // so the number feels stable while still allowing real growth/decline over time.
     const MAX_SCORE_DRIFT = 5;
@@ -274,12 +228,13 @@ async function handlePost(request: NextRequest) {
       console.error('Leaderboard save error:', leaderboardError);
     }
 
-    // Record scan to Supabase (non-blocking)
+    // Record scan to Supabase (non-blocking) — persist full intelligence
     recordScan({
       username: profile.username,
       score: brandScore.overallScore,
       archetype: brandScore.archetype?.primary || '',
       enhanced: false,
+      intelligence: extractIntelligence(brandScore),
     }).catch((err) => console.error('Scan tracking error:', err));
 
     return NextResponse.json({
