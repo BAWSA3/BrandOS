@@ -3,7 +3,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import { xBrandScorePrompt, XProfileData } from '@/lib/gemini';
 import { resolveArchetype, getEvolutionInfo } from '@/lib/archetype-engine';
 import { withRateLimit, rateLimiters } from '@/lib/rate-limit';
-import { recordScan, extractIntelligence } from '@/lib/scan-tracking';
+import { recordScan } from '@/lib/scan-tracking';
 import { brandScoreCache } from '@/lib/cache';
 import { getUserProfile } from '@/lib/user-profiles';
 
@@ -228,13 +228,12 @@ async function handlePost(request: NextRequest) {
       console.error('Leaderboard save error:', leaderboardError);
     }
 
-    // Record scan to Supabase (non-blocking) — persist full intelligence
+    // Record scan to Supabase (non-blocking)
     recordScan({
       username: profile.username,
       score: brandScore.overallScore,
       archetype: brandScore.archetype?.primary || '',
       enhanced: false,
-      intelligence: extractIntelligence(brandScore),
     }).catch((err) => console.error('Scan tracking error:', err));
 
     return NextResponse.json({
