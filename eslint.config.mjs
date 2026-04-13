@@ -27,6 +27,32 @@ const eslintConfig = defineConfig([
       "react-hooks/hooks": "warn",
       "react-hooks/preserve-manual-memoization": "warn",
       "prefer-const": "warn",
+      // Restrict service-role Supabase client to trusted server contexts.
+      // See src/lib/supabase-admin.ts for the policy. Allowlist is enforced
+      // via a per-directory override below — this rule is the default-deny.
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            {
+              name: "@/lib/supabase-admin",
+              message:
+                "createAdminClient bypasses RLS. Allowed only in src/app/api/cron/**, src/app/api/stripe/webhook/**, and src/app/api/admin/**. See src/lib/supabase-admin.ts.",
+            },
+          ],
+        },
+      ],
+    },
+  },
+  // Allowlist: paths permitted to import the service-role client.
+  {
+    files: [
+      "src/app/api/cron/**/*.{ts,tsx}",
+      "src/app/api/stripe/webhook/**/*.{ts,tsx}",
+      "src/app/api/admin/**/*.{ts,tsx}",
+    ],
+    rules: {
+      "no-restricted-imports": "off",
     },
   },
   globalIgnores([
