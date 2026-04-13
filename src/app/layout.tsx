@@ -5,6 +5,7 @@ import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { ToastProvider } from '@/components/ToastProvider';
 import BetaBadge from '@/components/BetaBadge';
+import EnvBanner from '@/components/EnvBanner';
 import PostHogProvider from '@/components/PostHogProvider';
 
 export const viewport = {
@@ -83,6 +84,7 @@ export default function RootLayout({
         {/* Custom fonts loaded via @font-face in globals.css */}
       </head>
       <body>
+        <EnvBanner />
         <PostHogProvider>
           <ToastProvider>
             <ThemeProvider>
