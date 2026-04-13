@@ -19,6 +19,11 @@ const allowedPages = [
   '/archetype', // Archetype scanner
   '/archetypes', // Archetype showcase
   '/test-cards', // Archetype card previews (dev)
+  '/intelligence', // Intelligence Report
+  '/card', // Brand Identity Card (/card/[username])
+  '/pricing', // Pricing page
+  '/opp', // Find Your Opp matchup
+  '/audit', // Score Boost Audit — post-purchase results page (/audit/[sessionId])
 ];
 
 export function middleware(request: NextRequest) {

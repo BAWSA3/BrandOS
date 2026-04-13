@@ -11,6 +11,7 @@ import BrandBreakdown from './BrandBreakdown';
 import BrandOSDashboard, { BrandOSDashboardData } from './BrandOSDashboard';
 import BrandScoreCard from './BrandScoreCard';
 import BrandIssuesSection from './BrandIssuesSection';
+import ScoreBoostAuditCta from './ScoreBoostAuditCta';
 import { SaveResultsPrompt } from './SaveResultsPrompt';
 import { useAuth } from '@/hooks/useAuth';
 import { domToPng } from 'modern-screenshot';
@@ -1609,8 +1610,9 @@ export default function XBrandScoreHero({
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              justifyContent: 'center',
-              overflow: 'hidden',
+              overflowY: 'auto',
+              paddingTop: '48px',
+              paddingBottom: '48px',
             }}
           >
             <div
@@ -1810,6 +1812,49 @@ export default function XBrandScoreHero({
                   </button>
                 </div>
               </div>
+              {/* Intelligence Report CTA */}
+              <motion.a
+                href={`/intelligence?u=${encodeURIComponent(profile.username)}`}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6 }}
+                className="capture-hide"
+                style={{
+                  display: 'block',
+                  width: '100%',
+                  marginTop: '12px',
+                  padding: '14px 20px',
+                  background: 'rgba(0, 71, 255, 0.04)',
+                  border: '1px solid rgba(0, 71, 255, 0.15)',
+                  borderRadius: '6px',
+                  textDecoration: 'none',
+                  cursor: 'pointer',
+                  textAlign: 'center',
+                }}
+              >
+                <span
+                  style={{
+                    fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace",
+                    fontSize: '11px',
+                    letterSpacing: '0.1em',
+                    color: '#0047FF',
+                  }}
+                >
+                  VIEW YOUR INTELLIGENCE REPORT →
+                </span>
+              </motion.a>
+
+              {/* Score Boost Audit CTA — $19 one-time, primary monetization upsell */}
+              <ScoreBoostAuditCta
+                handle={profile.username}
+                phaseScores={{
+                  define: brandScore.phases.define.score,
+                  check: brandScore.phases.check.score,
+                  generate: brandScore.phases.generate.score,
+                  scale: brandScore.phases.scale.score,
+                }}
+              />
+
               <motion.button
                 onClick={async () => {
                   // Capture score card image before transitioning
