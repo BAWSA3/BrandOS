@@ -69,8 +69,8 @@ export default function AuditResultsClient({ sessionId }: { sessionId: string })
         <p className="mt-2 text-sm text-neutral-600">{state.message}</p>
         <p className="mt-6 text-sm">
           Your payment succeeded — reach out to{' '}
-          <a className="underline" href="mailto:hey@brandos.app">
-            hey@brandos.app
+          <a className="underline" href="mailto:hey@mybrandos.app">
+            hey@mybrandos.app
           </a>{' '}
           with your session ID and we&apos;ll regenerate manually.
         </p>

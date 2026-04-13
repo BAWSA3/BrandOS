@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
 
     const appUrl =
       process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '') ||
-      'https://brandos.app';
+      'https://mybrandos.app';
 
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
