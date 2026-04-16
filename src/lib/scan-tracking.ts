@@ -19,13 +19,74 @@ async function revalidateTierList() {
  * Table: BrandScans
  */
 
+export interface ScanIntelligence {
+  phaseScores?: { define: number; check: number; generate: number; scale: number };
+  insights?: {
+    define?: string[];
+    check?: string[];
+    generate?: string[];
+    scale?: string[];
+  };
+  strengths?: string[];
+  improvements?: string[];
+  summary?: string;
+  influenceTier?: string;
+  nextMoves?: string[];
+  contentPillars?: string[];
+}
+
 export interface BrandScanRecord {
   id?: string;
   username: string;
   score: number;
   archetype: string;
   enhanced: boolean;
+  phase_scores?: string;
+  insights?: string;
+  strengths?: string;
+  improvements?: string;
+  summary?: string;
+  influence_tier?: string;
+  next_moves?: string;
+  content_pillars?: string;
   created_at?: string;
+}
+
+/**
+ * Extract intelligence data from a Gemini brandScore response
+ */
+export function extractIntelligence(brandScore: Record<string, unknown>): ScanIntelligence {
+  const phases = brandScore.phases as {
+    define?: { score: number; insights: string[] };
+    check?: { score: number; insights: string[] };
+    generate?: { score: number; insights: string[] };
+    scale?: { score: number; insights: string[] };
+  } | undefined;
+
+  return {
+    phaseScores: phases
+      ? {
+          define: phases.define?.score ?? 0,
+          check: phases.check?.score ?? 0,
+          generate: phases.generate?.score ?? 0,
+          scale: phases.scale?.score ?? 0,
+        }
+      : undefined,
+    insights: phases
+      ? {
+          define: phases.define?.insights,
+          check: phases.check?.insights,
+          generate: phases.generate?.insights,
+          scale: phases.scale?.insights,
+        }
+      : undefined,
+    strengths: (brandScore.topStrengths as string[]) || undefined,
+    improvements: (brandScore.topImprovements as string[]) || undefined,
+    summary: (brandScore.summary as string) || undefined,
+    influenceTier: (brandScore.influenceTier as string) || undefined,
+    nextMoves: (brandScore.nextMoves as string[]) || undefined,
+    contentPillars: (brandScore.contentPillars as string[]) || undefined,
+  };
 }
 
 /**
@@ -36,6 +97,7 @@ export async function recordScan(scan: {
   score: number;
   archetype?: string;
   enhanced: boolean;
+  intelligence?: ScanIntelligence;
 }): Promise<{ success: boolean; error?: string }> {
   try {
     const { error } = await supabase.from('BrandScans').insert({
@@ -43,6 +105,26 @@ export async function recordScan(scan: {
       score: scan.score,
       archetype: scan.archetype || 'unknown',
       enhanced: scan.enhanced,
+      phase_scores: scan.intelligence?.phaseScores
+        ? JSON.stringify(scan.intelligence.phaseScores)
+        : null,
+      insights: scan.intelligence?.insights
+        ? JSON.stringify(scan.intelligence.insights)
+        : null,
+      strengths: scan.intelligence?.strengths
+        ? JSON.stringify(scan.intelligence.strengths)
+        : null,
+      improvements: scan.intelligence?.improvements
+        ? JSON.stringify(scan.intelligence.improvements)
+        : null,
+      summary: scan.intelligence?.summary || null,
+      influence_tier: scan.intelligence?.influenceTier || null,
+      next_moves: scan.intelligence?.nextMoves
+        ? JSON.stringify(scan.intelligence.nextMoves)
+        : null,
+      content_pillars: scan.intelligence?.contentPillars
+        ? JSON.stringify(scan.intelligence.contentPillars)
+        : null,
       created_at: new Date().toISOString(),
     });
 
