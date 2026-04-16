@@ -1,6 +1,12 @@
 'use client';
 
 import { useState } from 'react';
+import { createBrowserClient } from '@supabase/ssr';
+
+const supabase = createBrowserClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+);
 
 interface DashboardClientProps {
   user: {
@@ -98,12 +104,19 @@ export default function DashboardClient({ user, workspace, xConnections }: Dashb
               <p className="text-gray-600 text-sm mb-4">
                 Connect your X account to scan your brand.
               </p>
-              <a
-                href="/api/auth/callback?provider=twitter"
+              <button
+                onClick={async () => {
+                  await supabase.auth.signInWithOAuth({
+                    provider: 'twitter',
+                    options: {
+                      redirectTo: `${window.location.origin}/api/auth/callback?next=/dashboard`,
+                    },
+                  });
+                }}
                 className="inline-block py-2 px-6 bg-black text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors"
               >
                 Connect X Account
-              </a>
+              </button>
               <p className="mt-2 text-xs text-gray-400">
                 We verify ownership via X OAuth. Only you can scan your handle.
               </p>
