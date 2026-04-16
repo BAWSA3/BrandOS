@@ -39,13 +39,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Brand not found' }, { status: 404 });
     }
 
-    const reportData = generateReportData(brand, user.xUsername);
+    const reportData = generateReportData(brand, user.xUsername ?? user.email ?? 'user');
 
     if (user.email) {
       await sendEmail(
         user.email,
         `Your Brand DNA Report is Ready — ${brand.name}`,
-        buildReportEmailBody(brand.name, user.xUsername, reportData)
+        buildReportEmailBody(brand.name, user.xUsername ?? user.email ?? 'user', reportData)
       );
     }
 
