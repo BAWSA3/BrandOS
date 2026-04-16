@@ -24,6 +24,8 @@ const allowedPages = [
   '/pricing', // Pricing page
   '/opp', // Find Your Opp matchup
   '/audit', // Score Boost Audit — post-purchase results page (/audit/[sessionId])
+  '/migrate-account', // Phase 1: legacy user credential migration
+  '/dashboard', // Phase 1: authenticated user dashboard
 ];
 
 export function middleware(request: NextRequest) {

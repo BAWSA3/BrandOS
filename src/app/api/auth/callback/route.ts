@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import prisma from '@/lib/db';
+import { ensurePersonalWorkspace } from '@/lib/auth';
+import { encryptOauthToken, getCurrentKeyId } from '@/lib/crypto';
+import { logSecurityEvent } from '@/lib/audit-log';
 
 // Early Access Mode - when true, all users get Inner Circle status
 const EARLY_ACCESS_MODE = process.env.NEXT_PUBLIC_EARLY_ACCESS_MODE === 'true';
@@ -134,6 +137,64 @@ export async function GET(request: NextRequest) {
     });
 
     console.log('[Auth Callback] User upserted:', user.id, user.xUsername);
+
+    // Phase 1: ensure personal workspace exists
+    const workspace = await ensurePersonalWorkspace(user.id, name || xUsername);
+
+    // Phase 1: auto-connect X account as PlatformConnection (if not already connected)
+    const providerToken = session.provider_token;
+    const providerRefreshToken = session.provider_refresh_token;
+
+    try {
+      const existing = await prisma.platformConnection.findFirst({
+        where: { userId: user.id, platform: 'x', platformUserId: xId },
+      });
+
+      if (!existing && providerToken) {
+        const encrypted = await encryptOauthToken(providerToken);
+        const encryptedRefresh = providerRefreshToken
+          ? await encryptOauthToken(providerRefreshToken)
+          : null;
+
+        await prisma.platformConnection.create({
+          data: {
+            userId: user.id,
+            platform: 'x',
+            platformUserId: xId,
+            platformUsername: xUsername,
+            accessToken: '**encrypted**',
+            scopes: JSON.stringify(['tweet.read', 'users.read']),
+            profileData: JSON.stringify({ name, avatar }),
+            workspaceId: workspace.id,
+            status: 'active',
+            keyId: getCurrentKeyId(),
+            accessTokenCiphertext: encrypted.ciphertext,
+            refreshTokenCiphertext: encryptedRefresh?.ciphertext ?? null,
+            lastVerifiedAt: new Date(),
+          },
+        });
+        console.log('[Auth Callback] X account connected:', xUsername);
+      } else if (existing) {
+        await prisma.platformConnection.update({
+          where: { id: existing.id },
+          data: {
+            platformUsername: xUsername,
+            lastVerifiedAt: new Date(),
+            status: 'active',
+          },
+        });
+      }
+    } catch (pcError) {
+      console.error('[Auth Callback] PlatformConnection error (non-blocking):', pcError);
+    }
+
+    await logSecurityEvent({
+      category: 'auth',
+      eventType: 'login_success',
+      userId: user.id,
+      workspaceId: workspace.id,
+      metadata: { method: 'x_oauth' },
+    });
 
     // Set auth cookies for the session
     const response = NextResponse.redirect(new URL(next, request.url));
