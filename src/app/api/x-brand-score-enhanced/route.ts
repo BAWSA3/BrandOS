@@ -8,8 +8,11 @@ import {
 import { features, getTierInfo } from '@/lib/features';
 import { analyzeVoiceConsistency } from '@/lib/voice-consistency';
 import type { VoiceConsistencyReport } from '@/lib/schemas/voice-consistency.schema';
-import { recordScan } from '@/lib/scan-tracking';
+import { recordScan, extractIntelligence } from '@/lib/scan-tracking';
 import { getUserProfile } from '@/lib/user-profiles';
+import { assertCanScan } from '@/lib/scan-guard';
+import prisma from '@/lib/db';
+import { logSecurityEvent, getClientIp } from '@/lib/audit-log';
 
 /**
  * Enhanced Brand Score API
@@ -119,13 +122,54 @@ async function fetchTweets(username: string, origin: string) {
 
 export async function POST(request: NextRequest) {
   try {
-    const { username } = (await request.json()) as { username: string };
+    const { username, workspaceId } = (await request.json()) as {
+      username: string;
+      workspaceId?: string;
+    };
 
     if (!username) {
       return NextResponse.json({ error: 'Username is required' }, { status: 400 });
     }
 
     const cleanUsername = username.replace(/^@/, '').trim();
+
+    // Phase 1: auth + plan guard
+    const guard = await assertCanScan(cleanUsername, workspaceId);
+    if (!guard.allowed) {
+      await logSecurityEvent({
+        category: 'scan',
+        eventType: 'scan_rejected',
+        success: false,
+        metadata: { error_code: guard.code, route: '/api/x-brand-score-enhanced' },
+        ip: getClientIp(request.headers),
+        userAgent: request.headers.get('user-agent'),
+      });
+      return NextResponse.json({ error: guard.error }, { status: guard.status });
+    }
+
+    // Return cached scan if same handle was scanned within 24h
+    if (guard.cachedScan) {
+      return NextResponse.json({
+        profile: null,
+        brandScore: {
+          overallScore: guard.cachedScan.score,
+          archetype: { primary: guard.cachedScan.archetype },
+          phases: guard.cachedScan.phaseScores,
+          topStrengths: guard.cachedScan.strengths,
+          topImprovements: guard.cachedScan.improvements,
+          summary: guard.cachedScan.summary,
+          influenceTier: guard.cachedScan.influenceTier,
+          nextMoves: guard.cachedScan.nextMoves,
+          contentPillars: guard.cachedScan.contentPillars,
+        },
+        meta: {
+          cached: true,
+          scannedAt: guard.cachedScan.scannedAt,
+          analyzedAt: guard.cachedScan.scannedAt.toISOString(),
+        },
+      });
+    }
+
     const origin = request.nextUrl.origin;
 
     // Fetch profile (always required)
@@ -252,13 +296,48 @@ export async function POST(request: NextRequest) {
       console.error('Leaderboard save error:', leaderboardError);
     }
 
-    // Record scan to Supabase (non-blocking)
+    // Record to new BrandScan table (Phase 1 — owned, workspace-scoped)
+    const intelligence = extractIntelligence(brandScore);
+    const newScan = await prisma.brandScan.create({
+      data: {
+        userId: guard.user.id,
+        workspaceId: guard.workspace.id,
+        platformConnectionId: guard.platformConnection.id,
+        xUsername: cleanUsername.toLowerCase(),
+        score: brandScore.overallScore,
+        archetype: brandScore.archetype?.primary || 'unknown',
+        phaseScores: intelligence.phaseScores ?? {},
+        strengths: intelligence.strengths ?? [],
+        improvements: intelligence.improvements ?? [],
+        insights: intelligence.insights ?? undefined,
+        summary: intelligence.summary ?? undefined,
+        influenceTier: intelligence.influenceTier ?? undefined,
+        nextMoves: intelligence.nextMoves ?? undefined,
+        contentPillars: intelligence.contentPillars ?? undefined,
+      },
+    }).catch((err) => {
+      console.error('[BrandScan] New table write error:', err);
+      return null;
+    });
+
+    // Legacy: also record to old BrandScans table (removed in migration 007)
     recordScan({
       username: profile.username,
       score: brandScore.overallScore,
       archetype: brandScore.archetype?.primary || '',
       enhanced: isEnhanced,
-    }).catch((err) => console.error('Scan tracking error:', err));
+      intelligence,
+    }).catch((err) => console.error('Legacy scan tracking error:', err));
+
+    await logSecurityEvent({
+      category: 'scan',
+      eventType: 'scan_completed',
+      userId: guard.user.id,
+      workspaceId: guard.workspace.id,
+      metadata: { scan_id: newScan?.id ?? 'unknown', route: '/api/x-brand-score-enhanced' },
+      ip: getClientIp(request.headers),
+      userAgent: request.headers.get('user-agent'),
+    });
 
     return NextResponse.json({
       profile,
@@ -270,6 +349,7 @@ export async function POST(request: NextRequest) {
         tier: features.xApiTier,
         tierInfo: getTierInfo(),
         analyzedAt: new Date().toISOString(),
+        scanId: newScan?.id,
       },
     });
   } catch (error) {

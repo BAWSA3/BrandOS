@@ -1,18 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { geminiFlash, xBrandScorePrompt, XProfileData } from '@/lib/gemini';
 import { resolveArchetype } from '@/lib/archetype-engine';
-import { recordScan } from '@/lib/scan-tracking';
+import { recordScan, extractIntelligence } from '@/lib/scan-tracking';
 import { brandScoreCache } from '@/lib/cache';
 import {
-  authenticateApiKey,
-  checkApiKeyRateLimit,
-  recordApiUsage,
   apiError,
   apiSuccess,
   apiOptionsHandler,
-  API_CORS_HEADERS,
 } from '@/lib/api-auth';
-import { checkRateLimit } from '@/lib/rate-limit';
+import { assertCanScan } from '@/lib/scan-guard';
+import prisma from '@/lib/db';
+import { logSecurityEvent, getClientIp } from '@/lib/audit-log';
 
 // =============================================================================
 // BrandOS Public API v1 — Brand Score
@@ -130,12 +128,13 @@ export async function scoreUsername(
     // Cache it
     brandScoreCache.set(cacheKey, { brandScore, cachedAt: analyzedAt }, SCORE_CACHE_TTL_MINUTES);
 
-    // Record scan (non-blocking)
+    // Record scan (non-blocking) — persist full intelligence
     recordScan({
       username: profile.username,
       score: (brandScore.overallScore as number) || 0,
       archetype: (brandScore.archetype as { primary?: string })?.primary || '',
       enhanced: false,
+      intelligence: extractIntelligence(brandScore),
     }).catch(() => {});
   }
 
@@ -191,31 +190,13 @@ export async function scoreUsername(
 }
 
 export async function POST(request: NextRequest) {
-  const startTime = Date.now();
-
-  // Auth
-  const auth = await authenticateApiKey(request);
-  if (!auth.authenticated) {
-    return apiError(auth.error || 'Unauthorized', auth.statusCode || 401, {
-      docs: 'https://mybrandos.app/docs',
-    });
-  }
-
-  // Rate limit
-  if (auth.apiKey) {
-    const rateLimited = checkApiKeyRateLimit(auth.apiKey);
-    if (rateLimited) return rateLimited;
-  } else {
-    // Env-based key: use simple rate limiter
-    const { limited } = checkRateLimit('v1:env-key', { interval: 60_000, maxRequests: 60 });
-    if (limited) return apiError('Rate limit exceeded', 429);
-  }
-
   // Parse body
   let username: string;
+  let workspaceId: string | undefined;
   try {
     const body = await request.json();
     username = body.username;
+    workspaceId = body.workspaceId;
   } catch {
     return apiError('Invalid request body. Expected JSON with { "username": "handle" }', 400);
   }
@@ -224,25 +205,75 @@ export async function POST(request: NextRequest) {
     return apiError('Missing required field: username', 400);
   }
 
-  const origin = request.nextUrl.origin;
-  const result = await scoreUsername(username, origin);
+  const cleanUsername = username.replace(/^@/, '').trim();
 
-  // Track usage
-  const latencyMs = Date.now() - startTime;
-  if (auth.apiKey) {
-    recordApiUsage(
-      auth.apiKey,
-      '/v1/score',
-      'POST',
-      result.error ? (result.status || 500) : 200,
-      latencyMs,
-      username.replace(/^@/, '').trim()
-    );
+  // Phase 1: auth + plan guard (replaces API key auth)
+  const guard = await assertCanScan(cleanUsername, workspaceId);
+  if (!guard.allowed) {
+    await logSecurityEvent({
+      category: 'scan',
+      eventType: 'scan_rejected',
+      success: false,
+      metadata: { error_code: guard.code, route: '/api/v1/score' },
+      ip: getClientIp(request.headers),
+      userAgent: request.headers.get('user-agent'),
+    });
+    return apiError(guard.error, guard.status);
   }
+
+  // Return cached scan if available
+  if (guard.cachedScan) {
+    return apiSuccess({
+      username: cleanUsername,
+      score: { overall: guard.cachedScan.score },
+      archetype: { name: guard.cachedScan.archetype },
+      cached: true,
+      scannedAt: guard.cachedScan.scannedAt,
+    });
+  }
+
+  const origin = request.nextUrl.origin;
+  const result = await scoreUsername(cleanUsername, origin);
 
   if (result.error) {
     return apiError(result.error, result.status || 500);
   }
+
+  // Write to new BrandScan table
+  const intelligence = result.data
+    ? extractIntelligence(result.data as Record<string, unknown>)
+    : null;
+
+  if (intelligence) {
+    prisma.brandScan.create({
+      data: {
+        userId: guard.user.id,
+        workspaceId: guard.workspace.id,
+        platformConnectionId: guard.platformConnection.id,
+        xUsername: cleanUsername.toLowerCase(),
+        score: ((result.data as Record<string, unknown>)?.score as { overall?: number })?.overall ?? 0,
+        archetype: ((result.data as Record<string, unknown>)?.archetype as { name?: string })?.name ?? 'unknown',
+        phaseScores: intelligence.phaseScores ?? {},
+        strengths: intelligence.strengths ?? [],
+        improvements: intelligence.improvements ?? [],
+        insights: intelligence.insights ?? undefined,
+        summary: intelligence.summary ?? undefined,
+        influenceTier: intelligence.influenceTier ?? undefined,
+        nextMoves: intelligence.nextMoves ?? undefined,
+        contentPillars: intelligence.contentPillars ?? undefined,
+      },
+    }).catch((err) => console.error('[BrandScan] v1 write error:', err));
+  }
+
+  await logSecurityEvent({
+    category: 'scan',
+    eventType: 'scan_completed',
+    userId: guard.user.id,
+    workspaceId: guard.workspace.id,
+    metadata: { route: '/api/v1/score' },
+    ip: getClientIp(request.headers),
+    userAgent: request.headers.get('user-agent'),
+  });
 
   return apiSuccess(result.data, { analyzedAt: (result.data as Record<string, unknown>)?.analyzedAt });
 }
