@@ -24,12 +24,66 @@ enum SubscriptionStatus {
   INCOMPLETE
 }
 
+enum PlanTier {
+  FREE
+  PRO
+  MAX
+  TEAM
+  ENTERPRISE
+}
+
+enum WorkspaceType {
+  personal
+  team
+}
+
+enum WorkspaceRole {
+  owner
+  admin
+  member
+}
+
+enum ConnectedAccountStatus {
+  active
+  dormant
+}
+
+enum ScanVisibility {
+  private
+  card_public
+}
+
+enum ScanStatus {
+  active
+  dormant
+  archived
+}
+
+enum AuditEventCategory {
+  auth
+  scan
+  payment
+  security
+  account
+}
+
+enum UserRole {
+  user
+  admin
+}
+
+enum AccountMigrationStatus {
+  legacy
+  in_progress
+  completed
+}
+
 model User {
   id            String    @id @default(cuid())
   supabaseId    String    @unique    // Links to Supabase Auth
   email         String?   @unique    // Optional - for account recovery
-  xUsername     String               // Required - from X OAuth
-  xId           String    @unique    // X user ID
+  xUsername     String?              // From X OAuth — null until X is connected
+  xId           String?   @unique    // X user ID — null until X is connected
   name          String?
   avatar        String?
   isInnerCircle Boolean   @default(false)
@@ -51,6 +105,10 @@ model User {
   generationsUsedThisMonth Int      @default(0)
   usageResetDate           DateTime @default(now())
 
+  // Phase 1: account model
+  role                       UserRole               @default(user)
+  accountMigrationStatus     AccountMigrationStatus @default(legacy) @map("account_migration_status")
+
   // Relationships
   brands              Brand[]
   teamMembers         TeamMember[]
@@ -61,6 +119,16 @@ model User {
   submittedApprovals  ApprovalRequest[]  @relation("SubmittedApprovals")
   reviewedApprovals   ApprovalRequest[]  @relation("ReviewedApprovals")
   sessions            UserSession[]
+  deals               Deal[]
+  invoices            Invoice[]
+  transactions        Transaction[]
+
+  // Phase 1 relationships
+  ownedWorkspaces     Workspace[]        @relation("WorkspaceOwner")
+  workspaceMemberships WorkspaceMember[]
+  brandScans          BrandScan[]
+  auditReportShares   AuditReportShare[]
+  securityAuditEvents SecurityAuditLog[]
 
   @@index([xUsername])
   @@index([stripeCustomerId])
@@ -245,8 +313,8 @@ model PlatformConnection {
   platform          String    // x, linkedin, instagram, youtube, tiktok, threads
   platformUserId    String    // User's ID on the external platform
   platformUsername  String    // Display username on the external platform
-  accessToken       String    // OAuth access token (encrypted at rest)
-  refreshToken      String?   // OAuth refresh token
+  accessToken       String    // OAuth access token (legacy — migrating to ciphertext)
+  refreshToken      String?   // OAuth refresh token (legacy — migrating to ciphertext)
   tokenExpiresAt    DateTime?
   scopes            String    // JSON array of granted scopes
   profileData       String?   // JSON: platform-specific profile info
@@ -257,6 +325,17 @@ model PlatformConnection {
 
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Phase 1: workspace scoping + encrypted tokens
+  workspaceId            String?                 @map("workspace_id") @db.Uuid
+  workspace              Workspace?              @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  status                 ConnectedAccountStatus  @default(active)
+  keyId                  String                  @default("v1") @map("key_id")
+  accessTokenCiphertext  String?                 @map("access_token_ciphertext")
+  refreshTokenCiphertext String?                 @map("refresh_token_ciphertext")
+  disconnectedAt         DateTime?               @map("disconnected_at") @db.Timestamptz
+  lastVerifiedAt         DateTime                @default(now()) @map("last_verified_at") @db.Timestamptz
+  brandScans             BrandScan[]
 
   @@unique([userId, platform])
   @@index([userId])
@@ -325,8 +404,10 @@ model EmailSignup {
   id        String   @id @default(cuid())
   email     String   @unique
   xUsername String?  // X username if provided
-  source    String   @default("landing") // where they signed up from
-  createdAt DateTime @default(now())
+  source        String    @default("landing") // where they signed up from
+  unsubscribed  Boolean?  @default(false)
+  unsubscribedAt DateTime?
+  createdAt     DateTime  @default(now())
 
   @@index([createdAt])
   @@index([xUsername])
@@ -334,16 +415,25 @@ model EmailSignup {
 
 // Brand score scan history (created via Supabase)
 model BrandScans {
-  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  username  String
-  score     Int
-  archetype String?
-  enhanced  Boolean?
-  userId    String?              // Optional link to auth user
-  createdAt DateTime? @default(now()) @map("created_at") @db.Timestamptz
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  username       String
+  score          Int
+  archetype      String?
+  enhanced       Boolean?
+  userId         String?              // Optional link to auth user
+  phaseScores    String?   @map("phase_scores")     // JSON: {"define":72,"check":65,"generate":80,"scale":58}
+  insights       String?   @map("insights")          // JSON: phase insights from Gemini
+  strengths      String?   @map("strengths")         // JSON: top 3 strengths
+  improvements   String?   @map("improvements")      // JSON: top 3 improvements
+  summary        String?   @map("summary")           // 2-3 sentence assessment
+  influenceTier  String?   @map("influence_tier")    // emerging|micro|mid|macro|elite
+  nextMoves      String?   @map("next_moves")        // JSON: 3 archetype-specific action items
+  contentPillars String?   @map("content_pillars")   // JSON: detected content topics/pillars
+  createdAt      DateTime? @default(now()) @map("created_at") @db.Timestamptz
 
   @@index([username])
   @@index([createdAt(sort: Desc)])
+  @@index([userId])
 }
 
 // Invite codes for Inner Circle referrals
@@ -758,5 +848,207 @@ model ApiUsageLog {
   @@index([apiKeyId, createdAt])
   @@index([createdAt])
   @@index([endpoint])
+}
+
+// =============================================================================
+// NOTE: user_profiles table is Supabase-managed (has generated columns).
+// Do NOT add a Prisma model for it — query via $queryRaw or Supabase client.
+// =============================================================================
+// Creator Portfolio — Deals, Invoices, Transactions
+// =============================================================================
+
+model Deal {
+  id        String    @id @default(cuid())
+  title     String                          // "Nike collaboration"
+  brand     String?                         // Sponsor/brand name
+  status    String    @default("lead")      // lead, negotiating, active, completed, lost
+  amount    Int?                            // in cents
+  currency  String    @default("usd")
+  notes     String?
+  startDate DateTime?
+  endDate   DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  invoices  Invoice[]
+
+  @@index([userId])
+  @@index([userId, status])
+}
+
+model Invoice {
+  id        String    @id @default(cuid())
+  number    String                          // INV-001
+  client    String                          // Client name
+  amount    Int                             // in cents
+  currency  String    @default("usd")
+  status    String    @default("draft")     // draft, sent, paid, overdue, cancelled
+  dueDate   DateTime?
+  paidAt    DateTime?
+  txId      String?                         // Crypto TX hash (optional)
+  txChain   String?                         // eth, sol, btc, base, etc.
+  notes     String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dealId    String?
+  deal      Deal?     @relation(fields: [dealId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([userId, status])
+  @@index([dealId])
+}
+
+model Transaction {
+  id          String    @id @default(cuid())
+  type        String                        // income, expense
+  source      String                        // deal, invoice, manual
+  amount      Int                           // in cents
+  currency    String    @default("usd")
+  description String?
+  txId        String?                       // Blockchain TX hash
+  txChain     String?                       // eth, sol, btc, base, etc.
+  occurredAt  DateTime  @default(now())
+  createdAt   DateTime  @default(now())
+
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, occurredAt(sort: Desc)])
+}
+
+// ===== PHASE 1: WORKSPACES + OWNED SCANS =====
+
+model Workspace {
+  id                   String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                 String
+  type                 WorkspaceType
+  ownerUserId          String         @map("owner_user_id")
+  owner                User           @relation("WorkspaceOwner", fields: [ownerUserId], references: [id], onDelete: Restrict)
+  plan                 PlanTier       @default(FREE)
+  seatCount            Int            @default(1) @map("seat_count")
+  stripeCustomerId     String?        @unique @map("stripe_customer_id")
+  stripeSubscriptionId String?        @unique @map("stripe_subscription_id")
+  trialEndsAt          DateTime?      @map("trial_ends_at") @db.Timestamptz
+  createdAt            DateTime       @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt            DateTime       @updatedAt @map("updated_at") @db.Timestamptz
+
+  members              WorkspaceMember[]
+  platformConnections  PlatformConnection[]
+  brandScans           BrandScan[]
+  auditReportShares    AuditReportShare[]
+  securityAuditEvents  SecurityAuditLog[]
+
+  @@index([ownerUserId])
+  @@map("Workspace")
+}
+
+model WorkspaceMember {
+  workspaceId        String         @map("workspace_id") @db.Uuid
+  workspace          Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  userId             String         @map("user_id")
+  user               User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role               WorkspaceRole  @default(member)
+  invitedByUserId    String?        @map("invited_by_user_id")
+  joinedAt           DateTime       @default(now()) @map("joined_at") @db.Timestamptz
+
+  @@id([workspaceId, userId])
+  @@index([userId])
+  @@map("WorkspaceMember")
+}
+
+model PlanLimit {
+  plan                         PlanTier  @id
+  scansPerDay                  Int       @map("scans_per_day")
+  xAccountsPerSeat             Int       @map("x_accounts_per_seat")
+  multiPlatformEnabled         Boolean   @default(false) @map("multi_platform_enabled")
+  competitorWatchlistEnabled   Boolean   @default(false) @map("competitor_watchlist_enabled")
+  scheduledRescansEnabled      Boolean   @default(false) @map("scheduled_rescans_enabled")
+  priorityQueueEnabled         Boolean   @default(false) @map("priority_queue_enabled")
+  maxFlaggedTweets             Int       @default(3) @map("max_flagged_tweets")
+  auditSummaryMaxChars         Int       @default(800) @map("audit_summary_max_chars")
+  maxStrengths                 Int       @default(3) @map("max_strengths")
+  maxImprovements              Int       @default(3) @map("max_improvements")
+
+  @@map("PlanLimit")
+}
+
+model BrandScan {
+  id                     String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId                 String              @map("user_id")
+  user                   User                @relation(fields: [userId], references: [id], onDelete: Restrict)
+  workspaceId            String              @map("workspace_id") @db.Uuid
+  workspace              Workspace           @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  platformConnectionId   String              @map("platform_connection_id")
+  platformConnection     PlatformConnection  @relation(fields: [platformConnectionId], references: [id], onDelete: Restrict)
+  xUsername              String              @map("x_username")
+
+  score                  Int
+  archetype              String
+  phaseScores            Json                @map("phase_scores")
+  strengths              Json
+  improvements           Json
+  insights               Json?
+  summary                String?
+  influenceTier          String?             @map("influence_tier")
+  nextMoves              Json?               @map("next_moves")
+  contentPillars         Json?               @map("content_pillars")
+
+  visibility             ScanVisibility      @default(card_public)
+  status                 ScanStatus          @default(active)
+  scannedAt              DateTime            @default(now()) @map("scanned_at") @db.Timestamptz
+
+  shares                 AuditReportShare[]
+
+  @@index([userId])
+  @@index([workspaceId])
+  @@index([platformConnectionId])
+  @@map("BrandScan")
+}
+
+model AuditReportShare {
+  id                String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  brandScanId       String?    @map("brand_scan_id") @db.Uuid
+  brandScan         BrandScan? @relation(fields: [brandScanId], references: [id], onDelete: Cascade)
+  workspaceId       String     @map("workspace_id") @db.Uuid
+  workspace         Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  createdByUserId   String     @map("created_by_user_id")
+  createdBy         User       @relation(fields: [createdByUserId], references: [id], onDelete: Restrict)
+  token             String     @unique
+  expiresAt         DateTime   @map("expires_at") @db.Timestamptz
+  revokedAt         DateTime?  @map("revoked_at") @db.Timestamptz
+  viewCount         Int        @default(0) @map("view_count")
+  uniqueViewerCount Int        @default(0) @map("unique_viewer_count")
+  createdAt         DateTime   @default(now()) @map("created_at") @db.Timestamptz
+
+  @@index([token])
+  @@index([workspaceId])
+  @@map("AuditReportShare")
+}
+
+model SecurityAuditLog {
+  id              String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  category        AuditEventCategory
+  eventType       String              @map("event_type")
+  userId          String?             @map("user_id")
+  user            User?               @relation(fields: [userId], references: [id], onDelete: SetNull)
+  workspaceId     String?             @map("workspace_id") @db.Uuid
+  workspace       Workspace?          @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
+  success         Boolean             @default(true)
+  metadata        Json                @default("{}")
+  ipHash          String?             @map("ip_hash")
+  userAgentFamily String?             @map("user_agent_family")
+  createdAt       DateTime            @default(now()) @map("created_at") @db.Timestamptz
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([workspaceId, createdAt(sort: Desc)])
+  @@index([category, createdAt(sort: Desc)])
+  @@index([createdAt])
+  @@map("SecurityAuditLog")
 }
 

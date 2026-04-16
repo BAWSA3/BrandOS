@@ -159,3 +159,94 @@ export interface SessionUser {
   isInnerCircle: boolean;
   invitedBy: string | null;
 }
+
+// ===== Phase 1: workspace-aware auth helpers =====
+
+export async function getCurrentUser() {
+  const session = await getSession();
+  if (!session?.user?.id) return null;
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: { supabaseId: session.user.id },
+      include: {
+        workspaceMemberships: {
+          include: {
+            workspace: true,
+          },
+        },
+        ownedWorkspaces: true,
+        platformConnections: {
+          where: { status: 'active' },
+        },
+      },
+    });
+
+    return user;
+  } catch (error) {
+    console.error('[Auth] getCurrentUser error:', error);
+    return null;
+  }
+}
+
+export type CurrentUser = NonNullable<Awaited<ReturnType<typeof getCurrentUser>>>;
+
+export async function getCurrentWorkspace(user: CurrentUser, workspaceId?: string) {
+  if (workspaceId) {
+    const membership = user.workspaceMemberships.find(
+      (m) => m.workspaceId === workspaceId,
+    );
+    if (!membership) return null;
+    return membership.workspace;
+  }
+
+  const personal = user.ownedWorkspaces.find((w) => w.type === 'personal');
+  return personal ?? null;
+}
+
+export async function getActiveXAccount(
+  workspaceId: string,
+  xUsername: string,
+) {
+  try {
+    const connection = await prisma.platformConnection.findFirst({
+      where: {
+        workspaceId,
+        platform: 'x',
+        platformUsername: { equals: xUsername, mode: 'insensitive' },
+        status: 'active',
+      },
+    });
+
+    return connection;
+  } catch (error) {
+    console.error('[Auth] getActiveXAccount error:', error);
+    return null;
+  }
+}
+
+export async function ensurePersonalWorkspace(userId: string, displayName?: string) {
+  const existing = await prisma.workspace.findFirst({
+    where: { ownerUserId: userId, type: 'personal' },
+  });
+
+  if (existing) return existing;
+
+  const workspace = await prisma.workspace.create({
+    data: {
+      name: displayName ? `${displayName}'s Workspace` : 'Personal Workspace',
+      type: 'personal',
+      ownerUserId: userId,
+      plan: 'FREE',
+      seatCount: 1,
+      members: {
+        create: {
+          userId,
+          role: 'owner',
+        },
+      },
+    },
+  });
+
+  return workspace;
+}

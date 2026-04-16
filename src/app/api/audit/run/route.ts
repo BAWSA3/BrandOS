@@ -21,6 +21,8 @@ import {
   type ScoreBoostAuditResult,
 } from '@/prompts/score-boost-audit';
 import { sendAuditEmail } from '@/lib/audit-email';
+import { assertCanScan } from '@/lib/scan-guard';
+import { logSecurityEvent, getClientIp } from '@/lib/audit-log';
 
 const HAIKU_MODEL = 'claude-haiku-4-5-20251001';
 
@@ -56,6 +58,20 @@ export async function POST(request: NextRequest) {
         { error: 'Handle missing from session metadata' },
         { status: 400 }
       );
+    }
+
+    // 1b) Phase 1: verify authenticated user owns this handle
+    const guard = await assertCanScan(handle);
+    if (!guard.allowed) {
+      await logSecurityEvent({
+        category: 'scan',
+        eventType: 'audit_rejected',
+        success: false,
+        metadata: { error_code: guard.code, route: '/api/audit/run' },
+        ip: getClientIp(request.headers),
+        userAgent: request.headers.get('user-agent'),
+      });
+      return NextResponse.json({ error: guard.error }, { status: guard.status });
     }
 
     // 2) Fetch last 50 tweets
