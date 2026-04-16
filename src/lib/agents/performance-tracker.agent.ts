@@ -2,6 +2,7 @@
 // Syncs tweets and computes performance snapshots for 3/7/30-day windows
 
 import prisma from '@/lib/db';
+import { fetchUserTweets, isSocialDataConfigured } from '@/lib/socialdata';
 
 interface TweetMetrics {
   likes: number;
@@ -16,34 +17,48 @@ interface TweetMetrics {
  * Reuses the same pattern as /api/x-sync
  */
 async function syncTweets(brandId: string, xUserId: string): Promise<number> {
-  const token = process.env.X_BEARER_TOKEN;
-  if (!token) return 0;
-
   try {
-    const tweetFields = 'id,text,created_at,public_metrics,entities';
-    const url = `https://api.x.com/2/users/${xUserId}/tweets?max_results=20&exclude=replies,retweets&tweet.fields=${tweetFields}`;
+    // Fetch tweets: SocialData primary, X API fallback
+    let rawTweets: { id: string; text: string; created_at: string; public_metrics: Record<string, number>; entities?: Record<string, unknown[]> | null }[] = [];
 
-    const response = await fetch(url, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-    if (!response.ok) {
-      console.error(`[performance-tracker] X API error: ${response.status}`);
-      return 0;
+    if (isSocialDataConfigured()) {
+      const sdResult = await fetchUserTweets(xUserId, 20);
+      if (sdResult.tweets.length > 0) {
+        rawTweets = sdResult.tweets.map((t) => ({
+          id: t.id,
+          text: t.text,
+          created_at: t.created_at,
+          public_metrics: t.public_metrics,
+          entities: t.entities as Record<string, unknown[]> | undefined,
+        }));
+      } else if (sdResult.error) {
+        console.warn('[performance-tracker] SocialData failed:', sdResult.error);
+      }
     }
 
-    const data = await response.json();
-    const tweets = data.data || [];
+    if (rawTweets.length === 0) {
+      const token = process.env.X_BEARER_TOKEN;
+      if (!token) return 0;
+
+      const tweetFields = 'id,text,created_at,public_metrics,entities';
+      const url = `https://api.x.com/2/users/${xUserId}/tweets?max_results=20&exclude=replies,retweets&tweet.fields=${tweetFields}`;
+      const response = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+
+      if (!response.ok) {
+        console.error(`[performance-tracker] X API error: ${response.status}`);
+        return 0;
+      }
+
+      const data = await response.json();
+      rawTweets = data.data || [];
+    }
+
     const syncedAt = new Date();
     let synced = 0;
 
-    for (const tweet of tweets) {
+    for (const tweet of rawTweets) {
       const metrics = tweet.public_metrics || {
-        like_count: 0,
-        retweet_count: 0,
-        reply_count: 0,
-        impression_count: 0,
-        quote_count: 0,
+        like_count: 0, retweet_count: 0, reply_count: 0, impression_count: 0, quote_count: 0,
       };
 
       const likes = metrics.like_count || 0;
@@ -53,18 +68,16 @@ async function syncTweets(brandId: string, xUserId: string): Promise<number> {
       const engagementRate = ((likes + retweets + replies) / impressions) * 100;
 
       const metricsJson = JSON.stringify({
-        likes,
-        retweets,
-        replies,
+        likes, retweets, replies,
         impressions: metrics.impression_count || 0,
         quotes: metrics.quote_count || 0,
       });
 
       const entitiesJson = tweet.entities
         ? JSON.stringify({
-            hashtags: tweet.entities.hashtags?.map((h: { tag: string }) => h.tag) || [],
-            mentions: tweet.entities.mentions?.map((m: { username: string }) => m.username) || [],
-            urls: tweet.entities.urls?.map((u: { expanded_url: string }) => u.expanded_url) || [],
+            hashtags: (tweet.entities.hashtags as { tag: string }[] || []).map((h) => h.tag),
+            mentions: (tweet.entities.mentions as { username: string }[] || []).map((m) => m.username),
+            urls: (tweet.entities.urls as { expanded_url: string }[] || []).map((u) => u.expanded_url),
           })
         : null;
 

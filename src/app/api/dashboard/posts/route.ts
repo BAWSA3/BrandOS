@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { createServerClient } from '@supabase/ssr';
+import { fetchUserTweets, isSocialDataConfigured } from '@/lib/socialdata';
 
 export interface DashboardPost {
   id: string;
@@ -69,54 +70,65 @@ export async function GET(_request: NextRequest) {
       return NextResponse.json({ posts: postsCache.data });
     }
 
-    // Try provider token first, fall back to bearer
-    const token = providerToken || process.env.X_BEARER_TOKEN;
-    const isBearer = !providerToken;
-
-    if (!token) {
-      return NextResponse.json({ error: 'No X API token available' }, { status: 500 });
-    }
-
     if (!xUserId) {
       return NextResponse.json({ error: 'X user ID not found' }, { status: 400 });
     }
 
-    const tweetFields = 'id,text,created_at,public_metrics,entities';
-    const url = `https://api.x.com/2/users/${xUserId}/tweets?max_results=20&exclude=replies,retweets&tweet.fields=${tweetFields}`;
+    let posts: DashboardPost[] = [];
 
-    const xResponse = await fetch(url, {
-      headers: {
-        Authorization: isBearer ? `Bearer ${token}` : `Bearer ${token}`,
-      },
-    });
-
-    if (!xResponse.ok) {
-      // If 403, X API tier insufficient
-      if (xResponse.status === 403) {
-        return NextResponse.json({
-          posts: [],
-          notice: 'X API Basic tier required for tweet fetching. Showing placeholder data.',
-        });
+    // Try SocialData first (budget-friendly)
+    if (isSocialDataConfigured()) {
+      const sdResult = await fetchUserTweets(xUserId, 20);
+      if (sdResult.tweets.length > 0) {
+        posts = sdResult.tweets.map((t) => ({
+          id: t.id,
+          text: t.text,
+          created_at: t.created_at,
+          public_metrics: {
+            retweet_count: t.public_metrics.retweet_count,
+            reply_count: t.public_metrics.reply_count,
+            like_count: t.public_metrics.like_count,
+            quote_count: t.public_metrics.quote_count,
+            impression_count: t.public_metrics.impression_count,
+          },
+          entities: t.entities || {},
+        }));
       }
-      const errorText = await xResponse.text();
-      console.error('X API error:', xResponse.status, errorText);
-      return NextResponse.json({ posts: [], error: 'Failed to fetch posts from X' });
     }
 
-    const data = await xResponse.json();
-    const posts: DashboardPost[] = (data.data || []).map((tweet: Record<string, unknown>) => ({
-      id: tweet.id,
-      text: tweet.text,
-      created_at: tweet.created_at,
-      public_metrics: tweet.public_metrics || {
-        retweet_count: 0,
-        reply_count: 0,
-        like_count: 0,
-        quote_count: 0,
-        impression_count: 0,
-      },
-      entities: tweet.entities || {},
-    }));
+    // Fallback: provider token or X API bearer
+    if (posts.length === 0) {
+      const token = providerToken || process.env.X_BEARER_TOKEN;
+      if (!token) {
+        return NextResponse.json({ posts: [], error: 'No tweet provider available' });
+      }
+
+      const tweetFields = 'id,text,created_at,public_metrics,entities';
+      const url = `https://api.x.com/2/users/${xUserId}/tweets?max_results=20&exclude=replies,retweets&tweet.fields=${tweetFields}`;
+      const xResponse = await fetch(url, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (!xResponse.ok) {
+        if (xResponse.status === 403) {
+          return NextResponse.json({ posts: [], notice: 'Tweet fetching unavailable.' });
+        }
+        const errorText = await xResponse.text();
+        console.error('X API error:', xResponse.status, errorText);
+        return NextResponse.json({ posts: [], error: 'Failed to fetch posts from X' });
+      }
+
+      const data = await xResponse.json();
+      posts = (data.data || []).map((tweet: Record<string, unknown>) => ({
+        id: tweet.id,
+        text: tweet.text,
+        created_at: tweet.created_at,
+        public_metrics: tweet.public_metrics || {
+          retweet_count: 0, reply_count: 0, like_count: 0, quote_count: 0, impression_count: 0,
+        },
+        entities: tweet.entities || {},
+      }));
+    }
 
     // Update cache
     postsCache = { data: posts, timestamp: Date.now(), userId: xUserId };

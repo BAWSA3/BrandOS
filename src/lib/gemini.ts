@@ -1043,6 +1043,16 @@ Cap at 100.
 
 REMEMBER: Do NOT factor in bio, username/handle, display name, profile picture, banner, location, or links. A person's name has NOTHING to do with their brand identity. Only evaluate content and reputation.
 
+NEXT MOVES (3 specific actions):
+Based on this creator's archetype, weakest phase, and current score, provide 3 concrete next steps. These MUST be:
+1. Specific to their archetype and current gaps (not generic advice like "post more")
+2. Actionable within 1-2 weeks
+3. Tied to improving a specific phase score
+Example for a BUILD.EXE with weak Define: "Ship a build-in-public thread documenting your current project — this crystallizes what you're known for and directly improves Define."
+
+CONTENT PILLARS:
+Identify 2-4 recurring content topics/themes this creator is known for based on their profile. Be specific — not "technology" but "developer tools" or "Bitcoin analysis".
+
 CREATOR ARCHETYPE (Choose ONE that best fits):
 1. 🎓 SOURCE - Deep knowledge authority, niche expert, educational content
 2. 🔌 RELAY - Super connector, everyone's mutual, "DMs open" energy, networker
@@ -1068,6 +1078,8 @@ Return ONLY valid JSON:
   },
   "topStrengths": ["Strength 1", "Strength 2", "Strength 3"],
   "topImprovements": ["Improvement 1", "Improvement 2", "Improvement 3"],
+  "nextMoves": ["Specific action 1 tied to weakest phase", "Specific action 2 tied to archetype growth", "Specific action 3 tied to what top scorers do"],
+  "contentPillars": ["Topic 1", "Topic 2", "Topic 3"],
   "summary": "2-3 sentence assessment acknowledging their influence tier and brand effectiveness.",
   "archetype": {
     "primary": "SOURCE|RELAY|FREQ|FORESIGHT|BUILD.EXE|ARC|ENTROPY|NULL",
@@ -1260,6 +1272,8 @@ Return ONLY valid JSON:
     "optimalPostingTime": "Day at HH:MM timezone",
     "hookEffectiveness": <0-100>
   },
+  "nextMoves": ["Specific action 1 tied to weakest phase and archetype", "Specific action 2 for archetype growth", "Specific action 3 based on top scorer patterns"],
+  "contentPillars": ["Topic 1", "Topic 2", "Topic 3"],
   "contentSuggestions": [
     "Specific content idea 1 based on what works for them",
     "Specific content idea 2",

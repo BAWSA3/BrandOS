@@ -16,10 +16,23 @@ export interface QuickVoiceScan {
 }
 
 async function fetchTweets(username: string): Promise<string[]> {
-  const bearerToken = process.env.X_BEARER_TOKEN;
-  if (!bearerToken) throw new Error('X API not configured');
+  // Try SocialData first (budget-friendly)
+  const { fetchTweetsByUsername, isSocialDataConfigured } = await import('@/lib/socialdata');
 
-  // Get user ID first
+  if (isSocialDataConfigured()) {
+    const result = await fetchTweetsByUsername(username, 15);
+    if (result.tweets.length > 0) {
+      return result.tweets.map((t) => t.text);
+    }
+    if (result.error) {
+      console.warn('[try-engine] SocialData failed:', result.error);
+    }
+  }
+
+  // Fallback to X API
+  const bearerToken = process.env.X_BEARER_TOKEN;
+  if (!bearerToken) throw new Error('No tweet provider configured');
+
   const userRes = await fetch(
     `https://api.x.com/2/users/by/username/${encodeURIComponent(username)}`,
     { headers: { Authorization: `Bearer ${bearerToken}` } }
@@ -27,7 +40,6 @@ async function fetchTweets(username: string): Promise<string[]> {
   const userData = await userRes.json();
   if (!userData.data?.id) throw new Error('User not found');
 
-  // Fetch recent tweets (exclude replies and retweets)
   const tweetsRes = await fetch(
     `https://api.x.com/2/users/${userData.data.id}/tweets?max_results=15&exclude=replies,retweets&tweet.fields=text`,
     { headers: { Authorization: `Bearer ${bearerToken}` } }

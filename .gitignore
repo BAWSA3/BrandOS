@@ -65,3 +65,4 @@ brandkit-for-ai-studio.txt
 # Local motion-plus source (not needed - inlined)
 plus/
 superpowers/
+.env*.local
