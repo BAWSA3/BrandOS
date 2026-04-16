@@ -12,7 +12,8 @@ export type GatedFeature =
   | 'apiAccess'
   | 'whiteLabel'
   | 'customIntegrations'
-  | 'ssoSaml';
+  | 'ssoSaml'
+  | 'intelligenceReport';
 
 export interface FeatureGateResult {
   allowed: boolean;
@@ -34,6 +35,7 @@ const FEATURE_MINIMUM_TIER: Record<GatedFeature, SubscriptionTier> = {
   whiteLabel: 'AGENCY',
   customIntegrations: 'AGENCY',
   ssoSaml: 'ENTERPRISE',
+  intelligenceReport: 'PRO',
 };
 
 const FEATURE_DISPLAY_NAMES: Record<GatedFeature, string> = {
@@ -49,6 +51,7 @@ const FEATURE_DISPLAY_NAMES: Record<GatedFeature, string> = {
   whiteLabel: 'White-Label Reports',
   customIntegrations: 'Custom Integrations',
   ssoSaml: 'SSO / SAML',
+  intelligenceReport: 'Intelligence Report',
 };
 
 const TIER_DISPLAY_NAMES: Record<SubscriptionTier, string> = {
@@ -73,6 +76,7 @@ const FEATURE_TO_PLAN_KEY: Record<GatedFeature, keyof import('@/lib/plans').Plan
   whiteLabel: 'whiteLabel',
   customIntegrations: 'customIntegrations',
   ssoSaml: 'ssoSaml',
+  intelligenceReport: 'intelligenceReport',
 };
 
 export function checkFeatureAccess(

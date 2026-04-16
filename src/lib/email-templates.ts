@@ -405,7 +405,7 @@ Bawsa here. Just wanted to give you a quick update on what I'm cooking up.
 So BrandOS right now just shows you your score, right? But I'm working on something way bigger. Imagine being able to:
 
 - Check if your tweets are on-brand before you post
-- Get AI rewrites that actually sound like YOU
+- Get evidence-backed suggestions that sharpen your voice without replacing it
 - Track how consistent your brand is over time
 
 That's the vision. And honestly, I'm building this because I needed it myself. Figuring out your brand is hard, and I want to make it easier for everyone.

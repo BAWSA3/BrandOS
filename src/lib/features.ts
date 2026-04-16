@@ -1,61 +1,39 @@
 /**
  * Feature Flags for BrandOS
  *
- * These flags control access to features that require different X API tiers.
- * Set via environment variables for easy configuration.
+ * Tweet-dependent features are available when SocialData.tools is configured
+ * (primary provider) OR when X API Basic+ tier is active (fallback).
  */
 
 export const features = {
-  /**
-   * X API Tier Detection
-   * Set X_API_TIER in .env.local to 'free' | 'basic' | 'pro'
-   */
   xApiTier: (process.env.X_API_TIER || 'free') as 'free' | 'basic' | 'pro',
 
-  /**
-   * Tweet Analysis (requires Basic tier - $100/month)
-   * Enables fetching and analyzing user's actual tweets
-   */
-  get tweetAnalysis(): boolean {
-    return this.xApiTier === 'basic' || this.xApiTier === 'pro';
+  /** SocialData.tools is configured — unlocks tweet access without X API Basic */
+  get socialDataAvailable(): boolean {
+    return !!process.env.SOCIALDATA_API_KEY;
   },
 
-  /**
-   * Verified Type Detection (requires Basic tier)
-   * Enables accurate blue/gold/gray checkmark detection
-   */
+  /** Tweet analysis: available via SocialData OR X API Basic+ */
+  get tweetAnalysis(): boolean {
+    return this.socialDataAvailable || this.xApiTier === 'basic' || this.xApiTier === 'pro';
+  },
+
   get verifiedTypeDetection(): boolean {
     return this.xApiTier === 'basic' || this.xApiTier === 'pro';
   },
 
-  /**
-   * Enhanced Voice Analysis (requires Basic tier + tweets)
-   * Analyzes tone, consistency, and writing patterns
-   */
   get voiceAnalysis(): boolean {
     return this.tweetAnalysis;
   },
 
-  /**
-   * Content Performance Metrics (requires Basic tier)
-   * Engagement rates, optimal posting times, etc.
-   */
   get contentPerformance(): boolean {
     return this.tweetAnalysis;
   },
 
-  /**
-   * Content Suggestions (requires Basic tier)
-   * AI-generated content ideas based on performance
-   */
   get contentSuggestions(): boolean {
     return this.tweetAnalysis;
   },
 
-  /**
-   * Competitor Comparison with Tweets (requires Basic tier)
-   * Compare content performance, not just profile metrics
-   */
   get enhancedComparison(): boolean {
     return this.tweetAnalysis;
   },
@@ -83,6 +61,7 @@ export function getTierInfo() {
       free: { price: '$0', userLookups: 500, tweets: 0 },
       basic: { price: '$100/mo', userLookups: 10000, tweets: 10000 },
       pro: { price: '$5000/mo', userLookups: 'unlimited', tweets: 'unlimited' },
+      socialdata: { price: '~$0.0002/req', userLookups: 'unlimited', tweets: 'unlimited' },
     },
   };
 }

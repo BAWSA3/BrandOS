@@ -3,6 +3,7 @@
 
 import Anthropic from '@anthropic-ai/sdk';
 import prisma from '@/lib/db';
+import { searchTweets as socialDataSearch, isSocialDataConfigured } from '@/lib/socialdata';
 
 const TWITTER_API_BASE = 'https://api.twitter.com/2';
 
@@ -69,10 +70,7 @@ async function searchNicheTweets(
   referenceAccounts: string[],
   maxResults: number = 20
 ): Promise<TwitterSearchResult[]> {
-  const token = process.env.X_BEARER_TOKEN;
-  if (!token) return [];
-
-  // Build query: keywords OR hashtags, optionally from reference accounts
+  // Build query: keywords OR hashtags
   const parts: string[] = [];
   if (keywords.length > 0) {
     parts.push(`(${keywords.slice(0, 3).join(' OR ')})`);
@@ -89,8 +87,36 @@ async function searchNicheTweets(
   let query = parts.join(' OR ');
   if (!query) return [];
 
-  // Filter for quality: exclude retweets, English only
   query += ' -is:retweet lang:en';
+
+  // Try SocialData first
+  if (isSocialDataConfigured()) {
+    try {
+      const sdResults = await socialDataSearch(query, maxResults);
+      if (sdResults.length > 0) {
+        return sdResults.map((t) => ({
+          id: t.id,
+          text: t.text,
+          author_id: t.author_id || '',
+          created_at: t.created_at,
+          public_metrics: {
+            retweet_count: t.public_metrics.retweet_count,
+            reply_count: t.public_metrics.reply_count,
+            like_count: t.public_metrics.like_count,
+            impression_count: t.public_metrics.impression_count,
+            quote_count: t.public_metrics.quote_count,
+          },
+          _authorUsername: t.author_username,
+        })) as (TwitterSearchResult & { _authorUsername?: string })[];
+      }
+    } catch (error) {
+      console.warn('[market-scanner] SocialData search failed:', error);
+    }
+  }
+
+  // Fallback to X API
+  const token = process.env.X_BEARER_TOKEN;
+  if (!token) return [];
 
   try {
     const params = new URLSearchParams({
@@ -113,7 +139,6 @@ async function searchNicheTweets(
     const data = await response.json();
     if (!data.data) return [];
 
-    // Attach author usernames
     const userMap = new Map<string, string>();
     if (data.includes?.users) {
       for (const user of data.includes.users) {

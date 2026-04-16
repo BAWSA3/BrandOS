@@ -241,22 +241,20 @@ export async function POST(request: NextRequest) {
       console.error('[DB CACHE ERROR]', dbError);
     }
 
-    // ── 3. Fetch from providers: X API first, SocialData fallback ─────────
-    console.log(`[FETCH] @${cleanUsername} — trying X API first`);
-    let result = await fetchFromXApi(cleanUsername);
+    // ── 3. Fetch from providers: SocialData first (budget), X API fallback ─
+    console.log(`[FETCH] @${cleanUsername} — trying SocialData first`);
+    let result = await fetchFromSocialData(cleanUsername);
 
-    // If X API fails (rate limited, 403, 500, etc.), try SocialData
+    // If SocialData fails (non-404), try X API as fallback
     if (!result.profile && result.status !== 404) {
-      console.log(`[FETCH] X API failed (${result.status}), falling back to SocialData`);
-      const fallback = await fetchFromSocialData(cleanUsername);
+      console.log(`[FETCH] SocialData failed (${result.status}), falling back to X API`);
+      const fallback = await fetchFromXApi(cleanUsername);
 
       if (fallback.profile) {
         result = fallback;
       } else if (fallback.status === 404) {
-        // Both providers say not found — it's genuinely not found
         result = fallback;
       }
-      // If SocialData also fails with a non-404, keep the original X API error
     }
 
     // ── 4. Handle result ──────────────────────────────────────────────────

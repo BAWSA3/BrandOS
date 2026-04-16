@@ -115,3 +115,47 @@ export async function getSignupsBySource(source: string): Promise<EmailSignup[]>
     return [];
   }
 }
+
+/**
+ * Get all active (non-unsubscribed) subscribers
+ */
+export async function getActiveSubscribers(): Promise<EmailSignup[]> {
+  try {
+    const { data, error } = await supabase
+      .from('EmailSignup')
+      .select('*')
+      .or('unsubscribed.is.null,unsubscribed.eq.false')
+      .order('createdAt', { ascending: false });
+
+    if (error) {
+      console.error('[Newsletter] Error getting active subscribers:', error);
+      return [];
+    }
+
+    return data || [];
+  } catch (error) {
+    console.error('[Newsletter] Error getting active subscribers:', error);
+    return [];
+  }
+}
+
+/**
+ * Get active subscriber count
+ */
+export async function getActiveSubscriberCount(): Promise<number> {
+  try {
+    const { count, error } = await supabase
+      .from('EmailSignup')
+      .select('*', { count: 'exact', head: true })
+      .or('unsubscribed.is.null,unsubscribed.eq.false');
+
+    if (error) {
+      console.error('[Newsletter] Error getting active count:', error);
+      return 0;
+    }
+
+    return count || 0;
+  } catch {
+    return 0;
+  }
+}

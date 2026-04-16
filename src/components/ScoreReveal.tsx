@@ -411,6 +411,49 @@ export default function ScoreReveal({ profile, brandScore, isVisible, theme }: S
           theme={theme}
         />
 
+        {/* Intelligence Report CTA */}
+        <motion.a
+          href={`/intelligence?u=${encodeURIComponent(profile.username)}`}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          style={{
+            display: 'block',
+            width: '100%',
+            marginTop: '16px',
+            padding: '16px 24px',
+            background: 'rgba(0, 71, 255, 0.04)',
+            border: '1px solid rgba(0, 71, 255, 0.15)',
+            borderRadius: '6px',
+            textDecoration: 'none',
+            cursor: 'pointer',
+            textAlign: 'center',
+          }}
+        >
+          <div
+            style={{
+              fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace",
+              fontSize: '12px',
+              letterSpacing: '0.1em',
+              color: '#0047FF',
+              marginBottom: '4px',
+            }}
+          >
+            VIEW INTELLIGENCE REPORT
+          </div>
+          <div
+            style={{
+              fontFamily: "'Helvetica Neue', sans-serif",
+              fontSize: '12px',
+              color: 'rgba(0, 0, 0, 0.5)',
+            }}
+          >
+            See how you compare to other {brandScore.archetype?.primary || 'creators'}s and what top scorers do differently
+          </div>
+        </motion.a>
+
         {/* Action Buttons */}
         <div style={{ display: 'flex', gap: '16px', marginTop: '16px' }}>
           <motion.button

@@ -42,10 +42,10 @@ interface FeatureRow {
 
 const COMPARISON_FEATURES: FeatureRow[] = [
   { label: 'scans', free: 'unlimited', pro: 'unlimited', agency: 'unlimited' },
-  { label: 'content checks / month', free: '10', pro: '200', agency: '1,000' },
-  { label: 'ai generations / month', free: '5', pro: '100', agency: '500' },
+  { label: 'content checks / month', free: '3', pro: '200', agency: '1,000' },
+  { label: 'ai generations / month', free: '2', pro: '100', agency: '500' },
   { label: 'brand profiles', free: '1', pro: '3', agency: '15' },
-  { label: 'history retention', free: '30 days', pro: 'unlimited', agency: 'unlimited' },
+  { label: 'history retention', free: '7 days', pro: 'unlimited', agency: 'unlimited' },
   { label: 'dashboard access', free: 'home + define', pro: 'full', agency: 'full' },
   { label: 'voice fingerprint', free: false, pro: true, agency: true },
   { label: 'content calendar', free: false, pro: true, agency: true },

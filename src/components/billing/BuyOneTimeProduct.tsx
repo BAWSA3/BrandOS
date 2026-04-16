@@ -1,18 +1,26 @@
 'use client';
 
 import { useState } from 'react';
-import { Sparkles, ArrowRight, Check, Zap, BookOpen } from 'lucide-react';
+import { Sparkles, ArrowRight, Check, Zap, BookOpen, BarChart3 } from 'lucide-react';
 import { ONE_TIME_PRODUCTS } from '@/lib/plans';
 
 type ProductKey = keyof typeof ONE_TIME_PRODUCTS;
 
 const PRODUCT_ICONS: Record<ProductKey, React.ReactNode> = {
+  INTELLIGENCE_REPORT: <BarChart3 className="h-5 w-5 text-white" />,
   BRAND_DNA_REPORT: <BookOpen className="h-5 w-5 text-white" />,
   SCORE_BOOST_AUDIT: <Zap className="h-5 w-5 text-white" />,
   ARCHETYPE_DEEP_DIVE: <Sparkles className="h-5 w-5 text-white" />,
 };
 
 const PRODUCT_FEATURES: Record<ProductKey, string[]> = {
+  INTELLIGENCE_REPORT: [
+    'Full archetype profile & phase analysis',
+    'Cohort comparison vs creators like you',
+    'Pattern intelligence from top scorers',
+    'Strengths & growth areas breakdown',
+    'Detailed phase insights',
+  ],
   BRAND_DNA_REPORT: [
     'Full color & typography analysis',
     'Voice fingerprint breakdown',
@@ -35,6 +43,7 @@ const PRODUCT_FEATURES: Record<ProductKey, string[]> = {
 };
 
 const PRODUCT_GRADIENTS: Record<ProductKey, string> = {
+  INTELLIGENCE_REPORT: 'from-blue-600 to-indigo-600',
   BRAND_DNA_REPORT: 'from-blue-500 to-purple-600',
   SCORE_BOOST_AUDIT: 'from-amber-500 to-orange-500',
   ARCHETYPE_DEEP_DIVE: 'from-emerald-500 to-teal-500',

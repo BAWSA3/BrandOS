@@ -138,6 +138,7 @@ export default function ArchetypeCard({
   return (
     <div
       id="archetype-card"
+      data-archetype={archetype}
       style={{
         width: '600px',
         height: '315px',

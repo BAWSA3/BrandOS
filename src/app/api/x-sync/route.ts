@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { createClient } from '@supabase/supabase-js';
 import prisma from '@/lib/db';
+import { fetchUserTweets, isSocialDataConfigured } from '@/lib/socialdata';
+import type { SocialDataTweet } from '@/lib/socialdata';
 
 const SYNC_COOLDOWN_MS = 15 * 60 * 1000; // 15 minutes
 
@@ -75,35 +77,53 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Use app bearer token (provider_token is ephemeral and unreliable after initial OAuth)
-    const token = process.env.X_BEARER_TOKEN;
-    if (!token) {
-      return NextResponse.json({ error: 'X API not configured' }, { status: 500 });
-    }
+    // Fetch tweets: SocialData primary, X API fallback
+    let tweets: SocialDataTweet[] = [];
 
-    const tweetFields = 'id,text,created_at,public_metrics,entities';
-    const url = `https://api.x.com/2/users/${user.xId}/tweets?max_results=20&exclude=replies,retweets&tweet.fields=${tweetFields}`;
-
-    const xResponse = await fetch(url, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-    if (!xResponse.ok) {
-      if (xResponse.status === 403) {
-        return NextResponse.json(
-          {
-            error: 'X API access insufficient. Basic tier or higher required.',
-          },
-          { status: 403 }
-        );
+    if (isSocialDataConfigured()) {
+      const sdResult = await fetchUserTweets(user.xId, 20);
+      if (sdResult.tweets.length > 0) {
+        tweets = sdResult.tweets;
+      } else if (sdResult.error) {
+        console.warn('[x-sync] SocialData failed:', sdResult.error);
       }
-      const errorText = await xResponse.text();
-      console.error('[x-sync] X API error:', xResponse.status, errorText);
-      return NextResponse.json({ error: 'Failed to fetch from X API' }, { status: 502 });
     }
 
-    const data = await xResponse.json();
-    const tweets = data.data || [];
+    // Fallback to X API if SocialData returned nothing
+    if (tweets.length === 0) {
+      const token = process.env.X_BEARER_TOKEN;
+      if (!token) {
+        return NextResponse.json({ error: 'No tweet provider configured' }, { status: 500 });
+      }
+
+      const tweetFields = 'id,text,created_at,public_metrics,entities';
+      const url = `https://api.x.com/2/users/${user.xId}/tweets?max_results=20&exclude=replies,retweets&tweet.fields=${tweetFields}`;
+      const xResponse = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+
+      if (!xResponse.ok) {
+        if (xResponse.status === 403) {
+          return NextResponse.json(
+            { error: 'X API access insufficient and SocialData unavailable.' },
+            { status: 403 }
+          );
+        }
+        const errorText = await xResponse.text();
+        console.error('[x-sync] X API error:', xResponse.status, errorText);
+        return NextResponse.json({ error: 'Failed to fetch tweets' }, { status: 502 });
+      }
+
+      const data = await xResponse.json();
+      // Map X API v2 response to our common format
+      tweets = (data.data || []).map((t: Record<string, unknown>) => ({
+        id: t.id,
+        text: t.text,
+        created_at: t.created_at,
+        public_metrics: t.public_metrics || {
+          like_count: 0, retweet_count: 0, reply_count: 0, quote_count: 0, impression_count: 0,
+        },
+        entities: t.entities,
+      }));
+    }
 
     // Upsert tweets into BrandTweet
     const syncedAt = new Date();

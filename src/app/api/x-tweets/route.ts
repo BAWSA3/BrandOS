@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
+import {
+  fetchTweetsByUsername,
+  fetchUserTweets,
+  isSocialDataConfigured,
+} from '@/lib/socialdata';
 
-// Tweet fields we want to fetch (requires Basic tier)
+// Tweet fields we want to fetch (X API v2 fallback)
 const TWEET_FIELDS = [
   'id',
   'text',
@@ -74,75 +79,69 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Either userId or username is required' }, { status: 400 });
     }
 
-    const bearerToken = process.env.X_BEARER_TOKEN;
+    let tweets: Tweet[] = [];
 
-    if (!bearerToken) {
-      return NextResponse.json({ error: 'X API not configured' }, { status: 500 });
+    // Try SocialData first (budget-friendly, no tier restrictions)
+    if (isSocialDataConfigured()) {
+      let sdResult;
+      if (userId) {
+        sdResult = await fetchUserTweets(userId, maxResults);
+      } else if (username) {
+        sdResult = await fetchTweetsByUsername(username, maxResults);
+      }
+      if (sdResult && sdResult.tweets.length > 0) {
+        tweets = sdResult.tweets;
+      } else if (sdResult?.error) {
+        console.warn('[x-tweets] SocialData failed:', sdResult.error);
+      }
     }
 
-    // If username provided, first get user ID
-    let targetUserId = userId;
-    if (!targetUserId && username) {
-      const userResponse = await fetch(`https://api.twitter.com/2/users/by/username/${username}`, {
-        headers: {
-          Authorization: `Bearer ${bearerToken}`,
-        },
+    // Fallback to X API if SocialData returned nothing
+    if (tweets.length === 0) {
+      const bearerToken = process.env.X_BEARER_TOKEN;
+      if (!bearerToken) {
+        return NextResponse.json({ error: 'No tweet provider configured' }, { status: 500 });
+      }
+
+      let targetUserId = userId;
+      if (!targetUserId && username) {
+        const userResponse = await fetch(`https://api.twitter.com/2/users/by/username/${username}`, {
+          headers: { Authorization: `Bearer ${bearerToken}` },
+        });
+        if (!userResponse.ok) {
+          return NextResponse.json({ error: 'Failed to find user' }, { status: userResponse.status });
+        }
+        const userData = await userResponse.json();
+        targetUserId = userData.data?.id;
+      }
+
+      if (!targetUserId) {
+        return NextResponse.json({ error: 'Could not resolve user ID' }, { status: 400 });
+      }
+
+      const tweetsUrl = `https://api.twitter.com/2/users/${targetUserId}/tweets?max_results=${Math.min(maxResults, 100)}&tweet.fields=${TWEET_FIELDS}&exclude=replies,retweets`;
+      const tweetsResponse = await fetch(tweetsUrl, {
+        headers: { Authorization: `Bearer ${bearerToken}` },
       });
 
-      if (!userResponse.ok) {
-        const error = await userResponse.json();
-        console.error('User lookup error:', error);
-        return NextResponse.json({ error: 'Failed to find user' }, { status: userResponse.status });
+      if (!tweetsResponse.ok) {
+        if (tweetsResponse.status === 403) {
+          return NextResponse.json(
+            { error: 'Tweet access unavailable. Configure SOCIALDATA_API_KEY or upgrade X API tier.' },
+            { status: 403 }
+          );
+        }
+        return NextResponse.json({ error: 'Failed to fetch tweets' }, { status: tweetsResponse.status });
       }
 
-      const userData = await userResponse.json();
-      targetUserId = userData.data?.id;
+      const tweetsData = await tweetsResponse.json();
+      tweets = tweetsData.data || [];
     }
-
-    if (!targetUserId) {
-      return NextResponse.json({ error: 'Could not resolve user ID' }, { status: 400 });
-    }
-
-    // Fetch user's tweets (requires Basic tier)
-    // exclude=replies,retweets to get only original posts for better content pillar analysis
-    const tweetsUrl = `https://api.twitter.com/2/users/${targetUserId}/tweets?max_results=${Math.min(maxResults, 100)}&tweet.fields=${TWEET_FIELDS}&exclude=replies,retweets`;
-
-    const tweetsResponse = await fetch(tweetsUrl, {
-      headers: {
-        Authorization: `Bearer ${bearerToken}`,
-      },
-    });
-
-    if (!tweetsResponse.ok) {
-      const error = await tweetsResponse.json();
-      console.error('Tweets fetch error:', tweetsResponse.status, error);
-
-      // Check for tier-specific errors
-      if (tweetsResponse.status === 403) {
-        return NextResponse.json(
-          {
-            error: 'Tweet access requires X API Basic tier ($100/month)',
-            upgradeRequired: true,
-            upgradeUrl: 'https://developer.twitter.com/en/portal/products',
-          },
-          { status: 403 }
-        );
-      }
-
-      return NextResponse.json(
-        { error: 'Failed to fetch tweets' },
-        { status: tweetsResponse.status }
-      );
-    }
-
-    const tweetsData = await tweetsResponse.json();
-    const tweets: Tweet[] = tweetsData.data || [];
 
     // Analyze tweets
     const analysis = analyzeTweets(tweets);
 
     console.log('=== TWEETS FETCHED ===');
-    console.log(`User ID: ${targetUserId}`);
     console.log(`Tweets retrieved: ${tweets.length}`);
     console.log(`Avg engagement: ${analysis.stats.avgEngagementRate.toFixed(2)}%`);
     console.log('======================');
@@ -150,7 +149,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       tweets,
       analysis,
-      meta: tweetsData.meta,
     });
   } catch (error) {
     console.error('X Tweets API error:', error);
