@@ -26,6 +26,7 @@ const allowedPages = [
   '/audit', // Score Boost Audit — post-purchase results page (/audit/[sessionId])
   '/migrate-account', // Phase 1: legacy user credential migration
   '/dashboard', // Phase 1: authenticated user dashboard
+  '/signup', // Phase 1: new account creation (email/Google/Apple)
 ];
 
 export function middleware(request: NextRequest) {

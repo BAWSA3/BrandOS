@@ -82,8 +82,8 @@ model User {
   id            String    @id @default(cuid())
   supabaseId    String    @unique    // Links to Supabase Auth
   email         String?   @unique    // Optional - for account recovery
-  xUsername     String               // Required - from X OAuth
-  xId           String    @unique    // X user ID
+  xUsername     String?              // From X OAuth — null until X is connected
+  xId           String?   @unique    // X user ID — null until X is connected
   name          String?
   avatar        String?
   isInnerCircle Boolean   @default(false)
