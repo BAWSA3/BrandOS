@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.71.2",
+    "@chenglou/pretext": "^0.0.2",
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
@@ -41,6 +42,7 @@
     "file-saver": "^2.0.5",
     "gsap": "^3.14.2",
     "html2canvas": "^1.4.1",
+    "libsodium-wrappers": "^0.8.3",
     "lucide-react": "^0.562.0",
     "modern-screenshot": "^4.6.7",
     "motion": "^12.23.26",
@@ -72,6 +74,7 @@
     "@tailwindcss/postcss": "^4",
     "@types/dompurify": "^3.0.5",
     "@types/file-saver": "^2.0.7",
+    "@types/libsodium-wrappers": "^0.7.14",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
