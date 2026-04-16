@@ -69,7 +69,7 @@ export async function GET(request: NextRequest) {
     // Build per-user stats
     const userStats = users.map((user) => {
       const session = sessionMap.get(user.id);
-      const invites = inviteMap.get(user.xUsername);
+      const invites = user.xUsername ? inviteMap.get(user.xUsername) : undefined;
       return {
         id: user.id,
         username: user.xUsername,
