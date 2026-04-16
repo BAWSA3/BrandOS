@@ -18,6 +18,7 @@ export interface PlanLimits {
   whiteLabel: boolean;
   customIntegrations: boolean;
   ssoSaml: boolean;
+  intelligenceReport: boolean;
   platforms: number; // number of social platforms
 }
 
@@ -45,9 +46,9 @@ export const PLAN_CONFIGS: Record<SubscriptionTier, PlanConfig> = {
     stripePriceIdAnnual: '',
     limits: {
       brands: 1,
-      checksPerMonth: 10,
-      generationsPerMonth: 5,
-      historyDays: 30,
+      checksPerMonth: 3,
+      generationsPerMonth: 2,
+      historyDays: 7,
       teamMembers: 1,
       apiAccess: false,
       voiceFingerprint: false,
@@ -58,6 +59,7 @@ export const PLAN_CONFIGS: Record<SubscriptionTier, PlanConfig> = {
       whiteLabel: false,
       customIntegrations: false,
       ssoSaml: false,
+      intelligenceReport: false,
       platforms: 1,
     },
   },
@@ -86,6 +88,7 @@ export const PLAN_CONFIGS: Record<SubscriptionTier, PlanConfig> = {
       whiteLabel: false,
       customIntegrations: false,
       ssoSaml: false,
+      intelligenceReport: false,
       platforms: 1,
     },
   },
@@ -113,6 +116,7 @@ export const PLAN_CONFIGS: Record<SubscriptionTier, PlanConfig> = {
       whiteLabel: false,
       customIntegrations: false,
       ssoSaml: false,
+      intelligenceReport: true,
       platforms: 3,
     },
   },
@@ -120,8 +124,8 @@ export const PLAN_CONFIGS: Record<SubscriptionTier, PlanConfig> = {
     tier: 'AGENCY',
     name: 'Agency',
     description: 'For agencies and multi-brand companies',
-    monthlyPrice: 149,
-    annualPrice: 119,
+    monthlyPrice: 99,
+    annualPrice: 79,
     stripePriceIdMonthly: process.env.STRIPE_PRICE_AGENCY_MONTHLY || '',
     stripePriceIdAnnual: process.env.STRIPE_PRICE_AGENCY_ANNUAL || '',
     limits: {
@@ -139,6 +143,7 @@ export const PLAN_CONFIGS: Record<SubscriptionTier, PlanConfig> = {
       whiteLabel: true,
       customIntegrations: true,
       ssoSaml: false,
+      intelligenceReport: true,
       platforms: 5,
     },
   },
@@ -165,6 +170,7 @@ export const PLAN_CONFIGS: Record<SubscriptionTier, PlanConfig> = {
       whiteLabel: true,
       customIntegrations: true,
       ssoSaml: true,
+      intelligenceReport: true,
       platforms: -1,
     },
   },
@@ -198,7 +204,93 @@ export function normalizeTier(tier: SubscriptionTier): SubscriptionTier {
   return tier === 'CREATOR' ? 'FREE' : tier;
 }
 
+// ===== Phase 1: DB-driven plan limits (replaces PLAN_CONFIGS at cutover) =====
+
+import prisma from '@/lib/db';
+import type { PlanTier, PlanLimit } from '@prisma/client';
+
+export type { PlanTier };
+
+export const PLAN_TIERS = ['FREE', 'PRO', 'MAX', 'TEAM', 'ENTERPRISE'] as const;
+
+export const PLAN_PRICING: Record<PlanTier, { monthly: number; annual: number; perSeat?: boolean; minSeats?: number }> = {
+  FREE: { monthly: 0, annual: 0 },
+  PRO: { monthly: 20, annual: 16 },
+  MAX: { monthly: 80, annual: 64 },
+  TEAM: { monthly: 25, annual: 20, perSeat: true, minSeats: 5 },
+  ENTERPRISE: { monthly: -1, annual: -1 },
+};
+
+let cachedPlanLimits: Map<PlanTier, PlanLimit> | null = null;
+let cacheTimestamp = 0;
+const CACHE_TTL_MS = 5 * 60 * 1000;
+
+export async function getPlanLimitsFromDB(plan: PlanTier): Promise<PlanLimit | null> {
+  if (cachedPlanLimits && Date.now() - cacheTimestamp < CACHE_TTL_MS) {
+    return cachedPlanLimits.get(plan) ?? null;
+  }
+
+  try {
+    const allLimits = await prisma.planLimit.findMany();
+    cachedPlanLimits = new Map(allLimits.map((l) => [l.plan, l]));
+    cacheTimestamp = Date.now();
+    return cachedPlanLimits.get(plan) ?? null;
+  } catch (error) {
+    console.error('[Plans] Failed to load plan limits from DB:', error);
+    return null;
+  }
+}
+
+export function computeWorkspaceDailyCap(limits: PlanLimit, seatCount: number, isTeam: boolean): number {
+  return isTeam ? limits.scansPerDay * seatCount : limits.scansPerDay;
+}
+
+export function computeXAccountCap(limits: PlanLimit, seatCount: number, isTeam: boolean): number {
+  return isTeam ? limits.xAccountsPerSeat * seatCount : limits.xAccountsPerSeat;
+}
+
+export function isFeatureEnabled(limits: PlanLimit, feature: 'multiPlatform' | 'competitorWatchlist' | 'scheduledRescans' | 'priorityQueue'): boolean {
+  switch (feature) {
+    case 'multiPlatform': return limits.multiPlatformEnabled;
+    case 'competitorWatchlist': return limits.competitorWatchlistEnabled;
+    case 'scheduledRescans': return limits.scheduledRescansEnabled;
+    case 'priorityQueue': return limits.priorityQueueEnabled;
+  }
+}
+
+export const PAID_PLAN_TIERS: PlanTier[] = ['PRO', 'MAX', 'TEAM', 'ENTERPRISE'];
+
+export function isPaidPlan(plan: PlanTier): boolean {
+  return plan !== 'FREE';
+}
+
+export function isAtLeastPro(plan: PlanTier): boolean {
+  return plan !== 'FREE';
+}
+
+export function isTeamPlan(plan: PlanTier): boolean {
+  return plan === 'TEAM' || plan === 'ENTERPRISE';
+}
+
+// Map legacy SubscriptionTier → PlanTier for migration period
+export function legacyTierToPlanTier(tier: SubscriptionTier): PlanTier {
+  switch (tier) {
+    case 'CREATOR': return 'FREE';
+    case 'AGENCY': return 'TEAM';
+    default: return tier as PlanTier;
+  }
+}
+
+// ===== One-time products (unchanged — à la carte per Q3 decision) =====
+
 export const ONE_TIME_PRODUCTS = {
+  INTELLIGENCE_REPORT: {
+    name: 'Intelligence Report',
+    description:
+      'Your complete brand breakdown — archetype profile, phase analysis, cohort comparison, pattern intelligence, and actionable insights. See how you rank against creators like you and what top scorers did to break through.',
+    price: 4.99,
+    stripePriceId: process.env.STRIPE_PRICE_INTELLIGENCE_REPORT || '',
+  },
   BRAND_DNA_REPORT: {
     name: 'Brand DNA Deep-Dive Report',
     description:
