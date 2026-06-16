@@ -27,6 +27,7 @@ const allowedPages = [
   '/migrate-account', // Phase 1: legacy user credential migration
   '/dashboard', // Phase 1: authenticated user dashboard
   '/signup', // Phase 1: new account creation (email/Google/Apple)
+  '/world-preview', // V2 worlds: unauthenticated theme preview (dev)
 ];
 
 export function middleware(request: NextRequest) {
