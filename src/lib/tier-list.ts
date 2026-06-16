@@ -17,10 +17,31 @@ const BOT_PATTERNS = [
   /\d{8,}/,
 ];
 
+const EMPTY_TIERS = {
+  tierUsers: [] as TierUser[],
+  tiers: {
+    elite: [] as TierUser[],
+    strong: [] as TierUser[],
+    rising: [] as TierUser[],
+  },
+};
+
 export async function getTierListData() {
-  const scans = await prisma.brandScans.findMany({
-    orderBy: { score: 'desc' },
-  });
+  let scans: Awaited<ReturnType<typeof prisma.brandScans.findMany>>;
+  let cachedProfiles: Awaited<ReturnType<typeof prisma.xProfileCache.findMany>>;
+
+  // The DB can be briefly unreachable (e.g. during a build-time prerender
+  // before Supabase has fully woken up). Don't let that fail the whole build —
+  // return empty tiers and let ISR backfill once the DB is reachable.
+  try {
+    scans = await prisma.brandScans.findMany({
+      orderBy: { score: 'desc' },
+    });
+    cachedProfiles = await prisma.xProfileCache.findMany();
+  } catch (error) {
+    console.error('[tier-list] Database unavailable; returning empty tiers:', error);
+    return EMPTY_TIERS;
+  }
 
   // Dedupe by username — keep highest score
   const userMap = new Map<string, (typeof scans)[0]>();
@@ -32,7 +53,6 @@ export async function getTierListData() {
   }
 
   // Get cached profile pictures
-  const cachedProfiles = await prisma.xProfileCache.findMany();
   const profileMap = new Map<string, string>();
 
   for (const profile of cachedProfiles) {
