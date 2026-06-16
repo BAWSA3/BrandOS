@@ -129,6 +129,7 @@ model User {
   brandScans          BrandScan[]
   auditReportShares   AuditReportShare[]
   securityAuditEvents SecurityAuditLog[]
+  dailyBriefs         DailyBrief[]
 
   @@index([xUsername])
   @@index([stripeCustomerId])
@@ -948,6 +949,7 @@ model Workspace {
   brandScans           BrandScan[]
   auditReportShares    AuditReportShare[]
   securityAuditEvents  SecurityAuditLog[]
+  dailyBriefs          DailyBrief[]
 
   @@index([ownerUserId])
   @@map("Workspace")
@@ -1073,5 +1075,32 @@ model SecurityAuditLog {
   @@index([category, createdAt(sort: Desc)])
   @@index([createdAt])
   @@map("SecurityAuditLog")
+}
+
+model DailyBrief {
+  id                  String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId              String     @map("user_id")
+  user                User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspaceId         String     @map("workspace_id") @db.Uuid
+  workspace           Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  briefDate           DateTime   @map("brief_date") @db.Date
+  sourceBrandScanId   String?    @map("source_brand_scan_id") @db.Uuid
+
+  archetype           String
+  scoreAtGeneration   Int        @map("score_at_generation")
+  weakestPhase        String     @map("weakest_phase")
+  weakestPhaseScore   Int        @map("weakest_phase_score")
+
+  idea                String
+  action              String
+
+  completedAt         DateTime?  @map("completed_at") @db.Timestamptz
+  createdAt           DateTime   @default(now()) @map("created_at") @db.Timestamptz
+
+  @@unique([userId, briefDate])
+  @@index([userId, briefDate(sort: Desc)])
+  @@index([workspaceId])
+  @@map("DailyBrief")
 }
 

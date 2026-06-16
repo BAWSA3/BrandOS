@@ -21,7 +21,10 @@ function detectProvider(session: { user: { app_metadata?: { provider?: string } 
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get('code');
-  const next = requestUrl.searchParams.get('next') || '/dashboard';
+  const rawNext = requestUrl.searchParams.get('next');
+  // Only allow same-origin relative paths to prevent open-redirect.
+  const next =
+    rawNext && rawNext.startsWith('/') && !rawNext.startsWith('//') ? rawNext : '/dashboard';
 
   if (!code) {
     return NextResponse.redirect(new URL('/?error=no_code', request.url));
