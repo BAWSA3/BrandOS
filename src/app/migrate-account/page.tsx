@@ -13,6 +13,9 @@ import MigrateAccountClient from './MigrateAccountClient';
  *
  * See: docs/PHASE-1-SCHEMA.md (Impl-2)
  */
+// Auth-gated page: render per-request, never statically prerender at build.
+export const dynamic = 'force-dynamic';
+
 export default async function MigrateAccountPage() {
   const user = await getCurrentUser();
 

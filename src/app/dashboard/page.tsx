@@ -2,6 +2,9 @@ import { redirect } from 'next/navigation';
 import { getCurrentUser, getCurrentWorkspace } from '@/lib/auth';
 import DashboardClient from './DashboardClient';
 
+// Auth-gated page: render per-request, never statically prerender at build.
+export const dynamic = 'force-dynamic';
+
 export default async function DashboardPage() {
   const user = await getCurrentUser();
 
