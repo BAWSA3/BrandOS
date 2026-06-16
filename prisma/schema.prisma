@@ -938,6 +938,11 @@ model Workspace {
   createdAt            DateTime       @default(now()) @map("created_at") @db.Timestamptz
   updatedAt            DateTime       @updatedAt @map("updated_at") @db.Timestamptz
 
+  // Themed worlds — registry id for starter worlds, FK for paid custom worlds
+  activeWorldId        String?        @map("active_world_id")
+  customWorldId        String?        @unique @map("custom_world_id") @db.Uuid
+  customWorld          CustomWorld?   @relation(fields: [customWorldId], references: [id], onDelete: SetNull)
+
   members              WorkspaceMember[]
   platformConnections  PlatformConnection[]
   brandScans           BrandScan[]
@@ -946,6 +951,21 @@ model Workspace {
 
   @@index([ownerUserId])
   @@map("Workspace")
+}
+
+model CustomWorld {
+  id           String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workspaceId  String     @unique @map("workspace_id") @db.Uuid
+  baseWorldId  String     @map("base_world_id")
+  manifest     Json       @default("{}")
+  name         String     @default("My World")
+  createdAt    DateTime   @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt    DateTime   @updatedAt @map("updated_at") @db.Timestamptz
+
+  workspace    Workspace?
+
+  @@index([workspaceId])
+  @@map("CustomWorld")
 }
 
 model WorkspaceMember {
@@ -974,6 +994,8 @@ model PlanLimit {
   auditSummaryMaxChars         Int       @default(800) @map("audit_summary_max_chars")
   maxStrengths                 Int       @default(3) @map("max_strengths")
   maxImprovements              Int       @default(3) @map("max_improvements")
+  customWorldBuilderEnabled    Boolean   @default(false) @map("custom_world_builder_enabled")
+  premiumWorldsEnabled         Boolean   @default(false) @map("premium_worlds_enabled")
 
   @@map("PlanLimit")
 }
@@ -1024,6 +1046,7 @@ model AuditReportShare {
   revokedAt         DateTime?  @map("revoked_at") @db.Timestamptz
   viewCount         Int        @default(0) @map("view_count")
   uniqueViewerCount Int        @default(0) @map("unique_viewer_count")
+  worldIdAtShare    String?    @map("world_id_at_share")
   createdAt         DateTime   @default(now()) @map("created_at") @db.Timestamptz
 
   @@index([token])

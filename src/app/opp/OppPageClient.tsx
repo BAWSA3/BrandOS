@@ -504,45 +504,118 @@ export default function OppPageClient() {
                 </motion.div>
               )}
 
-              {/* Shareable Card */}
+              {/* Shareable Card — Boxing Scorecard */}
               <div ref={cardRef}
-                style={{ width: '600px', height: '340px', background: '#060A0F', padding: '20px 24px', borderRadius: '4px', border: '1px solid rgba(0,255,136,0.15)', fontFamily: MONO, color: '#fff', position: 'relative', overflow: 'hidden', marginBottom: '24px', boxSizing: 'border-box' }}>
-                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundImage: 'linear-gradient(rgba(0,255,136,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(0,255,136,0.02) 1px, transparent 1px)', backgroundSize: '20px 20px', pointerEvents: 'none' }} />
-                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'repeating-linear-gradient(0deg, rgba(0,0,0,0.08) 0px, rgba(0,0,0,0.08) 1px, transparent 1px, transparent 3px)', pointerEvents: 'none' }} />
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', position: 'relative' }}>
+                style={{ width: '600px', height: '420px', background: '#0B1018', borderRadius: '4px', border: '1px solid rgba(0,255,136,0.15)', fontFamily: MONO, color: '#fff', position: 'relative', overflow: 'hidden', marginBottom: '24px', boxSizing: 'border-box', display: 'flex', flexDirection: 'column' }}>
+                {/* Subtle scanline only — no grid */}
+                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'repeating-linear-gradient(0deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 3px)', pointerEvents: 'none' }} />
+
+                {/* Card header */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 20px', position: 'relative', borderBottom: '1px solid rgba(0,255,136,0.08)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#00FF88' }} />
                     <span style={{ color: '#00FF88', fontSize: '8px', letterSpacing: '0.2em' }}>BRANDOS</span>
                     <span style={{ color: 'rgba(0,255,136,0.2)', fontSize: '8px' }}>│</span>
-                    <span style={{ color: 'rgba(0,255,136,0.5)', fontSize: '8px', letterSpacing: '0.12em' }}>OPP INTEL REPORT</span>
+                    <span style={{ color: 'rgba(0,255,136,0.5)', fontSize: '8px', letterSpacing: '0.12em' }}>OPP SCORECARD</span>
                   </div>
                   <span style={{ color: 'rgba(0,255,136,0.3)', fontSize: '7px', letterSpacing: '0.1em' }}>mybrandos.app/opp</span>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', position: 'relative' }}>
-                  <CardDossier user={result.user1} side="left" />
-                  <span style={{ color: '#FF3333', fontSize: '18px', fontWeight: 700, letterSpacing: '0.15em', textShadow: '0 0 20px rgba(255,51,51,0.3)' }}>VS</span>
-                  <CardDossier user={result.user2} side="right" />
+
+                {/* Fighter portraits + VS — centered vertically */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px 28px 16px', position: 'relative', flex: '0 0 auto', gap: '24px' }}>
+                  {/* Left fighter */}
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '160px' }}>
+                    {result.user1.profile.profile_image_url && (
+                      <img src={result.user1.profile.profile_image_url} alt={result.user1.profile.username} crossOrigin="anonymous"
+                        style={{ width: '100px', height: '100px', borderRadius: '8px', border: `3px solid ${getThreatLevel(result.user1.score).color}`, marginBottom: '10px', objectFit: 'cover' }} />
+                    )}
+                    <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '10px', letterSpacing: '0.08em', marginBottom: '4px' }}>@{result.user1.profile.username}</div>
+                    <div style={{ color: getThreatLevel(result.user1.score).color, fontSize: '36px', fontWeight: 700, lineHeight: '1' }}>{result.user1.score}</div>
+                    <div style={{ display: 'flex', gap: '6px', alignItems: 'center', marginTop: '4px' }}>
+                      <span style={{ color: '#00FF88', fontSize: '7px', letterSpacing: '0.08em', textTransform: 'uppercase' }}>{result.user1.archetype}</span>
+                      <span style={{ color: 'rgba(255,255,255,0.15)', fontSize: '7px' }}>│</span>
+                      <span style={{ color: getThreatLevel(result.user1.score).color, fontSize: '7px', letterSpacing: '0.08em' }}>{getThreatLevel(result.user1.score).label}</span>
+                    </div>
+                  </div>
+
+                  {/* VS center */}
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <span style={{ color: '#FF3333', fontSize: '28px', fontWeight: 700, letterSpacing: '0.15em', textShadow: '0 0 24px rgba(255,51,51,0.4)' }}>VS</span>
+                  </div>
+
+                  {/* Right fighter */}
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '160px' }}>
+                    {result.user2.profile.profile_image_url && (
+                      <img src={result.user2.profile.profile_image_url} alt={result.user2.profile.username} crossOrigin="anonymous"
+                        style={{ width: '100px', height: '100px', borderRadius: '8px', border: `3px solid ${getThreatLevel(result.user2.score).color}`, marginBottom: '10px', objectFit: 'cover' }} />
+                    )}
+                    <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '10px', letterSpacing: '0.08em', marginBottom: '4px' }}>@{result.user2.profile.username}</div>
+                    <div style={{ color: getThreatLevel(result.user2.score).color, fontSize: '36px', fontWeight: 700, lineHeight: '1' }}>{result.user2.score}</div>
+                    <div style={{ display: 'flex', gap: '6px', alignItems: 'center', marginTop: '4px' }}>
+                      <span style={{ color: '#00FF88', fontSize: '7px', letterSpacing: '0.08em', textTransform: 'uppercase' }}>{result.user2.archetype}</span>
+                      <span style={{ color: 'rgba(255,255,255,0.15)', fontSize: '7px' }}>│</span>
+                      <span style={{ color: getThreatLevel(result.user2.score).color, fontSize: '7px', letterSpacing: '0.08em' }}>{getThreatLevel(result.user2.score).label}</span>
+                    </div>
+                  </div>
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', marginBottom: '12px', position: 'relative' }}>
+
+                {/* Divider */}
+                <div style={{ margin: '0 20px', height: '1px', background: 'linear-gradient(90deg, transparent, rgba(0,255,136,0.2), rgba(255,51,51,0.2), rgba(0,255,136,0.2), transparent)', position: 'relative' }} />
+
+                {/* Boxing Scorecard — centered phase breakdown */}
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '10px 40px', position: 'relative' }}>
+                  {/* Scorecard header row */}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '8px' }}>
+                    <span style={{ color: 'rgba(0,255,136,0.3)', fontSize: '7px', letterSpacing: '0.15em' }}>PHASE SCORECARD</span>
+                  </div>
+
+                  {/* Column labels */}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0', marginBottom: '6px' }}>
+                    <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: '7px', letterSpacing: '0.08em', width: '60px', textAlign: 'right' }}>@{result.user1.profile.username.slice(0, 7).toUpperCase()}</span>
+                    <span style={{ width: '100px', textAlign: 'center', color: 'rgba(0,255,136,0.3)', fontSize: '7px', letterSpacing: '0.1em' }}>ROUND</span>
+                    <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: '7px', letterSpacing: '0.08em', width: '60px' }}>@{result.user2.profile.username.slice(0, 7).toUpperCase()}</span>
+                  </div>
+
+                  {/* Phase rows — boxing scorecard style */}
                   {PHASES.map((phase) => {
-                    const s1 = result.user1.phases[phase.key]; const s2 = result.user2.phases[phase.key]; const w = s1 >= s2 ? 'left' : 'right';
+                    const s1 = result.user1.phases[phase.key];
+                    const s2 = result.user2.phases[phase.key];
+                    const leftWins = s1 > s2;
+                    const rightWins = s2 > s1;
+                    const tie = s1 === s2;
                     return (
-                      <div key={phase.key} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <span style={{ color: 'rgba(0,255,136,0.5)', fontSize: '7px', letterSpacing: '0.08em', width: '55px' }}>{phase.icon} {phase.label}</span>
-                        <span style={{ color: w === 'left' ? '#00FF88' : 'rgba(255,255,255,0.2)', fontSize: '8px', letterSpacing: '0.02em' }}>{renderHPBar(s1, 100, 10)}</span>
-                        <span style={{ color: '#fff', fontSize: '8px', fontWeight: w === 'left' ? 700 : 400, width: '18px', textAlign: 'right' }}>{s1}</span>
-                        <span style={{ color: 'rgba(255,51,51,0.3)', fontSize: '7px' }}>│</span>
-                        <span style={{ color: '#fff', fontSize: '8px', fontWeight: w === 'right' ? 700 : 400, width: '18px' }}>{s2}</span>
-                        <span style={{ color: w === 'right' ? '#00FF88' : 'rgba(255,255,255,0.2)', fontSize: '8px', letterSpacing: '0.02em' }}>{renderHPBar(s2, 100, 10)}</span>
+                      <div key={phase.key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0', marginBottom: '3px' }}>
+                        <div style={{
+                          width: '60px', textAlign: 'right', paddingRight: '12px',
+                          color: leftWins ? '#00FF88' : tie ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.25)',
+                          fontSize: '14px', fontWeight: leftWins ? 700 : 400,
+                        }}>
+                          {s1}
+                        </div>
+                        <div style={{
+                          width: '100px', textAlign: 'center',
+                          padding: '4px 0',
+                          borderTop: '1px solid rgba(0,255,136,0.06)',
+                          borderBottom: '1px solid rgba(0,255,136,0.06)',
+                          background: 'rgba(0,255,136,0.03)',
+                        }}>
+                          <span style={{ color: 'rgba(0,255,136,0.5)', fontSize: '9px', letterSpacing: '0.12em' }}>{phase.icon} {phase.label}</span>
+                        </div>
+                        <div style={{
+                          width: '60px', paddingLeft: '12px',
+                          color: rightWins ? '#00FF88' : tie ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.25)',
+                          fontSize: '14px', fontWeight: rightWins ? 700 : 400,
+                        }}>
+                          {s2}
+                        </div>
                       </div>
                     );
                   })}
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 12px', background: 'rgba(0,255,136,0.05)', border: '1px solid rgba(0,255,136,0.15)', borderRadius: '2px', position: 'relative' }}>
-                  <span style={{ color: '#00FF88', fontSize: '7px', letterSpacing: '0.15em' }}>⊕ VERDICT</span>
-                  <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: '8px', maxWidth: '380px', textAlign: 'right', lineHeight: '1.4' }}>
-                    {result.roast.verdict.line.length > 100 ? result.roast.verdict.line.slice(0, 100) + '...' : result.roast.verdict.line}
-                  </span>
+
+                {/* Card footer */}
+                <div style={{ display: 'flex', justifyContent: 'center', padding: '8px 20px 12px', position: 'relative' }}>
+                  <span style={{ color: 'rgba(0,255,136,0.2)', fontSize: '7px', letterSpacing: '0.12em' }}>FIND YOUR OPP → MYBRANDOS.APP/OPP</span>
                 </div>
               </div>
 
