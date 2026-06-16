@@ -124,7 +124,8 @@ SSO / SAML.
 
 - Original: **first paying customer by end of April 2026.**
 - Revised in `SECURITY-HARDENING.md` (2026-04-13): _"End-of-April target is no longer realistic — re-aim at mid-to-late May."_
-- **Reality (2026-06-15): mid/late May has also passed.** No commits since 2026-04-20. The goal needs to be consciously re-set with a current date and a clear definition of "green enough to take money."
+- **Reality (2026-06-15): mid/late May has also passed.** No commits since 2026-04-20.
+- **Re-anchored 2026-06-15:** adopted a reduced "minimum safe bar" instead of the full 9-phase gate. **New target: first paying customer by ~2026-07-13.** See `MINIMUM-LAUNCH-BAR.md` for the scoped 4-week plan (what's in-scope, what's deferred post-revenue, and the funnel tripwire).
 - Constraints unchanged: solo founder, ~$25k debt, runway in months, $15–20k/mo target, no paid marketing. (See `CONSTRAINTS.md`.)
 
 ---
