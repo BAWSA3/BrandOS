@@ -60,6 +60,17 @@ CONSTRAINTS ("one bet per week").
 Revisit if: it isn't pulling its weight on activation/retention by the
 time the account model merges.
 
+## 2026-04-13 — Drop partner API + Kreatorsverse; scanning becomes own-handle-only
+Per SECURITY-HARDENING.md resolved decisions: "No partner API for now.
+Kreatorsverse engagement dropped." The /api/v1 cross-handle key path is
+removed in Phase 2 — you must sign in to BrandOS AND connect the target
+X handle via OAuth to scan it (kills the impersonation vector).
+Trade-off: removes the "API is the B2B wedge" thesis and the named
+enterprise prospect; raises free-scan friction (account + X OAuth now
+required, vs. the unauthenticated handle-entry that drove 5,400 wk-1 scans).
+Revisit if: a concrete B2B buyer reappears, or the auth-gate tanks
+top-of-funnel scan volume (watch activation after Phase 2).
+
 ## 2026-04 — Onchain attestations (EAS on Avalanche/Base)
 Added OnchainAttestation model + /api/onchain/* to attest brand-dna,
 content, score, and health onchain. User.walletAddress added.

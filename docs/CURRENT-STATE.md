@@ -36,7 +36,7 @@ The product on `main` still matches the April snapshot. But roughly **two months
 - **Shareable cards** (`/card`, `/test-cards`): PFP-embedded score cards via image proxy.
 
 ### B2B / platform
-- **Public API v1** (`/api/v1/*`): DB-backed keys (`ApiKey`, `ApiUsageLog`), tiered rate limits. Endpoints: `score`, `archetypes`, `batch`, `history`, `keys`, `leaderboard`, `profile`, `usage`. Docs at `/api-docs`.
+- **Public API v1** (`/api/v1/*`): DB-backed keys (`ApiKey`, `ApiUsageLog`), tiered rate limits. Endpoints: `score`, `archetypes`, `batch`, `history`, `keys`, `leaderboard`, `profile`, `usage`. Docs at `/api-docs`. ⚠️ **The hardening plan removes the partner/cross-handle API path in Phase 2** (`SECURITY-HARDENING.md`) — scanning becomes auth-required + own-handle-only. The public B2B API is effectively being deprecated, not extended.
 - **Enterprise page**: `/enterprise`.
 
 ### Monetization primitives (live but adoption unknown)
@@ -130,7 +130,7 @@ SSO / SAML.
 ---
 
 ## Known active workstreams / context
-- **B2B lead: Kreatorsverse** — first enterprise prospect (AI creator platform, 6K+ creators) evaluating API integration.
+- **Kreatorsverse (B2B lead) — DROPPED.** Per `SECURITY-HARDENING.md` resolved decisions (2026-04-13): "No partner API for now. Kreatorsverse engagement dropped." The cross-handle API key path is removed in Phase 2. (The April snapshot listed this as the active enterprise prospect; it is no longer.)
 - **Content/voice system** (`docs/content/*` + `scripts/extract-voice.ts`, `send-newsletter.ts`) — voice extraction, audience, content meta-tracking for `@BawsaXBT` / `@BrandOS`.
 - **Investor/strategy deck**: `docs/01-21*.md` (executive summary → investor summary), `GROWTH-PLAN-33K-TO-50K.md`, `BRAND-GROWTH-SYSTEM.md`, `BRANDOS-WORKFLOW-MAP.md`.
 
