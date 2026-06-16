@@ -35,19 +35,12 @@ export async function GET(request: NextRequest) {
     return 'LOW RISK';
   }
 
-  function renderBar(value: number, width: number = 12) {
-    const filled = Math.round((value / 100) * width);
-    return '\u2588'.repeat(filled) + '\u2591'.repeat(width - filled);
-  }
-
   const phases = [
     { label: '◎ DEFINE', l: d1, r: d2 },
     { label: '◈ CHECK', l: c1, r: c2 },
     { label: '◆ GENERATE', l: g1, r: g2 },
     { label: '◉ SCALE', l: sc1, r: sc2 },
   ];
-
-  const winner = s1 >= s2 ? u1 : u2;
 
   return new ImageResponse(
     <div
@@ -57,7 +50,6 @@ export async function GET(request: NextRequest) {
         background: '#060A0F',
         display: 'flex',
         flexDirection: 'column',
-        padding: '36px 52px',
         fontFamily: 'monospace',
         position: 'relative',
       }}
@@ -66,265 +58,120 @@ export async function GET(request: NextRequest) {
       <div
         style={{
           position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundImage:
-            'linear-gradient(rgba(0,255,136,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0,255,136,0.03) 1px, transparent 1px)',
+          top: 0, left: 0, right: 0, bottom: 0,
+          backgroundImage: 'linear-gradient(rgba(0,255,136,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0,255,136,0.03) 1px, transparent 1px)',
           backgroundSize: '30px 30px',
           display: 'flex',
         }}
       />
-
-      {/* Scanline overlay */}
+      {/* Scanline */}
       <div
         style={{
           position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background:
-            'repeating-linear-gradient(0deg, rgba(0,0,0,0.08) 0px, rgba(0,0,0,0.08) 1px, transparent 1px, transparent 3px)',
+          top: 0, left: 0, right: 0, bottom: 0,
+          background: 'repeating-linear-gradient(0deg, rgba(0,0,0,0.08) 0px, rgba(0,0,0,0.08) 1px, transparent 1px, transparent 3px)',
           display: 'flex',
         }}
       />
 
       {/* Header */}
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '12px',
-          paddingBottom: '12px',
-          borderBottom: '1px solid rgba(0,255,136,0.1)',
-        }}
-      >
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 48px', borderBottom: '1px solid rgba(0,255,136,0.1)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#00FF88', display: 'flex' }} />
-          <div style={{ color: '#00FF88', fontSize: '13px', letterSpacing: '0.2em', display: 'flex' }}>
-            BRANDOS
-          </div>
-          <div style={{ color: 'rgba(0,255,136,0.2)', fontSize: '13px', display: 'flex' }}>│</div>
-          <div style={{ color: 'rgba(0,255,136,0.5)', fontSize: '12px', letterSpacing: '0.15em', display: 'flex' }}>
-            OPP INTEL REPORT
-          </div>
+          <div style={{ color: '#00FF88', fontSize: '14px', letterSpacing: '0.2em', display: 'flex' }}>BRANDOS</div>
+          <div style={{ color: 'rgba(0,255,136,0.2)', fontSize: '14px', display: 'flex' }}>│</div>
+          <div style={{ color: 'rgba(0,255,136,0.5)', fontSize: '13px', letterSpacing: '0.15em', display: 'flex' }}>OPP SCORECARD</div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <div style={{ color: 'rgba(255,51,51,0.5)', fontSize: '10px', letterSpacing: '0.15em', display: 'flex' }}>
-            ■ CLASSIFIED
-          </div>
-          <div style={{ color: 'rgba(0,255,136,0.3)', fontSize: '11px', letterSpacing: '0.1em', display: 'flex' }}>
-            mybrandos.app/opp
-          </div>
+          <div style={{ color: 'rgba(255,51,51,0.5)', fontSize: '11px', letterSpacing: '0.15em', display: 'flex' }}>■ CLASSIFIED</div>
+          <div style={{ color: 'rgba(0,255,136,0.3)', fontSize: '11px', letterSpacing: '0.1em', display: 'flex' }}>mybrandos.app/opp</div>
         </div>
       </div>
 
-      {/* Head to Head */}
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '24px',
-        }}
-      >
-        {/* Agent 1 */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '300px' }}>
-          <div style={{ color: 'rgba(0,255,136,0.3)', fontSize: '9px', letterSpacing: '0.2em', marginBottom: '6px', display: 'flex' }}>
-            AGENT
+      {/* Fighter portraits + VS */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '28px 80px 20px', flex: '0 0 auto' }}>
+        {/* Left fighter */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '280px' }}>
+          <div style={{ width: '120px', height: '120px', borderRadius: '12px', border: `3px solid ${threatColor(s1)}`, background: 'rgba(0,255,136,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '12px' }}>
+            <div style={{ color: 'rgba(0,255,136,0.3)', fontSize: '40px', display: 'flex' }}>◉</div>
           </div>
-          <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '14px', letterSpacing: '0.1em', marginBottom: '8px', display: 'flex' }}>
-            @{u1}
-          </div>
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexDirection: 'column',
-              marginBottom: '6px',
-            }}
-          >
-            <div style={{ color: threatColor(s1), fontSize: '48px', fontWeight: 700, display: 'flex' }}>
-              {s1}
-            </div>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <div
-              style={{
-                color: '#00FF88',
-                fontSize: '12px',
-                letterSpacing: '0.08em',
-                textTransform: 'uppercase' as const,
-                display: 'flex',
-              }}
-            >
-              {a1}
-            </div>
+          <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '16px', letterSpacing: '0.1em', marginBottom: '6px', display: 'flex' }}>@{u1}</div>
+          <div style={{ color: threatColor(s1), fontSize: '52px', fontWeight: 700, lineHeight: '1', display: 'flex' }}>{s1}</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '6px' }}>
+            <div style={{ color: '#00FF88', fontSize: '12px', letterSpacing: '0.08em', display: 'flex' }}>{a1.toUpperCase()}</div>
             <div style={{ color: 'rgba(255,255,255,0.15)', fontSize: '10px', display: 'flex' }}>│</div>
-            <div style={{ color: threatColor(s1), fontSize: '10px', letterSpacing: '0.1em', display: 'flex' }}>
-              {threatLabel(s1)}
-            </div>
+            <div style={{ color: threatColor(s1), fontSize: '11px', letterSpacing: '0.1em', display: 'flex' }}>{threatLabel(s1)}</div>
           </div>
         </div>
 
         {/* VS */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
-          <div
-            style={{
-              color: '#FF3333',
-              fontSize: '36px',
-              fontWeight: 700,
-              letterSpacing: '0.15em',
-              display: 'flex',
-            }}
-          >
-            VS
-          </div>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <div style={{ color: '#FF3333', fontSize: '44px', fontWeight: 700, letterSpacing: '0.15em', display: 'flex' }}>VS</div>
         </div>
 
-        {/* Agent 2 */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '300px' }}>
-          <div style={{ color: 'rgba(0,255,136,0.3)', fontSize: '9px', letterSpacing: '0.2em', marginBottom: '6px', display: 'flex' }}>
-            TARGET
+        {/* Right fighter */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '280px' }}>
+          <div style={{ width: '120px', height: '120px', borderRadius: '12px', border: `3px solid ${threatColor(s2)}`, background: 'rgba(0,255,136,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '12px' }}>
+            <div style={{ color: 'rgba(0,255,136,0.3)', fontSize: '40px', display: 'flex' }}>◉</div>
           </div>
-          <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '14px', letterSpacing: '0.1em', marginBottom: '8px', display: 'flex' }}>
-            @{u2}
-          </div>
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexDirection: 'column',
-              marginBottom: '6px',
-            }}
-          >
-            <div style={{ color: threatColor(s2), fontSize: '48px', fontWeight: 700, display: 'flex' }}>
-              {s2}
-            </div>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <div
-              style={{
-                color: '#00FF88',
-                fontSize: '12px',
-                letterSpacing: '0.08em',
-                textTransform: 'uppercase' as const,
-                display: 'flex',
-              }}
-            >
-              {a2}
-            </div>
+          <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '16px', letterSpacing: '0.1em', marginBottom: '6px', display: 'flex' }}>@{u2}</div>
+          <div style={{ color: threatColor(s2), fontSize: '52px', fontWeight: 700, lineHeight: '1', display: 'flex' }}>{s2}</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '6px' }}>
+            <div style={{ color: '#00FF88', fontSize: '12px', letterSpacing: '0.08em', display: 'flex' }}>{a2.toUpperCase()}</div>
             <div style={{ color: 'rgba(255,255,255,0.15)', fontSize: '10px', display: 'flex' }}>│</div>
-            <div style={{ color: threatColor(s2), fontSize: '10px', letterSpacing: '0.1em', display: 'flex' }}>
-              {threatLabel(s2)}
-            </div>
+            <div style={{ color: threatColor(s2), fontSize: '11px', letterSpacing: '0.1em', display: 'flex' }}>{threatLabel(s2)}</div>
           </div>
         </div>
       </div>
 
-      {/* Phase Comparison */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
+      {/* Divider */}
+      <div style={{ display: 'flex', margin: '0 60px', height: '1px', background: 'linear-gradient(90deg, transparent, rgba(0,255,136,0.15), rgba(255,51,51,0.15), rgba(0,255,136,0.15), transparent)' }} />
+
+      {/* Boxing Scorecard — centered */}
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '16px 0', flex: 1, justifyContent: 'center' }}>
+        <div style={{ color: 'rgba(0,255,136,0.3)', fontSize: '10px', letterSpacing: '0.15em', marginBottom: '12px', display: 'flex' }}>PHASE SCORECARD</div>
+
+        {/* Column labels */}
+        <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
+          <div style={{ width: '100px', textAlign: 'right', color: 'rgba(255,255,255,0.25)', fontSize: '10px', letterSpacing: '0.08em', display: 'flex', justifyContent: 'flex-end' }}>@{u1.slice(0, 8).toUpperCase()}</div>
+          <div style={{ width: '160px', textAlign: 'center', color: 'rgba(0,255,136,0.3)', fontSize: '10px', letterSpacing: '0.1em', display: 'flex', justifyContent: 'center' }}>ROUND</div>
+          <div style={{ width: '100px', color: 'rgba(255,255,255,0.25)', fontSize: '10px', letterSpacing: '0.08em', display: 'flex' }}>@{u2.slice(0, 8).toUpperCase()}</div>
+        </div>
+
+        {/* Phase rows */}
         {phases.map((phase) => {
-          const lWins = phase.l >= phase.r;
+          const lWins = phase.l > phase.r;
+          const rWins = phase.r > phase.l;
+          const tie = phase.l === phase.r;
           return (
-            <div key={phase.label} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <div
-                style={{
-                  color: 'rgba(0,255,136,0.5)',
-                  fontSize: '11px',
-                  letterSpacing: '0.08em',
-                  width: '95px',
-                  display: 'flex',
-                }}
-              >
-                {phase.label}
+            <div key={phase.label} style={{ display: 'flex', alignItems: 'center', marginBottom: '4px' }}>
+              <div style={{
+                width: '100px', textAlign: 'right', paddingRight: '20px', display: 'flex', justifyContent: 'flex-end',
+                color: lWins ? '#00FF88' : tie ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.25)',
+                fontSize: '20px', fontWeight: lWins ? 700 : 400,
+              }}>{phase.l}</div>
+              <div style={{
+                width: '160px', textAlign: 'center', padding: '5px 0', display: 'flex', justifyContent: 'center',
+                borderTop: '1px solid rgba(0,255,136,0.06)',
+                borderBottom: '1px solid rgba(0,255,136,0.06)',
+                background: 'rgba(0,255,136,0.02)',
+              }}>
+                <div style={{ color: 'rgba(0,255,136,0.5)', fontSize: '12px', letterSpacing: '0.12em', display: 'flex' }}>{phase.label}</div>
               </div>
-              <div
-                style={{
-                  color: lWins ? '#00FF88' : 'rgba(255,255,255,0.2)',
-                  fontSize: '13px',
-                  display: 'flex',
-                  letterSpacing: '0.03em',
-                }}
-              >
-                {renderBar(phase.l)}
-              </div>
-              <div
-                style={{
-                  color: '#fff',
-                  fontSize: '13px',
-                  fontWeight: lWins ? 700 : 400,
-                  width: '28px',
-                  textAlign: 'right',
-                  display: 'flex',
-                  justifyContent: 'flex-end',
-                }}
-              >
-                {phase.l}
-              </div>
-              <div style={{ color: 'rgba(255,51,51,0.3)', fontSize: '11px', display: 'flex' }}>│</div>
-              <div
-                style={{
-                  color: '#fff',
-                  fontSize: '13px',
-                  fontWeight: !lWins ? 700 : 400,
-                  width: '28px',
-                  display: 'flex',
-                }}
-              >
-                {phase.r}
-              </div>
-              <div
-                style={{
-                  color: !lWins ? '#00FF88' : 'rgba(255,255,255,0.2)',
-                  fontSize: '13px',
-                  display: 'flex',
-                  letterSpacing: '0.03em',
-                }}
-              >
-                {renderBar(phase.r)}
-              </div>
+              <div style={{
+                width: '100px', paddingLeft: '20px', display: 'flex',
+                color: rWins ? '#00FF88' : tie ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.25)',
+                fontSize: '20px', fontWeight: rWins ? 700 : 400,
+              }}>{phase.r}</div>
             </div>
           );
         })}
       </div>
 
       {/* Footer */}
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          paddingTop: '14px',
-          borderTop: '1px solid rgba(0,255,136,0.1)',
-        }}
-      >
-        <div
-          style={{
-            color: 'rgba(0,255,136,0.4)',
-            fontSize: '11px',
-            letterSpacing: '0.1em',
-            display: 'flex',
-          }}
-        >
-          {'⊕ VERDICT: @'}{winner}{' TAKES THIS ONE'}
-        </div>
-        <div
-          style={{
-            display: 'flex',
-            padding: '8px 16px',
-            background: '#00FF88',
-            borderRadius: '2px',
-          }}
-        >
-          <span style={{ color: '#060A0F', fontSize: '11px', letterSpacing: '0.15em', fontWeight: 700 }}>
-            FIND YOUR OPP → mybrandos.app/opp
-          </span>
+      <div style={{ display: 'flex', justifyContent: 'center', padding: '12px', borderTop: '1px solid rgba(0,255,136,0.1)' }}>
+        <div style={{ display: 'flex', padding: '8px 20px', background: '#00FF88', borderRadius: '2px' }}>
+          <span style={{ color: '#060A0F', fontSize: '12px', letterSpacing: '0.15em', fontWeight: 700 }}>FIND YOUR OPP → MYBRANDOS.APP/OPP</span>
         </div>
       </div>
     </div>,

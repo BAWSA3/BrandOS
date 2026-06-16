@@ -11,7 +11,6 @@ import BrandBreakdown from './BrandBreakdown';
 import BrandOSDashboard, { BrandOSDashboardData } from './BrandOSDashboard';
 import BrandScoreCard from './BrandScoreCard';
 import BrandIssuesSection from './BrandIssuesSection';
-import ScoreBoostAuditCta from './ScoreBoostAuditCta';
 import { SaveResultsPrompt } from './SaveResultsPrompt';
 import { useAuth } from '@/hooks/useAuth';
 import { domToPng } from 'modern-screenshot';
@@ -1843,17 +1842,6 @@ export default function XBrandScoreHero({
                   VIEW YOUR INTELLIGENCE REPORT →
                 </span>
               </motion.a>
-
-              {/* Score Boost Audit CTA — $19 one-time, primary monetization upsell */}
-              <ScoreBoostAuditCta
-                handle={profile.username}
-                phaseScores={{
-                  define: brandScore.phases.define.score,
-                  check: brandScore.phases.check.score,
-                  generate: brandScore.phases.generate.score,
-                  scale: brandScore.phases.scale.score,
-                }}
-              />
 
               <motion.button
                 onClick={async () => {
