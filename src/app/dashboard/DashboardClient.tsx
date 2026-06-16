@@ -2,10 +2,11 @@
 
 import { useState } from 'react';
 import { createBrowserClient } from '@supabase/ssr';
+import { useWorld } from '@/components/world/WorldProvider';
 
 const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
 );
 
 interface DashboardClientProps {
@@ -22,6 +23,7 @@ interface DashboardClientProps {
     name: string;
     type: string;
     plan: string;
+    activeWorldId: string | null;
   } | null;
   xConnections: Array<{
     id: string;
@@ -32,11 +34,13 @@ interface DashboardClientProps {
 }
 
 export default function DashboardClient({ user, workspace, xConnections }: DashboardClientProps) {
+  const { world, t } = useWorld();
   const [scanning, setScanning] = useState(false);
   const [scanResult, setScanResult] = useState<Record<string, unknown> | null>(null);
   const [scanError, setScanError] = useState<string | null>(null);
 
   const activeConnection = xConnections.find((c) => c.status === 'active');
+  const showWorldBanner = workspace && !workspace.activeWorldId;
 
   async function handleScan() {
     if (!activeConnection) return;
@@ -64,45 +68,59 @@ export default function DashboardClient({ user, workspace, xConnections }: Dashb
   }
 
   return (
-    <div className="min-h-screen bg-white p-6">
+    <div className="min-h-screen p-6" style={{ color: 'var(--text-primary)' }}>
       <div className="max-w-2xl mx-auto space-y-8">
         <header className="flex items-center justify-between">
           <div>
-            <h1
-              className="text-xl font-bold"
-              style={{ fontFamily: 'JetBrains Mono, monospace' }}
-            >
-              BrandOS Dashboard
-            </h1>
-            <p className="text-sm text-gray-500">
-              {workspace?.name || 'Personal Workspace'} &middot; {workspace?.plan || 'FREE'} plan
+            <h1 className="text-xl font-bold font-mono">{t('dashboardTitle', world.name)}</h1>
+            <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+              {workspace?.name || 'Personal Workspace'} · {workspace?.plan || 'FREE'} plan
             </p>
           </div>
           <div className="flex items-center gap-3">
             {user.avatar && (
-              <img
-                src={user.avatar}
-                alt=""
-                className="w-8 h-8 rounded-full"
-              />
+              <img src={user.avatar} alt="" className="w-8 h-8 rounded-full" />
             )}
-            <span className="text-sm text-gray-700">{user.name || user.email}</span>
+            <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+              {user.name || user.email}
+            </span>
           </div>
         </header>
 
+        {showWorldBanner && (
+          <a
+            href="/dashboard/world"
+            className="block rounded-lg border p-4 transition-colors"
+            style={{
+              borderColor: 'var(--border)',
+              backgroundColor: 'var(--surface)',
+            }}
+          >
+            <p className="text-sm font-mono" style={{ color: 'var(--accent)' }}>
+              → Choose your world
+            </p>
+            <p className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>
+              Pick a theme for your BrandOS dashboard. Step into the aesthetic that fits you.
+            </p>
+          </a>
+        )}
+
         {/* X Account Connections */}
-        <section className="border border-gray-200 rounded-lg p-6">
+        <section
+          className="rounded-lg p-6 border"
+          style={{ borderColor: 'var(--border)', backgroundColor: 'var(--surface)' }}
+        >
           <h2
-            className="text-sm font-semibold uppercase tracking-wide text-gray-500 mb-4"
-            style={{ fontFamily: 'JetBrains Mono, monospace' }}
+            className="text-sm font-semibold uppercase tracking-wide mb-4 font-mono"
+            style={{ color: 'var(--text-tertiary)' }}
           >
             Connected X Accounts
           </h2>
 
           {xConnections.length === 0 ? (
             <div className="text-center py-8">
-              <p className="text-gray-600 text-sm mb-4">
-                Connect your X account to scan your brand.
+              <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>
+                {t('emptyConnections', 'Connect your X account to scan your brand.')}
               </p>
               <button
                 onClick={async () => {
@@ -113,11 +131,15 @@ export default function DashboardClient({ user, workspace, xConnections }: Dashb
                     },
                   });
                 }}
-                className="inline-block py-2 px-6 bg-black text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors"
+                className="inline-block py-2 px-6 text-sm font-medium rounded-lg transition-opacity hover:opacity-90"
+                style={{
+                  backgroundColor: 'var(--accent)',
+                  color: 'var(--background)',
+                }}
               >
-                Connect X Account
+                {t('connectCta', 'Connect X Account')}
               </button>
-              <p className="mt-2 text-xs text-gray-400">
+              <p className="mt-2 text-xs" style={{ color: 'var(--text-tertiary)' }}>
                 We verify ownership via X OAuth. Only you can scan your handle.
               </p>
             </div>
@@ -126,21 +148,23 @@ export default function DashboardClient({ user, workspace, xConnections }: Dashb
               {xConnections.map((conn) => (
                 <div
                   key={conn.id}
-                  className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                  className="flex items-center justify-between p-3 rounded-lg"
+                  style={{ backgroundColor: 'var(--surface-tertiary)' }}
                 >
                   <div>
                     <span className="font-medium text-sm">@{conn.username}</span>
                     <span
-                      className={`ml-2 text-xs px-2 py-0.5 rounded-full ${
+                      className="ml-2 text-xs px-2 py-0.5 rounded-full"
+                      style={
                         conn.status === 'active'
-                          ? 'bg-green-100 text-green-700'
-                          : 'bg-gray-200 text-gray-500'
-                      }`}
+                          ? { backgroundColor: 'color-mix(in srgb, var(--success) 20%, transparent)', color: 'var(--success)' }
+                          : { backgroundColor: 'var(--surface-hover)', color: 'var(--text-tertiary)' }
+                      }
                     >
                       {conn.status}
                     </span>
                   </div>
-                  <span className="text-xs text-gray-400">
+                  <span className="text-xs" style={{ color: 'var(--text-tertiary)' }}>
                     Connected {new Date(conn.connectedAt).toLocaleDateString()}
                   </span>
                 </div>
@@ -151,39 +175,56 @@ export default function DashboardClient({ user, workspace, xConnections }: Dashb
 
         {/* Scan Section */}
         {activeConnection && (
-          <section className="border border-gray-200 rounded-lg p-6">
+          <section
+            className="rounded-lg p-6 border"
+            style={{ borderColor: 'var(--border)', backgroundColor: 'var(--surface)' }}
+          >
             <h2
-              className="text-sm font-semibold uppercase tracking-wide text-gray-500 mb-4"
-              style={{ fontFamily: 'JetBrains Mono, monospace' }}
+              className="text-sm font-semibold uppercase tracking-wide mb-4 font-mono"
+              style={{ color: 'var(--text-tertiary)' }}
             >
               Brand Scan
             </h2>
 
             <div className="flex items-center gap-4">
-              <p className="text-sm text-gray-600 flex-1">
-                Scan <strong>@{activeConnection.username}</strong> for a fresh brand score.
+              <p className="text-sm flex-1" style={{ color: 'var(--text-secondary)' }}>
+                Scan <strong style={{ color: 'var(--text-primary)' }}>@{activeConnection.username}</strong> for a fresh brand score.
               </p>
               <button
                 onClick={handleScan}
                 disabled={scanning}
-                className="py-2 px-6 bg-black text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50"
+                className="py-2 px-6 text-sm font-medium rounded-lg transition-opacity hover:opacity-90 disabled:opacity-50"
+                style={{
+                  backgroundColor: 'var(--accent)',
+                  color: 'var(--background)',
+                }}
               >
-                {scanning ? 'Scanning...' : 'Scan Now'}
+                {scanning ? t('scanningLabel', 'Scanning...') : t('scanCta', 'Scan Now')}
               </button>
             </div>
 
             {scanError && (
-              <div className="mt-4 bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700">
+              <div
+                className="mt-4 rounded-lg p-3 text-sm border"
+                style={{
+                  backgroundColor: 'color-mix(in srgb, var(--danger) 12%, transparent)',
+                  borderColor: 'color-mix(in srgb, var(--danger) 30%, transparent)',
+                  color: 'var(--danger)',
+                }}
+              >
                 {scanError}
               </div>
             )}
 
             {scanResult && (
-              <div className="mt-4 bg-gray-50 rounded-lg p-4">
+              <div
+                className="mt-4 rounded-lg p-4"
+                style={{ backgroundColor: 'var(--surface-tertiary)' }}
+              >
                 <p className="text-sm font-medium">
                   Score: {(scanResult as { brandScore?: { overallScore?: number } }).brandScore?.overallScore ?? 'N/A'}
                 </p>
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs mt-1" style={{ color: 'var(--text-tertiary)' }}>
                   {(scanResult as { meta?: { cached?: boolean } }).meta?.cached
                     ? 'Returned from 24h cache'
                     : 'Fresh analysis'}
@@ -197,27 +238,27 @@ export default function DashboardClient({ user, workspace, xConnections }: Dashb
         <section className="grid grid-cols-2 gap-4">
           <a
             href="/pricing"
-            className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors"
+            className="rounded-lg p-4 border transition-colors"
+            style={{ borderColor: 'var(--border)', backgroundColor: 'var(--surface)' }}
           >
-            <h3
-              className="text-sm font-semibold"
-              style={{ fontFamily: 'JetBrains Mono, monospace' }}
-            >
-              Upgrade Plan
+            <h3 className="text-sm font-semibold font-mono">
+              {t('upgradeCta', 'Upgrade Plan')}
             </h3>
-            <p className="text-xs text-gray-500 mt-1">Unlock multi-platform, watchlists, and more.</p>
+            <p className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>
+              Unlock multi-platform, watchlists, and more.
+            </p>
           </a>
           <a
             href={activeConnection ? `/card/${activeConnection.username}` : '#'}
-            className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors"
+            className="rounded-lg p-4 border transition-colors"
+            style={{ borderColor: 'var(--border)', backgroundColor: 'var(--surface)' }}
           >
-            <h3
-              className="text-sm font-semibold"
-              style={{ fontFamily: 'JetBrains Mono, monospace' }}
-            >
-              Shareable Card
+            <h3 className="text-sm font-semibold font-mono">
+              {t('shareableCardTitle', 'Shareable Card')}
             </h3>
-            <p className="text-xs text-gray-500 mt-1">View and share your public brand card.</p>
+            <p className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>
+              {t('shareableCardSubtitle', 'View and share your public brand card.')}
+            </p>
           </a>
         </section>
       </div>
