@@ -142,6 +142,9 @@ SSO / SAML.
 
 ---
 
+## Deploy model (reconciled 2026-06-15)
+Production (`brandos`/mybrandos.app) tracks `main`; `main` is now an honest mirror of what's live. Build happens on `staging` -> `brandos-staging`, promoted to `main` only when green. Full rules: `SOLO-DEPLOY-WORKFLOW.md`.
+
 ## Reconciliation TODO (the "start again" backlog)
 
 Priority order to get unstuck safely:

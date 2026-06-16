@@ -100,6 +100,7 @@ Track these in `SECURITY-HARDENING.md`; schedule within 30 days of first paying 
 ---
 
 ## Relationship to other docs
+- How to ship it safely (build on staging, promote to prod): `SOLO-DEPLOY-WORKFLOW.md`. All Week 1+ work lands on `staging` -> brandos-staging first.
 - Full security program + acceptance criteria: `SECURITY-HARDENING.md` (this doc scopes a subset of it).
 - Why partner API / Kreatorsverse were dropped: `DECISIONS.md` (2026-04-13).
 - What exists already so you don't rebuild it: `CURRENT-STATE.md`.

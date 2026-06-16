@@ -37,8 +37,8 @@ yarn-error.log*
 # npm config with tokens
 .npmrc
 
-# vercel
-.vercel
+# vercel (project link folders — never commit; covers .vercel and .vercel.staging)
+.vercel*
 
 # IDE and tool configs
 .claude/
@@ -51,8 +51,9 @@ yarn-error.log*
 # Windows artifacts
 nul
 
-# Data files with PII
+# Data files with PII (signup exports contain emails)
 data/*.json
+data/*.csv
 
 # typescript
 *.tsbuildinfo
