@@ -2,6 +2,28 @@
 
 **Status:** PLAN (not yet executed) · **Created:** 2026-06-18 · **Risk:** HIGH (live DB, 6,445 real rows; the env-var-rename trap)
 
+## 0. PROGRESS — RESUME HERE (paused 2026-06-18)
+
+Promotion **paused before the merge** at a clean, safe state. Prod still runs the
+OLD code untouched; the Phase 1 DB schema is applied but **dormant** (old code
+doesn't read it); a backup exists. Nothing is half-broken.
+
+**✅ Done:**
+- **Pre-flight:** backup taken (`~/brandos-prod-backup-2026-06-18.sql`, 6.2 MB, 85 data stmts); app write-path confirmed RLS-safe (BrandScan via service-role Prisma); staging green (`test:rls` 13/13, `test:safety` 21/21).
+- **Prod DB connectivity FIXED (incident):** prod DB password was rotated; its connection strings had been pointing at the **direct** host (`db.<ref>.supabase.co`, unreachable from Vercel → `P1001`). Switched `DATABASE_URL`/`DIRECT_URL` to the **Supavisor pooler**. Verified: zero prod errors, Prisma reaching DB. See [[reference-supabase-prod-connection]].
+- **Step A (Supabase key env):** prod already has BOTH old + new name-sets (`PUBLISHABLE_KEY`/`SECRET_KEY` alongside `ANON_KEY`/`SERVICE_ROLE_KEY`) — integration synced them. No action needed.
+- **Step B (migrations):** `004` → `005` → `011` applied to prod DB and **verified** — all of `has_brandscan_table`, `has_workspace_table`, `has_member_table`, `has_select_policy`, `has_insert_policy`, `has_011_helper` = `true`. (`010` was already on prod.)
+
+**⛔ BLOCKER before the merge (Step D): prod is missing 18 env vars staging uses.**
+Triaged:
+- 🔴 **Required** (Phase 1 scan/connect-X throws without it): `X_OAUTH_ENCRYPTION_KEY` (generate fresh: `openssl rand -base64 32 | tr '+/' '-_' | tr -d '='`), `NEXT_PUBLIC_APP_URL` = `https://mybrandos.app`, `NEXT_PUBLIC_APP_ENV` = `production`.
+- 🟢 **Easy:** `CRON_SECRET` (`openssl rand -hex 32`), `ENTERPRISE_NOTIFY_EMAIL`.
+- 🟡 **Stripe (17 vars) — a decision, not a copy:** needs LIVE-mode keys + live price IDs (`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, `STRIPE_PRICE_*`). Routes already `503` on prod today, so deferring = status quo. Deferred for now (revenue is gated by the higher-bar posture anyway).
+
+**▶️ To resume:** set the 🔴+🟢 vars on the `brandos` project → then Step C/D (env-aware merge `staging`→`main`) → Step E (verify, incl. confirm the public homepage scan still works = no funnel collapse; `x-brand-score` is NOT `assertCanScan`-gated, so it should stay open) → Step F (remove old Supabase key names). Resume at §3 Step C below.
+
+---
+
 This is the step-by-step, env-aware plan to promote the Phase 1 account model
 (workspaces, owned scans, RLS) from `staging` to production (`main` / the
 `brandos` Vercel project / `mybrandos.app`). Do NOT improvise this — it's the
