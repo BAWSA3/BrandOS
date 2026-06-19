@@ -13,6 +13,7 @@ import { getUserProfile } from '@/lib/user-profiles';
 import { assertCanScan } from '@/lib/scan-guard';
 import prisma from '@/lib/db';
 import { logSecurityEvent, getClientIp } from '@/lib/audit-log';
+import { internalHeaders } from '@/lib/internal-auth';
 
 /**
  * Enhanced Brand Score API
@@ -73,7 +74,7 @@ async function fetchTweets(username: string, origin: string) {
   try {
     const response = await fetch(`${origin}/api/x-tweets`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...internalHeaders() },
       body: JSON.stringify({ username, maxResults: 100 }),
     });
 
