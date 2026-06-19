@@ -54,7 +54,8 @@ Track these in `SECURITY-HARDENING.md`; schedule within 30 days of first paying 
 | RLS migrations `004`/`005` + staging baseline | ✅ written — ⚠️ not validated against acceptance criteria |
 | Token encryption (`crypto.ts`), audit log (`audit-log.ts`) | ✅ built |
 | Privacy + Terms pages | ✅ exist — ⚠️ signup acknowledgment + deletion route open |
-| Partner/cross-handle API removal (`api-auth.ts`) | ❌ open |
+| Partner/cross-handle API removal (`api-auth.ts`) | ✅ done — `BRANDOS_PARTNER_API_KEYS` bypass removed (commit `ecbab4f`) |
+| `/api/x-tweets` cost-abuse hole (unauth, arbitrary handle, paid data) | ✅ mitigated — IP rate-limit + cache + internal-token bypass (commit `4600ac5`). ⚠️ needs `INTERNAL_API_SECRET` set in Vercel env groups |
 | `score-schemas.ts` (output validation) | ❌ missing |
 | `prompt-safety.ts` (injection guard) | ❌ missing |
 | Supabase key rename → env set → rotation | 🟡 code applied (uncommitted), env + rotation open |
