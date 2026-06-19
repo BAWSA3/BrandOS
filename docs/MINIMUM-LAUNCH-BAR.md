@@ -51,7 +51,9 @@ Track these in `SECURITY-HARDENING.md`; schedule within 30 days of first paying 
 |---|---|
 | `auth.ts` helpers (`getCurrentUser/Workspace/ActiveXAccount`) | ✅ built |
 | `assertCanScan` in `audit/run`, `x-brand-score-enhanced`, `v1/score` | ✅ wired (verify it also covers `x-sync`/`x-tweets`) |
-| RLS migrations `004`/`005` + staging baseline | ✅ written — ⚠️ not validated against acceptance criteria |
+| RLS migrations `004`/`005` + staging baseline | ✅ written AND validated on staging (2026-06-18). Found + fixed 3 defects → migrations `010`/`011`. Regression suite: `npm run test:rls` (13/13 green). ⚠️ `010`/`011` applied to staging only — not prod |
+| RLS recursion / insert-policy bugs (`011`) | ✅ fixed on staging — membership + connection lookups moved to SECURITY DEFINER helpers. Was masked by service-role Prisma. ⚠️ apply to prod with the next promotion |
+| Legacy `BrandScans` anon-insert poisoning | 🟡 interim guard `010` applied to staging (score/length `WITH CHECK`). Full fix = BrandScans→BrandScan cutover, deferred to gated-funnel/BotID work |
 | Token encryption (`crypto.ts`), audit log (`audit-log.ts`) | ✅ built |
 | Privacy + Terms pages | ✅ exist — ⚠️ signup acknowledgment + deletion route open |
 | Partner/cross-handle API removal (`api-auth.ts`) | ✅ done — `BRANDOS_PARTNER_API_KEYS` bypass removed (commit `ecbab4f`) |
