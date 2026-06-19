@@ -14,6 +14,7 @@ import { assertCanScan } from '@/lib/scan-guard';
 import prisma from '@/lib/db';
 import { logSecurityEvent, getClientIp } from '@/lib/audit-log';
 import { internalHeaders } from '@/lib/internal-auth';
+import { parseBrandScore, heuristicBrandScore } from '@/lib/score-schemas';
 
 /**
  * Enhanced Brand Score API
@@ -218,18 +219,15 @@ export async function POST(request: NextRequest) {
 
     const responseText = geminiResult.response.text();
 
-    // Parse JSON response
-    let brandScore;
-    try {
-      const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) {
-        throw new Error('No JSON found in response');
-      }
-      brandScore = JSON.parse(jsonMatch[0]);
-    } catch (parseError) {
-      console.error('Failed to parse Gemini response:', parseError);
-      console.error('Raw response:', responseText);
-      return NextResponse.json({ error: 'Failed to analyze profile' }, { status: 500 });
+    // Validate + clamp model output (no untyped JSON.parse). On malformed
+    // output, fall back to the deterministic heuristic instead of hard-failing.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- rich, varied model object consumed dynamically downstream
+    let brandScore: any = parseBrandScore(responseText);
+    if (!brandScore) {
+      console.warn(
+        `[EnhancedScore] Output failed validation for @${cleanUsername} — heuristic fallback`
+      );
+      brandScore = heuristicBrandScore(profile);
     }
 
     // Validate contentIdentity if present
@@ -271,9 +269,8 @@ export async function POST(request: NextRequest) {
       const storedScore = existingProfile.currentScore;
       const rawScore = brandScore.overallScore;
       if (Math.abs(rawScore - storedScore) > MAX_SCORE_DRIFT) {
-        brandScore.overallScore = rawScore > storedScore
-          ? storedScore + MAX_SCORE_DRIFT
-          : storedScore - MAX_SCORE_DRIFT;
+        brandScore.overallScore =
+          rawScore > storedScore ? storedScore + MAX_SCORE_DRIFT : storedScore - MAX_SCORE_DRIFT;
         console.log(
           `[EnhancedScore] Smoothed score for @${cleanUsername}: ${rawScore} → ${brandScore.overallScore} (stored: ${storedScore})`
         );
@@ -299,27 +296,29 @@ export async function POST(request: NextRequest) {
 
     // Record to new BrandScan table (Phase 1 — owned, workspace-scoped)
     const intelligence = extractIntelligence(brandScore);
-    const newScan = await prisma.brandScan.create({
-      data: {
-        userId: guard.user.id,
-        workspaceId: guard.workspace.id,
-        platformConnectionId: guard.platformConnection.id,
-        xUsername: cleanUsername.toLowerCase(),
-        score: brandScore.overallScore,
-        archetype: brandScore.archetype?.primary || 'unknown',
-        phaseScores: intelligence.phaseScores ?? {},
-        strengths: intelligence.strengths ?? [],
-        improvements: intelligence.improvements ?? [],
-        insights: intelligence.insights ?? undefined,
-        summary: intelligence.summary ?? undefined,
-        influenceTier: intelligence.influenceTier ?? undefined,
-        nextMoves: intelligence.nextMoves ?? undefined,
-        contentPillars: intelligence.contentPillars ?? undefined,
-      },
-    }).catch((err) => {
-      console.error('[BrandScan] New table write error:', err);
-      return null;
-    });
+    const newScan = await prisma.brandScan
+      .create({
+        data: {
+          userId: guard.user.id,
+          workspaceId: guard.workspace.id,
+          platformConnectionId: guard.platformConnection.id,
+          xUsername: cleanUsername.toLowerCase(),
+          score: brandScore.overallScore,
+          archetype: brandScore.archetype?.primary || 'unknown',
+          phaseScores: intelligence.phaseScores ?? {},
+          strengths: intelligence.strengths ?? [],
+          improvements: intelligence.improvements ?? [],
+          insights: intelligence.insights ?? undefined,
+          summary: intelligence.summary ?? undefined,
+          influenceTier: intelligence.influenceTier ?? undefined,
+          nextMoves: intelligence.nextMoves ?? undefined,
+          contentPillars: intelligence.contentPillars ?? undefined,
+        },
+      })
+      .catch((err) => {
+        console.error('[BrandScan] New table write error:', err);
+        return null;
+      });
 
     // Legacy: also record to old BrandScans table (removed in migration 007)
     recordScan({

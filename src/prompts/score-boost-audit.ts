@@ -11,6 +11,14 @@
  * Output is strict JSON for downstream rendering + MD generation.
  */
 
+import {
+  GUARD_PREAMBLE,
+  sanitizeInline,
+  sanitizeUntrusted,
+  wrapUntrusted,
+  INPUT_CAPS,
+} from '@/lib/prompt-safety';
+
 export interface ScoreBoostAuditResult {
   handle: string;
   overallScore: number; // 0-100
@@ -41,11 +49,21 @@ export function buildAuditPrompt(
   handle: string,
   tweets: { text: string; likes: number; replies: number; retweets: number }[]
 ): string {
-  const tweetBlock = tweets
-    .map((t, i) => `TWEET ${i + 1} (${t.likes} likes, ${t.replies} replies, ${t.retweets} RTs):\n${t.text}`)
-    .join('\n\n---\n\n');
+  const safeHandle = sanitizeInline(handle, INPUT_CAPS.username);
+  // Tweet text is untrusted user content — sanitize each line; the whole block
+  // is fenced via wrapUntrusted so injected "instructions" are treated as data.
+  const tweetBlock = wrapUntrusted(
+    tweets
+      .slice(0, INPUT_CAPS.tweetCount)
+      .map(
+        (t, i) =>
+          `TWEET ${i + 1} (${t.likes} likes, ${t.replies} replies, ${t.retweets} RTs):\n${sanitizeUntrusted(t.text).slice(0, INPUT_CAPS.tweetText)}`
+      )
+      .join('\n\n---\n\n'),
+    'tweets'
+  );
 
-  return `You are a senior brand strategist auditing @${handle}'s X account. The user paid $19 for this audit. Be specific, brutal, and actionable. Generic advice = refund.
+  return `${GUARD_PREAMBLE}You are a senior brand strategist auditing @${safeHandle}'s X account. The user paid $19 for this audit. Be specific, brutal, and actionable. Generic advice = refund.
 
 You will analyze ${tweets.length} recent tweets and produce a deep brand audit.
 
@@ -84,7 +102,7 @@ RULES:
 
 RETURN ONLY VALID JSON matching this exact shape (no markdown, no prose outside the JSON):
 {
-  "handle": "${handle}",
+  "handle": "${safeHandle}",
   "overallScore": <0-100>,
   "archetype": {
     "name": "<ARCHETYPE>",

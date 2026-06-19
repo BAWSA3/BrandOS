@@ -6,6 +6,7 @@ import { withRateLimit, rateLimiters } from '@/lib/rate-limit';
 import { recordScan } from '@/lib/scan-tracking';
 import { brandScoreCache } from '@/lib/cache';
 import { getUserProfile } from '@/lib/user-profiles';
+import { parseBrandScore, heuristicBrandScore } from '@/lib/score-schemas';
 
 /** How long a cached score stays valid (6 hours in ms) */
 const SCORE_CACHE_TTL_MINUTES = 360;
@@ -98,7 +99,12 @@ async function handlePost(request: NextRequest) {
     const cacheKey = `score:${cleanUsername}`;
     const cachedResult = brandScoreCache.get<{
       brandScore: Record<string, unknown>;
-      archetypeDecision: { reason: string; evolved: boolean; previousArchetype?: string; archetype: Record<string, unknown> } | null;
+      archetypeDecision: {
+        reason: string;
+        evolved: boolean;
+        previousArchetype?: string;
+        archetype: Record<string, unknown>;
+      } | null;
       cachedAt: string;
     }>(cacheKey);
 
@@ -106,9 +112,14 @@ async function handlePost(request: NextRequest) {
     const userProfile = getUserProfile(cleanUsername);
     const scoreHistory = userProfile?.scores || [];
     const scoreValues = scoreHistory.map((s) => s.value);
-    const scoreRange = scoreValues.length >= 2
-      ? { low: Math.min(...scoreValues), high: Math.max(...scoreValues), samples: scoreValues.length }
-      : null;
+    const scoreRange =
+      scoreValues.length >= 2
+        ? {
+            low: Math.min(...scoreValues),
+            high: Math.max(...scoreValues),
+            samples: scoreValues.length,
+          }
+        : null;
 
     if (cachedResult && !forceReevaluate) {
       console.log(`[BrandScore] Returning cached score for @${cleanUsername}`);
@@ -136,21 +147,26 @@ async function handlePost(request: NextRequest) {
       });
     }
 
-    // Generate prompt and call Claude
-    let brandScore;
+    // Generate prompt and call Claude. Model output is validated + clamped by
+    // parseBrandScore (no untyped JSON.parse); on malformed/unusable output we
+    // fall back to the deterministic heuristic so the funnel never hard-fails.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- rich, varied model object consumed dynamically downstream
+    let brandScore: any;
     try {
       const prompt = xBrandScorePrompt(profile);
       const responseText = await scoreWithClaude(prompt);
-
-      // Parse JSON response
-      const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) {
-        throw new Error('No JSON found in response');
+      const parsed = parseBrandScore(responseText);
+      if (parsed) {
+        brandScore = parsed;
+      } else {
+        console.warn(
+          `[BrandScore] Output failed validation for @${cleanUsername} — heuristic fallback`
+        );
+        brandScore = heuristicBrandScore(profile);
       }
-      brandScore = JSON.parse(jsonMatch[0]);
     } catch (scoreError) {
       console.error(`[BrandScore] Failed to score @${cleanUsername}:`, scoreError);
-      return NextResponse.json({ error: 'Failed to analyze profile' }, { status: 500 });
+      brandScore = heuristicBrandScore(profile);
     }
 
     // === SCORE SMOOTHING: prevent jarring score swings for returning users ===
@@ -162,9 +178,8 @@ async function handlePost(request: NextRequest) {
       const storedScore = userProfile.currentScore;
       const rawScore = brandScore.overallScore;
       if (Math.abs(rawScore - storedScore) > MAX_SCORE_DRIFT) {
-        brandScore.overallScore = rawScore > storedScore
-          ? storedScore + MAX_SCORE_DRIFT
-          : storedScore - MAX_SCORE_DRIFT;
+        brandScore.overallScore =
+          rawScore > storedScore ? storedScore + MAX_SCORE_DRIFT : storedScore - MAX_SCORE_DRIFT;
         console.log(
           `[BrandScore] Smoothed score for @${cleanUsername}: ${rawScore} → ${brandScore.overallScore} (stored: ${storedScore})`
         );
@@ -201,7 +216,12 @@ async function handlePost(request: NextRequest) {
       {
         brandScore,
         archetypeDecision: archetypeDecision
-          ? { reason: archetypeDecision.reason, evolved: archetypeDecision.evolved, previousArchetype: archetypeDecision.previousArchetype, archetype: archetypeDecision.archetype }
+          ? {
+              reason: archetypeDecision.reason,
+              evolved: archetypeDecision.evolved,
+              previousArchetype: archetypeDecision.previousArchetype,
+              archetype: archetypeDecision.archetype,
+            }
           : null,
         cachedAt: analyzedAt,
       },
