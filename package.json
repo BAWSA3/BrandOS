@@ -10,6 +10,7 @@
     "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,css}\"",
     "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,json,css}\"",
     "send-email": "npx tsx scripts/send-email.ts",
+    "test:rls": "node --env-file=.env.local scripts/rls-acceptance.mjs",
     "prepare": "husky"
   },
   "dependencies": {
