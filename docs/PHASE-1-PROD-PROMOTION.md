@@ -1,8 +1,32 @@
 # Phase 1 → Production Promotion Plan
 
-**Status:** PLAN (not yet executed) · **Created:** 2026-06-18 · **Risk:** HIGH (live DB, 6,445 real rows; the env-var-rename trap)
+**Status:** ✅ EXECUTED 2026-07-05 — Phase 1 is LIVE on prod · **Created:** 2026-06-18 · **Risk:** HIGH (live DB, 6,445 real rows; the env-var-rename trap)
 
-## 0. PROGRESS — RESUME HERE (paused 2026-06-18)
+## 0. PROGRESS — COMPLETED 2026-07-05
+
+**Promotion executed successfully.** Steps A–E done; Step F (remove old Supabase
+key names) pending a few hours of stability. Remaining manual item: authed smoke
+test (signup → connect X → scan own handle; non-owned = 403).
+
+**2026-07-05 execution log:**
+- Env vars set on `brandos` Production: `X_OAUTH_ENCRYPTION_KEY` (fresh),
+  `CRON_SECRET` (fresh), `NEXT_PUBLIC_APP_URL`, `NEXT_PUBLIC_APP_ENV`,
+  `ENTERPRISE_NOTIFY_EMAIL`. Stripe (17 vars) still deferred.
+- Step C re-verified: `test:rls` 13/13, `test:safety` 21/21; local build green.
+- Fresh backup: `~/brandos-prod-backup-2026-07-05.sql` (6.3 MB, 92 data stmts).
+- Step D: merged `staging`→`main` (`ba241a8`), zero conflicts (main's 2 hotfixes
+  were already re-applied on staging). Deploy Ready in 3m.
+- Step E: all 4 logged-out checks pass (incl. `/dashboard` 307→/signup = auth
+  gate live). Anonymous `/api/x-brand-score` scan works — **no funnel collapse**.
+- **BONUS FIX:** prod `DATABASE_URL` (transaction pooler :6543) lacked
+  `?pgbouncer=true&connection_limit=1` → intermittent Prisma
+  `prepared statement does not exist` errors (81×/27 users on /tier-list since
+  the 6/18 pooler switch). Param added + redeployed (`dpl_FxSdsCy4…`); zero
+  recurrence post-deploy; /tier-list renders real data.
+
+---
+
+## 0b. ORIGINAL PAUSE STATE (2026-06-18, superseded)
 
 Promotion **paused before the merge** at a clean, safe state. Prod still runs the
 OLD code untouched; the Phase 1 DB schema is applied but **dormant** (old code
