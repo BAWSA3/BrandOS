@@ -5,7 +5,7 @@ import { createBrowserClient } from '@supabase/ssr';
 
 const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
 );
 
 type AuthMethod = 'choose' | 'email';
@@ -22,6 +22,14 @@ export default function SignupPage() {
     ? new URLSearchParams(window.location.search)
     : new URLSearchParams();
   const ref = searchParams.get('ref');
+  const rawNext = searchParams.get('next');
+  // Only allow same-origin relative paths to prevent open-redirect.
+  const next =
+    rawNext && rawNext.startsWith('/') && !rawNext.startsWith('//') ? rawNext : '/dashboard';
+  const callbackUrl =
+    typeof window !== 'undefined'
+      ? `${window.location.origin}/api/auth/callback?next=${encodeURIComponent(next)}`
+      : '';
 
   async function handleEmailSignup(e: React.FormEvent) {
     e.preventDefault();
@@ -32,7 +40,7 @@ export default function SignupPage() {
       email,
       password,
       options: {
-        emailRedirectTo: `${window.location.origin}/api/auth/callback?next=/dashboard`,
+        emailRedirectTo: callbackUrl,
       },
     });
 
@@ -51,7 +59,7 @@ export default function SignupPage() {
     const { error: oauthError } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/api/auth/callback?next=/dashboard`,
+        redirectTo: callbackUrl,
       },
     });
     if (oauthError) {
@@ -65,7 +73,7 @@ export default function SignupPage() {
     const { error: oauthError } = await supabase.auth.signInWithOAuth({
       provider: 'apple',
       options: {
-        redirectTo: `${window.location.origin}/api/auth/callback?next=/dashboard`,
+        redirectTo: callbackUrl,
       },
     });
     if (oauthError) {
@@ -79,7 +87,7 @@ export default function SignupPage() {
     const { error: oauthError } = await supabase.auth.signInWithOAuth({
       provider: 'twitter',
       options: {
-        redirectTo: `${window.location.origin}/api/auth/callback?next=/dashboard`,
+        redirectTo: callbackUrl,
       },
     });
     if (oauthError) {

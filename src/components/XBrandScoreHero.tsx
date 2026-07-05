@@ -11,7 +11,6 @@ import BrandBreakdown from './BrandBreakdown';
 import BrandOSDashboard, { BrandOSDashboardData } from './BrandOSDashboard';
 import BrandScoreCard from './BrandScoreCard';
 import BrandIssuesSection from './BrandIssuesSection';
-import ScoreBoostAuditCta from './ScoreBoostAuditCta';
 import { SaveResultsPrompt } from './SaveResultsPrompt';
 import { useAuth } from '@/hooks/useAuth';
 import { domToPng } from 'modern-screenshot';
@@ -1844,16 +1843,37 @@ export default function XBrandScoreHero({
                 </span>
               </motion.a>
 
-              {/* Score Boost Audit CTA — $19 one-time, primary monetization upsell */}
-              <ScoreBoostAuditCta
-                handle={profile.username}
-                phaseScores={{
-                  define: brandScore.phases.define.score,
-                  check: brandScore.phases.check.score,
-                  generate: brandScore.phases.generate.score,
-                  scale: brandScore.phases.scale.score,
+              {/* Daily Brief CTA */}
+              <motion.a
+                href="/signup?next=/today"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.7 }}
+                className="capture-hide"
+                style={{
+                  display: 'block',
+                  width: '100%',
+                  marginTop: '8px',
+                  padding: '14px 20px',
+                  background: '#000000',
+                  border: '1px solid #000000',
+                  borderRadius: '6px',
+                  textDecoration: 'none',
+                  cursor: 'pointer',
+                  textAlign: 'center',
                 }}
-              />
+              >
+                <span
+                  style={{
+                    fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace",
+                    fontSize: '11px',
+                    letterSpacing: '0.1em',
+                    color: '#FFFFFF',
+                  }}
+                >
+                  GET TODAY&apos;S BRIEF — 1 IDEA · 1 METRIC · 1 ACTION →
+                </span>
+              </motion.a>
 
               <motion.button
                 onClick={async () => {

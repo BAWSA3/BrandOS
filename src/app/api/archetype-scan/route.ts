@@ -7,6 +7,7 @@ import { withRateLimit, rateLimiters } from '@/lib/rate-limit';
 import { recordScan } from '@/lib/scan-tracking';
 import { ARCHETYPE_DATA, getArchetypeInfo } from '@/lib/archetype-descriptions';
 import { detectArchetypeSignals } from '@/lib/archetype-signals';
+import { internalHeaders } from '@/lib/internal-auth';
 
 /**
  * Archetype Scan API — Lightweight archetype classification
@@ -162,7 +163,7 @@ async function handlePost(request: NextRequest) {
     try {
       const tweetsResponse = await fetch(`${origin}/api/x-tweets`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...internalHeaders() },
         body: JSON.stringify({ username: cleanUsername, maxResults: 50 }),
       });
       if (tweetsResponse.ok) {

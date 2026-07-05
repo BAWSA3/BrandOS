@@ -16,11 +16,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { stripe } from '@/lib/stripe';
 import { fetchTweetsByUsername } from '@/lib/socialdata';
-import {
-  buildAuditPrompt,
-  type ScoreBoostAuditResult,
-} from '@/prompts/score-boost-audit';
+import { buildAuditPrompt } from '@/prompts/score-boost-audit';
 import { sendAuditEmail } from '@/lib/audit-email';
+import { parseAudit } from '@/lib/score-schemas';
 import { assertCanScan } from '@/lib/scan-guard';
 import { logSecurityEvent, getClientIp } from '@/lib/audit-log';
 
@@ -40,10 +38,7 @@ export async function POST(request: NextRequest) {
     // 1) Verify the session is paid and matches our product
     const session = await stripe.checkout.sessions.retrieve(sessionId);
     if (session.payment_status !== 'paid') {
-      return NextResponse.json(
-        { error: 'Payment not completed' },
-        { status: 402 }
-      );
+      return NextResponse.json({ error: 'Payment not completed' }, { status: 402 });
     }
     if (session.metadata?.productType !== 'SCORE_BOOST_AUDIT') {
       return NextResponse.json(
@@ -54,10 +49,7 @@ export async function POST(request: NextRequest) {
 
     const handle = session.metadata?.handle;
     if (!handle) {
-      return NextResponse.json(
-        { error: 'Handle missing from session metadata' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Handle missing from session metadata' }, { status: 400 });
     }
 
     // 1b) Phase 1: verify authenticated user owns this handle
@@ -103,10 +95,7 @@ export async function POST(request: NextRequest) {
     // 3) Call Claude Haiku
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) {
-      return NextResponse.json(
-        { error: 'Anthropic API not configured' },
-        { status: 503 }
-      );
+      return NextResponse.json({ error: 'Anthropic API not configured' }, { status: 503 });
     }
 
     const anthropic = new Anthropic({ apiKey });
@@ -119,30 +108,14 @@ export async function POST(request: NextRequest) {
     });
 
     const text = message.content[0]?.type === 'text' ? message.content[0].text : '';
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      console.error('[audit/run] No JSON in model output:', text.slice(0, 500));
-      return NextResponse.json(
-        { error: 'Audit generation failed — could not parse response' },
-        { status: 502 }
-      );
-    }
 
-    let audit: ScoreBoostAuditResult;
-    try {
-      audit = JSON.parse(jsonMatch[0]);
-    } catch (err) {
-      console.error('[audit/run] JSON parse error:', err);
+    // Validate + clamp model output (no untyped JSON.parse). A paid audit gets
+    // NO heuristic fallback — error out rather than serve garbage to a customer.
+    const audit = parseAudit(text);
+    if (!audit) {
+      console.error('[audit/run] Output failed validation:', text.slice(0, 500));
       return NextResponse.json(
-        { error: 'Audit generation returned malformed JSON' },
-        { status: 502 }
-      );
-    }
-
-    // Basic sanity check
-    if (!audit.phaseScores || !audit.flaggedTweets || !audit.archetype) {
-      return NextResponse.json(
-        { error: 'Audit missing required fields' },
+        { error: 'Audit generation failed — invalid response, please retry' },
         { status: 502 }
       );
     }

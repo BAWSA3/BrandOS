@@ -23,6 +23,7 @@ import {
 import { features } from '@/lib/features';
 import { extractColorsFromImage, ExtractedColors } from '@/lib/color-extraction';
 import { withRateLimit, rateLimiters } from '@/lib/rate-limit';
+import { internalHeaders } from '@/lib/internal-auth';
 
 // Minimum tweets required for content-primary analysis
 const MINIMUM_TWEETS_FOR_CONTENT_ANALYSIS = 10;
@@ -104,7 +105,7 @@ async function handlePost(request: NextRequest) {
         const origin = request.nextUrl.origin;
         const tweetsResponse = await fetch(`${origin}/api/x-tweets`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', ...internalHeaders() },
           body: JSON.stringify({
             username: profile.username,
             maxResults: 100,

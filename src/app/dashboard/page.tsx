@@ -36,6 +36,7 @@ export default async function DashboardPage() {
               name: workspace.name,
               type: workspace.type,
               plan: workspace.plan,
+              activeWorldId: workspace.activeWorldId,
             }
           : null
       }

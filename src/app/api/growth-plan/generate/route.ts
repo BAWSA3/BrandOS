@@ -10,7 +10,7 @@ export const maxDuration = 60;
 async function handlePost(request: NextRequest) {
   try {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
     const anthropicKey = process.env.ANTHROPIC_API_KEY;
     if (!supabaseUrl || !supabaseAnonKey || !anthropicKey) {
       return NextResponse.json({ error: 'Server misconfigured' }, { status: 500 });

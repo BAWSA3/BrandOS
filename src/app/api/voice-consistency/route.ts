@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { VoiceConsistencyRequestSchema } from '@/lib/schemas/voice-consistency.schema';
 import { analyzeVoiceConsistency } from '@/lib/voice-consistency';
 import { features } from '@/lib/features';
+import { withRateLimit, rateLimiters } from '@/lib/rate-limit';
+import { internalHeaders } from '@/lib/internal-auth';
 
 interface FetchedTweet {
   id: string;
@@ -20,7 +22,7 @@ async function fetchTweets(username: string, origin: string): Promise<FetchedTwe
   try {
     const response = await fetch(`${origin}/api/x-tweets`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...internalHeaders() },
       body: JSON.stringify({ username, maxResults: 50 }),
     });
 
@@ -49,7 +51,7 @@ async function fetchStoredFingerprint(username: string, origin: string) {
   }
 }
 
-export async function POST(request: NextRequest) {
+async function handlePost(request: NextRequest) {
   try {
     const body = await request.json();
     const parsed = VoiceConsistencyRequestSchema.safeParse(body);
@@ -115,3 +117,5 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }
+
+export const POST = withRateLimit(handlePost, rateLimiters.ai);

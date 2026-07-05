@@ -4,6 +4,9 @@ import {
   fetchUserTweets,
   isSocialDataConfigured,
 } from '@/lib/socialdata';
+import { getClientIdentifier, checkRateLimit, rateLimiters } from '@/lib/rate-limit';
+import { isInternalRequest } from '@/lib/internal-auth';
+import { tweetsCache } from '@/lib/cache';
 
 // Tweet fields we want to fetch (X API v2 fallback)
 const TWEET_FIELDS = [
@@ -65,6 +68,21 @@ export interface TweetAnalysis {
  */
 export async function POST(request: NextRequest) {
   try {
+    // First-party server routes send the internal token and skip the public
+    // cap. Everyone else is rate-limited by IP — this endpoint pulls paid
+    // third-party data, so an unthrottled public path is a cost-abuse vector.
+    const internal = isInternalRequest(request);
+    if (!internal) {
+      const clientId = getClientIdentifier(request);
+      const { limited, resetIn } = checkRateLimit(`${clientId}:x-tweets`, rateLimiters.ai);
+      if (limited) {
+        return NextResponse.json(
+          { error: 'Too many requests. Please try again later.' },
+          { status: 429, headers: { 'Retry-After': Math.ceil(resetIn / 1000).toString() } },
+        );
+      }
+    }
+
     const {
       userId,
       username,
@@ -77,6 +95,14 @@ export async function POST(request: NextRequest) {
 
     if (!userId && !username) {
       return NextResponse.json({ error: 'Either userId or username is required' }, { status: 400 });
+    }
+
+    // Cache by target + size — cuts repeat SocialData spend for hot handles
+    // and absorbs scripted retries that slip under the rate limit.
+    const cacheKey = `tweets:${(userId || username || '').toLowerCase()}:${maxResults}`;
+    const cached = tweetsCache.get<{ tweets: Tweet[]; analysis: TweetAnalysis }>(cacheKey);
+    if (cached) {
+      return NextResponse.json(cached);
     }
 
     let tweets: Tweet[] = [];
@@ -146,10 +172,14 @@ export async function POST(request: NextRequest) {
     console.log(`Avg engagement: ${analysis.stats.avgEngagementRate.toFixed(2)}%`);
     console.log('======================');
 
-    return NextResponse.json({
-      tweets,
-      analysis,
-    });
+    const payload = { tweets, analysis };
+    // Only cache real results — don't pin an empty payload for a hot handle
+    // whose provider call briefly failed.
+    if (tweets.length > 0) {
+      tweetsCache.set(cacheKey, payload);
+    }
+
+    return NextResponse.json(payload);
   } catch (error) {
     console.error('X Tweets API error:', error);
     return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });

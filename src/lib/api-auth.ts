@@ -69,13 +69,11 @@ export async function authenticateApiKey(request: NextRequest): Promise<ApiAuthR
     };
   }
 
-  // Check env-based keys first (backwards compat)
+  // Internal env-based key (backwards compat for first-party callers/webhooks).
+  // NOTE: the partner/cross-handle key path (BRANDOS_PARTNER_API_KEYS) was
+  // removed for the Minimum Launch Bar — no third-party shared-secret access.
   const primaryKey = process.env.BRANDOS_API_KEY;
   if (primaryKey && rawKey === primaryKey) {
-    return { authenticated: true };
-  }
-  const partnerKeys = process.env.BRANDOS_PARTNER_API_KEYS?.split(',').map((k) => k.trim()) || [];
-  if (partnerKeys.includes(rawKey)) {
     return { authenticated: true };
   }
 
