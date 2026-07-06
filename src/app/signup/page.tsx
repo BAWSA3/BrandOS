@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { createBrowserClient } from '@supabase/ssr';
+import { TOS_VERSION } from '@/lib/tos';
 
 const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -17,6 +18,7 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [checkEmail, setCheckEmail] = useState(false);
+  const [tosAccepted, setTosAccepted] = useState(false);
 
   const searchParams = typeof window !== 'undefined'
     ? new URLSearchParams(window.location.search)
@@ -26,9 +28,11 @@ export default function SignupPage() {
   // Only allow same-origin relative paths to prevent open-redirect.
   const next =
     rawNext && rawNext.startsWith('/') && !rawNext.startsWith('//') ? rawNext : '/dashboard';
+  // tos param rides the callback URL so the acknowledgment survives OAuth
+  // redirects AND the email-confirmation link; the callback persists it.
   const callbackUrl =
     typeof window !== 'undefined'
-      ? `${window.location.origin}/api/auth/callback?next=${encodeURIComponent(next)}`
+      ? `${window.location.origin}/api/auth/callback?next=${encodeURIComponent(next)}&tos=${encodeURIComponent(TOS_VERSION)}`
       : '';
 
   async function handleEmailSignup(e: React.FormEvent) {
@@ -144,11 +148,26 @@ export default function SignupPage() {
           </div>
         )}
 
+        <label className="flex items-start gap-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+          <input
+            type="checkbox"
+            checked={tosAccepted}
+            onChange={(e) => setTosAccepted(e.target.checked)}
+            className="mt-0.5 h-4 w-4 accent-black cursor-pointer"
+          />
+          <span className="text-xs text-gray-600">
+            I agree to the{' '}
+            <a href="/terms" target="_blank" className="underline hover:text-gray-900">Terms of Service</a>{' '}
+            and{' '}
+            <a href="/privacy" target="_blank" className="underline hover:text-gray-900">Privacy Policy</a>.
+          </span>
+        </label>
+
         {method === 'choose' && (
           <div className="space-y-3">
             <button
               onClick={handleGoogleSignup}
-              disabled={loading}
+              disabled={loading || !tosAccepted}
               className="w-full py-3 px-4 bg-white border border-gray-300 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -188,7 +207,7 @@ export default function SignupPage() {
 
             <button
               onClick={handleXSignup}
-              disabled={loading}
+              disabled={loading || !tosAccepted}
               className="w-full py-3 px-4 bg-gray-100 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50"
             >
               Sign in with X (existing users)
@@ -223,7 +242,7 @@ export default function SignupPage() {
             </div>
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || !tosAccepted}
               className="w-full py-3 px-4 bg-black text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50"
             >
               {loading ? 'Creating account...' : 'Create account'}
@@ -238,11 +257,11 @@ export default function SignupPage() {
           </form>
         )}
 
-        <p className="text-center text-xs text-gray-400">
-          By signing up, you agree to our{' '}
-          <a href="/terms" className="underline hover:text-gray-600">Terms</a> and{' '}
-          <a href="/privacy" className="underline hover:text-gray-600">Privacy Policy</a>.
-        </p>
+        {!tosAccepted && (
+          <p className="text-center text-xs text-gray-400">
+            Accept the terms above to continue.
+          </p>
+        )}
       </div>
     </div>
   );

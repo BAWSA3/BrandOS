@@ -109,6 +109,10 @@ model User {
   role                       UserRole               @default(user)
   accountMigrationStatus     AccountMigrationStatus @default(legacy) @map("account_migration_status")
 
+  // TOS/privacy acknowledgment (Launch Bar Week 3) — null = pre-feature account
+  tosAcceptedAt              DateTime?              @map("tos_accepted_at") @db.Timestamptz
+  tosVersion                 String?                @map("tos_version")
+
   // Relationships
   brands              Brand[]
   teamMembers         TeamMember[]

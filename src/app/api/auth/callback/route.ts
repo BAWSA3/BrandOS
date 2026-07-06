@@ -5,6 +5,7 @@ import prisma from '@/lib/db';
 import { ensurePersonalWorkspace } from '@/lib/auth';
 import { encryptOauthToken, getCurrentKeyId } from '@/lib/crypto';
 import { logSecurityEvent } from '@/lib/audit-log';
+import { isValidTosVersion } from '@/lib/tos';
 
 const EARLY_ACCESS_MODE = process.env.NEXT_PUBLIC_EARLY_ACCESS_MODE === 'true';
 
@@ -25,6 +26,10 @@ export async function GET(request: NextRequest) {
   // Only allow same-origin relative paths to prevent open-redirect.
   const next =
     rawNext && rawNext.startsWith('/') && !rawNext.startsWith('//') ? rawNext : '/dashboard';
+  // TOS acknowledgment version from the signup page (strict-format validated —
+  // the param round-trips through OAuth providers / email links).
+  const rawTos = requestUrl.searchParams.get('tos');
+  const tosVersion = isValidTosVersion(rawTos) ? rawTos : null;
 
   if (!code) {
     return NextResponse.redirect(new URL('/?error=no_code', request.url));
@@ -130,6 +135,13 @@ export async function GET(request: NextRequest) {
       ? existingUser.accountMigrationStatus
       : 'completed'; // new users start as completed (no legacy migration needed)
 
+    // Record TOS acknowledgment on first acceptance only (never overwrite an
+    // earlier acceptance timestamp — it's the auditable legal record).
+    const recordTos = tosVersion !== null && !existingUser?.tosAcceptedAt;
+    const tosFields = recordTos
+      ? { tosAcceptedAt: new Date(), tosVersion }
+      : {};
+
     // Upsert user — xUsername/xId are nullable for non-X-first signups
     const user = await prisma.user.upsert({
       where: { supabaseId: session.user.id },
@@ -140,6 +152,7 @@ export async function GET(request: NextRequest) {
         ...(xUsername && !existingUser?.xUsername ? { xUsername } : {}),
         ...(xId && !existingUser?.xId ? { xId } : {}),
         ...(isInnerCircle ? { isInnerCircle: true, invitedBy } : {}),
+        ...tosFields,
       },
       create: {
         supabaseId: session.user.id,
@@ -151,6 +164,7 @@ export async function GET(request: NextRequest) {
         isInnerCircle,
         invitedBy,
         accountMigrationStatus: migrationStatus,
+        ...tosFields,
       },
     });
 
@@ -212,6 +226,16 @@ export async function GET(request: NextRequest) {
       workspaceId: workspace.id,
       metadata: { method: provider },
     });
+
+    if (recordTos) {
+      await logSecurityEvent({
+        category: 'auth',
+        eventType: 'tos_accepted',
+        userId: user.id,
+        workspaceId: workspace.id,
+        metadata: { target_id: tosVersion },
+      });
+    }
 
     // Determine redirect: legacy users go to migration page
     let redirectTo = next;
