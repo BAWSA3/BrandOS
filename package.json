@@ -12,6 +12,7 @@
     "send-email": "npx tsx scripts/send-email.ts",
     "test:rls": "node --env-file=.env.local scripts/rls-acceptance.mjs",
     "test:safety": "npx tsx scripts/test-prompt-safety.ts",
+    "test:deletion": "npx tsx --env-file=.env.local scripts/test-account-deletion.ts",
     "prepare": "husky"
   },
   "dependencies": {
