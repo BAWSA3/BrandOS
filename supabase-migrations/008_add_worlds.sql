@@ -40,9 +40,15 @@ CREATE INDEX IF NOT EXISTS idx_custom_world_workspace ON "CustomWorld" (workspac
 -- FK from Workspace.custom_world_id → CustomWorld.id (nullable; SET NULL on delete
 -- since CustomWorld cascade-deletes from Workspace anyway, this just keeps the
 -- column consistent if a custom world is deleted without removing the workspace).
-ALTER TABLE "Workspace"
-  ADD CONSTRAINT IF NOT EXISTS workspace_custom_world_fkey
-  FOREIGN KEY (custom_world_id) REFERENCES "CustomWorld"(id) ON DELETE SET NULL;
+-- (ADD CONSTRAINT has no IF NOT EXISTS in Postgres — guard via pg_constraint)
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'workspace_custom_world_fkey') THEN
+    ALTER TABLE "Workspace"
+      ADD CONSTRAINT workspace_custom_world_fkey
+      FOREIGN KEY (custom_world_id) REFERENCES "CustomWorld"(id) ON DELETE SET NULL;
+  END IF;
+END $$;
 
 -- RLS — mirrors 005 policies for workspace-scoped rows
 ALTER TABLE "CustomWorld" ENABLE ROW LEVEL SECURITY;
