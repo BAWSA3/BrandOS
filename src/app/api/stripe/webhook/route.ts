@@ -3,6 +3,12 @@ import { stripe, STRIPE_WEBHOOK_SECRET } from '@/lib/stripe';
 import prisma from '@/lib/db';
 import type { SubscriptionTier, SubscriptionStatus } from '@prisma/client';
 import Stripe from 'stripe';
+import {
+  claimWebhookEvent,
+  releaseWebhookEvent,
+  purgeOldWebhookClaims,
+} from '@/lib/webhook-idempotency';
+import { logSecurityEvent } from '@/lib/audit-log';
 
 export async function POST(request: NextRequest) {
   const body = await request.text();
@@ -19,6 +25,19 @@ export async function POST(request: NextRequest) {
   } catch (err) {
     console.error('[Stripe Webhook] Signature verification failed:', err);
     return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
+  }
+
+  // Idempotency: claim the event id BEFORE processing. A replayed or
+  // concurrent duplicate delivery finds the claim taken and no-ops with 200
+  // (200 so Stripe stops retrying — the first delivery owns the work).
+  const claimed = await claimWebhookEvent(event.id, event.type);
+  if (!claimed) {
+    await logSecurityEvent({
+      category: 'payment',
+      eventType: 'webhook_replayed',
+      metadata: { event_id: event.id },
+    });
+    return NextResponse.json({ received: true, replay: true });
   }
 
   try {
@@ -55,9 +74,14 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // 7-day retention, purged opportunistically (no cron needed)
+    await purgeOldWebhookClaims().catch(() => {});
+
     return NextResponse.json({ received: true });
   } catch (error) {
     console.error('[Stripe Webhook] Handler error:', error);
+    // Release the claim so Stripe's retry can actually reprocess the event.
+    await releaseWebhookEvent(event.id);
     return NextResponse.json({ error: 'Webhook handler failed' }, { status: 500 });
   }
 }

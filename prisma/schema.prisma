@@ -1081,6 +1081,15 @@ model SecurityAuditLog {
   @@map("SecurityAuditLog")
 }
 
+model ProcessedWebhook {
+  id          String   @id // Stripe event id (evt_...)
+  eventType   String   @map("event_type")
+  processedAt DateTime @default(now()) @map("processed_at") @db.Timestamptz
+
+  @@index([processedAt])
+  @@map("ProcessedWebhook")
+}
+
 model DailyBrief {
   id                  String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   userId              String     @map("user_id")
