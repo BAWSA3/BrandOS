@@ -8,9 +8,13 @@ import {
   ONE_TIME_PRODUCTS,
   type SubscriptionTier,
 } from '@/lib/plans';
+import { botGuard } from '@/lib/botid-guard';
 
 export async function POST(request: NextRequest) {
   try {
+    const botBlock = await botGuard(request);
+    if (botBlock) return botBlock;
+
     const user = await getUser();
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

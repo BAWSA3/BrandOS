@@ -6,6 +6,7 @@ import {
   XProfileData,
 } from '@/lib/gemini';
 import { features, getTierInfo } from '@/lib/features';
+import { botGuard } from '@/lib/botid-guard';
 import { analyzeVoiceConsistency } from '@/lib/voice-consistency';
 import type { VoiceConsistencyReport } from '@/lib/schemas/voice-consistency.schema';
 import { recordScan, extractIntelligence } from '@/lib/scan-tracking';
@@ -124,6 +125,9 @@ async function fetchTweets(username: string, origin: string) {
 
 export async function POST(request: NextRequest) {
   try {
+    const botBlock = await botGuard(request);
+    if (botBlock) return botBlock;
+
     const { username, workspaceId } = (await request.json()) as {
       username: string;
       workspaceId?: string;

@@ -21,11 +21,15 @@ import { sendAuditEmail } from '@/lib/audit-email';
 import { parseAudit } from '@/lib/score-schemas';
 import { assertCanScan } from '@/lib/scan-guard';
 import { logSecurityEvent, getClientIp } from '@/lib/audit-log';
+import { botGuard } from '@/lib/botid-guard';
 
 const HAIKU_MODEL = 'claude-haiku-4-5-20251001';
 
 export async function POST(request: NextRequest) {
   try {
+    const botBlock = await botGuard(request);
+    if (botBlock) return botBlock;
+
     if (!stripe) {
       return NextResponse.json({ error: 'Stripe not configured' }, { status: 503 });
     }
