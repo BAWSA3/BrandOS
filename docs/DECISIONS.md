@@ -98,6 +98,19 @@ by design (you can buy an audit of any public handle).
 Revisit if: audits sell but don't convert buyers into accounts, or
 cross-handle audits draw abuse complaints.
 
+## 2026-07-08 — Tier reconciliation: map, don't rename
+The pricing page keeps selling FREE/PRO/AGENCY/ENTERPRISE (legacy
+SubscriptionTier); the internal Phase 1 model (FREE/PRO/MAX/TEAM/
+ENTERPRISE PlanTier) stays canonical for limits. `legacyTierToPlanTier`
+(AGENCY→TEAM, CREATOR→FREE) translates at the Stripe webhook, which now
+also syncs the buyer's personal `workspace.plan` — previously NOTHING
+wrote workspace.plan, so a paying subscriber kept FREE scan/connection
+caps forever. Rejected renaming the public page to MAX/TEAM now: no
+Stripe prices exist for those tiers and renaming is post-revenue work.
+Trade-off: two tier vocabularies live on (bounded by the mapping fn).
+Revisit if: MAX is ready to sell, or the AGENCY→TEAM label confuses a
+real buyer.
+
 ---
 
 ## Template for new entries

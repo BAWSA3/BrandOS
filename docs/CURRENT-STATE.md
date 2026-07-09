@@ -150,7 +150,7 @@ Production (`brandos`/mybrandos.app) tracks `main`; `main` is now an honest mirr
 
 Items 1–3 of the June backlog are **done** (uncommitted work snapshotted; Phase 1 merged via `staging` → `main` and promoted 2026-07-05; goal re-anchored to Jul 13 via `MINIMUM-LAUNCH-BAR.md`). Still open:
 
-1. **Reconcile plan tiers** — Phase 1 model (FREE/PRO/MAX/TEAM/ENTERPRISE) vs. live pricing page (FREE/PRO/AGENCY/ENTERPRISE). Must resolve before taking money (Week 4).
+1. **Reconcile plan tiers** — ✅ resolved 2026-07-08 (see `DECISIONS.md`): pricing page keeps selling legacy FREE/PRO/AGENCY; `legacyTierToPlanTier` maps to the internal PlanTier model, and the Stripe webhook now syncs `workspace.plan` on subscription events (it previously never got written — paying users would have kept FREE limits).
 2. **Sanity-check scope creep** — onchain attestations, Worlds V2, VERITY launch stay parked until first revenue (see `CONSTRAINTS.md`, `DECISIONS.md`). Housekeeping 2026-07-08: unrelated side-project repos (`api-examples/`, `interview-coach-skill/`, `verity-trainer/`) moved out of this repo to `~/Documents/Bawsa Vibe Coding/`.
 
 ---

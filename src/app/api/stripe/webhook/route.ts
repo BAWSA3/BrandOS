@@ -10,6 +10,7 @@ import {
 } from '@/lib/webhook-idempotency';
 import { logSecurityEvent } from '@/lib/audit-log';
 import { captureFunnelEvent } from '@/lib/funnel-events';
+import { legacyTierToPlanTier } from '@/lib/plans';
 
 export async function POST(request: NextRequest) {
   const body = await request.text();
@@ -159,6 +160,13 @@ async function handleSubscriptionChange(subscription: Stripe.Subscription) {
       currentPeriodEnd: periodEnd ? new Date(periodEnd * 1000) : null,
     },
   });
+
+  // Sync the Phase 1 workspace plan (drives assertCanScan + PlanLimit caps).
+  // Without this a paying subscriber keeps FREE workspace limits. PAST_DUE /
+  // INCOMPLETE keep the current plan — Stripe dunning decides, deletion resets.
+  if (status === 'ACTIVE' || status === 'TRIALING') {
+    await syncWorkspacePlan(userId, tier);
+  }
 }
 
 async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
@@ -174,6 +182,19 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
       billingInterval: null,
       currentPeriodEnd: null,
     },
+  });
+
+  await syncWorkspacePlan(userId, 'FREE');
+}
+
+// Legacy SubscriptionTier (what Stripe metadata carries) → PlanTier on the
+// buyer's personal workspace. updateMany: safe no-op if the user has no
+// personal workspace (can't happen for new signups — the auth callback
+// creates one before checkout is reachable).
+async function syncWorkspacePlan(userId: string, tier: SubscriptionTier) {
+  await prisma.workspace.updateMany({
+    where: { ownerUserId: userId, type: 'personal' },
+    data: { plan: legacyTierToPlanTier(tier) },
   });
 }
 
