@@ -1,53 +1,68 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getUser } from '@/lib/auth';
-import supabase from '@/lib/supabase';
+import { getCurrentUser, getCurrentWorkspace } from '@/lib/auth';
+import prisma from '@/lib/db';
 
 /**
  * GET /api/scan-history?username=xxx
  *
- * Returns scan history for the given username (session-auth for dashboard).
- * Falls back to the authenticated user's xUsername if no query param.
+ * Returns the authenticated user's workspace scan history from the Phase 1
+ * BrandScan table. Optional ?username narrows to one connected handle —
+ * always scoped to the caller's workspace, so no cross-user reads.
+ *
+ * (Previously read the legacy public BrandScans table by arbitrary username —
+ * wrong table for Phase 1 scans and an unscoped cross-handle read.)
  */
 export async function GET(request: NextRequest) {
   try {
-    const user = await getUser();
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+    }
+    const workspace = await getCurrentWorkspace(user);
+    if (!workspace) {
+      return NextResponse.json({ error: 'Workspace not found' }, { status: 404 });
+    }
+
     const { searchParams } = new URL(request.url);
-    const username = searchParams.get('username') || user?.xUsername;
+    const username = searchParams.get('username');
 
-    if (!username) {
-      return NextResponse.json({ error: 'Username required' }, { status: 400 });
-    }
+    const scans = await prisma.brandScan.findMany({
+      where: {
+        workspaceId: workspace.id,
+        ...(username ? { xUsername: username.toLowerCase() } : {}),
+      },
+      select: {
+        score: true,
+        archetype: true,
+        phaseScores: true,
+        scannedAt: true,
+        xUsername: true,
+      },
+      orderBy: { scannedAt: 'asc' },
+      take: 100,
+    });
 
-    const { data: scans, error } = await supabase
-      .from('BrandScans')
-      .select('id, username, score, archetype, phase_scores, created_at')
-      .eq('username', username.toLowerCase())
-      .order('created_at', { ascending: true })
-      .limit(100);
-
-    if (error) {
-      console.error('[ScanHistory] Supabase error:', error);
-      return NextResponse.json({ error: 'Failed to fetch history' }, { status: 500 });
-    }
-
-    if (!scans || scans.length === 0) {
+    if (scans.length === 0) {
       return NextResponse.json({
-        username,
+        username: username ?? user.xUsername ?? null,
         scans: [],
         stats: null,
         deltas: null,
       });
     }
 
-    // Parse phase scores from JSON strings
     const parsed = scans.map((s) => ({
       score: s.score,
       archetype: s.archetype,
-      phaseScores: s.phase_scores ? JSON.parse(s.phase_scores) : null,
-      createdAt: s.created_at,
+      phaseScores: (s.phaseScores ?? null) as {
+        define?: number;
+        check?: number;
+        generate?: number;
+        scale?: number;
+      } | null,
+      createdAt: s.scannedAt.toISOString(),
     }));
 
-    // Compute stats
     const scores = parsed.map((s) => s.score);
     const stats = {
       totalScans: parsed.length,
@@ -59,7 +74,6 @@ export async function GET(request: NextRequest) {
       lastScan: parsed[parsed.length - 1].createdAt,
     };
 
-    // Compute deltas between two most recent scans
     let deltas: Record<string, number> | null = null;
     if (parsed.length >= 2) {
       const current = parsed[parsed.length - 1];
@@ -77,7 +91,7 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json({
-      username,
+      username: username ?? scans[scans.length - 1].xUsername,
       scans: parsed,
       stats,
       deltas,

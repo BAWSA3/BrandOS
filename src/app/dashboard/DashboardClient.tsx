@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { createBrowserClient } from '@supabase/ssr';
 import { useWorld } from '@/components/world/WorldProvider';
+import ScanResultPanel, { type ScanResponse } from '@/components/dashboard/ScanResultPanel';
+import ScoreHistoryCard from '@/components/dashboard/ScoreHistoryCard';
 
 const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -36,11 +38,32 @@ interface DashboardClientProps {
 export default function DashboardClient({ user, workspace, xConnections }: DashboardClientProps) {
   const { world, t } = useWorld();
   const [scanning, setScanning] = useState(false);
-  const [scanResult, setScanResult] = useState<Record<string, unknown> | null>(null);
+  const [scanResult, setScanResult] = useState<ScanResponse | null>(null);
   const [scanError, setScanError] = useState<string | null>(null);
+  const [connecting, setConnecting] = useState(false);
+  const [connectError, setConnectError] = useState<string | null>(null);
+  // Bumped after each successful scan so ScoreHistoryCard refetches
+  const [historyKey, setHistoryKey] = useState(0);
 
   const activeConnection = xConnections.find((c) => c.status === 'active');
-  const showWorldBanner = workspace && !workspace.activeWorldId;
+
+  async function handleConnect() {
+    setConnecting(true);
+    setConnectError(null);
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'twitter',
+        options: {
+          redirectTo: `${window.location.origin}/api/auth/callback?next=/dashboard`,
+        },
+      });
+      if (error) throw error;
+      // On success the browser navigates away to X — leave the spinner on.
+    } catch (err) {
+      setConnectError(err instanceof Error ? err.message : 'Could not start X sign-in');
+      setConnecting(false);
+    }
+  }
 
   async function handleScan() {
     if (!activeConnection) return;
@@ -59,7 +82,8 @@ export default function DashboardClient({ user, workspace, xConnections }: Dashb
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Scan failed');
-      setScanResult(data);
+      setScanResult(data as ScanResponse);
+      setHistoryKey((k) => k + 1);
     } catch (err) {
       setScanError(err instanceof Error ? err.message : 'Unknown error');
     } finally {
@@ -87,24 +111,6 @@ export default function DashboardClient({ user, workspace, xConnections }: Dashb
           </div>
         </header>
 
-        {showWorldBanner && (
-          <a
-            href="/dashboard/world"
-            className="block rounded-lg border p-4 transition-colors"
-            style={{
-              borderColor: 'var(--border)',
-              backgroundColor: 'var(--surface)',
-            }}
-          >
-            <p className="text-sm font-mono" style={{ color: 'var(--accent)' }}>
-              → Choose your world
-            </p>
-            <p className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>
-              Pick a theme for your BrandOS dashboard. Step into the aesthetic that fits you.
-            </p>
-          </a>
-        )}
-
         {/* X Account Connections */}
         <section
           className="rounded-lg p-6 border"
@@ -123,22 +129,23 @@ export default function DashboardClient({ user, workspace, xConnections }: Dashb
                 {t('emptyConnections', 'Connect your X account to scan your brand.')}
               </p>
               <button
-                onClick={async () => {
-                  await supabase.auth.signInWithOAuth({
-                    provider: 'twitter',
-                    options: {
-                      redirectTo: `${window.location.origin}/api/auth/callback?next=/dashboard`,
-                    },
-                  });
-                }}
-                className="inline-block py-2 px-6 text-sm font-medium rounded-lg transition-opacity hover:opacity-90"
+                onClick={handleConnect}
+                disabled={connecting}
+                className="inline-block py-2 px-6 text-sm font-medium rounded-lg transition-opacity hover:opacity-90 disabled:opacity-50"
                 style={{
                   backgroundColor: 'var(--accent)',
                   color: 'var(--background)',
                 }}
               >
-                {t('connectCta', 'Connect X Account')}
+                {connecting
+                  ? t('connectingLabel', 'Redirecting to X...')
+                  : t('connectCta', 'Connect X Account')}
               </button>
+              {connectError && (
+                <p className="mt-2 text-xs" style={{ color: 'var(--danger)' }}>
+                  {connectError}
+                </p>
+              )}
               <p className="mt-2 text-xs" style={{ color: 'var(--text-tertiary)' }}>
                 We verify ownership via X OAuth. Only you can scan your handle.
               </p>
@@ -217,21 +224,14 @@ export default function DashboardClient({ user, workspace, xConnections }: Dashb
             )}
 
             {scanResult && (
-              <div
-                className="mt-4 rounded-lg p-4"
-                style={{ backgroundColor: 'var(--surface-tertiary)' }}
-              >
-                <p className="text-sm font-medium">
-                  Score: {(scanResult as { brandScore?: { overallScore?: number } }).brandScore?.overallScore ?? 'N/A'}
-                </p>
-                <p className="text-xs mt-1" style={{ color: 'var(--text-tertiary)' }}>
-                  {(scanResult as { meta?: { cached?: boolean } }).meta?.cached
-                    ? 'Returned from 24h cache'
-                    : 'Fresh analysis'}
-                </p>
-              </div>
+              <ScanResultPanel result={scanResult} fallbackUsername={activeConnection.username} />
             )}
           </section>
+        )}
+
+        {/* Score History */}
+        {activeConnection && (
+          <ScoreHistoryCard key={historyKey} username={activeConnection.username} />
         )}
 
         {/* Quick Links */}
@@ -248,18 +248,32 @@ export default function DashboardClient({ user, workspace, xConnections }: Dashb
               Unlock multi-platform, watchlists, and more.
             </p>
           </a>
-          <a
-            href={activeConnection ? `/card/${activeConnection.username}` : '#'}
-            className="rounded-lg p-4 border transition-colors"
-            style={{ borderColor: 'var(--border)', backgroundColor: 'var(--surface)' }}
-          >
-            <h3 className="text-sm font-semibold font-mono">
-              {t('shareableCardTitle', 'Shareable Card')}
-            </h3>
-            <p className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>
-              {t('shareableCardSubtitle', 'View and share your public brand card.')}
-            </p>
-          </a>
+          {activeConnection ? (
+            <a
+              href={`/card/${activeConnection.username}`}
+              className="rounded-lg p-4 border transition-colors"
+              style={{ borderColor: 'var(--border)', backgroundColor: 'var(--surface)' }}
+            >
+              <h3 className="text-sm font-semibold font-mono">
+                {t('shareableCardTitle', 'Shareable Card')}
+              </h3>
+              <p className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>
+                {t('shareableCardSubtitle', 'View and share your public brand card.')}
+              </p>
+            </a>
+          ) : (
+            <div
+              className="rounded-lg p-4 border opacity-60"
+              style={{ borderColor: 'var(--border)', backgroundColor: 'var(--surface)' }}
+            >
+              <h3 className="text-sm font-semibold font-mono">
+                {t('shareableCardTitle', 'Shareable Card')}
+              </h3>
+              <p className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>
+                Connect an X account to unlock your public brand card.
+              </p>
+            </div>
+          )}
         </section>
       </div>
     </div>

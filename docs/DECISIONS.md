@@ -111,6 +111,19 @@ Trade-off: two tier vocabularies live on (bounded by the mapping fn).
 Revisit if: MAX is ready to sell, or the AGENCY→TEAM label confuses a
 real buyer.
 
+## 2026-07-08 — Defer the payments flip; build product first
+Deliberate deferral, not drift: all payment CODE is done and green
+(audit path fixed, webhook plan sync, acceptance suites 57/57). The
+remaining ~30 min of dashboard config (Stripe $19 price, prod Stripe
+env vars, PostHog key, staging test purchase) is parked in favor of
+refining the core scan → dashboard experience.
+Why — founder call: product quality over first-dollar timing.
+Trade-off knowingly accepted: the Jul 13 first-customer target slips
+unless the config happens in parallel; this repeats the April/May
+pattern the launch bar was written to break.
+Revisit: this entry is the tripwire — if no paying customer by
+2026-07-20, do the 30-minute config before ANY further product work.
+
 ---
 
 ## Template for new entries

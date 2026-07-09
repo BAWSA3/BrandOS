@@ -47,7 +47,7 @@ export default function SignupPrompt({
 
       await signInWithX({
         inviteCode,
-        redirectTo: `${window.location.origin}/api/auth/callback?next=/app`,
+        redirectTo: `${window.location.origin}/api/auth/callback?next=/dashboard`,
       });
     } catch (err) {
       console.error('[SignupPrompt] X sign in error:', err);

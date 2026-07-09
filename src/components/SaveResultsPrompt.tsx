@@ -37,7 +37,7 @@ export function SaveResultsPrompt({ onDismiss, inviteCode }: SaveResultsPromptPr
 
       await signInWithX({
         inviteCode,
-        redirectTo: `${window.location.origin}/api/auth/callback?next=/app`,
+        redirectTo: `${window.location.origin}/api/auth/callback?next=/dashboard`,
       });
     } catch (err) {
       console.error('[SaveResultsPrompt] Sign in error:', err);
