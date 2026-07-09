@@ -51,9 +51,10 @@ yarn-error.log*
 # Windows artifacts
 nul
 
-# Data files with PII (signup exports contain emails)
+# Data files with PII (signup exports contain emails) + generated charts
 data/*.json
 data/*.csv
+data/*.html
 
 # typescript
 *.tsbuildinfo
@@ -67,3 +68,4 @@ brandkit-for-ai-studio.txt
 plus/
 superpowers/
 .env*.local
+.vercel
