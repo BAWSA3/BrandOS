@@ -9,6 +9,7 @@ import {
   purgeOldWebhookClaims,
 } from '@/lib/webhook-idempotency';
 import { logSecurityEvent } from '@/lib/audit-log';
+import { captureFunnelEvent } from '@/lib/funnel-events';
 
 export async function POST(request: NextRequest) {
   const body = await request.text();
@@ -88,7 +89,21 @@ export async function POST(request: NextRequest) {
 
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   const userId = session.metadata?.userId;
-  if (!userId) return;
+
+  // Anonymous audit purchase (no account) — attribute to the scanned handle,
+  // matching the distinct id used at checkout_started.
+  if (!userId) {
+    const handle = session.metadata?.handle;
+    if (handle) {
+      await captureFunnelEvent(`anon:${handle.toLowerCase()}`, 'purchase_completed', {
+        mode: session.mode,
+        product_type: session.metadata?.productType ?? null,
+        amount_cents: session.amount_total,
+        anonymous: true,
+      });
+    }
+    return;
+  }
 
   if (session.mode === 'payment') {
     const productType = session.metadata?.productType;
@@ -108,6 +123,19 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
         },
       });
     }
+  }
+
+  const buyer = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { supabaseId: true },
+  });
+  if (buyer) {
+    await captureFunnelEvent(buyer.supabaseId, 'purchase_completed', {
+      mode: session.mode,
+      product_type: session.metadata?.productType ?? null,
+      tier: session.metadata?.tier ?? null,
+      amount_cents: session.amount_total,
+    });
   }
 }
 

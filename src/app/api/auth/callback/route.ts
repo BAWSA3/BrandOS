@@ -5,6 +5,7 @@ import prisma from '@/lib/db';
 import { ensurePersonalWorkspace } from '@/lib/auth';
 import { encryptOauthToken, getCurrentKeyId } from '@/lib/crypto';
 import { logSecurityEvent } from '@/lib/audit-log';
+import { captureFunnelEvent } from '@/lib/funnel-events';
 import { isValidTosVersion } from '@/lib/tos';
 
 const EARLY_ACCESS_MODE = process.env.NEXT_PUBLIC_EARLY_ACCESS_MODE === 'true';
@@ -204,6 +205,10 @@ export async function GET(request: NextRequest) {
               lastVerifiedAt: new Date(),
             },
           });
+
+          await captureFunnelEvent(session.user.id, 'x_connected', {
+            source: 'oauth_signup',
+          });
         } else if (existing) {
           await prisma.platformConnection.update({
             where: { id: existing.id },
@@ -226,6 +231,13 @@ export async function GET(request: NextRequest) {
       workspaceId: workspace.id,
       metadata: { method: provider },
     });
+
+    if (!existingUser) {
+      await captureFunnelEvent(session.user.id, 'signup_completed', {
+        method: provider,
+        inner_circle: isInnerCircle,
+      });
+    }
 
     if (recordTos) {
       await logSecurityEvent({

@@ -9,6 +9,7 @@ import {
   type SubscriptionTier,
 } from '@/lib/plans';
 import { botGuard } from '@/lib/botid-guard';
+import { captureFunnelEvent } from '@/lib/funnel-events';
 
 export async function POST(request: NextRequest) {
   try {
@@ -68,6 +69,11 @@ export async function POST(request: NextRequest) {
         cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/pricing?canceled=true`,
       });
 
+      await captureFunnelEvent(user.supabaseId, 'checkout_started', {
+        mode: 'payment',
+        product_type: productType,
+      });
+
       return NextResponse.json({ url: session.url });
     }
 
@@ -108,6 +114,12 @@ export async function POST(request: NextRequest) {
       allow_promotion_codes: true,
       success_url: `${process.env.NEXT_PUBLIC_APP_URL}/app?upgrade=success&plan=${tier}`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/pricing?canceled=true`,
+    });
+
+    await captureFunnelEvent(user.supabaseId, 'checkout_started', {
+      mode: 'subscription',
+      tier,
+      interval: billingInterval,
     });
 
     return NextResponse.json({ url: session.url });

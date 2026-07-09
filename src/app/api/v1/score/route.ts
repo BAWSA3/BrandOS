@@ -11,6 +11,7 @@ import {
 import { assertCanScan } from '@/lib/scan-guard';
 import prisma from '@/lib/db';
 import { logSecurityEvent, getClientIp } from '@/lib/audit-log';
+import { captureFunnelEvent } from '@/lib/funnel-events';
 
 // =============================================================================
 // BrandOS Public API v1 — Brand Score
@@ -273,6 +274,15 @@ export async function POST(request: NextRequest) {
     metadata: { route: '/api/v1/score' },
     ip: getClientIp(request.headers),
     userAgent: request.headers.get('user-agent'),
+  });
+
+  const scanNumber = await prisma.brandScan
+    .count({ where: { userId: guard.user.id } })
+    .catch(() => null);
+  await captureFunnelEvent(guard.user.supabaseId, 'scan_completed', {
+    route: 'v1/score',
+    scan_number: scanNumber,
+    is_first_scan: scanNumber === 1,
   });
 
   return apiSuccess(result.data, { analyzedAt: (result.data as Record<string, unknown>)?.analyzedAt });

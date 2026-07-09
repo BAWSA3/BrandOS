@@ -3,6 +3,7 @@ import prisma from '@/lib/db';
 import { getCurrentUser, getCurrentWorkspace } from '@/lib/auth';
 import { encryptOauthToken, getCurrentKeyId } from '@/lib/crypto';
 import { logSecurityEvent, getClientIp } from '@/lib/audit-log';
+import { captureFunnelEvent } from '@/lib/funnel-events';
 import { computeXAccountCap } from '@/lib/plans';
 
 /**
@@ -126,6 +127,11 @@ export async function POST(request: NextRequest) {
       metadata: { platform_connection_id: connection.id },
       ip: getClientIp(request.headers),
       userAgent: request.headers.get('user-agent'),
+    });
+
+    await captureFunnelEvent(user.supabaseId, 'x_connected', {
+      source: 'connect_endpoint',
+      reactivated: existing?.status === 'dormant',
     });
 
     return NextResponse.json({
