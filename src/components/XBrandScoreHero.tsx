@@ -1538,6 +1538,28 @@ export default function XBrandScoreHero({
             >
               ── WORKS WITH ANY PUBLIC X ACCOUNT ──
             </motion.p>
+            {/* Legal footer — Phase 8 acceptance: privacy + terms reachable from landing */}
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.6, duration: 0.4 }}
+              style={{
+                fontFamily: "'PP NeueBit', monospace",
+                fontSize: '11px',
+                letterSpacing: '0.15em',
+                color: 'rgba(0,0,0,0.35)',
+                textAlign: 'center',
+                marginTop: '0.5rem',
+              }}
+            >
+              <a href="/privacy" style={{ color: 'inherit', textDecoration: 'underline' }}>
+                PRIVACY
+              </a>
+              {' · '}
+              <a href="/terms" style={{ color: 'inherit', textDecoration: 'underline' }}>
+                TERMS
+              </a>
+            </motion.p>
           </motion.div>
         )}
 

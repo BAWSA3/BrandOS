@@ -92,6 +92,15 @@ Track these in `SECURITY-HARDENING.md`; schedule within 30 days of first paying 
 - Final pass on Phase 8 minimum acceptance; flip on payments.
 - **Target: first paying customer by Jul 13.**
 
+#### Week 4 progress (2026-07-08)
+- ✅ Funnel instrumented: server-side PostHog on signup/connect/scan/checkout/purchase + client identify (`src/lib/funnel-events.ts`). ⚠️ Inert until `NEXT_PUBLIC_POSTHOG_KEY` is set — it is currently set in NO environment.
+- ✅ First dollar decided: $19 Score Boost Audit (DECISIONS.md). Path unbroken same day: `assertCanScan` removed from `audit/run` (rejected every anonymous buyer post-payment), orphaned `ScoreBoostAuditCta` mounted in the reveal state.
+- ✅ Tier reconciliation: map-don't-rename (DECISIONS.md); webhook now syncs `workspace.plan` (was never written — subscribers would have kept FREE limits).
+- ✅ Acceptance suites all green (57/57): `test:safety` 21, `test:webhooks` 7, `test:rls` 13, `test:deletion` 16. `gitleaks` history scan: clean (14 doc placeholders + 1 revoked-from-tree motion-plus download token, Jan 2026 — rotate at leisure).
+- ✅ security.txt exists; privacy/terms now linked from landing footer + signup.
+- ⬜ **Flip on payments — blocked on env config (user action):** prod `brandos` has ZERO Stripe vars; `STRIPE_PRICE_SCORE_BOOST` set nowhere; PostHog key set nowhere. Steps: create $19 price in Stripe → set price ID + PostHog key in staging → test purchase (4242…) on staging → copy Stripe vars + register webhook endpoint for prod → promote staging→main.
+- ⬜ Key rotation (min-bar item 5): Anthropic/Stripe/Resend rotation status unconfirmed — verify against `KEY-ROTATION-CHECKLIST.md` before go-live.
+
 ---
 
 ## Tripwires (revisit the whole plan if any fire)
