@@ -158,6 +158,11 @@ model Brand {
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  // Workspace scope (Phase 1 model). Nullable: legacy brands are adopted
+  // into the owner's personal workspace on first authed read.
+  workspaceId String?    @db.Uuid
+  workspace   Workspace? @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
+
   // Team access
   team      Team?    @relation(fields: [teamId], references: [id])
   teamId    String?
@@ -196,6 +201,7 @@ model Brand {
   gapAnalyses          GapAnalysis[]
 
   @@index([userId])
+  @@index([workspaceId])
   @@index([teamId])
   @@index([shareToken])
 }
@@ -954,6 +960,7 @@ model Workspace {
   auditReportShares    AuditReportShare[]
   securityAuditEvents  SecurityAuditLog[]
   dailyBriefs          DailyBrief[]
+  brands               Brand[]
 
   @@index([ownerUserId])
   @@map("Workspace")

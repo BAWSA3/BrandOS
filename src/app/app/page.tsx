@@ -46,7 +46,7 @@ import { useInnerCircle, InnerCircleStyles } from '@/components/InnerCircleBadge
 import ChangelogModal from '@/components/ChangelogModal';
 import analytics from '@/lib/analytics';
 import { useAuth } from '@/hooks/useAuth';
-import { useBrandSync } from '@/hooks/useBrandSync';
+import { useBrandHydration } from '@/hooks/useBrandHydration';
 import { useHistorySync } from '@/hooks/useHistorySync';
 import ContentWorkflow from '@/components/workflow/ContentWorkflow';
 import ContentCalendar from '@/components/calendar/ContentCalendar';
@@ -81,7 +81,7 @@ function HomeContent() {
   const toast = useToast();
   const { isInnerCircle, pendingInviteCode } = useInnerCircle();
   const { user, isLoading: authLoading } = useAuth();
-  const { isSyncing, syncError } = useBrandSync();
+  const { isSyncing, syncError } = useBrandHydration();
   const { saveHistoryItem } = useHistorySync();
 
   // State for showing save results prompt (for unauthenticated users)

@@ -68,6 +68,8 @@ interface BrandStore {
   deleteBrand: (id: string) => void;
   switchBrand: (id: string) => void;
   importBrandFromDNA: (dna: ImportableBrandDNA, twitterUsername: string) => string;
+  hydrateBrands: (brands: BrandDNA[]) => void;
+  replaceBrandId: (oldId: string, newId: string) => void;
 
   // History
   history: HistoryItem[];
@@ -230,6 +232,39 @@ export const useBrandStore = create<BrandStore>()(
         }),
 
       switchBrand: (id) => set({ currentBrandId: id }),
+
+      // Server-first hydration: replace local brands wholesale with the
+      // workspace's server brands (the server is the source of truth once
+      // the user is authed).
+      hydrateBrands: (brands) =>
+        set((state) => {
+          if (brands.length === 0) return state;
+          const currentStillExists = brands.some((b) => b.id === state.currentBrandId);
+          return {
+            brands,
+            currentBrandId: currentStillExists ? state.currentBrandId : brands[0].id,
+          };
+        }),
+
+      // Swap a local uuid for the server cuid after a create round-trips,
+      // carrying every per-brand keyed record along so nothing orphans.
+      replaceBrandId: (oldId, newId) =>
+        set((state) => {
+          const remap = <T>(record: Record<string, T>): Record<string, T> => {
+            if (!(oldId in record)) return record;
+            const { [oldId]: moved, ...rest } = record;
+            return { ...rest, [newId]: moved };
+          };
+          return {
+            brands: state.brands.map((b) => (b.id === oldId ? { ...b, id: newId } : b)),
+            currentBrandId: state.currentBrandId === oldId ? newId : state.currentBrandId,
+            safeZones: remap(state.safeZones),
+            brandMemory: remap(state.brandMemory),
+            designIntents: remap(state.designIntents),
+            voiceFingerprints: remap(state.voiceFingerprints),
+            contentEngineConfigs: remap(state.contentEngineConfigs),
+          };
+        }),
 
       importBrandFromDNA: (dna, twitterUsername) => {
         const newBrand: BrandDNA = {
