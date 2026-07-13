@@ -91,8 +91,8 @@ export function useAuth(): UseAuthReturn {
           } else if (hashSession) {
             setSession(hashSession);
             await fetchUser(hashSession.user);
-            // Clean up URL hash and redirect to app
-            window.history.replaceState(null, '', '/app');
+            // Clean up URL hash and redirect to the authenticated home
+            window.history.replaceState(null, '', '/dashboard');
             setIsLoading(false);
             return;
           }
@@ -169,6 +169,17 @@ export function useAuth(): UseAuthReturn {
     }
     setUser(null);
     setSession(null);
+    // Wipe persisted brand data so the next login on this browser can't see it
+    try {
+      localStorage.removeItem('brandos-storage');
+      localStorage.removeItem('brandos-brandkit-storage');
+      localStorage.removeItem('pendingBrandSync');
+    } catch {
+      // localStorage unavailable (private mode) — nothing persisted to clear
+    }
+    // Hard navigation: zustand's in-memory state would re-persist the cleared
+    // keys on the next state change; a full reload guarantees a clean slate.
+    window.location.href = '/';
   }, []);
 
   // Refresh user data

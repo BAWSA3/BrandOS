@@ -482,7 +482,7 @@ export default function PhantomShowcase() {
             <span>PHANTOM</span>
           </div>
           <div className={styles.footerLinks}>
-            <a href="/app">BrandOS App</a>
+            <a href="/dashboard">BrandOS App</a>
             <a href="/">Home</a>
           </div>
           <div className={styles.footerMeta}>

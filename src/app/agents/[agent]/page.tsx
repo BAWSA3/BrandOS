@@ -52,7 +52,7 @@ export default function AgentChatPage() {
             The AI agents need your brand DNA to create on-brand content and strategies.
           </p>
           <Link
-            href="/app"
+            href="/dashboard"
             className="inline-flex items-center gap-2 px-6 py-3 bg-white text-black font-medium rounded-lg hover:bg-neutral-200 transition-colors"
           >
             Create Brand

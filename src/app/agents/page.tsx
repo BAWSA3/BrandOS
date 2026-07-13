@@ -33,7 +33,7 @@ export default function AgentsPage() {
             started.
           </p>
           <Link
-            href="/app"
+            href="/dashboard"
             className="inline-flex items-center gap-2 px-6 py-3 bg-white text-black font-medium rounded-lg hover:bg-neutral-200 transition-colors"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -57,7 +57,7 @@ export default function AgentsPage() {
       <header className="border-b border-neutral-800 px-6 py-4">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link href="/app" className="text-neutral-400 hover:text-white transition-colors">
+            <Link href="/dashboard" className="text-neutral-400 hover:text-white transition-colors">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
                   strokeLinecap="round"

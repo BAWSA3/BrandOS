@@ -219,7 +219,7 @@ export default function ContentEnginePage() {
             the content engine needs your brand dna to generate on-brand content with your voice.
           </p>
           <Link
-            href="/app"
+            href="/dashboard"
             className="btn-primary inline-flex items-center gap-2 px-6 py-3 font-medium rounded-[var(--radius-md)]"
           >
             create brand

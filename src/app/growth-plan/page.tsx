@@ -436,7 +436,7 @@ export default function GrowthPlanPage() {
               </span>
             </button>
             <button
-              onClick={() => (window.location.href = '/app')}
+              onClick={() => (window.location.href = '/dashboard')}
               style={{
                 padding: '14px 28px',
                 background: '#0047FF',

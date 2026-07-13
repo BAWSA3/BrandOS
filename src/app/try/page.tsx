@@ -440,7 +440,7 @@ export default function TryEnginePage() {
                 with unlimited access, deep voice fingerprinting, and the full BrandOS suite.
               </p>
               <Link
-                href="/app"
+                href="/dashboard"
                 className="label-mono inline-block px-6 py-3 rounded-[var(--radius-sm)]"
                 style={{ background: 'var(--accent)', color: '#fff' }}
               >
@@ -457,7 +457,7 @@ export default function TryEnginePage() {
                 {daysRemaining - 1 !== 1 ? 's' : ''} left in your trial.
               </p>
               <Link
-                href="/app"
+                href="/dashboard"
                 className="label-mono inline-block px-5 py-2.5 rounded-[var(--radius-sm)]"
                 style={{
                   background: 'transparent',
@@ -510,7 +510,7 @@ export default function TryEnginePage() {
             </span>
             {rateLimited && (
               <div className="mt-2">
-                <Link href="/app" className="label-mono text-[var(--accent)] underline">
+                <Link href="/dashboard" className="label-mono text-[var(--accent)] underline">
                   Sign up for unlimited access →
                 </Link>
               </div>
@@ -555,7 +555,7 @@ export default function TryEnginePage() {
                   {voiceScan
                     ? 'Quick scan. Full Brand DNA gets you to 85%+. '
                     : 'Users with Brand DNA average 85%+. '}
-                  <Link href="/app" className="text-[var(--accent)] underline">
+                  <Link href="/dashboard" className="text-[var(--accent)] underline">
                     Set up yours free →
                   </Link>
                 </span>
@@ -630,7 +630,7 @@ export default function TryEnginePage() {
           </p>
           <div className="flex gap-3 justify-center">
             <Link
-              href="/app"
+              href="/dashboard"
               className="label-mono inline-block px-5 py-2.5 rounded-[var(--radius-sm)]"
               style={{ background: 'var(--accent)', color: '#fff' }}
             >
