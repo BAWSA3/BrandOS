@@ -9,6 +9,7 @@ import ScanResultPanel, { type ScanResponse } from '@/components/dashboard/ScanR
 import ScoreHistoryCard from '@/components/dashboard/ScoreHistoryCard';
 import BrandSetupWizard from '@/components/dashboard/BrandSetupWizard';
 import BrandDNAPanel from '@/components/dashboard/BrandDNAPanel';
+import ContentCheckPanel from '@/components/dashboard/ContentCheckPanel';
 
 const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -148,10 +149,14 @@ export default function DashboardClient({ user, workspace, xConnections }: Dashb
           <>
             {/* Brand DNA editor — only once server hydration is live */}
             {storeReady && isHydrated && (
-              <BrandDNAPanel
-                sync={{ isSyncing, lastSyncedAt, syncError }}
-                onReinit={() => setReinitRequested(true)}
-              />
+              <>
+                <BrandDNAPanel
+                  sync={{ isSyncing, lastSyncedAt, syncError }}
+                  onReinit={() => setReinitRequested(true)}
+                />
+                {/* Content Check — hidden until the brand has DNA to score against */}
+                <ContentCheckPanel />
+              </>
             )}
 
             {/* X Account Connections */}

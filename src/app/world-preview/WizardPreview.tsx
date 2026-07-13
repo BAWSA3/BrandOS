@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import BrandSetupWizard from '@/components/dashboard/BrandSetupWizard';
 import BrandDNAPanel from '@/components/dashboard/BrandDNAPanel';
+import ContentCheckPanel from '@/components/dashboard/ContentCheckPanel';
 import { useBrandStore } from '@/lib/store';
 import { brandHasContent } from '@/hooks/useBrandHydration';
 import { brandTemplates } from '@/lib/templates';
@@ -11,16 +12,19 @@ import { brandTemplates } from '@/lib/templates';
 //   ?wizard=1 — first-run BrandSetupWizard
 //   ?dna=1    — BrandDNAPanel editor (seeds a template brand if the local
 //               store is empty so the editor has data to show)
+//   ?check=1  — ContentCheckPanel (seeded brand; the check API itself
+//               requires auth, so [RUN CHECK] will error here — this mode is
+//               for layout/typography iteration)
 // Local store only; nothing syncs from this page.
 
-export default function WizardPreview({ mode }: { mode: 'wizard' | 'dna' }) {
+export default function WizardPreview({ mode }: { mode: 'wizard' | 'dna' | 'check' }) {
   const [done, setDone] = useState(false);
   const [reinit, setReinit] = useState(false);
   const { brands, setBrandDNA } = useBrandStore();
 
-  // dna mode: seed the store so the editor renders populated.
+  // dna/check modes: seed the store so the panels render populated.
   useEffect(() => {
-    if (mode === 'dna' && !brands.some(brandHasContent)) {
+    if (mode !== 'wizard' && !brands.some(brandHasContent)) {
       const t = brandTemplates[0];
       setBrandDNA({ ...t.preview, name: 'Phantom Labs' });
     }
@@ -37,6 +41,8 @@ export default function WizardPreview({ mode }: { mode: 'wizard' | 'dna' }) {
           ) : (
             <BrandSetupWizard onComplete={() => setDone(true)} onSkip={() => setDone(true)} />
           )
+        ) : mode === 'check' ? (
+          <ContentCheckPanel />
         ) : (
           <BrandDNAPanel
             sync={{ isSyncing: false, lastSyncedAt: new Date(), syncError: null }}
