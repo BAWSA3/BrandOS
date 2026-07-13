@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import type { Brand } from '@prisma/client';
 import prisma from '@/lib/db';
-import { getCurrentUser, getCurrentWorkspace, ensurePersonalWorkspace } from '@/lib/auth';
+import { getWorkspaceContext, ownedBrandWhere, ownedBrandsWhere } from '@/lib/workspace-auth';
 
 // Check/generate history, workspace-scoped (consolidation step 4). The old
 // route read the dead sb-access-token cookie — this is the route that
@@ -9,21 +8,6 @@ import { getCurrentUser, getCurrentWorkspace, ensurePersonalWorkspace } from '@/
 // Check panel is its first real consumer.
 
 const MAX_BODY_BYTES = 150_000;
-
-async function getAuthContext() {
-  const user = await getCurrentUser();
-  if (!user) return null;
-  const workspace =
-    (await getCurrentWorkspace(user)) ??
-    (await ensurePersonalWorkspace(user.id, user.name ?? undefined));
-  return { user, workspace };
-}
-
-// Brands the caller may read/write history for: their workspace's brands,
-// plus legacy rows they own that haven't been adopted yet.
-function ownedBrandsWhere(workspaceId: string, userId: string) {
-  return { OR: [{ workspaceId }, { userId, workspaceId: null }] };
-}
 
 function serializeEntry(
   entry: {
@@ -52,25 +36,32 @@ function serializeEntry(
 // GET /api/history - Fetch history for the workspace's brands
 export async function GET(request: NextRequest) {
   try {
-    const ctx = await getAuthContext();
+    // Read path stays read-only: no workspace auto-creation on GET.
+    const ctx = await getWorkspaceContext({ ensure: false });
     if (!ctx) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    if (!ctx.workspace) {
+      return NextResponse.json({ history: [] });
     }
 
     const { searchParams } = new URL(request.url);
     const brandId = searchParams.get('brandId');
-    const limit = Math.min(parseInt(searchParams.get('limit') || '50', 10) || 50, 200);
+    const limit = Math.min(Math.max(parseInt(searchParams.get('limit') || '50', 10) || 50, 1), 200);
 
-    const brands = await prisma.brand.findMany({
-      where: ownedBrandsWhere(ctx.workspace.id, ctx.user.id),
-      select: { id: true, name: true },
-    });
-    const brandNameMap = Object.fromEntries(
-      brands.map((b: Pick<Brand, 'id' | 'name'>) => [b.id, b.name])
-    );
-    const brandIds = brandId
-      ? brands.filter((b) => b.id === brandId).map((b) => b.id)
-      : brands.map((b) => b.id);
+    // Single-brand lookup when the caller filters (the panel always does);
+    // full workspace set only for the unfiltered view.
+    const brands = brandId
+      ? await prisma.brand.findMany({
+          where: ownedBrandWhere(brandId, ctx.workspace.id, ctx.user.id),
+          select: { id: true, name: true },
+        })
+      : await prisma.brand.findMany({
+          where: ownedBrandsWhere(ctx.workspace.id, ctx.user.id),
+          select: { id: true, name: true },
+        });
+    const brandNameMap = Object.fromEntries(brands.map((b) => [b.id, b.name]));
+    const brandIds = brands.map((b) => b.id);
 
     if (brandIds.length === 0) {
       return NextResponse.json({ history: [] });
@@ -96,8 +87,8 @@ export async function GET(request: NextRequest) {
 // POST /api/history - Save a new history entry
 export async function POST(request: NextRequest) {
   try {
-    const ctx = await getAuthContext();
-    if (!ctx) {
+    const ctx = await getWorkspaceContext({ ensure: true });
+    if (!ctx || !ctx.workspace) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -130,7 +121,7 @@ export async function POST(request: NextRequest) {
     // The brand must belong to the caller's workspace (or be a legacy row
     // they own).
     const brand = await prisma.brand.findFirst({
-      where: { id: brandId, ...ownedBrandsWhere(ctx.workspace.id, ctx.user.id) },
+      where: ownedBrandWhere(brandId, ctx.workspace.id, ctx.user.id),
     });
 
     if (!brand) {
@@ -164,7 +155,7 @@ export async function POST(request: NextRequest) {
 // DELETE /api/history?id=xxx - Delete a history entry
 export async function DELETE(request: NextRequest) {
   try {
-    const ctx = await getAuthContext();
+    const ctx = await getWorkspaceContext({ ensure: false });
     if (!ctx) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -183,7 +174,7 @@ export async function DELETE(request: NextRequest) {
 
     const owned =
       entry &&
-      (entry.brand.workspaceId === ctx.workspace.id ||
+      ((ctx.workspace !== null && entry.brand.workspaceId === ctx.workspace.id) ||
         (entry.brand.userId === ctx.user.id && entry.brand.workspaceId === null));
 
     if (!owned) {

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import type { Brand } from '@prisma/client';
 import prisma from '@/lib/db';
-import { getCurrentUser, getCurrentWorkspace, ensurePersonalWorkspace } from '@/lib/auth';
+import { getWorkspaceContext, ownedBrandWhere } from '@/lib/workspace-auth';
 
 // Brand CRUD, workspace-scoped (Phase 1 model). Legacy rows (userId set,
 // workspaceId null) are adopted into the caller's personal workspace on GET,
@@ -11,16 +11,6 @@ import { getCurrentUser, getCurrentWorkspace, ensurePersonalWorkspace } from '@/
 // Request bodies carry brand text corpora (voice samples etc.) but anything
 // beyond this is abuse, not usage.
 const MAX_BODY_BYTES = 200_000;
-
-async function getAuthContext() {
-  const user = await getCurrentUser();
-  if (!user) return null;
-
-  const workspace =
-    (await getCurrentWorkspace(user)) ?? (await ensurePersonalWorkspace(user.id, user.name ?? undefined));
-
-  return { user, workspace };
-}
 
 async function readJsonBody(request: NextRequest): Promise<Record<string, unknown> | null> {
   const raw = await request.text();
@@ -50,20 +40,11 @@ function serializeBrand(brand: Brand) {
   };
 }
 
-// Ownership scope for writes: workspace-scoped, with a fallback for legacy
-// rows the caller owns that haven't been adopted yet (write-before-read).
-function ownedBrandWhere(id: string, workspaceId: string, userId: string) {
-  return {
-    id,
-    OR: [{ workspaceId }, { userId, workspaceId: null }],
-  };
-}
-
 // GET /api/brands - Fetch the workspace's brands
 export async function GET() {
   try {
-    const ctx = await getAuthContext();
-    if (!ctx) {
+    const ctx = await getWorkspaceContext({ ensure: true });
+    if (!ctx || !ctx.workspace) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -91,8 +72,8 @@ export async function GET() {
 // POST /api/brands - Create a new brand in the workspace
 export async function POST(request: NextRequest) {
   try {
-    const ctx = await getAuthContext();
-    if (!ctx) {
+    const ctx = await getWorkspaceContext({ ensure: true });
+    if (!ctx || !ctx.workspace) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -141,8 +122,8 @@ export async function POST(request: NextRequest) {
 // PUT /api/brands - Update a brand in the workspace
 export async function PUT(request: NextRequest) {
   try {
-    const ctx = await getAuthContext();
-    if (!ctx) {
+    const ctx = await getWorkspaceContext({ ensure: true });
+    if (!ctx || !ctx.workspace) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -196,8 +177,8 @@ export async function PUT(request: NextRequest) {
 // DELETE /api/brands?id=xxx - Delete a brand in the workspace
 export async function DELETE(request: NextRequest) {
   try {
-    const ctx = await getAuthContext();
-    if (!ctx) {
+    const ctx = await getWorkspaceContext({ ensure: true });
+    if (!ctx || !ctx.workspace) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 

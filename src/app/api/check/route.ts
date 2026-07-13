@@ -8,7 +8,7 @@ import { getCurrentUser } from '@/lib/auth';
 import { botGuard } from '@/lib/botid-guard';
 import { checkAndIncrementUsage } from '@/lib/usage';
 import { GUARD_PREAMBLE, wrapUntrusted } from '@/lib/prompt-safety';
-import { clampScore } from '@/lib/score-schemas';
+import { clampScore, extractJson } from '@/lib/score-schemas';
 
 // Content Check — scores a draft against the user's brand DNA (consolidation
 // step 4). Hardened for the dashboard surface: the legacy route allowed
@@ -37,18 +37,12 @@ function asStringList(value: unknown): string[] {
 // Validate + clamp the model's JSON into a CheckResult shape. Returns null
 // if the output doesn't look like a check result at all.
 function parseCheckResult(text: string) {
-  const jsonMatch = text.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) return null;
-
-  let raw: unknown;
-  try {
-    raw = JSON.parse(jsonMatch[0]);
-  } catch {
-    return null;
-  }
+  const raw = extractJson(text);
   if (typeof raw !== 'object' || raw === null) return null;
   const obj = raw as Record<string, unknown>;
-  if (obj.score === undefined) return null;
+  // A non-numeric score means the model didn't produce a usable check —
+  // reject rather than clamp null/strings into a confident-looking 0.
+  if (typeof obj.score !== 'number') return null;
 
   return {
     score: clampScore(obj.score),
@@ -69,14 +63,6 @@ export async function POST(request: NextRequest) {
 
     const botBlock = await botGuard(request);
     if (botBlock) return botBlock;
-
-    const { allowed, usage } = await checkAndIncrementUsage(user.id, 'check');
-    if (!allowed) {
-      return NextResponse.json(
-        { error: 'Usage limit reached', code: 'USAGE_LIMIT', usage, upgradeUrl: '/pricing' },
-        { status: 429 }
-      );
-    }
 
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) {
@@ -113,6 +99,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Only after the request is known-valid — rejected requests must not
+    // burn a check credit. (An LLM failure after this point still consumes
+    // one; refunds would need transactional usage tracking.)
+    const { allowed, usage } = await checkAndIncrementUsage(user.id, 'check');
+    if (!allowed) {
+      return NextResponse.json(
+        { error: 'Usage limit reached', code: 'USAGE_LIMIT', usage, upgradeUrl: '/pricing' },
+        { status: 429 }
+      );
+    }
+
     const anthropic = new Anthropic({ apiKey });
 
     // The draft is untrusted (users paste third-party text); fence it so it
@@ -120,7 +117,10 @@ export async function POST(request: NextRequest) {
     // and flow through buildCheckPrompt as before.
     const fencedContent = wrapUntrusted(content, 'user_draft', MAX_CONTENT_CHARS);
 
-    const message = await anthropic.messages.create({
+    // The authenticity check depends only on request inputs, so it runs
+    // concurrently with the main check instead of doubling latency. It is
+    // non-blocking: failures resolve to null rather than rejecting the pair.
+    const mainCall = anthropic.messages.create({
       model: MODEL,
       max_tokens: 2048,
       // Sonnet 5 runs adaptive thinking when the field is omitted — keep the
@@ -134,6 +134,28 @@ export async function POST(request: NextRequest) {
       ],
     });
 
+    const authCall = voiceFingerprint?.metadata
+      ? anthropic.messages
+          .create({
+            model: MODEL,
+            max_tokens: 3000,
+            thinking: { type: 'disabled' },
+            messages: [
+              {
+                role: 'user',
+                content:
+                  GUARD_PREAMBLE + buildAuthenticityCheckPrompt(voiceFingerprint, fencedContent),
+              },
+            ],
+          })
+          .catch((e: unknown) => {
+            console.error('Authenticity check failed (non-blocking):', e);
+            return null;
+          })
+      : Promise.resolve(null);
+
+    const [message, authMessage] = await Promise.all([mainCall, authCall]);
+
     const responseText = message.content[0]?.type === 'text' ? message.content[0].text : '';
     const result = parseCheckResult(responseText);
     if (!result) {
@@ -141,41 +163,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Analysis returned an invalid result' }, { status: 502 });
     }
 
-    // Optional: authenticity check if fingerprint provided (non-blocking)
     let authenticityScore: AuthenticityScore | null = null;
-    if (voiceFingerprint?.metadata) {
-      try {
-        const authMessage = await anthropic.messages.create({
-          model: MODEL,
-          max_tokens: 3000,
-          thinking: { type: 'disabled' },
-          messages: [
-            {
-              role: 'user',
-              content:
-                GUARD_PREAMBLE + buildAuthenticityCheckPrompt(voiceFingerprint, fencedContent),
-            },
-          ],
-        });
-
-        const authText = authMessage.content[0]?.type === 'text' ? authMessage.content[0].text : '';
-        const authJson = authText.match(/\{[\s\S]*\}/);
-        if (authJson) {
-          const parsed: unknown = JSON.parse(authJson[0]);
-          // Minimal shape gate — non-blocking feature, but never forward
-          // unvalidated model output.
-          if (
-            typeof parsed === 'object' &&
-            parsed !== null &&
-            typeof (parsed as Record<string, unknown>).overall === 'number' &&
-            typeof (parsed as Record<string, unknown>).verdict === 'string'
-          ) {
-            const cand = parsed as AuthenticityScore;
-            authenticityScore = { ...cand, overall: clampScore(cand.overall) };
-          }
-        }
-      } catch (e) {
-        console.error('Authenticity check failed (non-blocking):', e);
+    if (authMessage) {
+      const authText = authMessage.content[0]?.type === 'text' ? authMessage.content[0].text : '';
+      const parsed = extractJson(authText);
+      // Minimal shape gate — non-blocking feature, but never forward
+      // unvalidated model output.
+      if (
+        typeof parsed === 'object' &&
+        parsed !== null &&
+        typeof (parsed as Record<string, unknown>).overall === 'number' &&
+        typeof (parsed as Record<string, unknown>).verdict === 'string'
+      ) {
+        const cand = parsed as AuthenticityScore;
+        authenticityScore = { ...cand, overall: clampScore(cand.overall) };
       }
     }
 

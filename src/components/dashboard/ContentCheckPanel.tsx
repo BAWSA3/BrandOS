@@ -13,10 +13,11 @@ import { MONO, asciiBar, TerminalButton, terminalInputStyle } from './terminal-u
 
 const MAX_CONTENT_CHARS = 10_000;
 
+// loadHistory filters to rows with a numeric score, so score is non-optional.
 interface HistoryRow {
   id: string;
   input: string;
-  output: { score?: number };
+  output: { score: number };
   timestamp: string;
 }
 
@@ -315,7 +316,7 @@ export default function ContentCheckPanel() {
             </p>
             <div className="space-y-1">
               {history.map((h) => {
-                const s = h.output.score ?? 0;
+                const s = h.output.score;
                 return (
                   <div key={h.id} className="flex items-center gap-3">
                     <span
