@@ -47,7 +47,8 @@ function toBrandDNA(b: ServerBrand): BrandDNA {
 }
 
 // Only brands the user actually worked on are worth a server row.
-function hasContent(b: BrandDNA): boolean {
+// Also the first-run signal: no brand with content → show the setup wizard.
+export function brandHasContent(b: BrandDNA): boolean {
   return (
     b.keywords.length > 0 ||
     b.doPatterns.length > 0 ||
@@ -127,7 +128,7 @@ export function useBrandHydration(): UseBrandHydrationReturn {
     for (const brand of current) {
       if (serverIdsRef.current.has(brand.id)) {
         await updateOnServer(brand);
-      } else if (hasContent(brand)) {
+      } else if (brandHasContent(brand)) {
         await createOnServer(brand);
       }
     }
@@ -151,7 +152,7 @@ export function useBrandHydration(): UseBrandHydrationReturn {
         // Push up local-only brands the user actually worked on.
         const localOnly = useBrandStore
           .getState()
-          .brands.filter((b) => !serverIdsRef.current.has(b.id) && hasContent(b));
+          .brands.filter((b) => !serverIdsRef.current.has(b.id) && brandHasContent(b));
         const pushed: BrandDNA[] = [];
         for (const brand of localOnly) {
           pushed.push(await createOnServer(brand));
@@ -160,12 +161,15 @@ export function useBrandHydration(): UseBrandHydrationReturn {
         hydrateBrands([...serverBrands, ...pushed]);
         lastPushedRef.current = JSON.stringify(useBrandStore.getState().brands);
         setLastSyncedAt(new Date());
+        // Success-only: isHydrated gates both the first-run wizard (a failed
+        // fetch must not show setup to an existing user) and the push loop
+        // (pushing against unknown server state re-creates duplicates).
+        setIsHydrated(true);
       } catch (error) {
         console.error('[useBrandHydration] Hydration error:', error);
         setSyncError('Failed to load brands from your account. Working from this device.');
       } finally {
         setIsSyncing(false);
-        setIsHydrated(true);
       }
     })();
   }, [authLoading, user, createOnServer, hydrateBrands]);
