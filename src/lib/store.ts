@@ -235,14 +235,28 @@ export const useBrandStore = create<BrandStore>()(
 
       // Server-first hydration: replace local brands wholesale with the
       // workspace's server brands (the server is the source of truth once
-      // the user is authed).
+      // the user is authed). Fingerprints stored on the brand rows are
+      // unpacked into the per-brand record so panels read one source.
       hydrateBrands: (brands) =>
         set((state) => {
           if (brands.length === 0) return state;
           const currentStillExists = brands.some((b) => b.id === state.currentBrandId);
+
+          const fingerprints = { ...state.voiceFingerprints };
+          for (const b of brands) {
+            if (b.voiceFingerprint) {
+              try {
+                fingerprints[b.id] = JSON.parse(b.voiceFingerprint);
+              } catch {
+                // Corrupt stored fingerprint — ignore; user can re-extract.
+              }
+            }
+          }
+
           return {
             brands,
             currentBrandId: currentStillExists ? state.currentBrandId : brands[0].id,
+            voiceFingerprints: fingerprints,
           };
         }),
 
@@ -413,19 +427,31 @@ export const useBrandStore = create<BrandStore>()(
           };
         }),
 
-      // Voice Fingerprints
+      // Voice Fingerprints — kept in the per-brand record for fast access AND
+      // mirrored onto brand.voiceFingerprint (JSON string) so the server sync
+      // (useBrandHydration → /api/brands) persists it to the workspace brand.
       setVoiceFingerprint: (brandId, fp) =>
         set((state) => ({
           voiceFingerprints: {
             ...state.voiceFingerprints,
             [brandId]: fp,
           },
+          brands: state.brands.map((b) =>
+            b.id === brandId
+              ? { ...b, voiceFingerprint: JSON.stringify(fp), updatedAt: new Date() }
+              : b
+          ),
         })),
 
       clearVoiceFingerprint: (brandId) =>
         set((state) => {
           const { [brandId]: _, ...rest } = state.voiceFingerprints;
-          return { voiceFingerprints: rest };
+          return {
+            voiceFingerprints: rest,
+            brands: state.brands.map((b) =>
+              b.id === brandId ? { ...b, voiceFingerprint: undefined, updatedAt: new Date() } : b
+            ),
+          };
         }),
 
       // Content Engine Configs
