@@ -8,6 +8,7 @@ import { useBrandHydration, brandHasContent } from '@/hooks/useBrandHydration';
 import ScanResultPanel, { type ScanResponse } from '@/components/dashboard/ScanResultPanel';
 import ScoreHistoryCard from '@/components/dashboard/ScoreHistoryCard';
 import BrandSetupWizard from '@/components/dashboard/BrandSetupWizard';
+import BrandDNAPanel from '@/components/dashboard/BrandDNAPanel';
 
 const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -54,18 +55,26 @@ export default function DashboardClient({ user, workspace, xConnections }: Dashb
   // hydration before deciding, so the wizard never flashes for users who
   // already have a brand.
   const storeReady = useHasHydrated();
-  const { isHydrated, forceSync } = useBrandHydration();
+  const { isHydrated, isSyncing, lastSyncedAt, syncError, forceSync } = useBrandHydration();
   const { brands, phaseProgress, completeOnboarding } = useBrandStore();
-  const needsSetup =
+  // Re-entry: the DNA panel's [ RUN brand.init() ] re-opens the wizard after
+  // a skipped onboarding.
+  const [reinitRequested, setReinitRequested] = useState(false);
+  const showWizard =
     storeReady &&
     isHydrated &&
-    !phaseProgress.hasCompletedOnboarding &&
-    !brands.some(brandHasContent);
+    (reinitRequested || (!phaseProgress.hasCompletedOnboarding && !brands.some(brandHasContent)));
 
   function handleSetupComplete() {
     completeOnboarding();
+    setReinitRequested(false);
     // Push the finished brand now rather than waiting out the debounce.
     void forceSync();
+  }
+
+  function handleSetupSkip() {
+    completeOnboarding();
+    setReinitRequested(false);
   }
 
   async function handleConnect() {
@@ -131,12 +140,20 @@ export default function DashboardClient({ user, workspace, xConnections }: Dashb
         </header>
 
         {/* First-run: brand DNA setup replaces the dashboard body until done */}
-        {needsSetup && (
-          <BrandSetupWizard onComplete={handleSetupComplete} onSkip={completeOnboarding} />
+        {showWizard && (
+          <BrandSetupWizard onComplete={handleSetupComplete} onSkip={handleSetupSkip} />
         )}
 
-        {!needsSetup && (
+        {!showWizard && (
           <>
+            {/* Brand DNA editor — only once server hydration is live */}
+            {storeReady && isHydrated && (
+              <BrandDNAPanel
+                sync={{ isSyncing, lastSyncedAt, syncError }}
+                onReinit={() => setReinitRequested(true)}
+              />
+            )}
+
             {/* X Account Connections */}
             <section
               className="rounded-lg p-6 border"

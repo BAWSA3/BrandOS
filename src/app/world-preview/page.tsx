@@ -7,14 +7,14 @@ import WizardPreview from './WizardPreview';
 
 // Unauthenticated preview for verifying the WorldProvider runtime.
 // Visit /world-preview?world=terminal-os (world param optional; defaults to terminal-os).
-// Add &wizard=1 to preview the first-run BrandSetupWizard under the theme
-// (writes to the local brand store only — nothing syncs from this page).
+// Add &wizard=1 for the first-run BrandSetupWizard, or &dna=1 for the
+// BrandDNAPanel editor (local brand store only — nothing syncs from here).
 export default async function WorldPreviewPage({
   searchParams,
 }: {
-  searchParams: Promise<{ world?: string; wizard?: string }>;
+  searchParams: Promise<{ world?: string; wizard?: string; dna?: string }>;
 }) {
-  const { world: worldId, wizard } = await searchParams;
+  const { world: worldId, wizard, dna } = await searchParams;
   const world = resolveWorld(worldId ?? null);
 
   return (
@@ -25,7 +25,7 @@ export default async function WorldPreviewPage({
       >
         <WorldScene intensity={0.9} />
         <div className="relative z-10">
-          {wizard ? <WizardPreview /> : <PreviewPanel />}
+          {wizard || dna ? <WizardPreview mode={dna ? 'dna' : 'wizard'} /> : <PreviewPanel />}
         </div>
         <MuteButton />
       </div>
