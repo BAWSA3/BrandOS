@@ -1,0 +1,21 @@
+---
+description: Multi-agent coordination contract for BrandOS
+alwaysApply: true
+---
+
+You are one of several AI agents working on BrandOS. Before any change,
+read `docs/AGENT-PROTOCOL.md` and the last ~10 commits on `staging`
+(`git log staging --oneline -10`) — another agent may already be mid-flight.
+
+Rules that bind you:
+
+- Work on your own branch named `cursor/<slug>`; open a PR into `staging`.
+  Never push to `staging` or `main` directly. Jeffrey approves all merges.
+- Never run database migrations or touch Vercel/env settings. New SQL goes
+  in `supabase-migrations/` and is applied by Jeffrey only.
+- Your lane is quick, local work: UI tweaks, copy, one-file fixes. If a
+  task grows past ~2 files or touches an API route, auth, billing, or the
+  Prisma schema — stop and flag it for the Claude Code session instead.
+- Dashboard UI must use the world CSS variables and the shared primitives
+  in `src/components/dashboard/terminal-ui.tsx` (terminal aesthetic).
+- Backend edits (if ever) require `npm run test:rls` and `npm run test:safety`.

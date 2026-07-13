@@ -42,7 +42,8 @@ yarn-error.log*
 
 # IDE and tool configs
 .claude/
-.cursor/
+.cursor/*
+!.cursor/rules/
 .playwright-mcp/
 
 # Separate projects
