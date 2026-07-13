@@ -246,7 +246,17 @@ export const useBrandStore = create<BrandStore>()(
           for (const b of brands) {
             if (b.voiceFingerprint) {
               try {
-                fingerprints[b.id] = JSON.parse(b.voiceFingerprint);
+                const fp = JSON.parse(b.voiceFingerprint);
+                // Legacy rows may hold un-stamped model output — panels
+                // dereference metadata, so only accept complete fingerprints.
+                if (
+                  fp &&
+                  typeof fp === 'object' &&
+                  typeof fp.metadata === 'object' &&
+                  fp.metadata
+                ) {
+                  fingerprints[b.id] = fp;
+                }
               } catch {
                 // Corrupt stored fingerprint — ignore; user can re-extract.
               }

@@ -66,7 +66,9 @@ export default function VoiceFingerprintPanel({ plan }: VoiceFingerprintPanelPro
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          samples: brandDNA.voiceSamples,
+          // Pre-cap to the server's limits so a large corpus doesn't trip
+          // the body-size guard before the server can truncate.
+          samples: brandDNA.voiceSamples.slice(0, 10).map((s) => s.slice(0, 2000)),
           existingFingerprint: fingerprint,
         }),
       });
