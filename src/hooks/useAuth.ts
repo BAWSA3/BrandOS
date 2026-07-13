@@ -169,28 +169,21 @@ export function useAuth(): UseAuthReturn {
     }
     setUser(null);
     setSession(null);
-    // #region agent log
-    try {
-      const _keys = ['brandos-storage','brandos-brandkit-storage','pendingBrandSync','innerCircle','innerCircle_earlyAccess','innerCircle_referredBy','pendingInviteCode'];
-      const _before = Object.fromEntries(_keys.map((k) => [k, localStorage.getItem(k) !== null]));
-      fetch('http://127.0.0.1:7857/ingest/eb505c67-6027-47b4-a48a-c61a70757ca2',{method:'POST',keepalive:true,headers:{'Content-Type':'application/json','X-Debug-Session-Id':'e8bb09'},body:JSON.stringify({sessionId:'e8bb09',runId:'pre-fix',hypothesisId:'A',location:'useAuth.ts:signOut-before',message:'localStorage keys present BEFORE removal',data:_before,timestamp:Date.now()})}).catch(()=>{});
-    } catch {}
-    // #endregion
-    // Wipe persisted brand data so the next login on this browser can't see it
+    // Wipe persisted brand data so the next login on this browser can't see it.
+    // Includes Inner Circle / invite state — otherwise a shared device leaks the
+    // previous user's access level + referral info into the next visitor's
+    // useInnerCircle() localStorage fallback before auth resolves.
     try {
       localStorage.removeItem('brandos-storage');
       localStorage.removeItem('brandos-brandkit-storage');
       localStorage.removeItem('pendingBrandSync');
+      localStorage.removeItem('innerCircle');
+      localStorage.removeItem('innerCircle_earlyAccess');
+      localStorage.removeItem('innerCircle_referredBy');
+      localStorage.removeItem('pendingInviteCode');
     } catch {
       // localStorage unavailable (private mode) — nothing persisted to clear
     }
-    // #region agent log
-    try {
-      const _keys = ['brandos-storage','brandos-brandkit-storage','pendingBrandSync','innerCircle','innerCircle_earlyAccess','innerCircle_referredBy','pendingInviteCode'];
-      const _after = Object.fromEntries(_keys.map((k) => [k, localStorage.getItem(k) !== null]));
-      fetch('http://127.0.0.1:7857/ingest/eb505c67-6027-47b4-a48a-c61a70757ca2',{method:'POST',keepalive:true,headers:{'Content-Type':'application/json','X-Debug-Session-Id':'e8bb09'},body:JSON.stringify({sessionId:'e8bb09',runId:'pre-fix',hypothesisId:'A',location:'useAuth.ts:signOut-after',message:'localStorage keys present AFTER removal (true = survived = leak)',data:_after,timestamp:Date.now()})}).catch(()=>{});
-    } catch {}
-    // #endregion
     // Hard navigation: zustand's in-memory state would re-persist the cleared
     // keys on the next state change; a full reload guarantees a clean slate.
     window.location.href = '/';

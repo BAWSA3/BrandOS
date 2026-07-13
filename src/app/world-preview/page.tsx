@@ -12,9 +12,9 @@ import WizardPreview from './WizardPreview';
 export default async function WorldPreviewPage({
   searchParams,
 }: {
-  searchParams: Promise<{ world?: string; wizard?: string; dna?: string }>;
+  searchParams: Promise<{ world?: string; wizard?: string; dna?: string; check?: string }>;
 }) {
-  const { world: worldId, wizard, dna } = await searchParams;
+  const { world: worldId, wizard, dna, check } = await searchParams;
   const world = resolveWorld(worldId ?? null);
 
   return (
@@ -25,7 +25,11 @@ export default async function WorldPreviewPage({
       >
         <WorldScene intensity={0.9} />
         <div className="relative z-10">
-          {wizard || dna ? <WizardPreview mode={dna ? 'dna' : 'wizard'} /> : <PreviewPanel />}
+          {wizard || dna || check ? (
+            <WizardPreview mode={check ? 'check' : dna ? 'dna' : 'wizard'} />
+          ) : (
+            <PreviewPanel />
+          )}
         </div>
         <MuteButton />
       </div>

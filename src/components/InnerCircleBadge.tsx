@@ -161,12 +161,6 @@ export function useInnerCircle() {
       // Check early access mode first
       const earlyAccessMode = process.env.NEXT_PUBLIC_EARLY_ACCESS_MODE === 'true';
 
-      // #region agent log
-      try {
-        fetch('http://127.0.0.1:7857/ingest/eb505c67-6027-47b4-a48a-c61a70757ca2',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'e8bb09'},body:JSON.stringify({sessionId:'e8bb09',runId:'pre-fix',hypothesisId:'C',location:'InnerCircleBadge.tsx:useInnerCircle-init',message:'useInnerCircle init: mode + leaked localStorage values',data:{earlyAccessMode,ls_innerCircle:localStorage.getItem('innerCircle'),ls_referredBy:localStorage.getItem('innerCircle_referredBy'),ls_pendingInvite:localStorage.getItem('pendingInviteCode')},timestamp:Date.now()})}).catch(()=>{});
-      } catch {}
-      // #endregion
-
       if (earlyAccessMode) {
         // Grant Inner Circle to everyone during early access
         const stored = localStorage.getItem('innerCircle');
@@ -231,11 +225,6 @@ export function useInnerCircle() {
         const res = await fetch('/api/auth/user');
         if (res.ok) {
           const data = await res.json();
-          // #region agent log
-          try {
-            fetch('http://127.0.0.1:7857/ingest/eb505c67-6027-47b4-a48a-c61a70757ca2',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'e8bb09'},body:JSON.stringify({sessionId:'e8bb09',runId:'pre-fix',hypothesisId:'D',location:'InnerCircleBadge.tsx:db-branch',message:'DB /api/auth/user result',data:{hasUser:!!data.user,dbIsInnerCircle:data.user?.isInnerCircle ?? null,willEarlyReturn:!!data.user?.isInnerCircle},timestamp:Date.now()})}).catch(()=>{});
-          } catch {}
-          // #endregion
           if (data.user?.isInnerCircle) {
             setIsInnerCircle(true);
             setReferredBy(data.user.invitedBy);
@@ -248,11 +237,6 @@ export function useInnerCircle() {
 
       // Fallback: check localStorage for unauthenticated users
       const stored = localStorage.getItem('innerCircle');
-      // #region agent log
-      try {
-        fetch('http://127.0.0.1:7857/ingest/eb505c67-6027-47b4-a48a-c61a70757ca2',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'e8bb09'},body:JSON.stringify({sessionId:'e8bb09',runId:'pre-fix',hypothesisId:'B',location:'InnerCircleBadge.tsx:ls-fallback',message:'localStorage fallback branch reached',data:{ls_innerCircle:stored,willSetInnerCircleTrue:stored==='true'},timestamp:Date.now()})}).catch(()=>{});
-      } catch {}
-      // #endregion
       if (stored === 'true') {
         setIsInnerCircle(true);
         setReferredBy(localStorage.getItem('innerCircle_referredBy'));
