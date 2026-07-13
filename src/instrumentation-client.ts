@@ -15,6 +15,8 @@ initBotId({
     { path: '/api/audit/run', method: 'POST' },
     // Content Check — dashboard AI-cost surface (consolidation step 4)
     { path: '/api/check', method: 'POST' },
+    // Voice Fingerprint extraction — PRO AI-cost surface (step 5)
+    { path: '/api/voice-fingerprint/extract', method: 'POST' },
     // Checkout — payment abuse surface
     { path: '/api/stripe/checkout', method: 'POST' },
   ],
