@@ -7,13 +7,14 @@ import type { CalendarDraft } from '@/hooks/useCalendarDrafts';
 interface RepurposePanelProps {
   source: CalendarDraft;
   onClose: () => void;
+  /** Resolves false when the save failed — the card must not flip to Saved. */
   onSaveDraft: (data: {
     content: string;
     contentType: string;
     tone: string;
     status: string;
     scheduledFor: string | null;
-  }) => Promise<void>;
+  }) => Promise<boolean>;
 }
 
 const formats = [
@@ -90,14 +91,19 @@ export default function RepurposePanel({ source, onClose, onSaveDraft }: Repurpo
       const d = derivatives[index];
       if (!d || d.saved) return;
 
-      await onSaveDraft({
+      const saved = await onSaveDraft({
         content: d.content,
         contentType: d.format,
         tone: source.tone,
         status: 'draft',
         scheduledFor: null,
       });
+      if (!saved) {
+        setError('Failed to save draft — try again');
+        return;
+      }
 
+      setError(null);
       setDerivatives((prev) =>
         prev.map((item, i) => (i === index ? { ...item, saved: true } : item))
       );

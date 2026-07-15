@@ -429,12 +429,13 @@ export default function ContentCalendar() {
           source={repurposeSource}
           onClose={() => setRepurposeSource(null)}
           onSaveDraft={async (data) => {
-            await createDraft({
+            const created = await createDraft({
               ...data,
               sourceType: 'repurpose',
               sourceId: repurposeSource.id,
               parentId: repurposeSource.id,
             });
+            return created !== null;
           }}
         />
       )}

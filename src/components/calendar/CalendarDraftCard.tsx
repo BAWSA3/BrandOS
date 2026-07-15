@@ -7,7 +7,11 @@ const statusColors: Record<string, { bg: string; text: string; label: string }> 
   idea: { bg: 'color-mix(in srgb, var(--warning) 12%, transparent)', text: 'var(--warning)', label: 'Idea' },
   draft: { bg: 'color-mix(in srgb, var(--accent) 12%, transparent)', text: 'var(--accent)', label: 'Draft' },
   scheduled: { bg: 'color-mix(in srgb, var(--success) 12%, transparent)', text: 'var(--success)', label: 'Scheduled' },
-  published: { bg: 'rgba(172,142,104,0.12)', text: '#AC8E68', label: 'Published' },
+  published: {
+    bg: 'color-mix(in srgb, var(--text-tertiary) 12%, transparent)',
+    text: 'var(--text-tertiary)',
+    label: 'Published',
+  },
 };
 
 const toneColors: Record<string, { bg: string; text: string }> = {
@@ -16,8 +20,11 @@ const toneColors: Record<string, { bg: string; text: string }> = {
   casual: { bg: 'color-mix(in srgb, var(--accent) 12%, transparent)', text: 'var(--accent)' },
   launch: { bg: 'color-mix(in srgb, var(--accent) 12%, transparent)', text: 'var(--accent)' },
   'behind-the-scenes': { bg: 'color-mix(in srgb, var(--warning) 12%, transparent)', text: 'var(--warning)' },
-  announcement: { bg: 'rgba(100,210,255,0.12)', text: '#64D2FF' },
-  thread: { bg: 'rgba(172,142,104,0.12)', text: '#AC8E68' },
+  announcement: { bg: 'color-mix(in srgb, var(--accent) 12%, transparent)', text: 'var(--accent)' },
+  thread: {
+    bg: 'color-mix(in srgb, var(--text-tertiary) 12%, transparent)',
+    text: 'var(--text-tertiary)',
+  },
   poll: { bg: 'color-mix(in srgb, var(--accent) 12%, transparent)', text: 'var(--accent)' },
   story: { bg: 'color-mix(in srgb, var(--warning) 12%, transparent)', text: 'var(--warning)' },
   'counter-argument': { bg: 'color-mix(in srgb, var(--danger) 12%, transparent)', text: 'var(--danger)' },

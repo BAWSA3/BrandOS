@@ -55,6 +55,23 @@ defects to fix in any migration: browser-global localStorage blob (not
 keyed per user), local uuid vs server cuid id mismatch (`useBrandSync`
 re-creates duplicates), `/app` never hydrates from the server.
 
+## Status ledger (update in the same PR that ships each step)
+
+| Step | Status | Landed |
+| --- | --- | --- |
+| 1. Dead links + logout leak | ✅ shipped | `742aa9d` (staging, 2026-07-12) |
+| 2. Foundation (Brand↔Workspace, hydration) | ✅ shipped | `303c88f` + migration 014 (staging applied; prod at next promotion) |
+| 3. Brand DNA + onboarding wizard | ✅ shipped | `47bb008` (3a) + `5d9998b` (3b) |
+| 4. Content Check | ✅ shipped | PR #3 |
+| 5. Voice Fingerprint | ✅ approved | PR #4 → re-landed as PR #5 (awaiting merge) |
+| 6. Content Calendar | ✅ in PR | `/dashboard/calendar` + `/api/calendar/*` and `/api/repurpose` rewritten on `getWorkspaceContext` (off the dead sb-access-token cookie); repurpose hardened (PRO gate on workspace.plan, BotID, prompt fencing, claude-sonnet-5); migration 015 backfills `Workspace.plan` from `subscriptionTier` for pre-Phase-1 subscribers |
+| 7. Import Hub | ⬜ next | — |
+| 8. Defer/kill list | ⬜ | — |
+
+Preview harnesses: `/world-preview?wizard=1`, `?dna=1`, `?check=1`, `?voice=1`,
+`?calendar=1`. Legacy routes still on the dead cookie auth migrate as each
+feature ports (remaining: brands/me, brands/share, drift-alerts, import).
+
 ## Option A — /dashboard is home; rescue features onto the workspace model
 
 Port the crown jewels one at a time into the Phase 1 architecture

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import { getWorkspaceContext, ownedBrandsWhere } from '@/lib/workspace-auth';
+import { readJsonBody } from '@/lib/api-body';
 import {
   MAX_DRAFT_CHARS,
   isDraftStatus,
@@ -11,41 +12,31 @@ import {
 } from '@/lib/calendar-drafts';
 
 // Single-draft update/delete, workspace-scoped (consolidation step 6).
-// Ownership resolves through the draft's brand with the same scope the
-// list route uses (workspace, plus legacy userId rows pre-adoption).
+// Ownership resolves through the draft's brand with the same scope the list
+// route uses: the caller's workspace, plus legacy userId rows pre-adoption
+// (a null workspace still owns its legacy rows).
 
 const MAX_BODY_BYTES = 50_000;
-
-/** The draft, if its brand is owned by the caller. */
-async function findOwnedDraft(id: string, workspaceId: string, userId: string) {
-  return prisma.contentDraft.findFirst({
-    where: { id, brand: ownedBrandsWhere(workspaceId, userId) },
-    select: { id: true },
-  });
-}
 
 // PATCH /api/calendar/drafts/[id]
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const ctx = await getWorkspaceContext({ ensure: false });
-    if (!ctx || !ctx.workspace) {
+    if (!ctx) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const { id } = await params;
 
-    const raw = await request.text();
-    if (raw.length > MAX_BODY_BYTES) {
-      return NextResponse.json({ error: 'Request too large' }, { status: 413 });
-    }
-    let body: Record<string, unknown>;
-    try {
-      body = JSON.parse(raw);
-    } catch {
-      return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
-    }
+    const read = await readJsonBody(request, MAX_BODY_BYTES);
+    if (!read.ok) return read.response;
+    const body = read.body;
 
-    const existing = await findOwnedDraft(id, ctx.workspace.id, ctx.user.id);
+    const ownedBrand = ownedBrandsWhere(ctx.workspace?.id ?? null, ctx.user.id);
+    const existing = await prisma.contentDraft.findFirst({
+      where: { id, brand: ownedBrand },
+      select: { id: true },
+    });
     if (!existing) {
       return NextResponse.json({ error: 'Draft not found' }, { status: 404 });
     }
@@ -77,7 +68,11 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       updateData.status = body.status;
     }
     if (body.authenticity !== undefined) {
-      updateData.authenticity = parseAuthenticity(body.authenticity);
+      const authenticity = parseAuthenticity(body.authenticity);
+      if (authenticity === undefined) {
+        return NextResponse.json({ error: 'Invalid authenticity value' }, { status: 400 });
+      }
+      updateData.authenticity = authenticity;
     }
     if (body.scheduledFor !== undefined) {
       const scheduledFor = parseScheduledFor(body.scheduledFor);
@@ -110,18 +105,20 @@ export async function DELETE(
 ) {
   try {
     const ctx = await getWorkspaceContext({ ensure: false });
-    if (!ctx || !ctx.workspace) {
+    if (!ctx) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const { id } = await params;
 
-    const existing = await findOwnedDraft(id, ctx.workspace.id, ctx.user.id);
-    if (!existing) {
+    // Ownership check and delete in one round trip: deleteMany accepts the
+    // relation filter, and count === 0 covers both missing and not-owned.
+    const { count } = await prisma.contentDraft.deleteMany({
+      where: { id, brand: ownedBrandsWhere(ctx.workspace?.id ?? null, ctx.user.id) },
+    });
+    if (count === 0) {
       return NextResponse.json({ error: 'Draft not found' }, { status: 404 });
     }
-
-    await prisma.contentDraft.delete({ where: { id } });
 
     return NextResponse.json({ success: true });
   } catch (error) {

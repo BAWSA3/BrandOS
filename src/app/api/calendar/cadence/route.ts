@@ -14,9 +14,6 @@ export async function GET(request: NextRequest) {
     if (!ctx) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    if (!ctx.workspace) {
-      return NextResponse.json({ error: 'Brand not found' }, { status: 404 });
-    }
 
     const { searchParams } = new URL(request.url);
     const brandId = searchParams.get('brandId');
@@ -25,7 +22,7 @@ export async function GET(request: NextRequest) {
     }
 
     const brand = await prisma.brand.findFirst({
-      where: ownedBrandWhere(brandId, ctx.workspace.id, ctx.user.id),
+      where: ownedBrandWhere(brandId, ctx.workspace?.id ?? null, ctx.user.id),
       select: { id: true },
     });
     if (!brand) {
@@ -42,11 +39,23 @@ export async function GET(request: NextRequest) {
     sunday.setDate(sunday.getDate() + 6);
     sunday.setHours(23, 59, 59, 999);
 
-    // Fetch this week's drafts and recent tweet history in parallel
+    // Fetch this week's drafts and recent tweet history in parallel. Only
+    // this-week rows and the idea backlog feed the stats below — don't scan
+    // (or transfer 10k-char bodies for) the brand's entire draft history.
     const [weekDrafts, recentTweets] = await Promise.all([
       prisma.contentDraft.findMany({
-        where: { brandId },
+        where: {
+          brandId,
+          OR: [{ status: 'idea' }, { scheduledFor: { gte: monday, lte: sunday } }],
+        },
         orderBy: { scheduledFor: 'asc' },
+        select: {
+          id: true,
+          status: true,
+          scheduledFor: true,
+          content: true,
+          contentType: true,
+        },
       }),
       prisma.brandTweet.findMany({
         where: { brandId },

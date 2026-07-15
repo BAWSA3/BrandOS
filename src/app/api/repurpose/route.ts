@@ -8,6 +8,7 @@ import { getWorkspaceContext, ownedBrandWhere } from '@/lib/workspace-auth';
 import { botGuard } from '@/lib/botid-guard';
 import { checkAndIncrementUsage } from '@/lib/usage';
 import { GUARD_PREAMBLE, wrapUntrusted } from '@/lib/prompt-safety';
+import { readJsonBody } from '@/lib/api-body';
 
 // Content repurposing (consolidation step 6). The legacy route read the dead
 // sb-access-token cookie, gated on user.subscriptionTier, and interpolated
@@ -46,7 +47,12 @@ function parseJsonColumn<T>(raw: string | null, fallback: T): T {
 
 export async function POST(request: NextRequest) {
   try {
-    const ctx = await getWorkspaceContext({ ensure: false });
+    // Auth lookup (DB) and bot classification (network) are independent —
+    // overlap them.
+    const [ctx, botBlock] = await Promise.all([
+      getWorkspaceContext({ ensure: false }),
+      botGuard(request),
+    ]);
     if (!ctx) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -62,8 +68,6 @@ export async function POST(request: NextRequest) {
         { status: 403 }
       );
     }
-
-    const botBlock = await botGuard(request);
     if (botBlock) return botBlock;
 
     const apiKey = process.env.ANTHROPIC_API_KEY;
@@ -71,22 +75,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'API key not configured' }, { status: 500 });
     }
 
-    const rawBody = await request.text();
-    if (rawBody.length > MAX_BODY_BYTES) {
-      return NextResponse.json({ error: 'Request too large' }, { status: 413 });
-    }
-    let body: { brandId?: unknown; sourceContent?: unknown; formats?: unknown };
-    try {
-      body = JSON.parse(rawBody);
-    } catch {
-      return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
-    }
+    const read = await readJsonBody(request, MAX_BODY_BYTES);
+    if (!read.ok) return read.response;
+    const body = read.body;
 
     const brandId = typeof body.brandId === 'string' ? body.brandId : '';
     const sourceContent = typeof body.sourceContent === 'string' ? body.sourceContent.trim() : '';
+    // Object.hasOwn, not `in`: prototype keys ('toString', 'constructor')
+    // must not pass the allowlist and reach the paid prompt.
     const formats = Array.isArray(body.formats)
       ? body.formats
-          .filter((f): f is string => typeof f === 'string' && f in formatInstructions)
+          .filter(
+            (f): f is string => typeof f === 'string' && Object.hasOwn(formatInstructions, f)
+          )
           .slice(0, MAX_FORMATS)
       : [];
 
@@ -148,8 +149,8 @@ export async function POST(request: NextRequest) {
 
     const anthropic = new Anthropic({ apiKey });
 
-    // Generate all derivatives in parallel; a single failed format degrades
-    // to a placeholder rather than failing the batch.
+    // Generate all derivatives in parallel; a single failed format is
+    // dropped rather than failing the batch.
     const results = await Promise.all(
       formats.map(async (format) => {
         const prompt = `You are a content repurposing assistant. Your job is to transform source content into different formats while maintaining the brand voice.
@@ -174,15 +175,26 @@ Return ONLY the repurposed content, no explanations or meta-commentary.`;
           });
 
           const content = message.content[0]?.type === 'text' ? message.content[0].text : '';
-          return { format, content: content.slice(0, MAX_OUTPUT_CHARS) };
+          return content.trim() ? { format, content: content.slice(0, MAX_OUTPUT_CHARS) } : null;
         } catch (err) {
           console.error(`[repurpose] Failed to generate ${format}:`, err);
-          return { format, content: `[Failed to generate ${format}]` };
+          return null;
         }
       })
     );
 
-    return NextResponse.json({ derivatives: results });
+    // Never return placeholder "derivatives" the UI would offer to save; if
+    // every format failed, say so. (The generation credit is already spent —
+    // refunds would need transactional usage tracking, same as /api/check.)
+    const derivatives = results.filter((r) => r !== null);
+    if (derivatives.length === 0) {
+      return NextResponse.json(
+        { error: 'Generation failed — try again in a minute.' },
+        { status: 502 }
+      );
+    }
+
+    return NextResponse.json({ derivatives });
   } catch (error: unknown) {
     console.error('[repurpose] error:', error);
     const message =

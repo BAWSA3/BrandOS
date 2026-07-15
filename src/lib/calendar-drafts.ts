@@ -1,18 +1,10 @@
 // Shared shapes + validation for the /api/calendar/* routes (consolidation
 // step 6). One serializer so the list, create, and update responses can't
-// drift apart.
+// drift apart. The vocabulary itself lives in content.schema.ts — the server
+// actions and these routes must accept the same values.
 
-export const DRAFT_STATUSES = ['idea', 'draft', 'scheduled', 'published'] as const;
-export const DRAFT_CONTENT_TYPES = [
-  'tweet',
-  'thread',
-  'poll',
-  'hot-take',
-  'educational',
-  'counter-argument',
-  'story',
-] as const;
-export const DRAFT_SOURCE_TYPES = ['idea-feed', 'manual', 'repurpose'] as const;
+import { CONTENT_TYPES, DRAFT_STATUSES, DRAFT_SOURCE_TYPES } from '@/lib/schemas/content.schema';
+import { clampScore } from '@/lib/score-schemas';
 
 export const MAX_DRAFT_CHARS = 10_000;
 
@@ -20,15 +12,15 @@ export function isDraftStatus(v: unknown): v is (typeof DRAFT_STATUSES)[number] 
   return typeof v === 'string' && (DRAFT_STATUSES as readonly string[]).includes(v);
 }
 
-export function isDraftContentType(v: unknown): v is (typeof DRAFT_CONTENT_TYPES)[number] {
-  return typeof v === 'string' && (DRAFT_CONTENT_TYPES as readonly string[]).includes(v);
+export function isDraftContentType(v: unknown): v is (typeof CONTENT_TYPES)[number] {
+  return typeof v === 'string' && (CONTENT_TYPES as readonly string[]).includes(v);
 }
 
 export function isDraftSourceType(v: unknown): v is (typeof DRAFT_SOURCE_TYPES)[number] {
   return typeof v === 'string' && (DRAFT_SOURCE_TYPES as readonly string[]).includes(v);
 }
 
-/** Parse an incoming date value; null clears, undefined/invalid rejects. */
+/** Parse an incoming date value; null clears, undefined means invalid. */
 export function parseScheduledFor(v: unknown): Date | null | undefined {
   if (v === null) return null;
   if (typeof v !== 'string') return undefined;
@@ -36,10 +28,11 @@ export function parseScheduledFor(v: unknown): Date | null | undefined {
   return isNaN(d.getTime()) ? undefined : d;
 }
 
-/** Clamp an authenticity value to an int in [0, 100], or null. */
-export function parseAuthenticity(v: unknown): number | null {
-  if (typeof v !== 'number' || isNaN(v)) return null;
-  return Math.min(100, Math.max(0, Math.round(v)));
+/** Clamp authenticity to an int in [0, 100]; null clears, undefined means invalid. */
+export function parseAuthenticity(v: unknown): number | null | undefined {
+  if (v === null) return null;
+  if (typeof v !== 'number' || isNaN(v)) return undefined;
+  return clampScore(v);
 }
 
 interface DraftRow {

@@ -36,8 +36,12 @@ export default function CalendarSummaryCard({ onOpenCalendar }: CalendarSummaryC
   const [data, setData] = useState<CadenceData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Depend on user?.id, not the user object — useAuth mints a new object on
+  // every TOKEN_REFRESHED event, which would refire the cadence fetch hourly.
+  const userId = user?.id;
+
   useEffect(() => {
-    if (!brand?.id || !user) {
+    if (!brand?.id || !userId) {
       setIsLoading(false);
       return;
     }

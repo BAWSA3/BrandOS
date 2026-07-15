@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import { getWorkspaceContext, ownedBrandWhere } from '@/lib/workspace-auth';
+import { readJsonBody } from '@/lib/api-body';
 import {
   MAX_DRAFT_CHARS,
   isDraftStatus,
@@ -14,7 +15,8 @@ import {
 // Content Calendar drafts, workspace-scoped (consolidation step 6). The old
 // route read the dead sb-access-token cookie and checked brand.userId only,
 // which broke for workspace-adopted brands and let a crafted parentId link
-// (and read back) another user's draft.
+// (and read back) another user's draft. Ownership scope covers legacy
+// pre-workspace rows too (ownedBrandWhere handles a null workspace).
 
 const MAX_BODY_BYTES = 50_000;
 
@@ -26,9 +28,6 @@ export async function GET(request: NextRequest) {
     if (!ctx) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    if (!ctx.workspace) {
-      return NextResponse.json({ drafts: [] });
-    }
 
     const { searchParams } = new URL(request.url);
     const brandId = searchParams.get('brandId');
@@ -37,20 +36,28 @@ export async function GET(request: NextRequest) {
     }
 
     const brand = await prisma.brand.findFirst({
-      where: ownedBrandWhere(brandId, ctx.workspace.id, ctx.user.id),
+      where: ownedBrandWhere(brandId, ctx.workspace?.id ?? null, ctx.user.id),
       select: { id: true },
     });
     if (!brand) {
       return NextResponse.json({ error: 'Brand not found' }, { status: 404 });
     }
 
+    // Filters are pass-through (an unknown status just matches nothing), but
+    // an unparseable date is a caller bug — reject rather than silently
+    // returning the unfiltered full history.
     const status = searchParams.get('status');
     const unscheduled = searchParams.get('unscheduled') === 'true';
-    const from = parseScheduledFor(searchParams.get('from') ?? undefined);
-    const to = parseScheduledFor(searchParams.get('to') ?? undefined);
+    const fromRaw = searchParams.get('from');
+    const toRaw = searchParams.get('to');
+    const from = fromRaw === null ? null : parseScheduledFor(fromRaw);
+    const to = toRaw === null ? null : parseScheduledFor(toRaw);
+    if (from === undefined || to === undefined) {
+      return NextResponse.json({ error: 'Invalid from/to date' }, { status: 400 });
+    }
 
     const where: Record<string, unknown> = { brandId };
-    if (isDraftStatus(status)) where.status = status;
+    if (status) where.status = status.slice(0, 50);
 
     if (unscheduled) {
       where.scheduledFor = null;
@@ -81,20 +88,13 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const ctx = await getWorkspaceContext({ ensure: true });
-    if (!ctx || !ctx.workspace) {
+    if (!ctx) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const raw = await request.text();
-    if (raw.length > MAX_BODY_BYTES) {
-      return NextResponse.json({ error: 'Request too large' }, { status: 413 });
-    }
-    let body: Record<string, unknown>;
-    try {
-      body = JSON.parse(raw);
-    } catch {
-      return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
-    }
+    const read = await readJsonBody(request, MAX_BODY_BYTES);
+    if (!read.ok) return read.response;
+    const body = read.body;
 
     const { brandId } = body;
     const content = typeof body.content === 'string' ? body.content.trim() : '';
@@ -109,30 +109,36 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const brand = await prisma.brand.findFirst({
-      where: ownedBrandWhere(brandId, ctx.workspace.id, ctx.user.id),
-      select: { id: true },
-    });
-    if (!brand) {
-      return NextResponse.json({ error: 'Brand not found' }, { status: 404 });
-    }
-
     const scheduledFor = parseScheduledFor(body.scheduledFor ?? null);
     if (scheduledFor === undefined) {
       return NextResponse.json({ error: 'Invalid scheduledFor date' }, { status: 400 });
     }
+    const authenticity = parseAuthenticity(body.authenticity ?? null);
+    if (authenticity === undefined) {
+      return NextResponse.json({ error: 'Invalid authenticity value' }, { status: 400 });
+    }
 
-    // A repurpose chain must stay inside the brand — a foreign parentId
-    // would leak the parent's content through the GET include.
+    const workspaceId = ctx.workspace?.id ?? null;
     const parentId = typeof body.parentId === 'string' ? body.parentId : null;
-    if (parentId) {
-      const parent = await prisma.contentDraft.findFirst({
-        where: { id: parentId, brandId },
+
+    // Brand ownership and parent-chain ownership are independent checks —
+    // run them together. A repurpose chain must stay inside the brand: a
+    // foreign parentId would leak the parent's content through the GET
+    // include.
+    const [brand, parent] = await Promise.all([
+      prisma.brand.findFirst({
+        where: ownedBrandWhere(brandId, workspaceId, ctx.user.id),
         select: { id: true },
-      });
-      if (!parent) {
-        return NextResponse.json({ error: 'Parent draft not found' }, { status: 404 });
-      }
+      }),
+      parentId
+        ? prisma.contentDraft.findFirst({ where: { id: parentId, brandId }, select: { id: true } })
+        : Promise.resolve(null),
+    ]);
+    if (!brand) {
+      return NextResponse.json({ error: 'Brand not found' }, { status: 404 });
+    }
+    if (parentId && !parent) {
+      return NextResponse.json({ error: 'Parent draft not found' }, { status: 404 });
     }
 
     const draft = await prisma.contentDraft.create({
@@ -148,7 +154,7 @@ export async function POST(request: NextRequest) {
         // back but never joined, unlike parentId.
         sourceId: typeof body.sourceId === 'string' ? body.sourceId.slice(0, 100) : null,
         parentId,
-        authenticity: parseAuthenticity(body.authenticity),
+        authenticity,
       },
     });
 
