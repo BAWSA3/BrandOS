@@ -5,6 +5,7 @@ import BrandSetupWizard from '@/components/dashboard/BrandSetupWizard';
 import BrandDNAPanel from '@/components/dashboard/BrandDNAPanel';
 import ContentCheckPanel from '@/components/dashboard/ContentCheckPanel';
 import VoiceFingerprintPanel from '@/components/dashboard/VoiceFingerprintPanel';
+import ContentCalendar from '@/components/calendar/ContentCalendar';
 import { createEmptyFingerprint } from '@/lib/voice-fingerprint';
 import { useBrandStore } from '@/lib/store';
 import { brandHasContent } from '@/hooks/useBrandHydration';
@@ -17,9 +18,15 @@ import { brandTemplates } from '@/lib/templates';
 //   ?check=1  — ContentCheckPanel (seeded brand; the check API itself
 //               requires auth, so [RUN CHECK] will error here — this mode is
 //               for layout/typography iteration)
+//   ?calendar=1 — ContentCalendar week grid (the drafts API requires auth,
+//               so lists render empty here — layout iteration only)
 // Local store only; nothing syncs from this page.
 
-export default function WizardPreview({ mode }: { mode: 'wizard' | 'dna' | 'check' | 'voice' }) {
+export default function WizardPreview({
+  mode,
+}: {
+  mode: 'wizard' | 'dna' | 'check' | 'voice' | 'calendar';
+}) {
   const [done, setDone] = useState(false);
   const [reinit, setReinit] = useState(false);
   const { brands, setBrandDNA, voiceFingerprints, setVoiceFingerprint } = useBrandStore();
@@ -55,8 +62,10 @@ export default function WizardPreview({ mode }: { mode: 'wizard' | 'dna' | 'chec
 
   return (
     <div className="min-h-screen p-6 flex items-center justify-center">
-      <div className="max-w-2xl w-full">
-        {mode === 'wizard' || reinit ? (
+      <div className={`${mode === 'calendar' ? 'max-w-6xl' : 'max-w-2xl'} w-full`}>
+        {mode === 'calendar' ? (
+          <ContentCalendar />
+        ) : mode === 'wizard' || reinit ? (
           done ? (
             <p className="text-sm font-mono" style={{ color: 'var(--text-secondary)' }}>
               wizard finished — reload to run it again

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { createBrowserClient } from '@supabase/ssr';
 import { useWorld } from '@/components/world/WorldProvider';
 import { useBrandStore, useHasHydrated } from '@/lib/store';
@@ -11,6 +12,7 @@ import BrandSetupWizard from '@/components/dashboard/BrandSetupWizard';
 import BrandDNAPanel from '@/components/dashboard/BrandDNAPanel';
 import ContentCheckPanel from '@/components/dashboard/ContentCheckPanel';
 import VoiceFingerprintPanel from '@/components/dashboard/VoiceFingerprintPanel';
+import CalendarSummaryCard from '@/components/dashboard/CalendarSummaryCard';
 
 const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -42,6 +44,7 @@ interface DashboardClientProps {
 }
 
 export default function DashboardClient({ user, workspace, xConnections }: DashboardClientProps) {
+  const router = useRouter();
   const { world, t } = useWorld();
   const [scanning, setScanning] = useState(false);
   const [scanResult, setScanResult] = useState<ScanResponse | null>(null);
@@ -159,6 +162,8 @@ export default function DashboardClient({ user, workspace, xConnections }: Dashb
                 <ContentCheckPanel />
                 {/* Voice Fingerprint — PRO; server enforces the gate */}
                 <VoiceFingerprintPanel plan={workspace?.plan ?? 'FREE'} />
+                {/* Content Calendar — week stats here, full grid on its own page */}
+                <CalendarSummaryCard onOpenCalendar={() => router.push('/dashboard/calendar')} />
               </>
             )}
 

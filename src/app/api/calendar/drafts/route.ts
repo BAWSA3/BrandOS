@@ -1,33 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-import { createClient } from '@supabase/supabase-js';
 import prisma from '@/lib/db';
+import { getWorkspaceContext, ownedBrandWhere } from '@/lib/workspace-auth';
+import {
+  MAX_DRAFT_CHARS,
+  isDraftStatus,
+  isDraftContentType,
+  isDraftSourceType,
+  parseScheduledFor,
+  parseAuthenticity,
+  serializeDraft,
+} from '@/lib/calendar-drafts';
 
-async function getAuthenticatedUser() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-  if (!supabaseUrl || !supabaseAnonKey) return null;
+// Content Calendar drafts, workspace-scoped (consolidation step 6). The old
+// route read the dead sb-access-token cookie and checked brand.userId only,
+// which broke for workspace-adopted brands and let a crafted parentId link
+// (and read back) another user's draft.
 
-  const cookieStore = await cookies();
-  const accessToken = cookieStore.get('sb-access-token')?.value;
-  if (!accessToken) return null;
+const MAX_BODY_BYTES = 50_000;
 
-  const supabase = createClient(supabaseUrl, supabaseAnonKey);
-  const {
-    data: { user: authUser },
-    error,
-  } = await supabase.auth.getUser(accessToken);
-  if (error || !authUser) return null;
-
-  return prisma.user.findUnique({ where: { supabaseId: authUser.id } });
-}
-
-// GET /api/calendar/drafts?brandId=...&from=...&to=...&status=...
+// GET /api/calendar/drafts?brandId=...&from=...&to=...&status=...&unscheduled=true
 export async function GET(request: NextRequest) {
   try {
-    const dbUser = await getAuthenticatedUser();
-    if (!dbUser) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+    // Read path stays read-only: no workspace auto-creation on GET.
+    const ctx = await getWorkspaceContext({ ensure: false });
+    if (!ctx) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    if (!ctx.workspace) {
+      return NextResponse.json({ drafts: [] });
     }
 
     const { searchParams } = new URL(request.url);
@@ -37,27 +37,27 @@ export async function GET(request: NextRequest) {
     }
 
     const brand = await prisma.brand.findFirst({
-      where: { id: brandId, userId: dbUser.id },
+      where: ownedBrandWhere(brandId, ctx.workspace.id, ctx.user.id),
+      select: { id: true },
     });
     if (!brand) {
       return NextResponse.json({ error: 'Brand not found' }, { status: 404 });
     }
 
-    const from = searchParams.get('from');
-    const to = searchParams.get('to');
     const status = searchParams.get('status');
     const unscheduled = searchParams.get('unscheduled') === 'true';
+    const from = parseScheduledFor(searchParams.get('from') ?? undefined);
+    const to = parseScheduledFor(searchParams.get('to') ?? undefined);
 
-    // Build where clause
     const where: Record<string, unknown> = { brandId };
-    if (status) where.status = status;
+    if (isDraftStatus(status)) where.status = status;
 
     if (unscheduled) {
       where.scheduledFor = null;
     } else if (from || to) {
       const scheduledFilter: Record<string, Date> = {};
-      if (from) scheduledFilter.gte = new Date(from);
-      if (to) scheduledFilter.lte = new Date(to);
+      if (from) scheduledFilter.gte = from;
+      if (to) scheduledFilter.lte = to;
       where.scheduledFor = scheduledFilter;
     }
 
@@ -70,24 +70,7 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    return NextResponse.json({
-      drafts: drafts.map((d) => ({
-        id: d.id,
-        content: d.content,
-        contentType: d.contentType,
-        tone: d.tone,
-        status: d.status,
-        scheduledFor: d.scheduledFor?.toISOString() || null,
-        sourceType: d.sourceType,
-        sourceId: d.sourceId,
-        authenticity: d.authenticity,
-        parentId: d.parentId,
-        parent: d.parent,
-        childrenCount: d.children.length,
-        createdAt: d.createdAt.toISOString(),
-        updatedAt: d.updatedAt.toISOString(),
-      })),
-    });
+    return NextResponse.json({ drafts: drafts.map(serializeDraft) });
   } catch (error) {
     console.error('[calendar/drafts] GET error:', error);
     return NextResponse.json({ error: 'Internal error' }, { status: 500 });
@@ -97,68 +80,79 @@ export async function GET(request: NextRequest) {
 // POST /api/calendar/drafts
 export async function POST(request: NextRequest) {
   try {
-    const dbUser = await getAuthenticatedUser();
-    if (!dbUser) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+    const ctx = await getWorkspaceContext({ ensure: true });
+    if (!ctx || !ctx.workspace) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const body = await request.json();
-    const {
-      brandId,
-      content,
-      contentType,
-      tone,
-      status,
-      scheduledFor,
-      sourceType,
-      sourceId,
-      parentId,
-      authenticity,
-    } = body;
+    const raw = await request.text();
+    if (raw.length > MAX_BODY_BYTES) {
+      return NextResponse.json({ error: 'Request too large' }, { status: 413 });
+    }
+    let body: Record<string, unknown>;
+    try {
+      body = JSON.parse(raw);
+    } catch {
+      return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
+    }
 
-    if (!brandId || !content) {
+    const { brandId } = body;
+    const content = typeof body.content === 'string' ? body.content.trim() : '';
+
+    if (typeof brandId !== 'string' || !content) {
       return NextResponse.json({ error: 'brandId and content are required' }, { status: 400 });
+    }
+    if (content.length > MAX_DRAFT_CHARS) {
+      return NextResponse.json(
+        { error: `Content too long (max ${MAX_DRAFT_CHARS} characters)` },
+        { status: 400 }
+      );
     }
 
     const brand = await prisma.brand.findFirst({
-      where: { id: brandId, userId: dbUser.id },
+      where: ownedBrandWhere(brandId, ctx.workspace.id, ctx.user.id),
+      select: { id: true },
     });
     if (!brand) {
       return NextResponse.json({ error: 'Brand not found' }, { status: 404 });
+    }
+
+    const scheduledFor = parseScheduledFor(body.scheduledFor ?? null);
+    if (scheduledFor === undefined) {
+      return NextResponse.json({ error: 'Invalid scheduledFor date' }, { status: 400 });
+    }
+
+    // A repurpose chain must stay inside the brand — a foreign parentId
+    // would leak the parent's content through the GET include.
+    const parentId = typeof body.parentId === 'string' ? body.parentId : null;
+    if (parentId) {
+      const parent = await prisma.contentDraft.findFirst({
+        where: { id: parentId, brandId },
+        select: { id: true },
+      });
+      if (!parent) {
+        return NextResponse.json({ error: 'Parent draft not found' }, { status: 404 });
+      }
     }
 
     const draft = await prisma.contentDraft.create({
       data: {
         brandId,
         content,
-        contentType: contentType || 'tweet',
-        tone: tone || 'casual',
-        status: status || 'idea',
-        scheduledFor: scheduledFor ? new Date(scheduledFor) : null,
-        sourceType: sourceType || 'manual',
-        sourceId: sourceId || null,
-        parentId: parentId || null,
-        authenticity: authenticity ?? null,
+        contentType: isDraftContentType(body.contentType) ? body.contentType : 'tweet',
+        tone: typeof body.tone === 'string' ? body.tone.slice(0, 100) : 'casual',
+        status: isDraftStatus(body.status) ? body.status : 'idea',
+        scheduledFor,
+        sourceType: isDraftSourceType(body.sourceType) ? body.sourceType : 'manual',
+        // Opaque provenance marker (draft id or tweet id) — stored and echoed
+        // back but never joined, unlike parentId.
+        sourceId: typeof body.sourceId === 'string' ? body.sourceId.slice(0, 100) : null,
+        parentId,
+        authenticity: parseAuthenticity(body.authenticity),
       },
     });
 
-    return NextResponse.json({
-      draft: {
-        id: draft.id,
-        content: draft.content,
-        contentType: draft.contentType,
-        tone: draft.tone,
-        status: draft.status,
-        scheduledFor: draft.scheduledFor?.toISOString() || null,
-        sourceType: draft.sourceType,
-        sourceId: draft.sourceId,
-        authenticity: draft.authenticity,
-        parentId: draft.parentId,
-        childrenCount: 0,
-        createdAt: draft.createdAt.toISOString(),
-        updatedAt: draft.updatedAt.toISOString(),
-      },
-    });
+    return NextResponse.json({ draft: serializeDraft(draft) }, { status: 201 });
   } catch (error) {
     console.error('[calendar/drafts] POST error:', error);
     return NextResponse.json({ error: 'Internal error' }, { status: 500 });

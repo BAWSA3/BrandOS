@@ -253,7 +253,7 @@ export default function NewDraftModal({
                 padding: '8px 16px',
                 borderRadius: 8,
                 border: 'none',
-                background: content.trim() ? '#0A84FF' : 'var(--surface-hover)',
+                background: content.trim() ? 'var(--accent)' : 'var(--surface-hover)',
                 color: content.trim() ? '#fff' : 'var(--text-tertiary)',
                 cursor: content.trim() ? 'pointer' : 'default',
               }}
