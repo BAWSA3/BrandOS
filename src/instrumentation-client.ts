@@ -15,6 +15,8 @@ initBotId({
     { path: '/api/audit/run', method: 'POST' },
     // Content Check — dashboard AI-cost surface (consolidation step 4)
     { path: '/api/check', method: 'POST' },
+    // Homepage Brand Advisor chat — anonymous AI-cost surface
+    { path: '/api/brand-advisor/chat', method: 'POST' },
     // Checkout — payment abuse surface
     { path: '/api/stripe/checkout', method: 'POST' },
   ],
