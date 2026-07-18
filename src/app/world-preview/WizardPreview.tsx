@@ -6,6 +6,7 @@ import BrandDNAPanel from '@/components/dashboard/BrandDNAPanel';
 import ContentCheckPanel from '@/components/dashboard/ContentCheckPanel';
 import VoiceFingerprintPanel from '@/components/dashboard/VoiceFingerprintPanel';
 import ContentCalendar from '@/components/calendar/ContentCalendar';
+import BrandImportHub from '@/components/import/BrandImportHub';
 import { createEmptyFingerprint } from '@/lib/voice-fingerprint';
 import { useBrandStore } from '@/lib/store';
 import { brandHasContent } from '@/hooks/useBrandHydration';
@@ -20,12 +21,14 @@ import { brandTemplates } from '@/lib/templates';
 //               for layout/typography iteration)
 //   ?calendar=1 — ContentCalendar week grid (the drafts API requires auth,
 //               so lists render empty here — layout iteration only)
+//   ?import=1 — BrandImportHub flow (the analysis APIs require auth, so
+//               [Analyze] will error here — layout iteration only)
 // Local store only; nothing syncs from this page.
 
 export default function WizardPreview({
   mode,
 }: {
-  mode: 'wizard' | 'dna' | 'check' | 'voice' | 'calendar';
+  mode: 'wizard' | 'dna' | 'check' | 'voice' | 'calendar' | 'import';
 }) {
   const [done, setDone] = useState(false);
   const [reinit, setReinit] = useState(false);
@@ -59,6 +62,20 @@ export default function WizardPreview({
     };
     setVoiceFingerprint(currentId, fp);
   }, [mode, currentId, voiceFingerprints, setVoiceFingerprint]);
+
+  // The import hub brings its own full-screen SwissBackground — don't box it
+  // into the centered preview column.
+  if (mode === 'import') {
+    return done ? (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-sm font-mono" style={{ color: 'var(--text-secondary)' }}>
+          import flow finished — reload to run it again
+        </p>
+      </div>
+    ) : (
+      <BrandImportHub onStartFresh={() => setDone(true)} onImportComplete={() => setDone(true)} />
+    );
+  }
 
   return (
     <div className="min-h-screen p-6 flex items-center justify-center">

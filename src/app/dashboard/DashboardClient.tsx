@@ -146,7 +146,20 @@ export default function DashboardClient({ user, workspace, xConnections }: Dashb
 
         {/* First-run: brand DNA setup replaces the dashboard body until done */}
         {showWizard && (
-          <BrandSetupWizard onComplete={handleSetupComplete} onSkip={handleSetupSkip} />
+          <>
+            <BrandSetupWizard onComplete={handleSetupComplete} onSkip={handleSetupSkip} />
+            {/* Alternative first-run path: extract the brand from existing
+                assets (site, PDF, images, X) instead of typing it in */}
+            <p className="text-center">
+              <button
+                onClick={() => router.push('/dashboard/import')}
+                className="text-xs font-mono underline underline-offset-4 transition-opacity hover:opacity-70"
+                style={{ color: 'var(--text-tertiary)' }}
+              >
+                or run brand.import() from your website, PDF, or X profile
+              </button>
+            </p>
+          </>
         )}
 
         {!showWizard && (

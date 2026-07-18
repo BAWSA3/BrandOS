@@ -19,9 +19,18 @@ export default async function WorldPreviewPage({
     check?: string;
     voice?: string;
     calendar?: string;
+    import?: string;
   }>;
 }) {
-  const { world: worldId, wizard, dna, check, voice, calendar } = await searchParams;
+  const {
+    world: worldId,
+    wizard,
+    dna,
+    check,
+    voice,
+    calendar,
+    import: importHub,
+  } = await searchParams;
   const world = resolveWorld(worldId ?? null);
 
   return (
@@ -32,10 +41,20 @@ export default async function WorldPreviewPage({
       >
         <WorldScene intensity={0.9} />
         <div className="relative z-10">
-          {wizard || dna || check || voice || calendar ? (
+          {wizard || dna || check || voice || calendar || importHub ? (
             <WizardPreview
               mode={
-                calendar ? 'calendar' : voice ? 'voice' : check ? 'check' : dna ? 'dna' : 'wizard'
+                importHub
+                  ? 'import'
+                  : calendar
+                    ? 'calendar'
+                    : voice
+                      ? 'voice'
+                      : check
+                        ? 'check'
+                        : dna
+                          ? 'dna'
+                          : 'wizard'
               }
             />
           ) : (

@@ -65,12 +65,12 @@ re-creates duplicates), `/app` never hydrates from the server.
 | 4. Content Check | ✅ shipped | PR #3 |
 | 5. Voice Fingerprint | ✅ approved | PR #4 → re-landed as PR #5 (awaiting merge) |
 | 6. Content Calendar | ✅ in PR | `/dashboard/calendar` + `/api/calendar/*` and `/api/repurpose` rewritten on `getWorkspaceContext` (off the dead sb-access-token cookie); repurpose hardened (PRO gate on workspace.plan, BotID, prompt fencing, claude-sonnet-5); migration 015 backfills `Workspace.plan` from `subscriptionTier` for pre-Phase-1 subscribers |
-| 7. Import Hub | ⬜ next | — |
-| 8. Defer/kill list | ⬜ | — |
+| 7. Import Hub | ✅ in PR | `/dashboard/import` mounts the existing hub; output lands on the workspace brand via `useBrandHydration.forceSync`. All `/api/import/*` routes were unauthenticated (and pdf/images/social were mocks) — now `getWorkspaceContext` + BotID everywhere; real extraction: pdf/images via claude-sonnet-5 (generation-metered, output clamped), social via SocialData for X (Instagram/LinkedIn disabled as "soon"), url keeps cheerio + per-hop SSRF-validated redirects and size/time caps; dead unauthenticated `extract-brand` route deleted |
+| 8. Defer/kill list | ⬜ next | — |
 
 Preview harnesses: `/world-preview?wizard=1`, `?dna=1`, `?check=1`, `?voice=1`,
-`?calendar=1`. Legacy routes still on the dead cookie auth migrate as each
-feature ports (remaining: brands/me, brands/share, drift-alerts, import).
+`?calendar=1`, `?import=1`. Legacy routes still on the dead cookie auth migrate
+as each feature ports (remaining: brands/me, brands/share, drift-alerts).
 
 ## Option A — /dashboard is home; rescue features onto the workspace model
 
