@@ -1124,3 +1124,28 @@ model DailyBrief {
   @@map("DailyBrief")
 }
 
+
+// ===== ARCHETYPE PROFILE CACHE (anon scan funnel) =====
+
+// Archetype/score history keyed by X username, written server-side by
+// src/lib/user-profiles.ts. Replaces the anon-key Supabase writes that RLS
+// (correctly) denied since March. Server-only: RLS on with no policies
+// (013 ProcessedWebhook pattern); Prisma reaches it as table owner.
+model UserProfile {
+  username         String   @id // normalized lowercase, no @
+  displayName      String   @map("display_name")
+  archetype        String   // JSON: ArchetypeData
+  archetypeHistory String   @default("[]") @map("archetype_history") // JSON: ArchetypeHistoryEntry[]
+  scores           String   @default("[]") // JSON: ScoreRecord[] (last 20)
+  highestScore     Int      @default(0) @map("highest_score")
+  currentScore     Int      @default(0) @map("current_score")
+  firstScannedAt   DateTime @default(now()) @map("first_scanned_at") @db.Timestamptz
+  lastScannedAt    DateTime @default(now()) @map("last_scanned_at") @db.Timestamptz
+  totalScans       Int      @default(1) @map("total_scans")
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt        DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@index([currentScore(sort: Desc)])
+  @@index([lastScannedAt(sort: Desc)])
+  @@map("user_profiles")
+}
