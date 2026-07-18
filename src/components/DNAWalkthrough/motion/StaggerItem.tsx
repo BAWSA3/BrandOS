@@ -1,6 +1,6 @@
 'use client';
 
-import { motion, Variants } from 'framer-motion';
+import { motion, Variants } from 'motion/react';
 import { ReactNode } from 'react';
 
 type StaggerDirection = 'up' | 'down' | 'left' | 'right' | 'scale';

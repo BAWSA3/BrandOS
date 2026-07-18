@@ -1,6 +1,6 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { ResearchTopic, TCGVertical, VERTICAL_CONFIGS } from '@/lib/agents/research.types';
 
 interface TopicCardProps {

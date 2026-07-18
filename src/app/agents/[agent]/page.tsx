@@ -2,7 +2,7 @@
 
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import AgentChat from '@/components/agents/AgentChat';
 import { AgentSelectorMini } from '@/components/agents/AgentSelector';
 import { getAgentPersona, agentPersonas } from '@/lib/agents/chat.types';

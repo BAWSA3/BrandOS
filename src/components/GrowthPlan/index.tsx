@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence } from 'motion/react';
 import WalkthroughProgress from '@/components/DNAWalkthrough/WalkthroughProgress';
 import CodeParallaxBackground from '@/components/backgrounds/CodeParallaxBackground';
 import TheMathSection from './sections/TheMathSection';

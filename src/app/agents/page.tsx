@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import UnifiedChat from '@/components/agents/UnifiedChat';
 import AgentChat from '@/components/agents/AgentChat';
 import AgentSelector from '@/components/agents/AgentSelector';

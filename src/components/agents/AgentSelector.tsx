@@ -1,6 +1,6 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { AgentPersona, getAllAgentPersonas } from '@/lib/agents/chat.types';
 import { AgentName } from '@/lib/agents/types';
 

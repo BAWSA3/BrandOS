@@ -1,6 +1,6 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import WalkthroughSection from '../WalkthroughSection';
 import { TypewriterText, StaggerContainer, StaggerItem } from '../motion';
 import type { ParallaxLayerConfig } from '../motion';
