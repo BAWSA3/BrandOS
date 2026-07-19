@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import { motion, useSpring, useMotionValue } from 'framer-motion';
+import { motion, useSpring, useMotionValue } from 'motion/react';
 
 export type CursorMode = 'default' | 'scanning' | 'analyzing' | 'interactive' | 'hidden';
 
