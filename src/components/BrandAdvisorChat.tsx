@@ -101,7 +101,13 @@ export default function BrandAdvisorChat({
         }),
       });
 
-      if (!response.ok) throw new Error('Failed to get response');
+      if (!response.ok) {
+        // Surface the server's message (rate limit, size caps) when present.
+        const err = await response.json().catch(() => null);
+        throw new Error(
+          err && typeof err.error === 'string' ? err.error : 'Failed to get response'
+        );
+      }
 
       const data = await response.json();
 
@@ -120,10 +126,12 @@ export default function BrandAdvisorChat({
         setTimeout(() => setShowWaitlistGate(true), 1500);
       }
     } catch (error) {
+      const serverMessage =
+        error instanceof Error && error.message !== 'Failed to get response' ? error.message : null;
       const errorMessage: ChatMessage = {
         id: `error-${Date.now()}`,
         role: 'assistant',
-        content: "I'm having trouble processing that right now. Could you try again?",
+        content: serverMessage ?? "I'm having trouble processing that right now. Could you try again?",
         timestamp: Date.now(),
       };
       setMessages((prev) => [...prev, errorMessage]);

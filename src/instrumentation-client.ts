@@ -15,6 +15,8 @@ initBotId({
     { path: '/api/audit/run', method: 'POST' },
     // Content Check — dashboard AI-cost surface (consolidation step 4)
     { path: '/api/check', method: 'POST' },
+    // Homepage Brand Advisor chat — anonymous AI-cost surface
+    { path: '/api/brand-advisor/chat', method: 'POST' },
     // Voice Fingerprint extraction — PRO AI-cost surface (step 5)
     { path: '/api/voice-fingerprint/extract', method: 'POST' },
     // Content repurposing — PRO AI-cost surface, up to 6 LLM calls (step 6)
