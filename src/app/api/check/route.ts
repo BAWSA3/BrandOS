@@ -4,7 +4,7 @@ import { buildCheckPrompt } from '@/prompts/brand-guardian';
 import { BrandDNA } from '@/lib/types';
 import { VoiceFingerprint, AuthenticityScore } from '@/lib/voice-fingerprint';
 import { buildAuthenticityCheckPrompt } from '@/prompts/voice-fingerprint';
-import { getCurrentUser } from '@/lib/auth';
+import { getWorkspaceContext } from '@/lib/workspace-auth';
 import { botGuard } from '@/lib/botid-guard';
 import { checkAndIncrementUsage } from '@/lib/usage';
 import { GUARD_PREAMBLE, wrapUntrusted } from '@/lib/prompt-safety';
@@ -56,8 +56,8 @@ function parseCheckResult(text: string) {
 
 export async function POST(request: NextRequest) {
   try {
-    const user = await getCurrentUser();
-    if (!user) {
+    const ctx = await getWorkspaceContext({ ensure: false });
+    if (!ctx) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
     // Only after the request is known-valid — rejected requests must not
     // burn a check credit. (An LLM failure after this point still consumes
     // one; refunds would need transactional usage tracking.)
-    const { allowed, usage } = await checkAndIncrementUsage(user.id, 'check');
+    const { allowed, usage } = await checkAndIncrementUsage(ctx.user.id, 'check');
     if (!allowed) {
       return NextResponse.json(
         { error: 'Usage limit reached', code: 'USAGE_LIMIT', usage, upgradeUrl: '/pricing' },
@@ -134,25 +134,31 @@ export async function POST(request: NextRequest) {
       ],
     });
 
-    const authCall = voiceFingerprint?.metadata
-      ? anthropic.messages
-          .create({
-            model: MODEL,
-            max_tokens: 3000,
-            thinking: { type: 'disabled' },
-            messages: [
-              {
-                role: 'user',
-                content:
-                  GUARD_PREAMBLE + buildAuthenticityCheckPrompt(voiceFingerprint, fencedContent),
-              },
-            ],
-          })
-          .catch((e: unknown) => {
-            console.error('Authenticity check failed (non-blocking):', e);
-            return null;
-          })
-      : Promise.resolve(null);
+    // Authenticity scoring rides on the PRO voice-fingerprint feature —
+    // gate it here too, or a crafted request bypasses the extract route's
+    // plan check and burns a second LLM call on FREE.
+    const isPro = ctx.workspace !== null && ctx.workspace.plan !== 'FREE';
+
+    const authCall =
+      isPro && voiceFingerprint?.metadata
+        ? anthropic.messages
+            .create({
+              model: MODEL,
+              max_tokens: 3000,
+              thinking: { type: 'disabled' },
+              messages: [
+                {
+                  role: 'user',
+                  content:
+                    GUARD_PREAMBLE + buildAuthenticityCheckPrompt(voiceFingerprint, fencedContent),
+                },
+              ],
+            })
+            .catch((e: unknown) => {
+              console.error('Authenticity check failed (non-blocking):', e);
+              return null;
+            })
+        : Promise.resolve(null);
 
     const [message, authMessage] = await Promise.all([mainCall, authCall]);
 

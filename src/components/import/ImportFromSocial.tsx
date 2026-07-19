@@ -10,7 +10,16 @@ interface ImportFromSocialProps {
 
 type SocialPlatform = 'twitter' | 'instagram' | 'linkedin';
 
-const platforms: { id: SocialPlatform; label: string; icon: string; placeholder: string }[] = [
+// Only X has a real data source (SocialData) — the server rejects the other
+// platforms, so present them as coming soon instead of letting the request
+// fail after the fact.
+const platforms: {
+  id: SocialPlatform;
+  label: string;
+  icon: string;
+  placeholder: string;
+  disabled?: boolean;
+}[] = [
   {
     id: 'twitter',
     label: 'Twitter / X',
@@ -19,15 +28,17 @@ const platforms: { id: SocialPlatform; label: string; icon: string; placeholder:
   },
   {
     id: 'instagram',
-    label: 'Instagram',
+    label: 'Instagram (soon)',
     icon: 'instagram',
     placeholder: '@yourbrand or instagram.com/yourbrand',
+    disabled: true,
   },
   {
     id: 'linkedin',
-    label: 'LinkedIn',
+    label: 'LinkedIn (soon)',
     icon: 'linkedin',
     placeholder: 'linkedin.com/company/yourbrand',
+    disabled: true,
   },
 ];
 
@@ -148,14 +159,17 @@ export default function ImportFromSocial({ onExtract }: ImportFromSocialProps) {
         {platforms.map((platform) => (
           <button
             key={platform.id}
+            disabled={platform.disabled}
             onClick={() => {
               setSelectedPlatform(platform.id);
               setProgress(null);
             }}
             className={`p-4 rounded-xl border transition-all ${
-              selectedPlatform === platform.id
-                ? 'border-foreground bg-surface'
-                : 'border-border hover:border-muted'
+              platform.disabled
+                ? 'border-border opacity-40 cursor-not-allowed'
+                : selectedPlatform === platform.id
+                  ? 'border-foreground bg-surface'
+                  : 'border-border hover:border-muted'
             }`}
           >
             <SocialIcon platform={platform.icon} active={selectedPlatform === platform.id} />

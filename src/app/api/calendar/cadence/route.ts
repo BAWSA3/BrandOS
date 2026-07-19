@@ -1,33 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-import { createClient } from '@supabase/supabase-js';
 import prisma from '@/lib/db';
+import { getWorkspaceContext, ownedBrandWhere } from '@/lib/workspace-auth';
 
-async function getAuthenticatedUser() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-  if (!supabaseUrl || !supabaseAnonKey) return null;
-
-  const cookieStore = await cookies();
-  const accessToken = cookieStore.get('sb-access-token')?.value;
-  if (!accessToken) return null;
-
-  const supabase = createClient(supabaseUrl, supabaseAnonKey);
-  const {
-    data: { user: authUser },
-    error,
-  } = await supabase.auth.getUser(accessToken);
-  if (error || !authUser) return null;
-
-  return prisma.user.findUnique({ where: { supabaseId: authUser.id } });
-}
+// Posting-cadence stats for the calendar, workspace-scoped (consolidation
+// step 6). Read-only route; the old version read the dead sb-access-token
+// cookie.
 
 // GET /api/calendar/cadence?brandId=...
 export async function GET(request: NextRequest) {
   try {
-    const dbUser = await getAuthenticatedUser();
-    if (!dbUser) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+    // Read path stays read-only: no workspace auto-creation on GET.
+    const ctx = await getWorkspaceContext({ ensure: false });
+    if (!ctx) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const { searchParams } = new URL(request.url);
@@ -37,7 +22,8 @@ export async function GET(request: NextRequest) {
     }
 
     const brand = await prisma.brand.findFirst({
-      where: { id: brandId, userId: dbUser.id },
+      where: ownedBrandWhere(brandId, ctx.workspace?.id ?? null, ctx.user.id),
+      select: { id: true },
     });
     if (!brand) {
       return NextResponse.json({ error: 'Brand not found' }, { status: 404 });
@@ -53,11 +39,23 @@ export async function GET(request: NextRequest) {
     sunday.setDate(sunday.getDate() + 6);
     sunday.setHours(23, 59, 59, 999);
 
-    // Fetch this week's drafts and recent tweet history in parallel
+    // Fetch this week's drafts and recent tweet history in parallel. Only
+    // this-week rows and the idea backlog feed the stats below — don't scan
+    // (or transfer 10k-char bodies for) the brand's entire draft history.
     const [weekDrafts, recentTweets] = await Promise.all([
       prisma.contentDraft.findMany({
-        where: { brandId },
+        where: {
+          brandId,
+          OR: [{ status: 'idea' }, { scheduledFor: { gte: monday, lte: sunday } }],
+        },
         orderBy: { scheduledFor: 'asc' },
+        select: {
+          id: true,
+          status: true,
+          scheduledFor: true,
+          content: true,
+          contentType: true,
+        },
       }),
       prisma.brandTweet.findMany({
         where: { brandId },

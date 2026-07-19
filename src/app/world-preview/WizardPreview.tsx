@@ -4,6 +4,10 @@ import { useEffect, useState } from 'react';
 import BrandSetupWizard from '@/components/dashboard/BrandSetupWizard';
 import BrandDNAPanel from '@/components/dashboard/BrandDNAPanel';
 import ContentCheckPanel from '@/components/dashboard/ContentCheckPanel';
+import VoiceFingerprintPanel from '@/components/dashboard/VoiceFingerprintPanel';
+import ContentCalendar from '@/components/calendar/ContentCalendar';
+import BrandImportHub from '@/components/import/BrandImportHub';
+import { createEmptyFingerprint } from '@/lib/voice-fingerprint';
 import { useBrandStore } from '@/lib/store';
 import { brandHasContent } from '@/hooks/useBrandHydration';
 import { brandTemplates } from '@/lib/templates';
@@ -15,12 +19,20 @@ import { brandTemplates } from '@/lib/templates';
 //   ?check=1  — ContentCheckPanel (seeded brand; the check API itself
 //               requires auth, so [RUN CHECK] will error here — this mode is
 //               for layout/typography iteration)
+//   ?calendar=1 — ContentCalendar week grid (the drafts API requires auth,
+//               so lists render empty here — layout iteration only)
+//   ?import=1 — BrandImportHub flow (the analysis APIs require auth, so
+//               [Analyze] will error here — layout iteration only)
 // Local store only; nothing syncs from this page.
 
-export default function WizardPreview({ mode }: { mode: 'wizard' | 'dna' | 'check' }) {
+export default function WizardPreview({
+  mode,
+}: {
+  mode: 'wizard' | 'dna' | 'check' | 'voice' | 'calendar' | 'import';
+}) {
   const [done, setDone] = useState(false);
   const [reinit, setReinit] = useState(false);
-  const { brands, setBrandDNA } = useBrandStore();
+  const { brands, setBrandDNA, voiceFingerprints, setVoiceFingerprint } = useBrandStore();
 
   // dna/check modes: seed the store so the panels render populated.
   useEffect(() => {
@@ -30,10 +42,47 @@ export default function WizardPreview({ mode }: { mode: 'wizard' | 'dna' | 'chec
     }
   }, [mode, brands, setBrandDNA]);
 
+  // voice mode: seed a plausible fingerprint so the extracted view renders.
+  const currentId = brands[0]?.id;
+  useEffect(() => {
+    if (mode !== 'voice' || !currentId || voiceFingerprints[currentId]) return;
+    const fp = createEmptyFingerprint();
+    fp.sentencePatterns.openingStyle = 'bold claims';
+    fp.sentencePatterns.closingStyle = 'mic drop';
+    fp.vocabulary.signatureWords = ['premium', 'nostalgic', 'tactile'];
+    fp.vocabulary.avoidedWords = ['epic', 'game-changer'];
+    fp.signatureElements = ['em-dashes for emphasis', 'short declarative closers'];
+    fp.antiPatterns = ['never opens with a question', "never says 'excited to announce'"];
+    fp.metadata = {
+      sampleCount: 5,
+      totalWordCount: 640,
+      extractedAt: new Date().toISOString(),
+      confidence: 82,
+      version: 1,
+    };
+    setVoiceFingerprint(currentId, fp);
+  }, [mode, currentId, voiceFingerprints, setVoiceFingerprint]);
+
+  // The import hub brings its own full-screen SwissBackground — don't box it
+  // into the centered preview column.
+  if (mode === 'import') {
+    return done ? (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-sm font-mono" style={{ color: 'var(--text-secondary)' }}>
+          import flow finished — reload to run it again
+        </p>
+      </div>
+    ) : (
+      <BrandImportHub onStartFresh={() => setDone(true)} onImportComplete={() => setDone(true)} />
+    );
+  }
+
   return (
     <div className="min-h-screen p-6 flex items-center justify-center">
-      <div className="max-w-2xl w-full">
-        {mode === 'wizard' || reinit ? (
+      <div className={`${mode === 'calendar' ? 'max-w-6xl' : 'max-w-2xl'} w-full`}>
+        {mode === 'calendar' ? (
+          <ContentCalendar />
+        ) : mode === 'wizard' || reinit ? (
           done ? (
             <p className="text-sm font-mono" style={{ color: 'var(--text-secondary)' }}>
               wizard finished — reload to run it again
@@ -43,6 +92,8 @@ export default function WizardPreview({ mode }: { mode: 'wizard' | 'dna' | 'chec
           )
         ) : mode === 'check' ? (
           <ContentCheckPanel />
+        ) : mode === 'voice' ? (
+          <VoiceFingerprintPanel plan="PRO" />
         ) : (
           <BrandDNAPanel
             sync={{ isSyncing: false, lastSyncedAt: new Date(), syncError: null }}
