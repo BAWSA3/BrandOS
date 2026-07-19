@@ -10,6 +10,7 @@ import ScoreHistoryCard from '@/components/dashboard/ScoreHistoryCard';
 import BrandSetupWizard from '@/components/dashboard/BrandSetupWizard';
 import BrandDNAPanel from '@/components/dashboard/BrandDNAPanel';
 import ContentCheckPanel from '@/components/dashboard/ContentCheckPanel';
+import VoiceFingerprintPanel from '@/components/dashboard/VoiceFingerprintPanel';
 
 const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -156,6 +157,8 @@ export default function DashboardClient({ user, workspace, xConnections }: Dashb
                 />
                 {/* Content Check — hidden until the brand has DNA to score against */}
                 <ContentCheckPanel />
+                {/* Voice Fingerprint — PRO; server enforces the gate */}
+                <VoiceFingerprintPanel plan={workspace?.plan ?? 'FREE'} />
               </>
             )}
 

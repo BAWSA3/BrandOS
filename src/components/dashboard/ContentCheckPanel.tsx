@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useBrandStore, useCurrentBrand } from '@/lib/store';
 import { brandHasContent } from '@/hooks/useBrandHydration';
 import { CheckResult } from '@/lib/types';
+import { AuthenticityScore } from '@/lib/voice-fingerprint';
 import { MONO, asciiBar, TerminalButton, terminalInputStyle } from './terminal-ui';
 
 // Content Check — the core loop (consolidation step 4): paste a draft, score
@@ -20,6 +21,18 @@ interface HistoryRow {
   output: { score: number };
   timestamp: string;
 }
+
+// /api/check returns the base result plus an authenticity score when the
+// brand has a voice fingerprint (PRO).
+type CheckResponse = CheckResult & { authenticityScore?: AuthenticityScore | null };
+
+const VERDICT_LABEL: Record<AuthenticityScore['verdict'], string> = {
+  authentic: 'authentic',
+  mostly_authentic: 'mostly authentic',
+  needs_work: 'needs work',
+  generic: 'generic',
+  ai_detected: 'reads as AI',
+};
 
 function scoreColor(score: number) {
   return score >= 70 ? 'var(--success)' : score >= 40 ? 'var(--warning)' : 'var(--danger)';
@@ -63,11 +76,11 @@ function ResultList({
 }
 
 export default function ContentCheckPanel() {
-  const { brands } = useBrandStore();
+  const { brands, voiceFingerprints } = useBrandStore();
   const brandDNA = useCurrentBrand();
   const [draft, setDraft] = useState('');
   const [checking, setChecking] = useState(false);
-  const [result, setResult] = useState<CheckResult | null>(null);
+  const [result, setResult] = useState<CheckResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [history, setHistory] = useState<HistoryRow[]>([]);
@@ -100,7 +113,12 @@ export default function ContentCheckPanel() {
       const res = await fetch('/api/check', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ brandDNA, content: draft.trim() }),
+        body: JSON.stringify({
+          brandDNA,
+          content: draft.trim(),
+          // PRO: authenticity scoring against the brand's voice fingerprint.
+          voiceFingerprint: voiceFingerprints[brandDNA.id],
+        }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -110,7 +128,7 @@ export default function ContentCheckPanel() {
             : data.error || 'Check failed'
         );
       }
-      setResult(data as CheckResult);
+      setResult(data as CheckResponse);
 
       // Persist the run; the id is the server cuid once hydration has synced.
       void fetch('/api/history', {
@@ -242,6 +260,48 @@ export default function ContentCheckPanel() {
                   {asciiBar(result.score, 32)}
                 </span>
               </div>
+
+              {result.authenticityScore && (
+                <div>
+                  <div className="flex items-baseline justify-between mb-1">
+                    <span
+                      style={{
+                        fontFamily: MONO,
+                        fontSize: 10,
+                        letterSpacing: '0.15em',
+                        color: 'var(--text-tertiary)',
+                      }}
+                    >
+                      AUTHENTICITY
+                    </span>
+                    <span
+                      style={{
+                        fontFamily: MONO,
+                        fontSize: 14,
+                        color: scoreColor(result.authenticityScore.overall),
+                      }}
+                    >
+                      {result.authenticityScore.overall} ·{' '}
+                      {VERDICT_LABEL[result.authenticityScore.verdict] ??
+                        result.authenticityScore.verdict}
+                    </span>
+                  </div>
+                  <span
+                    className="block whitespace-pre text-sm"
+                    style={{
+                      fontFamily: MONO,
+                      color: scoreColor(result.authenticityScore.overall),
+                    }}
+                  >
+                    {asciiBar(result.authenticityScore.overall, 32)}
+                  </span>
+                  {result.authenticityScore.summary && (
+                    <p className="mt-1 text-xs" style={{ color: 'var(--text-tertiary)' }}>
+                      {result.authenticityScore.summary}
+                    </p>
+                  )}
+                </div>
+              )}
 
               <ResultList
                 title="// strengths"
