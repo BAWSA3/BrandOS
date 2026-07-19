@@ -35,7 +35,6 @@ yarn-error.log*
 !.env.example
 
 # npm config with tokens
-.npmrc
 
 # vercel (project link folders — never commit; covers .vercel and .vercel.staging)
 .vercel*
