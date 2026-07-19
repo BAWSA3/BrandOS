@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { createBrowserClient } from '@supabase/ssr';
 import { useWorld } from '@/components/world/WorldProvider';
 import { useBrandStore, useHasHydrated } from '@/lib/store';
@@ -10,6 +11,8 @@ import ScoreHistoryCard from '@/components/dashboard/ScoreHistoryCard';
 import BrandSetupWizard from '@/components/dashboard/BrandSetupWizard';
 import BrandDNAPanel from '@/components/dashboard/BrandDNAPanel';
 import ContentCheckPanel from '@/components/dashboard/ContentCheckPanel';
+import VoiceFingerprintPanel from '@/components/dashboard/VoiceFingerprintPanel';
+import CalendarSummaryCard from '@/components/dashboard/CalendarSummaryCard';
 
 const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -41,6 +44,7 @@ interface DashboardClientProps {
 }
 
 export default function DashboardClient({ user, workspace, xConnections }: DashboardClientProps) {
+  const router = useRouter();
   const { world, t } = useWorld();
   const [scanning, setScanning] = useState(false);
   const [scanResult, setScanResult] = useState<ScanResponse | null>(null);
@@ -142,7 +146,20 @@ export default function DashboardClient({ user, workspace, xConnections }: Dashb
 
         {/* First-run: brand DNA setup replaces the dashboard body until done */}
         {showWizard && (
-          <BrandSetupWizard onComplete={handleSetupComplete} onSkip={handleSetupSkip} />
+          <>
+            <BrandSetupWizard onComplete={handleSetupComplete} onSkip={handleSetupSkip} />
+            {/* Alternative first-run path: extract the brand from existing
+                assets (site, PDF, images, X) instead of typing it in */}
+            <p className="text-center">
+              <button
+                onClick={() => router.push('/dashboard/import')}
+                className="text-xs font-mono underline underline-offset-4 transition-opacity hover:opacity-70"
+                style={{ color: 'var(--text-tertiary)' }}
+              >
+                or run brand.import() from your website, PDF, or X profile
+              </button>
+            </p>
+          </>
         )}
 
         {!showWizard && (
@@ -156,6 +173,10 @@ export default function DashboardClient({ user, workspace, xConnections }: Dashb
                 />
                 {/* Content Check — hidden until the brand has DNA to score against */}
                 <ContentCheckPanel />
+                {/* Voice Fingerprint — PRO; server enforces the gate */}
+                <VoiceFingerprintPanel plan={workspace?.plan ?? 'FREE'} />
+                {/* Content Calendar — week stats here, full grid on its own page */}
+                <CalendarSummaryCard onOpenCalendar={() => router.push('/dashboard/calendar')} />
               </>
             )}
 

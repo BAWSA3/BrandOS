@@ -27,11 +27,18 @@ export async function getWorkspaceContext(opts: { ensure: boolean }) {
  * fallback for legacy rows they own that haven't been adopted into a
  * workspace yet (see /api/brands adopt-on-read).
  */
-export function ownedBrandWhere(id: string, workspaceId: string, userId: string) {
+export function ownedBrandWhere(id: string, workspaceId: string | null, userId: string) {
   return { id, ...ownedBrandsWhere(workspaceId, userId) };
 }
 
-/** Same scope without the id — for findMany over all accessible brands. */
-export function ownedBrandsWhere(workspaceId: string, userId: string) {
-  return { OR: [{ workspaceId }, { userId, workspaceId: null }] };
+/**
+ * Same scope without the id — for findMany over all accessible brands.
+ * A null workspace (authenticated user whose personal workspace hasn't been
+ * created yet) still owns their legacy rows — never emit `workspaceId: null`
+ * alone, which would match every unadopted brand in the table.
+ */
+export function ownedBrandsWhere(workspaceId: string | null, userId: string) {
+  return workspaceId
+    ? { OR: [{ workspaceId }, { userId, workspaceId: null }] }
+    : { userId, workspaceId: null };
 }
