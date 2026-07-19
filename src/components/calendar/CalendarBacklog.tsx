@@ -67,9 +67,9 @@ export default function CalendarBacklog({
       style={{
         width: 200,
         flexShrink: 0,
-        background: isOver ? 'rgba(10,132,255,0.04)' : 'var(--surface)',
+        background: isOver ? 'color-mix(in srgb, var(--accent) 4%, transparent)' : 'var(--surface)',
         borderRadius: 12,
-        border: isOver ? '1.5px solid rgba(10,132,255,0.3)' : '1px solid var(--border)',
+        border: isOver ? '1.5px solid color-mix(in srgb, var(--accent) 30%, transparent)' : '1px solid var(--border)',
         padding: 12,
         transition: 'all 150ms ease',
         overflowY: 'auto',

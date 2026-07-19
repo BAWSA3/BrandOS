@@ -4,23 +4,30 @@ import { useState } from 'react';
 import type { CalendarDraft } from '@/hooks/useCalendarDrafts';
 
 const statusColors: Record<string, { bg: string; text: string; label: string }> = {
-  idea: { bg: 'rgba(255,214,10,0.12)', text: '#FFD60A', label: 'Idea' },
-  draft: { bg: 'rgba(10,132,255,0.12)', text: '#0A84FF', label: 'Draft' },
-  scheduled: { bg: 'rgba(48,209,88,0.12)', text: '#30D158', label: 'Scheduled' },
-  published: { bg: 'rgba(172,142,104,0.12)', text: '#AC8E68', label: 'Published' },
+  idea: { bg: 'color-mix(in srgb, var(--warning) 12%, transparent)', text: 'var(--warning)', label: 'Idea' },
+  draft: { bg: 'color-mix(in srgb, var(--accent) 12%, transparent)', text: 'var(--accent)', label: 'Draft' },
+  scheduled: { bg: 'color-mix(in srgb, var(--success) 12%, transparent)', text: 'var(--success)', label: 'Scheduled' },
+  published: {
+    bg: 'color-mix(in srgb, var(--text-tertiary) 12%, transparent)',
+    text: 'var(--text-tertiary)',
+    label: 'Published',
+  },
 };
 
 const toneColors: Record<string, { bg: string; text: string }> = {
-  'hot-take': { bg: 'rgba(255,69,58,0.12)', text: '#FF453A' },
-  educational: { bg: 'rgba(48,209,88,0.12)', text: '#30D158' },
-  casual: { bg: 'rgba(10,132,255,0.12)', text: '#0A84FF' },
-  launch: { bg: 'rgba(191,90,242,0.12)', text: '#BF5AF2' },
-  'behind-the-scenes': { bg: 'rgba(255,159,10,0.12)', text: '#FF9F0A' },
-  announcement: { bg: 'rgba(100,210,255,0.12)', text: '#64D2FF' },
-  thread: { bg: 'rgba(172,142,104,0.12)', text: '#AC8E68' },
-  poll: { bg: 'rgba(191,90,242,0.12)', text: '#BF5AF2' },
-  story: { bg: 'rgba(255,159,10,0.12)', text: '#FF9F0A' },
-  'counter-argument': { bg: 'rgba(255,69,58,0.12)', text: '#FF453A' },
+  'hot-take': { bg: 'color-mix(in srgb, var(--danger) 12%, transparent)', text: 'var(--danger)' },
+  educational: { bg: 'color-mix(in srgb, var(--success) 12%, transparent)', text: 'var(--success)' },
+  casual: { bg: 'color-mix(in srgb, var(--accent) 12%, transparent)', text: 'var(--accent)' },
+  launch: { bg: 'color-mix(in srgb, var(--accent) 12%, transparent)', text: 'var(--accent)' },
+  'behind-the-scenes': { bg: 'color-mix(in srgb, var(--warning) 12%, transparent)', text: 'var(--warning)' },
+  announcement: { bg: 'color-mix(in srgb, var(--accent) 12%, transparent)', text: 'var(--accent)' },
+  thread: {
+    bg: 'color-mix(in srgb, var(--text-tertiary) 12%, transparent)',
+    text: 'var(--text-tertiary)',
+  },
+  poll: { bg: 'color-mix(in srgb, var(--accent) 12%, transparent)', text: 'var(--accent)' },
+  story: { bg: 'color-mix(in srgb, var(--warning) 12%, transparent)', text: 'var(--warning)' },
+  'counter-argument': { bg: 'color-mix(in srgb, var(--danger) 12%, transparent)', text: 'var(--danger)' },
 };
 
 interface CalendarDraftCardProps {
@@ -177,8 +184,8 @@ export default function CalendarDraftCard({
               style={{
                 fontSize: 10,
                 fontWeight: 500,
-                color: '#0A84FF',
-                background: 'rgba(10,132,255,0.08)',
+                color: 'var(--accent)',
+                background: 'color-mix(in srgb, var(--accent) 8%, transparent)',
                 border: 'none',
                 borderRadius: 4,
                 padding: '2px 8px',
@@ -252,8 +259,8 @@ export default function CalendarDraftCard({
               style={{
                 fontSize: 10,
                 fontWeight: 500,
-                color: 'var(--error, #ff3b30)',
-                background: 'rgba(255,59,48,0.08)',
+                color: 'var(--danger)',
+                background: 'color-mix(in srgb, var(--danger) 8%, transparent)',
                 border: 'none',
                 borderRadius: 4,
                 padding: '2px 8px',

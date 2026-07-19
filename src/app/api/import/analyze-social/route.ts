@@ -1,129 +1,109 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { getWorkspaceContext } from '@/lib/workspace-auth';
+import { botGuard } from '@/lib/botid-guard';
+import { readJsonBody } from '@/lib/api-body';
+import { fetchProfile, fetchUserTweets, isSocialDataConfigured } from '@/lib/socialdata';
+import { analyzeToneHeuristic, extractKeywordsFromText } from '@/lib/import-extraction';
 
-export async function POST(request: Request) {
+// Import Hub — social profile analysis (consolidation step 7). The legacy
+// route was an unauthenticated mock returning canned per-platform data. Now
+// real for X/Twitter via SocialData (the app's existing provider); Instagram
+// and LinkedIn have no data source yet and are rejected honestly instead of
+// returning fake analysis. Hardening: workspace auth + BotID (each request
+// costs paid SocialData calls) + body clamp + strict handle validation.
+
+const MAX_BODY_BYTES = 10_000;
+const MAX_TWEETS = 20;
+const HANDLE_PATTERN = /^[A-Za-z0-9_]{1,15}$/;
+
+export async function POST(request: NextRequest) {
   try {
-    const { platform, handle } = await request.json();
+    const [ctx, botBlock] = await Promise.all([
+      getWorkspaceContext({ ensure: false }),
+      botGuard(request),
+    ]);
+    if (!ctx) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    if (botBlock) return botBlock;
+
+    const read = await readJsonBody(request, MAX_BODY_BYTES);
+    if (!read.ok) return read.response;
+    const platform = typeof read.body.platform === 'string' ? read.body.platform : '';
+    const handle = typeof read.body.handle === 'string' ? read.body.handle : '';
 
     if (!platform || !handle) {
       return NextResponse.json({ error: 'Platform and handle are required' }, { status: 400 });
     }
+    if (platform !== 'twitter') {
+      return NextResponse.json(
+        { error: 'Only X/Twitter import is supported right now — Instagram and LinkedIn are coming soon.' },
+        { status: 400 }
+      );
+    }
+    if (!isSocialDataConfigured()) {
+      return NextResponse.json(
+        { error: 'Social import is temporarily unavailable' },
+        { status: 503 }
+      );
+    }
 
-    // Clean up handle
     const cleanHandle = handle
       .replace(/^@/, '')
-      .replace(/^https?:\/\/(www\.)?(twitter|x|instagram|linkedin)\.com\/(in\/|company\/)?/, '')
-      .replace(/\/$/, '');
+      .replace(/^https?:\/\/(www\.)?(twitter|x)\.com\//, '')
+      .replace(/[/?].*$/, '')
+      .trim();
+    if (!HANDLE_PATTERN.test(cleanHandle)) {
+      return NextResponse.json({ error: 'Invalid X handle' }, { status: 400 });
+    }
 
-    // In production, you would:
-    // 1. Use official APIs (Twitter API, Instagram Graph API, LinkedIn API)
-    // 2. Or use web scraping with proper rate limiting
+    const profileResult = await fetchProfile(cleanHandle);
+    if (!profileResult.profile) {
+      return NextResponse.json(
+        { error: profileResult.error || `@${cleanHandle} not found on X` },
+        { status: profileResult.status === 404 ? 404 : 502 }
+      );
+    }
+    const profile = profileResult.profile;
+    if (profile.protected) {
+      return NextResponse.json(
+        { error: `@${cleanHandle} is a protected account — posts can't be analyzed` },
+        { status: 400 }
+      );
+    }
 
-    // For now, provide mock analysis based on platform
-    // This demonstrates the structure of the response
+    const { tweets } = await fetchUserTweets(profile.id, MAX_TWEETS);
 
-    const result = await mockSocialAnalysis(platform, cleanHandle);
+    // Voice samples: the account's highest-engagement recent posts.
+    const voiceSamples = [...tweets]
+      .sort((a, b) => b.public_metrics.like_count - a.public_metrics.like_count)
+      .slice(0, 4)
+      .map((t) => t.text.slice(0, 280));
 
-    return NextResponse.json(result);
+    const hashtags = tweets
+      .flatMap((t) => t.entities?.hashtags?.map((h) => h.tag.toLowerCase()) ?? [])
+      .filter((tag) => tag.length > 2);
+    const keywords = [
+      ...new Set([
+        ...hashtags,
+        ...extractKeywordsFromText([profile.description, ...tweets.map((t) => t.text)].join(' ')),
+      ]),
+    ].slice(0, 8);
+
+    const tone = analyzeToneHeuristic(
+      [profile.description, ...tweets.map((t) => t.text)].join(' ')
+    );
+
+    return NextResponse.json({
+      overallConfidence: tweets.length > 0 ? 80 : 55,
+      name: profile.name || cleanHandle,
+      tone,
+      keywords,
+      voiceSamples,
+      profileImage: profile.profile_image_url || null,
+    });
   } catch (error) {
-    console.error('Social analysis error:', error);
+    console.error('[import/analyze-social] error:', error);
     return NextResponse.json({ error: 'Failed to analyze social profile' }, { status: 500 });
   }
-}
-
-async function mockSocialAnalysis(platform: string, handle: string) {
-  // Simulate API delay
-  await new Promise((resolve) => setTimeout(resolve, 500));
-
-  // Mock data - in production, this would come from actual API calls
-  const baseResult = {
-    overallConfidence: 70,
-    name: capitalizeHandle(handle),
-    colors: {
-      primary: '#1a1a2e',
-      secondary: '#0f3460',
-    },
-    tone: {
-      formality: 50,
-      energy: 60,
-      confidence: 55,
-      style: 50,
-    },
-    keywords: ['brand', 'community', 'innovation'],
-    voiceSamples: [],
-    profileImage: null,
-  };
-
-  // Platform-specific adjustments
-  switch (platform) {
-    case 'twitter':
-      return {
-        ...baseResult,
-        tone: {
-          formality: 35, // Twitter tends to be more casual
-          energy: 70,
-          confidence: 60,
-          style: 55,
-        },
-        voiceSamples: [
-          'Excited to share our latest update! 🚀',
-          'What do you think about this new feature?',
-          'Thank you all for your amazing support ❤️',
-        ],
-        keywords: ['community', 'updates', 'innovation', 'support'],
-      };
-
-    case 'instagram':
-      return {
-        ...baseResult,
-        tone: {
-          formality: 40,
-          energy: 75,
-          confidence: 65,
-          style: 70,
-        },
-        voiceSamples: [
-          'Behind the scenes of something special ✨',
-          'Celebrating our incredible team today!',
-          'New drop coming soon... stay tuned 👀',
-        ],
-        keywords: ['lifestyle', 'community', 'style', 'creativity'],
-        colors: {
-          primary: '#c13584', // Instagram-ish colors
-          secondary: '#e1306c',
-        },
-      };
-
-    case 'linkedin':
-      return {
-        ...baseResult,
-        tone: {
-          formality: 75, // LinkedIn is more professional
-          energy: 45,
-          confidence: 70,
-          style: 35,
-        },
-        voiceSamples: [
-          "We're thrilled to announce a new partnership that will transform how we serve our customers.",
-          'Our team continues to push boundaries in innovation and excellence.',
-          'Join us in our mission to create lasting impact in the industry.',
-        ],
-        keywords: ['leadership', 'innovation', 'partnership', 'excellence', 'growth'],
-        colors: {
-          primary: '#0077b5', // LinkedIn blue
-          secondary: '#313335',
-        },
-      };
-
-    default:
-      return baseResult;
-  }
-}
-
-function capitalizeHandle(handle: string): string {
-  // Convert handle to potential brand name
-  return handle
-    .replace(/[_-]/g, ' ')
-    .split(' ')
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join(' ');
 }

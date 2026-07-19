@@ -151,7 +151,7 @@ function EarlyAccessContent() {
                 we'll reach out when it's your turn.
               </p>
               <Link
-                href="/content-engine"
+                href="/dashboard"
                 className="btn-engine label-mono inline-block px-6 py-3 rounded-[var(--radius-sm)]"
                 style={{
                   background: 'transparent',

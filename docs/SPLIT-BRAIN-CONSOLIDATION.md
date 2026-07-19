@@ -55,6 +55,23 @@ defects to fix in any migration: browser-global localStorage blob (not
 keyed per user), local uuid vs server cuid id mismatch (`useBrandSync`
 re-creates duplicates), `/app` never hydrates from the server.
 
+## Status ledger (update in the same PR that ships each step)
+
+| Step | Status | Landed |
+| --- | --- | --- |
+| 1. Dead links + logout leak | ✅ shipped | `742aa9d` (staging, 2026-07-12) |
+| 2. Foundation (Brand↔Workspace, hydration) | ✅ shipped | `303c88f` + migration 014 (staging applied; prod at next promotion) |
+| 3. Brand DNA + onboarding wizard | ✅ shipped | `47bb008` (3a) + `5d9998b` (3b) |
+| 4. Content Check | ✅ shipped | PR #3 |
+| 5. Voice Fingerprint | ✅ approved | PR #4 → re-landed as PR #5 (awaiting merge) |
+| 6. Content Calendar | ✅ in PR | `/dashboard/calendar` + `/api/calendar/*` and `/api/repurpose` rewritten on `getWorkspaceContext` (off the dead sb-access-token cookie); repurpose hardened (PRO gate on workspace.plan, BotID, prompt fencing, claude-sonnet-5); migration 015 backfills `Workspace.plan` from `subscriptionTier` for pre-Phase-1 subscribers |
+| 7. Import Hub | ✅ in PR | `/dashboard/import` mounts the existing hub; output lands on the workspace brand via `useBrandHydration.forceSync`. All `/api/import/*` routes were unauthenticated (and pdf/images/social were mocks) — now `getWorkspaceContext` + BotID everywhere; real extraction: pdf/images via claude-sonnet-5 (generation-metered, output clamped), social via SocialData for X (Instagram/LinkedIn disabled as "soon"), url keeps cheerio + per-hop SSRF-validated redirects and size/time caps; dead unauthenticated `extract-brand` route deleted |
+| 8. Defer/kill list | ✅ in PR | Shell retired: /app + satellites (/content-engine /conductor /agents /try /phantom /growth-plan, all middleware-blocked since step 1) deleted with their cluster-only components (~20k LOC incl. brandkit/AI Studio canvas, workflow graph, ascii-sky, GrowthPlan, onchain). 21 orphaned API routes deleted — 16 of them unauthenticated LLM/Gemini cost surfaces with zero callers (gemini/* ×8, analyze-tone, analyze-competitor, guardrails, generate, design-intent, cohesion, context-tone, platform-adapt, taste-protect, taste-translate, analyze-image, generate-workflow, voice-consistency, search-pinterest, expand-search) plus cookie-auth brands/me, growth-plan/generate, onchain/*, try-engine/*, agents/chat*, conductor/chat. Store slimmed (history/safeZones/brandMemory/designIntents/contentEngineConfigs slices removed; phaseProgress kept). **Deferred, code intact:** /api/content-engine + lib/agents product agents (authed/metered; generator-vs-workflow decision pending), AI Studio revival point = parent commit of this PR. Follow-up flagged: /api/brand-advisor (live homepage chat) is unauthenticated. |
+
+Preview harnesses: `/world-preview?wizard=1`, `?dna=1`, `?check=1`, `?voice=1`,
+`?calendar=1`, `?import=1`. Legacy routes still on the dead cookie auth migrate
+as each feature ports (remaining: brands/me, brands/share, drift-alerts).
+
 ## Option A — /dashboard is home; rescue features onto the workspace model
 
 Port the crown jewels one at a time into the Phase 1 architecture
