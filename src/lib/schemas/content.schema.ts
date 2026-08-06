@@ -1,6 +1,8 @@
 import { z } from 'zod';
 
-const CONTENT_TYPES = [
+// Single source of truth for the ContentDraft vocabulary — the API routes
+// (via src/lib/calendar-drafts.ts) and the zod schemas below must agree.
+export const CONTENT_TYPES = [
   'tweet',
   'thread',
   'poll',
@@ -10,7 +12,9 @@ const CONTENT_TYPES = [
   'story',
 ] as const;
 
-const DRAFT_STATUSES = ['idea', 'draft', 'scheduled', 'published'] as const;
+export const DRAFT_STATUSES = ['idea', 'draft', 'scheduled', 'published'] as const;
+
+export const DRAFT_SOURCE_TYPES = ['idea-feed', 'manual', 'repurpose'] as const;
 
 export const CreateContentDraftSchema = z.object({
   content: z.string().min(1, 'Content cannot be empty'),
@@ -18,7 +22,7 @@ export const CreateContentDraftSchema = z.object({
   tone: z.string().default('casual'),
   brandId: z.string().min(1),
   scheduledFor: z.string().datetime().optional(),
-  sourceType: z.enum(['idea-feed', 'manual', 'repurpose']).optional(),
+  sourceType: z.enum(DRAFT_SOURCE_TYPES).optional(),
   sourceId: z.string().optional(),
   parentId: z.string().optional(),
 });

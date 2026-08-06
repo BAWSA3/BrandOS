@@ -6,6 +6,7 @@ import {
   XProfileData,
 } from '@/lib/gemini';
 import { features, getTierInfo } from '@/lib/features';
+import { botGuard } from '@/lib/botid-guard';
 import { analyzeVoiceConsistency } from '@/lib/voice-consistency';
 import type { VoiceConsistencyReport } from '@/lib/schemas/voice-consistency.schema';
 import { recordScan, extractIntelligence } from '@/lib/scan-tracking';
@@ -13,6 +14,7 @@ import { getUserProfile } from '@/lib/user-profiles';
 import { assertCanScan } from '@/lib/scan-guard';
 import prisma from '@/lib/db';
 import { logSecurityEvent, getClientIp } from '@/lib/audit-log';
+import { captureFunnelEvent } from '@/lib/funnel-events';
 import { internalHeaders } from '@/lib/internal-auth';
 import { parseBrandScore, heuristicBrandScore } from '@/lib/score-schemas';
 
@@ -124,6 +126,9 @@ async function fetchTweets(username: string, origin: string) {
 
 export async function POST(request: NextRequest) {
   try {
+    const botBlock = await botGuard(request);
+    if (botBlock) return botBlock;
+
     const { username, workspaceId } = (await request.json()) as {
       username: string;
       workspaceId?: string;
@@ -337,6 +342,17 @@ export async function POST(request: NextRequest) {
       metadata: { scan_id: newScan?.id ?? 'unknown', route: '/api/x-brand-score-enhanced' },
       ip: getClientIp(request.headers),
       userAgent: request.headers.get('user-agent'),
+    });
+
+    const scanNumber = await prisma.brandScan
+      .count({ where: { userId: guard.user.id } })
+      .catch(() => null);
+    await captureFunnelEvent(guard.user.supabaseId, 'scan_completed', {
+      route: 'x-brand-score-enhanced',
+      score: brandScore.overallScore,
+      archetype: brandScore.archetype?.primary ?? 'unknown',
+      scan_number: scanNumber,
+      is_first_scan: scanNumber === 1,
     });
 
     return NextResponse.json({

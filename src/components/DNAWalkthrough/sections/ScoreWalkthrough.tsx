@@ -1,6 +1,6 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import WalkthroughSection from '../WalkthroughSection';
 import { ParallaxCard } from '../motion';
 import type { ParallaxLayerConfig } from '../motion';

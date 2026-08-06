@@ -1,12 +1,22 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { createBrowserClient } from '@supabase/ssr';
 import { useWorld } from '@/components/world/WorldProvider';
+import { useBrandStore, useHasHydrated } from '@/lib/store';
+import { useBrandHydration, brandHasContent } from '@/hooks/useBrandHydration';
+import ScanResultPanel, { type ScanResponse } from '@/components/dashboard/ScanResultPanel';
+import ScoreHistoryCard from '@/components/dashboard/ScoreHistoryCard';
+import BrandSetupWizard from '@/components/dashboard/BrandSetupWizard';
+import BrandDNAPanel from '@/components/dashboard/BrandDNAPanel';
+import ContentCheckPanel from '@/components/dashboard/ContentCheckPanel';
+import VoiceFingerprintPanel from '@/components/dashboard/VoiceFingerprintPanel';
+import CalendarSummaryCard from '@/components/dashboard/CalendarSummaryCard';
 
 const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
+  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!
 );
 
 interface DashboardClientProps {
@@ -34,13 +44,61 @@ interface DashboardClientProps {
 }
 
 export default function DashboardClient({ user, workspace, xConnections }: DashboardClientProps) {
+  const router = useRouter();
   const { world, t } = useWorld();
   const [scanning, setScanning] = useState(false);
-  const [scanResult, setScanResult] = useState<Record<string, unknown> | null>(null);
+  const [scanResult, setScanResult] = useState<ScanResponse | null>(null);
   const [scanError, setScanError] = useState<string | null>(null);
+  const [connecting, setConnecting] = useState(false);
+  const [connectError, setConnectError] = useState<string | null>(null);
+  // Bumped after each successful scan so ScoreHistoryCard refetches
+  const [historyKey, setHistoryKey] = useState(0);
 
   const activeConnection = xConnections.find((c) => c.status === 'active');
-  const showWorldBanner = workspace && !workspace.activeWorldId;
+
+  // First-run brand setup: wait for both the persisted store and the server
+  // hydration before deciding, so the wizard never flashes for users who
+  // already have a brand.
+  const storeReady = useHasHydrated();
+  const { isHydrated, isSyncing, lastSyncedAt, syncError, forceSync } = useBrandHydration();
+  const { brands, phaseProgress, completeOnboarding } = useBrandStore();
+  // Re-entry: the DNA panel's [ RUN brand.init() ] re-opens the wizard after
+  // a skipped onboarding.
+  const [reinitRequested, setReinitRequested] = useState(false);
+  const showWizard =
+    storeReady &&
+    isHydrated &&
+    (reinitRequested || (!phaseProgress.hasCompletedOnboarding && !brands.some(brandHasContent)));
+
+  function handleSetupComplete() {
+    completeOnboarding();
+    setReinitRequested(false);
+    // Push the finished brand now rather than waiting out the debounce.
+    void forceSync();
+  }
+
+  function handleSetupSkip() {
+    completeOnboarding();
+    setReinitRequested(false);
+  }
+
+  async function handleConnect() {
+    setConnecting(true);
+    setConnectError(null);
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'twitter',
+        options: {
+          redirectTo: `${window.location.origin}/api/auth/callback?next=/dashboard`,
+        },
+      });
+      if (error) throw error;
+      // On success the browser navigates away to X — leave the spinner on.
+    } catch (err) {
+      setConnectError(err instanceof Error ? err.message : 'Could not start X sign-in');
+      setConnecting(false);
+    }
+  }
 
   async function handleScan() {
     if (!activeConnection) return;
@@ -59,7 +117,8 @@ export default function DashboardClient({ user, workspace, xConnections }: Dashb
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Scan failed');
-      setScanResult(data);
+      setScanResult(data as ScanResponse);
+      setHistoryKey((k) => k + 1);
     } catch (err) {
       setScanError(err instanceof Error ? err.message : 'Unknown error');
     } finally {
@@ -78,189 +137,229 @@ export default function DashboardClient({ user, workspace, xConnections }: Dashb
             </p>
           </div>
           <div className="flex items-center gap-3">
-            {user.avatar && (
-              <img src={user.avatar} alt="" className="w-8 h-8 rounded-full" />
-            )}
+            {user.avatar && <img src={user.avatar} alt="" className="w-8 h-8 rounded-full" />}
             <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>
               {user.name || user.email}
             </span>
           </div>
         </header>
 
-        {showWorldBanner && (
-          <a
-            href="/dashboard/world"
-            className="block rounded-lg border p-4 transition-colors"
-            style={{
-              borderColor: 'var(--border)',
-              backgroundColor: 'var(--surface)',
-            }}
-          >
-            <p className="text-sm font-mono" style={{ color: 'var(--accent)' }}>
-              → Choose your world
+        {/* First-run: brand DNA setup replaces the dashboard body until done */}
+        {showWizard && (
+          <>
+            <BrandSetupWizard onComplete={handleSetupComplete} onSkip={handleSetupSkip} />
+            {/* Alternative first-run path: extract the brand from existing
+                assets (site, PDF, images, X) instead of typing it in */}
+            <p className="text-center">
+              <button
+                onClick={() => router.push('/dashboard/import')}
+                className="text-xs font-mono underline underline-offset-4 transition-opacity hover:opacity-70"
+                style={{ color: 'var(--text-tertiary)' }}
+              >
+                or run brand.import() from your website, PDF, or X profile
+              </button>
             </p>
-            <p className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>
-              Pick a theme for your BrandOS dashboard. Step into the aesthetic that fits you.
-            </p>
-          </a>
+          </>
         )}
 
-        {/* X Account Connections */}
-        <section
-          className="rounded-lg p-6 border"
-          style={{ borderColor: 'var(--border)', backgroundColor: 'var(--surface)' }}
-        >
-          <h2
-            className="text-sm font-semibold uppercase tracking-wide mb-4 font-mono"
-            style={{ color: 'var(--text-tertiary)' }}
-          >
-            Connected X Accounts
-          </h2>
+        {!showWizard && (
+          <>
+            {/* Brand DNA editor — only once server hydration is live */}
+            {storeReady && isHydrated && (
+              <>
+                <BrandDNAPanel
+                  sync={{ isSyncing, lastSyncedAt, syncError }}
+                  onReinit={() => setReinitRequested(true)}
+                />
+                {/* Content Check — hidden until the brand has DNA to score against */}
+                <ContentCheckPanel />
+                {/* Voice Fingerprint — PRO; server enforces the gate */}
+                <VoiceFingerprintPanel plan={workspace?.plan ?? 'FREE'} />
+                {/* Content Calendar — week stats here, full grid on its own page */}
+                <CalendarSummaryCard onOpenCalendar={() => router.push('/dashboard/calendar')} />
+              </>
+            )}
 
-          {xConnections.length === 0 ? (
-            <div className="text-center py-8">
-              <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>
-                {t('emptyConnections', 'Connect your X account to scan your brand.')}
-              </p>
-              <button
-                onClick={async () => {
-                  await supabase.auth.signInWithOAuth({
-                    provider: 'twitter',
-                    options: {
-                      redirectTo: `${window.location.origin}/api/auth/callback?next=/dashboard`,
-                    },
-                  });
-                }}
-                className="inline-block py-2 px-6 text-sm font-medium rounded-lg transition-opacity hover:opacity-90"
-                style={{
-                  backgroundColor: 'var(--accent)',
-                  color: 'var(--background)',
-                }}
-              >
-                {t('connectCta', 'Connect X Account')}
-              </button>
-              <p className="mt-2 text-xs" style={{ color: 'var(--text-tertiary)' }}>
-                We verify ownership via X OAuth. Only you can scan your handle.
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {xConnections.map((conn) => (
-                <div
-                  key={conn.id}
-                  className="flex items-center justify-between p-3 rounded-lg"
-                  style={{ backgroundColor: 'var(--surface-tertiary)' }}
-                >
-                  <div>
-                    <span className="font-medium text-sm">@{conn.username}</span>
-                    <span
-                      className="ml-2 text-xs px-2 py-0.5 rounded-full"
-                      style={
-                        conn.status === 'active'
-                          ? { backgroundColor: 'color-mix(in srgb, var(--success) 20%, transparent)', color: 'var(--success)' }
-                          : { backgroundColor: 'var(--surface-hover)', color: 'var(--text-tertiary)' }
-                      }
-                    >
-                      {conn.status}
-                    </span>
-                  </div>
-                  <span className="text-xs" style={{ color: 'var(--text-tertiary)' }}>
-                    Connected {new Date(conn.connectedAt).toLocaleDateString()}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
-
-        {/* Scan Section */}
-        {activeConnection && (
-          <section
-            className="rounded-lg p-6 border"
-            style={{ borderColor: 'var(--border)', backgroundColor: 'var(--surface)' }}
-          >
-            <h2
-              className="text-sm font-semibold uppercase tracking-wide mb-4 font-mono"
-              style={{ color: 'var(--text-tertiary)' }}
+            {/* X Account Connections */}
+            <section
+              className="rounded-lg p-6 border"
+              style={{ borderColor: 'var(--border)', backgroundColor: 'var(--surface)' }}
             >
-              Brand Scan
-            </h2>
-
-            <div className="flex items-center gap-4">
-              <p className="text-sm flex-1" style={{ color: 'var(--text-secondary)' }}>
-                Scan <strong style={{ color: 'var(--text-primary)' }}>@{activeConnection.username}</strong> for a fresh brand score.
-              </p>
-              <button
-                onClick={handleScan}
-                disabled={scanning}
-                className="py-2 px-6 text-sm font-medium rounded-lg transition-opacity hover:opacity-90 disabled:opacity-50"
-                style={{
-                  backgroundColor: 'var(--accent)',
-                  color: 'var(--background)',
-                }}
+              <h2
+                className="text-sm font-semibold uppercase tracking-wide mb-4 font-mono"
+                style={{ color: 'var(--text-tertiary)' }}
               >
-                {scanning ? t('scanningLabel', 'Scanning...') : t('scanCta', 'Scan Now')}
-              </button>
-            </div>
+                Connected X Accounts
+              </h2>
 
-            {scanError && (
-              <div
-                className="mt-4 rounded-lg p-3 text-sm border"
-                style={{
-                  backgroundColor: 'color-mix(in srgb, var(--danger) 12%, transparent)',
-                  borderColor: 'color-mix(in srgb, var(--danger) 30%, transparent)',
-                  color: 'var(--danger)',
-                }}
+              {xConnections.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>
+                    {t('emptyConnections', 'Connect your X account to scan your brand.')}
+                  </p>
+                  <button
+                    onClick={handleConnect}
+                    disabled={connecting}
+                    className="inline-block py-2 px-6 text-sm font-medium rounded-lg transition-opacity hover:opacity-90 disabled:opacity-50"
+                    style={{
+                      backgroundColor: 'var(--accent)',
+                      color: 'var(--background)',
+                    }}
+                  >
+                    {connecting
+                      ? t('connectingLabel', 'Redirecting to X...')
+                      : t('connectCta', 'Connect X Account')}
+                  </button>
+                  {connectError && (
+                    <p className="mt-2 text-xs" style={{ color: 'var(--danger)' }}>
+                      {connectError}
+                    </p>
+                  )}
+                  <p className="mt-2 text-xs" style={{ color: 'var(--text-tertiary)' }}>
+                    We verify ownership via X OAuth. Only you can scan your handle.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {xConnections.map((conn) => (
+                    <div
+                      key={conn.id}
+                      className="flex items-center justify-between p-3 rounded-lg"
+                      style={{ backgroundColor: 'var(--surface-tertiary)' }}
+                    >
+                      <div>
+                        <span className="font-medium text-sm">@{conn.username}</span>
+                        <span
+                          className="ml-2 text-xs px-2 py-0.5 rounded-full"
+                          style={
+                            conn.status === 'active'
+                              ? {
+                                  backgroundColor:
+                                    'color-mix(in srgb, var(--success) 20%, transparent)',
+                                  color: 'var(--success)',
+                                }
+                              : {
+                                  backgroundColor: 'var(--surface-hover)',
+                                  color: 'var(--text-tertiary)',
+                                }
+                          }
+                        >
+                          {conn.status}
+                        </span>
+                      </div>
+                      <span className="text-xs" style={{ color: 'var(--text-tertiary)' }}>
+                        Connected {new Date(conn.connectedAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
+
+            {/* Scan Section */}
+            {activeConnection && (
+              <section
+                className="rounded-lg p-6 border"
+                style={{ borderColor: 'var(--border)', backgroundColor: 'var(--surface)' }}
               >
-                {scanError}
-              </div>
+                <h2
+                  className="text-sm font-semibold uppercase tracking-wide mb-4 font-mono"
+                  style={{ color: 'var(--text-tertiary)' }}
+                >
+                  Brand Scan
+                </h2>
+
+                <div className="flex items-center gap-4">
+                  <p className="text-sm flex-1" style={{ color: 'var(--text-secondary)' }}>
+                    Scan{' '}
+                    <strong style={{ color: 'var(--text-primary)' }}>
+                      @{activeConnection.username}
+                    </strong>{' '}
+                    for a fresh brand score.
+                  </p>
+                  <button
+                    onClick={handleScan}
+                    disabled={scanning}
+                    className="py-2 px-6 text-sm font-medium rounded-lg transition-opacity hover:opacity-90 disabled:opacity-50"
+                    style={{
+                      backgroundColor: 'var(--accent)',
+                      color: 'var(--background)',
+                    }}
+                  >
+                    {scanning ? t('scanningLabel', 'Scanning...') : t('scanCta', 'Scan Now')}
+                  </button>
+                </div>
+
+                {scanError && (
+                  <div
+                    className="mt-4 rounded-lg p-3 text-sm border"
+                    style={{
+                      backgroundColor: 'color-mix(in srgb, var(--danger) 12%, transparent)',
+                      borderColor: 'color-mix(in srgb, var(--danger) 30%, transparent)',
+                      color: 'var(--danger)',
+                    }}
+                  >
+                    {scanError}
+                  </div>
+                )}
+
+                {scanResult && (
+                  <ScanResultPanel
+                    result={scanResult}
+                    fallbackUsername={activeConnection.username}
+                  />
+                )}
+              </section>
             )}
 
-            {scanResult && (
-              <div
-                className="mt-4 rounded-lg p-4"
-                style={{ backgroundColor: 'var(--surface-tertiary)' }}
-              >
-                <p className="text-sm font-medium">
-                  Score: {(scanResult as { brandScore?: { overallScore?: number } }).brandScore?.overallScore ?? 'N/A'}
-                </p>
-                <p className="text-xs mt-1" style={{ color: 'var(--text-tertiary)' }}>
-                  {(scanResult as { meta?: { cached?: boolean } }).meta?.cached
-                    ? 'Returned from 24h cache'
-                    : 'Fresh analysis'}
-                </p>
-              </div>
+            {/* Score History */}
+            {activeConnection && (
+              <ScoreHistoryCard key={historyKey} username={activeConnection.username} />
             )}
-          </section>
+
+            {/* Quick Links */}
+            <section className="grid grid-cols-2 gap-4">
+              <a
+                href="/pricing"
+                className="rounded-lg p-4 border transition-colors"
+                style={{ borderColor: 'var(--border)', backgroundColor: 'var(--surface)' }}
+              >
+                <h3 className="text-sm font-semibold font-mono">
+                  {t('upgradeCta', 'Upgrade Plan')}
+                </h3>
+                <p className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>
+                  Unlock multi-platform, watchlists, and more.
+                </p>
+              </a>
+              {activeConnection ? (
+                <a
+                  href={`/card/${activeConnection.username}`}
+                  className="rounded-lg p-4 border transition-colors"
+                  style={{ borderColor: 'var(--border)', backgroundColor: 'var(--surface)' }}
+                >
+                  <h3 className="text-sm font-semibold font-mono">
+                    {t('shareableCardTitle', 'Shareable Card')}
+                  </h3>
+                  <p className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>
+                    {t('shareableCardSubtitle', 'View and share your public brand card.')}
+                  </p>
+                </a>
+              ) : (
+                <div
+                  className="rounded-lg p-4 border opacity-60"
+                  style={{ borderColor: 'var(--border)', backgroundColor: 'var(--surface)' }}
+                >
+                  <h3 className="text-sm font-semibold font-mono">
+                    {t('shareableCardTitle', 'Shareable Card')}
+                  </h3>
+                  <p className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>
+                    Connect an X account to unlock your public brand card.
+                  </p>
+                </div>
+              )}
+            </section>
+          </>
         )}
-
-        {/* Quick Links */}
-        <section className="grid grid-cols-2 gap-4">
-          <a
-            href="/pricing"
-            className="rounded-lg p-4 border transition-colors"
-            style={{ borderColor: 'var(--border)', backgroundColor: 'var(--surface)' }}
-          >
-            <h3 className="text-sm font-semibold font-mono">
-              {t('upgradeCta', 'Upgrade Plan')}
-            </h3>
-            <p className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>
-              Unlock multi-platform, watchlists, and more.
-            </p>
-          </a>
-          <a
-            href={activeConnection ? `/card/${activeConnection.username}` : '#'}
-            className="rounded-lg p-4 border transition-colors"
-            style={{ borderColor: 'var(--border)', backgroundColor: 'var(--surface)' }}
-          >
-            <h3 className="text-sm font-semibold font-mono">
-              {t('shareableCardTitle', 'Shareable Card')}
-            </h3>
-            <p className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>
-              {t('shareableCardSubtitle', 'View and share your public brand card.')}
-            </p>
-          </a>
-        </section>
       </div>
     </div>
   );

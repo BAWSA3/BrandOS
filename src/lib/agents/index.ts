@@ -97,8 +97,6 @@ import {
 
 // Re-export all types for convenience
 export * from './types';
-export * from './chat.types';
-export * from './conductor';
 export * from './research.types';
 export * from './authority.types';
 export * from './content-engine.types';

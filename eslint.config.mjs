@@ -50,6 +50,9 @@ const eslintConfig = defineConfig([
       "src/app/api/cron/**/*.{ts,tsx}",
       "src/app/api/stripe/webhook/**/*.{ts,tsx}",
       "src/app/api/admin/**/*.{ts,tsx}",
+      // account deletion: admin client used ONLY for auth.admin.deleteUser on
+      // the session user's own auth record — see route header comment
+      "src/app/api/account/**/*.{ts,tsx}",
     ],
     rules: {
       "no-restricted-imports": "off",

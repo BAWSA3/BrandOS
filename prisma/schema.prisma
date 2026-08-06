@@ -109,6 +109,10 @@ model User {
   role                       UserRole               @default(user)
   accountMigrationStatus     AccountMigrationStatus @default(legacy) @map("account_migration_status")
 
+  // TOS/privacy acknowledgment (Launch Bar Week 3) — null = pre-feature account
+  tosAcceptedAt              DateTime?              @map("tos_accepted_at") @db.Timestamptz
+  tosVersion                 String?                @map("tos_version")
+
   // Relationships
   brands              Brand[]
   teamMembers         TeamMember[]
@@ -154,6 +158,11 @@ model Brand {
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  // Workspace scope (Phase 1 model). Nullable: legacy brands are adopted
+  // into the owner's personal workspace on first authed read.
+  workspaceId String?    @db.Uuid
+  workspace   Workspace? @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
+
   // Team access
   team      Team?    @relation(fields: [teamId], references: [id])
   teamId    String?
@@ -192,6 +201,7 @@ model Brand {
   gapAnalyses          GapAnalysis[]
 
   @@index([userId])
+  @@index([workspaceId])
   @@index([teamId])
   @@index([shareToken])
 }
@@ -950,6 +960,7 @@ model Workspace {
   auditReportShares    AuditReportShare[]
   securityAuditEvents  SecurityAuditLog[]
   dailyBriefs          DailyBrief[]
+  brands               Brand[]
 
   @@index([ownerUserId])
   @@map("Workspace")
@@ -1077,6 +1088,15 @@ model SecurityAuditLog {
   @@map("SecurityAuditLog")
 }
 
+model ProcessedWebhook {
+  id          String   @id // Stripe event id (evt_...)
+  eventType   String   @map("event_type")
+  processedAt DateTime @default(now()) @map("processed_at") @db.Timestamptz
+
+  @@index([processedAt])
+  @@map("ProcessedWebhook")
+}
+
 model DailyBrief {
   id                  String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   userId              String     @map("user_id")
@@ -1104,3 +1124,28 @@ model DailyBrief {
   @@map("DailyBrief")
 }
 
+
+// ===== ARCHETYPE PROFILE CACHE (anon scan funnel) =====
+
+// Archetype/score history keyed by X username, written server-side by
+// src/lib/user-profiles.ts. Replaces the anon-key Supabase writes that RLS
+// (correctly) denied since March. Server-only: RLS on with no policies
+// (013 ProcessedWebhook pattern); Prisma reaches it as table owner.
+model UserProfile {
+  username         String   @id // normalized lowercase, no @
+  displayName      String   @map("display_name")
+  archetype        String   // JSON: ArchetypeData
+  archetypeHistory String   @default("[]") @map("archetype_history") // JSON: ArchetypeHistoryEntry[]
+  scores           String   @default("[]") // JSON: ScoreRecord[] (last 20)
+  highestScore     Int      @default(0) @map("highest_score")
+  currentScore     Int      @default(0) @map("current_score")
+  firstScannedAt   DateTime @default(now()) @map("first_scanned_at") @db.Timestamptz
+  lastScannedAt    DateTime @default(now()) @map("last_scanned_at") @db.Timestamptz
+  totalScans       Int      @default(1) @map("total_scans")
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt        DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@index([currentScore(sort: Desc)])
+  @@index([lastScannedAt(sort: Desc)])
+  @@map("user_profiles")
+}
