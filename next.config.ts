@@ -20,10 +20,12 @@ const nextConfig: NextConfig = {
             value: [
               "default-src 'self'",
               "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
-              "style-src 'self' 'unsafe-inline'",
+              // Google Fonts: layout.tsx + dashboard components load these
+              // stylesheets; without the hosts the CSP silently blocks them.
+              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "img-src 'self' data: https:",
               "connect-src 'self' https://*.supabase.co https://*.posthog.com https://*.vercel-insights.com",
-              "font-src 'self'",
+              "font-src 'self' https://fonts.gstatic.com",
               "frame-ancestors 'none'",
             ].join('; '),
           },
