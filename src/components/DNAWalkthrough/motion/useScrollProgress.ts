@@ -1,6 +1,6 @@
 'use client';
 
-import { useScroll, useTransform, MotionValue } from 'framer-motion';
+import { useScroll, useTransform, MotionValue } from 'motion/react';
 import { RefObject } from 'react';
 
 interface UseScrollProgressOptions {

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
+import { motion, AnimatePresence, useScroll, useTransform } from 'motion/react';
 import TerminalPostCard from './TerminalPostCard';
 import AnalysisStep, { AnalysisStepData } from './AnalysisStep';
 import { ScrollReveal } from '../interactive';

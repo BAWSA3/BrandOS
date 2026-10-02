@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef } from 'react';
-import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
+import { motion, useScroll, useTransform, useSpring } from 'motion/react';
 
 type RevealDirection = 'up' | 'down' | 'left' | 'right' | 'fade' | 'scale';
 

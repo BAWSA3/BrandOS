@@ -1,4 +1,4 @@
-import { Variants } from 'framer-motion';
+import { Variants } from 'motion/react';
 
 // Stagger container variants
 export const staggerContainerVariants: Variants = {

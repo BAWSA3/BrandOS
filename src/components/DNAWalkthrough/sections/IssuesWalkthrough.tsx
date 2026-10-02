@@ -1,6 +1,6 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import WalkthroughSection from '../WalkthroughSection';
 import { AuthenticityAnalysis } from '@/lib/gemini';
 import { StaggerContainer, StaggerItem } from '../motion';

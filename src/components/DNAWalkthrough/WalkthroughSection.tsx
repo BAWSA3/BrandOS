@@ -1,7 +1,7 @@
 'use client';
 
 import { ReactNode, useRef } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { ParallaxLayer } from './motion';
 import type { ParallaxLayerConfig } from './motion';
 

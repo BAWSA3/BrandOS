@@ -23,7 +23,7 @@ export function clampScore(n: unknown): number {
 }
 
 /** Pull the first JSON object out of a model response; null if none/invalid. */
-function extractJson(text: string): unknown {
+export function extractJson(text: string): unknown {
   const match = typeof text === 'string' ? text.match(/\{[\s\S]*\}/) : null;
   if (!match) return null;
   try {

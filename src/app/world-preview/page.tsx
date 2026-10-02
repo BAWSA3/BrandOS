@@ -3,15 +3,34 @@ import { WorldProvider } from '@/components/world/WorldProvider';
 import WorldScene from '@/components/world/WorldScene';
 import MuteButton from '@/components/world/MuteButton';
 import PreviewPanel from './PreviewPanel';
+import WizardPreview from './WizardPreview';
 
 // Unauthenticated preview for verifying the WorldProvider runtime.
 // Visit /world-preview?world=terminal-os (world param optional; defaults to terminal-os).
+// Add &wizard=1 for the first-run BrandSetupWizard, or &dna=1 for the
+// BrandDNAPanel editor (local brand store only — nothing syncs from here).
 export default async function WorldPreviewPage({
   searchParams,
 }: {
-  searchParams: Promise<{ world?: string }>;
+  searchParams: Promise<{
+    world?: string;
+    wizard?: string;
+    dna?: string;
+    check?: string;
+    voice?: string;
+    calendar?: string;
+    import?: string;
+  }>;
 }) {
-  const { world: worldId } = await searchParams;
+  const {
+    world: worldId,
+    wizard,
+    dna,
+    check,
+    voice,
+    calendar,
+    import: importHub,
+  } = await searchParams;
   const world = resolveWorld(worldId ?? null);
 
   return (
@@ -22,7 +41,25 @@ export default async function WorldPreviewPage({
       >
         <WorldScene intensity={0.9} />
         <div className="relative z-10">
-          <PreviewPanel />
+          {wizard || dna || check || voice || calendar || importHub ? (
+            <WizardPreview
+              mode={
+                importHub
+                  ? 'import'
+                  : calendar
+                    ? 'calendar'
+                    : voice
+                      ? 'voice'
+                      : check
+                        ? 'check'
+                        : dna
+                          ? 'dna'
+                          : 'wizard'
+              }
+            />
+          ) : (
+            <PreviewPanel />
+          )}
         </div>
         <MuteButton />
       </div>

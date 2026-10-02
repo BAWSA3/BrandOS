@@ -177,14 +177,14 @@ export default function ContentCalendar() {
     const overloadedDays = Object.values(dayStats).filter((s) => s.overloaded).length;
 
     let indicator = 'On track';
-    let indicatorColor = '#30D158';
+    let indicatorColor = 'var(--success)';
     if (gapDays >= 3) {
       indicator = `Gap ahead (${gapDays} empty days)`;
-      indicatorColor = '#FF9F0A';
+      indicatorColor = 'var(--warning)';
     }
     if (overloadedDays > 0) {
       indicator = `Heavy (${overloadedDays} day${overloadedDays > 1 ? 's' : ''} with 3+ posts)`;
-      indicatorColor = '#FF9F0A';
+      indicatorColor = 'var(--warning)';
     }
 
     return { scheduled, draftCount, ideaCount, indicator, indicatorColor };
@@ -221,7 +221,7 @@ export default function ContentCalendar() {
             padding: '8px 16px',
             borderRadius: 8,
             border: 'none',
-            background: '#0A84FF',
+            background: 'var(--accent)',
             color: '#fff',
             cursor: 'pointer',
             display: 'flex',
@@ -346,7 +346,7 @@ export default function ContentCalendar() {
 
       {/* Error */}
       {error && (
-        <p style={{ fontSize: 13, color: 'var(--error, #ff3b30)', marginBottom: 12 }}>{error}</p>
+        <p style={{ fontSize: 13, color: 'var(--danger)', marginBottom: 12 }}>{error}</p>
       )}
 
       {/* Loading */}
@@ -429,12 +429,13 @@ export default function ContentCalendar() {
           source={repurposeSource}
           onClose={() => setRepurposeSource(null)}
           onSaveDraft={async (data) => {
-            await createDraft({
+            const created = await createDraft({
               ...data,
               sourceType: 'repurpose',
               sourceId: repurposeSource.id,
               parentId: repurposeSource.id,
             });
+            return created !== null;
           }}
         />
       )}

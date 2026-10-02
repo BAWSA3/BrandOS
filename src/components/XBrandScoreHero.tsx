@@ -12,6 +12,7 @@ import BrandOSDashboard, { BrandOSDashboardData } from './BrandOSDashboard';
 import BrandScoreCard from './BrandScoreCard';
 import BrandIssuesSection from './BrandIssuesSection';
 import { SaveResultsPrompt } from './SaveResultsPrompt';
+import ScoreBoostAuditCta from './ScoreBoostAuditCta';
 import { useAuth } from '@/hooks/useAuth';
 import { domToPng } from 'modern-screenshot';
 import { AuthenticityAnalysis, ActivityAnalysis } from '@/lib/gemini';
@@ -1537,6 +1538,28 @@ export default function XBrandScoreHero({
             >
               ── WORKS WITH ANY PUBLIC X ACCOUNT ──
             </motion.p>
+            {/* Legal footer — Phase 8 acceptance: privacy + terms reachable from landing */}
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.6, duration: 0.4 }}
+              style={{
+                fontFamily: "'PP NeueBit', monospace",
+                fontSize: '11px',
+                letterSpacing: '0.15em',
+                color: 'rgba(0,0,0,0.35)',
+                textAlign: 'center',
+                marginTop: '0.5rem',
+              }}
+            >
+              <a href="/privacy" style={{ color: 'inherit', textDecoration: 'underline' }}>
+                PRIVACY
+              </a>
+              {' · '}
+              <a href="/terms" style={{ color: 'inherit', textDecoration: 'underline' }}>
+                TERMS
+              </a>
+            </motion.p>
           </motion.div>
         )}
 
@@ -1811,6 +1834,16 @@ export default function XBrandScoreHero({
                   </button>
                 </div>
               </div>
+              {/* Score Boost Audit CTA — $19 one-time, the first-dollar product */}
+              <ScoreBoostAuditCta
+                handle={profile.username}
+                phaseScores={{
+                  define: brandScore.phases.define.score,
+                  check: brandScore.phases.check.score,
+                  generate: brandScore.phases.generate.score,
+                  scale: brandScore.phases.scale.score,
+                }}
+              />
               {/* Intelligence Report CTA */}
               <motion.a
                 href={`/intelligence?u=${encodeURIComponent(profile.username)}`}

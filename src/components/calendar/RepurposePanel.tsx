@@ -7,13 +7,14 @@ import type { CalendarDraft } from '@/hooks/useCalendarDrafts';
 interface RepurposePanelProps {
   source: CalendarDraft;
   onClose: () => void;
+  /** Resolves false when the save failed — the card must not flip to Saved. */
   onSaveDraft: (data: {
     content: string;
     contentType: string;
     tone: string;
     status: string;
     scheduledFor: string | null;
-  }) => Promise<void>;
+  }) => Promise<boolean>;
 }
 
 const formats = [
@@ -62,18 +63,24 @@ export default function RepurposePanel({ source, onClose, onSaveDraft }: Repurpo
         }),
       });
 
-      if (!res.ok) throw new Error('Failed to generate');
+      const data = await res.json().catch(() => null);
+      if (!res.ok) {
+        // The API returns typed denials (PLAN_REQUIRED, USAGE_LIMIT) with a
+        // user-facing message — surface it instead of a generic failure.
+        throw new Error(
+          data && typeof data.error === 'string' ? data.error : 'Failed to generate'
+        );
+      }
 
-      const data = await res.json();
       setDerivatives(
-        (data.derivatives || []).map((d: { format: string; content: string }) => ({
+        (data?.derivatives || []).map((d: { format: string; content: string }) => ({
           ...d,
           saved: false,
         }))
       );
     } catch (err) {
       console.error('Repurpose failed:', err);
-      setError('Failed to generate derivatives');
+      setError(err instanceof Error ? err.message : 'Failed to generate derivatives');
     } finally {
       setIsGenerating(false);
     }
@@ -84,14 +91,19 @@ export default function RepurposePanel({ source, onClose, onSaveDraft }: Repurpo
       const d = derivatives[index];
       if (!d || d.saved) return;
 
-      await onSaveDraft({
+      const saved = await onSaveDraft({
         content: d.content,
         contentType: d.format,
         tone: source.tone,
         status: 'draft',
         scheduledFor: null,
       });
+      if (!saved) {
+        setError('Failed to save draft — try again');
+        return;
+      }
 
+      setError(null);
       setDerivatives((prev) =>
         prev.map((item, i) => (i === index ? { ...item, saved: true } : item))
       );
@@ -214,8 +226,8 @@ export default function RepurposePanel({ source, onClose, onSaveDraft }: Repurpo
                   style={{
                     padding: '8px 12px',
                     borderRadius: 8,
-                    border: selected ? '1.5px solid #0A84FF' : '1px solid var(--border)',
-                    background: selected ? 'rgba(10,132,255,0.06)' : 'var(--surface)',
+                    border: selected ? '1.5px solid var(--accent)' : '1px solid var(--border)',
+                    background: selected ? 'color-mix(in srgb, var(--accent) 6%, transparent)' : 'var(--surface)',
                     cursor: 'pointer',
                     textAlign: 'left',
                   }}
@@ -224,7 +236,7 @@ export default function RepurposePanel({ source, onClose, onSaveDraft }: Repurpo
                     style={{
                       fontSize: 12,
                       fontWeight: 500,
-                      color: selected ? '#0A84FF' : 'var(--text-primary)',
+                      color: selected ? 'var(--accent)' : 'var(--text-primary)',
                     }}
                   >
                     {f.label}
@@ -249,7 +261,7 @@ export default function RepurposePanel({ source, onClose, onSaveDraft }: Repurpo
             borderRadius: 8,
             border: 'none',
             background:
-              selectedFormats.length > 0 && !isGenerating ? '#0A84FF' : 'var(--surface-hover)',
+              selectedFormats.length > 0 && !isGenerating ? 'var(--accent)' : 'var(--surface-hover)',
             color: selectedFormats.length > 0 && !isGenerating ? '#fff' : 'var(--text-tertiary)',
             cursor: selectedFormats.length > 0 && !isGenerating ? 'pointer' : 'default',
             marginBottom: 20,
@@ -274,7 +286,7 @@ export default function RepurposePanel({ source, onClose, onSaveDraft }: Repurpo
 
         {/* Error */}
         {error && (
-          <p style={{ fontSize: 13, color: 'var(--error, #ff3b30)', marginBottom: 12 }}>{error}</p>
+          <p style={{ fontSize: 13, color: 'var(--danger)', marginBottom: 12 }}>{error}</p>
         )}
 
         {/* Results */}
@@ -298,8 +310,8 @@ export default function RepurposePanel({ source, onClose, onSaveDraft }: Repurpo
                     style={{
                       fontSize: 11,
                       fontWeight: 500,
-                      color: '#0A84FF',
-                      background: 'rgba(10,132,255,0.12)',
+                      color: 'var(--accent)',
+                      background: 'color-mix(in srgb, var(--accent) 12%, transparent)',
                       padding: '2px 8px',
                       borderRadius: 4,
                     }}
@@ -335,8 +347,8 @@ export default function RepurposePanel({ source, onClose, onSaveDraft }: Repurpo
                       padding: '5px 12px',
                       borderRadius: 6,
                       border: 'none',
-                      background: d.saved ? 'rgba(48,209,88,0.12)' : 'rgba(10,132,255,0.1)',
-                      color: d.saved ? '#30D158' : '#0A84FF',
+                      background: d.saved ? 'color-mix(in srgb, var(--success) 12%, transparent)' : 'color-mix(in srgb, var(--accent) 10%, transparent)',
+                      color: d.saved ? 'var(--success)' : 'var(--accent)',
                       cursor: d.saved ? 'default' : 'pointer',
                     }}
                   >

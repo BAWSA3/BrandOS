@@ -91,8 +91,8 @@ export function useAuth(): UseAuthReturn {
           } else if (hashSession) {
             setSession(hashSession);
             await fetchUser(hashSession.user);
-            // Clean up URL hash and redirect to app
-            window.history.replaceState(null, '', '/app');
+            // Clean up URL hash and redirect to the authenticated home
+            window.history.replaceState(null, '', '/dashboard');
             setIsLoading(false);
             return;
           }
@@ -169,6 +169,24 @@ export function useAuth(): UseAuthReturn {
     }
     setUser(null);
     setSession(null);
+    // Wipe persisted brand data so the next login on this browser can't see it.
+    // Includes Inner Circle / invite state — otherwise a shared device leaks the
+    // previous user's access level + referral info into the next visitor's
+    // useInnerCircle() localStorage fallback before auth resolves.
+    try {
+      localStorage.removeItem('brandos-storage');
+      localStorage.removeItem('brandos-brandkit-storage');
+      localStorage.removeItem('pendingBrandSync');
+      localStorage.removeItem('innerCircle');
+      localStorage.removeItem('innerCircle_earlyAccess');
+      localStorage.removeItem('innerCircle_referredBy');
+      localStorage.removeItem('pendingInviteCode');
+    } catch {
+      // localStorage unavailable (private mode) — nothing persisted to clear
+    }
+    // Hard navigation: zustand's in-memory state would re-persist the cleared
+    // keys on the next state change; a full reload guarantees a clean slate.
+    window.location.href = '/';
   }, []);
 
   // Refresh user data

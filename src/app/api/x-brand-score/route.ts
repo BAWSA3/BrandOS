@@ -7,6 +7,7 @@ import { recordScan } from '@/lib/scan-tracking';
 import { brandScoreCache } from '@/lib/cache';
 import { getUserProfile } from '@/lib/user-profiles';
 import { parseBrandScore, heuristicBrandScore } from '@/lib/score-schemas';
+import { botGuard } from '@/lib/botid-guard';
 
 /** How long a cached score stays valid (6 hours in ms) */
 const SCORE_CACHE_TTL_MINUTES = 360;
@@ -73,6 +74,9 @@ async function fetchProfile(username: string, origin: string): Promise<XProfileD
 
 async function handlePost(request: NextRequest) {
   try {
+    const botBlock = await botGuard(request);
+    if (botBlock) return botBlock;
+
     const { username, forceReevaluate = false } = (await request.json()) as {
       username: string;
       forceReevaluate?: boolean;

@@ -1,21 +1,22 @@
 # BrandOS — Current State Snapshot
 
-_Last updated: 2026-06-15 (full reconciliation after a logged-off gap). Previous update was 2026-04-12 and had gone badly stale. Regenerate periodically so Claude.ai Project context stays accurate._
+_Last updated: 2026-07-08 (post-Phase-1-promotion refresh). Previous full reconciliation was 2026-06-15. Regenerate periodically so Claude.ai Project context stays accurate._
 
 ## One-liner
 A creator-economy intelligence layer. Users scan an X handle → get a brand score, creator archetype, strengths/gaps, and an actionable narrative. Free scan is the top-of-funnel; paid features sit behind PRO/AGENCY tiers; a public API is the B2B wedge.
 
 ---
 
-## ⚠️ Read this first — repo reality as of 2026-06-15
+## ⚠️ Read this first — repo reality as of 2026-07-08
 
-The product on `main` still matches the April snapshot. But roughly **two months of work lives only in branches and the uncommitted working tree**, and a lot of it has never been committed at all. There are three layers:
+**The June reconciliation crisis is resolved.** Phase 1 (account model + security hardening) was merged `staging` → `main` and **promoted to production on 2026-07-05** (merge `ba241a8`, execution log in `docs/`). `main` and `staging` are in sync and pushed to origin; the previously at-risk uncommitted work (Worlds V2, docs knowledge base, migrations, scripts) was committed during the June 15–18 snapshot work. `feat/phase-1-account-model` is superseded — its work reached `main` via `staging`.
 
-1. **`main`** — the shipped April-era product (below under "Live on `main`").
-2. **`feat/phase-1-account-model`** (current branch, HEAD = `1a575e6`, last commit 2026-04-20) — **not merged.** ~11.2k lines / 82 files ahead of `main`. Contains the security-hardening Phase 0 + Phase 1 work AND a large content-ops feature layer (see below).
-3. **Uncommitted working tree** — Worlds V2 runtime, the entire `docs/` knowledge base, several SQL migrations, and scripts. **Never committed to git.** This is the most at-risk work.
+**Launch-bar status (see `MINIMUM-LAUNCH-BAR.md`):** Weeks 1–3 are done —
+- Week 1 (data isolation + auth gate): RLS validated/repaired (migrations 010/011, `npm run test:rls` 13/13), partner API path removed, `/api/x-tweets` rate-limited.
+- Week 2 (prompt safety + output validation): `prompt-safety.ts` + `score-schemas.ts` shipped (`npm run test:safety` 21/21).
+- Week 3 (payment-legal + infra): GDPR account-deletion route, TOS/privacy acknowledgment at signup, Vercel BotID on scan/checkout, Stripe webhook idempotency — all landed and promoted 2026-07-05.
 
-**The single highest-priority hygiene task is snapshotting the uncommitted work onto branches so it can't be lost.** See "Reconciliation TODO" at the bottom.
+**Current work: Week 4 (Jul 6–12) — validate the gated funnel + go-live.** Instrument signup→connect→scan drop-off, pick the first-dollar pricing entry point, final Phase 8 acceptance, flip on payments. Target: first paying customer by 2026-07-13.
 
 ---
 
@@ -124,8 +125,8 @@ SSO / SAML.
 
 - Original: **first paying customer by end of April 2026.**
 - Revised in `SECURITY-HARDENING.md` (2026-04-13): _"End-of-April target is no longer realistic — re-aim at mid-to-late May."_
-- **Reality (2026-06-15): mid/late May has also passed.** No commits since 2026-04-20.
-- **Re-anchored 2026-06-15:** adopted a reduced "minimum safe bar" instead of the full 9-phase gate. **New target: first paying customer by ~2026-07-13.** See `MINIMUM-LAUNCH-BAR.md` for the scoped 4-week plan (what's in-scope, what's deferred post-revenue, and the funnel tripwire).
+- Re-anchored 2026-06-15: adopted a reduced "minimum safe bar" (`MINIMUM-LAUNCH-BAR.md`) instead of the full 9-phase gate. **Target: first paying customer by ~2026-07-13.**
+- **Status 2026-07-08: on track.** Weeks 1–3 of the launch bar are green and promoted to prod (2026-07-05). Week 4 (funnel validation + flip on payments) is in progress with 5 days to target.
 - Constraints unchanged: solo founder, ~$25k debt, runway in months, $15–20k/mo target, no paid marketing. (See `CONSTRAINTS.md`.)
 
 ---
@@ -145,15 +146,12 @@ SSO / SAML.
 ## Deploy model (reconciled 2026-06-15)
 Production (`brandos`/mybrandos.app) tracks `main`; `main` is now an honest mirror of what's live. Build happens on `staging` -> `brandos-staging`, promoted to `main` only when green. Full rules: `SOLO-DEPLOY-WORKFLOW.md`.
 
-## Reconciliation TODO (the "start again" backlog)
+## Reconciliation TODO (updated 2026-07-08)
 
-Priority order to get unstuck safely:
+Items 1–3 of the June backlog are **done** (uncommitted work snapshotted; Phase 1 merged via `staging` → `main` and promoted 2026-07-05; goal re-anchored to Jul 13 via `MINIMUM-LAUNCH-BAR.md`). Still open:
 
-1. **Snapshot uncommitted work** — commit the Worlds V2 runtime, the `docs/` knowledge base (currently untracked), migrations `002/003/007/008` + staging-setup, and scripts onto branches so nothing is lost. The Supabase key-rename is one clean commit on its own.
-2. **Decide `feat/phase-1-account-model`'s fate** — merge to `main`, keep building, or park. It's blocking a clean `main` and represents the bulk of recent work.
-3. **Re-anchor the goal** — set a current-dated first-paying-customer target and define the minimum security-hardening bar that unblocks it.
-4. **Reconcile plan tiers** — Phase 1 model (FREE/PRO/MAX/TEAM/ENTERPRISE) vs. live pricing page (FREE/PRO/AGENCY/ENTERPRISE).
-5. **Sanity-check scope creep** — onchain attestations, Worlds V2, VERITY launch vs. CONSTRAINTS ("one bet per week," "revenue/retention over nice-to-have").
+1. **Reconcile plan tiers** — ✅ resolved 2026-07-08 (see `DECISIONS.md`): pricing page keeps selling legacy FREE/PRO/AGENCY; `legacyTierToPlanTier` maps to the internal PlanTier model, and the Stripe webhook now syncs `workspace.plan` on subscription events (it previously never got written — paying users would have kept FREE limits).
+2. **Sanity-check scope creep** — onchain attestations, Worlds V2, VERITY launch stay parked until first revenue (see `CONSTRAINTS.md`, `DECISIONS.md`). Housekeeping 2026-07-08: unrelated side-project repos (`api-examples/`, `interview-coach-skill/`, `verity-trainer/`) moved out of this repo to `~/Documents/Bawsa Vibe Coding/`.
 
 ---
 

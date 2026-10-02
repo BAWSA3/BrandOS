@@ -42,7 +42,10 @@ export default function PreviewPanel() {
           className="rounded-lg p-6 border"
           style={{ borderColor: 'var(--border)', backgroundColor: 'var(--surface)' }}
         >
-          <h3 className="text-sm font-semibold uppercase tracking-wide mb-3 font-mono" style={{ color: 'var(--text-tertiary)' }}>
+          <h3
+            className="text-sm font-semibold uppercase tracking-wide mb-3 font-mono"
+            style={{ color: 'var(--text-tertiary)' }}
+          >
             Palette sample
           </h3>
           <div className="grid grid-cols-5 gap-2">
@@ -61,9 +64,17 @@ export default function PreviewPanel() {
         </section>
 
         <section className="text-xs font-mono" style={{ color: 'var(--text-tertiary)' }}>
-          <div>data-world: <span style={{ color: 'var(--text-primary)' }}>{world.id}</span></div>
-          <div>reduced-motion: <span style={{ color: 'var(--text-primary)' }}>{String(reducedMotion)}</span></div>
-          <div>font-mono: <span style={{ color: 'var(--text-primary)' }}>{world.typography.fontMono}</span></div>
+          <div>
+            data-world: <span style={{ color: 'var(--text-primary)' }}>{world.id}</span>
+          </div>
+          <div>
+            reduced-motion:{' '}
+            <span style={{ color: 'var(--text-primary)' }}>{String(reducedMotion)}</span>
+          </div>
+          <div>
+            font-mono:{' '}
+            <span style={{ color: 'var(--text-primary)' }}>{world.typography.fontMono}</span>
+          </div>
           <div>{t('scanCompleteToast', 'scan complete.')}</div>
         </section>
       </div>

@@ -1,6 +1,5 @@
 import { NextRequest } from 'next/server';
-import { promises as fs } from 'fs';
-import path from 'path';
+import prisma from '@/lib/db';
 import {
   authenticateApiKey,
   checkApiKeyRateLimit,
@@ -14,26 +13,15 @@ import { checkRateLimit } from '@/lib/rate-limit';
 // =============================================================================
 // GET /api/v1/leaderboard
 // Returns top scored creators. Supports ?range=week|month|all&limit=25
+// Backed by user_profiles (Prisma) — previously read a dead file-based store
+// that was always empty on Vercel's read-only filesystem.
 // =============================================================================
 
-interface LeaderboardEntry {
-  username: string;
-  displayName: string;
-  score: number;
-  profileImage: string;
-  timestamp: number;
-  isCrypto?: boolean;
-}
-
-const LEADERBOARD_FILE = path.join(process.cwd(), 'data', 'leaderboard.json');
-
-async function readLeaderboard(): Promise<LeaderboardEntry[]> {
-  try {
-    const data = await fs.readFile(LEADERBOARD_FILE, 'utf-8');
-    return JSON.parse(data);
-  } catch {
-    return [];
-  }
+function rangeCutoff(range: string): Date | null {
+  const now = Date.now();
+  if (range === 'week') return new Date(now - 7 * 24 * 60 * 60 * 1000);
+  if (range === 'month') return new Date(now - 30 * 24 * 60 * 60 * 1000);
+  return null;
 }
 
 export async function GET(request: NextRequest) {
@@ -56,25 +44,51 @@ export async function GET(request: NextRequest) {
 
   const { searchParams } = new URL(request.url);
   const range = searchParams.get('range') || 'week';
-  const limit = Math.min(parseInt(searchParams.get('limit') || '25'), 100);
+  const limit = Math.min(parseInt(searchParams.get('limit') || '25', 10) || 25, 100);
 
-  let entries = await readLeaderboard();
+  const cutoff = rangeCutoff(range);
+  const where = cutoff ? { lastScannedAt: { gte: cutoff } } : {};
 
-  // Filter by time range
-  const now = Date.now();
-  if (range === 'week') {
-    entries = entries.filter((e) => now - e.timestamp < 7 * 24 * 60 * 60 * 1000);
-  } else if (range === 'month') {
-    entries = entries.filter((e) => now - e.timestamp < 30 * 24 * 60 * 60 * 1000);
+  // Degrade to an empty board on DB errors (e.g. migration 016 not yet
+  // applied) rather than 500ing a documented public endpoint.
+  let total = 0;
+  let profiles: { username: string; displayName: string; currentScore: number }[] = [];
+  const images = new Map<string, string>();
+  try {
+    [total, profiles] = await Promise.all([
+      prisma.userProfile.count({ where }),
+      prisma.userProfile.findMany({
+        where,
+        orderBy: [{ currentScore: 'desc' }, { lastScannedAt: 'desc' }],
+        take: limit,
+        select: {
+          username: true,
+          displayName: true,
+          currentScore: true,
+        },
+      }),
+    ]);
+
+    // Enrich with profile images from the X profile cache (best-effort)
+    if (profiles.length > 0) {
+      const cached = await prisma.xProfileCache.findMany({
+        where: { username: { in: profiles.map((p) => p.username) } },
+        select: { username: true, profileData: true },
+      });
+      for (const c of cached) {
+        try {
+          const parsed = JSON.parse(c.profileData);
+          if (typeof parsed?.profile_image_url === 'string') {
+            images.set(c.username, parsed.profile_image_url);
+          }
+        } catch {
+          // ignore malformed cache rows
+        }
+      }
+    }
+  } catch (err) {
+    console.error('[v1/leaderboard] DB error, returning empty board:', err);
   }
-
-  // Sort by score desc
-  entries.sort((a, b) => {
-    if (b.score !== a.score) return b.score - a.score;
-    return b.timestamp - a.timestamp;
-  });
-
-  const top = entries.slice(0, limit);
 
   const latencyMs = Date.now() - startTime;
   if (auth.apiKey) {
@@ -83,15 +97,15 @@ export async function GET(request: NextRequest) {
 
   return apiSuccess(
     {
-      entries: top.map((e, i) => ({
+      entries: profiles.map((p, i) => ({
         rank: i + 1,
-        username: e.username,
-        displayName: e.displayName,
-        score: e.score,
-        profileImageUrl: e.profileImage,
+        username: p.username,
+        displayName: p.displayName,
+        score: p.currentScore,
+        profileImageUrl: images.get(p.username) || '',
       })),
     },
-    { range, total: entries.length, returned: top.length }
+    { range, total, returned: profiles.length }
   );
 }
 

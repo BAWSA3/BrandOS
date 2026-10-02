@@ -1,12 +1,14 @@
-import supabase from './supabase';
+import prisma from './db';
 
 /**
  * User Profile Storage System
  *
- * Persists user archetype data in Supabase to enable consistency
- * across scans and track evolution over time.
+ * Persists user archetype data to enable consistency across scans and
+ * track evolution over time.
  *
- * Table: UserProfiles (created via Supabase)
+ * Table: user_profiles (Prisma model UserProfile, migration 016).
+ * Server-only — RLS denies anon/authenticated; Prisma writes as table owner.
+ * All DB access is best-effort: failures degrade to the in-memory cache.
  */
 
 // Types
@@ -89,35 +91,34 @@ export async function getUserProfileAsync(username: string): Promise<UserProfile
   }
 
   try {
-    const { data, error } = await supabase
-      .from('user_profiles')
-      .select('*')
-      .eq('username', normalized)
-      .single();
+    const row = await prisma.userProfile.findUnique({
+      where: { username: normalized },
+    });
 
-    if (error || !data) return null;
+    if (!row) return null;
 
-    // Supabase may return JSON fields as strings or already-parsed objects
-    const parseField = (val: unknown, fallback: string = '[]') => {
-      if (!val) return JSON.parse(fallback);
-      if (typeof val === 'string') return JSON.parse(val);
-      return val; // already parsed
+    const parseField = (val: string | null, fallback: string) => {
+      try {
+        return JSON.parse(val || fallback);
+      } catch {
+        return JSON.parse(fallback);
+      }
     };
 
     const profile: UserProfile = {
-      username: data.username,
-      displayName: data.display_name,
-      archetype: parseField(data.archetype, '{}'),
-      archetypeHistory: parseField(data.archetype_history, '[]'),
-      scores: parseField(data.scores, '[]'),
-      highestScore: data.highest_score,
-      currentScore: data.current_score,
-      firstScannedAt: data.first_scanned_at,
-      lastScannedAt: data.last_scanned_at,
-      totalScans: data.total_scans,
+      username: row.username,
+      displayName: row.displayName,
+      archetype: parseField(row.archetype, '{}'),
+      archetypeHistory: parseField(row.archetypeHistory, '[]'),
+      scores: parseField(row.scores, '[]'),
+      highestScore: row.highestScore,
+      currentScore: row.currentScore,
+      firstScannedAt: row.firstScannedAt.getTime(),
+      lastScannedAt: row.lastScannedAt.getTime(),
+      totalScans: row.totalScans,
     };
 
-    console.log(`[UserProfiles] Loaded @${data.username} from DB: ${profile.archetype.primary}`);
+    console.log(`[UserProfiles] Loaded @${row.username} from DB: ${profile.archetype.primary}`);
 
     // Cache it for the duration of this request
     profileCache[normalized] = profile;
@@ -143,30 +144,26 @@ async function insertProfile(profile: UserProfile): Promise<void> {
   profileCache[normalized] = profile;
 
   try {
-    const row = {
-      username: normalized,
-      display_name: profile.displayName,
-      archetype: JSON.stringify(profile.archetype),
-      archetype_history: JSON.stringify(profile.archetypeHistory),
-      scores: JSON.stringify(profile.scores),
-      highest_score: profile.highestScore,
-      current_score: profile.currentScore,
-      first_scanned_at: profile.firstScannedAt,
-      last_scanned_at: profile.lastScannedAt,
-      total_scans: profile.totalScans,
-    };
-
     // Insert only — if username already exists, do nothing (preserve existing archetype)
-    const { error } = await supabase
-      .from('user_profiles')
-      .insert(row);
-
-    if (error && error.code !== '23505') {
-      // 23505 = unique violation (already exists) — that's fine, skip it
-      console.error('[UserProfiles] Supabase insert error:', error);
-    }
+    await prisma.userProfile.create({
+      data: {
+        username: normalized,
+        displayName: profile.displayName,
+        archetype: JSON.stringify(profile.archetype),
+        archetypeHistory: JSON.stringify(profile.archetypeHistory),
+        scores: JSON.stringify(profile.scores),
+        highestScore: profile.highestScore,
+        currentScore: profile.currentScore,
+        firstScannedAt: new Date(profile.firstScannedAt),
+        lastScannedAt: new Date(profile.lastScannedAt),
+        totalScans: profile.totalScans,
+      },
+    });
   } catch (err) {
-    console.error('[UserProfiles] Error inserting profile:', err);
+    // P2002 = unique violation (already exists) — that's fine, skip it
+    if ((err as { code?: string })?.code !== 'P2002') {
+      console.error('[UserProfiles] Error inserting profile:', err);
+    }
   }
 }
 
@@ -178,22 +175,26 @@ async function updateProfileInDB(profile: UserProfile): Promise<void> {
   profileCache[normalized] = profile;
 
   try {
-    const { error } = await supabase
-      .from('user_profiles')
-      .update({
-        archetype: JSON.stringify(profile.archetype),
-        archetype_history: JSON.stringify(profile.archetypeHistory),
-        scores: JSON.stringify(profile.scores),
-        highest_score: profile.highestScore,
-        current_score: profile.currentScore,
-        last_scanned_at: profile.lastScannedAt,
-        total_scans: profile.totalScans,
-      })
-      .eq('username', normalized);
-
-    if (error) {
-      console.error('[UserProfiles] Supabase update error:', error);
-    }
+    const data = {
+      archetype: JSON.stringify(profile.archetype),
+      archetypeHistory: JSON.stringify(profile.archetypeHistory),
+      scores: JSON.stringify(profile.scores),
+      highestScore: profile.highestScore,
+      currentScore: profile.currentScore,
+      lastScannedAt: new Date(profile.lastScannedAt),
+      totalScans: profile.totalScans,
+    };
+    // Upsert: self-heals rows whose original insert was lost
+    await prisma.userProfile.upsert({
+      where: { username: normalized },
+      update: data,
+      create: {
+        ...data,
+        username: normalized,
+        displayName: profile.displayName,
+        firstScannedAt: new Date(profile.firstScannedAt),
+      },
+    });
   } catch (err) {
     console.error('[UserProfiles] Error updating profile:', err);
   }

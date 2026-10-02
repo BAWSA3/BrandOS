@@ -1,5 +1,21 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import * as cheerio from 'cheerio';
+import { getWorkspaceContext } from '@/lib/workspace-auth';
+import { botGuard } from '@/lib/botid-guard';
+import { readJsonBody } from '@/lib/api-body';
+import { analyzeToneHeuristic, extractKeywordsFromText } from '@/lib/import-extraction';
+
+// Import Hub — website analysis (consolidation step 7). The legacy route was
+// unauthenticated, followed redirects blindly, and read unbounded response
+// bodies. Now: workspace auth + BotID (this endpoint makes server-side
+// fetches on the caller's behalf), per-hop SSRF validation on redirects, a
+// response size cap, and a fetch timeout. Extraction itself stays heuristic
+// (cheerio) — no LLM cost, so no generation metering.
+
+const MAX_BODY_BYTES = 10_000;
+const MAX_HTML_BYTES = 2_000_000;
+const MAX_REDIRECTS = 3;
+const FETCH_TIMEOUT_MS = 10_000;
 
 // Security: Validate URL to prevent SSRF attacks
 function isUrlSafe(urlString: string): boolean {
@@ -19,7 +35,9 @@ function isUrlSafe(urlString: string): boolean {
       /^.*\.local$/i,
       /^.*\.internal$/i,
       /^\[::1\]$/,
+      /^\[::\]$/,
       /^\[fc00:/i,
+      /^\[fd/i,
       /^\[fe80:/i,
     ];
     return !blockedPatterns.some((p) => p.test(hostname));
@@ -28,15 +46,54 @@ function isUrlSafe(urlString: string): boolean {
   }
 }
 
-export async function POST(request: Request) {
+/**
+ * Fetch with manual redirect handling so every hop is SSRF-validated — a
+ * public URL 302ing to an internal address must not be followed.
+ */
+async function fetchPage(startUrl: string): Promise<Response | null> {
+  let current = startUrl;
+  for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
+    if (!isUrlSafe(current)) return null;
+
+    const response = await fetch(current, {
+      redirect: 'manual',
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+      headers: {
+        'User-Agent': 'BrandOS/1.0 (Brand Analysis Bot)',
+        Accept: 'text/html,application/xhtml+xml',
+      },
+    });
+
+    if (response.status >= 300 && response.status < 400) {
+      const location = response.headers.get('location');
+      if (!location) return null;
+      current = new URL(location, current).toString();
+      continue;
+    }
+    return response;
+  }
+  return null;
+}
+
+export async function POST(request: NextRequest) {
   try {
-    const { url } = await request.json();
+    const [ctx, botBlock] = await Promise.all([
+      getWorkspaceContext({ ensure: false }),
+      botGuard(request),
+    ]);
+    if (!ctx) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    if (botBlock) return botBlock;
+
+    const read = await readJsonBody(request, MAX_BODY_BYTES);
+    if (!read.ok) return read.response;
+    const url = typeof read.body.url === 'string' ? read.body.url : '';
 
     if (!url) {
       return NextResponse.json({ error: 'URL is required' }, { status: 400 });
     }
 
-    // Validate URL format
     let validUrl: URL;
     try {
       validUrl = new URL(url);
@@ -44,24 +101,26 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Invalid URL' }, { status: 400 });
     }
 
-    // Validate URL is not internal/private (SSRF protection)
     if (!isUrlSafe(validUrl.toString())) {
       return NextResponse.json({ error: 'URL not allowed' }, { status: 400 });
     }
 
-    // Fetch the webpage
-    const response = await fetch(validUrl.toString(), {
-      headers: {
-        'User-Agent': 'BrandOS/1.0 (Brand Analysis Bot)',
-        Accept: 'text/html,application/xhtml+xml',
-      },
-    });
-
-    if (!response.ok) {
+    let response: Response | null;
+    try {
+      response = await fetchPage(validUrl.toString());
+    } catch {
+      return NextResponse.json({ error: 'Failed to fetch website' }, { status: 400 });
+    }
+    if (!response || !response.ok) {
       return NextResponse.json({ error: 'Failed to fetch website' }, { status: 400 });
     }
 
-    const html = await response.text();
+    const contentType = response.headers.get('content-type') || '';
+    if (!contentType.includes('text/html') && !contentType.includes('application/xhtml')) {
+      return NextResponse.json({ error: 'URL is not an HTML page' }, { status: 400 });
+    }
+
+    const html = (await response.text()).slice(0, MAX_HTML_BYTES);
     const $ = cheerio.load(html);
 
     // Extract brand name from various sources
@@ -69,19 +128,14 @@ export async function POST(request: Request) {
     const ogTitle = $('meta[property="og:title"]').attr('content');
     const brandName = extractBrandName(ogTitle || title, validUrl.hostname);
 
-    // Extract meta description
     const metaDescription =
       $('meta[name="description"]').attr('content') ||
       $('meta[property="og:description"]').attr('content') ||
       '';
 
-    // Extract colors from inline styles and CSS
     const colors = extractColorsFromHTML($, html);
+    const fonts = extractFonts($);
 
-    // Extract font families
-    const fonts = extractFonts($, html);
-
-    // Extract text samples for voice analysis
     const headings = $('h1, h2, h3')
       .map((_, el) => $(el).text().trim())
       .get()
@@ -92,7 +146,6 @@ export async function POST(request: Request) {
       .filter((p) => p.length > 20 && p.length < 200)
       .slice(0, 3);
 
-    // Extract keywords from meta tags
     const metaKeywords =
       $('meta[name="keywords"]')
         .attr('content')
@@ -105,11 +158,10 @@ export async function POST(request: Request) {
       ]),
     ].slice(0, 8);
 
-    // Analyze tone from text samples
     const allText = [metaDescription, ...headings, ...paragraphs].join(' ');
-    const tone = analyzeTone(allText);
+    const tone = analyzeToneHeuristic(allText);
 
-    const result = {
+    return NextResponse.json({
       overallConfidence: 75,
       name: brandName,
       colors: {
@@ -122,11 +174,9 @@ export async function POST(request: Request) {
       keywords,
       fonts,
       voiceSamples: [...headings, ...paragraphs].slice(0, 4),
-    };
-
-    return NextResponse.json(result);
+    });
   } catch (error) {
-    console.error('URL analysis error:', error);
+    console.error('[import/analyze-url] error:', error);
     return NextResponse.json({ error: 'Failed to analyze website' }, { status: 500 });
   }
 }
@@ -148,7 +198,6 @@ function extractBrandName(title: string, hostname: string): string {
 function extractColorsFromHTML($: cheerio.CheerioAPI, html: string): string[] {
   const colors: string[] = [];
   const hexPattern = /#([0-9A-Fa-f]{6}|[0-9A-Fa-f]{3})\b/g;
-  const rgbPattern = /rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/g;
 
   // Extract from style tags
   $('style').each((_, el) => {
@@ -180,10 +229,9 @@ function extractColorsFromHTML($: cheerio.CheerioAPI, html: string): string[] {
   return filtered.slice(0, 6);
 }
 
-function extractFonts($: cheerio.CheerioAPI, html: string): string[] {
+function extractFonts($: cheerio.CheerioAPI): string[] {
   const fonts: string[] = [];
 
-  // Common font-family patterns
   const fontFamilyPattern = /font-family:\s*['"]?([^'";\n]+)/gi;
 
   // Extract from style tags
@@ -213,73 +261,4 @@ function extractFonts($: cheerio.CheerioAPI, html: string): string[] {
   });
 
   return filtered.slice(0, 4);
-}
-
-function extractKeywordsFromText(text: string): string[] {
-  // Simple keyword extraction - in production, use NLP
-  const words = text
-    .toLowerCase()
-    .replace(/[^\w\s]/g, ' ')
-    .split(/\s+/)
-    .filter((w) => w.length > 4);
-
-  const stopWords = [
-    'about',
-    'their',
-    'would',
-    'could',
-    'should',
-    'which',
-    'where',
-    'there',
-    'these',
-    'those',
-    'being',
-  ];
-  const filtered = words.filter((w) => !stopWords.includes(w));
-
-  // Count occurrences
-  const counts: Record<string, number> = {};
-  filtered.forEach((w) => (counts[w] = (counts[w] || 0) + 1));
-
-  // Sort by frequency and return top keywords
-  return Object.entries(counts)
-    .sort((a, b) => b[1] - a[1])
-    .map(([word]) => word)
-    .slice(0, 6);
-}
-
-function analyzeTone(text: string): {
-  formality: number;
-  energy: number;
-  confidence: number;
-  style: number;
-} {
-  const lower = text.toLowerCase();
-
-  // Simple heuristic-based tone analysis
-  // In production, use AI for better accuracy
-
-  // Formality (casual vs formal)
-  const informalIndicators = ['hey', 'cool', 'awesome', 'check out', 'btw', '!', 'gonna', 'wanna'];
-  const formalIndicators = ['therefore', 'furthermore', 'regarding', 'hereby', 'pursuant'];
-  const informalCount = informalIndicators.filter((i) => lower.includes(i)).length;
-  const formalCount = formalIndicators.filter((i) => lower.includes(i)).length;
-  const formality = Math.min(100, Math.max(0, 50 + (formalCount - informalCount) * 15));
-
-  // Energy (reserved vs energetic)
-  const exclamations = (text.match(/!/g) || []).length;
-  const energy = Math.min(100, Math.max(0, 30 + exclamations * 10));
-
-  // Confidence (humble vs bold)
-  const boldIndicators = ['best', 'leading', '#1', 'revolutionary', 'ultimate', 'proven'];
-  const humbleIndicators = ['try', 'maybe', 'might', 'could', 'possibly'];
-  const boldCount = boldIndicators.filter((i) => lower.includes(i)).length;
-  const humbleCount = humbleIndicators.filter((i) => lower.includes(i)).length;
-  const confidence = Math.min(100, Math.max(0, 50 + (boldCount - humbleCount) * 15));
-
-  // Style (classic vs experimental)
-  const style = 50; // Default to middle, hard to detect without more context
-
-  return { formality, energy, confidence, style };
 }

@@ -447,20 +447,24 @@ export default function BrandFeedCard() {
           source={repurposeSource}
           onClose={() => setRepurposeSource(null)}
           onSaveDraft={async (data) => {
-            if (!brand?.id) return;
+            if (!brand?.id) return false;
             try {
-              await fetch('/api/calendar/drafts', {
+              const res = await fetch('/api/calendar/drafts', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                   brandId: brand.id,
                   ...data,
                   sourceType: 'repurpose',
+                  // A tweet id, not a draft id — provenance only, never a
+                  // parentId (the API ownership-checks parent chains).
                   sourceId: repurposeSource.id,
                 }),
               });
+              return res.ok;
             } catch (err) {
               console.error('Failed to save repurposed draft:', err);
+              return false;
             }
           }}
         />

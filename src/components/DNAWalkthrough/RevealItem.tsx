@@ -1,7 +1,7 @@
 'use client';
 
 import { ReactNode, useMemo } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { useRevealContext } from './RevealContainer';
 
 type AnimationType = 'fade-up' | 'fade-scale' | 'slide-left' | 'slide-right' | 'fade';

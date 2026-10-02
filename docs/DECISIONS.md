@@ -79,6 +79,51 @@ entry — risks being scope creep against the revenue goal.
 Revisit BEFORE further investment: is there a customer or revenue thesis?
 If not, this is a Parked candidate, not an active bet.
 
+## 2026-07-08 — First dollar: Score Boost Audit ($19)
+Chose the anonymous $19 Score Boost Audit over PRO ($29/mo) as the
+first-sale target. Rejected leading with subscriptions because that path
+depends on the unresolved tier reconciliation (pricing page AGENCY vs.
+internal MAX/TEAM model) and on the auth-gated funnel converting.
+Why — the audit is sold from the free-scan reveal with zero signup
+friction, and its pipeline is already hardened (BotID, webhook
+idempotency, validated LLM output, no heuristic fallback on paid output).
+Consequences shipped same day: removed the wrongly-applied assertCanScan
+from /api/audit/run (it rejected every anonymous buyer after payment,
+contradicting SECURITY-HARDENING resolved decision #18 "audit reports
+stay à la carte"); abuse bounded instead by paid-session verification +
+BotID + IP/session rate limits. Mounted the orphaned ScoreBoostAuditCta
+in the reveal state (the product previously had no purchase entry point).
+Trade-off: one-time revenue, not MRR; cross-handle audits stay possible
+by design (you can buy an audit of any public handle).
+Revisit if: audits sell but don't convert buyers into accounts, or
+cross-handle audits draw abuse complaints.
+
+## 2026-07-08 — Tier reconciliation: map, don't rename
+The pricing page keeps selling FREE/PRO/AGENCY/ENTERPRISE (legacy
+SubscriptionTier); the internal Phase 1 model (FREE/PRO/MAX/TEAM/
+ENTERPRISE PlanTier) stays canonical for limits. `legacyTierToPlanTier`
+(AGENCY→TEAM, CREATOR→FREE) translates at the Stripe webhook, which now
+also syncs the buyer's personal `workspace.plan` — previously NOTHING
+wrote workspace.plan, so a paying subscriber kept FREE scan/connection
+caps forever. Rejected renaming the public page to MAX/TEAM now: no
+Stripe prices exist for those tiers and renaming is post-revenue work.
+Trade-off: two tier vocabularies live on (bounded by the mapping fn).
+Revisit if: MAX is ready to sell, or the AGENCY→TEAM label confuses a
+real buyer.
+
+## 2026-07-08 — Defer the payments flip; build product first
+Deliberate deferral, not drift: all payment CODE is done and green
+(audit path fixed, webhook plan sync, acceptance suites 57/57). The
+remaining ~30 min of dashboard config (Stripe $19 price, prod Stripe
+env vars, PostHog key, staging test purchase) is parked in favor of
+refining the core scan → dashboard experience.
+Why — founder call: product quality over first-dollar timing.
+Trade-off knowingly accepted: the Jul 13 first-customer target slips
+unless the config happens in parallel; this repeats the April/May
+pattern the launch bar was written to break.
+Revisit: this entry is the tripwire — if no paying customer by
+2026-07-20, do the 30-minute config before ANY further product work.
+
 ---
 
 ## Template for new entries

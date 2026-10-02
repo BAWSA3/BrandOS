@@ -84,12 +84,12 @@ export default function CalendarDayColumn({
         minWidth: 0,
         display: 'flex',
         flexDirection: 'column',
-        background: isOver ? 'rgba(10,132,255,0.04)' : 'transparent',
+        background: isOver ? 'color-mix(in srgb, var(--accent) 4%, transparent)' : 'transparent',
         borderRadius: 12,
         border: isOver
-          ? '1.5px solid rgba(10,132,255,0.3)'
+          ? '1.5px solid color-mix(in srgb, var(--accent) 30%, transparent)'
           : isOverloaded
-            ? '1.5px solid rgba(255,159,10,0.4)'
+            ? '1.5px solid color-mix(in srgb, var(--warning) 40%, transparent)'
             : isGap
               ? '1.5px dashed var(--border)'
               : '1px solid var(--border)',
@@ -106,7 +106,7 @@ export default function CalendarDayColumn({
             style={{
               fontSize: 11,
               fontWeight: 500,
-              color: isToday ? '#0A84FF' : 'var(--text-tertiary)',
+              color: isToday ? 'var(--accent)' : 'var(--text-tertiary)',
             }}
           >
             {dayNames[date.getDay()]}
@@ -115,8 +115,8 @@ export default function CalendarDayColumn({
             style={{
               fontSize: 13,
               fontWeight: isToday ? 600 : 500,
-              color: isToday ? '#0A84FF' : 'var(--text-primary)',
-              background: isToday ? 'rgba(10,132,255,0.12)' : 'transparent',
+              color: isToday ? 'var(--accent)' : 'var(--text-primary)',
+              background: isToday ? 'color-mix(in srgb, var(--accent) 12%, transparent)' : 'transparent',
               borderRadius: 6,
               padding: isToday ? '1px 6px' : '0',
             }}
@@ -164,7 +164,7 @@ export default function CalendarDayColumn({
         <div
           style={{
             fontSize: 10,
-            color: '#FF9F0A',
+            color: 'var(--warning)',
             textAlign: 'center',
             marginBottom: 4,
           }}

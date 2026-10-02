@@ -1,6 +1,6 @@
 'use client';
 
-import { motion, Variants, AnimatePresence } from 'framer-motion';
+import { motion, Variants, AnimatePresence } from 'motion/react';
 import { useState, useEffect } from 'react';
 import MetalArchetypeIcon from '@/components/MetalArchetypeIcon';
 

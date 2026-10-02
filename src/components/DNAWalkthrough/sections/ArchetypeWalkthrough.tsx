@@ -1,6 +1,6 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import WalkthroughSection from '../WalkthroughSection';
 import MetalArchetypeIcon from '@/components/MetalArchetypeIcon';
 import { TypewriterText, ParallaxCard, StaggerContainer, StaggerItem } from '../motion';

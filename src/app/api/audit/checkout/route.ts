@@ -15,6 +15,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
+import { captureFunnelEvent } from '@/lib/funnel-events';
 import { ONE_TIME_PRODUCTS } from '@/lib/plans';
 
 export async function POST(request: NextRequest) {
@@ -71,6 +72,13 @@ export async function POST(request: NextRequest) {
       },
       success_url: `${appUrl}/audit/{CHECKOUT_SESSION_ID}`,
       cancel_url: `${appUrl}/?audit_canceled=1&handle=${encodeURIComponent(cleanHandle)}`,
+    });
+
+    // Anonymous flow — no account yet, so key the event to the scanned handle
+    await captureFunnelEvent(`anon:${cleanHandle.toLowerCase()}`, 'checkout_started', {
+      mode: 'payment',
+      product_type: 'SCORE_BOOST_AUDIT',
+      anonymous: true,
     });
 
     return NextResponse.json({ url: session.url });

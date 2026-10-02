@@ -90,7 +90,10 @@ export async function POST(request: NextRequest) {
     }
 
     const message = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
+      model: 'claude-sonnet-5',
+      // Sonnet 5 runs adaptive thinking when the field is omitted — keep the
+      // legacy no-thinking behavior so the token budget is all response.
+      thinking: { type: 'disabled' },
       max_tokens: 1500,
       messages: [
         {

@@ -19,13 +19,21 @@ import { fetchTweetsByUsername } from '@/lib/socialdata';
 import { buildAuditPrompt } from '@/prompts/score-boost-audit';
 import { sendAuditEmail } from '@/lib/audit-email';
 import { parseAudit } from '@/lib/score-schemas';
-import { assertCanScan } from '@/lib/scan-guard';
 import { logSecurityEvent, getClientIp } from '@/lib/audit-log';
+import { botGuard } from '@/lib/botid-guard';
+import { checkRateLimit, getClientIdentifier, rateLimiters } from '@/lib/rate-limit';
+
+// Regeneration cap: a paid session can re-run its audit a few times (page
+// reloads, transient LLM failures) but not farm the ~$0.05/run cost.
+const SESSION_RERUN_LIMIT = { interval: 60 * 60 * 1000, maxRequests: 3 };
 
 const HAIKU_MODEL = 'claude-haiku-4-5-20251001';
 
 export async function POST(request: NextRequest) {
   try {
+    const botBlock = await botGuard(request);
+    if (botBlock) return botBlock;
+
     if (!stripe) {
       return NextResponse.json({ error: 'Stripe not configured' }, { status: 503 });
     }
@@ -52,18 +60,29 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Handle missing from session metadata' }, { status: 400 });
     }
 
-    // 1b) Phase 1: verify authenticated user owns this handle
-    const guard = await assertCanScan(handle);
-    if (!guard.allowed) {
+    // 1b) Authorization = the verified paid session (this product is sold
+    // anonymously — SECURITY-HARDENING resolved decision #18: audit reports
+    // stay à la carte). assertCanScan was wrongly applied here and rejected
+    // every anonymous buyer post-payment. Abuse is bounded instead by BotID
+    // (above), the paid-session requirement, and rate limits per IP + session.
+    const ipLimit = checkRateLimit(
+      `${getClientIdentifier(request)}:audit-run`,
+      rateLimiters.aiStrict,
+    );
+    const sessionLimit = checkRateLimit(`audit-session:${sessionId}`, SESSION_RERUN_LIMIT);
+    if (ipLimit.limited || sessionLimit.limited) {
       await logSecurityEvent({
         category: 'scan',
         eventType: 'audit_rejected',
         success: false,
-        metadata: { error_code: guard.code, route: '/api/audit/run' },
+        metadata: { error_code: 'rate_limited', route: '/api/audit/run' },
         ip: getClientIp(request.headers),
         userAgent: request.headers.get('user-agent'),
       });
-      return NextResponse.json({ error: guard.error }, { status: guard.status });
+      return NextResponse.json(
+        { error: 'Too many audit runs — try again shortly. Your report was also emailed to you.' },
+        { status: 429 },
+      );
     }
 
     // 2) Fetch last 50 tweets

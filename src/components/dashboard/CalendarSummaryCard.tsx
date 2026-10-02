@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useCurrentBrand } from '@/lib/store';
 import { useAuth } from '@/hooks/useAuth';
+import { MONO } from './terminal-ui';
 
 interface CadenceData {
   thisWeek: {
@@ -35,8 +36,12 @@ export default function CalendarSummaryCard({ onOpenCalendar }: CalendarSummaryC
   const [data, setData] = useState<CadenceData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Depend on user?.id, not the user object — useAuth mints a new object on
+  // every TOKEN_REFRESHED event, which would refire the cadence fetch hourly.
+  const userId = user?.id;
+
   useEffect(() => {
-    if (!brand?.id || !user) {
+    if (!brand?.id || !userId) {
       setIsLoading(false);
       return;
     }
@@ -63,12 +68,12 @@ export default function CalendarSummaryCard({ onOpenCalendar }: CalendarSummaryC
     if (!data) return { label: '--', color: 'var(--text-tertiary)' };
     const { recommendations } = data;
     if (recommendations.some((r) => r.startsWith('Heavy'))) {
-      return { label: 'Heavy schedule', color: '#FF9F0A' };
+      return { label: 'Heavy schedule', color: 'var(--warning)' };
     }
     if (recommendations.some((r) => r.startsWith('Gap'))) {
-      return { label: 'Gap ahead', color: '#FF9F0A' };
+      return { label: 'Gap ahead', color: 'var(--warning)' };
     }
-    return { label: 'On track', color: '#30D158' };
+    return { label: 'On track', color: 'var(--success)' };
   };
 
   const status = getStatusIndicator();
@@ -87,13 +92,12 @@ export default function CalendarSummaryCard({ onOpenCalendar }: CalendarSummaryC
       <div className="flex items-center justify-between mb-3">
         <h3
           style={{
-            fontSize: 14,
-            fontWeight: 600,
+            fontFamily: MONO,
+            fontSize: 13,
             color: 'var(--text-secondary)',
-            letterSpacing: '-0.01em',
           }}
         >
-          Content Calendar
+          $ brand.calendar()
         </h3>
         <span
           style={{
@@ -185,8 +189,8 @@ export default function CalendarSummaryCard({ onOpenCalendar }: CalendarSummaryC
                     style={{
                       fontSize: 10,
                       fontWeight: 500,
-                      color: '#0A84FF',
-                      background: 'rgba(10,132,255,0.12)',
+                      color: 'var(--accent)',
+                      background: 'color-mix(in srgb, var(--accent) 12%, transparent)',
                       padding: '1px 6px',
                       borderRadius: 4,
                       flexShrink: 0,
@@ -216,7 +220,7 @@ export default function CalendarSummaryCard({ onOpenCalendar }: CalendarSummaryC
                   key={i}
                   style={{
                     fontSize: 11,
-                    color: '#FF9F0A',
+                    color: 'var(--warning)',
                     lineHeight: 1.4,
                     marginBottom: 2,
                   }}
@@ -256,20 +260,7 @@ export default function CalendarSummaryCard({ onOpenCalendar }: CalendarSummaryC
                 e.currentTarget.style.color = 'var(--text-secondary)';
               }}
             >
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                <line x1="16" y1="2" x2="16" y2="6" />
-                <line x1="8" y1="2" x2="8" y2="6" />
-                <line x1="3" y1="10" x2="21" y2="10" />
-              </svg>
-              Open Calendar
+              <span style={{ fontFamily: MONO, letterSpacing: '0.08em' }}>[ OPEN calendar ]</span>
             </button>
           )}
         </>

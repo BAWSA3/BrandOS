@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { useAuth } from '@/hooks/useAuth';
 
 interface SignupPromptProps {
@@ -47,7 +47,7 @@ export default function SignupPrompt({
 
       await signInWithX({
         inviteCode,
-        redirectTo: `${window.location.origin}/api/auth/callback?next=/app`,
+        redirectTo: `${window.location.origin}/api/auth/callback?next=/dashboard`,
       });
     } catch (err) {
       console.error('[SignupPrompt] X sign in error:', err);

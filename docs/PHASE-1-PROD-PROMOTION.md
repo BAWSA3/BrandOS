@@ -1,12 +1,23 @@
 # Phase 1 → Production Promotion Plan
 
-**Status:** ✅ EXECUTED 2026-07-05 — Phase 1 is LIVE on prod · **Created:** 2026-06-18 · **Risk:** HIGH (live DB, 6,445 real rows; the env-var-rename trap)
+**Status:** ✅ COMPLETE (all steps A–F) — Phase 1 LIVE on prod · **Created:** 2026-06-18 · **Risk:** HIGH (live DB, 6,445 real rows; the env-var-rename trap)
 
-## 0. PROGRESS — COMPLETED 2026-07-05
+## 0. PROGRESS — COMPLETED 2026-07-05 (Step F: 2026-07-06)
 
-**Promotion executed successfully.** Steps A–E done; Step F (remove old Supabase
-key names) pending a few hours of stability. Remaining manual item: authed smoke
-test (signup → connect X → scan own handle; non-owned = 403).
+**Promotion fully executed, including Step F.** `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+and `SUPABASE_SERVICE_ROLE_KEY` removed from all `brandos` env groups; redeploy
+green (§5 checks + anon scan pass, zero new runtime errors). The env-rename
+trap is gone — prod and staging both use only the new key names.
+(`SUPABASE_ANON_KEY` kept: integration-synced, unreferenced by code.)
+Remaining manual item: authed smoke test (signup → connect X → scan own
+handle; non-owned = 403).
+
+**Post-promotion addendum (2026-07-05):** prod was missing migrations
+003/007/008/009 (Workspace world columns!) — every authed request errored
+until they were applied+verified. Root cause: this plan tracked only the
+Phase-1 migrations. **Next promotion: diff the FULL supabase-migrations/
+set against prod information_schema first.** Migrations 012 (TOS) and 013
+(ProcessedWebhook) were applied to BOTH DBs at build time to prevent a repeat.
 
 **2026-07-05 execution log:**
 - Env vars set on `brandos` Production: `X_OAUTH_ENCRYPTION_KEY` (fresh),

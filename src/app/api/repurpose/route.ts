@@ -1,11 +1,26 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { NextRequest, NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-import { createClient } from '@supabase/supabase-js';
 import prisma from '@/lib/db';
 import { buildBrandContext } from '@/prompts/brand-guardian';
 import { BrandDNA } from '@/lib/types';
 import { summarizeFingerprint, VoiceFingerprint } from '@/lib/voice-fingerprint';
+import { getWorkspaceContext, ownedBrandWhere } from '@/lib/workspace-auth';
+import { botGuard } from '@/lib/botid-guard';
+import { checkAndIncrementUsage } from '@/lib/usage';
+import { GUARD_PREAMBLE, wrapUntrusted } from '@/lib/prompt-safety';
+import { readJsonBody } from '@/lib/api-body';
+
+// Content repurposing (consolidation step 6). The legacy route read the dead
+// sb-access-token cookie, gated on user.subscriptionTier, and interpolated
+// user content into the prompt unfenced. Now: workspace auth + plan gate,
+// BotID, prompt-safety fencing, generation-usage metering, and the
+// deprecated claude-sonnet-4-20250514 swapped for its replacement tier.
+
+const MAX_BODY_BYTES = 50_000;
+const MAX_SOURCE_CHARS = 10_000;
+const MAX_FORMATS = 6;
+const MAX_OUTPUT_CHARS = 10_000;
+const MODEL = 'claude-sonnet-5';
 
 const formatInstructions: Record<string, string> = {
   thread:
@@ -21,136 +36,171 @@ const formatInstructions: Record<string, string> = {
     'Rewrite this as a short narrative/story format. Use personal or hypothetical storytelling to convey the same core message.',
 };
 
+function parseJsonColumn<T>(raw: string | null, fallback: T): T {
+  if (!raw) return fallback;
+  try {
+    return JSON.parse(raw) as T;
+  } catch {
+    return fallback;
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
-    // Feature gate: Content Calendar/Repurpose requires PRO+
-    const { enforceFeatureAccess } = await import('@/lib/gate');
-    // Auth is handled below via supabase — get tier after auth check
+    // Auth lookup (DB) and bot classification (network) are independent —
+    // overlap them.
+    const [ctx, botBlock] = await Promise.all([
+      getWorkspaceContext({ ensure: false }),
+      botGuard(request),
+    ]);
+    if (!ctx) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    // Repurposing rides on the PRO Content Calendar feature — enforce on the
+    // server, not just in the UI.
+    if (!ctx.workspace || ctx.workspace.plan === 'FREE') {
+      return NextResponse.json(
+        {
+          error: 'Content repurposing requires a PRO plan',
+          code: 'PLAN_REQUIRED',
+          upgradeUrl: '/pricing',
+        },
+        { status: 403 }
+      );
+    }
+    if (botBlock) return botBlock;
+
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) {
       return NextResponse.json({ error: 'API key not configured' }, { status: 500 });
     }
 
-    // Auth
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-    if (!supabaseUrl || !supabaseAnonKey) {
-      return NextResponse.json({ error: 'Server misconfigured' }, { status: 500 });
-    }
+    const read = await readJsonBody(request, MAX_BODY_BYTES);
+    if (!read.ok) return read.response;
+    const body = read.body;
 
-    const cookieStore = await cookies();
-    const accessToken = cookieStore.get('sb-access-token')?.value;
-    if (!accessToken) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
-    }
+    const brandId = typeof body.brandId === 'string' ? body.brandId : '';
+    const sourceContent = typeof body.sourceContent === 'string' ? body.sourceContent.trim() : '';
+    // Object.hasOwn, not `in`: prototype keys ('toString', 'constructor')
+    // must not pass the allowlist and reach the paid prompt.
+    const formats = Array.isArray(body.formats)
+      ? body.formats
+          .filter(
+            (f): f is string => typeof f === 'string' && Object.hasOwn(formatInstructions, f)
+          )
+          .slice(0, MAX_FORMATS)
+      : [];
 
-    const supabase = createClient(supabaseUrl, supabaseAnonKey);
-    const {
-      data: { user: authUser },
-      error: authError,
-    } = await supabase.auth.getUser(accessToken);
-    if (authError || !authUser) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
-    }
-
-    const dbUser = await prisma.user.findUnique({ where: { supabaseId: authUser.id } });
-    if (!dbUser) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
-    }
-
-    // Feature gate: Repurpose requires PRO+ (contentCalendar feature)
-    const gateCheck = enforceFeatureAccess(dbUser.subscriptionTier as any, 'contentCalendar');
-    if (!gateCheck.allowed) return gateCheck.response;
-
-    const { brandId, sourceContent, formats } = (await request.json()) as {
-      brandId: string;
-      sourceContent: string;
-      formats: string[];
-    };
-
-    if (!brandId || !sourceContent || !formats?.length) {
+    if (!brandId || !sourceContent || formats.length === 0) {
       return NextResponse.json(
         { error: 'brandId, sourceContent, and formats are required' },
         { status: 400 }
       );
     }
+    if (sourceContent.length > MAX_SOURCE_CHARS) {
+      return NextResponse.json(
+        { error: `Content too long (max ${MAX_SOURCE_CHARS} characters)` },
+        { status: 400 }
+      );
+    }
 
-    // Verify brand ownership
     const brand = await prisma.brand.findFirst({
-      where: { id: brandId, userId: dbUser.id },
+      where: ownedBrandWhere(brandId, ctx.workspace.id, ctx.user.id),
     });
     if (!brand) {
       return NextResponse.json({ error: 'Brand not found' }, { status: 404 });
     }
 
-    // Build brand DNA for prompt
+    // Only after the request is known-valid — rejected requests must not
+    // burn a generation credit. One credit per request, not per format: a
+    // repurpose is a single user action.
+    const { allowed, usage } = await checkAndIncrementUsage(ctx.user.id, 'generation');
+    if (!allowed) {
+      return NextResponse.json(
+        { error: 'Usage limit reached', code: 'USAGE_LIMIT', usage, upgradeUrl: '/pricing' },
+        { status: 429 }
+      );
+    }
+
     const brandDNA: BrandDNA = {
       id: brand.id,
       name: brand.name,
-      colors: JSON.parse(brand.colors),
-      tone: JSON.parse(brand.tone),
-      keywords: JSON.parse(brand.keywords),
-      doPatterns: JSON.parse(brand.doPatterns),
-      dontPatterns: JSON.parse(brand.dontPatterns),
-      voiceSamples: JSON.parse(brand.voiceSamples),
+      colors: parseJsonColumn(brand.colors, { primary: '', secondary: '', accent: '' }),
+      tone: parseJsonColumn(brand.tone, { minimal: 50, playful: 50, bold: 50, experimental: 50 }),
+      keywords: parseJsonColumn(brand.keywords, []),
+      doPatterns: parseJsonColumn(brand.doPatterns, []),
+      dontPatterns: parseJsonColumn(brand.dontPatterns, []),
+      voiceSamples: parseJsonColumn(brand.voiceSamples, []),
       createdAt: brand.createdAt,
       updatedAt: brand.updatedAt,
     };
 
-    // Get voice fingerprint if available
     let fingerprintSummary;
     if (brand.voiceFingerprint) {
-      try {
-        const fp = JSON.parse(brand.voiceFingerprint) as VoiceFingerprint;
-        fingerprintSummary = summarizeFingerprint(fp);
-      } catch {
-        // Ignore fingerprint parse errors
-      }
+      const fp = parseJsonColumn<VoiceFingerprint | null>(brand.voiceFingerprint, null);
+      if (fp) fingerprintSummary = summarizeFingerprint(fp);
     }
 
     const brandContext = buildBrandContext(brandDNA, fingerprintSummary);
 
-    // Build format-specific prompts
-    const validFormats = formats.filter((f) => formatInstructions[f]);
+    // The source is often third-party text (repurposing someone's tweet) —
+    // fence it so it can't override the task instructions.
+    const fencedSource = wrapUntrusted(sourceContent, 'source_content', MAX_SOURCE_CHARS);
 
     const anthropic = new Anthropic({ apiKey });
 
-    const formatPrompts = validFormats.map((format) => ({
-      format,
-      prompt: `You are a content repurposing assistant. Your job is to transform source content into different formats while maintaining the brand voice.
+    // Generate all derivatives in parallel; a single failed format is
+    // dropped rather than failing the batch.
+    const results = await Promise.all(
+      formats.map(async (format) => {
+        const prompt = `You are a content repurposing assistant. Your job is to transform source content into different formats while maintaining the brand voice.
 
 ${brandContext}
 
 SOURCE CONTENT:
-"${sourceContent}"
+${fencedSource}
 
 TASK: ${formatInstructions[format]}
 
-Return ONLY the repurposed content, no explanations or meta-commentary.`,
-    }));
+Return ONLY the repurposed content, no explanations or meta-commentary.`;
 
-    // Generate all derivatives in parallel
-    const results = await Promise.all(
-      formatPrompts.map(async ({ format, prompt }) => {
         try {
           const message = await anthropic.messages.create({
-            model: 'claude-sonnet-4-20250514',
+            model: MODEL,
             max_tokens: 1000,
-            messages: [{ role: 'user', content: prompt }],
+            // Sonnet 5 defaults to adaptive thinking — keep the budget for
+            // output.
+            thinking: { type: 'disabled' },
+            messages: [{ role: 'user', content: GUARD_PREAMBLE + prompt }],
           });
 
-          const content = message.content[0].type === 'text' ? message.content[0].text : '';
-          return { format, content };
+          const content = message.content[0]?.type === 'text' ? message.content[0].text : '';
+          return content.trim() ? { format, content: content.slice(0, MAX_OUTPUT_CHARS) } : null;
         } catch (err) {
           console.error(`[repurpose] Failed to generate ${format}:`, err);
-          return { format, content: `[Failed to generate ${format}]` };
+          return null;
         }
       })
     );
 
-    return NextResponse.json({ derivatives: results });
-  } catch (error) {
+    // Never return placeholder "derivatives" the UI would offer to save; if
+    // every format failed, say so. (The generation credit is already spent —
+    // refunds would need transactional usage tracking, same as /api/check.)
+    const derivatives = results.filter((r) => r !== null);
+    if (derivatives.length === 0) {
+      return NextResponse.json(
+        { error: 'Generation failed — try again in a minute.' },
+        { status: 502 }
+      );
+    }
+
+    return NextResponse.json({ derivatives });
+  } catch (error: unknown) {
     console.error('[repurpose] error:', error);
-    return NextResponse.json({ error: 'Internal error' }, { status: 500 });
+    const message =
+      error instanceof Anthropic.APIError && error.status === 429
+        ? 'Repurposing is busy right now — try again in a minute.'
+        : 'Repurposing failed';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

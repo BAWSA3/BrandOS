@@ -44,7 +44,10 @@ Return ONLY valid JSON with no markdown fencing, no preamble:
       'anthropic-dangerous-direct-browser-access': 'true',
     },
     body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
+      model: 'claude-sonnet-5',
+      // Sonnet 5 runs adaptive thinking when the field is omitted — keep the
+      // legacy no-thinking behavior so the token budget is all response.
+      thinking: { type: 'disabled' },
       max_tokens: 1000,
       messages: [{ role: 'user', content: prompt }],
     }),

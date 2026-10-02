@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs";
+import { withBotId } from "botid/next/config";
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
@@ -19,10 +20,12 @@ const nextConfig: NextConfig = {
             value: [
               "default-src 'self'",
               "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
-              "style-src 'self' 'unsafe-inline'",
+              // Google Fonts: layout.tsx + dashboard components load these
+              // stylesheets; without the hosts the CSP silently blocks them.
+              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "img-src 'self' data: https:",
               "connect-src 'self' https://*.supabase.co https://*.posthog.com https://*.vercel-insights.com",
-              "font-src 'self'",
+              "font-src 'self' https://fonts.gstatic.com",
               "frame-ancestors 'none'",
             ].join('; '),
           },
@@ -32,7 +35,7 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withSentryConfig(nextConfig, {
+export default withSentryConfig(withBotId(nextConfig), {
   // Sentry options
   org: process.env.SENTRY_ORG,
   project: process.env.SENTRY_PROJECT,

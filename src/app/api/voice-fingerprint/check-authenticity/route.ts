@@ -1,10 +1,27 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { NextRequest, NextResponse } from 'next/server';
+import { getWorkspaceContext } from '@/lib/workspace-auth';
 import { VoiceFingerprint, AuthenticityScore } from '@/lib/voice-fingerprint';
 import { buildAuthenticityCheckPrompt } from '@/prompts/voice-fingerprint';
 
 export async function POST(request: NextRequest) {
   try {
+    const ctx = await getWorkspaceContext({ ensure: false });
+    if (!ctx) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    // Fingerprint features are PRO — enforce server-side.
+    if (!ctx.workspace || ctx.workspace.plan === 'FREE') {
+      return NextResponse.json(
+        {
+          error: 'Voice Fingerprint requires a PRO plan',
+          code: 'PLAN_REQUIRED',
+          upgradeUrl: '/pricing',
+        },
+        { status: 403 }
+      );
+    }
+
     const apiKey = process.env.ANTHROPIC_API_KEY;
 
     if (!apiKey) {
@@ -27,7 +44,8 @@ export async function POST(request: NextRequest) {
     const anthropic = new Anthropic({ apiKey });
 
     const message = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
+      model: 'claude-sonnet-5',
+      thinking: { type: 'disabled' },
       max_tokens: 3000,
       messages: [
         {

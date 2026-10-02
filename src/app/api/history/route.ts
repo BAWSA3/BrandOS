@@ -1,92 +1,83 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-import { cookies } from 'next/headers';
 import prisma from '@/lib/db';
+import { getWorkspaceContext, ownedBrandWhere, ownedBrandsWhere } from '@/lib/workspace-auth';
 
-// Helper to get authenticated user
-async function getAuthUser() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+// Check/generate history, workspace-scoped (consolidation step 4). The old
+// route read the dead sb-access-token cookie — this is the route that
+// existed since Phase-0 but was never wired to a UI; the dashboard Content
+// Check panel is its first real consumer.
 
-  if (!supabaseUrl || !supabaseAnonKey) {
-    return null;
-  }
+const MAX_BODY_BYTES = 150_000;
 
-  const cookieStore = await cookies();
-  const accessToken = cookieStore.get('sb-access-token')?.value;
-
-  if (!accessToken) {
-    return null;
-  }
-
-  const supabase = createClient(supabaseUrl, supabaseAnonKey);
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser(accessToken);
-
-  if (error || !user) {
-    return null;
-  }
-
-  const dbUser = await prisma.user.findUnique({
-    where: { supabaseId: user.id },
-  });
-
-  return dbUser;
+function serializeEntry(
+  entry: {
+    id: string;
+    type: string;
+    brandId: string;
+    input: string;
+    contentType: string | null;
+    output: string;
+    createdAt: Date;
+  },
+  brandName: string
+) {
+  return {
+    id: entry.id,
+    type: entry.type as 'check' | 'generate',
+    brandId: entry.brandId,
+    brandName,
+    input: entry.input,
+    contentType: entry.contentType || undefined,
+    output: JSON.parse(entry.output),
+    timestamp: entry.createdAt,
+  };
 }
 
-// GET /api/history - Fetch history for user's brands
+// GET /api/history - Fetch history for the workspace's brands
 export async function GET(request: NextRequest) {
   try {
-    const user = await getAuthUser();
-
-    if (!user) {
+    // Read path stays read-only: no workspace auto-creation on GET.
+    const ctx = await getWorkspaceContext({ ensure: false });
+    if (!ctx) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+    if (!ctx.workspace) {
+      return NextResponse.json({ history: [] });
+    }
 
-    // Get brandId filter from query params (optional)
     const { searchParams } = new URL(request.url);
     const brandId = searchParams.get('brandId');
-    const limit = parseInt(searchParams.get('limit') || '50', 10);
+    const limit = Math.min(Math.max(parseInt(searchParams.get('limit') || '50', 10) || 50, 1), 200);
 
-    // Get user's brand IDs
-    const userBrands = await prisma.brand.findMany({
-      where: { userId: user.id },
-      select: { id: true, name: true },
-    });
-
-    const brandIds = userBrands.map((b) => b.id);
-    const brandNameMap = Object.fromEntries(userBrands.map((b) => [b.id, b.name]));
+    // Single-brand lookup when the caller filters (the panel always does);
+    // full workspace set only for the unfiltered view.
+    const brands = brandId
+      ? await prisma.brand.findMany({
+          where: ownedBrandWhere(brandId, ctx.workspace.id, ctx.user.id),
+          select: { id: true, name: true },
+        })
+      : await prisma.brand.findMany({
+          where: ownedBrandsWhere(ctx.workspace.id, ctx.user.id),
+          select: { id: true, name: true },
+        });
+    const brandNameMap = Object.fromEntries(brands.map((b) => [b.id, b.name]));
+    const brandIds = brands.map((b) => b.id);
 
     if (brandIds.length === 0) {
       return NextResponse.json({ history: [] });
     }
 
-    // Build where clause
-    const whereClause = brandId
-      ? { brandId, brand: { userId: user.id } }
-      : { brandId: { in: brandIds } };
-
     const historyEntries = await prisma.historyEntry.findMany({
-      where: whereClause,
+      where: { brandId: { in: brandIds } },
       orderBy: { createdAt: 'desc' },
       take: limit,
     });
 
-    // Transform to match HistoryItem interface
-    const history = historyEntries.map((entry) => ({
-      id: entry.id,
-      type: entry.type as 'check' | 'generate',
-      brandId: entry.brandId,
-      brandName: brandNameMap[entry.brandId] || 'Unknown Brand',
-      input: entry.input,
-      contentType: entry.contentType || undefined,
-      output: JSON.parse(entry.output),
-      timestamp: entry.createdAt,
-    }));
-
-    return NextResponse.json({ history });
+    return NextResponse.json({
+      history: historyEntries.map((e) =>
+        serializeEntry(e, brandNameMap[e.brandId] || 'Unknown Brand')
+      ),
+    });
   } catch (error) {
     console.error('[History API] GET error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
@@ -96,35 +87,51 @@ export async function GET(request: NextRequest) {
 // POST /api/history - Save a new history entry
 export async function POST(request: NextRequest) {
   try {
-    const user = await getAuthUser();
-
-    if (!user) {
+    const ctx = await getWorkspaceContext({ ensure: true });
+    if (!ctx || !ctx.workspace) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const body = await request.json();
+    const raw = await request.text();
+    if (raw.length > MAX_BODY_BYTES) {
+      return NextResponse.json({ error: 'Request too large' }, { status: 413 });
+    }
+    let body: Record<string, unknown>;
+    try {
+      body = JSON.parse(raw);
+    } catch {
+      return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
+    }
+
     const { type, brandId, input, contentType, output } = body;
 
-    if (!type || !brandId || !input || output === undefined) {
+    if (
+      typeof type !== 'string' ||
+      !['check', 'generate'].includes(type) ||
+      typeof brandId !== 'string' ||
+      typeof input !== 'string' ||
+      output === undefined
+    ) {
       return NextResponse.json(
         { error: 'Missing required fields: type, brandId, input, output' },
         { status: 400 }
       );
     }
 
-    // Verify user owns the brand
+    // The brand must belong to the caller's workspace (or be a legacy row
+    // they own).
     const brand = await prisma.brand.findFirst({
-      where: { id: brandId, userId: user.id },
+      where: ownedBrandWhere(brandId, ctx.workspace.id, ctx.user.id),
     });
 
     if (!brand) {
       return NextResponse.json({ error: 'Brand not found' }, { status: 404 });
     }
 
-    // Extract score from output if it's a check result
     let score: number | undefined;
-    if (type === 'check' && typeof output === 'object' && output.score !== undefined) {
-      score = output.score;
+    if (type === 'check' && typeof output === 'object' && output !== null) {
+      const s = (output as Record<string, unknown>).score;
+      if (typeof s === 'number') score = s;
     }
 
     const entry = await prisma.historyEntry.create({
@@ -132,27 +139,13 @@ export async function POST(request: NextRequest) {
         type,
         input,
         output: JSON.stringify(output),
-        contentType: contentType || null,
-        score: score || null,
+        contentType: typeof contentType === 'string' ? contentType : null,
+        score: score ?? null,
         brandId,
       },
     });
 
-    return NextResponse.json(
-      {
-        entry: {
-          id: entry.id,
-          type: entry.type,
-          brandId: entry.brandId,
-          brandName: brand.name,
-          input: entry.input,
-          contentType: entry.contentType || undefined,
-          output: JSON.parse(entry.output),
-          timestamp: entry.createdAt,
-        },
-      },
-      { status: 201 }
-    );
+    return NextResponse.json({ entry: serializeEntry(entry, brand.name) }, { status: 201 });
   } catch (error) {
     console.error('[History API] POST error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
@@ -162,9 +155,8 @@ export async function POST(request: NextRequest) {
 // DELETE /api/history?id=xxx - Delete a history entry
 export async function DELETE(request: NextRequest) {
   try {
-    const user = await getAuthUser();
-
-    if (!user) {
+    const ctx = await getWorkspaceContext({ ensure: false });
+    if (!ctx) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -175,13 +167,17 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'History entry ID is required' }, { status: 400 });
     }
 
-    // Verify user owns the history entry's brand
     const entry = await prisma.historyEntry.findUnique({
       where: { id },
-      include: { brand: { select: { userId: true } } },
+      include: { brand: { select: { userId: true, workspaceId: true } } },
     });
 
-    if (!entry || entry.brand.userId !== user.id) {
+    const owned =
+      entry &&
+      ((ctx.workspace !== null && entry.brand.workspaceId === ctx.workspace.id) ||
+        (entry.brand.userId === ctx.user.id && entry.brand.workspaceId === null));
+
+    if (!owned) {
       return NextResponse.json({ error: 'History entry not found' }, { status: 404 });
     }
 
