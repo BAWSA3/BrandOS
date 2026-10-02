@@ -318,7 +318,10 @@ export default function ApiDocs() {
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-xl border-b border-black/10">
         <div className="max-w-5xl mx-auto px-6 h-14 flex items-center justify-between">
-          <a href="/" className="font-mono text-sm tracking-tight hover:opacity-60 transition-opacity">
+          <a
+            href="/"
+            className="font-mono text-sm tracking-tight hover:opacity-60 transition-opacity"
+          >
             ← brandos
           </a>
           <div className="flex items-center gap-1">
@@ -422,8 +425,8 @@ export default function ApiDocs() {
                   count, verification status
                 </div>
                 <div>
-                  <span className="text-[#0047FF]">analyzed</span>: Voice consistency, niche clarity,
-                  content pillars
+                  <span className="text-[#0047FF]">analyzed</span>: Voice consistency, niche
+                  clarity, content pillars
                 </div>
                 <div>
                   <span className="text-[#0047FF]">analyzed</span>: Growth trajectory, authority
@@ -438,10 +441,22 @@ export default function ApiDocs() {
             <h2 className="text-2xl font-light mb-6">Scoring Framework</h2>
             <div className="space-y-3 mb-16">
               {[
-                { phase: 'DEFINE (30%)', desc: 'What are they known for? Content pillars, niche clarity, audience identification' },
-                { phase: 'CHECK (25%)', desc: 'Consistency & voice. Tone, staying on-topic, recognizable style, cadence' },
-                { phase: 'GENERATE (25%)', desc: 'Output quality. Volume, formats, expertise, originality' },
-                { phase: 'SCALE (20%)', desc: 'Reputation signals. Follower ratio, listed count, verified status, growth' },
+                {
+                  phase: 'DEFINE (30%)',
+                  desc: 'What are they known for? Content pillars, niche clarity, audience identification',
+                },
+                {
+                  phase: 'CHECK (25%)',
+                  desc: 'Consistency & voice. Tone, staying on-topic, recognizable style, cadence',
+                },
+                {
+                  phase: 'GENERATE (25%)',
+                  desc: 'Output quality. Volume, formats, expertise, originality',
+                },
+                {
+                  phase: 'SCALE (20%)',
+                  desc: 'Reputation signals. Follower ratio, listed count, verified status, growth',
+                },
               ].map((item) => (
                 <div key={item.phase} className="flex gap-4 p-4 border border-black/10 rounded-lg">
                   <div className="font-mono text-xs text-[#0047FF] w-32 shrink-0 pt-0.5">
@@ -459,8 +474,10 @@ export default function ApiDocs() {
           <section className="py-16">
             <h2 className="text-2xl font-light mb-4">Endpoints</h2>
             <p className="text-black/50 mb-8">
-              All endpoints require the <code className="px-1.5 py-0.5 bg-black/5 rounded font-mono text-xs">x-api-key</code> header.
-              Base URL: <code className="px-1.5 py-0.5 bg-black/5 rounded font-mono text-xs">{baseUrl}</code>
+              All endpoints require the{' '}
+              <code className="px-1.5 py-0.5 bg-black/5 rounded font-mono text-xs">x-api-key</code>{' '}
+              header. Base URL:{' '}
+              <code className="px-1.5 py-0.5 bg-black/5 rounded font-mono text-xs">{baseUrl}</code>
             </p>
 
             <div className="space-y-4">
@@ -576,7 +593,7 @@ export default function ApiDocs() {
                     ['400', 'Bad Request', 'Check your request body/params'],
                     ['401', 'Unauthorized', 'Check your x-api-key header'],
                     ['403', 'Forbidden', 'Key deactivated, expired, or tier too low'],
-                    ['404', 'Not Found', 'Username doesn\'t exist on X'],
+                    ['404', 'Not Found', "Username doesn't exist on X"],
                     ['429', 'Rate Limited', 'Wait and retry, or upgrade your tier'],
                     ['503', 'Service Unavailable', 'AI quota exceeded — retry in a few minutes'],
                   ].map(([code, meaning, fix]) => (
@@ -605,9 +622,7 @@ export default function ApiDocs() {
                 <div
                   key={tier.name}
                   className={`p-6 rounded-lg border ${
-                    tier.popular
-                      ? 'border-[#0047FF] ring-1 ring-[#0047FF]/20'
-                      : 'border-black/10'
+                    tier.popular ? 'border-[#0047FF] ring-1 ring-[#0047FF]/20' : 'border-black/10'
                   } relative`}
                 >
                   {tier.popular && (

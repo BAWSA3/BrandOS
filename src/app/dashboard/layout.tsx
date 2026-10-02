@@ -18,7 +18,10 @@ export default async function DashboardLayout({ children }: { children: ReactNod
 
   return (
     <WorldProvider world={world}>
-      <div className="relative min-h-screen" style={{ backgroundColor: 'var(--background)', color: 'var(--text-primary)' }}>
+      <div
+        className="relative min-h-screen"
+        style={{ backgroundColor: 'var(--background)', color: 'var(--text-primary)' }}
+      >
         <WorldScene intensity={0.9} />
         <div className="relative z-10">{children}</div>
         <MuteButton />
@@ -28,7 +31,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
 }
 
 async function resolveWorldForWorkspace(
-  workspace: { id: string; activeWorldId: string | null; customWorldId: string | null } | null,
+  workspace: { id: string; activeWorldId: string | null; customWorldId: string | null } | null
 ): Promise<WorldManifest> {
   if (!workspace) return resolveWorld(null);
 

@@ -46,7 +46,7 @@ export function createAdminClient(): SupabaseClient {
   }
   if (!serviceRoleKey) {
     throw new Error(
-      'SUPABASE_SECRET_KEY is not set. This is required for admin/cron/webhook contexts.',
+      'SUPABASE_SECRET_KEY is not set. This is required for admin/cron/webhook contexts.'
     );
   }
 

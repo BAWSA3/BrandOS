@@ -183,17 +183,11 @@ export async function POST(request: NextRequest) {
     ]);
 
     if (!result1) {
-      return NextResponse.json(
-        { error: `Could not find or score @${clean1}` },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: `Could not find or score @${clean1}` }, { status: 404 });
     }
 
     if (!result2) {
-      return NextResponse.json(
-        { error: `Could not find or score @${clean2}` },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: `Could not find or score @${clean2}` }, { status: 404 });
     }
 
     // Generate roast + insights via Claude
@@ -205,9 +199,10 @@ export async function POST(request: NextRequest) {
       interactionData
     );
 
-    const winnerUsername = result1.brandScore.overallScore >= result2.brandScore.overallScore
-      ? result1.profile.username
-      : result2.profile.username;
+    const winnerUsername =
+      result1.brandScore.overallScore >= result2.brandScore.overallScore
+        ? result1.profile.username
+        : result2.profile.username;
 
     // Record matchup for leaderboard (fire and forget)
     Promise.resolve(

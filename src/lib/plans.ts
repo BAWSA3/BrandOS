@@ -213,7 +213,10 @@ export type { PlanTier };
 
 export const PLAN_TIERS = ['FREE', 'PRO', 'MAX', 'TEAM', 'ENTERPRISE'] as const;
 
-export const PLAN_PRICING: Record<PlanTier, { monthly: number; annual: number; perSeat?: boolean; minSeats?: number }> = {
+export const PLAN_PRICING: Record<
+  PlanTier,
+  { monthly: number; annual: number; perSeat?: boolean; minSeats?: number }
+> = {
   FREE: { monthly: 0, annual: 0 },
   PRO: { monthly: 20, annual: 16 },
   MAX: { monthly: 80, annual: 64 },
@@ -241,7 +244,11 @@ export async function getPlanLimitsFromDB(plan: PlanTier): Promise<PlanLimit | n
   }
 }
 
-export function computeWorkspaceDailyCap(limits: PlanLimit, seatCount: number, isTeam: boolean): number {
+export function computeWorkspaceDailyCap(
+  limits: PlanLimit,
+  seatCount: number,
+  isTeam: boolean
+): number {
   return isTeam ? limits.scansPerDay * seatCount : limits.scansPerDay;
 }
 
@@ -249,12 +256,19 @@ export function computeXAccountCap(limits: PlanLimit, seatCount: number, isTeam:
   return isTeam ? limits.xAccountsPerSeat * seatCount : limits.xAccountsPerSeat;
 }
 
-export function isFeatureEnabled(limits: PlanLimit, feature: 'multiPlatform' | 'competitorWatchlist' | 'scheduledRescans' | 'priorityQueue'): boolean {
+export function isFeatureEnabled(
+  limits: PlanLimit,
+  feature: 'multiPlatform' | 'competitorWatchlist' | 'scheduledRescans' | 'priorityQueue'
+): boolean {
   switch (feature) {
-    case 'multiPlatform': return limits.multiPlatformEnabled;
-    case 'competitorWatchlist': return limits.competitorWatchlistEnabled;
-    case 'scheduledRescans': return limits.scheduledRescansEnabled;
-    case 'priorityQueue': return limits.priorityQueueEnabled;
+    case 'multiPlatform':
+      return limits.multiPlatformEnabled;
+    case 'competitorWatchlist':
+      return limits.competitorWatchlistEnabled;
+    case 'scheduledRescans':
+      return limits.scheduledRescansEnabled;
+    case 'priorityQueue':
+      return limits.priorityQueueEnabled;
   }
 }
 
@@ -275,9 +289,12 @@ export function isTeamPlan(plan: PlanTier): boolean {
 // Map legacy SubscriptionTier → PlanTier for migration period
 export function legacyTierToPlanTier(tier: SubscriptionTier): PlanTier {
   switch (tier) {
-    case 'CREATOR': return 'FREE';
-    case 'AGENCY': return 'TEAM';
-    default: return tier as PlanTier;
+    case 'CREATOR':
+      return 'FREE';
+    case 'AGENCY':
+      return 'TEAM';
+    default:
+      return tier as PlanTier;
   }
 }
 

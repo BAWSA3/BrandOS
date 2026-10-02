@@ -106,12 +106,7 @@ function resolveUrl(src: string): string {
   return new URL(src, window.location.origin).toString();
 }
 
-function fadeTo(
-  el: HTMLAudioElement,
-  target: number,
-  durationMs: number,
-  onDone?: () => void,
-) {
+function fadeTo(el: HTMLAudioElement, target: number, durationMs: number, onDone?: () => void) {
   const start = el.volume;
   const delta = target - start;
   const steps = Math.max(1, Math.round(durationMs / 40));

@@ -345,9 +345,7 @@ export default function ContentCalendar() {
       </div>
 
       {/* Error */}
-      {error && (
-        <p style={{ fontSize: 13, color: 'var(--danger)', marginBottom: 12 }}>{error}</p>
-      )}
+      {error && <p style={{ fontSize: 13, color: 'var(--danger)', marginBottom: 12 }}>{error}</p>}
 
       {/* Loading */}
       {isLoading ? (

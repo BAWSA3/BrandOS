@@ -289,10 +289,7 @@ export default function ScoreHistoryCard({ username }: { username?: string }) {
 
       {/* Archetype changes */}
       {archetypeChanges.length > 0 && (
-        <div
-          className="mt-3 border-t pt-3"
-          style={{ borderColor: 'rgba(255,255,255,0.06)' }}
-        >
+        <div className="mt-3 border-t pt-3" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
           <p
             className="mb-2 text-[9px] uppercase tracking-widest"
             style={{ color: '#444', fontFamily: 'var(--font-vcr, monospace)' }}
@@ -311,10 +308,7 @@ export default function ScoreHistoryCard({ username }: { username?: string }) {
 
       {/* Current archetype */}
       {latestArchetype && archetypeChanges.length === 0 && (
-        <div
-          className="mt-3 border-t pt-3"
-          style={{ borderColor: 'rgba(255,255,255,0.06)' }}
-        >
+        <div className="mt-3 border-t pt-3" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
           <div className="flex items-center gap-2">
             <span
               className="text-[9px] uppercase tracking-widest"

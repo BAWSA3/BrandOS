@@ -28,8 +28,7 @@ export async function sendAuditEmail(params: {
 
   const resend = new Resend(apiKey);
   const md = generateAuditMarkdown(params.audit);
-  const appUrl =
-    process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '') || 'https://mybrandos.app';
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '') || 'https://mybrandos.app';
   const auditUrl = `${appUrl}/audit/${params.sessionId}`;
   const today = new Date().toISOString().slice(0, 10);
   const fileName = `brandos-audit-${params.audit.handle}-${today}.md`;

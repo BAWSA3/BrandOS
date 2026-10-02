@@ -37,7 +37,7 @@ export interface DeletionCounts {
  */
 export async function deleteAccountData(
   userId: string,
-  opts: { deleteOwnedTeamWorkspaces?: boolean } = {},
+  opts: { deleteOwnedTeamWorkspaces?: boolean } = {}
 ): Promise<DeletionCounts> {
   const ownedWorkspaces = await prisma.workspace.findMany({
     where: { ownerUserId: userId },
@@ -51,32 +51,31 @@ export async function deleteAccountData(
 
   const ownedIds = ownedWorkspaces.map((w) => w.id);
 
-  const [shares, scans, , connections, , memberships, , workspaces] =
-    await prisma.$transaction([
-      // RESTRICT relations first — in an order that never leaves a dangling FK
-      prisma.auditReportShare.deleteMany({
-        where: { OR: [{ createdByUserId: userId }, { workspaceId: { in: ownedIds } }] },
-      }),
-      prisma.brandScan.deleteMany({
-        where: { OR: [{ userId }, { workspaceId: { in: ownedIds } }] },
-      }),
-      prisma.approvalRequest.deleteMany({ where: { submittedById: userId } }),
-      // BrandScan -> PlatformConnection is RESTRICT: connections only after scans
-      prisma.platformConnection.deleteMany({
-        where: { OR: [{ userId }, { workspaceId: { in: ownedIds } }] },
-      }),
-      prisma.dailyBrief.deleteMany({
-        where: { OR: [{ userId }, { workspaceId: { in: ownedIds } }] },
-      }),
-      prisma.workspaceMember.deleteMany({
-        where: { OR: [{ userId }, { workspaceId: { in: ownedIds } }] },
-      }),
-      // CustomWorld has no FK back to Workspace — explicit cleanup
-      prisma.customWorld.deleteMany({ where: { workspaceId: { in: ownedIds } } }),
-      prisma.workspace.deleteMany({ where: { id: { in: ownedIds } } }),
-      // Remaining relations (brands, purchases, sessions, ...) cascade from here
-      prisma.user.delete({ where: { id: userId } }),
-    ]);
+  const [shares, scans, , connections, , memberships, , workspaces] = await prisma.$transaction([
+    // RESTRICT relations first — in an order that never leaves a dangling FK
+    prisma.auditReportShare.deleteMany({
+      where: { OR: [{ createdByUserId: userId }, { workspaceId: { in: ownedIds } }] },
+    }),
+    prisma.brandScan.deleteMany({
+      where: { OR: [{ userId }, { workspaceId: { in: ownedIds } }] },
+    }),
+    prisma.approvalRequest.deleteMany({ where: { submittedById: userId } }),
+    // BrandScan -> PlatformConnection is RESTRICT: connections only after scans
+    prisma.platformConnection.deleteMany({
+      where: { OR: [{ userId }, { workspaceId: { in: ownedIds } }] },
+    }),
+    prisma.dailyBrief.deleteMany({
+      where: { OR: [{ userId }, { workspaceId: { in: ownedIds } }] },
+    }),
+    prisma.workspaceMember.deleteMany({
+      where: { OR: [{ userId }, { workspaceId: { in: ownedIds } }] },
+    }),
+    // CustomWorld has no FK back to Workspace — explicit cleanup
+    prisma.customWorld.deleteMany({ where: { workspaceId: { in: ownedIds } } }),
+    prisma.workspace.deleteMany({ where: { id: { in: ownedIds } } }),
+    // Remaining relations (brands, purchases, sessions, ...) cascade from here
+    prisma.user.delete({ where: { id: userId } }),
+  ]);
 
   return {
     brandScans: scans.count,
@@ -88,9 +87,7 @@ export async function deleteAccountData(
 }
 
 export class OwnedTeamWorkspacesError extends Error {
-  constructor(
-    public readonly workspaces: Array<{ id: string; name: string }>,
-  ) {
+  constructor(public readonly workspaces: Array<{ id: string; name: string }>) {
     super('User owns team workspaces; explicit consent required to delete them');
     this.name = 'OwnedTeamWorkspacesError';
   }

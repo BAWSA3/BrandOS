@@ -16,8 +16,8 @@ export interface NewsletterContent {
 export interface NewsletterSection {
   type: 'heading' | 'text' | 'cta' | 'divider' | 'stat';
   content: string;
-  url?: string;       // for cta type
-  label?: string;     // for stat type (the number/value)
+  url?: string; // for cta type
+  label?: string; // for stat type (the number/value)
 }
 
 /**
@@ -89,19 +89,25 @@ export function renderNewsletter(
 </html>`;
 
   // Plain text version
-  const text = content.sections
-    .map((s) => {
-      switch (s.type) {
-        case 'heading': return `\n## ${s.content}\n`;
-        case 'text': return s.content;
-        case 'cta': return `${s.content}: ${s.url || APP_URL}`;
-        case 'divider': return '\n---\n';
-        case 'stat': return `${s.label} — ${s.content}`;
-        default: return '';
-      }
-    })
-    .join('\n')
-    + `\n\n---\nUnsubscribe: ${unsubscribeUrl}`;
+  const text =
+    content.sections
+      .map((s) => {
+        switch (s.type) {
+          case 'heading':
+            return `\n## ${s.content}\n`;
+          case 'text':
+            return s.content;
+          case 'cta':
+            return `${s.content}: ${s.url || APP_URL}`;
+          case 'divider':
+            return '\n---\n';
+          case 'stat':
+            return `${s.label} — ${s.content}`;
+          default:
+            return '';
+        }
+      })
+      .join('\n') + `\n\n---\nUnsubscribe: ${unsubscribeUrl}`;
 
   return { html, text };
 }

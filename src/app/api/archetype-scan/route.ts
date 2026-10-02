@@ -68,7 +68,9 @@ async function handlePost(request: NextRequest) {
     let existingProfile: Awaited<ReturnType<typeof getUserProfileAsync>> = null;
     try {
       existingProfile = await getUserProfileAsync(cleanUsername);
-      console.log(`[ArchetypeScan] user_profiles lookup: ${existingProfile ? existingProfile.archetype.primary : 'NOT FOUND'}`);
+      console.log(
+        `[ArchetypeScan] user_profiles lookup: ${existingProfile ? existingProfile.archetype.primary : 'NOT FOUND'}`
+      );
     } catch (dbErr) {
       console.error(`[ArchetypeScan] user_profiles lookup failed:`, dbErr);
     }
@@ -89,15 +91,22 @@ async function handlePost(request: NextRequest) {
           const prevArchetype = normalizeArchetypeName(prevScan.archetype);
           const info = getArchetypeInfo(prevArchetype);
           if (info) {
-            console.log(`[ArchetypeScan] Found previous BrandScan archetype for @${cleanUsername}: ${prevArchetype}`);
+            console.log(
+              `[ArchetypeScan] Found previous BrandScan archetype for @${cleanUsername}: ${prevArchetype}`
+            );
             // Create a profile from the previous scan so it's locked in
             const { createUserProfile } = await import('@/lib/user-profiles');
-            createUserProfile(cleanUsername, cleanUsername, {
-              primary: prevArchetype,
-              emoji: info.emoji,
-              tagline: info.tagline,
-              strengths: info.strengths,
-            }, prevScan.score || 50);
+            createUserProfile(
+              cleanUsername,
+              cleanUsername,
+              {
+                primary: prevArchetype,
+                emoji: info.emoji,
+                tagline: info.tagline,
+                strengths: info.strengths,
+              },
+              prevScan.score || 50
+            );
 
             existingProfile = await getUserProfileAsync(cleanUsername);
           }
@@ -180,10 +189,17 @@ async function handlePost(request: NextRequest) {
     // Run signal detection on tweets + profile
     const signalScores = tweets ? detectArchetypeSignals(tweets, profile) : undefined;
     if (signalScores) {
-      console.log(`[ArchetypeScan] Signal scores for @${cleanUsername}: ${signalScores.filter(s => s.score > 0).map(s => `${s.archetype}:${s.score}`).join(', ')}`);
+      console.log(
+        `[ArchetypeScan] Signal scores for @${cleanUsername}: ${signalScores
+          .filter((s) => s.score > 0)
+          .map((s) => `${s.archetype}:${s.score}`)
+          .join(', ')}`
+      );
     }
 
-    console.log(`[ArchetypeScan] Running Gemini analysis for @${cleanUsername} (${tweets ? 'with tweets' : 'profile only'})`);
+    console.log(
+      `[ArchetypeScan] Running Gemini analysis for @${cleanUsername} (${tweets ? 'with tweets' : 'profile only'})`
+    );
 
     const geminiResult = await analyzeArchetypeOnly(profile, tweets, signalScores);
 

@@ -16,10 +16,8 @@ export async function GET(request: NextRequest) {
     pfp = pfp.replace(/_(?:normal|bigger|mini|400x400)\./i, '_200x200.');
   }
 
-  const tierName =
-    score >= 80 ? 'ELITE' : score >= 60 ? 'STRONG' : 'RISING';
-  const tierColor =
-    score >= 80 ? '#0047FF' : score >= 60 ? '#10B981' : '#F59E0B';
+  const tierName = score >= 80 ? 'ELITE' : score >= 60 ? 'STRONG' : 'RISING';
+  const tierColor = score >= 80 ? '#0047FF' : score >= 60 ? '#10B981' : '#F59E0B';
   const percentile = total > 0 ? Math.round((1 - (rank - 1) / total) * 100) : 0;
 
   function renderBar(value: number, max: number = 100) {
@@ -109,12 +107,7 @@ export async function GET(request: NextRequest) {
               }}
             >
               {pfp ? (
-                <img
-                  src={pfp}
-                  width={100}
-                  height={100}
-                  style={{ objectFit: 'cover' }}
-                />
+                <img src={pfp} width={100} height={100} style={{ objectFit: 'cover' }} />
               ) : (
                 <div style={{ color: '#555', fontSize: '36px', display: 'flex' }}>?</div>
               )}
@@ -149,8 +142,18 @@ export async function GET(request: NextRequest) {
           </div>
 
           {/* Score */}
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '16px', marginBottom: '16px' }}>
-            <div style={{ color: '#fff', fontSize: '72px', fontWeight: 700, display: 'flex', lineHeight: 1 }}>
+          <div
+            style={{ display: 'flex', alignItems: 'baseline', gap: '16px', marginBottom: '16px' }}
+          >
+            <div
+              style={{
+                color: '#fff',
+                fontSize: '72px',
+                fontWeight: 700,
+                display: 'flex',
+                lineHeight: 1,
+              }}
+            >
               {score}
             </div>
             <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: '24px', display: 'flex' }}>
@@ -160,7 +163,14 @@ export async function GET(request: NextRequest) {
 
           {/* Score bar */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
-            <div style={{ color: tierColor, fontSize: '14px', display: 'flex', letterSpacing: '0.05em' }}>
+            <div
+              style={{
+                color: tierColor,
+                fontSize: '14px',
+                display: 'flex',
+                letterSpacing: '0.05em',
+              }}
+            >
               {renderBar(score)}
             </div>
           </div>
@@ -178,14 +188,29 @@ export async function GET(request: NextRequest) {
               alignSelf: 'flex-start',
             }}
           >
-            <span style={{ color: tierColor, fontSize: '14px', letterSpacing: '0.15em', fontWeight: 600 }}>
+            <span
+              style={{
+                color: tierColor,
+                fontSize: '14px',
+                letterSpacing: '0.15em',
+                fontWeight: 600,
+              }}
+            >
               {tierName} TIER
             </span>
           </div>
         </div>
 
         {/* Right: Rank + Stats */}
-        <div style={{ display: 'flex', flexDirection: 'column', flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            flex: 1,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
           <div
             style={{
               display: 'flex',
@@ -198,13 +223,35 @@ export async function GET(request: NextRequest) {
               background: `${tierColor}08`,
             }}
           >
-            <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', letterSpacing: '0.15em', display: 'flex' }}>
+            <div
+              style={{
+                color: 'rgba(255,255,255,0.4)',
+                fontSize: '12px',
+                letterSpacing: '0.15em',
+                display: 'flex',
+              }}
+            >
               RANKED
             </div>
-            <div style={{ color: '#fff', fontSize: '64px', fontWeight: 700, display: 'flex', lineHeight: 1 }}>
+            <div
+              style={{
+                color: '#fff',
+                fontSize: '64px',
+                fontWeight: 700,
+                display: 'flex',
+                lineHeight: 1,
+              }}
+            >
               #{rank}
             </div>
-            <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '14px', letterSpacing: '0.1em', display: 'flex' }}>
+            <div
+              style={{
+                color: 'rgba(255,255,255,0.4)',
+                fontSize: '14px',
+                letterSpacing: '0.1em',
+                display: 'flex',
+              }}
+            >
               of {total.toLocaleString()} creators
             </div>
             <div
@@ -216,7 +263,14 @@ export async function GET(request: NextRequest) {
                 display: 'flex',
               }}
             >
-              <span style={{ color: '#fff', fontSize: '13px', fontWeight: 700, letterSpacing: '0.12em' }}>
+              <span
+                style={{
+                  color: '#fff',
+                  fontSize: '13px',
+                  fontWeight: 700,
+                  letterSpacing: '0.12em',
+                }}
+              >
                 TOP {percentile}%
               </span>
             </div>

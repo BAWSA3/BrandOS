@@ -22,10 +22,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth';
 import { createAdminClient } from '@/lib/supabase-admin';
-import {
-  deleteAccountData,
-  OwnedTeamWorkspacesError,
-} from '@/lib/account-deletion';
+import { deleteAccountData, OwnedTeamWorkspacesError } from '@/lib/account-deletion';
 import { logSecurityEvent, getClientIp } from '@/lib/audit-log';
 import { withRateLimit, rateLimiters } from '@/lib/rate-limit';
 import { stripe } from '@/lib/stripe';
@@ -48,7 +45,7 @@ async function handleDelete(request: NextRequest) {
   if (body.confirm !== CONFIRM_PHRASE) {
     return NextResponse.json(
       { error: `Confirmation required. Send { "confirm": "${CONFIRM_PHRASE}" }.` },
-      { status: 400 },
+      { status: 400 }
     );
   }
 
@@ -69,7 +66,7 @@ async function handleDelete(request: NextRequest) {
             'You own team workspaces. Deleting your account will permanently delete them and all their data. Re-send with { "deleteOwnedTeamWorkspaces": true } to confirm.',
           ownedTeamWorkspaces: error.workspaces,
         },
-        { status: 409 },
+        { status: 409 }
       );
     }
     console.error('[Account] Deletion transaction failed:', error);
@@ -84,7 +81,7 @@ async function handleDelete(request: NextRequest) {
     });
     return NextResponse.json(
       { error: 'Account deletion failed. Nothing was deleted — please retry or contact support.' },
-      { status: 500 },
+      { status: 500 }
     );
   }
 

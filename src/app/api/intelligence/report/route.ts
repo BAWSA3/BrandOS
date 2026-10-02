@@ -28,7 +28,7 @@ const PHASE_LABELS: Record<string, string> = {
 };
 
 const PHASE_DESCRIPTIONS: Record<string, string> = {
-  define: 'What you\'re known for — content pillars, niche clarity, audience understanding',
+  define: "What you're known for — content pillars, niche clarity, audience understanding",
   check: 'Voice consistency — tone, style, on-brand focus across posts',
   generate: 'Content quality & output — volume, format effectiveness, originality',
   scale: 'Reputation signals — follower ratio, authority indicators, growth trajectory',
@@ -36,7 +36,11 @@ const PHASE_DESCRIPTIONS: Record<string, string> = {
 
 function safeJsonParse<T>(value: string | null | undefined): T | null {
   if (!value) return null;
-  try { return JSON.parse(value) as T; } catch { return null; }
+  try {
+    return JSON.parse(value) as T;
+  } catch {
+    return null;
+  }
 }
 
 export async function GET(request: NextRequest) {
@@ -67,7 +71,10 @@ export async function GET(request: NextRequest) {
     }
 
     if (!userScans || userScans.length === 0) {
-      return NextResponse.json({ error: `No scans found for @${username}. Run a scan first at mybrandos.app` }, { status: 404 });
+      return NextResponse.json(
+        { error: `No scans found for @${username}. Run a scan first at mybrandos.app` },
+        { status: 404 }
+      );
     }
 
     const latestScan = userScans[0];
@@ -113,7 +120,9 @@ export async function GET(request: NextRequest) {
           if (phases.define != null) {
             cohortParsed.push({ score: scan.score, phases });
           }
-        } catch { /* skip */ }
+        } catch {
+          /* skip */
+        }
       }
     }
 
@@ -122,14 +131,15 @@ export async function GET(request: NextRequest) {
 
     // Cohort averages
     const cohortAvgScore = avg(cohortParsed.map((c) => c.score));
-    const cohortAvgPhases = cohortParsed.length > 0
-      ? {
-          define: avg(cohortParsed.map((c) => c.phases.define)),
-          check: avg(cohortParsed.map((c) => c.phases.check)),
-          generate: avg(cohortParsed.map((c) => c.phases.generate)),
-          scale: avg(cohortParsed.map((c) => c.phases.scale)),
-        }
-      : null;
+    const cohortAvgPhases =
+      cohortParsed.length > 0
+        ? {
+            define: avg(cohortParsed.map((c) => c.phases.define)),
+            check: avg(cohortParsed.map((c) => c.phases.check)),
+            generate: avg(cohortParsed.map((c) => c.phases.generate)),
+            scale: avg(cohortParsed.map((c) => c.phases.scale)),
+          }
+        : null;
 
     // Percentile
     let percentile: number | null = null;
@@ -139,7 +149,16 @@ export async function GET(request: NextRequest) {
     }
 
     // Phase comparison vs cohort
-    let phaseComparison: { phase: string; label: string; description: string; user: number; cohort: number; delta: number }[] | null = null;
+    let phaseComparison:
+      | {
+          phase: string;
+          label: string;
+          description: string;
+          user: number;
+          cohort: number;
+          delta: number;
+        }[]
+      | null = null;
     if (latestPhases && cohortAvgPhases) {
       phaseComparison = (Object.keys(latestPhases) as (keyof PhaseScores)[]).map((phase) => ({
         phase,
@@ -152,7 +171,15 @@ export async function GET(request: NextRequest) {
     }
 
     // Critical gap
-    let criticalGap: { weakest: string; weakestPhase: string; weakestScore: number; strongest: string; strongestPhase: string; strongestScore: number; gap: number } | null = null;
+    let criticalGap: {
+      weakest: string;
+      weakestPhase: string;
+      weakestScore: number;
+      strongest: string;
+      strongestPhase: string;
+      strongestScore: number;
+      gap: number;
+    } | null = null;
     if (latestPhases) {
       const phaseEntries = Object.entries(latestPhases) as [string, number][];
       const sorted = [...phaseEntries].sort((a, b) => b[1] - a[1]);
@@ -169,7 +196,11 @@ export async function GET(request: NextRequest) {
 
     // Breakout patterns
     const highScorers = cohortParsed.filter((c) => c.score >= 75);
-    let breakoutPatterns: { sampleSize: number; keyDifference: { phase: string; label: string; delta: number }; insight: string } | null = null;
+    let breakoutPatterns: {
+      sampleSize: number;
+      keyDifference: { phase: string; label: string; delta: number };
+      insight: string;
+    } | null = null;
     if (highScorers.length >= 3 && cohortAvgPhases) {
       const highAvg = {
         define: avg(highScorers.map((h) => h.phases.define)),
@@ -244,9 +275,9 @@ export async function GET(request: NextRequest) {
           : null,
 
         // Strengths + improvements
-        strengths: (isPro || includePublic) ? latestStrengths : null,
+        strengths: isPro || includePublic ? latestStrengths : null,
         improvements: isPro ? latestImprovements : null,
-        summary: (isPro || includePublic) ? latestScan.summary : null,
+        summary: isPro || includePublic ? latestScan.summary : null,
 
         // Next moves (action items from Gemini)
         nextMoves: latestNextMoves,

@@ -12,11 +12,7 @@
 import { notFound } from 'next/navigation';
 import AuditResultsClient from './AuditResultsClient';
 
-export default async function AuditPage({
-  params,
-}: {
-  params: Promise<{ session: string }>;
-}) {
+export default async function AuditPage({ params }: { params: Promise<{ session: string }> }) {
   const { session } = await params;
 
   // Basic sanity check — Stripe session IDs start with cs_

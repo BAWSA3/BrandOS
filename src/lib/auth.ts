@@ -193,9 +193,7 @@ export type CurrentUser = NonNullable<Awaited<ReturnType<typeof getCurrentUser>>
 
 export async function getCurrentWorkspace(user: CurrentUser, workspaceId?: string) {
   if (workspaceId) {
-    const membership = user.workspaceMemberships.find(
-      (m) => m.workspaceId === workspaceId,
-    );
+    const membership = user.workspaceMemberships.find((m) => m.workspaceId === workspaceId);
     if (!membership) return null;
     return membership.workspace;
   }
@@ -204,10 +202,7 @@ export async function getCurrentWorkspace(user: CurrentUser, workspaceId?: strin
   return personal ?? null;
 }
 
-export async function getActiveXAccount(
-  workspaceId: string,
-  xUsername: string,
-) {
+export async function getActiveXAccount(workspaceId: string, xUsername: string) {
   try {
     const connection = await prisma.platformConnection.findFirst({
       where: {

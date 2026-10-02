@@ -144,7 +144,14 @@ export default function ArchetypesPage() {
             </span>
 
             {/* Icon */}
-            <div style={{ width: '120px', height: '120px', marginBottom: '20px', position: 'relative' }}>
+            <div
+              style={{
+                width: '120px',
+                height: '120px',
+                marginBottom: '20px',
+                position: 'relative',
+              }}
+            >
               <Image
                 src={`/archetypes/${a.name}.png`}
                 alt={a.name}

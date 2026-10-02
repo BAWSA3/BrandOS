@@ -58,8 +58,19 @@ export interface EmailTemplateData {
   archetypeIconUrl?: string;
   // Post diagnosis - specific examples of good/bad posts tied to score dimensions
   postDiagnosis?: {
-    strongPosts: { text: string; metrics: { likes: number; retweets: number; replies: number }; why: string; dimension: string }[];
-    weakPosts: { text: string; metrics: { likes: number; retweets: number; replies: number }; why: string; fix: string; dimension: string }[];
+    strongPosts: {
+      text: string;
+      metrics: { likes: number; retweets: number; replies: number };
+      why: string;
+      dimension: string;
+    }[];
+    weakPosts: {
+      text: string;
+      metrics: { likes: number; retweets: number; replies: number };
+      why: string;
+      fix: string;
+      dimension: string;
+    }[];
     brandStrengths: { strength: string; why: string; evidence: string }[];
     brandWeaknesses: { weakness: string; why: string; steps: string[] }[];
     overallDiagnosis: string;
@@ -249,7 +260,11 @@ export const email1ScoreExplainer: EmailTemplate = {
     };
 
     if (diagnosis && (diagnosis.weakPosts?.length || diagnosis.strongPosts?.length)) {
-      const formatPost = (p: { text: string; metrics: { likes: number; retweets: number; replies: number }; dimension?: string }) => {
+      const formatPost = (p: {
+        text: string;
+        metrics: { likes: number; retweets: number; replies: number };
+        dimension?: string;
+      }) => {
         const truncated = p.text.length > 180 ? p.text.substring(0, 180) + '...' : p.text;
         return `"${truncated}"
 → ${p.metrics.likes} likes | ${p.metrics.retweets} RTs | ${p.metrics.replies} replies`;
@@ -257,22 +272,25 @@ export const email1ScoreExplainer: EmailTemplate = {
 
       // Group posts by dimension for the score breakdown
       const dimensions = ['identity', 'consistency', 'content', 'growth'] as const;
-      const dimensionSections = dimensions.map((dim) => {
-        const strong = (diagnosis.strongPosts || []).filter((p) => p.dimension === dim);
-        const weak = (diagnosis.weakPosts || []).filter((p) => p.dimension === dim);
-        if (strong.length === 0 && weak.length === 0) return '';
+      const dimensionSections = dimensions
+        .map((dim) => {
+          const strong = (diagnosis.strongPosts || []).filter((p) => p.dimension === dim);
+          const weak = (diagnosis.weakPosts || []).filter((p) => p.dimension === dim);
+          if (strong.length === 0 && weak.length === 0) return '';
 
-        let section = `**${dimensionLabels[dim]} (${dimensionScores[dim]}/100)**\n`;
+          let section = `**${dimensionLabels[dim]} (${dimensionScores[dim]}/100)**\n`;
 
-        for (const p of strong.slice(0, 2)) {
-          section += `\n✓ This post HELPED your score:\n${formatPost(p)}\n→ ${sanitizeAIText(p.why)}\n`;
-        }
-        for (const p of weak.slice(0, 2)) {
-          section += `\n✗ This post HURT your score:\n${formatPost(p)}\n→ ${sanitizeAIText(p.why)}\n→ Fix: ${sanitizeAIText(p.fix)}\n`;
-        }
+          for (const p of strong.slice(0, 2)) {
+            section += `\n✓ This post HELPED your score:\n${formatPost(p)}\n→ ${sanitizeAIText(p.why)}\n`;
+          }
+          for (const p of weak.slice(0, 2)) {
+            section += `\n✗ This post HURT your score:\n${formatPost(p)}\n→ ${sanitizeAIText(p.why)}\n→ Fix: ${sanitizeAIText(p.fix)}\n`;
+          }
 
-        return section;
-      }).filter(Boolean).join('\n');
+          return section;
+        })
+        .filter(Boolean)
+        .join('\n');
 
       // Brand strengths section
       const brandStrengthsSection = (diagnosis.brandStrengths || [])
@@ -301,15 +319,23 @@ ${(w.steps || []).map((step) => `  ${step}`).join('\n')}`
 We analyzed your recent posts to show you exactly how we got to your score. Here's the evidence:
 
 ${dimensionSections}
-${brandStrengthsSection ? `
+${
+  brandStrengthsSection
+    ? `
 **WHAT'S STRONG ABOUT YOUR BRAND**
 
 ${brandStrengthsSection}
-` : ''}${brandWeaknessesSection ? `
+`
+    : ''
+}${
+        brandWeaknessesSection
+          ? `
 **WHAT'S WEAK ABOUT YOUR BRAND**
 
 ${brandWeaknessesSection}
-` : ''}
+`
+          : ''
+      }
 **THE BOTTOM LINE**
 
 ${sanitizeAIText(diagnosis.overallDiagnosis)}
@@ -325,14 +351,17 @@ Let's get into it.
 {{SCORE_CARD_IMAGE}}
 
 **YOUR BRAND SCORE: ${data.score}/100**
-${postDiagnosisBlock || `
+${
+  postDiagnosisBlock ||
+  `
 We analyzed your profile and content across 4 dimensions. Here's what we found:
 
 → Identity: ${data.defineScore}/100${data.identitySignature ? ` — Known for: ${data.identitySignature}` : ''}
 → Consistency: ${data.checkScore}/100${data.voiceConsistency != null ? ` — Voice consistency: ${data.voiceConsistency}%` : ''}
 → Content: ${data.generateScore}/100${data.bestContentFormat ? ` — Best format: ${data.bestContentFormat}` : ''}
 → Growth: ${data.scaleScore}/100
-`}
+`
+}
 **WHAT TO FIX FIRST**
 ${improvements || "→ Keep creating — we'll identify opportunities as your brand grows"}
 
@@ -1062,15 +1091,66 @@ export function getEmailSequenceForSegment(segment: Segment): EmailTemplate[] {
 // Evolution Path Email (Archetype Scan — "What can I evolve to?" hook)
 // =============================================================================
 
-const EVOLUTION_ARCHETYPE_DATA: Record<string, { emoji: string; tagline: string; tier: number; tierLabel: string; color: string }> = {
-  ARC: { emoji: '🐕', tagline: 'Rising star. Growth story.', tier: 1, tierLabel: 'ENTRY', color: '#10B981' },
-  ENTROPY: { emoji: '🎰', tagline: 'Risk-taker. Cult builder.', tier: 2, tierLabel: 'RISING', color: '#F59E0B' },
-  NULL: { emoji: '👻', tagline: 'Ideas over identity.', tier: 2, tierLabel: 'RISING', color: '#8B5CF6' },
-  FREQ: { emoji: '🎪', tagline: 'Entertainer. Community builder.', tier: 2, tierLabel: 'RISING', color: '#EC4899' },
-  RELAY: { emoji: '🔌', tagline: 'Super connector.', tier: 3, tierLabel: 'ADVANCED', color: '#06B6D4' },
-  'BUILD.EXE': { emoji: '🚢', tagline: 'Builder. Shipper. Doer.', tier: 3, tierLabel: 'ADVANCED', color: '#EF4444' },
-  SOURCE: { emoji: '🎓', tagline: 'Knowledge authority.', tier: 4, tierLabel: 'EXPERT', color: '#3B82F6' },
-  FORESIGHT: { emoji: '🔮', tagline: 'Shapes the narrative.', tier: 5, tierLabel: 'PEAK', color: '#9D4EDD' },
+const EVOLUTION_ARCHETYPE_DATA: Record<
+  string,
+  { emoji: string; tagline: string; tier: number; tierLabel: string; color: string }
+> = {
+  ARC: {
+    emoji: '🐕',
+    tagline: 'Rising star. Growth story.',
+    tier: 1,
+    tierLabel: 'ENTRY',
+    color: '#10B981',
+  },
+  ENTROPY: {
+    emoji: '🎰',
+    tagline: 'Risk-taker. Cult builder.',
+    tier: 2,
+    tierLabel: 'RISING',
+    color: '#F59E0B',
+  },
+  NULL: {
+    emoji: '👻',
+    tagline: 'Ideas over identity.',
+    tier: 2,
+    tierLabel: 'RISING',
+    color: '#8B5CF6',
+  },
+  FREQ: {
+    emoji: '🎪',
+    tagline: 'Entertainer. Community builder.',
+    tier: 2,
+    tierLabel: 'RISING',
+    color: '#EC4899',
+  },
+  RELAY: {
+    emoji: '🔌',
+    tagline: 'Super connector.',
+    tier: 3,
+    tierLabel: 'ADVANCED',
+    color: '#06B6D4',
+  },
+  'BUILD.EXE': {
+    emoji: '🚢',
+    tagline: 'Builder. Shipper. Doer.',
+    tier: 3,
+    tierLabel: 'ADVANCED',
+    color: '#EF4444',
+  },
+  SOURCE: {
+    emoji: '🎓',
+    tagline: 'Knowledge authority.',
+    tier: 4,
+    tierLabel: 'EXPERT',
+    color: '#3B82F6',
+  },
+  FORESIGHT: {
+    emoji: '🔮',
+    tagline: 'Shapes the narrative.',
+    tier: 5,
+    tierLabel: 'PEAK',
+    color: '#9D4EDD',
+  },
 };
 
 const EVOLUTION_PATHS: Record<string, string[]> = {
@@ -1090,7 +1170,7 @@ export const evolutionPathEmail: EmailTemplate = {
   sendDelay: 'immediate',
   subjectLines: [
     "Here's your evolution path, @{{username}} →",
-    'Your archetype can evolve. Here\'s how.',
+    "Your archetype can evolve. Here's how.",
   ],
   body: (data: EmailTemplateData) => {
     const archetype = data.archetype || 'ARC';
@@ -1141,17 +1221,23 @@ export const evolutionPathEmail: EmailTemplate = {
     </div>
 
     <!-- Your Strengths -->
-    ${data.archetypeStrengths && data.archetypeStrengths.length > 0 ? `
+    ${
+      data.archetypeStrengths && data.archetypeStrengths.length > 0
+        ? `
     <div style="margin-bottom: 32px;">
       <div style="font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.15em; color: #555; margin-bottom: 12px;">YOUR STRENGTHS</div>
       ${data.archetypeStrengths.map((s) => `<div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #888; margin-bottom: 6px;"><span style="color: ${currentData.color};">▸</span> ${s}</div>`).join('')}
     </div>
-    ` : ''}
+    `
+        : ''
+    }
 
     <!-- Divider -->
     <div style="width: 60px; height: 1px; background: #222; margin: 0 auto 32px;"></div>
 
-    ${isTerminal ? `
+    ${
+      isTerminal
+        ? `
     <!-- Terminal Archetype Message -->
     <div style="background: #111; border: 1px solid #222; border-radius: 8px; padding: 24px; text-align: center; margin-bottom: 32px;">
       <div style="font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.15em; color: ${currentData.color}; margin-bottom: 12px;">PEAK ARCHETYPE</div>
@@ -1159,7 +1245,8 @@ export const evolutionPathEmail: EmailTemplate = {
         You've reached ${archetype} — a terminal archetype. This is the peak of the evolution tree. You don't evolve further — you set the standard others evolve toward.
       </div>
     </div>
-    ` : `
+    `
+        : `
     <!-- Evolution Paths -->
     <div style="margin-bottom: 32px;">
       <div style="font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.15em; color: #555; margin-bottom: 16px; text-align: center;">YOUR POSSIBLE EVOLUTIONS</div>
@@ -1178,7 +1265,8 @@ export const evolutionPathEmail: EmailTemplate = {
         <div><span style="color: ${currentData.color};">04.</span> Your archetype upgrades when you earn it</div>
       </div>
     </div>
-    `}
+    `
+    }
 
     <!-- CTA -->
     <div style="text-align: center; margin-bottom: 40px;">

@@ -231,10 +231,7 @@ export function apiOptionsHandler() {
  * Build a standard API error response
  */
 export function apiError(message: string, status: number, details?: Record<string, unknown>) {
-  return NextResponse.json(
-    { error: message, ...details },
-    { status, headers: API_CORS_HEADERS }
-  );
+  return NextResponse.json({ error: message, ...details }, { status, headers: API_CORS_HEADERS });
 }
 
 /**

@@ -236,9 +236,8 @@ export async function GET(request: NextRequest) {
     const storedScore = cachedProfile.currentScore;
     const rawScore = brandScore.overallScore;
     if (Math.abs(rawScore - storedScore) > MAX_SCORE_DRIFT) {
-      brandScore.overallScore = rawScore > storedScore
-        ? storedScore + MAX_SCORE_DRIFT
-        : storedScore - MAX_SCORE_DRIFT;
+      brandScore.overallScore =
+        rawScore > storedScore ? storedScore + MAX_SCORE_DRIFT : storedScore - MAX_SCORE_DRIFT;
       console.log(
         `[Extension] Smoothed score for @${cleanUsername}: ${rawScore} → ${brandScore.overallScore} (stored: ${storedScore})`
       );

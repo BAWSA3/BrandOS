@@ -74,25 +74,31 @@ async function generateQuickWins(body: BeatMyOppRequest): Promise<string[]> {
     const anthropic = new Anthropic({ apiKey });
 
     const weakPhases = [];
-    if (body.phases.define < body.oppPhases.define) weakPhases.push(`DEFINE (you: ${body.phases.define}, them: ${body.oppPhases.define})`);
-    if (body.phases.check < body.oppPhases.check) weakPhases.push(`CHECK (you: ${body.phases.check}, them: ${body.oppPhases.check})`);
-    if (body.phases.generate < body.oppPhases.generate) weakPhases.push(`GENERATE (you: ${body.phases.generate}, them: ${body.oppPhases.generate})`);
-    if (body.phases.scale < body.oppPhases.scale) weakPhases.push(`SCALE (you: ${body.phases.scale}, them: ${body.oppPhases.scale})`);
+    if (body.phases.define < body.oppPhases.define)
+      weakPhases.push(`DEFINE (you: ${body.phases.define}, them: ${body.oppPhases.define})`);
+    if (body.phases.check < body.oppPhases.check)
+      weakPhases.push(`CHECK (you: ${body.phases.check}, them: ${body.oppPhases.check})`);
+    if (body.phases.generate < body.oppPhases.generate)
+      weakPhases.push(`GENERATE (you: ${body.phases.generate}, them: ${body.oppPhases.generate})`);
+    if (body.phases.scale < body.oppPhases.scale)
+      weakPhases.push(`SCALE (you: ${body.phases.scale}, them: ${body.oppPhases.scale})`);
 
     const message = await anthropic.messages.create({
       model: 'claude-haiku-4-5-20251001',
       max_tokens: 500,
-      messages: [{
-        role: 'user',
-        content: `You are BrandOS, a brand intelligence system. Give exactly 3 quick, actionable wins for @${body.username} (score: ${body.userScore}, archetype: ${body.archetype}) to beat their opp @${body.oppUsername} (score: ${body.oppScore}, archetype: ${body.oppArchetype}).
+      messages: [
+        {
+          role: 'user',
+          content: `You are BrandOS, a brand intelligence system. Give exactly 3 quick, actionable wins for @${body.username} (score: ${body.userScore}, archetype: ${body.archetype}) to beat their opp @${body.oppUsername} (score: ${body.oppScore}, archetype: ${body.oppArchetype}).
 
-Phases where they're losing: ${weakPhases.length > 0 ? weakPhases.join(', ') : 'none — they\'re winning overall'}
+Phases where they're losing: ${weakPhases.length > 0 ? weakPhases.join(', ') : "none — they're winning overall"}
 
 Each win should be 1 sentence, specific and actionable. Not generic advice — reference their archetype and weak phases.
 
 Return ONLY a JSON array of 3 strings. No markdown, no explanation.
-Example: ["Pin your niche in your bio — your DEFINE score is 12 points behind.", "...", "..."]`
-      }],
+Example: ["Pin your niche in your bio — your DEFINE score is 12 points behind.", "...", "..."]`,
+        },
+      ],
     });
 
     const text = message.content[0].type === 'text' ? message.content[0].text : '';
@@ -109,25 +115,36 @@ function getDefaultQuickWins(body: BeatMyOppRequest): string[] {
   const phases = [
     { key: 'define', label: 'DEFINE', user: body.phases.define, opp: body.oppPhases.define },
     { key: 'check', label: 'CHECK', user: body.phases.check, opp: body.oppPhases.check },
-    { key: 'generate', label: 'GENERATE', user: body.phases.generate, opp: body.oppPhases.generate },
+    {
+      key: 'generate',
+      label: 'GENERATE',
+      user: body.phases.generate,
+      opp: body.oppPhases.generate,
+    },
     { key: 'scale', label: 'SCALE', user: body.phases.scale, opp: body.oppPhases.scale },
   ];
 
-  const weakest = phases.sort((a, b) => (a.user - a.opp) - (b.user - b.opp));
+  const weakest = phases.sort((a, b) => a.user - a.opp - (b.user - b.opp));
 
   for (const phase of weakest.slice(0, 3)) {
     if (phase.user < phase.opp) {
-      wins.push(`Your ${phase.label} is ${phase.opp - phase.user} points behind — focus here first.`);
+      wins.push(
+        `Your ${phase.label} is ${phase.opp - phase.user} points behind — focus here first.`
+      );
     } else {
-      wins.push(`You're ahead on ${phase.label} by ${phase.user - phase.opp} — double down to widen the gap.`);
+      wins.push(
+        `You're ahead on ${phase.label} by ${phase.user - phase.opp} — double down to widen the gap.`
+      );
     }
   }
 
-  return wins.length >= 3 ? wins : [
-    'Sharpen your bio to make your niche crystal clear.',
-    'Post more consistently — voice consistency is where most people lose.',
-    'Study your opp\'s best content and find your angle on the same topics.',
-  ];
+  return wins.length >= 3
+    ? wins
+    : [
+        'Sharpen your bio to make your niche crystal clear.',
+        'Post more consistently — voice consistency is where most people lose.',
+        "Study your opp's best content and find your angle on the same topics.",
+      ];
 }
 
 async function sendDetailedReport(body: BeatMyOppRequest, quickWins: string[]) {
@@ -143,9 +160,10 @@ async function sendDetailedReport(body: BeatMyOppRequest, quickWins: string[]) {
     // legacy no-thinking behavior so the token budget is all response.
     thinking: { type: 'disabled' },
     max_tokens: 2000,
-    messages: [{
-      role: 'user',
-      content: `You are BrandOS, a brand intelligence analyst. Write a detailed coaching report for @${body.username} on how to beat their opp @${body.oppUsername}.
+    messages: [
+      {
+        role: 'user',
+        content: `You are BrandOS, a brand intelligence analyst. Write a detailed coaching report for @${body.username} on how to beat their opp @${body.oppUsername}.
 
 DATA:
 - @${body.username}: Score ${body.userScore}/100, Archetype: ${body.archetype}
@@ -161,8 +179,9 @@ Write a report with these sections (use plain text with line breaks, no markdown
 4. 7-DAY OPS PLAN — A day-by-day plan of 7 specific actions (one per day) to close the gap
 5. FINAL INTEL — 1 sentence motivational closer
 
-Keep the spy/mission briefing tone. Be specific and actionable, not generic.`
-    }],
+Keep the spy/mission briefing tone. Be specific and actionable, not generic.`,
+      },
+    ],
   });
 
   const reportText = message.content[0].type === 'text' ? message.content[0].text : '';
@@ -193,11 +212,7 @@ Keep the spy/mission briefing tone. Be specific and actionable, not generic.`
     .eq('opp_username', body.oppUsername.toLowerCase());
 }
 
-function buildEmailHtml(
-  body: BeatMyOppRequest,
-  quickWins: string[],
-  reportText: string
-): string {
+function buildEmailHtml(body: BeatMyOppRequest, quickWins: string[], reportText: string): string {
   return `
 <!DOCTYPE html>
 <html>
@@ -237,7 +252,7 @@ function buildEmailHtml(
 
     <div class="quick-wins">
       <div class="quick-wins-title">⊕ QUICK WINS</div>
-      ${quickWins.map(w => `<div class="win-item">${w}</div>`).join('')}
+      ${quickWins.map((w) => `<div class="win-item">${w}</div>`).join('')}
     </div>
 
     <div class="report">${reportText}</div>

@@ -42,14 +42,14 @@ function getMasterKey(keyId: string): Uint8Array {
   if (!raw) {
     throw new Error(
       'X_OAUTH_ENCRYPTION_KEY is not set. Generate one with: ' +
-        'node -e "console.log(require(\'crypto\').randomBytes(32).toString(\'base64url\'))"',
+        "node -e \"console.log(require('crypto').randomBytes(32).toString('base64url'))\""
     );
   }
 
   const key = sodium.from_base64(raw, sodium.base64_variants.URLSAFE_NO_PADDING);
   if (key.length !== sodium.crypto_secretbox_KEYBYTES) {
     throw new Error(
-      `X_OAUTH_ENCRYPTION_KEY must decode to ${sodium.crypto_secretbox_KEYBYTES} bytes, got ${key.length}`,
+      `X_OAUTH_ENCRYPTION_KEY must decode to ${sodium.crypto_secretbox_KEYBYTES} bytes, got ${key.length}`
     );
   }
 
