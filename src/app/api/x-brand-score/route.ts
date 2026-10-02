@@ -1,12 +1,17 @@
 import { NextRequest, NextResponse, after } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
-import { xBrandScorePrompt, XProfileData } from '@/lib/gemini';
+import { xBrandScorePrompt, enhancedBrandScorePrompt, XProfileData } from '@/lib/gemini';
 import { resolveArchetype, getEvolutionInfo } from '@/lib/archetype-engine';
 import { withRateLimit, rateLimiters } from '@/lib/rate-limit';
 import { recordScan, extractIntelligence } from '@/lib/scan-tracking';
 import { brandScoreCache } from '@/lib/cache';
 import { getUserProfile } from '@/lib/user-profiles';
-import { parseBrandScore, heuristicBrandScore } from '@/lib/score-schemas';
+import {
+  parseBrandScore,
+  heuristicBrandScore,
+  BRAND_SCORE_OUTPUT_SCHEMA,
+} from '@/lib/score-schemas';
+import { fetchScoringTweets } from '@/lib/score-tweets';
 import { botGuard } from '@/lib/botid-guard';
 
 /** How long a cached score stays valid (6 hours in ms) */
@@ -16,25 +21,44 @@ const SCORE_CACHE_TTL_MINUTES = 360;
  * Brand Score API - Profile-only analysis
  */
 
+/** Same size the homepage requests, so /api/x-tweets serves both from cache. */
+const SCORING_TWEET_COUNT = 50;
+
+// Claude sometimes declined a metadata-only prompt in prose ("I can't access
+// their content…"), which failed validation and dropped the scan to the
+// heuristic. The system note sets the expectation; the structured-output
+// schema makes a JSON answer the only possible one.
+const SCORE_SYSTEM =
+  'You score creator brands for BrandOS. Always produce a complete score from the data provided, ' +
+  'even when it is limited (for example, profile details without posts): base every judgment on ' +
+  'what you can see and keep insights specific to it. Never ask for more data or decline to score.';
+
 /** Score profiles via Claude Haiku (fast, cheap, reliable) */
 async function scoreWithClaude(prompt: string): Promise<string> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) throw new Error('ANTHROPIC_API_KEY not configured');
 
   const anthropic = new Anthropic({ apiKey });
-  const message = await anthropic.messages.create({
+  // Structured outputs live on the beta path in this SDK version (0.71).
+  const message = await anthropic.beta.messages.create({
     model: 'claude-haiku-4-5-20251001',
     max_tokens: 4096,
+    system: SCORE_SYSTEM,
     messages: [{ role: 'user', content: prompt }],
+    betas: ['structured-outputs-2025-11-13'],
+    output_format: { type: 'json_schema', schema: BRAND_SCORE_OUTPUT_SCHEMA },
   });
 
-  const text = message.content[0].type === 'text' ? message.content[0].text : '';
-
+  if (message.stop_reason === 'refusal') {
+    console.warn('[BrandScore] Model refused — heuristic fallback');
+    return '';
+  }
   if (message.stop_reason === 'max_tokens') {
     console.warn('[BrandScore] Response truncated — may fail to parse');
   }
 
-  return text;
+  const block = message.content.find((b) => b.type === 'text');
+  return block?.type === 'text' ? block.text : '';
 }
 
 async function fetchProfile(username: string, origin: string): Promise<XProfileData | null> {
@@ -157,7 +181,20 @@ async function handlePost(request: NextRequest) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any -- rich, varied model object consumed dynamically downstream
     let brandScore: any;
     try {
-      const prompt = xBrandScorePrompt(profile);
+      // Score from the creator's actual posts when we can get them; the
+      // profile-only prompt is the fallback.
+      const tweetData = await fetchScoringTweets(cleanUsername, origin, SCORING_TWEET_COUNT);
+      const prompt = tweetData
+        ? enhancedBrandScorePrompt({
+            profile,
+            tweets: tweetData.tweets,
+            stats: tweetData.stats,
+            contentPatterns: tweetData.contentPatterns,
+          })
+        : xBrandScorePrompt(profile);
+      console.log(
+        `[BrandScore] Mode: ${tweetData ? `tweets (${tweetData.tweets.length})` : 'profile only'}`
+      );
       const responseText = await scoreWithClaude(prompt);
       const parsed = parseBrandScore(responseText);
       if (parsed) {
