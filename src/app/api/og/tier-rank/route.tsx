@@ -173,7 +173,9 @@ export async function GET(request: NextRequest) {
               background: `${tierColor}15`,
               border: `1px solid ${tierColor}40`,
               borderRadius: '4px',
-              width: 'fit-content',
+              // Satori (next/og) rejects width: 'fit-content'; in this flex
+              // column, align-self: flex-start shrinks the badge to its text.
+              alignSelf: 'flex-start',
             }}
           >
             <span style={{ color: tierColor, fontSize: '14px', letterSpacing: '0.15em', fontWeight: 600 }}>
