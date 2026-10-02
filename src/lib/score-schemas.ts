@@ -52,6 +52,128 @@ const BrandScoreCore = z.object({
 
 const PHASES = ['define', 'check', 'generate', 'scale'] as const;
 
+// ----------------------------------------------------------------------------
+// Structured-output schema for the Claude brand score. Sent as the request's
+// output format so the model MUST return this JSON shape — without it, Claude
+// sometimes answered in prose ("I can't access their content…") and the scan
+// fell back to the heuristic. Mirrors the JSON spec at the end of
+// xBrandScorePrompt / enhancedBrandScorePrompt (gemini.ts); the enhanced-only
+// extras no UI reads (voiceAnalysis, contentPerformance, contentSuggestions)
+// are left out. Every object needs additionalProperties: false. Numeric ranges
+// aren't expressible here — clampScore still bounds every score.
+// ----------------------------------------------------------------------------
+const strArr = { type: 'array', items: { type: 'string' } } as const;
+const scoredPhase = {
+  type: 'object',
+  properties: { score: { type: 'integer' }, insights: strArr },
+  required: ['score', 'insights'],
+  additionalProperties: false,
+} as const;
+
+export const BRAND_SCORE_OUTPUT_SCHEMA = {
+  type: 'object',
+  properties: {
+    overallScore: { type: 'integer' },
+    phases: {
+      type: 'object',
+      properties: {
+        define: {
+          type: 'object',
+          properties: {
+            score: { type: 'integer' },
+            insights: strArr,
+            contentIdentity: {
+              type: 'object',
+              properties: {
+                contentPillars: {
+                  type: 'array',
+                  items: {
+                    type: 'object',
+                    properties: {
+                      topic: { type: 'string' },
+                      confidence: { type: 'integer' },
+                      tweetCount: { type: 'integer' },
+                      sampleEvidence: { type: 'string' },
+                    },
+                    required: ['topic', 'confidence', 'tweetCount', 'sampleEvidence'],
+                    additionalProperties: false,
+                  },
+                },
+                identitySignature: { type: 'string' },
+                recurringThemes: {
+                  type: 'array',
+                  items: {
+                    type: 'object',
+                    properties: {
+                      theme: { type: 'string' },
+                      frequency: { type: 'string', enum: ['high', 'medium', 'low'] },
+                      evidence: { type: 'string' },
+                    },
+                    required: ['theme', 'frequency', 'evidence'],
+                    additionalProperties: false,
+                  },
+                },
+                topicConcentration: { type: 'integer' },
+                audienceSignal: { type: 'string' },
+              },
+              required: [
+                'contentPillars',
+                'identitySignature',
+                'recurringThemes',
+                'topicConcentration',
+                'audienceSignal',
+              ],
+              additionalProperties: false,
+            },
+          },
+          required: ['score', 'insights'],
+          additionalProperties: false,
+        },
+        check: scoredPhase,
+        generate: scoredPhase,
+        scale: scoredPhase,
+      },
+      required: ['define', 'check', 'generate', 'scale'],
+      additionalProperties: false,
+    },
+    topStrengths: strArr,
+    topImprovements: strArr,
+    nextMoves: strArr,
+    contentPillars: strArr,
+    summary: { type: 'string' },
+    archetype: {
+      type: 'object',
+      properties: {
+        primary: {
+          type: 'string',
+          enum: ['SOURCE', 'RELAY', 'FREQ', 'FORESIGHT', 'BUILD.EXE', 'ARC', 'ENTROPY', 'NULL'],
+        },
+        emoji: { type: 'string' },
+        tagline: { type: 'string' },
+        description: { type: 'string' },
+        strengths: strArr,
+        growthTip: { type: 'string' },
+      },
+      required: ['primary', 'emoji', 'tagline', 'description', 'strengths', 'growthTip'],
+      additionalProperties: false,
+    },
+    influenceTier: { type: 'string' },
+    cryptoContext: { type: 'boolean' },
+  },
+  required: [
+    'overallScore',
+    'phases',
+    'topStrengths',
+    'topImprovements',
+    'nextMoves',
+    'contentPillars',
+    'summary',
+    'archetype',
+    'influenceTier',
+  ],
+  additionalProperties: false,
+} as const;
+
 /**
  * Validate + clamp a brand-score model response. Returns the full object (rich
  * fields preserved) with all scores clamped to [0,100], or null if the core
