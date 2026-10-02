@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse, after } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { xBrandScorePrompt, XProfileData } from '@/lib/gemini';
 import { resolveArchetype, getEvolutionInfo } from '@/lib/archetype-engine';
 import { withRateLimit, rateLimiters } from '@/lib/rate-limit';
-import { recordScan } from '@/lib/scan-tracking';
+import { recordScan, extractIntelligence } from '@/lib/scan-tracking';
 import { brandScoreCache } from '@/lib/cache';
 import { getUserProfile } from '@/lib/user-profiles';
 import { parseBrandScore, heuristicBrandScore } from '@/lib/score-schemas';
@@ -235,30 +235,20 @@ async function handlePost(request: NextRequest) {
     // Get evolution info for UI
     const evolutionInfo = getEvolutionInfo(cleanUsername);
 
-    // Save to leaderboard
-    try {
-      await fetch(`${origin}/api/leaderboard`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          username: profile.username,
-          name: profile.name,
-          profile_image_url: profile.profile_image_url,
-          score: brandScore.overallScore,
-          enhanced: false,
-        }),
-      });
-    } catch (leaderboardError) {
-      console.error('Leaderboard save error:', leaderboardError);
-    }
-
-    // Record scan to Supabase (non-blocking)
-    recordScan({
-      username: profile.username,
-      score: brandScore.overallScore,
-      archetype: brandScore.archetype?.primary || '',
-      enhanced: false,
-    }).catch((err) => console.error('Scan tracking error:', err));
+    // Record the scan after the response is sent. after() keeps the function
+    // alive until the insert finishes — a bare fire-and-forget promise can be
+    // frozen with the function and the row silently dropped. The phase scores,
+    // insights and next moves feed the Intelligence Report; a heuristic
+    // fallback score has placeholder text, so it saves the score only.
+    after(() =>
+      recordScan({
+        username: profile.username,
+        score: brandScore.overallScore,
+        archetype: brandScore.archetype?.primary || '',
+        enhanced: false,
+        intelligence: brandScore._fallback ? undefined : extractIntelligence(brandScore),
+      }).catch((err) => console.error('Scan tracking error:', err))
+    );
 
     return NextResponse.json({
       profile,

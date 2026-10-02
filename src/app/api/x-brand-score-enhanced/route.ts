@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse, after } from 'next/server';
 import {
   geminiFlash,
   xBrandScorePrompt,
@@ -326,13 +326,16 @@ export async function POST(request: NextRequest) {
       });
 
     // Legacy: also record to old BrandScans table (removed in migration 007)
-    recordScan({
-      username: profile.username,
-      score: brandScore.overallScore,
-      archetype: brandScore.archetype?.primary || '',
-      enhanced: isEnhanced,
-      intelligence,
-    }).catch((err) => console.error('Legacy scan tracking error:', err));
+    // after(): keep the function alive until the insert finishes (see x-brand-score).
+    after(() =>
+      recordScan({
+        username: profile.username,
+        score: brandScore.overallScore,
+        archetype: brandScore.archetype?.primary || '',
+        enhanced: isEnhanced,
+        intelligence,
+      }).catch((err) => console.error('Legacy scan tracking error:', err))
+    );
 
     await logSecurityEvent({
       category: 'scan',
