@@ -67,9 +67,7 @@ export default function RepurposePanel({ source, onClose, onSaveDraft }: Repurpo
       if (!res.ok) {
         // The API returns typed denials (PLAN_REQUIRED, USAGE_LIMIT) with a
         // user-facing message — surface it instead of a generic failure.
-        throw new Error(
-          data && typeof data.error === 'string' ? data.error : 'Failed to generate'
-        );
+        throw new Error(data && typeof data.error === 'string' ? data.error : 'Failed to generate');
       }
 
       setDerivatives(
@@ -227,7 +225,9 @@ export default function RepurposePanel({ source, onClose, onSaveDraft }: Repurpo
                     padding: '8px 12px',
                     borderRadius: 8,
                     border: selected ? '1.5px solid var(--accent)' : '1px solid var(--border)',
-                    background: selected ? 'color-mix(in srgb, var(--accent) 6%, transparent)' : 'var(--surface)',
+                    background: selected
+                      ? 'color-mix(in srgb, var(--accent) 6%, transparent)'
+                      : 'var(--surface)',
                     cursor: 'pointer',
                     textAlign: 'left',
                   }}
@@ -261,7 +261,9 @@ export default function RepurposePanel({ source, onClose, onSaveDraft }: Repurpo
             borderRadius: 8,
             border: 'none',
             background:
-              selectedFormats.length > 0 && !isGenerating ? 'var(--accent)' : 'var(--surface-hover)',
+              selectedFormats.length > 0 && !isGenerating
+                ? 'var(--accent)'
+                : 'var(--surface-hover)',
             color: selectedFormats.length > 0 && !isGenerating ? '#fff' : 'var(--text-tertiary)',
             cursor: selectedFormats.length > 0 && !isGenerating ? 'pointer' : 'default',
             marginBottom: 20,
@@ -285,9 +287,7 @@ export default function RepurposePanel({ source, onClose, onSaveDraft }: Repurpo
         </button>
 
         {/* Error */}
-        {error && (
-          <p style={{ fontSize: 13, color: 'var(--danger)', marginBottom: 12 }}>{error}</p>
-        )}
+        {error && <p style={{ fontSize: 13, color: 'var(--danger)', marginBottom: 12 }}>{error}</p>}
 
         {/* Results */}
         {derivatives.length > 0 && (
@@ -347,7 +347,9 @@ export default function RepurposePanel({ source, onClose, onSaveDraft }: Repurpo
                       padding: '5px 12px',
                       borderRadius: 6,
                       border: 'none',
-                      background: d.saved ? 'color-mix(in srgb, var(--success) 12%, transparent)' : 'color-mix(in srgb, var(--accent) 10%, transparent)',
+                      background: d.saved
+                        ? 'color-mix(in srgb, var(--success) 12%, transparent)'
+                        : 'color-mix(in srgb, var(--accent) 10%, transparent)',
                       color: d.saved ? 'var(--success)' : 'var(--accent)',
                       cursor: d.saved ? 'default' : 'pointer',
                     }}

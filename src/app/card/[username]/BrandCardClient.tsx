@@ -69,7 +69,9 @@ export default function BrandCardClient({ username }: { username: string }) {
   useEffect(() => {
     async function load() {
       try {
-        const res = await fetch(`/api/intelligence/report?username=${encodeURIComponent(username)}&include=public`);
+        const res = await fetch(
+          `/api/intelligence/report?username=${encodeURIComponent(username)}&include=public`
+        );
         const json = await res.json();
         if (!res.ok) {
           setError(json.error || 'Could not load card');
@@ -99,7 +101,12 @@ export default function BrandCardClient({ username }: { username: string }) {
         <motion.div
           animate={{ opacity: [0.3, 1, 0.3] }}
           transition={{ duration: 1.5, repeat: Infinity }}
-          style={{ fontFamily: MONO, fontSize: '12px', color: 'rgba(255,255,255,0.5)', letterSpacing: '0.1em' }}
+          style={{
+            fontFamily: MONO,
+            fontSize: '12px',
+            color: 'rgba(255,255,255,0.5)',
+            letterSpacing: '0.1em',
+          }}
         >
           LOADING @{username}...
         </motion.div>
@@ -120,7 +127,9 @@ export default function BrandCardClient({ username }: { username: string }) {
           gap: '16px',
         }}
       >
-        <div style={{ fontFamily: MONO, fontSize: '12px', color: '#EF4444', letterSpacing: '0.1em' }}>
+        <div
+          style={{ fontFamily: MONO, fontSize: '12px', color: '#EF4444', letterSpacing: '0.1em' }}
+        >
           [ERROR] {error || 'No data found'}
         </div>
         <a
@@ -180,11 +189,39 @@ export default function BrandCardClient({ username }: { username: string }) {
           }}
         >
           <div style={{ display: 'flex', gap: '6px' }}>
-            <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'rgba(255,255,255,0.15)' }} />
-            <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'rgba(255,255,255,0.15)' }} />
-            <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'rgba(255,255,255,0.15)' }} />
+            <div
+              style={{
+                width: 8,
+                height: 8,
+                borderRadius: '50%',
+                background: 'rgba(255,255,255,0.15)',
+              }}
+            />
+            <div
+              style={{
+                width: 8,
+                height: 8,
+                borderRadius: '50%',
+                background: 'rgba(255,255,255,0.15)',
+              }}
+            />
+            <div
+              style={{
+                width: 8,
+                height: 8,
+                borderRadius: '50%',
+                background: 'rgba(255,255,255,0.15)',
+              }}
+            />
           </div>
-          <span style={{ fontFamily: MONO, fontSize: '9px', letterSpacing: '0.15em', color: 'rgba(255,255,255,0.3)' }}>
+          <span
+            style={{
+              fontFamily: MONO,
+              fontSize: '9px',
+              letterSpacing: '0.15em',
+              color: 'rgba(255,255,255,0.3)',
+            }}
+          >
             BRANDOS IDENTITY CARD
           </span>
         </div>
@@ -192,18 +229,56 @@ export default function BrandCardClient({ username }: { username: string }) {
         {/* Main content */}
         <div style={{ padding: '32px 28px' }}>
           {/* Archetype + Score row */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '28px' }}>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'flex-start',
+              marginBottom: '28px',
+            }}
+          >
             <div>
-              <div style={{ fontFamily: MONO, fontSize: '10px', letterSpacing: '0.15em', color: 'rgba(255,255,255,0.3)', marginBottom: '8px' }}>
+              <div
+                style={{
+                  fontFamily: MONO,
+                  fontSize: '10px',
+                  letterSpacing: '0.15em',
+                  color: 'rgba(255,255,255,0.3)',
+                  marginBottom: '8px',
+                }}
+              >
                 @{data.username}
               </div>
-              <div style={{ fontFamily: MONO, fontSize: '32px', color: r.archetype.color, lineHeight: 1 }}>
+              <div
+                style={{
+                  fontFamily: MONO,
+                  fontSize: '32px',
+                  color: r.archetype.color,
+                  lineHeight: 1,
+                }}
+              >
                 {r.archetype.emoji} {r.archetype.name}
               </div>
-              <div style={{ fontFamily: MONO, fontSize: '11px', color: 'rgba(255,255,255,0.4)', letterSpacing: '0.1em', marginTop: '6px' }}>
+              <div
+                style={{
+                  fontFamily: MONO,
+                  fontSize: '11px',
+                  color: 'rgba(255,255,255,0.4)',
+                  letterSpacing: '0.1em',
+                  marginTop: '6px',
+                }}
+              >
                 {r.archetype.tierLabel} · TIER {r.archetype.tier}
               </div>
-              <div style={{ fontFamily: SANS, fontSize: '13px', color: 'rgba(255,255,255,0.5)', marginTop: '4px', fontStyle: 'italic' }}>
+              <div
+                style={{
+                  fontFamily: SANS,
+                  fontSize: '13px',
+                  color: 'rgba(255,255,255,0.5)',
+                  marginTop: '4px',
+                  fontStyle: 'italic',
+                }}
+              >
                 {r.archetype.tagline}
               </div>
             </div>
@@ -222,10 +297,25 @@ export default function BrandCardClient({ username }: { username: string }) {
                 flexShrink: 0,
               }}
             >
-              <div style={{ fontFamily: MONO, fontSize: '28px', color: '#fff', fontWeight: 500, lineHeight: 1 }}>
+              <div
+                style={{
+                  fontFamily: MONO,
+                  fontSize: '28px',
+                  color: '#fff',
+                  fontWeight: 500,
+                  lineHeight: 1,
+                }}
+              >
                 {r.score.current}
               </div>
-              <div style={{ fontFamily: MONO, fontSize: '8px', color: 'rgba(255,255,255,0.4)', letterSpacing: '0.15em' }}>
+              <div
+                style={{
+                  fontFamily: MONO,
+                  fontSize: '8px',
+                  color: 'rgba(255,255,255,0.4)',
+                  letterSpacing: '0.15em',
+                }}
+              >
                 SCORE
               </div>
             </div>
@@ -234,7 +324,15 @@ export default function BrandCardClient({ username }: { username: string }) {
           {/* Phase breakdown */}
           {phases && (
             <div style={{ marginBottom: '24px' }}>
-              <div style={{ fontFamily: MONO, fontSize: '9px', letterSpacing: '0.2em', color: 'rgba(255,255,255,0.25)', marginBottom: '12px' }}>
+              <div
+                style={{
+                  fontFamily: MONO,
+                  fontSize: '9px',
+                  letterSpacing: '0.2em',
+                  color: 'rgba(255,255,255,0.25)',
+                  marginBottom: '12px',
+                }}
+              >
                 PHASE ANALYSIS
               </div>
               {(['define', 'check', 'generate', 'scale'] as const).map((phase, i) => (
@@ -252,10 +350,19 @@ export default function BrandCardClient({ username }: { username: string }) {
                     fontSize: '11px',
                   }}
                 >
-                  <span style={{ width: '70px', color: 'rgba(255,255,255,0.4)', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+                  <span
+                    style={{
+                      width: '70px',
+                      color: 'rgba(255,255,255,0.4)',
+                      letterSpacing: '0.05em',
+                      textTransform: 'uppercase',
+                    }}
+                  >
                     {phase}
                   </span>
-                  <span style={{ color: 'rgba(255,255,255,0.2)', whiteSpace: 'pre', fontSize: '10px' }}>
+                  <span
+                    style={{ color: 'rgba(255,255,255,0.2)', whiteSpace: 'pre', fontSize: '10px' }}
+                  >
                     [{AsciiBar({ value: phases[phase] })}]
                   </span>
                   <span style={{ color: '#fff', minWidth: '24px' }}>{phases[phase]}</span>
@@ -267,7 +374,15 @@ export default function BrandCardClient({ username }: { username: string }) {
           {/* Strengths */}
           {r.strengths && r.strengths.length > 0 && (
             <div style={{ marginBottom: '24px' }}>
-              <div style={{ fontFamily: MONO, fontSize: '9px', letterSpacing: '0.2em', color: 'rgba(255,255,255,0.25)', marginBottom: '10px' }}>
+              <div
+                style={{
+                  fontFamily: MONO,
+                  fontSize: '9px',
+                  letterSpacing: '0.2em',
+                  color: 'rgba(255,255,255,0.25)',
+                  marginBottom: '10px',
+                }}
+              >
                 TOP STRENGTHS
               </div>
               {r.strengths.slice(0, 3).map((s, i) => (
@@ -283,7 +398,11 @@ export default function BrandCardClient({ username }: { username: string }) {
                     lineHeight: 1.4,
                   }}
                 >
-                  <span style={{ fontFamily: MONO, color: '#10B981', fontSize: '10px', flexShrink: 0 }}>[+]</span>
+                  <span
+                    style={{ fontFamily: MONO, color: '#10B981', fontSize: '10px', flexShrink: 0 }}
+                  >
+                    [+]
+                  </span>
                   {s}
                 </div>
               ))}
@@ -302,16 +421,38 @@ export default function BrandCardClient({ username }: { username: string }) {
             }}
           >
             <div>
-              <div style={{ fontFamily: MONO, fontSize: '9px', letterSpacing: '0.15em', color: 'rgba(255,255,255,0.25)' }}>
+              <div
+                style={{
+                  fontFamily: MONO,
+                  fontSize: '9px',
+                  letterSpacing: '0.15em',
+                  color: 'rgba(255,255,255,0.25)',
+                }}
+              >
                 INFLUENCE
               </div>
-              <div style={{ fontFamily: MONO, fontSize: '13px', color: '#fff', textTransform: 'uppercase', marginTop: '2px' }}>
+              <div
+                style={{
+                  fontFamily: MONO,
+                  fontSize: '13px',
+                  color: '#fff',
+                  textTransform: 'uppercase',
+                  marginTop: '2px',
+                }}
+              >
                 {r.score.influenceTier}
               </div>
             </div>
             {r.score.percentile != null && (
               <div style={{ borderLeft: '1px solid rgba(255,255,255,0.06)', paddingLeft: '12px' }}>
-                <div style={{ fontFamily: MONO, fontSize: '9px', letterSpacing: '0.15em', color: 'rgba(255,255,255,0.25)' }}>
+                <div
+                  style={{
+                    fontFamily: MONO,
+                    fontSize: '9px',
+                    letterSpacing: '0.15em',
+                    color: 'rgba(255,255,255,0.25)',
+                  }}
+                >
                   PERCENTILE
                 </div>
                 <div style={{ fontFamily: MONO, fontSize: '13px', color: KLEIN, marginTop: '2px' }}>
@@ -320,10 +461,24 @@ export default function BrandCardClient({ username }: { username: string }) {
               </div>
             )}
             <div style={{ borderLeft: '1px solid rgba(255,255,255,0.06)', paddingLeft: '12px' }}>
-              <div style={{ fontFamily: MONO, fontSize: '9px', letterSpacing: '0.15em', color: 'rgba(255,255,255,0.25)' }}>
+              <div
+                style={{
+                  fontFamily: MONO,
+                  fontSize: '9px',
+                  letterSpacing: '0.15em',
+                  color: 'rgba(255,255,255,0.25)',
+                }}
+              >
                 SCANS
               </div>
-              <div style={{ fontFamily: MONO, fontSize: '13px', color: 'rgba(255,255,255,0.6)', marginTop: '2px' }}>
+              <div
+                style={{
+                  fontFamily: MONO,
+                  fontSize: '13px',
+                  color: 'rgba(255,255,255,0.6)',
+                  marginTop: '2px',
+                }}
+              >
                 {r.totalScans}
               </div>
             </div>
@@ -341,11 +496,28 @@ export default function BrandCardClient({ username }: { username: string }) {
             background: 'rgba(255,255,255,0.02)',
           }}
         >
-          <span style={{ fontFamily: MONO, fontSize: '9px', letterSpacing: '0.15em', color: 'rgba(255,255,255,0.2)' }}>
+          <span
+            style={{
+              fontFamily: MONO,
+              fontSize: '9px',
+              letterSpacing: '0.15em',
+              color: 'rgba(255,255,255,0.2)',
+            }}
+          >
             BRANDOS.APP
           </span>
-          <span style={{ fontFamily: MONO, fontSize: '9px', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.15)' }}>
-            VERIFIED {new Date(r.scannedAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }).toUpperCase()}
+          <span
+            style={{
+              fontFamily: MONO,
+              fontSize: '9px',
+              letterSpacing: '0.1em',
+              color: 'rgba(255,255,255,0.15)',
+            }}
+          >
+            VERIFIED{' '}
+            {new Date(r.scannedAt)
+              .toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+              .toUpperCase()}
           </span>
         </div>
       </motion.div>
@@ -380,7 +552,14 @@ export default function BrandCardClient({ username }: { username: string }) {
         >
           GET YOUR BRAND SCORE
         </a>
-        <span style={{ fontFamily: MONO, fontSize: '10px', color: 'rgba(255,255,255,0.2)', letterSpacing: '0.1em' }}>
+        <span
+          style={{
+            fontFamily: MONO,
+            fontSize: '10px',
+            color: 'rgba(255,255,255,0.2)',
+            letterSpacing: '0.1em',
+          }}
+        >
           FREE · 30 SECONDS · NO SIGNUP
         </span>
       </motion.div>

@@ -21,10 +21,7 @@ import { ONE_TIME_PRODUCTS } from '@/lib/plans';
 export async function POST(request: NextRequest) {
   try {
     if (!stripe) {
-      return NextResponse.json(
-        { error: 'Stripe not configured' },
-        { status: 503 }
-      );
+      return NextResponse.json({ error: 'Stripe not configured' }, { status: 503 });
     }
 
     const { handle } = (await request.json()) as { handle?: string };
@@ -41,18 +38,14 @@ export async function POST(request: NextRequest) {
 
     const priceId = ONE_TIME_PRODUCTS.SCORE_BOOST_AUDIT.stripePriceId;
     if (!priceId) {
-      console.error(
-        '[audit/checkout] STRIPE_PRICE_SCORE_BOOST not configured'
-      );
+      console.error('[audit/checkout] STRIPE_PRICE_SCORE_BOOST not configured');
       return NextResponse.json(
         { error: 'Product not configured — admin action required' },
         { status: 503 }
       );
     }
 
-    const appUrl =
-      process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '') ||
-      'https://mybrandos.app';
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '') || 'https://mybrandos.app';
 
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',

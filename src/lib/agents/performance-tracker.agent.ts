@@ -19,7 +19,13 @@ interface TweetMetrics {
 async function syncTweets(brandId: string, xUserId: string): Promise<number> {
   try {
     // Fetch tweets: SocialData primary, X API fallback
-    let rawTweets: { id: string; text: string; created_at: string; public_metrics: Record<string, number>; entities?: Record<string, unknown[]> | null }[] = [];
+    let rawTweets: {
+      id: string;
+      text: string;
+      created_at: string;
+      public_metrics: Record<string, number>;
+      entities?: Record<string, unknown[]> | null;
+    }[] = [];
 
     if (isSocialDataConfigured()) {
       const sdResult = await fetchUserTweets(xUserId, 20);
@@ -58,7 +64,11 @@ async function syncTweets(brandId: string, xUserId: string): Promise<number> {
 
     for (const tweet of rawTweets) {
       const metrics = tweet.public_metrics || {
-        like_count: 0, retweet_count: 0, reply_count: 0, impression_count: 0, quote_count: 0,
+        like_count: 0,
+        retweet_count: 0,
+        reply_count: 0,
+        impression_count: 0,
+        quote_count: 0,
       };
 
       const likes = metrics.like_count || 0;
@@ -68,16 +78,22 @@ async function syncTweets(brandId: string, xUserId: string): Promise<number> {
       const engagementRate = ((likes + retweets + replies) / impressions) * 100;
 
       const metricsJson = JSON.stringify({
-        likes, retweets, replies,
+        likes,
+        retweets,
+        replies,
         impressions: metrics.impression_count || 0,
         quotes: metrics.quote_count || 0,
       });
 
       const entitiesJson = tweet.entities
         ? JSON.stringify({
-            hashtags: (tweet.entities.hashtags as { tag: string }[] || []).map((h) => h.tag),
-            mentions: (tweet.entities.mentions as { username: string }[] || []).map((m) => m.username),
-            urls: (tweet.entities.urls as { expanded_url: string }[] || []).map((u) => u.expanded_url),
+            hashtags: ((tweet.entities.hashtags as { tag: string }[]) || []).map((h) => h.tag),
+            mentions: ((tweet.entities.mentions as { username: string }[]) || []).map(
+              (m) => m.username
+            ),
+            urls: ((tweet.entities.urls as { expanded_url: string }[]) || []).map(
+              (u) => u.expanded_url
+            ),
           })
         : null;
 

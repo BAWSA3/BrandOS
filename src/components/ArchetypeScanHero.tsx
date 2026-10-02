@@ -44,7 +44,12 @@ interface ArchetypeResult {
 // Dark Mode Background — terminal text elements (dark version of HybridCodeBg)
 // ============================================================================
 // ── Dark typewriter hook ──
-function useDarkTypewriter(texts: string[], cycleDuration: number, typeSpeed = 35, deleteSpeed = 20) {
+function useDarkTypewriter(
+  texts: string[],
+  cycleDuration: number,
+  typeSpeed = 35,
+  deleteSpeed = 20
+) {
   const [index, setIndex] = useState(0);
   const [displayed, setDisplayed] = useState('');
   const [phase, setPhase] = useState<'typing' | 'holding' | 'deleting'>('typing');
@@ -53,7 +58,10 @@ function useDarkTypewriter(texts: string[], cycleDuration: number, typeSpeed = 3
     const text = texts[index];
     if (phase === 'typing') {
       if (displayed.length < text.length) {
-        const timer = setTimeout(() => setDisplayed(text.slice(0, displayed.length + 1)), typeSpeed);
+        const timer = setTimeout(
+          () => setDisplayed(text.slice(0, displayed.length + 1)),
+          typeSpeed
+        );
         return () => clearTimeout(timer);
       } else {
         const timer = setTimeout(() => setPhase('deleting'), cycleDuration);
@@ -75,7 +83,11 @@ function useDarkTypewriter(texts: string[], cycleDuration: number, typeSpeed = 3
 }
 
 // ── Dark line-by-line typewriter ──
-function DarkTypedLogBlock({ logs, position, color }: {
+function DarkTypedLogBlock({
+  logs,
+  position,
+  color,
+}: {
   logs: { text: string; color?: string }[][];
   position: React.CSSProperties;
   color: string;
@@ -107,20 +119,44 @@ function DarkTypedLogBlock({ logs, position, color }: {
   }, [visibleLines, phase, setIndex, logSet.length, logs.length]);
 
   return (
-    <div style={{ position: 'absolute', ...position, fontFamily: "'JetBrains Mono', monospace", fontSize: 'clamp(9px, 1vw, 11px)', lineHeight: 1.8 }}>
+    <div
+      style={{
+        position: 'absolute',
+        ...position,
+        fontFamily: "'JetBrains Mono', monospace",
+        fontSize: 'clamp(9px, 1vw, 11px)',
+        lineHeight: 1.8,
+      }}
+    >
       {logSet.slice(0, visibleLines).map((line, i) => (
-        <motion.div key={`${setIndex}-${i}`} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3 }} style={{ color: line.color || color, whiteSpace: 'pre', background: 'none' }}>
+        <motion.div
+          key={`${setIndex}-${i}`}
+          initial={{ opacity: 0, x: -10 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.3 }}
+          style={{ color: line.color || color, whiteSpace: 'pre', background: 'none' }}
+        >
           {line.text}
         </motion.div>
       ))}
       {phase === 'typing' && visibleLines < logSet.length && (
-        <motion.span animate={{ opacity: [1, 0] }} transition={{ duration: 0.5, repeat: Infinity }} style={{ color: 'rgba(0, 71, 255, 0.5)' }}>█</motion.span>
+        <motion.span
+          animate={{ opacity: [1, 0] }}
+          transition={{ duration: 0.5, repeat: Infinity }}
+          style={{ color: 'rgba(0, 71, 255, 0.5)' }}
+        >
+          █
+        </motion.span>
       )}
     </div>
   );
 }
 
-function DarkTypedCodeBlock({ texts, position, opacity: targetOpacity }: {
+function DarkTypedCodeBlock({
+  texts,
+  position,
+  opacity: targetOpacity,
+}: {
   texts: string[];
   position: React.CSSProperties;
   opacity: number;
@@ -130,10 +166,48 @@ function DarkTypedCodeBlock({ texts, position, opacity: targetOpacity }: {
 
   return (
     <div style={{ position: 'absolute', ...position }}>
-      <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 'clamp(9px, 1.1vw, 12px)', lineHeight: 1.7, whiteSpace: 'pre', visibility: 'hidden', background: 'none', margin: 0, padding: 0 }} aria-hidden="true">{longest}</div>
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: targetOpacity }} transition={{ duration: 1.5 }} style={{ position: 'absolute', top: 0, left: 0, fontFamily: "'JetBrains Mono', monospace", fontSize: 'clamp(9px, 1.1vw, 12px)', lineHeight: 1.7, color: 'rgba(255,255,255,0.8)', margin: 0, whiteSpace: 'pre', userSelect: 'none', background: 'none', padding: 0 }}>
+      <div
+        style={{
+          fontFamily: "'JetBrains Mono', monospace",
+          fontSize: 'clamp(9px, 1.1vw, 12px)',
+          lineHeight: 1.7,
+          whiteSpace: 'pre',
+          visibility: 'hidden',
+          background: 'none',
+          margin: 0,
+          padding: 0,
+        }}
+        aria-hidden="true"
+      >
+        {longest}
+      </div>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: targetOpacity }}
+        transition={{ duration: 1.5 }}
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          fontFamily: "'JetBrains Mono', monospace",
+          fontSize: 'clamp(9px, 1.1vw, 12px)',
+          lineHeight: 1.7,
+          color: 'rgba(255,255,255,0.8)',
+          margin: 0,
+          whiteSpace: 'pre',
+          userSelect: 'none',
+          background: 'none',
+          padding: 0,
+        }}
+      >
         {displayed}
-        <motion.span animate={{ opacity: [1, 0] }} transition={{ duration: 0.5, repeat: Infinity }} style={{ color: 'rgba(255,255,255,0.3)' }}>{isTyping ? '█' : ''}</motion.span>
+        <motion.span
+          animate={{ opacity: [1, 0] }}
+          transition={{ duration: 0.5, repeat: Infinity }}
+          style={{ color: 'rgba(255,255,255,0.3)' }}
+        >
+          {isTyping ? '█' : ''}
+        </motion.span>
       </motion.div>
     </div>
   );
@@ -209,15 +283,35 @@ const DARK_CODE_RIGHT = [
 
 function DarkCodeBg() {
   return (
-    <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none', zIndex: 0 }}>
+    <div
+      style={{
+        position: 'absolute',
+        inset: 0,
+        overflow: 'hidden',
+        pointerEvents: 'none',
+        zIndex: 0,
+      }}
+    >
       {/* Top-left: animated terminal logs */}
-      <DarkTypedLogBlock logs={DARK_LOG_SETS} position={{ top: '6%', left: '4%' }} color="rgba(255,255,255,0.25)" />
+      <DarkTypedLogBlock
+        logs={DARK_LOG_SETS}
+        position={{ top: '6%', left: '4%' }}
+        color="rgba(255,255,255,0.25)"
+      />
 
       {/* Middle-left: animated TypeScript interface */}
-      <DarkTypedCodeBlock texts={DARK_CODE_LEFT} position={{ top: '42%', left: '3%' }} opacity={0.25} />
+      <DarkTypedCodeBlock
+        texts={DARK_CODE_LEFT}
+        position={{ top: '42%', left: '3%' }}
+        opacity={0.25}
+      />
 
       {/* Top-right: animated archetype type */}
-      <DarkTypedCodeBlock texts={DARK_CODE_RIGHT} position={{ top: '10%', right: '4%' }} opacity={0.2} />
+      <DarkTypedCodeBlock
+        texts={DARK_CODE_RIGHT}
+        position={{ top: '10%', right: '4%' }}
+        opacity={0.2}
+      />
 
       {/* Middle-right: animated comment block */}
       <DarkTypedLogBlock
@@ -246,9 +340,20 @@ function DarkCodeBg() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.6, duration: 1 }}
-        style={{ position: 'absolute', bottom: '12%', left: '6%', fontFamily: "'JetBrains Mono', monospace", fontSize: '10px', color: 'rgba(255,255,255,0.12)', whiteSpace: 'pre', background: 'none', margin: 0, padding: 0 }}
+        style={{
+          position: 'absolute',
+          bottom: '12%',
+          left: '6%',
+          fontFamily: "'JetBrains Mono', monospace",
+          fontSize: '10px',
+          color: 'rgba(255,255,255,0.12)',
+          whiteSpace: 'pre',
+          background: 'none',
+          margin: 0,
+          padding: 0,
+        }}
       >
-{`┌─────────────────────┐
+        {`┌─────────────────────┐
 │  IDENTITY_MATRIX    │
 │  STATUS: STANDBY    │
 └─────────────────────┘`}
@@ -259,9 +364,21 @@ function DarkCodeBg() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.6, duration: 1 }}
-        style={{ position: 'absolute', bottom: '12%', right: '6%', fontFamily: "'JetBrains Mono', monospace", fontSize: '10px', color: 'rgba(255,255,255,0.12)', whiteSpace: 'pre', textAlign: 'right', background: 'none', margin: 0, padding: 0 }}
+        style={{
+          position: 'absolute',
+          bottom: '12%',
+          right: '6%',
+          fontFamily: "'JetBrains Mono', monospace",
+          fontSize: '10px',
+          color: 'rgba(255,255,255,0.12)',
+          whiteSpace: 'pre',
+          textAlign: 'right',
+          background: 'none',
+          margin: 0,
+          padding: 0,
+        }}
       >
-{`┌─────────────────────┐
+        {`┌─────────────────────┐
 │  ARCHETYPE_DB       │
 │  ENTRIES: 8         │
 └─────────────────────┘`}
@@ -417,10 +534,7 @@ const DECRYPT_PHASES = [
   {
     title: 'ARCHETYPE LOCK',
     command: '> archetype.lock(confirmed)',
-    items: [
-      'Identity pattern confirmed.',
-      'Archetype signature locked.',
-    ],
+    items: ['Identity pattern confirmed.', 'Archetype signature locked.'],
   },
 ];
 
@@ -457,22 +571,46 @@ function DecryptPhase({
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-        <span style={{ color: isComplete ? '#10B981' : isActive ? '#fff' : '#333', fontSize: '11px' }}>
+        <span
+          style={{ color: isComplete ? '#10B981' : isActive ? '#fff' : '#333', fontSize: '11px' }}
+        >
           {isComplete ? '✓' : isActive ? '▶' : '○'}
         </span>
-        <span style={{ fontSize: '11px', letterSpacing: '0.15em', color: isComplete ? '#10B981' : isActive ? '#ddd' : '#333', fontWeight: 700 }}>
+        <span
+          style={{
+            fontSize: '11px',
+            letterSpacing: '0.15em',
+            color: isComplete ? '#10B981' : isActive ? '#ddd' : '#333',
+            fontWeight: 700,
+          }}
+        >
           {phase.title}
         </span>
       </div>
-      <div style={{ fontSize: '10px', color: '#2a2a2a', marginBottom: '6px', paddingLeft: '20px' }}>{phase.command}</div>
+      <div style={{ fontSize: '10px', color: '#2a2a2a', marginBottom: '6px', paddingLeft: '20px' }}>
+        {phase.command}
+      </div>
       <AnimatePresence>
-        {isActive && phase.items.map((item, i) =>
-          i < visibleItems && (
-            <motion.div key={item} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} style={{ fontSize: '11px', color: '#666', paddingLeft: '20px', marginBottom: '3px' }}>
-              <span style={{ color: '#222', marginRight: '8px' }}>│</span>{item}
-            </motion.div>
-          )
-        )}
+        {isActive &&
+          phase.items.map(
+            (item, i) =>
+              i < visibleItems && (
+                <motion.div
+                  key={item}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  style={{
+                    fontSize: '11px',
+                    color: '#666',
+                    paddingLeft: '20px',
+                    marginBottom: '3px',
+                  }}
+                >
+                  <span style={{ color: '#222', marginRight: '8px' }}>│</span>
+                  {item}
+                </motion.div>
+              )
+          )}
       </AnimatePresence>
     </motion.div>
   );
@@ -483,8 +621,11 @@ function AsciiBar({ progress }: { progress: number }) {
   const filled = Math.round((progress / 100) * width);
   const bar = '█'.repeat(filled) + '░'.repeat(width - filled);
   return (
-    <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '11px', textAlign: 'center' }}>
-      <span style={{ color: '#fff' }}>[{bar}]</span> <span style={{ color: '#555' }}>{progress}%</span>
+    <div
+      style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '11px', textAlign: 'center' }}
+    >
+      <span style={{ color: '#fff' }}>[{bar}]</span>{' '}
+      <span style={{ color: '#555' }}>{progress}%</span>
     </div>
   );
 }
@@ -514,16 +655,19 @@ function PremiumCardWrapper({ children, color }: { children: React.ReactNode; co
 
   const [parallax, setParallax] = useState({ x: 0, y: 0 });
 
-  const handleMouseMove = useCallback((e: ReactMouseEvent<HTMLDivElement>) => {
-    if (!wrapperRef.current) return;
-    const rect = wrapperRef.current.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width;
-    const y = (e.clientY - rect.top) / rect.height;
-    tiltX.set((y - 0.5) * -16);
-    tiltY.set((x - 0.5) * 16);
-    setGlare({ x: x * 100, y: y * 100 });
-    setParallax({ x: (x - 0.5) * 2, y: (y - 0.5) * 2 });
-  }, [tiltX, tiltY]);
+  const handleMouseMove = useCallback(
+    (e: ReactMouseEvent<HTMLDivElement>) => {
+      if (!wrapperRef.current) return;
+      const rect = wrapperRef.current.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width;
+      const y = (e.clientY - rect.top) / rect.height;
+      tiltX.set((y - 0.5) * -16);
+      tiltY.set((x - 0.5) * 16);
+      setGlare({ x: x * 100, y: y * 100 });
+      setParallax({ x: (x - 0.5) * 2, y: (y - 0.5) * 2 });
+    },
+    [tiltX, tiltY]
+  );
 
   const handleMouseLeave = useCallback(() => {
     tiltX.set(0);
@@ -656,25 +800,42 @@ export default function ArchetypeScanHero({ initialUsername, autoStart }: Archet
     setCurrentPhase(1);
     phaseTimers.push(setTimeout(() => setCurrentPhase(2), 2800));
     phaseTimers.push(setTimeout(() => setCurrentPhase(3), 5200));
-    return () => { clearInterval(progressTimer); phaseTimers.forEach(clearTimeout); };
+    return () => {
+      clearInterval(progressTimer);
+      phaseTimers.forEach(clearTimeout);
+    };
   }, [flowState]);
 
   useEffect(() => {
     if (flowState !== 'journey') return;
     if (journeyProgress >= 100 && apiComplete && apiResultRef.current) {
-      setTimeout(() => { setResult(apiResultRef.current); setFlowState('reveal'); }, 500);
+      setTimeout(() => {
+        setResult(apiResultRef.current);
+        setFlowState('reveal');
+      }, 500);
     }
   }, [flowState, journeyProgress, apiComplete]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!username.trim()) { setError('Enter a handle to identify'); return; }
+    if (!username.trim()) {
+      setError('Enter a handle to identify');
+      return;
+    }
     setError('');
     setIsValidating(true);
     try {
-      const profileResponse = await fetch('/api/x-profile', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: username.trim() }) });
+      const profileResponse = await fetch('/api/x-profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: username.trim() }),
+      });
       const profileData = await profileResponse.json();
-      if (!profileResponse.ok || !profileData.profile) { setError(profileData?.error || `@${username.trim()} not found`); setIsValidating(false); return; }
+      if (!profileResponse.ok || !profileData.profile) {
+        setError(profileData?.error || `@${username.trim()} not found`);
+        setIsValidating(false);
+        return;
+      }
       setJourneyPfp(profileData.profile.profile_image_url?.replace('_normal', '_200x200') || null);
       setIsValidating(false);
       setFlowState('journey');
@@ -683,20 +844,29 @@ export default function ArchetypeScanHero({ initialUsername, autoStart }: Archet
       apiCompleteRef.current = false;
       setApiComplete(false);
       apiResultRef.current = null;
-      const scanResponse = await fetch('/api/archetype-scan', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: username.trim() }) });
+      const scanResponse = await fetch('/api/archetype-scan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: username.trim() }),
+      });
       if (!scanResponse.ok) throw new Error('Scan failed');
       const scanResult: ArchetypeResult = await scanResponse.json();
       // Merge profile data from validation (API may not have it for cached users)
       if (!scanResult.profile.profile_image_url && profileData.profile) {
         scanResult.profile.profile_image_url = profileData.profile.profile_image_url || '';
         scanResult.profile.name = profileData.profile.name || scanResult.profile.name;
-        scanResult.profile.followers_count = profileData.profile.public_metrics?.followers_count || 0;
+        scanResult.profile.followers_count =
+          profileData.profile.public_metrics?.followers_count || 0;
         scanResult.profile.verified = profileData.profile.verified || false;
       }
       apiResultRef.current = scanResult;
       apiCompleteRef.current = true;
       setApiComplete(true);
-    } catch { setError('Decryption failed. Try again.'); setFlowState('input'); setIsValidating(false); }
+    } catch {
+      setError('Decryption failed. Try again.');
+      setFlowState('input');
+      setIsValidating(false);
+    }
   };
 
   const handleShareToX = useCallback(() => {
@@ -704,7 +874,10 @@ export default function ArchetypeScanHero({ initialUsername, autoStart }: Archet
     const info = getArchetypeInfo(result.archetype.primary);
     const shareUrl = `https://mybrandos.app/archetype/${result.profile.username}?a=${encodeURIComponent(result.archetype.primary)}&t=${result.tier}&tl=${encodeURIComponent(result.tierLabel)}&n=${encodeURIComponent(result.profile.name)}`;
     const text = `I'm ${result.archetype.primary} — "${info?.tagline || result.archetype.tagline}"\n\nTop ${result.rarity}% of creators.\n\nDiscover your Creator Archetype:`;
-    window.open(`https://x.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`, '_blank');
+    window.open(
+      `https://x.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`,
+      '_blank'
+    );
   }, [result]);
 
   const captureCardImage = useCallback(async (): Promise<string | null> => {
@@ -715,7 +888,8 @@ export default function ArchetypeScanHero({ initialUsername, autoStart }: Archet
     const clone = card.cloneNode(true) as HTMLElement;
     clone.removeAttribute('id');
     const container = document.createElement('div');
-    container.style.cssText = 'position:fixed;left:-9999px;top:-9999px;z-index:-1;pointer-events:none;';
+    container.style.cssText =
+      'position:fixed;left:-9999px;top:-9999px;z-index:-1;pointer-events:none;';
     container.appendChild(clone);
     document.body.appendChild(container);
 
@@ -765,7 +939,9 @@ export default function ArchetypeScanHero({ initialUsername, autoStart }: Archet
         a.download = `brandos-${result.archetype.primary.toLowerCase()}-${result.profile.username}.png`;
         a.click();
       }
-    } catch (err) { console.error('Failed to capture card:', err); }
+    } catch (err) {
+      console.error('Failed to capture card:', err);
+    }
     setIsGeneratingImage(false);
   }, [result, isGeneratingImage, captureCardImage]);
 
@@ -776,9 +952,36 @@ export default function ArchetypeScanHero({ initialUsername, autoStart }: Archet
       const archetypeName = normalizeArchetypeName(result.archetype.primary);
       const info = getArchetypeInfo(archetypeName);
 
-      const response = await fetch('/api/signup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: email.trim(), source: 'archetype-scan', xUsername: result.profile.username, brandData: { score: 0, archetype: archetypeName, archetypeEmoji: info?.emoji || result.archetype.emoji, archetypeTagline: result.archetype.tagline, archetypeDescription: result.archetype.description, archetypeIconUrl: `https://mybrandos.app/archetypes/${encodeURIComponent(archetypeName)}.png`, archetypeStrengths: result.archetype.strengths, evolutionPaths: result.evolutionPaths, traits: result.traits, tier: result.tier, tierLabel: result.tierLabel } }) });
-      if (response.ok || response.status === 409) { setEmailStatus('success'); } else { throw new Error('Signup failed'); }
-    } catch { setEmailStatus('error'); }
+      const response = await fetch('/api/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: email.trim(),
+          source: 'archetype-scan',
+          xUsername: result.profile.username,
+          brandData: {
+            score: 0,
+            archetype: archetypeName,
+            archetypeEmoji: info?.emoji || result.archetype.emoji,
+            archetypeTagline: result.archetype.tagline,
+            archetypeDescription: result.archetype.description,
+            archetypeIconUrl: `https://mybrandos.app/archetypes/${encodeURIComponent(archetypeName)}.png`,
+            archetypeStrengths: result.archetype.strengths,
+            evolutionPaths: result.evolutionPaths,
+            traits: result.traits,
+            tier: result.tier,
+            tierLabel: result.tierLabel,
+          },
+        }),
+      });
+      if (response.ok || response.status === 409) {
+        setEmailStatus('success');
+      } else {
+        throw new Error('Signup failed');
+      }
+    } catch {
+      setEmailStatus('error');
+    }
   };
 
   // ============================================================================
@@ -817,7 +1020,8 @@ export default function ArchetypeScanHero({ initialUsername, autoStart }: Archet
         style={{
           position: 'absolute',
           inset: 0,
-          background: 'repeating-linear-gradient(0deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 3px)',
+          background:
+            'repeating-linear-gradient(0deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 3px)',
           pointerEvents: 'none',
           zIndex: 2,
         }}
@@ -856,10 +1060,30 @@ export default function ArchetypeScanHero({ initialUsername, autoStart }: Archet
         {flowState === 'input' && (
           <>
             {[
-              { top: 16, left: 16, borderTop: '1px solid rgba(255,255,255,0.2)', borderLeft: '1px solid rgba(255,255,255,0.2)' },
-              { top: 16, right: 16, borderTop: '1px solid rgba(255,255,255,0.2)', borderRight: '1px solid rgba(255,255,255,0.2)' },
-              { bottom: 16, left: 16, borderBottom: '1px solid rgba(255,255,255,0.2)', borderLeft: '1px solid rgba(255,255,255,0.2)' },
-              { bottom: 16, right: 16, borderBottom: '1px solid rgba(255,255,255,0.2)', borderRight: '1px solid rgba(255,255,255,0.2)' },
+              {
+                top: 16,
+                left: 16,
+                borderTop: '1px solid rgba(255,255,255,0.2)',
+                borderLeft: '1px solid rgba(255,255,255,0.2)',
+              },
+              {
+                top: 16,
+                right: 16,
+                borderTop: '1px solid rgba(255,255,255,0.2)',
+                borderRight: '1px solid rgba(255,255,255,0.2)',
+              },
+              {
+                bottom: 16,
+                left: 16,
+                borderBottom: '1px solid rgba(255,255,255,0.2)',
+                borderLeft: '1px solid rgba(255,255,255,0.2)',
+              },
+              {
+                bottom: 16,
+                right: 16,
+                borderBottom: '1px solid rgba(255,255,255,0.2)',
+                borderRight: '1px solid rgba(255,255,255,0.2)',
+              },
             ].map((pos, i) => (
               <motion.div
                 key={i}
@@ -867,20 +1091,77 @@ export default function ArchetypeScanHero({ initialUsername, autoStart }: Archet
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ delay: 1.2, duration: 0.5 }}
-                style={{ position: 'fixed', width: 30, height: 30, pointerEvents: 'none', zIndex: 20, ...pos }}
+                style={{
+                  position: 'fixed',
+                  width: 30,
+                  height: 30,
+                  pointerEvents: 'none',
+                  zIndex: 20,
+                  ...pos,
+                }}
               />
             ))}
 
             {/* Version label — top-right */}
-            <motion.span initial={{ opacity: 0 }} animate={{ opacity: 0.4 }} exit={{ opacity: 0 }} transition={{ delay: 1.2 }} style={{ position: 'fixed', top: 22, right: 54, fontFamily: "'PP NeueBit', monospace", fontSize: '11px', letterSpacing: '0.15em', color: 'rgba(255,255,255,0.35)', pointerEvents: 'none', zIndex: 20 }}>
+            <motion.span
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.4 }}
+              exit={{ opacity: 0 }}
+              transition={{ delay: 1.2 }}
+              style={{
+                position: 'fixed',
+                top: 22,
+                right: 54,
+                fontFamily: "'PP NeueBit', monospace",
+                fontSize: '11px',
+                letterSpacing: '0.15em',
+                color: 'rgba(255,255,255,0.35)',
+                pointerEvents: 'none',
+                zIndex: 20,
+              }}
+            >
               v1.0
             </motion.span>
 
             {/* Blue accent line — top */}
-            <motion.div initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ delay: 1.0, duration: 0.8, ease: 'easeOut' }} style={{ position: 'fixed', top: 0, left: '20%', right: '20%', height: '1px', background: 'linear-gradient(90deg, transparent, rgba(0, 71, 255, 0.3), transparent)', pointerEvents: 'none', zIndex: 20, transformOrigin: 'center' }} />
+            <motion.div
+              initial={{ scaleX: 0 }}
+              animate={{ scaleX: 1 }}
+              transition={{ delay: 1.0, duration: 0.8, ease: 'easeOut' }}
+              style={{
+                position: 'fixed',
+                top: 0,
+                left: '20%',
+                right: '20%',
+                height: '1px',
+                background:
+                  'linear-gradient(90deg, transparent, rgba(0, 71, 255, 0.3), transparent)',
+                pointerEvents: 'none',
+                zIndex: 20,
+                transformOrigin: 'center',
+              }}
+            />
 
             {/* Bottom center */}
-            <motion.span initial={{ opacity: 0 }} animate={{ opacity: 0.35 }} exit={{ opacity: 0 }} transition={{ delay: 1.4 }} style={{ position: 'fixed', bottom: 22, left: '50%', transform: 'translateX(-50%)', fontFamily: "'PP NeueBit', monospace", fontSize: '11px', letterSpacing: '0.2em', color: 'rgba(255,255,255,0.25)', whiteSpace: 'nowrap', pointerEvents: 'none', zIndex: 20 }}>
+            <motion.span
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.35 }}
+              exit={{ opacity: 0 }}
+              transition={{ delay: 1.4 }}
+              style={{
+                position: 'fixed',
+                bottom: 22,
+                left: '50%',
+                transform: 'translateX(-50%)',
+                fontFamily: "'PP NeueBit', monospace",
+                fontSize: '11px',
+                letterSpacing: '0.2em',
+                color: 'rgba(255,255,255,0.25)',
+                whiteSpace: 'nowrap',
+                pointerEvents: 'none',
+                zIndex: 20,
+              }}
+            >
               ── 8 ARCHETYPES // 1 IDENTITY ──
             </motion.span>
           </>
@@ -898,13 +1179,35 @@ export default function ArchetypeScanHero({ initialUsername, autoStart }: Archet
             animate={{ opacity: 1 }}
             exit={{ opacity: 0, y: -30 }}
             transition={{ duration: 0.5 }}
-            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', maxWidth: '100%', width: '100%', height: '100vh', maxHeight: '100vh', position: 'relative', zIndex: 10, padding: '24px', boxSizing: 'border-box' }}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              maxWidth: '100%',
+              width: '100%',
+              height: '100vh',
+              maxHeight: '100vh',
+              position: 'relative',
+              zIndex: 10,
+              padding: '24px',
+              boxSizing: 'border-box',
+            }}
           >
             <motion.div
               initial={{ opacity: 0, scale: 0.97 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.4, delay: 0.2 }}
-              style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0px', padding: 'clamp(16px, 4vw, 48px) clamp(16px, 4vw, 32px) 0px clamp(16px, 4vw, 32px)', width: '100%', height: '100%' }}
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0px',
+                padding: 'clamp(16px, 4vw, 48px) clamp(16px, 4vw, 32px) 0px clamp(16px, 4vw, 32px)',
+                width: '100%',
+                height: '100%',
+              }}
             >
               {/* Logo — white SVG for dark bg */}
               <motion.div
@@ -912,7 +1215,13 @@ export default function ArchetypeScanHero({ initialUsername, autoStart }: Archet
                 animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
                 transition={{ duration: 0.5, delay: 0.5 }}
                 className="hero-logo-wrapper"
-                style={{ display: 'flex', justifyContent: 'center', width: '100%', overflow: 'visible', marginTop: '-60px' }}
+                style={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  width: '100%',
+                  overflow: 'visible',
+                  marginTop: '-60px',
+                }}
               >
                 <img
                   src="/brandos-hero-logo-white.svg"
@@ -931,7 +1240,14 @@ export default function ArchetypeScanHero({ initialUsername, autoStart }: Archet
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.7 }}
-                style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', width: '100%', maxWidth: '420px' }}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: '12px',
+                  width: '100%',
+                  maxWidth: '420px',
+                }}
               >
                 <motion.div
                   initial={{ opacity: 0 }}
@@ -939,7 +1255,19 @@ export default function ArchetypeScanHero({ initialUsername, autoStart }: Archet
                   transition={{ delay: 0.8, duration: 0.3 }}
                   style={{ position: 'relative', width: '100%' }}
                 >
-                  <span style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', fontFamily: "'VCR OSD Mono', monospace", fontSize: '1.125rem', color: 'rgba(255,255,255,0.25)', pointerEvents: 'none', zIndex: 1 }}>
+                  <span
+                    style={{
+                      position: 'absolute',
+                      left: '14px',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      fontFamily: "'VCR OSD Mono', monospace",
+                      fontSize: '1.125rem',
+                      color: 'rgba(255,255,255,0.25)',
+                      pointerEvents: 'none',
+                      zIndex: 1,
+                    }}
+                  >
                     &gt;
                   </span>
                   {!username && <TypewriterPlaceholder text="enter @username" />}
@@ -951,12 +1279,28 @@ export default function ArchetypeScanHero({ initialUsername, autoStart }: Archet
                     maxLength={15}
                     className="terminal-input"
                     style={{
-                      width: '100%', fontSize: '1.125rem', padding: '1rem 1rem 1rem 32px', textAlign: 'left', borderRadius: '10px',
-                      border: `1px solid ${error ? '#EF4444' : 'rgba(255,255,255,0.1)'}`, background: 'rgba(255,255,255,0.04)',
-                      backdropFilter: 'blur(8px)', color: '#ffffff', outline: 'none', transition: 'all 0.3s ease',
+                      width: '100%',
+                      fontSize: '1.125rem',
+                      padding: '1rem 1rem 1rem 32px',
+                      textAlign: 'left',
+                      borderRadius: '10px',
+                      border: `1px solid ${error ? '#EF4444' : 'rgba(255,255,255,0.1)'}`,
+                      background: 'rgba(255,255,255,0.04)',
+                      backdropFilter: 'blur(8px)',
+                      color: '#ffffff',
+                      outline: 'none',
+                      transition: 'all 0.3s ease',
                     }}
-                    onFocus={(e) => { e.currentTarget.style.borderColor = 'rgba(0, 71, 255, 0.5)'; e.currentTarget.style.boxShadow = '0 0 20px rgba(0, 71, 255, 0.15)'; }}
-                    onBlur={(e) => { e.currentTarget.style.borderColor = error ? '#EF4444' : 'rgba(255,255,255,0.1)'; e.currentTarget.style.boxShadow = 'none'; }}
+                    onFocus={(e) => {
+                      e.currentTarget.style.borderColor = 'rgba(0, 71, 255, 0.5)';
+                      e.currentTarget.style.boxShadow = '0 0 20px rgba(0, 71, 255, 0.15)';
+                    }}
+                    onBlur={(e) => {
+                      e.currentTarget.style.borderColor = error
+                        ? '#EF4444'
+                        : 'rgba(255,255,255,0.1)';
+                      e.currentTarget.style.boxShadow = 'none';
+                    }}
                   />
                 </motion.div>
 
@@ -969,23 +1313,54 @@ export default function ArchetypeScanHero({ initialUsername, autoStart }: Archet
                   whileHover={!isValidating ? { scale: 1.02 } : {}}
                   whileTap={!isValidating ? { scale: 0.98 } : {}}
                   style={{
-                    width: '100%', fontFamily: "'VCR OSD Mono', monospace", fontSize: '13px', letterSpacing: '0.15em', color: '#ffffff',
-                    background: '#0047FF', border: 'none', padding: '1rem', borderRadius: '10px', cursor: isValidating ? 'wait' : 'pointer',
-                    opacity: isValidating ? 0.7 : 1, boxShadow: '0 4px 24px rgba(0, 71, 255, 0.4), 0 0 48px rgba(0, 71, 255, 0.2)', transition: 'opacity 0.3s ease',
+                    width: '100%',
+                    fontFamily: "'VCR OSD Mono', monospace",
+                    fontSize: '13px',
+                    letterSpacing: '0.15em',
+                    color: '#ffffff',
+                    background: '#0047FF',
+                    border: 'none',
+                    padding: '1rem',
+                    borderRadius: '10px',
+                    cursor: isValidating ? 'wait' : 'pointer',
+                    opacity: isValidating ? 0.7 : 1,
+                    boxShadow: '0 4px 24px rgba(0, 71, 255, 0.4), 0 0 48px rgba(0, 71, 255, 0.2)',
+                    transition: 'opacity 0.3s ease',
                   }}
                 >
                   {isValidating ? 'DECRYPTING...' : 'IDENTIFY MY ARCHETYPE →'}
                 </motion.button>
 
                 {error && (
-                  <motion.p initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} style={{ fontFamily: "'VCR OSD Mono', monospace", fontSize: '12px', color: '#EF4444', margin: 0 }}>
+                  <motion.p
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    style={{
+                      fontFamily: "'VCR OSD Mono', monospace",
+                      fontSize: '12px',
+                      color: '#EF4444',
+                      margin: 0,
+                    }}
+                  >
                     {error}
                   </motion.p>
                 )}
               </motion.form>
             </motion.div>
 
-            <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.4 }} style={{ fontFamily: "'PP NeueBit', monospace", fontSize: '11px', letterSpacing: '0.15em', color: 'rgba(255,255,255,0.4)', textAlign: 'center', marginTop: '1.5rem' }}>
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.4 }}
+              style={{
+                fontFamily: "'PP NeueBit', monospace",
+                fontSize: '11px',
+                letterSpacing: '0.15em',
+                color: 'rgba(255,255,255,0.4)',
+                textAlign: 'center',
+                marginTop: '1.5rem',
+              }}
+            >
               ── WORKS WITH ANY PUBLIC X ACCOUNT ──
             </motion.p>
           </motion.div>
@@ -995,20 +1370,83 @@ export default function ArchetypeScanHero({ initialUsername, autoStart }: Archet
         {/* JOURNEY STATE */}
         {/* ================================================================ */}
         {flowState === 'journey' && (
-          <motion.div key="journey" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', maxWidth: '500px', padding: '0 24px' }}>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ textAlign: 'center', marginBottom: '32px' }}>
+          <motion.div
+            key="journey"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              width: '100%',
+              maxWidth: '500px',
+              padding: '0 24px',
+            }}
+          >
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              style={{ textAlign: 'center', marginBottom: '32px' }}
+            >
               {journeyPfp && (
-                <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2, type: 'spring', damping: 15 }} style={{ marginBottom: '16px' }}>
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.2, type: 'spring', damping: 15 }}
+                  style={{ marginBottom: '16px' }}
+                >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={journeyPfp} alt={username} width={48} height={48} style={{ borderRadius: '50%', objectFit: 'cover', border: '2px solid #222', boxShadow: '0 0 20px rgba(255,255,255,0.05)' }} />
+                  <img
+                    src={journeyPfp}
+                    alt={username}
+                    width={48}
+                    height={48}
+                    style={{
+                      borderRadius: '50%',
+                      objectFit: 'cover',
+                      border: '2px solid #222',
+                      boxShadow: '0 0 20px rgba(255,255,255,0.05)',
+                    }}
+                  />
                 </motion.div>
               )}
-              <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '10px', letterSpacing: '0.2em', color: '#555', marginBottom: '4px' }}>{'>'} IDENTITY_PROTOCOL INITIATED</p>
-              <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '10px', letterSpacing: '0.15em', color: '#333' }}>{'>'} SUBJECT: @{username}</p>
+              <p
+                style={{
+                  fontFamily: "'JetBrains Mono', monospace",
+                  fontSize: '10px',
+                  letterSpacing: '0.2em',
+                  color: '#555',
+                  marginBottom: '4px',
+                }}
+              >
+                {'>'} IDENTITY_PROTOCOL INITIATED
+              </p>
+              <p
+                style={{
+                  fontFamily: "'JetBrains Mono', monospace",
+                  fontSize: '10px',
+                  letterSpacing: '0.15em',
+                  color: '#333',
+                }}
+              >
+                {'>'} SUBJECT: @{username}
+              </p>
             </motion.div>
-            <div style={{ width: '100%', height: '1px', background: '#1a1a1a', marginBottom: '28px' }} />
-            {DECRYPT_PHASES.map((phase, i) => <DecryptPhase key={phase.title} phase={phase} isActive={currentPhase === i + 1} isComplete={currentPhase > i + 1} />)}
-            <div style={{ marginTop: '20px', width: '100%', maxWidth: '300px' }}><AsciiBar progress={Math.min(Math.round(journeyProgress), 100)} /></div>
+            <div
+              style={{ width: '100%', height: '1px', background: '#1a1a1a', marginBottom: '28px' }}
+            />
+            {DECRYPT_PHASES.map((phase, i) => (
+              <DecryptPhase
+                key={phase.title}
+                phase={phase}
+                isActive={currentPhase === i + 1}
+                isComplete={currentPhase > i + 1}
+              />
+            ))}
+            <div style={{ marginTop: '20px', width: '100%', maxWidth: '300px' }}>
+              <AsciiBar progress={Math.min(Math.round(journeyProgress), 100)} />
+            </div>
           </motion.div>
         )}
 
@@ -1016,8 +1454,33 @@ export default function ArchetypeScanHero({ initialUsername, autoStart }: Archet
         {/* REVEAL STATE */}
         {/* ================================================================ */}
         {flowState === 'reveal' && result && (
-          <motion.div key="reveal" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8 }} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', maxWidth: '800px', padding: '0 24px', color: '#fff' }}>
-            <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '10px', letterSpacing: '0.2em', color: '#444', marginBottom: '24px' }}>
+          <motion.div
+            key="reveal"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8 }}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              width: '100%',
+              maxWidth: '800px',
+              padding: '0 24px',
+              color: '#fff',
+            }}
+          >
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.2 }}
+              style={{
+                fontFamily: "'JetBrains Mono', monospace",
+                fontSize: '10px',
+                letterSpacing: '0.2em',
+                color: '#444',
+                marginBottom: '24px',
+              }}
+            >
               IDENTITY_DECRYPTED // @{result.profile.username}
             </motion.p>
 
@@ -1026,7 +1489,11 @@ export default function ArchetypeScanHero({ initialUsername, autoStart }: Archet
               initial={{ opacity: 0, scale: 1.2 }}
               animate={{ opacity: 1, scale: 1.5 }}
               transition={{ delay: 0.4, duration: 0.6, type: 'spring', damping: 20 }}
-              style={{ marginBottom: '100px', transformOrigin: 'center center', perspective: '1000px' }}
+              style={{
+                marginBottom: '100px',
+                transformOrigin: 'center center',
+                perspective: '1000px',
+              }}
             >
               <PremiumCardWrapper color={result.color}>
                 <ArchetypeCard
@@ -1043,58 +1510,312 @@ export default function ArchetypeScanHero({ initialUsername, autoStart }: Archet
             </motion.div>
 
             {/* Share buttons */}
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.4 }} style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', justifyContent: 'center', marginBottom: '28px' }}>
-              <motion.button onClick={handleCopyCard} disabled={isGeneratingImage} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} style={{ padding: '12px 24px', fontFamily: "'JetBrains Mono', monospace", fontSize: '11px', fontWeight: 700, letterSpacing: '0.05em', background: '#fff', color: '#000', border: 'none', borderRadius: '4px', cursor: isGeneratingImage ? 'wait' : 'pointer', opacity: isGeneratingImage ? 0.5 : 1 }}>{shareStatus === 'copied' ? 'COPIED!' : 'COPY'}</motion.button>
-              <motion.button onClick={handleDownloadCard} disabled={isGeneratingImage} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} style={{ padding: '12px 24px', fontFamily: "'JetBrains Mono', monospace", fontSize: '11px', fontWeight: 700, letterSpacing: '0.05em', background: 'transparent', color: '#fff', border: '1px solid #252525', borderRadius: '4px', cursor: isGeneratingImage ? 'wait' : 'pointer', opacity: isGeneratingImage ? 0.5 : 1 }}>{isGeneratingImage ? 'GENERATING...' : 'DOWNLOAD'}</motion.button>
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1.4 }}
+              style={{
+                display: 'flex',
+                gap: '10px',
+                flexWrap: 'wrap',
+                justifyContent: 'center',
+                marginBottom: '28px',
+              }}
+            >
+              <motion.button
+                onClick={handleCopyCard}
+                disabled={isGeneratingImage}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                style={{
+                  padding: '12px 24px',
+                  fontFamily: "'JetBrains Mono', monospace",
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  letterSpacing: '0.05em',
+                  background: '#fff',
+                  color: '#000',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: isGeneratingImage ? 'wait' : 'pointer',
+                  opacity: isGeneratingImage ? 0.5 : 1,
+                }}
+              >
+                {shareStatus === 'copied' ? 'COPIED!' : 'COPY'}
+              </motion.button>
+              <motion.button
+                onClick={handleDownloadCard}
+                disabled={isGeneratingImage}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                style={{
+                  padding: '12px 24px',
+                  fontFamily: "'JetBrains Mono', monospace",
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  letterSpacing: '0.05em',
+                  background: 'transparent',
+                  color: '#fff',
+                  border: '1px solid #252525',
+                  borderRadius: '4px',
+                  cursor: isGeneratingImage ? 'wait' : 'pointer',
+                  opacity: isGeneratingImage ? 0.5 : 1,
+                }}
+              >
+                {isGeneratingImage ? 'GENERATING...' : 'DOWNLOAD'}
+              </motion.button>
             </motion.div>
 
             {/* Evolution Hook */}
-            {(
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.6 }} style={{ width: '100%', maxWidth: '460px', textAlign: 'center' }}>
+            {
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 1.6 }}
+                style={{ width: '100%', maxWidth: '460px', textAlign: 'center' }}
+              >
                 {!showEvolutionHook && emailStatus !== 'success' && (
-                  <button onClick={() => setShowEvolutionHook(true)} style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '12px', color: result.color, background: 'none', border: 'none', cursor: 'pointer', padding: '12px', letterSpacing: '0.05em', textDecoration: 'underline', textUnderlineOffset: '4px', textShadow: `0 0 12px ${result.color}60, 0 0 24px ${result.color}30` }}>
+                  <button
+                    onClick={() => setShowEvolutionHook(true)}
+                    style={{
+                      fontFamily: "'JetBrains Mono', monospace",
+                      fontSize: '12px',
+                      color: result.color,
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      padding: '12px',
+                      letterSpacing: '0.05em',
+                      textDecoration: 'underline',
+                      textUnderlineOffset: '4px',
+                      textShadow: `0 0 12px ${result.color}60, 0 0 24px ${result.color}30`,
+                    }}
+                  >
                     WHAT CAN I EVOLVE TO? →
                   </button>
                 )}
                 <AnimatePresence>
                   {showEvolutionHook && emailStatus !== 'success' && (
-                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} style={{ overflow: 'hidden' }}>
-                      <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid #1a1a1a', borderRadius: '8px', padding: '24px', marginBottom: '16px' }}>
-                        <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '9px', letterSpacing: '0.15em', color: '#444', marginBottom: '12px' }}>EVOLUTION PATH PREVIEW</p>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', marginBottom: '16px', flexWrap: 'wrap' }}>
-                          <span style={{ fontFamily: "'Inter', sans-serif", fontSize: '14px', fontWeight: 800, fontStyle: 'italic', color: result.color }}>{result.archetype.primary}</span>
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      style={{ overflow: 'hidden' }}
+                    >
+                      <div
+                        style={{
+                          background: 'rgba(255,255,255,0.03)',
+                          border: '1px solid #1a1a1a',
+                          borderRadius: '8px',
+                          padding: '24px',
+                          marginBottom: '16px',
+                        }}
+                      >
+                        <p
+                          style={{
+                            fontFamily: "'JetBrains Mono', monospace",
+                            fontSize: '9px',
+                            letterSpacing: '0.15em',
+                            color: '#444',
+                            marginBottom: '12px',
+                          }}
+                        >
+                          EVOLUTION PATH PREVIEW
+                        </p>
+                        <div
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '12px',
+                            marginBottom: '16px',
+                            flexWrap: 'wrap',
+                          }}
+                        >
+                          <span
+                            style={{
+                              fontFamily: "'Inter', sans-serif",
+                              fontSize: '14px',
+                              fontWeight: 800,
+                              fontStyle: 'italic',
+                              color: result.color,
+                            }}
+                          >
+                            {result.archetype.primary}
+                          </span>
                           <span style={{ color: '#333', fontSize: '14px' }}>→</span>
-                          {result.evolutionPaths.slice(0, 3).map((path) => { const p = getArchetypeInfo(path); return (<span key={path} style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '11px', color: p?.color || '#666', border: `1px solid ${(p?.color || '#666')}25`, padding: '3px 8px', borderRadius: '2px' }}>{p?.emoji} {path}</span>); })}
+                          {result.evolutionPaths.slice(0, 3).map((path) => {
+                            const p = getArchetypeInfo(path);
+                            return (
+                              <span
+                                key={path}
+                                style={{
+                                  fontFamily: "'JetBrains Mono', monospace",
+                                  fontSize: '11px',
+                                  color: p?.color || '#666',
+                                  border: `1px solid ${p?.color || '#666'}25`,
+                                  padding: '3px 8px',
+                                  borderRadius: '2px',
+                                }}
+                              >
+                                {p?.emoji} {path}
+                              </span>
+                            );
+                          })}
                         </div>
-                        <p style={{ fontFamily: "'Inter', sans-serif", fontSize: '12px', color: '#555', lineHeight: 1.5 }}>Drop your email to get notified when your full evolution roadmap is ready — including what triggers each shift.</p>
+                        <p
+                          style={{
+                            fontFamily: "'Inter', sans-serif",
+                            fontSize: '12px',
+                            color: '#555',
+                            lineHeight: 1.5,
+                          }}
+                        >
+                          Drop your email to get notified when your full evolution roadmap is ready
+                          — including what triggers each shift.
+                        </p>
                       </div>
                       <div style={{ display: 'flex', gap: '8px' }}>
-                        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="your@email.com" style={{ flex: 1, padding: '12px 14px', fontFamily: "'JetBrains Mono', monospace", fontSize: '12px', background: 'rgba(255,255,255,0.03)', border: '1px solid #222', borderRadius: '4px', outline: 'none', color: '#fff' }} />
-                        <motion.button onClick={handleEvolutionSignup} disabled={emailStatus === 'sending' || !email.trim()} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} style={{ padding: '12px 20px', fontFamily: "'JetBrains Mono', monospace", fontSize: '11px', fontWeight: 700, background: result.color, color: '#fff', border: 'none', borderRadius: '4px', cursor: emailStatus === 'sending' ? 'wait' : 'pointer', opacity: emailStatus === 'sending' ? 0.6 : 1, whiteSpace: 'nowrap' }}>
+                        <input
+                          type="email"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          placeholder="your@email.com"
+                          style={{
+                            flex: 1,
+                            padding: '12px 14px',
+                            fontFamily: "'JetBrains Mono', monospace",
+                            fontSize: '12px',
+                            background: 'rgba(255,255,255,0.03)',
+                            border: '1px solid #222',
+                            borderRadius: '4px',
+                            outline: 'none',
+                            color: '#fff',
+                          }}
+                        />
+                        <motion.button
+                          onClick={handleEvolutionSignup}
+                          disabled={emailStatus === 'sending' || !email.trim()}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          style={{
+                            padding: '12px 20px',
+                            fontFamily: "'JetBrains Mono', monospace",
+                            fontSize: '11px',
+                            fontWeight: 700,
+                            background: result.color,
+                            color: '#fff',
+                            border: 'none',
+                            borderRadius: '4px',
+                            cursor: emailStatus === 'sending' ? 'wait' : 'pointer',
+                            opacity: emailStatus === 'sending' ? 0.6 : 1,
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
                           {emailStatus === 'sending' ? '...' : 'UNLOCK'}
                         </motion.button>
                       </div>
-                      {emailStatus === 'error' && <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '10px', color: '#EF4444', marginTop: '8px' }}>Something went wrong. Try again.</p>}
+                      {emailStatus === 'error' && (
+                        <p
+                          style={{
+                            fontFamily: "'JetBrains Mono', monospace",
+                            fontSize: '10px',
+                            color: '#EF4444',
+                            marginTop: '8px',
+                          }}
+                        >
+                          Something went wrong. Try again.
+                        </p>
+                      )}
                     </motion.div>
                   )}
                 </AnimatePresence>
                 {emailStatus === 'success' && (
-                  <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${result.color}20`, borderRadius: '8px', padding: '20px' }}>
-                    <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '11px', color: '#10B981', marginBottom: '4px' }}>✓ YOU&apos;RE IN</p>
-                    <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '10px', color: '#555' }}>We&apos;ll send your evolution roadmap when it&apos;s ready.</p>
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    style={{
+                      background: 'rgba(255,255,255,0.03)',
+                      border: `1px solid ${result.color}20`,
+                      borderRadius: '8px',
+                      padding: '20px',
+                    }}
+                  >
+                    <p
+                      style={{
+                        fontFamily: "'JetBrains Mono', monospace",
+                        fontSize: '11px',
+                        color: '#10B981',
+                        marginBottom: '4px',
+                      }}
+                    >
+                      ✓ YOU&apos;RE IN
+                    </p>
+                    <p
+                      style={{
+                        fontFamily: "'JetBrains Mono', monospace",
+                        fontSize: '10px',
+                        color: '#555',
+                      }}
+                    >
+                      We&apos;ll send your evolution roadmap when it&apos;s ready.
+                    </p>
                   </motion.div>
                 )}
               </motion.div>
-            )}
+            }
 
             {emailStatus === 'success' && (
-              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} style={{ marginTop: '20px', textAlign: 'center' }}>
-                <a href="https://mybrandos.app" style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '12px', color: '#0047FF', textDecoration: 'none', letterSpacing: '0.05em', textShadow: '0 0 12px rgba(0,71,255,0.4), 0 0 24px rgba(0,71,255,0.2)', borderBottom: '1px solid rgba(0,71,255,0.3)', paddingBottom: '2px' }}>CHECK YOUR BRAND SCORE →</a>
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                style={{ marginTop: '20px', textAlign: 'center' }}
+              >
+                <a
+                  href="https://mybrandos.app"
+                  style={{
+                    fontFamily: "'JetBrains Mono', monospace",
+                    fontSize: '12px',
+                    color: '#0047FF',
+                    textDecoration: 'none',
+                    letterSpacing: '0.05em',
+                    textShadow: '0 0 12px rgba(0,71,255,0.4), 0 0 24px rgba(0,71,255,0.2)',
+                    borderBottom: '1px solid rgba(0,71,255,0.3)',
+                    paddingBottom: '2px',
+                  }}
+                >
+                  CHECK YOUR BRAND SCORE →
+                </a>
               </motion.div>
             )}
 
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 2.2 }} style={{ marginTop: '20px' }}>
-              <button onClick={() => { setFlowState('input'); setResult(null); setUsername(''); setShowEvolutionHook(false); setEmailStatus('idle'); setEmail(''); }} style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '10px', color: '#333', background: 'none', border: 'none', cursor: 'pointer', letterSpacing: '0.05em' }}>DECODE ANOTHER →</button>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 2.2 }}
+              style={{ marginTop: '20px' }}
+            >
+              <button
+                onClick={() => {
+                  setFlowState('input');
+                  setResult(null);
+                  setUsername('');
+                  setShowEvolutionHook(false);
+                  setEmailStatus('idle');
+                  setEmail('');
+                }}
+                style={{
+                  fontFamily: "'JetBrains Mono', monospace",
+                  fontSize: '10px',
+                  color: '#333',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  letterSpacing: '0.05em',
+                }}
+              >
+                DECODE ANOTHER →
+              </button>
             </motion.div>
           </motion.div>
         )}

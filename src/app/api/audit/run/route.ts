@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
     // (above), the paid-session requirement, and rate limits per IP + session.
     const ipLimit = checkRateLimit(
       `${getClientIdentifier(request)}:audit-run`,
-      rateLimiters.aiStrict,
+      rateLimiters.aiStrict
     );
     const sessionLimit = checkRateLimit(`audit-session:${sessionId}`, SESSION_RERUN_LIMIT);
     if (ipLimit.limited || sessionLimit.limited) {
@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
       });
       return NextResponse.json(
         { error: 'Too many audit runs — try again shortly. Your report was also emailed to you.' },
-        { status: 429 },
+        { status: 429 }
       );
     }
 

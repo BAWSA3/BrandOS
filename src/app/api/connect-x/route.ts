@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
     if (!xUsername || !xUserId || !accessToken) {
       return NextResponse.json(
         { error: 'Missing required fields: xUsername, xUserId, accessToken' },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
         {
           error: `X account limit reached (${cap} on ${workspace.plan} plan). Upgrade or remove an existing connection.`,
         },
-        { status: 403 },
+        { status: 403 }
       );
     }
 
@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
     if (existing && existing.status === 'active') {
       return NextResponse.json(
         { error: 'This X account is already connected to this workspace' },
-        { status: 409 },
+        { status: 409 }
       );
     }
 

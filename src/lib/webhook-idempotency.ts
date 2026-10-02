@@ -34,9 +34,7 @@ export async function claimWebhookEvent(eventId: string, eventType: string): Pro
 
 /** Undo a claim so Stripe's retry can reprocess after a handler failure. */
 export async function releaseWebhookEvent(eventId: string): Promise<void> {
-  await prisma.processedWebhook
-    .delete({ where: { id: eventId } })
-    .catch(() => {}); // best-effort — a stuck claim just means a manual replay later
+  await prisma.processedWebhook.delete({ where: { id: eventId } }).catch(() => {}); // best-effort — a stuck claim just means a manual replay later
 }
 
 /** Drop claims past retention. Cheap; called opportunistically per delivery. */

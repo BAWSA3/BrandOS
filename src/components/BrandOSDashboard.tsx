@@ -165,11 +165,19 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({
             </span>
             <div className="flex items-center gap-3">
               <div className="text-right">
-                <h2 className="font-brand font-black italic text-white text-lg md:text-xl leading-tight">{data.profile.displayName}</h2>
-                <p className="font-os text-[10px] md:text-xs text-white/60">@{data.profile.username}</p>
+                <h2 className="font-brand font-black italic text-white text-lg md:text-xl leading-tight">
+                  {data.profile.displayName}
+                </h2>
+                <p className="font-os text-[10px] md:text-xs text-white/60">
+                  @{data.profile.username}
+                </p>
               </div>
               <div className="w-12 h-12 md:w-14 md:h-14 rounded-full overflow-hidden border-2 border-white/30 shrink-0">
-                <img src={data.profile.profileImageUrl} alt={data.profile.displayName} className="w-full h-full object-cover" />
+                <img
+                  src={data.profile.profileImageUrl}
+                  alt={data.profile.displayName}
+                  className="w-full h-full object-cover"
+                />
               </div>
             </div>
           </div>
@@ -197,7 +205,9 @@ const BrandOSDashboard: React.FC<BrandOSDashboardProps> = ({
                   { label: 'GROWTH', value: data.scores.phaseScores.growth },
                 ].map((phase) => (
                   <div key={phase.label} className="flex items-center gap-3 justify-end">
-                    <span className="font-os text-[10px] md:text-xs text-white/50 tracking-widest">{phase.label}</span>
+                    <span className="font-os text-[10px] md:text-xs text-white/50 tracking-widest">
+                      {phase.label}
+                    </span>
                     <span className="font-brand font-black italic text-white text-lg md:text-xl">
                       +<AnimateNumber trend={1}>{phase.value}</AnimateNumber>
                     </span>

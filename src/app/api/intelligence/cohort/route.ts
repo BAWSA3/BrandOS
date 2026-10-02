@@ -147,27 +147,28 @@ export async function GET(request: NextRequest) {
 
     // Breakout analysis: what do high scorers (75+) do differently?
     const highScorers = parsed.filter((p) => p.score >= 75);
-    const breakoutPhases = highScorers.length >= 3
-      ? {
-          sampleSize: highScorers.length,
-          averagePhases: {
-            define: avg(highScorers.map((p) => p.phases.define)),
-            check: avg(highScorers.map((p) => p.phases.check)),
-            generate: avg(highScorers.map((p) => p.phases.generate)),
-            scale: avg(highScorers.map((p) => p.phases.scale)),
-          },
-          biggestDiffFromCohort: (() => {
-            const diffs = {
-              define: avg(highScorers.map((p) => p.phases.define)) - averagePhases.define,
-              check: avg(highScorers.map((p) => p.phases.check)) - averagePhases.check,
-              generate: avg(highScorers.map((p) => p.phases.generate)) - averagePhases.generate,
-              scale: avg(highScorers.map((p) => p.phases.scale)) - averagePhases.scale,
-            };
-            const biggest = Object.entries(diffs).sort((a, b) => b[1] - a[1])[0];
-            return { phase: biggest[0], delta: biggest[1] };
-          })(),
-        }
-      : null;
+    const breakoutPhases =
+      highScorers.length >= 3
+        ? {
+            sampleSize: highScorers.length,
+            averagePhases: {
+              define: avg(highScorers.map((p) => p.phases.define)),
+              check: avg(highScorers.map((p) => p.phases.check)),
+              generate: avg(highScorers.map((p) => p.phases.generate)),
+              scale: avg(highScorers.map((p) => p.phases.scale)),
+            },
+            biggestDiffFromCohort: (() => {
+              const diffs = {
+                define: avg(highScorers.map((p) => p.phases.define)) - averagePhases.define,
+                check: avg(highScorers.map((p) => p.phases.check)) - averagePhases.check,
+                generate: avg(highScorers.map((p) => p.phases.generate)) - averagePhases.generate,
+                scale: avg(highScorers.map((p) => p.phases.scale)) - averagePhases.scale,
+              };
+              const biggest = Object.entries(diffs).sort((a, b) => b[1] - a[1])[0];
+              return { phase: biggest[0], delta: biggest[1] };
+            })(),
+          }
+        : null;
 
     return NextResponse.json({
       archetype,

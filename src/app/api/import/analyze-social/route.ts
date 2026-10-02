@@ -37,7 +37,10 @@ export async function POST(request: NextRequest) {
     }
     if (platform !== 'twitter') {
       return NextResponse.json(
-        { error: 'Only X/Twitter import is supported right now — Instagram and LinkedIn are coming soon.' },
+        {
+          error:
+            'Only X/Twitter import is supported right now — Instagram and LinkedIn are coming soon.',
+        },
         { status: 400 }
       );
     }

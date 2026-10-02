@@ -32,17 +32,34 @@ export default function TestCardsClient() {
     for (const name of Object.keys(ARCHETYPE_DATA)) {
       await downloadCard(name);
       // Small delay between downloads so browser doesn't block them
-      await new Promise(r => setTimeout(r, 500));
+      await new Promise((r) => setTimeout(r, 500));
     }
     setDownloadedAll(true);
   }, [downloadCard]);
 
   return (
     <div style={{ minHeight: '100vh', background: '#0A0A0C', padding: '40px 24px' }}>
-      <h1 style={{ color: '#fff', textAlign: 'center', marginBottom: '8px', fontFamily: 'Inter, sans-serif', fontWeight: 900, fontStyle: 'italic' }}>
+      <h1
+        style={{
+          color: '#fff',
+          textAlign: 'center',
+          marginBottom: '8px',
+          fontFamily: 'Inter, sans-serif',
+          fontWeight: 900,
+          fontStyle: 'italic',
+        }}
+      >
         Archetype Reveal Cards
       </h1>
-      <p style={{ color: '#555', textAlign: 'center', marginBottom: '32px', fontFamily: "'JetBrains Mono', monospace", fontSize: '12px' }}>
+      <p
+        style={{
+          color: '#555',
+          textAlign: 'center',
+          marginBottom: '32px',
+          fontFamily: "'JetBrains Mono', monospace",
+          fontSize: '12px',
+        }}
+      >
         @bawsaxbt — all 8 archetypes
       </p>
 
@@ -65,16 +82,42 @@ export default function TestCardsClient() {
             opacity: downloading ? 0.5 : 1,
           }}
         >
-          {downloading ? `DOWNLOADING ${downloading}...` : downloadedAll ? '✓ ALL DOWNLOADED' : 'DOWNLOAD ALL 8 CARDS'}
+          {downloading
+            ? `DOWNLOADING ${downloading}...`
+            : downloadedAll
+              ? '✓ ALL DOWNLOADED'
+              : 'DOWNLOAD ALL 8 CARDS'}
         </button>
       </div>
 
       {/* All 8 Cards */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '32px', maxWidth: '640px', margin: '0 auto' }}>
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '32px',
+          maxWidth: '640px',
+          margin: '0 auto',
+        }}
+      >
         {Object.values(ARCHETYPE_DATA).map((a) => (
           <div key={a.name}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-              <p style={{ color: '#888', fontSize: '11px', fontFamily: "'JetBrains Mono', monospace", margin: 0 }}>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginBottom: '8px',
+              }}
+            >
+              <p
+                style={{
+                  color: '#888',
+                  fontSize: '11px',
+                  fontFamily: "'JetBrains Mono', monospace",
+                  margin: 0,
+                }}
+              >
                 {a.emoji} {a.name} — TIER {a.tier} {a.tierLabel}
               </p>
               <button

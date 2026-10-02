@@ -149,7 +149,7 @@ export async function resolveArchetype(
   forceReevaluate: boolean = false
 ): Promise<ArchetypeDecision> {
   // Load profile from DB (populates in-memory cache for sync calls below)
-  const existingProfile = await getUserProfileAsync(username) || getUserProfile(username);
+  const existingProfile = (await getUserProfileAsync(username)) || getUserProfile(username);
 
   // === CASE 1: New User ===
   if (!existingProfile) {

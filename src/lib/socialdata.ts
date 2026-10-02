@@ -128,7 +128,7 @@ export async function fetchProfile(
  */
 function mapTweet(raw: Record<string, unknown>): SocialDataTweet {
   const fullText = (raw.full_text || raw.text || '') as string;
-  const createdAt = raw.created_at as string || '';
+  const createdAt = (raw.created_at as string) || '';
 
   // v1.1 metrics
   const likeCount = (raw.favorite_count as number) || 0;
@@ -201,7 +201,9 @@ export async function fetchUserTweets(
     // Filter out retweets and replies, map to our format
     const tweets = rawTweets
       .filter((t) => {
-        const isRetweet = !!(t.retweeted_status || (t.full_text as string || '').startsWith('RT @'));
+        const isRetweet = !!(
+          t.retweeted_status || ((t.full_text as string) || '').startsWith('RT @')
+        );
         const isReply = !!(t.in_reply_to_status_id_str || t.in_reply_to_status_id);
         return !isRetweet && !isReply;
       })
@@ -272,7 +274,7 @@ export async function searchTweets(
       const user = raw.user as Record<string, unknown> | undefined;
       return {
         ...tweet,
-        author_id: user ? ((user.id_str as string) || String(user.id || '')) : undefined,
+        author_id: user ? (user.id_str as string) || String(user.id || '') : undefined,
         author_username: user ? (user.screen_name as string) : undefined,
       };
     });

@@ -450,7 +450,8 @@ export default function ScoreReveal({ profile, brandScore, isVisible, theme }: S
               color: 'rgba(0, 0, 0, 0.5)',
             }}
           >
-            See how you compare to other {brandScore.archetype?.primary || 'creators'}s and what top scorers do differently
+            See how you compare to other {brandScore.archetype?.primary || 'creators'}s and what top
+            scorers do differently
           </div>
         </motion.a>
 

@@ -42,7 +42,9 @@ export interface XProfile {
 // ---------------------------------------------------------------------------
 // Provider: X API v2 (Official — 100 lookups/day on Basic tier)
 // ---------------------------------------------------------------------------
-async function fetchFromXApi(username: string): Promise<{ profile?: XProfile; status: number; error?: string }> {
+async function fetchFromXApi(
+  username: string
+): Promise<{ profile?: XProfile; status: number; error?: string }> {
   const bearerToken = process.env.X_BEARER_TOKEN;
   if (!bearerToken) {
     return { status: 500, error: 'X_BEARER_TOKEN not configured' };
@@ -56,7 +58,9 @@ async function fetchFromXApi(username: string): Promise<{ profile?: XProfile; st
 
   const remaining = response.headers.get('x-rate-limit-remaining');
   const reset = response.headers.get('x-rate-limit-reset');
-  console.log(`[X API] @${username} -> ${response.status}, remaining: ${remaining}, reset: ${reset ? new Date(Number(reset) * 1000).toISOString() : 'N/A'}`);
+  console.log(
+    `[X API] @${username} -> ${response.status}, remaining: ${remaining}, reset: ${reset ? new Date(Number(reset) * 1000).toISOString() : 'N/A'}`
+  );
 
   if (response.status === 429) {
     return { status: 429, error: 'X API rate limited' };
@@ -88,7 +92,10 @@ async function fetchFromXApi(username: string): Promise<{ profile?: XProfile; st
       description: data.data.description || '',
       profile_image_url: data.data.profile_image_url || '',
       public_metrics: data.data.public_metrics || {
-        followers_count: 0, following_count: 0, tweet_count: 0, listed_count: 0,
+        followers_count: 0,
+        following_count: 0,
+        tweet_count: 0,
+        listed_count: 0,
       },
       created_at: data.data.created_at || '',
       verified: data.data.verified || false,
@@ -102,7 +109,9 @@ async function fetchFromXApi(username: string): Promise<{ profile?: XProfile; st
 // ---------------------------------------------------------------------------
 // Provider: SocialData.tools (Fallback — ~$0.0002/request, no daily cap)
 // ---------------------------------------------------------------------------
-async function fetchFromSocialData(username: string): Promise<{ profile?: XProfile; status: number; error?: string }> {
+async function fetchFromSocialData(
+  username: string
+): Promise<{ profile?: XProfile; status: number; error?: string }> {
   const apiKey = process.env.SOCIALDATA_API_KEY;
   if (!apiKey) {
     return { status: 500, error: 'SOCIALDATA_API_KEY not configured' };
@@ -163,21 +172,23 @@ async function fetchFromSocialData(username: string): Promise<{ profile?: XProfi
 // Persist profile to DB cache (fire-and-forget)
 // ---------------------------------------------------------------------------
 function persistToDbCache(usernameLower: string, profile: XProfile) {
-  prisma.xProfileCache.upsert({
-    where: { username: usernameLower },
-    update: {
-      profileData: JSON.stringify(profile),
-      followersCount: profile.public_metrics.followers_count,
-      tweetCount: profile.public_metrics.tweet_count,
-      fetchedAt: new Date(),
-    },
-    create: {
-      username: usernameLower,
-      profileData: JSON.stringify(profile),
-      followersCount: profile.public_metrics.followers_count,
-      tweetCount: profile.public_metrics.tweet_count,
-    },
-  }).catch((err) => console.error('[DB CACHE WRITE ERROR]', err));
+  prisma.xProfileCache
+    .upsert({
+      where: { username: usernameLower },
+      update: {
+        profileData: JSON.stringify(profile),
+        followersCount: profile.public_metrics.followers_count,
+        tweetCount: profile.public_metrics.tweet_count,
+        fetchedAt: new Date(),
+      },
+      create: {
+        username: usernameLower,
+        profileData: JSON.stringify(profile),
+        followersCount: profile.public_metrics.followers_count,
+        tweetCount: profile.public_metrics.tweet_count,
+      },
+    })
+    .catch((err) => console.error('[DB CACHE WRITE ERROR]', err));
 }
 
 // ---------------------------------------------------------------------------
@@ -192,7 +203,7 @@ export async function POST(request: NextRequest) {
     if (limited) {
       return NextResponse.json(
         { error: 'Too many requests. Please try again later.' },
-        { status: 429, headers: { 'Retry-After': Math.ceil(resetIn / 1000).toString() } },
+        { status: 429, headers: { 'Retry-After': Math.ceil(resetIn / 1000).toString() } }
       );
     }
 
@@ -265,13 +276,15 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: msg }, { status: 404 });
       }
       return NextResponse.json(
-        { error: 'We\'re experiencing high demand right now. Please try again in a few minutes.' },
-        { status: 503 },
+        { error: "We're experiencing high demand right now. Please try again in a few minutes." },
+        { status: 503 }
       );
     }
 
     const profile = result.profile;
-    console.log(`[SUCCESS] @${profile.username} — ${profile.public_metrics.followers_count} followers, ${profile.public_metrics.tweet_count} tweets`);
+    console.log(
+      `[SUCCESS] @${profile.username} — ${profile.public_metrics.followers_count} followers, ${profile.public_metrics.tweet_count} tweets`
+    );
 
     // ── 5. Cache everywhere ───────────────────────────────────────────────
     profileCache.set(cacheKey, profile);

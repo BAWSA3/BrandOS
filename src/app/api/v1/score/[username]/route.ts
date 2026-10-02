@@ -49,7 +49,14 @@ export async function GET(
   // Track usage
   const latencyMs = Date.now() - startTime;
   if (auth.apiKey) {
-    recordApiUsage(auth.apiKey, '/v1/score/:username', 'GET', result.error ? (result.status || 500) : 200, latencyMs, username);
+    recordApiUsage(
+      auth.apiKey,
+      '/v1/score/:username',
+      'GET',
+      result.error ? result.status || 500 : 200,
+      latencyMs,
+      username
+    );
   }
 
   if (result.error) {

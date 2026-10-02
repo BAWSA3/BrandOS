@@ -65,9 +65,20 @@ export interface BrandIdentityResponse {
 
 async function handlePost(request: NextRequest) {
   try {
-    const { profile, tweets: clientTweets }: {
+    const {
+      profile,
+      tweets: clientTweets,
+    }: {
       profile: XProfileData;
-      tweets?: { text: string; public_metrics: { like_count: number; retweet_count: number; reply_count: number; impression_count?: number } }[];
+      tweets?: {
+        text: string;
+        public_metrics: {
+          like_count: number;
+          retweet_count: number;
+          reply_count: number;
+          impression_count?: number;
+        };
+      }[];
     } = await request.json();
 
     if (!profile || !profile.username) {
@@ -96,7 +107,12 @@ async function handlePost(request: NextRequest) {
     let analysisMode: AnalysisMode = 'profile-only';
     let rawTweetsForDiagnosis: {
       text: string;
-      public_metrics: { like_count: number; retweet_count: number; reply_count: number; impression_count?: number };
+      public_metrics: {
+        like_count: number;
+        retweet_count: number;
+        reply_count: number;
+        impression_count?: number;
+      };
     }[] = [];
 
     if (features.tweetAnalysis) {

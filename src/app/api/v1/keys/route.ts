@@ -20,10 +20,7 @@ function authenticateAdmin(request: NextRequest): boolean {
 /** POST — Create a new API key */
 export async function POST(request: NextRequest) {
   if (!authenticateAdmin(request)) {
-    return NextResponse.json(
-      { error: 'Unauthorized' },
-      { status: 401, headers: API_CORS_HEADERS }
-    );
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401, headers: API_CORS_HEADERS });
   }
 
   let name: string;
@@ -104,10 +101,7 @@ export async function POST(request: NextRequest) {
 /** GET — List all API keys (no secrets) */
 export async function GET(request: NextRequest) {
   if (!authenticateAdmin(request)) {
-    return NextResponse.json(
-      { error: 'Unauthorized' },
-      { status: 401, headers: API_CORS_HEADERS }
-    );
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401, headers: API_CORS_HEADERS });
   }
 
   try {

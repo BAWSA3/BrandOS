@@ -24,7 +24,7 @@ export const ARCHETYPE_DATA: Record<string, ArchetypeInfo> = {
     tierLabel: 'ENTRY',
     tagline: 'Rising star. Growth story.',
     description:
-      'You\'re the underdog the timeline is rooting for. Your brand is your journey — every milestone, every pivot, every honest moment of growth. People follow you because they want to watch you win.',
+      "You're the underdog the timeline is rooting for. Your brand is your journey — every milestone, every pivot, every honest moment of growth. People follow you because they want to watch you win.",
     traits: ['Resilient', 'Authentic', 'Journey-driven', 'Relatable'],
     color: '#10B981',
     emoji: '🐕',
@@ -38,7 +38,7 @@ export const ARCHETYPE_DATA: Record<string, ArchetypeInfo> = {
     tierLabel: 'RISING',
     tagline: 'Risk-taker. Cult builder.',
     description:
-      'You thrive in chaos. While others play it safe, you make bold calls, rally communities, and turn volatility into content. Your audience doesn\'t just follow — they\'re loyal to the chaos.',
+      "You thrive in chaos. While others play it safe, you make bold calls, rally communities, and turn volatility into content. Your audience doesn't just follow — they're loyal to the chaos.",
     traits: ['Bold', 'Provocative', 'High-conviction', 'Community-first'],
     color: '#F59E0B',
     emoji: '🎰',
@@ -66,7 +66,7 @@ export const ARCHETYPE_DATA: Record<string, ArchetypeInfo> = {
     tierLabel: 'RISING',
     tagline: 'Entertainer. Community builder.',
     description:
-      'You\'re the heartbeat of the timeline. Memes, hot takes, shitposts, engagement bait — you know exactly what makes people stop scrolling. Your community doesn\'t just engage, they participate.',
+      "You're the heartbeat of the timeline. Memes, hot takes, shitposts, engagement bait — you know exactly what makes people stop scrolling. Your community doesn't just engage, they participate.",
     traits: ['Witty', 'Engaging', 'Culture-aware', 'High-energy'],
     color: '#EC4899',
     emoji: '🎪',
@@ -80,7 +80,7 @@ export const ARCHETYPE_DATA: Record<string, ArchetypeInfo> = {
     tierLabel: 'ADVANCED',
     tagline: 'Super connector.',
     description:
-      'You\'re everyone\'s favorite mutual. You don\'t just build your own network — you connect others, amplify signal, and curate the best of the timeline. Your DMs are a power grid.',
+      "You're everyone's favorite mutual. You don't just build your own network — you connect others, amplify signal, and curate the best of the timeline. Your DMs are a power grid.",
     traits: ['Connected', 'Generous', 'Curator', 'Bridge-builder'],
     color: '#06B6D4',
     emoji: '🔌',
@@ -108,7 +108,7 @@ export const ARCHETYPE_DATA: Record<string, ArchetypeInfo> = {
     tierLabel: 'EXPERT',
     tagline: 'Knowledge authority.',
     description:
-      'You\'re the person people screenshot and save. Educational threads, deep dives, how-to guides — your content has shelf life. When you speak on your topic, the timeline listens.',
+      "You're the person people screenshot and save. Educational threads, deep dives, how-to guides — your content has shelf life. When you speak on your topic, the timeline listens.",
     traits: ['Authoritative', 'Educational', 'Trusted', 'Deep-expertise'],
     color: '#3B82F6',
     emoji: '🎓',
@@ -122,7 +122,7 @@ export const ARCHETYPE_DATA: Record<string, ArchetypeInfo> = {
     tierLabel: 'PEAK',
     tagline: 'Shapes the narrative.',
     description:
-      'You don\'t follow trends — you set them. Visionary takes, contrarian predictions, big-picture thinking. When you post, it becomes the conversation. You\'re the signal everyone else amplifies.',
+      "You don't follow trends — you set them. Visionary takes, contrarian predictions, big-picture thinking. When you post, it becomes the conversation. You're the signal everyone else amplifies.",
     traits: ['Visionary', 'Contrarian', 'Narrative-shaping', 'Influential'],
     color: '#9D4EDD',
     emoji: '🔮',

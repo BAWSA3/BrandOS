@@ -35,26 +35,10 @@ interface Tiers {
 
 // ── Right-side rotating comment blocks (matches product page aesthetic) ──
 const RIGHT_COMMENT_SETS = [
-  [
-    'TIER LIST ENGINE',
-    'Status: OPERATIONAL',
-    'Creators: INDEXED',
-  ],
-  [
-    'SCORE DISTRIBUTION',
-    'Elite: 80–100',
-    'Strong: 60–79',
-  ],
-  [
-    'ARCHETYPE MODULE',
-    'Match: COMPUTED',
-    'Confidence: HIGH',
-  ],
-  [
-    'REPUTATION ENGINE',
-    'Signal: STRONG',
-    'Tier: RESOLVED',
-  ],
+  ['TIER LIST ENGINE', 'Status: OPERATIONAL', 'Creators: INDEXED'],
+  ['SCORE DISTRIBUTION', 'Elite: 80–100', 'Strong: 60–79'],
+  ['ARCHETYPE MODULE', 'Match: COMPUTED', 'Confidence: HIGH'],
+  ['REPUTATION ENGINE', 'Signal: STRONG', 'Tier: RESOLVED'],
 ];
 
 // ── Right-side rotating code blocks ──
@@ -135,7 +119,6 @@ function TerminalLogs() {
   );
 }
 
-
 // ── Cycling comment block (top-right) ──
 function TypedCommentBlock() {
   const [setIndex, setSetIndex] = useState(0);
@@ -205,10 +188,7 @@ function TypedCodeBlock() {
 
     if (phase === 'typing') {
       if (displayed.length < text.length) {
-        const timer = setTimeout(
-          () => setDisplayed(text.slice(0, displayed.length + 1)),
-          25
-        );
+        const timer = setTimeout(() => setDisplayed(text.slice(0, displayed.length + 1)), 25);
         return () => clearTimeout(timer);
       } else {
         const timer = setTimeout(() => setPhase('deleting'), 8000);
@@ -231,7 +211,13 @@ function TypedCodeBlock() {
     <div className="hidden lg:block fixed top-36 right-8 z-0 pointer-events-none select-none">
       <pre
         className="text-[11px] text-white/20 whitespace-pre"
-        style={{ fontFamily: "'JetBrains Mono', 'Fira Code', monospace", lineHeight: 1.7, background: 'none', padding: 0, borderRadius: 0 }}
+        style={{
+          fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
+          lineHeight: 1.7,
+          background: 'none',
+          padding: 0,
+          borderRadius: 0,
+        }}
       >
         {displayed}
         <motion.span
@@ -266,7 +252,7 @@ function UserCard({
 }: {
   user: TierUser;
   isHighlighted: boolean;
-  cardRef?: ((node: HTMLDivElement | null) => void);
+  cardRef?: (node: HTMLDivElement | null) => void;
   tierColor: string;
 }) {
   const borderColor = isHighlighted
@@ -279,57 +265,57 @@ function UserCard({
 
   return (
     <div ref={cardRef}>
-    <a href={`/tier-list/${user.username}`} className="block cursor-pointer">
-    <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{
-        opacity: 1,
-        y: 0,
-        scale: isHighlighted ? 1.2 : 1,
-      }}
-      transition={{ duration: 0.3 }}
-      whileHover={{ scale: 1.08 }}
-      className={`flex flex-col items-center w-[72px] md:w-[80px] gap-1 relative ${isHighlighted ? 'z-10' : ''}`}
-    >
-      <div
-        className={`w-12 h-12 md:w-14 md:h-14 rounded-full overflow-hidden border-2 transition-all duration-500 ${borderColor}`}
-      >
-        {user.profileImageUrl ? (
-          <img
-            src={user.profileImageUrl}
-            alt={`@${user.username}`}
-            className="w-full h-full object-cover"
-            loading="lazy"
-            onError={handlePfpError}
-          />
-        ) : (
-          <div className="w-full h-full bg-[#222] flex items-center justify-center text-[#666] text-lg">
-            ?
-          </div>
-        )}
-      </div>
-      <span
-        className={`text-[8px] md:text-[9px] text-center overflow-hidden text-ellipsis whitespace-nowrap w-full transition-colors ${isHighlighted ? 'text-[#0047FF] font-bold' : 'text-white/60'}`}
-        style={{ fontFamily: "'VCR OSD Mono', monospace" }}
-      >
-        @{user.username}
-      </span>
-      <span
-        className={`text-[10px] md:text-[11px] font-bold transition-colors ${isHighlighted ? 'text-[#0047FF]' : 'text-white/90'}`}
-        style={{ fontFamily: "'VCR OSD Mono', monospace" }}
-      >
-        {user.score}
-      </span>
-      {user.archetype && (
-        <span
-          className="text-[7px] md:text-[8px] text-white/35 uppercase"
-          style={{ fontFamily: "'VCR OSD Mono', monospace" }}
+      <a href={`/tier-list/${user.username}`} className="block cursor-pointer">
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{
+            opacity: 1,
+            y: 0,
+            scale: isHighlighted ? 1.2 : 1,
+          }}
+          transition={{ duration: 0.3 }}
+          whileHover={{ scale: 1.08 }}
+          className={`flex flex-col items-center w-[72px] md:w-[80px] gap-1 relative ${isHighlighted ? 'z-10' : ''}`}
         >
-          {user.archetype}
-        </span>
-      )}
-    </motion.div>
-    </a>
+          <div
+            className={`w-12 h-12 md:w-14 md:h-14 rounded-full overflow-hidden border-2 transition-all duration-500 ${borderColor}`}
+          >
+            {user.profileImageUrl ? (
+              <img
+                src={user.profileImageUrl}
+                alt={`@${user.username}`}
+                className="w-full h-full object-cover"
+                loading="lazy"
+                onError={handlePfpError}
+              />
+            ) : (
+              <div className="w-full h-full bg-[#222] flex items-center justify-center text-[#666] text-lg">
+                ?
+              </div>
+            )}
+          </div>
+          <span
+            className={`text-[8px] md:text-[9px] text-center overflow-hidden text-ellipsis whitespace-nowrap w-full transition-colors ${isHighlighted ? 'text-[#0047FF] font-bold' : 'text-white/60'}`}
+            style={{ fontFamily: "'VCR OSD Mono', monospace" }}
+          >
+            @{user.username}
+          </span>
+          <span
+            className={`text-[10px] md:text-[11px] font-bold transition-colors ${isHighlighted ? 'text-[#0047FF]' : 'text-white/90'}`}
+            style={{ fontFamily: "'VCR OSD Mono', monospace" }}
+          >
+            {user.score}
+          </span>
+          {user.archetype && (
+            <span
+              className="text-[7px] md:text-[8px] text-white/35 uppercase"
+              style={{ fontFamily: "'VCR OSD Mono', monospace" }}
+            >
+              {user.archetype}
+            </span>
+          )}
+        </motion.div>
+      </a>
     </div>
   );
 }
@@ -348,7 +334,7 @@ function TierSection({
   users: TierUser[];
   color: string;
   searchResult: string | null;
-  highlightedRef: ((node: HTMLDivElement | null) => void);
+  highlightedRef: (node: HTMLDivElement | null) => void;
   index: number;
 }) {
   const headerColors: Record<string, string> = {
@@ -390,8 +376,7 @@ function TierSection({
       <div className="flex flex-wrap gap-2 md:gap-3 p-4 md:p-5">
         {users.length > 0 ? (
           users.map((user) => {
-            const isHighlighted =
-              searchResult === user.username.toLowerCase();
+            const isHighlighted = searchResult === user.username.toLowerCase();
             return (
               <UserCard
                 key={user.username}
@@ -421,24 +406,24 @@ export default function TierListClient({ tiers }: { tiers: Tiers }) {
   const [notFound, setNotFound] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const highlightedRef = useCallback((node: HTMLDivElement | null) => {
-    if (node) {
-      setTimeout(() => {
-        node.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }, 100);
-    }
-  }, [searchResult]);
-  const totalCreators =
-    tiers.elite.length + tiers.strong.length + tiers.rising.length;
+  const highlightedRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      if (node) {
+        setTimeout(() => {
+          node.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 100);
+      }
+    },
+    [searchResult]
+  );
+  const totalCreators = tiers.elite.length + tiers.strong.length + tiers.rising.length;
 
   const allUsers = [...tiers.elite, ...tiers.strong, ...tiers.rising];
 
   const suggestions = (() => {
     const query = search.trim().toLowerCase().replace('@', '');
     if (query.length < 1) return [];
-    return allUsers
-      .filter((u) => u.username.toLowerCase().includes(query))
-      .slice(0, 6);
+    return allUsers.filter((u) => u.username.toLowerCase().includes(query)).slice(0, 6);
   })();
 
   const handleSearch = useCallback(() => {
@@ -449,9 +434,7 @@ export default function TierListClient({ tiers }: { tiers: Tiers }) {
       return;
     }
 
-    const found = allUsers.find(
-      (u) => u.username.toLowerCase() === query
-    );
+    const found = allUsers.find((u) => u.username.toLowerCase() === query);
 
     if (found) {
       setSearchResult(found.username.toLowerCase());
@@ -511,10 +494,7 @@ export default function TierListClient({ tiers }: { tiers: Tiers }) {
             style={{ fontFamily: "'VCR OSD Mono', monospace" }}
           >
             can&apos;t find your username?{' '}
-            <a
-              href="/"
-              className="text-[#0047FF] hover:underline"
-            >
+            <a href="/" className="text-[#0047FF] hover:underline">
               scan now → mybrandos.app
             </a>
           </p>
@@ -579,7 +559,9 @@ export default function TierListClient({ tiers }: { tiers: Tiers }) {
                               className="w-full h-full object-cover"
                             />
                           ) : (
-                            <div className="w-full h-full bg-[#222] flex items-center justify-center text-[#555] text-xs">?</div>
+                            <div className="w-full h-full bg-[#222] flex items-center justify-center text-[#555] text-xs">
+                              ?
+                            </div>
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
@@ -729,7 +711,12 @@ export default function TierListClient({ tiers }: { tiers: Tiers }) {
         <div className="flex justify-center mt-8 opacity-[0.15]">
           <pre
             className="text-[9px] text-white text-center"
-            style={{ fontFamily: "'VCR OSD Mono', monospace", background: 'none', padding: 0, borderRadius: 0 }}
+            style={{
+              fontFamily: "'VCR OSD Mono', monospace",
+              background: 'none',
+              padding: 0,
+              borderRadius: 0,
+            }}
           >
             {`┌──────────────────────────────────┐
 │  BRANDOS TIER LIST v1.0          │

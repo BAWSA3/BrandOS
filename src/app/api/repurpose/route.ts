@@ -85,9 +85,7 @@ export async function POST(request: NextRequest) {
     // must not pass the allowlist and reach the paid prompt.
     const formats = Array.isArray(body.formats)
       ? body.formats
-          .filter(
-            (f): f is string => typeof f === 'string' && Object.hasOwn(formatInstructions, f)
-          )
+          .filter((f): f is string => typeof f === 'string' && Object.hasOwn(formatInstructions, f))
           .slice(0, MAX_FORMATS)
       : [];
 

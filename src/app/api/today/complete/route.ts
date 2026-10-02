@@ -24,10 +24,7 @@ export async function POST(request: Request) {
 
   const brief = await markBriefCompleted(briefId, user.id);
   if (!brief) {
-    return NextResponse.json(
-      { error: 'Brief not found or already completed' },
-      { status: 404 },
-    );
+    return NextResponse.json({ error: 'Brief not found or already completed' }, { status: 404 });
   }
 
   return NextResponse.json({ ok: true, completedAt: brief.completedAt });

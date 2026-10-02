@@ -3,11 +3,7 @@ import { geminiFlash, xBrandScorePrompt, XProfileData } from '@/lib/gemini';
 import { resolveArchetype } from '@/lib/archetype-engine';
 import { recordScan, extractIntelligence } from '@/lib/scan-tracking';
 import { brandScoreCache } from '@/lib/cache';
-import {
-  apiError,
-  apiSuccess,
-  apiOptionsHandler,
-} from '@/lib/api-auth';
+import { apiError, apiSuccess, apiOptionsHandler } from '@/lib/api-auth';
 import { assertCanScan } from '@/lib/scan-guard';
 import prisma from '@/lib/db';
 import { logSecurityEvent, getClientIp } from '@/lib/audit-log';
@@ -140,19 +136,23 @@ export async function scoreUsername(
   }
 
   // Build clean response
-  const archetype = brandScore.archetype as {
-    primary?: string;
-    emoji?: string;
-    tagline?: string;
-    description?: string;
-  } | undefined;
+  const archetype = brandScore.archetype as
+    | {
+        primary?: string;
+        emoji?: string;
+        tagline?: string;
+        description?: string;
+      }
+    | undefined;
 
-  const phases = brandScore.phases as {
-    define?: { score: number; insights: string[] };
-    check?: { score: number; insights: string[] };
-    generate?: { score: number; insights: string[] };
-    scale?: { score: number; insights: string[] };
-  } | undefined;
+  const phases = brandScore.phases as
+    | {
+        define?: { score: number; insights: string[] };
+        check?: { score: number; insights: string[] };
+        generate?: { score: number; insights: string[] };
+        scale?: { score: number; insights: string[] };
+      }
+    | undefined;
 
   return {
     data: {
@@ -246,24 +246,29 @@ export async function POST(request: NextRequest) {
     : null;
 
   if (intelligence) {
-    prisma.brandScan.create({
-      data: {
-        userId: guard.user.id,
-        workspaceId: guard.workspace.id,
-        platformConnectionId: guard.platformConnection.id,
-        xUsername: cleanUsername.toLowerCase(),
-        score: ((result.data as Record<string, unknown>)?.score as { overall?: number })?.overall ?? 0,
-        archetype: ((result.data as Record<string, unknown>)?.archetype as { name?: string })?.name ?? 'unknown',
-        phaseScores: intelligence.phaseScores ?? {},
-        strengths: intelligence.strengths ?? [],
-        improvements: intelligence.improvements ?? [],
-        insights: intelligence.insights ?? undefined,
-        summary: intelligence.summary ?? undefined,
-        influenceTier: intelligence.influenceTier ?? undefined,
-        nextMoves: intelligence.nextMoves ?? undefined,
-        contentPillars: intelligence.contentPillars ?? undefined,
-      },
-    }).catch((err) => console.error('[BrandScan] v1 write error:', err));
+    prisma.brandScan
+      .create({
+        data: {
+          userId: guard.user.id,
+          workspaceId: guard.workspace.id,
+          platformConnectionId: guard.platformConnection.id,
+          xUsername: cleanUsername.toLowerCase(),
+          score:
+            ((result.data as Record<string, unknown>)?.score as { overall?: number })?.overall ?? 0,
+          archetype:
+            ((result.data as Record<string, unknown>)?.archetype as { name?: string })?.name ??
+            'unknown',
+          phaseScores: intelligence.phaseScores ?? {},
+          strengths: intelligence.strengths ?? [],
+          improvements: intelligence.improvements ?? [],
+          insights: intelligence.insights ?? undefined,
+          summary: intelligence.summary ?? undefined,
+          influenceTier: intelligence.influenceTier ?? undefined,
+          nextMoves: intelligence.nextMoves ?? undefined,
+          contentPillars: intelligence.contentPillars ?? undefined,
+        },
+      })
+      .catch((err) => console.error('[BrandScan] v1 write error:', err));
   }
 
   await logSecurityEvent({
@@ -285,7 +290,9 @@ export async function POST(request: NextRequest) {
     is_first_scan: scanNumber === 1,
   });
 
-  return apiSuccess(result.data, { analyzedAt: (result.data as Record<string, unknown>)?.analyzedAt });
+  return apiSuccess(result.data, {
+    analyzedAt: (result.data as Record<string, unknown>)?.analyzedAt,
+  });
 }
 
 export async function OPTIONS() {

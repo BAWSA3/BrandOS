@@ -42,7 +42,17 @@ function FilmGrain() {
 
 // ── Canvas image generation ──
 async function generateTierRankImage(props: TierRankProps): Promise<Blob | null> {
-  const { username, score, archetype, profileImageUrl, rank, totalUsers, percentile, tierName, tierColor } = props;
+  const {
+    username,
+    score,
+    archetype,
+    profileImageUrl,
+    rank,
+    totalUsers,
+    percentile,
+    tierName,
+    tierColor,
+  } = props;
 
   const W = 1200;
   const H = 630;
@@ -86,7 +96,11 @@ async function generateTierRankImage(props: TierRankProps): Promise<Blob | null>
   // Separator
   ctx.fillStyle = 'rgba(255,255,255,0.15)';
   ctx.font = '12px monospace';
-  ctx.fillText('/* ════════════════════════════════════════════════════════════════════ */', 56, 80);
+  ctx.fillText(
+    '/* ════════════════════════════════════════════════════════════════════ */',
+    56,
+    80
+  );
 
   // Profile picture
   const pfpX = 56;
@@ -183,7 +197,10 @@ async function generateTierRankImage(props: TierRankProps): Promise<Blob | null>
   ctx.fillStyle = tierColor + '20';
   ctx.strokeStyle = tierColor + '60';
   ctx.lineWidth = 1;
-  const bx = 56, by = badgeY, bw = badgeWidth + 40, bh = 36;
+  const bx = 56,
+    by = badgeY,
+    bw = badgeWidth + 40,
+    bh = 36;
   ctx.beginPath();
   ctx.roundRect(bx, by, bw, bh, 4);
   ctx.fill();
@@ -286,7 +303,17 @@ async function copyImageToClipboard(blob: Blob): Promise<boolean> {
 }
 
 export default function TierRankClient(props: TierRankProps) {
-  const { username, score, archetype, rank, totalUsers, percentile, tierName, tierColor, profileImageUrl } = props;
+  const {
+    username,
+    score,
+    archetype,
+    rank,
+    totalUsers,
+    percentile,
+    tierName,
+    tierColor,
+    profileImageUrl,
+  } = props;
 
   const [isCopied, setIsCopied] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -427,7 +454,11 @@ export default function TierRankClient(props: TierRankProps) {
               </div>
               <p
                 className="text-sm tracking-wide"
-                style={{ fontFamily: "'VCR OSD Mono', monospace", color: tierColor, letterSpacing: '0.05em' }}
+                style={{
+                  fontFamily: "'VCR OSD Mono', monospace",
+                  color: tierColor,
+                  letterSpacing: '0.05em',
+                }}
               >
                 {scoreBar}
               </p>
@@ -504,7 +535,13 @@ export default function TierRankClient(props: TierRankProps) {
                 className="flex-1 text-center py-3 rounded font-bold text-[11px] tracking-[0.1em] transition-colors bg-[#0047FF] hover:bg-[#0035cc] text-white disabled:opacity-50"
                 style={{ fontFamily: "'VCR OSD Mono', monospace" }}
               >
-                {isGenerating ? 'GENERATING...' : isCopied ? 'COPIED TO CLIPBOARD' : copySupported ? 'COPY IMAGE' : 'DOWNLOAD IMAGE'}
+                {isGenerating
+                  ? 'GENERATING...'
+                  : isCopied
+                    ? 'COPIED TO CLIPBOARD'
+                    : copySupported
+                      ? 'COPY IMAGE'
+                      : 'DOWNLOAD IMAGE'}
               </button>
               <button
                 onClick={handleDownload}

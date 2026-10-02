@@ -53,9 +53,12 @@ export default function AuditResultsClient({ sessionId }: { sessionId: string })
           This takes about 30 seconds. Pulling your last 50 tweets and running deep analysis.
         </p>
         <div className="mt-8 font-mono text-xs text-neutral-500">
-          [████░░░░░░░░] fetching tweets<br />
-          [░░░░░░░░░░░░] analyzing phases<br />
-          [░░░░░░░░░░░░] generating rewrites<br />
+          [████░░░░░░░░] fetching tweets
+          <br />
+          [░░░░░░░░░░░░] analyzing phases
+          <br />
+          [░░░░░░░░░░░░] generating rewrites
+          <br />
           [░░░░░░░░░░░░] finalizing report
         </div>
       </main>
@@ -175,9 +178,7 @@ export default function AuditResultsClient({ sessionId }: { sessionId: string })
         <div className="mt-3 space-y-5">
           {audit.flaggedTweets.map((t, i) => (
             <div key={i} className="rounded border border-neutral-200 p-4">
-              <p className="font-mono text-[10px] uppercase text-neutral-500">
-                original
-              </p>
+              <p className="font-mono text-[10px] uppercase text-neutral-500">original</p>
               <p className="mt-1 whitespace-pre-wrap text-sm">{t.original}</p>
               <p className="mt-3 font-mono text-[10px] uppercase text-red-600">issue</p>
               <p className="mt-1 text-sm">{t.issue}</p>

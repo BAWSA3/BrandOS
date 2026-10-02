@@ -12,7 +12,9 @@ function UnsubscribeContent() {
     alreadyUnsubscribed ? 'success' : 'idle'
   );
   const [message, setMessage] = useState(
-    alreadyUnsubscribed ? 'You have been unsubscribed. You won\'t receive any more emails from us.' : ''
+    alreadyUnsubscribed
+      ? "You have been unsubscribed. You won't receive any more emails from us."
+      : ''
   );
 
   async function handleUnsubscribe(e: React.FormEvent) {
@@ -30,7 +32,7 @@ function UnsubscribeContent() {
 
       if (res.ok) {
         setStatus('success');
-        setMessage('You have been unsubscribed. You won\'t receive any more emails from us.');
+        setMessage("You have been unsubscribed. You won't receive any more emails from us.");
       } else {
         setStatus('error');
         setMessage(data.error || 'Something went wrong.');
@@ -54,9 +56,7 @@ function UnsubscribeContent() {
       }}
     >
       <div style={{ maxWidth: 480, width: '100%', textAlign: 'center' }}>
-        <h1 style={{ fontSize: 20, fontWeight: 600, marginBottom: 8 }}>
-          BrandOS — Unsubscribe
-        </h1>
+        <h1 style={{ fontSize: 20, fontWeight: 600, marginBottom: 8 }}>BrandOS — Unsubscribe</h1>
 
         {status === 'success' ? (
           <div style={{ marginTop: 24 }}>

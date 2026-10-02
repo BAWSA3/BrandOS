@@ -40,8 +40,8 @@ export default async function TodayPage() {
             <p className="text-xs text-gray-500">// brandos / today</p>
             <h1 className="text-2xl font-bold">No scan on file yet.</h1>
             <p className="text-sm text-gray-700">
-              Your daily brief is generated from your most recent BrandOS scan. Run one first
-              and your brief will be ready in seconds.
+              Your daily brief is generated from your most recent BrandOS scan. Run one first and
+              your brief will be ready in seconds.
             </p>
             <Link
               href="/"
@@ -92,13 +92,19 @@ export default async function TodayPage() {
         </header>
 
         {streak === 3 && (
-          <p className="text-xs px-3 py-2 bg-black text-white inline-block">3 days. you&apos;re in.</p>
+          <p className="text-xs px-3 py-2 bg-black text-white inline-block">
+            3 days. you&apos;re in.
+          </p>
         )}
         {streak === 7 && (
-          <p className="text-xs px-3 py-2 bg-black text-white inline-block">7 days straight. real shift.</p>
+          <p className="text-xs px-3 py-2 bg-black text-white inline-block">
+            7 days straight. real shift.
+          </p>
         )}
         {streak === 30 && (
-          <p className="text-xs px-3 py-2 bg-black text-white inline-block">30 days. you&apos;re built different now.</p>
+          <p className="text-xs px-3 py-2 bg-black text-white inline-block">
+            30 days. you&apos;re built different now.
+          </p>
         )}
 
         <section className="border border-black/10 p-5 space-y-2">
@@ -109,7 +115,9 @@ export default async function TodayPage() {
         <section className="border border-black/10 p-5 space-y-2">
           <p className="text-xs uppercase tracking-wider text-gray-500">2 / metric</p>
           <p className="text-base">
-            <span className="font-bold">{PHASE_LABELS[brief.weakestPhase] ?? brief.weakestPhase}</span>{' '}
+            <span className="font-bold">
+              {PHASE_LABELS[brief.weakestPhase] ?? brief.weakestPhase}
+            </span>{' '}
             = {brief.weakestPhaseScore}/100
           </p>
           <p className="text-sm text-gray-700">
@@ -123,9 +131,7 @@ export default async function TodayPage() {
           <TodayClient briefId={brief.id} initiallyCompleted={completed} />
         </section>
 
-        <footer className="text-xs text-gray-500 pt-4">
-          New brief tomorrow at 00:00 UTC.
-        </footer>
+        <footer className="text-xs text-gray-500 pt-4">New brief tomorrow at 00:00 UTC.</footer>
       </div>
     </main>
   );

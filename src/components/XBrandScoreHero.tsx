@@ -766,8 +766,17 @@ export default function XBrandScoreHero({
   const [accountAuthenticity, setAccountAuthenticity] = useState<AuthenticityAnalysis | null>(null);
   const [accountActivity, setAccountActivity] = useState<ActivityAnalysis | null>(null);
   const [postDiagnosis, setPostDiagnosis] = useState<{
-    strongPosts: { text: string; metrics: { likes: number; retweets: number; replies: number }; why: string }[];
-    weakPosts: { text: string; metrics: { likes: number; retweets: number; replies: number }; why: string; fix: string }[];
+    strongPosts: {
+      text: string;
+      metrics: { likes: number; retweets: number; replies: number };
+      why: string;
+    }[];
+    weakPosts: {
+      text: string;
+      metrics: { likes: number; retweets: number; replies: number };
+      why: string;
+      fix: string;
+    }[];
     overallDiagnosis: string;
   } | null>(null);
   const [rawTweets, setRawTweets] = useState<
@@ -798,7 +807,11 @@ export default function XBrandScoreHero({
   // Compare state (coming soon)
   const [compareUsername, setCompareUsername] = useState('');
 
-  const apiResultRef = useRef<{ profile: XProfileData; brandScore: BrandScoreResult; meta?: Record<string, unknown> } | null>(null);
+  const apiResultRef = useRef<{
+    profile: XProfileData;
+    brandScore: BrandScoreResult;
+    meta?: Record<string, unknown>;
+  } | null>(null);
   const apiCompleteRef = useRef(false);
   const apiErrorRef = useRef<string | null>(null);
   const rawTweetsRef = useRef<typeof rawTweets>([]);
@@ -912,7 +925,8 @@ export default function XBrandScoreHero({
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                   profile: data.profile,
-                  tweets: rawTweetsRef.current.length > 0 ? rawTweetsRef.current.slice(0, 40) : undefined,
+                  tweets:
+                    rawTweetsRef.current.length > 0 ? rawTweetsRef.current.slice(0, 40) : undefined,
                 }),
               });
               const identityData = await identityResponse.json();

@@ -30,14 +30,17 @@ type DeepPartial<T> = {
 
 export function resolveCustomWorld(
   base: WorldManifest,
-  overrides: DeepPartial<WorldManifest> | Record<string, unknown>,
+  overrides: DeepPartial<WorldManifest> | Record<string, unknown>
 ): WorldManifest {
-  return deepMerge(base as unknown as Record<string, unknown>, overrides as Record<string, unknown>) as unknown as WorldManifest;
+  return deepMerge(
+    base as unknown as Record<string, unknown>,
+    overrides as Record<string, unknown>
+  ) as unknown as WorldManifest;
 }
 
 function deepMerge(
   target: Record<string, unknown>,
-  source: Record<string, unknown>,
+  source: Record<string, unknown>
 ): Record<string, unknown> {
   const result: Record<string, unknown> = { ...target };
   for (const key in source) {
@@ -53,7 +56,7 @@ function deepMerge(
     ) {
       result[key] = deepMerge(
         targetVal as Record<string, unknown>,
-        sourceVal as Record<string, unknown>,
+        sourceVal as Record<string, unknown>
       );
     } else if (sourceVal !== undefined) {
       result[key] = sourceVal;

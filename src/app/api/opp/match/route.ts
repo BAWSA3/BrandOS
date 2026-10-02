@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { checkRateLimit, getClientIdentifier, rateLimiters } from '@/lib/rate-limit';
 import supabase from '@/lib/supabase';
-import {
-  findInteractionBasedOpp,
-  type MutualInteractionResult,
-} from '@/lib/interaction-scanner';
+import { findInteractionBasedOpp, type MutualInteractionResult } from '@/lib/interaction-scanner';
 
 const SCORE_CHANGE_THRESHOLD = 5;
 

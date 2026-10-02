@@ -51,7 +51,10 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     usernames = body.usernames;
   } catch {
-    return apiError('Invalid request body. Expected JSON with { "usernames": ["handle1", "handle2"] }', 400);
+    return apiError(
+      'Invalid request body. Expected JSON with { "usernames": ["handle1", "handle2"] }',
+      400
+    );
   }
 
   if (!Array.isArray(usernames) || usernames.length === 0) {
@@ -91,10 +94,7 @@ export async function POST(request: NextRequest) {
   const latencyMs = Date.now() - startTime;
   recordApiUsage(auth.apiKey, '/v1/batch', 'POST', 200, latencyMs, `batch:${usernames.length}`);
 
-  return apiSuccess(
-    { results: scores },
-    { total: usernames.length, succeeded, failed }
-  );
+  return apiSuccess({ results: scores }, { total: usernames.length, succeeded, failed });
 }
 
 export async function OPTIONS() {
