@@ -1,26 +1,27 @@
 import { getAppEnv } from '@/lib/app-env';
 
-const ENV_STYLE: Record<string, { label: string; bg: string; border: string; fg: string } | null> = {
-  production: null,
-  staging: {
-    label: 'STAGING — not production. Data here is isolated from real users.',
-    bg: '#FFB000',
-    border: '#7A5400',
-    fg: '#1a1a00',
-  },
-  preview: {
-    label: 'PREVIEW — branch deploy. Do not use real credentials.',
-    bg: '#7C3AED',
-    border: '#4C1D95',
-    fg: '#ffffff',
-  },
-  development: {
-    label: 'DEV — local environment.',
-    bg: '#10B981',
-    border: '#065F46',
-    fg: '#ffffff',
-  },
-};
+const ENV_STYLE: Record<string, { label: string; bg: string; border: string; fg: string } | null> =
+  {
+    production: null,
+    staging: {
+      label: 'STAGING — not production. Data here is isolated from real users.',
+      bg: '#FFB000',
+      border: '#7A5400',
+      fg: '#1a1a00',
+    },
+    preview: {
+      label: 'PREVIEW — branch deploy. Do not use real credentials.',
+      bg: '#7C3AED',
+      border: '#4C1D95',
+      fg: '#ffffff',
+    },
+    development: {
+      label: 'DEV — local environment.',
+      bg: '#10B981',
+      border: '#065F46',
+      fg: '#ffffff',
+    },
+  };
 
 export default function EnvBanner() {
   const env = getAppEnv();

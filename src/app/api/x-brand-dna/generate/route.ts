@@ -249,8 +249,7 @@ function detectPersonalityType(
     (geminiBrandDNA?.differentiationScore || 50) * 0.2;
 
   // SOURCE: Educational content, helpful, clear explanations
-  scores.source =
-    tv.educational * 0.6 + tv.approachable * 0.25 + (100 - tv.promotional) * 0.15;
+  scores.source = tv.educational * 0.6 + tv.approachable * 0.25 + (100 - tv.promotional) * 0.15;
 
   // ENTROPY: Playful, casual, high energy, risk-taking content
   scores.entropy =
@@ -314,7 +313,10 @@ function stripPromptLeaks(text: string): string {
     cleaned = cleaned.replace(pattern, '');
   }
 
-  return cleaned.replace(/\n{3,}/g, '\n\n').replace(/ {2,}/g, ' ').trim();
+  return cleaned
+    .replace(/\n{3,}/g, '\n\n')
+    .replace(/ {2,}/g, ' ')
+    .trim();
 }
 
 // Generate AI personality summary using Claude API

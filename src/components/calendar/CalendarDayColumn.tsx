@@ -116,7 +116,9 @@ export default function CalendarDayColumn({
               fontSize: 13,
               fontWeight: isToday ? 600 : 500,
               color: isToday ? 'var(--accent)' : 'var(--text-primary)',
-              background: isToday ? 'color-mix(in srgb, var(--accent) 12%, transparent)' : 'transparent',
+              background: isToday
+                ? 'color-mix(in srgb, var(--accent) 12%, transparent)'
+                : 'transparent',
               borderRadius: 6,
               padding: isToday ? '1px 6px' : '0',
             }}

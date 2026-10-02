@@ -119,7 +119,11 @@ export async function POST(request: NextRequest) {
         text: t.text,
         created_at: t.created_at,
         public_metrics: t.public_metrics || {
-          like_count: 0, retweet_count: 0, reply_count: 0, quote_count: 0, impression_count: 0,
+          like_count: 0,
+          retweet_count: 0,
+          reply_count: 0,
+          quote_count: 0,
+          impression_count: 0,
         },
         entities: t.entities,
       }));

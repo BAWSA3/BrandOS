@@ -75,14 +75,16 @@ export async function GET(request: NextRequest) {
     const avatar = session.user.user_metadata?.avatar_url || session.user.user_metadata?.picture;
 
     // Extract X-specific data (only present for twitter provider)
-    const xUsername = provider === 'twitter'
-      ? (session.user.user_metadata?.user_name ||
-         session.user.user_metadata?.preferred_username ||
-         session.user.user_metadata?.screen_name)
-      : null;
-    const xId = provider === 'twitter'
-      ? (session.user.user_metadata?.provider_id || session.user.user_metadata?.sub)
-      : null;
+    const xUsername =
+      provider === 'twitter'
+        ? session.user.user_metadata?.user_name ||
+          session.user.user_metadata?.preferred_username ||
+          session.user.user_metadata?.screen_name
+        : null;
+    const xId =
+      provider === 'twitter'
+        ? session.user.user_metadata?.provider_id || session.user.user_metadata?.sub
+        : null;
 
     // Invite code redemption
     const pendingInviteCode = cookieStore.get('pendingInviteCode')?.value;
@@ -132,16 +134,12 @@ export async function GET(request: NextRequest) {
       where: { supabaseId: session.user.id },
     });
 
-    const migrationStatus = existingUser
-      ? existingUser.accountMigrationStatus
-      : 'completed'; // new users start as completed (no legacy migration needed)
+    const migrationStatus = existingUser ? existingUser.accountMigrationStatus : 'completed'; // new users start as completed (no legacy migration needed)
 
     // Record TOS acknowledgment on first acceptance only (never overwrite an
     // earlier acceptance timestamp — it's the auditable legal record).
     const recordTos = tosVersion !== null && !existingUser?.tosAcceptedAt;
-    const tosFields = recordTos
-      ? { tosAcceptedAt: new Date(), tosVersion }
-      : {};
+    const tosFields = recordTos ? { tosAcceptedAt: new Date(), tosVersion } : {};
 
     // Upsert user — xUsername/xId are nullable for non-X-first signups
     const user = await prisma.user.upsert({
@@ -170,7 +168,10 @@ export async function GET(request: NextRequest) {
     });
 
     // Ensure personal workspace
-    const workspace = await ensurePersonalWorkspace(user.id, name || xUsername || email?.split('@')[0]);
+    const workspace = await ensurePersonalWorkspace(
+      user.id,
+      name || xUsername || email?.split('@')[0]
+    );
 
     // Auto-connect X account if this is an X OAuth login
     if (provider === 'twitter' && xUsername && xId) {

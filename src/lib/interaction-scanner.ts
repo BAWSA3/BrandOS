@@ -5,11 +5,7 @@
  * then extracts and ranks interaction targets by frequency.
  */
 
-import {
-  fetchProfile,
-  isSocialDataConfigured,
-  type SocialDataTweet,
-} from './socialdata';
+import { fetchProfile, isSocialDataConfigured, type SocialDataTweet } from './socialdata';
 
 const SOCIALDATA_BASE = 'https://api.socialdata.tools';
 
@@ -48,10 +44,10 @@ export interface MutualInteractionResult {
 // ---------------------------------------------------------------------------
 
 const WEIGHTS = {
-  reply: 3,     // replying = strongest signal
+  reply: 3, // replying = strongest signal
   quoteTweet: 2, // QRT = strong engagement
-  mention: 1,    // mention in original tweet
-  retweet: 1,    // RT = acknowledgment
+  mention: 1, // mention in original tweet
+  retweet: 1, // RT = acknowledgment
 };
 
 // ---------------------------------------------------------------------------
@@ -213,19 +209,34 @@ export async function scanInteractions(
   maxTweets: number = 100
 ): Promise<InteractionScanResult> {
   if (!isSocialDataConfigured()) {
-    return { username, topInteractors: [], totalTweetsScanned: 0, error: 'SocialData not configured' };
+    return {
+      username,
+      topInteractors: [],
+      totalTweetsScanned: 0,
+      error: 'SocialData not configured',
+    };
   }
 
   // Resolve username to user ID
   const profileResult = await fetchProfile(username);
   if (!profileResult.profile) {
-    return { username, topInteractors: [], totalTweetsScanned: 0, error: profileResult.error || 'User not found' };
+    return {
+      username,
+      topInteractors: [],
+      totalTweetsScanned: 0,
+      error: profileResult.error || 'User not found',
+    };
   }
 
   // Fetch tweets WITH replies/RTs
   const { tweets, error } = await fetchAllTweets(profileResult.profile.id, maxTweets);
   if (error || tweets.length === 0) {
-    return { username, topInteractors: [], totalTweetsScanned: 0, error: error || 'No tweets found' };
+    return {
+      username,
+      topInteractors: [],
+      totalTweetsScanned: 0,
+      error: error || 'No tweets found',
+    };
   }
 
   // Extract and rank
@@ -249,7 +260,7 @@ export async function confirmMutualInteraction(
   scanA?: InteractionScanResult
 ): Promise<MutualInteractionResult | null> {
   // Scan A if not already provided
-  const resultA = scanA || await scanInteractions(userA);
+  const resultA = scanA || (await scanInteractions(userA));
   if (resultA.error) return null;
 
   // Find B in A's interactions
@@ -309,11 +320,7 @@ export async function findInteractionBasedOpp(
   const candidates = scan.topInteractors.slice(0, 5);
 
   for (const candidate of candidates) {
-    const mutual = await confirmMutualInteraction(
-      username,
-      candidate.username,
-      scan
-    );
+    const mutual = await confirmMutualInteraction(username, candidate.username, scan);
     if (mutual && mutual.mutualScore > 0) {
       return { opp: candidate.username, mutualData: mutual };
     }

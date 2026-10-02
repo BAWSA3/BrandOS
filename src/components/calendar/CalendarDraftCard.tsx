@@ -4,9 +4,21 @@ import { useState } from 'react';
 import type { CalendarDraft } from '@/hooks/useCalendarDrafts';
 
 const statusColors: Record<string, { bg: string; text: string; label: string }> = {
-  idea: { bg: 'color-mix(in srgb, var(--warning) 12%, transparent)', text: 'var(--warning)', label: 'Idea' },
-  draft: { bg: 'color-mix(in srgb, var(--accent) 12%, transparent)', text: 'var(--accent)', label: 'Draft' },
-  scheduled: { bg: 'color-mix(in srgb, var(--success) 12%, transparent)', text: 'var(--success)', label: 'Scheduled' },
+  idea: {
+    bg: 'color-mix(in srgb, var(--warning) 12%, transparent)',
+    text: 'var(--warning)',
+    label: 'Idea',
+  },
+  draft: {
+    bg: 'color-mix(in srgb, var(--accent) 12%, transparent)',
+    text: 'var(--accent)',
+    label: 'Draft',
+  },
+  scheduled: {
+    bg: 'color-mix(in srgb, var(--success) 12%, transparent)',
+    text: 'var(--success)',
+    label: 'Scheduled',
+  },
   published: {
     bg: 'color-mix(in srgb, var(--text-tertiary) 12%, transparent)',
     text: 'var(--text-tertiary)',
@@ -16,10 +28,16 @@ const statusColors: Record<string, { bg: string; text: string; label: string }> 
 
 const toneColors: Record<string, { bg: string; text: string }> = {
   'hot-take': { bg: 'color-mix(in srgb, var(--danger) 12%, transparent)', text: 'var(--danger)' },
-  educational: { bg: 'color-mix(in srgb, var(--success) 12%, transparent)', text: 'var(--success)' },
+  educational: {
+    bg: 'color-mix(in srgb, var(--success) 12%, transparent)',
+    text: 'var(--success)',
+  },
   casual: { bg: 'color-mix(in srgb, var(--accent) 12%, transparent)', text: 'var(--accent)' },
   launch: { bg: 'color-mix(in srgb, var(--accent) 12%, transparent)', text: 'var(--accent)' },
-  'behind-the-scenes': { bg: 'color-mix(in srgb, var(--warning) 12%, transparent)', text: 'var(--warning)' },
+  'behind-the-scenes': {
+    bg: 'color-mix(in srgb, var(--warning) 12%, transparent)',
+    text: 'var(--warning)',
+  },
   announcement: { bg: 'color-mix(in srgb, var(--accent) 12%, transparent)', text: 'var(--accent)' },
   thread: {
     bg: 'color-mix(in srgb, var(--text-tertiary) 12%, transparent)',
@@ -27,7 +45,10 @@ const toneColors: Record<string, { bg: string; text: string }> = {
   },
   poll: { bg: 'color-mix(in srgb, var(--accent) 12%, transparent)', text: 'var(--accent)' },
   story: { bg: 'color-mix(in srgb, var(--warning) 12%, transparent)', text: 'var(--warning)' },
-  'counter-argument': { bg: 'color-mix(in srgb, var(--danger) 12%, transparent)', text: 'var(--danger)' },
+  'counter-argument': {
+    bg: 'color-mix(in srgb, var(--danger) 12%, transparent)',
+    text: 'var(--danger)',
+  },
 };
 
 interface CalendarDraftCardProps {

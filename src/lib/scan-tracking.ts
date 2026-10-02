@@ -56,12 +56,14 @@ export interface BrandScanRecord {
  * Extract intelligence data from a Gemini brandScore response
  */
 export function extractIntelligence(brandScore: Record<string, unknown>): ScanIntelligence {
-  const phases = brandScore.phases as {
-    define?: { score: number; insights: string[] };
-    check?: { score: number; insights: string[] };
-    generate?: { score: number; insights: string[] };
-    scale?: { score: number; insights: string[] };
-  } | undefined;
+  const phases = brandScore.phases as
+    | {
+        define?: { score: number; insights: string[] };
+        check?: { score: number; insights: string[] };
+        generate?: { score: number; insights: string[] };
+        scale?: { score: number; insights: string[] };
+      }
+    | undefined;
 
   return {
     phaseScores: phases
@@ -108,20 +110,14 @@ export async function recordScan(scan: {
       phase_scores: scan.intelligence?.phaseScores
         ? JSON.stringify(scan.intelligence.phaseScores)
         : null,
-      insights: scan.intelligence?.insights
-        ? JSON.stringify(scan.intelligence.insights)
-        : null,
-      strengths: scan.intelligence?.strengths
-        ? JSON.stringify(scan.intelligence.strengths)
-        : null,
+      insights: scan.intelligence?.insights ? JSON.stringify(scan.intelligence.insights) : null,
+      strengths: scan.intelligence?.strengths ? JSON.stringify(scan.intelligence.strengths) : null,
       improvements: scan.intelligence?.improvements
         ? JSON.stringify(scan.intelligence.improvements)
         : null,
       summary: scan.intelligence?.summary || null,
       influence_tier: scan.intelligence?.influenceTier || null,
-      next_moves: scan.intelligence?.nextMoves
-        ? JSON.stringify(scan.intelligence.nextMoves)
-        : null,
+      next_moves: scan.intelligence?.nextMoves ? JSON.stringify(scan.intelligence.nextMoves) : null,
       content_pillars: scan.intelligence?.contentPillars
         ? JSON.stringify(scan.intelligence.contentPillars)
         : null,

@@ -1,9 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import {
-  fetchTweetsByUsername,
-  fetchUserTweets,
-  isSocialDataConfigured,
-} from '@/lib/socialdata';
+import { fetchTweetsByUsername, fetchUserTweets, isSocialDataConfigured } from '@/lib/socialdata';
 import { getClientIdentifier, checkRateLimit, rateLimiters } from '@/lib/rate-limit';
 import { isInternalRequest } from '@/lib/internal-auth';
 import { tweetsCache } from '@/lib/cache';
@@ -78,7 +74,7 @@ export async function POST(request: NextRequest) {
       if (limited) {
         return NextResponse.json(
           { error: 'Too many requests. Please try again later.' },
-          { status: 429, headers: { 'Retry-After': Math.ceil(resetIn / 1000).toString() } },
+          { status: 429, headers: { 'Retry-After': Math.ceil(resetIn / 1000).toString() } }
         );
       }
     }
@@ -131,11 +127,17 @@ export async function POST(request: NextRequest) {
 
       let targetUserId = userId;
       if (!targetUserId && username) {
-        const userResponse = await fetch(`https://api.twitter.com/2/users/by/username/${username}`, {
-          headers: { Authorization: `Bearer ${bearerToken}` },
-        });
+        const userResponse = await fetch(
+          `https://api.twitter.com/2/users/by/username/${username}`,
+          {
+            headers: { Authorization: `Bearer ${bearerToken}` },
+          }
+        );
         if (!userResponse.ok) {
-          return NextResponse.json({ error: 'Failed to find user' }, { status: userResponse.status });
+          return NextResponse.json(
+            { error: 'Failed to find user' },
+            { status: userResponse.status }
+          );
         }
         const userData = await userResponse.json();
         targetUserId = userData.data?.id;
@@ -153,11 +155,17 @@ export async function POST(request: NextRequest) {
       if (!tweetsResponse.ok) {
         if (tweetsResponse.status === 403) {
           return NextResponse.json(
-            { error: 'Tweet access unavailable. Configure SOCIALDATA_API_KEY or upgrade X API tier.' },
+            {
+              error:
+                'Tweet access unavailable. Configure SOCIALDATA_API_KEY or upgrade X API tier.',
+            },
             { status: 403 }
           );
         }
-        return NextResponse.json({ error: 'Failed to fetch tweets' }, { status: tweetsResponse.status });
+        return NextResponse.json(
+          { error: 'Failed to fetch tweets' },
+          { status: tweetsResponse.status }
+        );
       }
 
       const tweetsData = await tweetsResponse.json();

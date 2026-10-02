@@ -8,15 +8,7 @@ export interface TierUser {
   profileImageUrl: string | null;
 }
 
-const BOT_PATTERNS = [
-  /^bot_/i,
-  /bot$/i,
-  /_bot_/i,
-  /^test/i,
-  /^fake/i,
-  /^spam/i,
-  /\d{8,}/,
-];
+const BOT_PATTERNS = [/^bot_/i, /bot$/i, /_bot_/i, /^test/i, /^fake/i, /^spam/i, /\d{8,}/];
 
 const EMPTY_TIERS = {
   tierUsers: [] as TierUser[],
@@ -80,26 +72,18 @@ function buildTiers(
   userMap: Map<string, { username: string; score: number; archetype: string | null }>,
   cachedProfiles: { username: string; profileData: string }[]
 ) {
-
   // Get cached profile pictures
   const profileMap = new Map<string, string>();
 
   for (const profile of cachedProfiles) {
     try {
       const data = JSON.parse(profile.profileData);
-      const pfp =
-        data.profileImageUrl ||
-        data.profile_image_url ||
-        data.avatar ||
-        null;
+      const pfp = data.profileImageUrl || data.profile_image_url || data.avatar || null;
       if (pfp) {
         // Use _200x200 instead of _400x400 — more reliably available on Twitter CDN
         // Also strip any existing size suffix first to normalize
         const normalized = pfp.replace(/_(?:normal|bigger|mini|200x200|400x400)\./i, '_200x200.');
-        profileMap.set(
-          profile.username.toLowerCase(),
-          normalized
-        );
+        profileMap.set(profile.username.toLowerCase(), normalized);
       }
     } catch {
       // skip

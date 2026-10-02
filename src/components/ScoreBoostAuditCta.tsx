@@ -32,8 +32,7 @@ const PHASE_LABEL: Record<PhaseKey, string> = {
 
 function getWeakestPhase(scores: Record<PhaseKey, number>): PhaseKey {
   return (Object.entries(scores) as [PhaseKey, number][]).reduce(
-    (weakest, [phase, score]) =>
-      score < scores[weakest] ? phase : weakest,
+    (weakest, [phase, score]) => (score < scores[weakest] ? phase : weakest),
     'define' as PhaseKey
   );
 }
@@ -111,10 +110,9 @@ export default function ScoreBoostAuditCta({ handle, phaseScores }: Props) {
           margin: '0 0 14px 0',
         }}
       >
-        Get a tweet-by-tweet audit with evidence-backed suggestions,
-        phase breakdown, and a personalized action plan. Downloadable as
-        a markdown file you can drop into Claude or ChatGPT as your
-        voice guide.
+        Get a tweet-by-tweet audit with evidence-backed suggestions, phase breakdown, and a
+        personalized action plan. Downloadable as a markdown file you can drop into Claude or
+        ChatGPT as your voice guide.
       </p>
       <button
         onClick={handleClick}

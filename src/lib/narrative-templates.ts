@@ -13,11 +13,12 @@ import { type ArchetypeInfo } from './archetype-descriptions';
 // =============================================================================
 
 export function getArchetypeIdentityNarrative(info: ArchetypeInfo): string {
-  const rarityText = info.rarity <= 8
-    ? `Only ${info.rarity}% of creators are ${info.name} — one of the rarest archetypes in BrandOS.`
-    : info.rarity <= 15
-    ? `${info.rarity}% of creators share your archetype. ${info.name} is uncommon — and that's your edge.`
-    : `${info.rarity}% of creators are ${info.name}. It's a common archetype, but the best ones stand out by leaning into it harder than anyone else.`;
+  const rarityText =
+    info.rarity <= 8
+      ? `Only ${info.rarity}% of creators are ${info.name} — one of the rarest archetypes in BrandOS.`
+      : info.rarity <= 15
+        ? `${info.rarity}% of creators share your archetype. ${info.name} is uncommon — and that's your edge.`
+        : `${info.rarity}% of creators are ${info.name}. It's a common archetype, but the best ones stand out by leaning into it harder than anyone else.`;
 
   const traitsText = info.traits.join(', ').toLowerCase();
 
@@ -30,19 +31,22 @@ export function getArchetypeIdentityNarrative(info: ArchetypeInfo): string {
 
 const PHASE_CONTEXT: Record<string, { strong: string; weak: string }> = {
   define: {
-    strong: 'Your audience knows exactly what you stand for. Your niche is clear and your content pillars are established.',
+    strong:
+      'Your audience knows exactly what you stand for. Your niche is clear and your content pillars are established.',
     weak: 'Your timeline doesn\'t yet have a clear "this is what I\'m about" signal. People follow you, but they might not be able to explain why in one sentence.',
   },
   check: {
-    strong: 'Your voice is consistent and recognizable. People can tell it\'s you without seeing the handle.',
+    strong:
+      "Your voice is consistent and recognizable. People can tell it's you without seeing the handle.",
     weak: 'Your voice drifts between posts. Some sound analytical, others casual, others like a different person. Consistency builds trust.',
   },
   generate: {
     strong: 'Your output is strong — consistent posting, quality content, effective formats.',
-    weak: 'Your content output needs work — either volume, format variety, or originality. The ideas might be there but the execution isn\'t landing yet.',
+    weak: "Your content output needs work — either volume, format variety, or originality. The ideas might be there but the execution isn't landing yet.",
   },
   scale: {
-    strong: 'Your reputation signals are healthy — good follower ratio, authority indicators, and growth trajectory.',
+    strong:
+      'Your reputation signals are healthy — good follower ratio, authority indicators, and growth trajectory.',
     weak: 'Your growth signals are lagging — this usually means the content is good but not enough people are seeing it yet.',
   },
 };
@@ -110,17 +114,20 @@ export function getEvolutionNarrative(
   }
 
   const paths = info.evolutionPaths;
-  const pathText = paths.length === 1
-    ? `Your next evolution is ${paths[0]}.`
-    : `Your potential evolutions are ${paths.slice(0, -1).join(', ')} or ${paths[paths.length - 1]}.`;
+  const pathText =
+    paths.length === 1
+      ? `Your next evolution is ${paths[0]}.`
+      : `Your potential evolutions are ${paths.slice(0, -1).join(', ')} or ${paths[paths.length - 1]}.`;
 
   let readinessText = '';
   if (currentScore >= 80) {
-    readinessText = ' Your score suggests you\'re approaching evolution territory.';
+    readinessText = " Your score suggests you're approaching evolution territory.";
   } else if (currentScore >= 65) {
-    readinessText = ' Keep building — evolution typically happens when your score consistently hits 80+.';
+    readinessText =
+      ' Keep building — evolution typically happens when your score consistently hits 80+.';
   } else {
-    readinessText = ' Focus on strengthening your current archetype before thinking about evolution.';
+    readinessText =
+      ' Focus on strengthening your current archetype before thinking about evolution.';
   }
 
   let timeText = '';
@@ -141,17 +148,23 @@ export function getEvolutionNarrative(
 
 export function getEmptyStateMessage(section: string, totalScans: number): string {
   const messages: Record<string, string> = {
-    phases: totalScans <= 1
-      ? 'Run a fresh scan to generate your phase analysis. Your first scan captures the baseline.'
-      : 'Phase data not available for this scan. Run a new scan to generate it.',
+    phases:
+      totalScans <= 1
+        ? 'Run a fresh scan to generate your phase analysis. Your first scan captures the baseline.'
+        : 'Phase data not available for this scan. Run a new scan to generate it.',
     strengths: 'Strengths are detected during scanning. Run a new scan to identify yours.',
-    nextMoves: 'Your next moves are generated during scanning. Run a fresh scan to get personalized action items.',
-    contentPillars: 'Content pillars are detected by analyzing your timeline. Run a scan to identify your recurring themes.',
-    patterns: 'Pattern intelligence needs more data from your archetype cohort. As more creators scan, this section gets smarter.',
-    trajectory: totalScans <= 1
-      ? 'One scan = one data point. Scan again in a week to start tracking your trajectory.'
-      : 'Score history is available after multiple scans.',
-    evolution: 'Evolution tracking activates after your profile is established. Keep scanning to build your history.',
+    nextMoves:
+      'Your next moves are generated during scanning. Run a fresh scan to get personalized action items.',
+    contentPillars:
+      'Content pillars are detected by analyzing your timeline. Run a scan to identify your recurring themes.',
+    patterns:
+      'Pattern intelligence needs more data from your archetype cohort. As more creators scan, this section gets smarter.',
+    trajectory:
+      totalScans <= 1
+        ? 'One scan = one data point. Scan again in a week to start tracking your trajectory.'
+        : 'Score history is available after multiple scans.',
+    evolution:
+      'Evolution tracking activates after your profile is established. Keep scanning to build your history.',
   };
 
   return messages[section] || 'Data not yet available. Run a scan to populate this section.';

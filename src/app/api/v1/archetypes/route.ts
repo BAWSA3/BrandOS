@@ -1,10 +1,5 @@
 import { NextRequest } from 'next/server';
-import {
-  authenticateApiKey,
-  apiError,
-  apiSuccess,
-  apiOptionsHandler,
-} from '@/lib/api-auth';
+import { authenticateApiKey, apiError, apiSuccess, apiOptionsHandler } from '@/lib/api-auth';
 
 // =============================================================================
 // GET /api/v1/archetypes

@@ -131,7 +131,8 @@ export default function BrandAdvisorChat({
       const errorMessage: ChatMessage = {
         id: `error-${Date.now()}`,
         role: 'assistant',
-        content: serverMessage ?? "I'm having trouble processing that right now. Could you try again?",
+        content:
+          serverMessage ?? "I'm having trouble processing that right now. Could you try again?",
         timestamp: Date.now(),
       };
       setMessages((prev) => [...prev, errorMessage]);

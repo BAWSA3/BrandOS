@@ -19,10 +19,7 @@ interface LeaderboardEntry {
 
 export async function GET(request: NextRequest) {
   try {
-    const limit = Math.min(
-      parseInt(request.nextUrl.searchParams.get('limit') || '10'),
-      25
-    );
+    const limit = Math.min(parseInt(request.nextUrl.searchParams.get('limit') || '10'), 25);
 
     // Fetch all matchups (last 30 days for relevance)
     const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();

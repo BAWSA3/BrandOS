@@ -26,7 +26,7 @@ export type ScanGuardResult =
 
 export async function assertCanScan(
   xUsername: string,
-  workspaceId?: string,
+  workspaceId?: string
 ): Promise<ScanGuardResult> {
   const user = await getCurrentUser();
   if (!user) {

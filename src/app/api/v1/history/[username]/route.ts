@@ -66,25 +66,23 @@ export async function GET(
       recordApiUsage(auth.apiKey, '/v1/history/:username', 'GET', 200, latencyMs, cleanUsername);
     }
 
-    return apiSuccess(
-      {
-        username: cleanUsername,
-        scans: scans.map((s) => ({
-          score: s.score,
-          archetype: s.archetype,
-          scannedAt: s.createdAt?.toISOString() || null,
-        })),
-        stats: {
-          totalScans: scans.length,
-          highScore: Math.max(...scores),
-          lowScore: Math.min(...scores),
-          currentScore: scores[0],
-          averageScore: Math.round(scores.reduce((a, b) => a + b, 0) / scores.length),
-          firstScan: scans[scans.length - 1]?.createdAt?.toISOString() || null,
-          lastScan: scans[0]?.createdAt?.toISOString() || null,
-        },
-      }
-    );
+    return apiSuccess({
+      username: cleanUsername,
+      scans: scans.map((s) => ({
+        score: s.score,
+        archetype: s.archetype,
+        scannedAt: s.createdAt?.toISOString() || null,
+      })),
+      stats: {
+        totalScans: scans.length,
+        highScore: Math.max(...scores),
+        lowScore: Math.min(...scores),
+        currentScore: scores[0],
+        averageScore: Math.round(scores.reduce((a, b) => a + b, 0) / scores.length),
+        firstScan: scans[scans.length - 1]?.createdAt?.toISOString() || null,
+        lastScan: scans[0]?.createdAt?.toISOString() || null,
+      },
+    });
   } catch (err) {
     console.error('[API v1/history] Error:', err);
     return apiError('Failed to fetch scan history', 500);

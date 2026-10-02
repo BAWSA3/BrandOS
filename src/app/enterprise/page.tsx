@@ -139,7 +139,9 @@ export default function EnterprisePage() {
             <div className="text-white/70 pl-4">
               -d <span className="text-amber-300">{`'{"username": "naval"}'`}</span>
             </div>
-            <div className="mt-4 text-white/30">// → score: 91, archetype: FORESIGHT, insights: [...] </div>
+            <div className="mt-4 text-white/30">
+              // → score: 91, archetype: FORESIGHT, insights: [...]{' '}
+            </div>
           </div>
 
           {/* API capabilities grid */}

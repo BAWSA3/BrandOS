@@ -42,8 +42,8 @@ const ARCHETYPE_COLORS: Record<string, string> = {
 
 // Per-archetype layout config (px at 600x315 DOM scale)
 interface CardLayout {
-  left: number;       // left edge of description + pills (aligns with name)
-  descTop: number;    // top of description text (clears below name)
+  left: number; // left edge of description + pills (aligns with name)
+  descTop: number; // top of description text (clears below name)
   pillsBottom: number; // bottom offset for traits/rarity/strengths
 }
 
@@ -163,10 +163,8 @@ export default function ArchetypeCard({
           gap: '6px',
         }}
       >
-        <span style={{ fontSize: '8px', color: '#555', letterSpacing: '0.02em' }}>
-          @{username}
-        </span>
-        {(pfpDataUrl || profileImageUrl) ? (
+        <span style={{ fontSize: '8px', color: '#555', letterSpacing: '0.02em' }}>@{username}</span>
+        {pfpDataUrl || profileImageUrl ? (
           /* eslint-disable-next-line @next/next/no-img-element */
           <img
             src={pfpDataUrl || profileImageUrl?.replace('_normal', '_200x200') || ''}

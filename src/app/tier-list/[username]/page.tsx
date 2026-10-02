@@ -12,9 +12,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { username } = await params;
   const { tierUsers } = await getTierListData();
 
-  const userIndex = tierUsers.findIndex(
-    (u) => u.username.toLowerCase() === username.toLowerCase()
-  );
+  const userIndex = tierUsers.findIndex((u) => u.username.toLowerCase() === username.toLowerCase());
 
   if (userIndex === -1) {
     return { title: 'Creator Not Found — BrandOS Tier List' };
@@ -24,8 +22,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const rank = userIndex + 1;
   const total = tierUsers.length;
   const percentile = Math.round((1 - (rank - 1) / total) * 100);
-  const tierName =
-    user.score >= 80 ? 'ELITE' : user.score >= 60 ? 'STRONG' : 'RISING';
+  const tierName = user.score >= 80 ? 'ELITE' : user.score >= 60 ? 'STRONG' : 'RISING';
 
   const title = `@${user.username} is ranked #${rank} on the BrandOS Tier List`;
   const description = `Score: ${user.score}/100 | Tier: ${tierName} | ${user.archetype ? `Archetype: THE ${user.archetype.toUpperCase()} | ` : ''}Top ${percentile}% of ${total.toLocaleString()} creators`;
@@ -65,9 +62,7 @@ export default async function TierRankPage({ params }: PageProps) {
   const { username } = await params;
   const { tierUsers } = await getTierListData();
 
-  const userIndex = tierUsers.findIndex(
-    (u) => u.username.toLowerCase() === username.toLowerCase()
-  );
+  const userIndex = tierUsers.findIndex((u) => u.username.toLowerCase() === username.toLowerCase());
 
   if (userIndex === -1) {
     return (
@@ -101,10 +96,8 @@ export default async function TierRankPage({ params }: PageProps) {
   const rank = userIndex + 1;
   const total = tierUsers.length;
   const percentile = Math.round((1 - (rank - 1) / total) * 100);
-  const tierName =
-    user.score >= 80 ? 'ELITE' : user.score >= 60 ? 'STRONG' : 'RISING';
-  const tierColor =
-    user.score >= 80 ? '#0047FF' : user.score >= 60 ? '#10B981' : '#F59E0B';
+  const tierName = user.score >= 80 ? 'ELITE' : user.score >= 60 ? 'STRONG' : 'RISING';
+  const tierColor = user.score >= 80 ? '#0047FF' : user.score >= 60 ? '#10B981' : '#F59E0B';
 
   return (
     <TierRankClient

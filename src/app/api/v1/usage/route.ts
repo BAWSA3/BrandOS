@@ -1,11 +1,6 @@
 import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/db';
-import {
-  authenticateApiKey,
-  apiError,
-  apiSuccess,
-  apiOptionsHandler,
-} from '@/lib/api-auth';
+import { authenticateApiKey, apiError, apiSuccess, apiOptionsHandler } from '@/lib/api-auth';
 
 // =============================================================================
 // GET /api/v1/usage
@@ -29,7 +24,8 @@ export async function GET(request: NextRequest) {
   if (!auth.apiKey) {
     return apiSuccess({
       tier: 'legacy',
-      message: 'Usage tracking is available for registered API keys. Contact team@mybrandos.app to upgrade.',
+      message:
+        'Usage tracking is available for registered API keys. Contact team@mybrandos.app to upgrade.',
     });
   }
 

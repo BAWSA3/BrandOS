@@ -90,7 +90,7 @@ Respond with JSON ONLY. No preamble, no markdown fences. Schema:
 
 export async function getOrGenerateTodayBrief(
   userId: string,
-  workspaceId: string,
+  workspaceId: string
 ): Promise<BriefResult> {
   const briefDate = todayUtcDate();
 
@@ -143,7 +143,7 @@ export async function getOrGenerateTodayBrief(
 
 export async function markBriefCompleted(
   briefId: string,
-  userId: string,
+  userId: string
 ): Promise<DailyBrief | null> {
   const result = await prisma.dailyBrief.updateMany({
     where: { id: briefId, userId, completedAt: null },
@@ -173,8 +173,8 @@ export async function getCurrentStreak(userId: string): Promise<number> {
       Date.UTC(
         row.briefDate.getUTCFullYear(),
         row.briefDate.getUTCMonth(),
-        row.briefDate.getUTCDate(),
-      ),
+        row.briefDate.getUTCDate()
+      )
     );
     if (rowUtc.getTime() === cursor.getTime()) {
       streak += 1;

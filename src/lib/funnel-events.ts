@@ -44,7 +44,7 @@ export type FunnelEvent =
 export async function captureFunnelEvent(
   distinctId: string,
   event: FunnelEvent,
-  properties: Record<string, string | number | boolean | null | undefined> = {},
+  properties: Record<string, string | number | boolean | null | undefined> = {}
 ): Promise<void> {
   const ph = getClient();
   if (!ph) return;

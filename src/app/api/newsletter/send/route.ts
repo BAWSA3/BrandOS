@@ -24,7 +24,12 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { subject, preheader, sections, dryRun = false } = body as {
+    const {
+      subject,
+      preheader,
+      sections,
+      dryRun = false,
+    } = body as {
       subject: string;
       preheader?: string;
       sections: NewsletterContent['sections'];
@@ -32,10 +37,7 @@ export async function POST(request: NextRequest) {
     };
 
     if (!subject || !sections?.length) {
-      return NextResponse.json(
-        { error: 'subject and sections are required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'subject and sections are required' }, { status: 400 });
     }
 
     const content: NewsletterContent = { subject, preheader, sections };
@@ -57,10 +59,7 @@ export async function POST(request: NextRequest) {
     // Send via Resend
     const resend = new Resend(process.env.RESEND_API_KEY);
     if (!process.env.RESEND_API_KEY) {
-      return NextResponse.json(
-        { error: 'RESEND_API_KEY not configured' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'RESEND_API_KEY not configured' }, { status: 500 });
     }
 
     let sent = 0;

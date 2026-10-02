@@ -42,16 +42,21 @@ export interface ScanResponse {
   meta?: { cached?: boolean; scoreContext?: never } & Record<string, unknown>;
 }
 
-function phaseScore(
-  phases: ScanResponse['brandScore']['phases'],
-  key: PhaseKey,
-): number {
+function phaseScore(phases: ScanResponse['brandScore']['phases'], key: PhaseKey): number {
   const p = phases?.[key];
   if (typeof p === 'number') return p;
   return p?.score ?? 0;
 }
 
-function InsightList({ title, items, accent }: { title: string; items: string[]; accent?: boolean }) {
+function InsightList({
+  title,
+  items,
+  accent,
+}: {
+  title: string;
+  items: string[];
+  accent?: boolean;
+}) {
   if (items.length === 0) return null;
   return (
     <div>
@@ -63,11 +68,7 @@ function InsightList({ title, items, accent }: { title: string; items: string[];
       </h3>
       <ul className="space-y-1.5">
         {items.map((item, i) => (
-          <li
-            key={i}
-            className="text-sm flex gap-2"
-            style={{ color: 'var(--text-secondary)' }}
-          >
+          <li key={i} className="text-sm flex gap-2" style={{ color: 'var(--text-secondary)' }}>
             <span style={{ color: accent ? 'var(--accent)' : 'var(--text-tertiary)' }}>
               {accent ? '→' : '·'}
             </span>

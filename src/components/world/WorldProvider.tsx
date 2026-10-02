@@ -73,10 +73,7 @@ export function WorldProvider({ world, children, staticMode = false }: WorldProv
     for (const key in PALETTE_VAR_MAP) {
       const varName = PALETTE_VAR_MAP[key as keyof typeof PALETTE_VAR_MAP];
       resets.push([varName, root.style.getPropertyValue(varName) || null]);
-      root.style.setProperty(
-        varName,
-        world.palette[key as keyof typeof PALETTE_VAR_MAP],
-      );
+      root.style.setProperty(varName, world.palette[key as keyof typeof PALETTE_VAR_MAP]);
     }
 
     resets.push(['--font-sans', root.style.getPropertyValue('--font-sans') || null]);

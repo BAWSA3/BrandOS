@@ -124,7 +124,11 @@ export async function GET(_request: NextRequest) {
         text: tweet.text,
         created_at: tweet.created_at,
         public_metrics: tweet.public_metrics || {
-          retweet_count: 0, reply_count: 0, like_count: 0, quote_count: 0, impression_count: 0,
+          retweet_count: 0,
+          reply_count: 0,
+          like_count: 0,
+          quote_count: 0,
+          impression_count: 0,
         },
         entities: tweet.entities || {},
       }));
