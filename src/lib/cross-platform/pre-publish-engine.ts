@@ -4,6 +4,7 @@
 // =============================================================================
 
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GEMINI_FLASH_MODEL } from '@/lib/gemini';
 import type { SocialPlatform, CrossPlatformContentType, PrePublishCheck } from './types';
 import { PLATFORM_NORMS, PLATFORM_LABELS } from './types';
 import type { BrandDNA } from '@/lib/types';
@@ -110,7 +111,7 @@ export async function runPrePublishCheck(
       return null;
     }
 
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+    const model = genAI.getGenerativeModel({ model: GEMINI_FLASH_MODEL });
     const prompt = buildPrePublishPrompt(
       content,
       platform,

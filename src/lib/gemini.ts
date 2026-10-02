@@ -32,8 +32,11 @@ function isUrlSafe(urlString: string): boolean {
 }
 
 // Models
-export const geminiFlash = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
-export const geminiPro = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' });
+// gemini-2.0-flash / 1.5-* were retired (404 "no longer available"), and
+// 2.5-* is closed to this account; 3.8-flash is Google's named replacement.
+// One constant so the next retirement is a one-line change.
+export const GEMINI_FLASH_MODEL = 'gemini-3.8-flash';
+export const geminiFlash = genAI.getGenerativeModel({ model: GEMINI_FLASH_MODEL });
 
 // Types for generation results
 export interface GeneratedImage {
@@ -2034,7 +2037,7 @@ export async function analyzeProfileImageWithVision(
     const mimeType = imageResponse.headers.get('content-type') || 'image/jpeg';
 
     // Use Gemini Flash with vision
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const model = genAI.getGenerativeModel({ model: GEMINI_FLASH_MODEL });
 
     const result = await model.generateContent([
       {
