@@ -4,7 +4,7 @@
 // =============================================================================
 
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { GEMINI_FLASH_MODEL } from '@/lib/gemini';
+import { resilientFlash } from '@/lib/gemini';
 import type { VisualDNA } from './types';
 
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GEMINI_API_KEY || '');
@@ -126,7 +126,7 @@ export async function analyzeVisualConsistency(
     const base64 = Buffer.from(arrayBuffer).toString('base64');
     const mimeType = imageResponse.headers.get('content-type') || 'image/jpeg';
 
-    const model = genAI.getGenerativeModel({ model: GEMINI_FLASH_MODEL });
+    const model = resilientFlash(genAI);
     const prompt = buildVisualConsistencyPrompt(visualDNA);
 
     const result = await model.generateContent([

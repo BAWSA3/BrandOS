@@ -44,10 +44,11 @@ const BrandScoreCard: React.FC<BrandScoreCardProps> = ({
       `}</style>
       <div
         id="brandos-score-card"
-        className="w-full max-w-[1100px] bg-[#2E6AFF] rounded-[8px] relative p-8 md:p-14 flex flex-col justify-between overflow-visible"
+        // 16:10 + a 480px min-height made CSS derive a 768px minimum WIDTH,
+        // so the card overflowed every phone. The ratio is desktop-only now;
+        // phones get a shorter, natural-height card.
+        className="w-full max-w-[1100px] min-h-[400px] md:min-h-[480px] md:aspect-[16/10] bg-[#2E6AFF] rounded-[8px] relative p-6 sm:p-8 md:p-14 flex flex-col justify-between gap-6 overflow-visible"
         style={{
-          minHeight: '480px',
-          aspectRatio: '16 / 10',
           boxShadow: '0 8px 40px rgba(46, 106, 255, 0.35), 0 2px 20px rgba(0, 0, 0, 0.15)',
         }}
       >
@@ -68,21 +69,21 @@ const BrandScoreCard: React.FC<BrandScoreCardProps> = ({
           </span>
           {/* Profile image + username */}
           <div className="flex items-center gap-4 min-w-0">
-            <div className="text-right min-w-0 max-w-[200px] md:max-w-[280px]">
+            <div className="text-right min-w-0 max-w-[160px] sm:max-w-[200px] md:max-w-[280px]">
               <span className="font-brand font-bold text-white text-lg md:text-xl leading-none block truncate">
                 {displayName}
               </span>
               <span className="font-os text-sm text-white/70 block mt-1 truncate">@{username}</span>
             </div>
-            <div className="w-[72px] h-[72px] rounded-full border-2 border-white/40 overflow-hidden shrink-0">
+            <div className="w-14 h-14 md:w-[72px] md:h-[72px] rounded-full border-2 border-white/40 overflow-hidden shrink-0">
               <img src={profileImageUrl} alt={displayName} className="w-full h-full object-cover" />
             </div>
           </div>
         </div>
 
         {/* Score number + summary */}
-        <div className="relative z-10 my-auto flex items-center justify-between">
-          <h1 className="font-brand font-black italic text-[160px] md:text-[240px] leading-none tracking-tighter text-white drop-shadow-xl shrink-0">
+        <div className="relative z-10 my-auto flex items-center justify-between gap-4">
+          <h1 className="font-brand font-black italic text-[112px] sm:text-[160px] md:text-[240px] leading-none tracking-tighter text-white drop-shadow-xl shrink-0">
             <AnimateNumber
               transition={{
                 y: { type: 'spring', duration: 0.8, bounce: 0 },
@@ -95,7 +96,7 @@ const BrandScoreCard: React.FC<BrandScoreCardProps> = ({
             </AnimateNumber>
           </h1>
           {phaseScores ? (
-            <div className="flex flex-col gap-2.5 text-right max-w-[240px]">
+            <div className="flex flex-col gap-2.5 text-right max-w-[240px] min-w-0">
               {(() => {
                 const phases = [
                   { label: 'IDENTITY', value: phaseScores.define },

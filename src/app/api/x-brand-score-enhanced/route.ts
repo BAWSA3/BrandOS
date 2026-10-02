@@ -15,7 +15,7 @@ import { assertCanScan } from '@/lib/scan-guard';
 import prisma from '@/lib/db';
 import { logSecurityEvent, getClientIp } from '@/lib/audit-log';
 import { captureFunnelEvent } from '@/lib/funnel-events';
-import { internalHeaders } from '@/lib/internal-auth';
+import { fetchScoringTweets } from '@/lib/score-tweets';
 import { parseBrandScore, heuristicBrandScore } from '@/lib/score-schemas';
 
 /**
@@ -24,15 +24,6 @@ import { parseBrandScore, heuristicBrandScore } from '@/lib/score-schemas';
  * Automatically uses tweet analysis if X API Basic tier is available.
  * Falls back to profile-only analysis on Free tier.
  */
-
-interface TweetData {
-  text: string;
-  created_at: string;
-  likes: number;
-  retweets: number;
-  replies: number;
-  impressions?: number;
-}
 
 async function fetchProfile(username: string, origin: string): Promise<XProfileData | null> {
   try {
@@ -65,61 +56,6 @@ async function fetchProfile(username: string, origin: string): Promise<XProfileD
     };
   } catch (error) {
     console.error('Profile fetch error:', error);
-    return null;
-  }
-}
-
-async function fetchTweets(username: string, origin: string) {
-  if (!features.tweetAnalysis) {
-    return null;
-  }
-
-  try {
-    const response = await fetch(`${origin}/api/x-tweets`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', ...internalHeaders() },
-      body: JSON.stringify({ username, maxResults: 100 }),
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      if (error.upgradeRequired) {
-        console.log('Tweet analysis requires X API Basic tier');
-      }
-      return null;
-    }
-
-    const data = await response.json();
-    return {
-      tweets: data.tweets.map(
-        (t: {
-          text: string;
-          created_at: string;
-          public_metrics: {
-            like_count: number;
-            retweet_count: number;
-            reply_count: number;
-            impression_count?: number;
-          };
-        }) => ({
-          text: t.text,
-          created_at: t.created_at,
-          likes: t.public_metrics?.like_count || 0,
-          retweets: t.public_metrics?.retweet_count || 0,
-          replies: t.public_metrics?.reply_count || 0,
-          impressions: t.public_metrics?.impression_count,
-        })
-      ) as TweetData[],
-      rawTweets: data.tweets.map((t: { id: string; text: string; created_at: string }) => ({
-        id: t.id,
-        text: t.text,
-        created_at: t.created_at,
-      })) as { id: string; text: string; created_at: string }[],
-      stats: data.analysis.stats,
-      contentPatterns: data.analysis.contentPatterns,
-    };
-  } catch (error) {
-    console.error('Tweets fetch error:', error);
     return null;
   }
 }
@@ -186,7 +122,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Try to fetch tweets if Basic tier is available
-    const tweetData = await fetchTweets(cleanUsername, origin);
+    const tweetData = await fetchScoringTweets(cleanUsername, origin, 100);
     const isEnhanced = tweetData !== null;
 
     console.log('=== BRAND SCORE ANALYSIS ===');
