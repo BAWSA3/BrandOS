@@ -53,6 +53,10 @@ const eslintConfig = defineConfig([
       // account deletion: admin client used ONLY for auth.admin.deleteUser on
       // the session user's own auth record — see route header comment
       "src/app/api/account/**/*.{ts,tsx}",
+      // security audit log: admin client used ONLY to insert into
+      // SecurityAuditLog (sanitized metadata, hashed IP), which is not
+      // writable under RLS — see logSecurityEvent
+      "src/lib/audit-log.ts",
     ],
     rules: {
       "no-restricted-imports": "off",
