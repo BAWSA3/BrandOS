@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenerativeAI, type GenerativeModel } from '@google/generative-ai';
 import { GUARD_PREAMBLE, sanitizeInline, wrapUntrusted, INPUT_CAPS } from './prompt-safety';
 
 // Initialize Gemini client
@@ -36,7 +36,54 @@ function isUrlSafe(urlString: string): boolean {
 // 2.5-* is closed to this account; 3.8-flash is Google's named replacement.
 // One constant so the next retirement is a one-line change.
 export const GEMINI_FLASH_MODEL = 'gemini-3.8-flash';
-export const geminiFlash = genAI.getGenerativeModel({ model: GEMINI_FLASH_MODEL });
+// 3.8-flash regularly returns 503 "high demand". On a transient failure we
+// retry it once, then fall back to the previous flash model.
+export const GEMINI_FALLBACK_MODEL = 'gemini-3.7-flash';
+
+const RETRY_DELAY_MS = 600;
+
+// Read the HTTP status off the SDK's fetch error by shape, not instanceof —
+// instanceof fails when two copies of the SDK are loaded (CJS + ESM).
+function geminiStatus(error: unknown): number | undefined {
+  const status = (error as { status?: unknown } | null)?.status;
+  return typeof status === 'number' ? status : undefined;
+}
+
+/**
+ * A flash model whose generateContent survives Gemini overload: transient
+ * errors (429/5xx, no status = network) retry the primary once, then go to the
+ * fallback model; a 404 (model retired) goes straight to the fallback. Other
+ * errors (bad request, auth, safety) throw unchanged.
+ */
+export function resilientFlash(client: GoogleGenerativeAI = genAI) {
+  const primary = client.getGenerativeModel({ model: GEMINI_FLASH_MODEL });
+  const fallback = client.getGenerativeModel({ model: GEMINI_FALLBACK_MODEL });
+
+  return {
+    async generateContent(
+      ...args: Parameters<GenerativeModel['generateContent']>
+    ): ReturnType<GenerativeModel['generateContent']> {
+      for (let attempt = 1; attempt <= 2; attempt++) {
+        try {
+          return await primary.generateContent(...args);
+        } catch (error) {
+          const status = geminiStatus(error);
+          const transient = status === undefined || status === 429 || status >= 500;
+          if (status === 404) break;
+          if (!transient) throw error;
+          console.warn(
+            `[Gemini] ${GEMINI_FLASH_MODEL} failed (${status ?? 'network'}), attempt ${attempt}`
+          );
+          if (attempt === 1) await new Promise((r) => setTimeout(r, RETRY_DELAY_MS));
+        }
+      }
+      console.warn(`[Gemini] falling back to ${GEMINI_FALLBACK_MODEL}`);
+      return fallback.generateContent(...args);
+    },
+  };
+}
+
+export const geminiFlash = resilientFlash();
 
 // Types for generation results
 export interface GeneratedImage {
@@ -2037,7 +2084,7 @@ export async function analyzeProfileImageWithVision(
     const mimeType = imageResponse.headers.get('content-type') || 'image/jpeg';
 
     // Use Gemini Flash with vision
-    const model = genAI.getGenerativeModel({ model: GEMINI_FLASH_MODEL });
+    const model = geminiFlash;
 
     const result = await model.generateContent([
       {
