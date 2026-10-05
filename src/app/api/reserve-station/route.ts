@@ -1,9 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse, after } from 'next/server';
 import prisma from '@/lib/db';
 import { botGuard } from '@/lib/botid-guard';
 import { withRateLimit, rateLimiters } from '@/lib/rate-limit';
 import { normalizeArchetypeName } from '@/lib/archetype-names';
 import { FOUNDING_PRIORITY_CAP } from '@/lib/reservations';
+import { sendReserveConfirmation } from '@/lib/launch-emails';
 
 /**
  * POST /api/reserve-station — "Reserve your brand station" after a scan.
@@ -16,6 +17,10 @@ import { FOUNDING_PRIORITY_CAP } from '@/lib/reservations';
  * the handle's latest scan (falling back to the client value only when there
  * is no scan), and is written only the first time. Whatever station someone
  * reserves is the one they get when the studio opens.
+ *
+ * A confirmation email ("Station #N is yours") goes out after the response,
+ * at most once per address EVER (EmailSend unique key, migration 020), so the
+ * form can't be used to repeatedly mail someone. Unsubscribed rows are skipped.
  */
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
@@ -105,6 +110,12 @@ async function handlePost(request: NextRequest) {
         data: { reservationNumber: n },
       });
     }
+
+    after(() =>
+      sendReserveConfirmation(row.id).catch((e) =>
+        console.error('[reserve-station] confirmation email failed:', e)
+      )
+    );
 
     const final = await prisma.emailSignup.findUnique({
       where: { id: row.id },

@@ -17,6 +17,7 @@ const allowedPages = [
   '/privacy', // Legal: privacy policy
   '/terms', // Legal: terms of service
   '/station', // Public reserved-station pages (flex sign + X link preview)
+  '/poll', // Launch-email one-click "would you pay?" vote landing
   '/archetype', // Archetype scanner
   '/archetypes', // Archetype showcase
   '/intelligence', // Intelligence Report
