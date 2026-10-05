@@ -1707,7 +1707,7 @@ export default function XBrandScoreHero({
                     className="mb-3 text-center text-[11px] tracking-[0.15em] text-black/50 uppercase"
                     style={{ fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace" }}
                   >
-                    {'// your brand station'}
+                    {'// your brand blueprint'}
                   </div>
                   <StationCard
                     archetype={normalizeArchetypeName(brandScore.archetype?.primary || '')}
