@@ -120,12 +120,14 @@ export default function StationCard({ archetype, username, score }: StationCardP
             shows the finished station as a BLUEPRINT ("the station you're
             building"); in the studio users start on an empty plot and build it. */}
         <div className="relative overflow-hidden" style={{ background: t.bg }}>
-          {/* Idle animation (code-only, no extra art): the station floats a
-              couple of pixels; its screens and neon pulse through a per-station
-              glow mask (public/worlds/stations/masks, built from the art's
-              bright blue/green pixels) with a rare CRT flicker; night adds a
-              slow scanline drift. All of it is off under prefers-reduced-motion
-              and left out of saved images. */}
+          {/* Idle animation (code-only, no extra art). The art has an opaque
+              background with the grid baked in, so the station stays planted
+              (floating it slid the whole picture against the CSS grid).
+              Instead: its screens and neon power on in hard, stepped flickers
+              through a per-station glow mask (public/worlds/stations/masks),
+              and a blueprint scan beam sweeps down every few seconds; night
+              adds a scanline drift. Off under prefers-reduced-motion and left
+              out of saved images. */}
           <div className="station-bob relative">
             {/* eslint-disable-next-line @next/next/no-img-element -- art is pre-scaled; next/image would re-encode it */}
             <img
@@ -168,6 +170,18 @@ export default function StationCard({ archetype, username, score }: StationCardP
               }}
             />
           )}
+          <div
+            aria-hidden
+            data-station-fx
+            className="station-beam pointer-events-none absolute inset-x-0"
+            style={{
+              height: '14%',
+              background:
+                mode === 'day'
+                  ? 'linear-gradient(to bottom, rgba(10,132,255,0) 0%, rgba(10,132,255,0.12) 85%, rgba(10,132,255,0.55) 100%)'
+                  : 'linear-gradient(to bottom, rgba(0,255,136,0) 0%, rgba(0,255,136,0.10) 85%, rgba(0,255,136,0.5) 100%)',
+            }}
+          />
           {/* Faint blueprint grid over the art */}
           <div
             aria-hidden
@@ -179,46 +193,52 @@ export default function StationCard({ archetype, username, score }: StationCardP
             }}
           />
           <style jsx>{`
-            .station-bob {
-              animation: station-bob 4s ease-in-out infinite;
-            }
             .station-glow {
               opacity: 0;
-              animation: station-glow 3.6s ease-in-out infinite;
+              /* steps(1) = hard on/off between keyframes, like a CRT, not a fade */
+              animation: station-glow 5s steps(1, end) infinite;
+            }
+            .station-beam {
+              top: -14%;
+              animation: station-beam 6s linear infinite;
             }
             .station-scan {
               animation: station-scan 9s linear infinite;
             }
-            @keyframes station-bob {
-              0%,
-              100% {
-                transform: translateY(0);
-              }
-              50% {
-                transform: translateY(-6px);
-              }
-            }
             @keyframes station-glow {
-              0%,
-              100% {
+              /* power on: flicker, catch, hold; brief brown-out; power down */
+              0% {
                 opacity: 0;
               }
-              45%,
-              55% {
+              6% {
+                opacity: 0.8;
+              }
+              8% {
+                opacity: 0.15;
+              }
+              10% {
                 opacity: 0.95;
               }
-              /* rare CRT flicker */
-              80% {
-                opacity: 0.1;
+              58% {
+                opacity: 0.35;
               }
-              81% {
-                opacity: 0.55;
+              60% {
+                opacity: 0.95;
               }
-              82% {
-                opacity: 0.05;
+              84% {
+                opacity: 0.5;
               }
-              83% {
-                opacity: 0.4;
+              88% {
+                opacity: 0;
+              }
+            }
+            @keyframes station-beam {
+              0% {
+                top: -14%;
+              }
+              45%,
+              100% {
+                top: 100%;
               }
             }
             @keyframes station-scan {
@@ -230,10 +250,13 @@ export default function StationCard({ archetype, username, score }: StationCardP
               }
             }
             @media (prefers-reduced-motion: reduce) {
-              .station-bob,
               .station-glow,
-              .station-scan {
+              .station-scan,
+              .station-beam {
                 animation: none;
+              }
+              .station-beam {
+                display: none;
               }
             }
           `}</style>

@@ -1,8 +1,16 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Activity, Info } from 'lucide-react';
+import { motion, useReducedMotion } from 'motion/react';
 import { AnimateNumber } from '@/lib/motion-plus';
+
+// Reveal choreography. AnimateNumber only animates when its value CHANGES, and
+// the card used to mount with the final score, so nothing ever counted. Now
+// the numbers mount at 0 and flip to the real values once the card has landed:
+// score rolls up, phase rows stagger in, then the bottom stats and bar fill.
+const REVEAL_DELAY_MS = 450;
+const PHASE_STAGGER_S = 0.12;
 
 export interface ScoreContext {
   range: { low: number; high: number; samples: number };
@@ -32,6 +40,18 @@ const BrandScoreCard: React.FC<BrandScoreCardProps> = ({
   phaseScores,
   scoreContext,
 }) => {
+  const reducedMotion = useReducedMotion() ?? false;
+  const [revealed, setRevealed] = useState(reducedMotion);
+  useEffect(() => {
+    if (reducedMotion) {
+      setRevealed(true);
+      return;
+    }
+    const t = setTimeout(() => setRevealed(true), REVEAL_DELAY_MS);
+    return () => clearTimeout(t);
+  }, [reducedMotion]);
+  const shown = (n: number) => (revealed ? n : 0);
+
   return (
     <>
       <style>{`
@@ -95,7 +115,7 @@ const BrandScoreCard: React.FC<BrandScoreCardProps> = ({
               }}
               trend={1}
             >
-              {score}
+              {shown(score)}
             </AnimateNumber>
           </h1>
           {phaseScores ? (
@@ -108,17 +128,27 @@ const BrandScoreCard: React.FC<BrandScoreCardProps> = ({
                   { label: 'GROWTH', value: phaseScores.scale },
                 ];
                 const total = phases.reduce((sum, p) => sum + p.value, 0);
-                return phases.map(({ label, value }) => {
+                return phases.map(({ label, value }, i) => {
                   const contribution = Math.round((value / total) * score);
                   return (
-                    <div key={label} className="flex items-center justify-end gap-3">
+                    <motion.div
+                      key={label}
+                      className="flex items-center justify-end gap-3"
+                      initial={reducedMotion ? false : { opacity: 0, x: 12 }}
+                      animate={revealed ? { opacity: 1, x: 0 } : undefined}
+                      transition={{
+                        duration: 0.35,
+                        delay: 0.35 + i * PHASE_STAGGER_S,
+                        ease: 'easeOut',
+                      }}
+                    >
                       <span className="font-os text-[10px] md:text-xs tracking-wider text-white/40">
                         {label}
                       </span>
                       <span className="font-os text-base md:text-lg font-bold text-white/90">
-                        +{contribution}
+                        +<AnimateNumber trend={1}>{shown(contribution)}</AnimateNumber>
                       </span>
-                    </div>
+                    </motion.div>
                   );
                 });
               })()}
@@ -139,12 +169,12 @@ const BrandScoreCard: React.FC<BrandScoreCardProps> = ({
             <div className="flex items-center gap-2">
               <span className="text-2xl font-brand font-bold italic text-white">
                 <AnimateNumber suffix="%" trend={1}>
-                  {voiceConsistency}
+                  {shown(voiceConsistency)}
                 </AnimateNumber>
               </span>
               <div className="h-1.5 w-12 bg-white/30 rounded-full overflow-hidden">
                 <div
-                  style={{ width: `${voiceConsistency}%` }}
+                  style={{ width: `${shown(voiceConsistency)}%`, transitionDelay: '700ms' }}
                   className="h-full bg-white transition-all duration-700"
                 />
               </div>
@@ -156,7 +186,7 @@ const BrandScoreCard: React.FC<BrandScoreCardProps> = ({
             </span>
             <span className="text-2xl font-brand font-bold italic text-white">
               <AnimateNumber suffix="/100" trend={1}>
-                {engagementScore}
+                {shown(engagementScore)}
               </AnimateNumber>
             </span>
           </div>
