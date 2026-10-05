@@ -142,7 +142,8 @@ export default function ReservedSignCard({
                 filter:
                   mode === 'day' ? 'grayscale(1) contrast(1.4)' : 'grayscale(1) brightness(1.6)',
                 mixBlendMode: mode === 'day' ? 'multiply' : 'screen',
-                animation: 'reserved-ghost 4s ease-in-out infinite',
+                // whole-pixel steps (3px), like a sprite, not a sub-pixel glide
+                animation: 'reserved-ghost 4s steps(3, jump-none) infinite',
               }}
               draggable={false}
             />
