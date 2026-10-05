@@ -17,7 +17,14 @@ routines) reads this before touching the repo._
 ## The one rule: sign-off = GitHub PR
 
 - **No agent pushes to `staging` or `main` directly.** All work lands as a
-  PR into `staging`; Jeffrey approves and merges.
+  PR into `staging`.
+- **Merging into `staging` is delegated to the main Claude Code session**
+  (Jeffrey, 2026-10-04): it merges once every check is green (CI, Vercel
+  previews, plus the local suites for code PRs) and reports what went in.
+  Other agents (Cursor, subagents, routines) open PRs and leave merging to
+  the main session or Jeffrey.
+- **`staging` → `main` needs Jeffrey's explicit "go".** The agent lists
+  exactly what ships; Jeffrey replies "go"; the agent merges the promotion PR.
 - `staging` → `main` promotion stays a deliberate, checklisted event
   (fresh backup, FULL migration diff vs information_schema, suite runs) —
   see `docs/PHASE-1-PROD-PROMOTION.md` for the pattern.
