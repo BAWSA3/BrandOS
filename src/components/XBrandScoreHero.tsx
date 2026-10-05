@@ -1506,6 +1506,11 @@ export default function XBrandScoreHero({
             <div
               id="brandos-dashboard-capture"
               style={{
+                // Explicit width: this sits in a centered flex column, so
+                // without it the score card shrinks to its content and loses
+                // its 16:10 desktop shape (card = 1064 - 2x24 padding = 1016).
+                width: '100%',
+                maxWidth: '1064px',
                 background: 'transparent',
                 padding: '24px',
                 borderRadius: '8px',

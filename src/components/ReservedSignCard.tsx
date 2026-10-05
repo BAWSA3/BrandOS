@@ -115,14 +115,14 @@ export default function ReservedSignCard({
 
         {/* Plot + ghost blueprint + sign text */}
         <div className="relative" style={{ containerType: 'inline-size' }}>
-          {/* eslint-disable-next-line @next/next/no-img-element -- pixel art must not be resampled by next/image */}
+          {/* eslint-disable-next-line @next/next/no-img-element -- art is pre-scaled; next/image would re-encode it */}
           <img
             src={`/worlds/stations/plot-${mode}.png`}
             alt={`Reserved plot for @${handle}, station #${no}`}
             width={597}
             height={746}
             className="block w-full h-auto select-none"
-            style={{ imageRendering: 'pixelated' }}
+            style={{ imageRendering: 'auto' }}
             draggable={false}
             onLoad={prepare}
           />
@@ -137,12 +137,12 @@ export default function ReservedSignCard({
                 left: '22%',
                 top: '-6%',
                 width: '56%',
-                imageRendering: 'pixelated',
+                imageRendering: 'auto',
                 opacity: mode === 'day' ? 0.16 : 0.22,
                 filter:
                   mode === 'day' ? 'grayscale(1) contrast(1.4)' : 'grayscale(1) brightness(1.6)',
                 mixBlendMode: mode === 'day' ? 'multiply' : 'screen',
-                animation: 'reserved-ghost 4.8s ease-in-out infinite',
+                animation: 'reserved-ghost 4s ease-in-out infinite',
               }}
               draggable={false}
             />
@@ -191,7 +191,7 @@ export default function ReservedSignCard({
                 transform: translateY(0);
               }
               50% {
-                transform: translateY(-3px);
+                transform: translateY(-6px);
               }
             }
             @media (prefers-reduced-motion: reduce) {
