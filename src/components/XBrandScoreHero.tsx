@@ -4,7 +4,6 @@ import { useState, useEffect, useRef, useCallback, MouseEvent as ReactMouseEvent
 import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence, useMotionValue, useSpring, animate } from 'motion/react';
 import BrandDNAPreview, { GeneratedBrandDNA } from './BrandDNAPreview';
-import ShareableScoreCard, { ShareCardData } from './ShareableScoreCard';
 import BrandAdvisorChat from './BrandAdvisorChat';
 import DNAWalkthrough from './DNAWalkthrough';
 import BrandBreakdown from './BrandBreakdown';
@@ -447,160 +446,6 @@ const phaseConfig: PhaseConfigItem[] = [
     ],
   },
 ];
-
-// ============================================================================
-// Score Gauge Component
-// ============================================================================
-function ScoreGauge({
-  score,
-  isVisible,
-  theme,
-}: {
-  score: number;
-  isVisible: boolean;
-  theme: string;
-}) {
-  const motionScore = useMotionValue(0);
-  const [currentScore, setCurrentScore] = useState(0);
-
-  useEffect(() => {
-    if (isVisible) {
-      const timer = setTimeout(() => {
-        const controls = animate(motionScore, score, {
-          duration: 2,
-          ease: [0.34, 1.56, 0.64, 1],
-        });
-
-        const unsubscribe = motionScore.on('change', (v) => {
-          setCurrentScore(Math.round(v));
-        });
-
-        return () => {
-          controls.stop();
-          unsubscribe();
-        };
-      }, 300);
-
-      return () => clearTimeout(timer);
-    }
-  }, [isVisible, score, motionScore]);
-
-  const radius = 90;
-  const circumference = 2 * Math.PI * radius;
-  const strokeDashoffset = circumference - (currentScore / 100) * circumference;
-
-  const getScoreColor = (s: number) => {
-    if (s >= 80) return '#10B981';
-    if (s >= 60) return '#D4A574';
-    if (s >= 40) return '#F59E0B';
-    return '#EF4444';
-  };
-
-  const getScoreLabel = (s: number) => {
-    if (s >= 80) return 'EXCELLENT';
-    if (s >= 60) return 'GOOD';
-    if (s >= 40) return 'NEEDS WORK';
-    return 'CRITICAL';
-  };
-
-  return (
-    <div
-      style={{
-        position: 'relative',
-        width: 'clamp(160px, 50vw, 220px)',
-        height: 'clamp(160px, 50vw, 220px)',
-      }}
-    >
-      {/* Glow effect */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={isVisible ? { opacity: 0.4, scale: 1 } : {}}
-        transition={{ duration: 1, delay: 0.3 }}
-        style={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          width: '130%',
-          height: '130%',
-          background: `radial-gradient(circle, ${getScoreColor(currentScore)}50 0%, transparent 70%)`,
-          filter: 'blur(30px)',
-          pointerEvents: 'none',
-        }}
-      />
-
-      <svg width="100%" height="100%" viewBox="0 0 220 220">
-        <circle
-          cx="110"
-          cy="110"
-          r={radius}
-          fill="none"
-          stroke={theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}
-          strokeWidth="14"
-        />
-        <motion.circle
-          cx="110"
-          cy="110"
-          r={radius}
-          fill="none"
-          stroke={getScoreColor(currentScore)}
-          strokeWidth="14"
-          strokeLinecap="round"
-          strokeDasharray={circumference}
-          strokeDashoffset={strokeDashoffset}
-          transform="rotate(-90 110 110)"
-          style={{
-            filter: `drop-shadow(0 0 20px ${getScoreColor(currentScore)}80)`,
-            transition: 'stroke 0.3s ease',
-          }}
-        />
-      </svg>
-
-      <div
-        style={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          textAlign: 'center',
-        }}
-      >
-        <motion.div
-          initial={{ scale: 0 }}
-          animate={isVisible ? { scale: 1 } : {}}
-          transition={{ delay: 0.5, type: 'spring', stiffness: 200, damping: 15 }}
-        >
-          <span
-            style={{
-              fontFamily: "'Helvetica Neue', sans-serif",
-              fontSize: 'clamp(40px, 12vw, 64px)',
-              fontWeight: 700,
-              color: theme === 'dark' ? '#FFFFFF' : '#000000',
-              lineHeight: 1,
-            }}
-          >
-            {currentScore}
-          </span>
-        </motion.div>
-        <motion.span
-          initial={{ opacity: 0 }}
-          animate={isVisible ? { opacity: 1 } : {}}
-          transition={{ delay: 1.5 }}
-          style={{
-            fontFamily: "'VCR OSD Mono', monospace",
-            fontSize: '11px',
-            letterSpacing: '0.2em',
-            color: getScoreColor(currentScore),
-            display: 'block',
-            marginTop: '8px',
-          }}
-        >
-          {getScoreLabel(currentScore)}
-        </motion.span>
-      </div>
-    </div>
-  );
-}
 
 // ============================================================================
 // Typewriter Placeholder
@@ -1627,8 +1472,12 @@ export default function XBrandScoreHero({
           />
         )}
 
-        {/* REVEAL STATE - BrandOS Dashboard Experience */}
-        {flowState === 'reveal' && brandScore && profile && generatedBrandDNA && (
+        {/* REVEAL STATE - BrandOS Dashboard Experience
+            Shown whenever there's a score. It used to also require the Gemini
+            Brand DNA, so every Gemini failure (overload, retired model) dropped
+            users to a plain gauge and the blue score card never appeared. The
+            DNA only fills voice consistency below, which has a score fallback. */}
+        {flowState === 'reveal' && brandScore && profile && (
           <motion.div
             key="reveal-dashboard"
             initial={{ opacity: 0, scale: 0.95 }}
@@ -1690,7 +1539,7 @@ export default function XBrandScoreHero({
               <BrandScoreCard
                 score={brandScore.overallScore}
                 voiceConsistency={
-                  generatedBrandDNA.performanceInsights?.voiceConsistency ||
+                  generatedBrandDNA?.performanceInsights?.voiceConsistency ||
                   brandScore.phases.check.score
                 }
                 engagementScore={brandScore.phases.scale.score}
@@ -1967,116 +1816,6 @@ export default function XBrandScoreHero({
                 style={{ fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace" }}
               >
                 WHY IS MY BRAND SCORE {brandScore.overallScore}?
-              </motion.button>
-            </div>
-          </motion.div>
-        )}
-
-        {/* REVEAL STATE - Fallback for no DNA */}
-        {flowState === 'reveal' && brandScore && profile && !generatedBrandDNA && (
-          <motion.div
-            key="reveal-fallback"
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.6 }}
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '32px',
-              maxWidth: '600px',
-              width: '100%',
-              position: 'relative',
-              zIndex: 10,
-            }}
-          >
-            <ScoreGauge score={brandScore.overallScore} isVisible={true} theme={theme} />
-            <ShareableScoreCard
-              data={
-                {
-                  score: brandScore.overallScore,
-                  username: profile.username,
-                  displayName: profile.name,
-                  profileImageUrl: profile.profile_image_url,
-                  topStrength: brandScore.topStrengths[0] || '',
-                  summary: brandScore.summary,
-                } as ShareCardData
-              }
-              theme={theme}
-            />
-            <div className="flex gap-3">
-              <motion.button
-                onClick={async () => {
-                  const shareUrl = `${window.location.origin}/score/${profile.username}`;
-                  try {
-                    await navigator.clipboard.writeText(shareUrl);
-                    const btn = document.activeElement as HTMLButtonElement;
-                    const originalText = btn.innerText;
-                    btn.innerText = '✓ COPIED!';
-                    setTimeout(() => {
-                      btn.innerText = originalText;
-                    }, 2000);
-                  } catch {
-                    window.open(shareUrl, '_blank');
-                  }
-                }}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                style={{
-                  fontFamily: "'VCR OSD Mono', monospace",
-                  fontSize: '12px',
-                  letterSpacing: '0.1em',
-                  color: '#000',
-                  background: '#D4A574',
-                  border: 'none',
-                  cursor: 'pointer',
-                  padding: '12px 20px',
-                  borderRadius: '6px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                }}
-              >
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-                </svg>
-                SHARE URL
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => {
-                  setFlowState('input');
-                  setUsername('');
-                  setProfile(null);
-                  setBrandScore(null);
-                  setGeneratedBrandDNA(null);
-                  setShowConfetti(false);
-                }}
-                style={{
-                  fontFamily: "'VCR OSD Mono', monospace",
-                  fontSize: '12px',
-                  letterSpacing: '0.1em',
-                  color: theme === 'dark' ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)',
-                  background: 'transparent',
-                  border: `1px solid ${theme === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)'}`,
-                  cursor: 'pointer',
-                  padding: '12px 20px',
-                  borderRadius: '6px',
-                }}
-              >
-                ANALYZE ANOTHER
               </motion.button>
             </div>
           </motion.div>
