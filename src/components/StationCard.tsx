@@ -119,7 +119,10 @@ export default function StationCard({ archetype, username, score }: StationCardP
         {/* Station art — 2x master (see top comment), scaled smoothly. The scan
             shows the finished station as a BLUEPRINT ("the station you're
             building"); in the studio users start on an empty plot and build it. */}
-        <div className="relative overflow-hidden" style={{ background: t.bg }}>
+        {/* Animation CSS lives in globals.css under .station-art. It used to be a
+            nested <style jsx> block, which the production build never scoped
+            onto these elements, so the station didn't animate on prod. */}
+        <div className="station-art relative overflow-hidden" style={{ background: t.bg }}>
           {/* Idle animation (code-only, no extra art). The art has an opaque
               background with the grid baked in, so the station stays planted
               (floating it slid the whole picture against the CSS grid).
@@ -192,74 +195,6 @@ export default function StationCard({ archetype, username, score }: StationCardP
               opacity: mode === 'day' ? 0.07 : 0.06,
             }}
           />
-          <style jsx>{`
-            .station-glow {
-              opacity: 0;
-              /* steps(1) = hard on/off between keyframes, like a CRT, not a fade */
-              animation: station-glow 5s steps(1, end) infinite;
-            }
-            .station-beam {
-              top: -14%;
-              animation: station-beam 6s linear infinite;
-            }
-            .station-scan {
-              animation: station-scan 9s linear infinite;
-            }
-            @keyframes station-glow {
-              /* power on: flicker, catch, hold; brief brown-out; power down */
-              0% {
-                opacity: 0;
-              }
-              6% {
-                opacity: 0.8;
-              }
-              8% {
-                opacity: 0.15;
-              }
-              10% {
-                opacity: 0.95;
-              }
-              58% {
-                opacity: 0.35;
-              }
-              60% {
-                opacity: 0.95;
-              }
-              84% {
-                opacity: 0.5;
-              }
-              88% {
-                opacity: 0;
-              }
-            }
-            @keyframes station-beam {
-              0% {
-                top: -14%;
-              }
-              45%,
-              100% {
-                top: 100%;
-              }
-            }
-            @keyframes station-scan {
-              from {
-                background-position: 0 0;
-              }
-              to {
-                background-position: 0 40px;
-              }
-            }
-            @media (prefers-reduced-motion: reduce) {
-              .station-glow,
-              .station-scan,
-              .station-beam {
-                animation: none;
-              }
-              .station-beam {
-                display: none;
-              }
-            }
-          `}</style>
         </div>
 
         {/* Footer */}
