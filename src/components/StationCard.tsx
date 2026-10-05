@@ -79,7 +79,18 @@ export default function StationCard({ archetype, username, score }: StationCardP
 
   const render = useCallback(async (): Promise<Blob | null> => {
     if (!cardRef.current) return null;
-    return domToBlob(cardRef.current, { scale: 2, type: 'image/png' });
+    return domToBlob(cardRef.current, {
+      scale: 2,
+      type: 'image/png',
+      // Saved images are a clean still: no glow layers, float frozen at rest.
+      filter: (node) => !(node instanceof Element && node.hasAttribute('data-station-fx')),
+      onCloneEachNode: (cloned) => {
+        if (cloned instanceof HTMLElement && cloned.classList.contains('station-bob')) {
+          cloned.style.animation = 'none';
+          cloned.style.transform = 'none';
+        }
+      },
+    });
   }, []);
 
   // Pre-render once the art for the current mode has loaded, so a tap can
@@ -178,18 +189,55 @@ export default function StationCard({ archetype, username, score }: StationCardP
         {/* Station art — native 597x746, scaled with hard pixel edges. The scan
             shows the finished station as a BLUEPRINT ("the station you're
             building"); in the studio users start on an empty plot and build it. */}
-        <div className="relative">
-          {/* eslint-disable-next-line @next/next/no-img-element -- pixel art must not be resampled by next/image */}
-          <img
-            src={`/worlds/stations/${slug}-${mode}.png`}
-            alt={`${info?.name ?? archetype} brand station blueprint`}
-            width={597}
-            height={746}
-            className="block w-full h-auto select-none"
-            style={{ imageRendering: 'pixelated' }}
-            draggable={false}
-            onLoad={prepare}
-          />
+        <div className="relative overflow-hidden" style={{ background: t.bg }}>
+          {/* Idle animation (code-only, no extra art): the station floats a
+              couple of pixels; its screens and neon pulse through a per-station
+              glow mask (public/worlds/stations/masks, built from the art's
+              bright blue/green pixels) with a rare CRT flicker; night adds a
+              slow scanline drift. All of it is off under prefers-reduced-motion
+              and left out of saved images. */}
+          <div className="station-bob relative">
+            {/* eslint-disable-next-line @next/next/no-img-element -- pixel art must not be resampled by next/image */}
+            <img
+              src={`/worlds/stations/${slug}-${mode}.png`}
+              alt={`${info?.name ?? archetype} brand station blueprint`}
+              width={597}
+              height={746}
+              className="block w-full h-auto select-none"
+              style={{ imageRendering: 'pixelated' }}
+              draggable={false}
+              onLoad={prepare}
+            />
+            <div
+              aria-hidden
+              data-station-fx
+              className="station-glow pointer-events-none absolute inset-0"
+              style={{
+                backgroundImage: `url(/worlds/stations/${slug}-${mode}.png)`,
+                backgroundSize: '100% 100%',
+                imageRendering: 'pixelated',
+                filter:
+                  mode === 'day'
+                    ? 'brightness(1.35) saturate(1.25)'
+                    : 'brightness(1.6) saturate(1.3)',
+                WebkitMaskImage: `url(/worlds/stations/masks/${slug}-${mode}.png)`,
+                maskImage: `url(/worlds/stations/masks/${slug}-${mode}.png)`,
+                WebkitMaskSize: '100% 100%',
+                maskSize: '100% 100%',
+              }}
+            />
+          </div>
+          {mode === 'night' && (
+            <div
+              aria-hidden
+              data-station-fx
+              className="station-scan pointer-events-none absolute inset-0"
+              style={{
+                backgroundImage:
+                  'repeating-linear-gradient(0deg, rgba(0,255,136,0.05) 0px, rgba(0,255,136,0.05) 1px, transparent 1px, transparent 4px)',
+              }}
+            />
+          )}
           {/* Faint blueprint grid over the art */}
           <div
             aria-hidden
@@ -200,6 +248,65 @@ export default function StationCard({ archetype, username, score }: StationCardP
               opacity: mode === 'day' ? 0.07 : 0.06,
             }}
           />
+          <style jsx>{`
+            .station-bob {
+              animation: station-bob 4.8s ease-in-out infinite;
+            }
+            .station-glow {
+              opacity: 0;
+              animation: station-glow 6s ease-in-out infinite;
+            }
+            .station-scan {
+              animation: station-scan 9s linear infinite;
+            }
+            @keyframes station-bob {
+              0%,
+              100% {
+                transform: translateY(0);
+              }
+              50% {
+                transform: translateY(-2px);
+              }
+            }
+            @keyframes station-glow {
+              0%,
+              100% {
+                opacity: 0;
+              }
+              45%,
+              55% {
+                opacity: 0.6;
+              }
+              /* rare CRT flicker */
+              80% {
+                opacity: 0.1;
+              }
+              81% {
+                opacity: 0.55;
+              }
+              82% {
+                opacity: 0.05;
+              }
+              83% {
+                opacity: 0.4;
+              }
+            }
+            @keyframes station-scan {
+              from {
+                background-position: 0 0;
+              }
+              to {
+                background-position: 0 40px;
+              }
+            }
+            @media (prefers-reduced-motion: reduce) {
+              .station-bob,
+              .station-glow,
+              .station-scan {
+                animation: none;
+              }
+            }
+          `}</style>
         </div>
 
         {/* Footer */}
