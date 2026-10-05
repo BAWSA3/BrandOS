@@ -419,9 +419,13 @@ model EmailSignup {
   unsubscribed  Boolean?  @default(false)
   unsubscribedAt DateTime?
   createdAt     DateTime  @default(now())
+  // "Reserve your brand station" (migration 018); set for new and existing emails
+  reservedAt        DateTime? @db.Timestamptz
+  reservedArchetype String?
 
   @@index([createdAt])
   @@index([xUsername])
+  @@index([reservedAt])
 }
 
 // Brand score scan history (created via Supabase)

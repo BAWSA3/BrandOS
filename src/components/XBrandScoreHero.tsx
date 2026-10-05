@@ -14,6 +14,7 @@ import { SaveResultsPrompt } from './SaveResultsPrompt';
 import { useAuth } from '@/hooks/useAuth';
 import { domToPng } from 'modern-screenshot';
 import StationCard, { stationSlug } from './StationCard';
+import ReserveStation from './ReserveStation';
 import { AuthenticityAnalysis, ActivityAnalysis } from '@/lib/gemini';
 import { useXBrandScoreDemoCapture } from '@/hooks/useDemoCaptureIntegration';
 import DemoModeControls from './DemoModeControls';
@@ -1712,6 +1713,10 @@ export default function XBrandScoreHero({
                     archetype={normalizeArchetypeName(brandScore.archetype?.primary || '')}
                     username={profile.username}
                     score={brandScore.overallScore}
+                  />
+                  <ReserveStation
+                    username={profile.username}
+                    archetype={normalizeArchetypeName(brandScore.archetype?.primary || '')}
                   />
                 </div>
               )}
