@@ -103,7 +103,7 @@ export default function StationCard({ archetype, username, score }: StationCardP
             className="px-2 py-1 rounded-[2px] text-[10px] tracking-[0.15em] uppercase"
             style={{ fontFamily: MONO, border: `1px solid ${t.border}`, color: t.muted }}
           >
-            BRAND_STATION
+            YOUR_BLUEPRINT
           </span>
           <span
             className="truncate text-[12px] tracking-wider min-w-0"
@@ -112,18 +112,38 @@ export default function StationCard({ archetype, username, score }: StationCardP
             @{username}
           </span>
         </div>
+        <div
+          className="px-4 pt-2 text-[10px] tracking-[0.15em] uppercase"
+          style={{ fontFamily: MONO, color: t.muted }}
+        >
+          the station you&apos;re building
+        </div>
 
-        {/* Station art — native 597x746, scaled with hard pixel edges */}
-        {/* eslint-disable-next-line @next/next/no-img-element -- pixel art must not be resampled by next/image */}
-        <img
-          src={`/worlds/stations/${slug}-${mode}.png`}
-          alt={`${info?.name ?? archetype} brand station`}
-          width={597}
-          height={746}
-          className="block w-full h-auto select-none"
-          style={{ imageRendering: 'pixelated' }}
-          draggable={false}
-        />
+        {/* Station art — native 597x746, scaled with hard pixel edges. The scan
+            shows the finished station as a BLUEPRINT ("the station you're
+            building"); in the studio users start on an empty plot and build it. */}
+        <div className="relative">
+          {/* eslint-disable-next-line @next/next/no-img-element -- pixel art must not be resampled by next/image */}
+          <img
+            src={`/worlds/stations/${slug}-${mode}.png`}
+            alt={`${info?.name ?? archetype} brand station blueprint`}
+            width={597}
+            height={746}
+            className="block w-full h-auto select-none"
+            style={{ imageRendering: 'pixelated' }}
+            draggable={false}
+          />
+          {/* Faint blueprint grid over the art */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0"
+            style={{
+              backgroundImage: `linear-gradient(${t.accent} 1px, transparent 1px), linear-gradient(90deg, ${t.accent} 1px, transparent 1px)`,
+              backgroundSize: '24px 24px',
+              opacity: mode === 'day' ? 0.07 : 0.06,
+            }}
+          />
+        </div>
 
         {/* Footer */}
         <div
