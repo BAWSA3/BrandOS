@@ -7,8 +7,10 @@ import { getArchetypeInfo } from '@/lib/archetype-descriptions';
 /**
  * "Your brand station" — the shareable card shown after a scan. Each archetype
  * has its own pixel-art station (public/worlds/stations/<slug>-<mode>.png),
- * cleaned to a 48-colour, 597x746 native grid and scaled up with hard pixel
- * edges. Day = BrandOS light palette, Night = Terminal OS. The handle and score
+ * cleaned to a 48-colour, 597x746 pixel grid, then shipped 2x (1194x1492, each
+ * art pixel an exact 2x2 block) and scaled smoothly. Hard-edged scaling by a
+ * non-integer factor (~1.8x on phones) made pixels uneven widths, so diagonals
+ * looked choppy; smooth scaling from the 2x master keeps every pixel even. Day = BrandOS light palette, Night = Terminal OS. The handle and score
  * are drawn in code (the art's signs are blank on purpose) so text is always
  * crisp. Saving captures the card element only, not the controls below.
  *
@@ -114,7 +116,7 @@ export default function StationCard({ archetype, username, score }: StationCardP
           the station you&apos;re building
         </div>
 
-        {/* Station art — native 597x746, scaled with hard pixel edges. The scan
+        {/* Station art — 2x master (see top comment), scaled smoothly. The scan
             shows the finished station as a BLUEPRINT ("the station you're
             building"); in the studio users start on an empty plot and build it. */}
         <div className="relative overflow-hidden" style={{ background: t.bg }}>
@@ -125,14 +127,14 @@ export default function StationCard({ archetype, username, score }: StationCardP
               slow scanline drift. All of it is off under prefers-reduced-motion
               and left out of saved images. */}
           <div className="station-bob relative">
-            {/* eslint-disable-next-line @next/next/no-img-element -- pixel art must not be resampled by next/image */}
+            {/* eslint-disable-next-line @next/next/no-img-element -- art is pre-scaled; next/image would re-encode it */}
             <img
               src={`/worlds/stations/${slug}-${mode}.png`}
               alt={`${info?.name ?? archetype} brand station blueprint`}
               width={597}
               height={746}
               className="block w-full h-auto select-none"
-              style={{ imageRendering: 'pixelated' }}
+              style={{ imageRendering: 'auto' }}
               draggable={false}
               onLoad={prepare}
             />
@@ -143,7 +145,7 @@ export default function StationCard({ archetype, username, score }: StationCardP
               style={{
                 backgroundImage: `url(/worlds/stations/${slug}-${mode}.png)`,
                 backgroundSize: '100% 100%',
-                imageRendering: 'pixelated',
+                imageRendering: 'auto',
                 filter:
                   mode === 'day'
                     ? 'brightness(1.35) saturate(1.25)'
@@ -178,11 +180,11 @@ export default function StationCard({ archetype, username, score }: StationCardP
           />
           <style jsx>{`
             .station-bob {
-              animation: station-bob 4.8s ease-in-out infinite;
+              animation: station-bob 4s ease-in-out infinite;
             }
             .station-glow {
               opacity: 0;
-              animation: station-glow 6s ease-in-out infinite;
+              animation: station-glow 3.6s ease-in-out infinite;
             }
             .station-scan {
               animation: station-scan 9s linear infinite;
@@ -193,7 +195,7 @@ export default function StationCard({ archetype, username, score }: StationCardP
                 transform: translateY(0);
               }
               50% {
-                transform: translateY(-2px);
+                transform: translateY(-6px);
               }
             }
             @keyframes station-glow {
@@ -203,7 +205,7 @@ export default function StationCard({ archetype, username, score }: StationCardP
               }
               45%,
               55% {
-                opacity: 0.6;
+                opacity: 0.95;
               }
               /* rare CRT flicker */
               80% {
