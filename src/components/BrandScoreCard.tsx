@@ -46,8 +46,11 @@ const BrandScoreCard: React.FC<BrandScoreCardProps> = ({
         id="brandos-score-card"
         // 16:10 + a 480px min-height made CSS derive a 768px minimum WIDTH,
         // so the card overflowed every phone. The ratio is desktop-only now;
-        // phones get a shorter, natural-height card.
-        className="w-full max-w-[1100px] min-h-[400px] md:min-h-[480px] md:aspect-[16/10] bg-[#2E6AFF] rounded-[8px] relative p-6 sm:p-8 md:p-14 flex flex-col justify-between gap-6 overflow-visible"
+        // phones get a shorter, natural-height card. On desktop min-height must
+        // stay `auto`: any explicit min-height turns off aspect-ratio's
+        // grow-to-fit, so tall content (score + stats + note) spilled out the
+        // bottom of the 16:10 box instead of stretching it.
+        className="w-full max-w-[1100px] min-h-[400px] md:min-h-[auto] md:aspect-[16/10] bg-[#2E6AFF] rounded-[8px] relative p-6 sm:p-8 md:p-14 flex flex-col justify-between gap-6 overflow-visible"
         style={{
           boxShadow: '0 8px 40px rgba(46, 106, 255, 0.35), 0 2px 20px rgba(0, 0, 0, 0.15)',
         }}
