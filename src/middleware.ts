@@ -16,6 +16,7 @@ const allowedPages = [
   '/privacy', // Legal: privacy policy
   '/terms', // Legal: terms of service
   '/tier-list', // Public tier list
+  '/station', // Public reserved-station pages (flex sign + X link preview)
   '/archetype', // Archetype scanner
   '/archetypes', // Archetype showcase
   '/test-cards', // Archetype card previews (dev)

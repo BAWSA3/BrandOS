@@ -422,6 +422,7 @@ model EmailSignup {
   // "Reserve your brand station" (migration 018); set for new and existing emails
   reservedAt        DateTime? @db.Timestamptz
   reservedArchetype String?
+  reservationNumber Int?    @unique // permanent "Station #N" (migration 019)
 
   @@index([createdAt])
   @@index([xUsername])
