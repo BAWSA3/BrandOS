@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import ReservedSignCard from './ReservedSignCard';
 
 /**
  * "Reserve your brand station" — the post-scan email capture. Adds the email
@@ -20,7 +21,12 @@ export default function ReserveStation({ username, archetype }: ReserveStationPr
   const [email, setEmail] = useState('');
   const [state, setState] = useState<'idle' | 'sending' | 'done' | 'error'>('idle');
   const [message, setMessage] = useState('');
-  const [position, setPosition] = useState<number | null>(null);
+  const [station, setStation] = useState<{
+    number: number;
+    handle: string;
+    archetype: string | null;
+    foundingPriority: boolean;
+  } | null>(null);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,7 +49,18 @@ export default function ReserveStation({ username, archetype }: ReserveStationPr
         );
         return;
       }
-      setPosition(typeof data.position === 'number' ? data.position : null);
+      // The server only returns the station when this email reserved with this
+      // handle; otherwise it's a plain "reserved" (see /api/reserve-station).
+      setStation(
+        typeof data.number === 'number' && typeof data.handle === 'string'
+          ? {
+              number: data.number,
+              handle: data.handle,
+              archetype: typeof data.archetype === 'string' ? data.archetype : null,
+              foundingPriority: !!data.foundingPriority,
+            }
+          : null
+      );
       setState('done');
     } catch {
       setState('error');
@@ -52,14 +69,31 @@ export default function ReserveStation({ username, archetype }: ReserveStationPr
   };
 
   if (state === 'done') {
+    if (station) {
+      return (
+        <div className="w-full mt-6">
+          <div
+            className="mb-3 text-center text-[11px] tracking-[0.15em] text-black/50 uppercase"
+            style={{ fontFamily: MONO }}
+          >
+            {'// your plot is claimed'}
+          </div>
+          <ReservedSignCard
+            handle={station.handle}
+            number={station.number}
+            archetype={station.archetype}
+            foundingPriority={station.foundingPriority}
+            shareUrl={`${window.location.origin}/station/${station.handle}`}
+          />
+        </div>
+      );
+    }
     return (
       <div
         className="w-full max-w-[480px] mx-auto mt-4 rounded-[8px] border border-black/10 bg-white/60 px-4 py-4 text-center"
         style={{ fontFamily: MONO }}
       >
-        <div className="text-[13px] tracking-wider text-[#1D1D1F]">
-          RESERVED ✓{position ? ` STATION #${position}` : ''}
-        </div>
+        <div className="text-[13px] tracking-wider text-[#1D1D1F]">RESERVED ✓</div>
         <div className="mt-1 text-[11px] tracking-wide text-[#6E6E73]">
           We&apos;ll email you when the studio opens Oct 20.
         </div>

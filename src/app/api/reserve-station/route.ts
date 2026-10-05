@@ -3,6 +3,7 @@ import prisma from '@/lib/db';
 import { botGuard } from '@/lib/botid-guard';
 import { withRateLimit, rateLimiters } from '@/lib/rate-limit';
 import { normalizeArchetypeName } from '@/lib/archetype-names';
+import { FOUNDING_PRIORITY_CAP } from '@/lib/reservations';
 
 /**
  * POST /api/reserve-station — "Reserve your brand station" after a scan.
@@ -69,34 +70,62 @@ async function handlePost(request: NextRequest) {
       select: { id: true, xUsername: true, reservedAt: true, reservedArchetype: true },
     });
 
-    if (existing) {
-      await prisma.emailSignup.update({
-        where: { id: existing.id },
-        data: {
-          reservedAt: existing.reservedAt ?? new Date(),
-          // Locked on first reservation; later scans never change it.
-          reservedArchetype: existing.reservedArchetype ?? archetype ?? undefined,
-          xUsername: existing.xUsername ?? handle ?? undefined,
-          // Unsubscribe status is deliberately untouched: anyone can type any
-          // email here, so reserving must never re-subscribe someone who left.
-        },
-      });
-    } else {
-      await prisma.emailSignup.create({
-        data: {
-          email,
-          xUsername: handle,
-          source: 'reserve-station',
-          reservedAt: new Date(),
-          reservedArchetype: archetype,
-        },
+    const row = existing
+      ? await prisma.emailSignup.update({
+          where: { id: existing.id },
+          data: {
+            reservedAt: existing.reservedAt ?? new Date(),
+            // Locked on first reservation; later scans never change it.
+            reservedArchetype: existing.reservedArchetype ?? archetype ?? undefined,
+            xUsername: existing.xUsername ?? handle ?? undefined,
+            // Unsubscribe status is deliberately untouched: anyone can type any
+            // email here, so reserving must never re-subscribe someone who left.
+          },
+          select: { id: true, reservationNumber: true },
+        })
+      : await prisma.emailSignup.create({
+          data: {
+            email,
+            xUsername: handle,
+            source: 'reserve-station',
+            reservedAt: new Date(),
+            reservedArchetype: archetype,
+          },
+          select: { id: true, reservationNumber: true },
+        });
+
+    // Permanent station number, assigned once (migration 019). The
+    // `reservationNumber: null` guard makes a concurrent double-submit keep
+    // whichever number landed first (the other value is just a sequence gap).
+    if (row.reservationNumber == null) {
+      const [{ n }] = await prisma.$queryRaw<{ n: number }[]>`
+        SELECT nextval('"EmailSignup_reservationNumber_seq"')::int AS n`;
+      await prisma.emailSignup.updateMany({
+        where: { id: row.id, reservationNumber: null },
+        data: { reservationNumber: n },
       });
     }
 
-    const position = await prisma.emailSignup.count({ where: { reservedAt: { not: null } } });
-    // Same response for new and existing emails, so this can't be used to
-    // check whether an address is on the list.
-    return NextResponse.json({ reserved: true, position });
+    const final = await prisma.emailSignup.findUnique({
+      where: { id: row.id },
+      select: { reservationNumber: true, xUsername: true, reservedArchetype: true },
+    });
+
+    // Only reveal the station (number + handle) when the request's handle is
+    // the one this email reserved with. Otherwise anyone could type someone
+    // else's email and learn which X handle it belongs to. New and existing
+    // emails otherwise get the same response (no list enumeration).
+    const matches = !!handle && final?.xUsername?.toLowerCase() === handle;
+    if (!matches || final?.reservationNumber == null) {
+      return NextResponse.json({ reserved: true });
+    }
+    return NextResponse.json({
+      reserved: true,
+      number: final.reservationNumber,
+      handle: final.xUsername,
+      archetype: final.reservedArchetype,
+      foundingPriority: final.reservationNumber <= FOUNDING_PRIORITY_CAP,
+    });
   } catch (error) {
     console.error('[reserve-station] Failed:', error);
     return NextResponse.json({ error: 'Could not reserve right now' }, { status: 500 });

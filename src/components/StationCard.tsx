@@ -1,7 +1,7 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { domToBlob } from 'modern-screenshot';
+import { useRef, useState } from 'react';
+import { useCardImageSave } from '@/lib/use-card-image-save';
 import { getArchetypeInfo } from '@/lib/archetype-descriptions';
 
 /**
@@ -31,9 +31,9 @@ const STATION_SLUGS: Record<string, string> = {
   NULL: 'null',
 };
 
-type Mode = 'day' | 'night';
+export type Mode = 'day' | 'night';
 
-const THEME: Record<
+export const THEME: Record<
   Mode,
   { bg: string; ink: string; muted: string; accent: string; border: string; panel: string }
 > = {
@@ -55,8 +55,8 @@ const THEME: Record<
   },
 };
 
-const MONO = "'VCR OSD Mono', 'JetBrains Mono', monospace";
-const PIXEL = "'PP NeueBit', 'VCR OSD Mono', monospace";
+export const MONO = "'VCR OSD Mono', 'JetBrains Mono', monospace";
+export const PIXEL = "'PP NeueBit', 'VCR OSD Mono', monospace";
 
 export interface StationCardProps {
   archetype: string; // archetype primary, e.g. 'SOURCE' or 'BUILD.EXE'
@@ -70,91 +70,19 @@ export function stationSlug(archetype: string): string | null {
 
 export default function StationCard({ archetype, username, score }: StationCardProps) {
   const [mode, setMode] = useState<Mode>('day');
-  const [status, setStatus] = useState<'idle' | 'saving' | 'saved' | 'failed'>('idle');
   const cardRef = useRef<HTMLDivElement>(null);
-  const cache = useRef<Partial<Record<Mode, Blob>>>({});
+  const { status, prepare, save } = useCardImageSave(
+    cardRef,
+    `brandos-blueprint-${username}-${mode}.png`,
+    mode,
+    `${username}:${score}`
+  );
 
   const slug = stationSlug(archetype);
-  const fileName = `brandos-blueprint-${username}-${mode}.png`;
-
-  const render = useCallback(async (): Promise<Blob | null> => {
-    if (!cardRef.current) return null;
-    return domToBlob(cardRef.current, {
-      scale: 2,
-      type: 'image/png',
-      // Saved images are a clean still: no glow layers, float frozen at rest.
-      filter: (node) => !(node instanceof Element && node.hasAttribute('data-station-fx')),
-      onCloneEachNode: (cloned) => {
-        if (cloned instanceof HTMLElement && cloned.classList.contains('station-bob')) {
-          cloned.style.animation = 'none';
-          cloned.style.transform = 'none';
-        }
-      },
-    });
-  }, []);
-
-  // Pre-render once the art for the current mode has loaded, so a tap can
-  // open the share sheet without awaiting a render first.
-  const prepare = useCallback(async () => {
-    if (cache.current[mode]) return;
-    try {
-      // Capture only after the pixel fonts are ready, or the cached image
-      // would bake in the fallback font.
-      await document.fonts?.ready;
-      const blob = await render();
-      if (blob) cache.current[mode] = blob;
-    } catch {
-      // non-fatal: the tap will render on demand
-    }
-  }, [mode, render]);
-
-  useEffect(() => {
-    // Handle / score changes invalidate the cached images.
-    cache.current = {};
-  }, [username, score]);
-
   if (!slug) return null;
 
   const info = getArchetypeInfo(archetype);
   const t = THEME[mode];
-
-  const downloadFallback = (blob: Blob) => {
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = fileName;
-    a.click();
-    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-  };
-
-  const save = async () => {
-    setStatus('saving');
-    try {
-      const blob = cache.current[mode] ?? (await render());
-      if (!blob) throw new Error('render failed');
-      cache.current[mode] = blob;
-      const file = new File([blob], fileName, { type: 'image/png' });
-      if (typeof navigator !== 'undefined' && navigator.canShare?.({ files: [file] })) {
-        try {
-          await navigator.share({ files: [file] });
-        } catch (err) {
-          // Cancelled by the user: not a failure. Lost user activation
-          // (NotAllowedError, e.g. first tap before pre-render): download instead.
-          if ((err as DOMException)?.name === 'AbortError') {
-            setStatus('idle');
-            return;
-          }
-          downloadFallback(blob);
-        }
-      } else {
-        downloadFallback(blob);
-      }
-      setStatus('saved');
-    } catch (err) {
-      console.error('[StationCard] Save failed:', err);
-      setStatus('failed');
-    }
-    setTimeout(() => setStatus('idle'), 2000);
-  };
 
   return (
     <div className="w-full max-w-[480px] mx-auto">
