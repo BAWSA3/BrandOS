@@ -1,7 +1,7 @@
 'use client';
 
-import { useRef, useState } from 'react';
-import { domToPng } from 'modern-screenshot';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { domToBlob } from 'modern-screenshot';
 import { getArchetypeInfo } from '@/lib/archetype-descriptions';
 
 /**
@@ -10,7 +10,14 @@ import { getArchetypeInfo } from '@/lib/archetype-descriptions';
  * cleaned to a 48-colour, 597x746 native grid and scaled up with hard pixel
  * edges. Day = BrandOS light palette, Night = Terminal OS. The handle and score
  * are drawn in code (the art's signs are blank on purpose) so text is always
- * crisp. The download captures the card element only, not the controls below.
+ * crisp. Saving captures the card element only, not the controls below.
+ *
+ * Save flow: on phones, websites can't write to Photos directly; the closest is
+ * the system share sheet (iOS: "Save Image" -> Photos; Android: save to
+ * Gallery). iOS only opens it while the tap's user activation is still live, so
+ * the PNG is pre-rendered whenever the art loads or the mode changes, and the
+ * tap shares the cached file immediately. Desktop / no file-share support falls
+ * back to a normal download.
  */
 
 const STATION_SLUGS: Record<string, string> = {
@@ -65,25 +72,74 @@ export default function StationCard({ archetype, username, score }: StationCardP
   const [mode, setMode] = useState<Mode>('day');
   const [status, setStatus] = useState<'idle' | 'saving' | 'saved' | 'failed'>('idle');
   const cardRef = useRef<HTMLDivElement>(null);
+  const cache = useRef<Partial<Record<Mode, Blob>>>({});
 
   const slug = stationSlug(archetype);
+  const fileName = `brandos-blueprint-${username}-${mode}.png`;
+
+  const render = useCallback(async (): Promise<Blob | null> => {
+    if (!cardRef.current) return null;
+    return domToBlob(cardRef.current, { scale: 2, type: 'image/png' });
+  }, []);
+
+  // Pre-render once the art for the current mode has loaded, so a tap can
+  // open the share sheet without awaiting a render first.
+  const prepare = useCallback(async () => {
+    if (cache.current[mode]) return;
+    try {
+      // Capture only after the pixel fonts are ready, or the cached image
+      // would bake in the fallback font.
+      await document.fonts?.ready;
+      const blob = await render();
+      if (blob) cache.current[mode] = blob;
+    } catch {
+      // non-fatal: the tap will render on demand
+    }
+  }, [mode, render]);
+
+  useEffect(() => {
+    // Handle / score changes invalidate the cached images.
+    cache.current = {};
+  }, [username, score]);
+
   if (!slug) return null;
 
   const info = getArchetypeInfo(archetype);
   const t = THEME[mode];
 
-  const download = async () => {
-    if (!cardRef.current) return;
+  const downloadFallback = (blob: Blob) => {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = fileName;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  };
+
+  const save = async () => {
     setStatus('saving');
     try {
-      const dataUrl = await domToPng(cardRef.current, { scale: 2 });
-      const a = document.createElement('a');
-      a.href = dataUrl;
-      a.download = `brandos-station-${username}-${mode}.png`;
-      a.click();
+      const blob = cache.current[mode] ?? (await render());
+      if (!blob) throw new Error('render failed');
+      cache.current[mode] = blob;
+      const file = new File([blob], fileName, { type: 'image/png' });
+      if (typeof navigator !== 'undefined' && navigator.canShare?.({ files: [file] })) {
+        try {
+          await navigator.share({ files: [file] });
+        } catch (err) {
+          // Cancelled by the user: not a failure. Lost user activation
+          // (NotAllowedError, e.g. first tap before pre-render): download instead.
+          if ((err as DOMException)?.name === 'AbortError') {
+            setStatus('idle');
+            return;
+          }
+          downloadFallback(blob);
+        }
+      } else {
+        downloadFallback(blob);
+      }
       setStatus('saved');
     } catch (err) {
-      console.error('[StationCard] Download failed:', err);
+      console.error('[StationCard] Save failed:', err);
       setStatus('failed');
     }
     setTimeout(() => setStatus('idle'), 2000);
@@ -132,6 +188,7 @@ export default function StationCard({ archetype, username, score }: StationCardP
             className="block w-full h-auto select-none"
             style={{ imageRendering: 'pixelated' }}
             draggable={false}
+            onLoad={prepare}
           />
           {/* Faint blueprint grid over the art */}
           <div
@@ -199,7 +256,7 @@ export default function StationCard({ archetype, username, score }: StationCardP
           </button>
         ))}
         <button
-          onClick={download}
+          onClick={save}
           disabled={status === 'saving'}
           className="px-4 py-2 rounded-[4px] text-[11px] tracking-wider text-white bg-[#1A1A1A] hover:bg-[#2E6AFF] transition-colors disabled:opacity-50"
           style={{ fontFamily: MONO }}
@@ -210,7 +267,7 @@ export default function StationCard({ archetype, username, score }: StationCardP
               ? 'SAVED ✓'
               : status === 'failed'
                 ? 'FAILED'
-                : 'DOWNLOAD STATION'}
+                : 'SAVE IMAGE'}
         </button>
       </div>
     </div>
