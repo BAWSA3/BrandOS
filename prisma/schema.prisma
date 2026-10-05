@@ -423,10 +423,37 @@ model EmailSignup {
   reservedAt        DateTime? @db.Timestamptz
   reservedArchetype String?
   reservationNumber Int?    @unique // permanent "Station #N" (migration 019)
+  emailSends        EmailSend[]
+  pollVote          PricingPollVote?
 
   @@index([createdAt])
   @@index([xUsername])
   @@index([reservedAt])
+}
+
+// One row per (signup, campaign): the once-per-address guarantee for
+// transactional mail and the re-run guard for campaigns (migration 020)
+model EmailSend {
+  id            String      @id @default(dbgenerated("(gen_random_uuid())::text"))
+  emailSignupId String
+  campaign      String
+  resendId      String?
+  sentAt        DateTime    @default(now()) @db.Timestamptz
+  emailSignup   EmailSignup @relation(fields: [emailSignupId], references: [id], onDelete: Cascade)
+
+  @@unique([emailSignupId, campaign])
+  @@index([campaign])
+}
+
+// Launch-email "would you pay?" one-click poll, one vote per signup (migration 020)
+model PricingPollVote {
+  id            String      @id @default(dbgenerated("(gen_random_uuid())::text"))
+  emailSignupId String      @unique
+  choice        String // standard | premium | founding | not-yet
+  campaign      String
+  createdAt     DateTime    @default(now()) @db.Timestamptz
+  updatedAt     DateTime    @default(now()) @updatedAt @db.Timestamptz
+  emailSignup   EmailSignup @relation(fields: [emailSignupId], references: [id], onDelete: Cascade)
 }
 
 // Brand score scan history (created via Supabase)

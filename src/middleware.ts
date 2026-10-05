@@ -17,6 +17,7 @@ const allowedPages = [
   '/terms', // Legal: terms of service
   '/tier-list', // Public tier list
   '/station', // Public reserved-station pages (flex sign + X link preview)
+  '/poll', // Launch-email one-click "would you pay?" vote landing
   '/archetype', // Archetype scanner
   '/archetypes', // Archetype showcase
   '/test-cards', // Archetype card previews (dev)
