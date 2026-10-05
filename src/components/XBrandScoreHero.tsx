@@ -14,6 +14,7 @@ import { SaveResultsPrompt } from './SaveResultsPrompt';
 import ScoreBoostAuditCta from './ScoreBoostAuditCta';
 import { useAuth } from '@/hooks/useAuth';
 import { domToPng } from 'modern-screenshot';
+import StationCard, { stationSlug } from './StationCard';
 import { AuthenticityAnalysis, ActivityAnalysis } from '@/lib/gemini';
 import { useXBrandScoreDemoCapture } from '@/hooks/useDemoCaptureIntegration';
 import DemoModeControls from './DemoModeControls';
@@ -66,6 +67,8 @@ interface BrandScoreResult {
   topStrengths: string[];
   topImprovements: string[];
   summary: string;
+  // Resolved by /api/x-brand-score's archetype engine (e.g. 'SOURCE', 'BUILD.EXE')
+  archetype?: { primary?: string };
 }
 
 type FlowState = 'input' | 'journey' | 'walkthrough' | 'reveal' | 'signup' | 'insufficient_data';
@@ -1697,6 +1700,22 @@ export default function XBrandScoreHero({
                   </button>
                 </div>
               </div>
+              {/* Your brand station — archetype pixel-art card, shareable */}
+              {stationSlug(normalizeArchetypeName(brandScore.archetype?.primary || '')) && (
+                <div className="capture-hide mt-10 w-full">
+                  <div
+                    className="mb-3 text-center text-[11px] tracking-[0.15em] text-black/50 uppercase"
+                    style={{ fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace" }}
+                  >
+                    {'// your brand station'}
+                  </div>
+                  <StationCard
+                    archetype={normalizeArchetypeName(brandScore.archetype?.primary || '')}
+                    username={profile.username}
+                    score={brandScore.overallScore}
+                  />
+                </div>
+              )}
               {/* Score Boost Audit CTA — $19 one-time, the first-dollar product */}
               <ScoreBoostAuditCta
                 handle={profile.username}
