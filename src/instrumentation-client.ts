@@ -27,6 +27,8 @@ initBotId({
     { path: '/api/import/analyze-images', method: 'POST' },
     { path: '/api/import/analyze-url', method: 'POST' },
     { path: '/api/import/analyze-social', method: 'POST' },
+    // Reserve your brand station — email capture after the scan (spam surface)
+    { path: '/api/reserve-station', method: 'POST' },
     // Checkout — payment abuse surface
     { path: '/api/stripe/checkout', method: 'POST' },
   ],

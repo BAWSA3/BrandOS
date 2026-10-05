@@ -11,10 +11,10 @@ import BrandOSDashboard, { BrandOSDashboardData } from './BrandOSDashboard';
 import BrandScoreCard from './BrandScoreCard';
 import BrandIssuesSection from './BrandIssuesSection';
 import { SaveResultsPrompt } from './SaveResultsPrompt';
-import ScoreBoostAuditCta from './ScoreBoostAuditCta';
 import { useAuth } from '@/hooks/useAuth';
 import { domToPng } from 'modern-screenshot';
 import StationCard, { stationSlug } from './StationCard';
+import ReserveStation from './ReserveStation';
 import { AuthenticityAnalysis, ActivityAnalysis } from '@/lib/gemini';
 import { useXBrandScoreDemoCapture } from '@/hooks/useDemoCaptureIntegration';
 import DemoModeControls from './DemoModeControls';
@@ -1714,128 +1714,12 @@ export default function XBrandScoreHero({
                     username={profile.username}
                     score={brandScore.overallScore}
                   />
+                  <ReserveStation
+                    username={profile.username}
+                    archetype={normalizeArchetypeName(brandScore.archetype?.primary || '')}
+                  />
                 </div>
               )}
-              {/* Score Boost Audit CTA — $19 one-time, the first-dollar product */}
-              <ScoreBoostAuditCta
-                handle={profile.username}
-                phaseScores={{
-                  define: brandScore.phases.define.score,
-                  check: brandScore.phases.check.score,
-                  generate: brandScore.phases.generate.score,
-                  scale: brandScore.phases.scale.score,
-                }}
-              />
-              {/* Intelligence Report CTA */}
-              <motion.a
-                href={`/intelligence?u=${encodeURIComponent(profile.username)}`}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6 }}
-                className="capture-hide"
-                style={{
-                  display: 'block',
-                  width: '100%',
-                  marginTop: '12px',
-                  padding: '14px 20px',
-                  background: 'rgba(0, 71, 255, 0.04)',
-                  border: '1px solid rgba(0, 71, 255, 0.15)',
-                  borderRadius: '6px',
-                  textDecoration: 'none',
-                  cursor: 'pointer',
-                  textAlign: 'center',
-                }}
-              >
-                <span
-                  style={{
-                    fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace",
-                    fontSize: '11px',
-                    letterSpacing: '0.1em',
-                    color: '#0047FF',
-                  }}
-                >
-                  VIEW YOUR INTELLIGENCE REPORT →
-                </span>
-              </motion.a>
-
-              {/* Daily Brief CTA */}
-              <motion.a
-                href="/signup?next=/today"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.7 }}
-                className="capture-hide"
-                style={{
-                  display: 'block',
-                  width: '100%',
-                  marginTop: '8px',
-                  padding: '14px 20px',
-                  background: '#000000',
-                  border: '1px solid #000000',
-                  borderRadius: '6px',
-                  textDecoration: 'none',
-                  cursor: 'pointer',
-                  textAlign: 'center',
-                }}
-              >
-                <span
-                  style={{
-                    fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace",
-                    fontSize: '11px',
-                    letterSpacing: '0.1em',
-                    color: '#FFFFFF',
-                  }}
-                >
-                  GET TODAY&apos;S BRIEF — 1 IDEA · 1 METRIC · 1 ACTION →
-                </span>
-              </motion.a>
-
-              <motion.button
-                onClick={async () => {
-                  // Capture score card image before transitioning
-                  const scoreCard = document.getElementById('brandos-score-card');
-                  if (scoreCard) {
-                    try {
-                      const pfpImg = scoreCard.querySelector(
-                        `img[alt="${profile.name}"]`
-                      ) as HTMLImageElement | null;
-                      const originalSrc = pfpImg?.src || '';
-                      try {
-                        const pfpRes = await fetch(
-                          `/api/image-proxy?url=${encodeURIComponent(profile.profile_image_url?.replace('_normal', '_200x200') || '')}`
-                        );
-                        if (pfpRes.ok && pfpImg) {
-                          const blob = await pfpRes.blob();
-                          const dataUrl = await new Promise<string>((r) => {
-                            const fr = new FileReader();
-                            fr.onloadend = () => r(fr.result as string);
-                            fr.readAsDataURL(blob);
-                          });
-                          pfpImg.src = dataUrl;
-                          await new Promise((r) => setTimeout(r, 50));
-                        }
-                      } catch {}
-                      const dataUrl = await domToPng(scoreCard, {
-                        scale: 2,
-                        quality: 1,
-                        timeout: 30000,
-                      });
-                      if (pfpImg) pfpImg.src = originalSrc;
-                      setScoreCardImage(dataUrl);
-                    } catch (err) {
-                      console.error('Failed to capture score card:', err);
-                    }
-                  }
-                  setFlowState('signup');
-                }}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.8 }}
-                className="capture-hide mt-3 bg-transparent border-none text-[11px] tracking-[0.15em] text-black/50 hover:text-[#0047FF] cursor-pointer py-2 underline underline-offset-4 decoration-black/25 hover:decoration-[#0047FF]/50 transition-all duration-300 w-full text-center uppercase"
-                style={{ fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace" }}
-              >
-                WHY IS MY BRAND SCORE {brandScore.overallScore}?
-              </motion.button>
             </div>
           </motion.div>
         )}
