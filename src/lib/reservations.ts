@@ -1,14 +1,10 @@
 import prisma from '@/lib/db';
 
-/** Reservations #1-250 get first access to the 250 Founding Member spots. */
-export const FOUNDING_PRIORITY_CAP = 250;
-
 export interface PublicReservation {
   handle: string;
   number: number;
   archetype: string | null;
   reservedAt: Date;
-  foundingPriority: boolean;
 }
 
 /**
@@ -30,6 +26,5 @@ export async function getReservationByHandle(rawHandle: string): Promise<PublicR
     number: row.reservationNumber,
     archetype: row.reservedArchetype,
     reservedAt: row.reservedAt,
-    foundingPriority: row.reservationNumber <= FOUNDING_PRIORITY_CAP,
   };
 }

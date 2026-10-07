@@ -423,10 +423,25 @@ model EmailSignup {
   reservedAt        DateTime? @db.Timestamptz
   reservedArchetype String?
   reservationNumber Int?    @unique // permanent "Station #N" (migration 019)
+  emailSends        EmailSend[]
 
   @@index([createdAt])
   @@index([xUsername])
   @@index([reservedAt])
+}
+
+// One row per (signup, campaign): the once-per-address guarantee for
+// transactional mail and the re-run guard for campaigns (migration 020)
+model EmailSend {
+  id            String      @id @default(dbgenerated("(gen_random_uuid())::text"))
+  emailSignupId String
+  campaign      String
+  resendId      String?
+  sentAt        DateTime    @default(now()) @db.Timestamptz
+  emailSignup   EmailSignup @relation(fields: [emailSignupId], references: [id], onDelete: Cascade)
+
+  @@unique([emailSignupId, campaign])
+  @@index([campaign])
 }
 
 // Brand score scan history (created via Supabase)

@@ -4,10 +4,11 @@ import type { NextRequest } from 'next/server';
 // ============================================================================
 // ALLOWED PAGES — only these pages are publicly accessible.
 // Everything else returns 404. Add routes here as you launch them.
+// Launch week (Oct 2026): /tier-list, /opp, the old /score scan and the dev
+// /test-cards preview were removed (they redirect to the homepage scan).
 // ============================================================================
 const allowedPages = [
   '/', // Homepage / lead magnet
-  '/score', // Score flow
   '/scan', // Scan results (/scan/[username])
   '/shared', // Shared brand profiles (/shared/[token])
   '/thanks', // Post-signup thank you
@@ -15,15 +16,12 @@ const allowedPages = [
   '/early-access', // Email signup / early access
   '/privacy', // Legal: privacy policy
   '/terms', // Legal: terms of service
-  '/tier-list', // Public tier list
   '/station', // Public reserved-station pages (flex sign + X link preview)
   '/archetype', // Archetype scanner
   '/archetypes', // Archetype showcase
-  '/test-cards', // Archetype card previews (dev)
   '/intelligence', // Intelligence Report
   '/card', // Brand Identity Card (/card/[username])
   '/pricing', // Pricing page
-  '/opp', // Find Your Opp matchup
   '/audit', // Score Boost Audit — post-purchase results page (/audit/[sessionId])
   '/migrate-account', // Phase 1: legacy user credential migration
   '/dashboard', // Phase 1: authenticated user dashboard

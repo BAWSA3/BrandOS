@@ -1718,6 +1718,7 @@ export default function XBrandScoreHero({
                     archetype={normalizeArchetypeName(brandScore.archetype?.primary || '')}
                     username={profile.username}
                     score={brandScore.overallScore}
+                    controls={false}
                   />
                   <ReserveStation
                     username={profile.username}

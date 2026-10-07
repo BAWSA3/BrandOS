@@ -1658,6 +1658,25 @@ code {
   white-space: nowrap;
 }
 
+/* Hero tagline — tablet / narrow laptop. Between 769px and ~1000px the
+   one-line desktop tagline is wider than the window, so wrap it here too
+   (the <=768px rules below refine size and height for phones). */
+@media (max-width: 1024px) {
+  .hero-tagline {
+    height: 44px;
+  }
+  .hero-tagline-spacer {
+    display: none;
+  }
+  .hero-tagline-text {
+    white-space: normal;
+    text-wrap: balance;
+    width: min(92vw, 560px) !important;
+    text-align: center;
+    line-height: 1.6;
+  }
+}
+
 /* Hero logo — tablet */
 @media (max-width: 768px) {
   .hero-logo-wrapper {
@@ -1714,5 +1733,124 @@ code {
   .hero-tagline-text {
     font-size: clamp(0.55rem, 2.8vw, 0.72rem);
     letter-spacing: 0.06em;
+  }
+}
+
+/* Station card idle animation (StationCard.tsx). Global on purpose: as a
+   nested styled-jsx block it was never scoped onto the elements in production
+   builds, so nothing animated on prod (dev worked).
+
+   "Status LEDs": the station's bright pixels are split into 4 groups, each
+   blinking on its own stepped beat (steps(1) = hard on/off, never a fade).
+   Different lengths (2.3 / 3.1 / 4.3 / 5.9s) keep the groups from syncing up,
+   so the pattern doesn't visibly loop. */
+.station-art .station-led {
+  opacity: 0;
+  animation-timing-function: steps(1, end);
+  animation-iteration-count: infinite;
+}
+.station-art .station-led-0 {
+  animation-name: station-led-a;
+  animation-duration: 2.3s;
+}
+.station-art .station-led-1 {
+  animation-name: station-led-b;
+  animation-duration: 3.1s;
+  animation-delay: -0.7s;
+}
+.station-art .station-led-2 {
+  animation-name: station-led-c;
+  animation-duration: 4.3s;
+  animation-delay: -1.9s;
+}
+.station-art .station-led-3 {
+  animation-name: station-led-d;
+  animation-duration: 5.9s;
+  animation-delay: -3.2s;
+}
+.station-art .station-scan {
+  animation: station-scan 9s linear infinite;
+}
+/* a: steady heartbeat, double blink */
+@keyframes station-led-a {
+  0% {
+    opacity: 0.9;
+  }
+  12% {
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.9;
+  }
+  32% {
+    opacity: 0;
+  }
+}
+/* b: mostly on, brief drop-outs (a busy screen) */
+@keyframes station-led-b {
+  0% {
+    opacity: 0.85;
+  }
+  58% {
+    opacity: 0;
+  }
+  64% {
+    opacity: 0.85;
+  }
+  88% {
+    opacity: 0.2;
+  }
+  92% {
+    opacity: 0.85;
+  }
+}
+/* c: slow on/off (a status lamp) */
+@keyframes station-led-c {
+  0% {
+    opacity: 0;
+  }
+  40% {
+    opacity: 0.9;
+  }
+  80% {
+    opacity: 0;
+  }
+}
+/* d: rare bursty chatter (disk activity) */
+@keyframes station-led-d {
+  0% {
+    opacity: 0;
+  }
+  70% {
+    opacity: 0.9;
+  }
+  73% {
+    opacity: 0;
+  }
+  76% {
+    opacity: 0.9;
+  }
+  79% {
+    opacity: 0.3;
+  }
+  82% {
+    opacity: 0.9;
+  }
+  86% {
+    opacity: 0;
+  }
+}
+@keyframes station-scan {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 0 40px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .station-art .station-led,
+  .station-art .station-scan {
+    animation: none;
   }
 }

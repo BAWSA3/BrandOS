@@ -64,13 +64,21 @@ export interface StationCardProps {
   archetype: string; // archetype primary, e.g. 'SOURCE' or 'BUILD.EXE'
   username: string;
   score: number;
+  /** Day/Night + Save Image under the card. Off on the scan reveal: those
+      tools unlock after reserving, on the reserved sign card. */
+  controls?: boolean;
 }
 
 export function stationSlug(archetype: string): string | null {
   return STATION_SLUGS[archetype?.toUpperCase?.()] ?? null;
 }
 
-export default function StationCard({ archetype, username, score }: StationCardProps) {
+export default function StationCard({
+  archetype,
+  username,
+  score,
+  controls = true,
+}: StationCardProps) {
   const [mode, setMode] = useState<Mode>('day');
   const cardRef = useRef<HTMLDivElement>(null);
   const { status, prepare, save } = useCardImageSave(
@@ -119,14 +127,18 @@ export default function StationCard({ archetype, username, score }: StationCardP
         {/* Station art — 2x master (see top comment), scaled smoothly. The scan
             shows the finished station as a BLUEPRINT ("the station you're
             building"); in the studio users start on an empty plot and build it. */}
-        <div className="relative overflow-hidden" style={{ background: t.bg }}>
+        {/* Animation CSS lives in globals.css under .station-art. It used to be a
+            nested <style jsx> block, which the production build never scoped
+            onto these elements, so the station didn't animate on prod. */}
+        <div className="station-art relative overflow-hidden" style={{ background: t.bg }}>
           {/* Idle animation (code-only, no extra art). The art has an opaque
               background with the grid baked in, so the station stays planted
               (floating it slid the whole picture against the CSS grid).
-              Instead: its screens and neon power on in hard, stepped flickers
-              through a per-station glow mask (public/worlds/stations/masks),
-              and a blueprint scan beam sweeps down every few seconds; night
-              adds a scanline drift. Off under prefers-reduced-motion and left
+              Instead it idles like a machine: its bright pixels (screens,
+              buttons, neon) are split into 4 "status LED" groups
+              (masks/<station>-led0..3.png, clusters dealt evenly across the
+              building) that blink on their own stepped beats. Night adds a
+              faint scanline drift. Off under prefers-reduced-motion and left
               out of saved images. */}
           <div className="station-bob relative">
             {/* eslint-disable-next-line @next/next/no-img-element -- art is pre-scaled; next/image would re-encode it */}
@@ -138,26 +150,28 @@ export default function StationCard({ archetype, username, score }: StationCardP
               className="block w-full h-auto select-none"
               style={{ imageRendering: 'auto' }}
               draggable={false}
-              onLoad={prepare}
+              onLoad={controls ? prepare : undefined}
             />
-            <div
-              aria-hidden
-              data-station-fx
-              className="station-glow pointer-events-none absolute inset-0"
-              style={{
-                backgroundImage: `url(/worlds/stations/${slug}-${mode}.png)`,
-                backgroundSize: '100% 100%',
-                imageRendering: 'auto',
-                filter:
-                  mode === 'day'
-                    ? 'brightness(1.35) saturate(1.25)'
-                    : 'brightness(1.6) saturate(1.3)',
-                WebkitMaskImage: `url(/worlds/stations/masks/${slug}-${mode}.png)`,
-                maskImage: `url(/worlds/stations/masks/${slug}-${mode}.png)`,
-                WebkitMaskSize: '100% 100%',
-                maskSize: '100% 100%',
-              }}
-            />
+            {[0, 1, 2, 3].map((k) => (
+              <div
+                key={k}
+                aria-hidden
+                data-station-fx
+                className={`station-led station-led-${k} pointer-events-none absolute inset-0`}
+                style={{
+                  backgroundImage: `url(/worlds/stations/${slug}-${mode}.png)`,
+                  backgroundSize: '100% 100%',
+                  filter:
+                    mode === 'day'
+                      ? 'brightness(1.7) saturate(1.5)'
+                      : 'brightness(2) saturate(1.4)',
+                  WebkitMaskImage: `url(/worlds/stations/masks/${slug}-${mode}-led${k}.png)`,
+                  maskImage: `url(/worlds/stations/masks/${slug}-${mode}-led${k}.png)`,
+                  WebkitMaskSize: '100% 100%',
+                  maskSize: '100% 100%',
+                }}
+              />
+            ))}
           </div>
           {mode === 'night' && (
             <div
@@ -170,18 +184,6 @@ export default function StationCard({ archetype, username, score }: StationCardP
               }}
             />
           )}
-          <div
-            aria-hidden
-            data-station-fx
-            className="station-beam pointer-events-none absolute inset-x-0"
-            style={{
-              height: '14%',
-              background:
-                mode === 'day'
-                  ? 'linear-gradient(to bottom, rgba(10,132,255,0) 0%, rgba(10,132,255,0.12) 85%, rgba(10,132,255,0.55) 100%)'
-                  : 'linear-gradient(to bottom, rgba(0,255,136,0) 0%, rgba(0,255,136,0.10) 85%, rgba(0,255,136,0.5) 100%)',
-            }}
-          />
           {/* Faint blueprint grid over the art */}
           <div
             aria-hidden
@@ -192,74 +194,6 @@ export default function StationCard({ archetype, username, score }: StationCardP
               opacity: mode === 'day' ? 0.07 : 0.06,
             }}
           />
-          <style jsx>{`
-            .station-glow {
-              opacity: 0;
-              /* steps(1) = hard on/off between keyframes, like a CRT, not a fade */
-              animation: station-glow 5s steps(1, end) infinite;
-            }
-            .station-beam {
-              top: -14%;
-              animation: station-beam 6s linear infinite;
-            }
-            .station-scan {
-              animation: station-scan 9s linear infinite;
-            }
-            @keyframes station-glow {
-              /* power on: flicker, catch, hold; brief brown-out; power down */
-              0% {
-                opacity: 0;
-              }
-              6% {
-                opacity: 0.8;
-              }
-              8% {
-                opacity: 0.15;
-              }
-              10% {
-                opacity: 0.95;
-              }
-              58% {
-                opacity: 0.35;
-              }
-              60% {
-                opacity: 0.95;
-              }
-              84% {
-                opacity: 0.5;
-              }
-              88% {
-                opacity: 0;
-              }
-            }
-            @keyframes station-beam {
-              0% {
-                top: -14%;
-              }
-              45%,
-              100% {
-                top: 100%;
-              }
-            }
-            @keyframes station-scan {
-              from {
-                background-position: 0 0;
-              }
-              to {
-                background-position: 0 40px;
-              }
-            }
-            @media (prefers-reduced-motion: reduce) {
-              .station-glow,
-              .station-scan,
-              .station-beam {
-                animation: none;
-              }
-              .station-beam {
-                display: none;
-              }
-            }
-          `}</style>
         </div>
 
         {/* Footer */}
@@ -298,38 +232,40 @@ export default function StationCard({ archetype, username, score }: StationCardP
       </div>
 
       {/* Controls (outside the captured card) */}
-      <div className="mt-3 flex items-center justify-center gap-2">
-        {(['day', 'night'] as const).map((m) => (
+      {controls && (
+        <div className="mt-3 flex items-center justify-center gap-2">
+          {(['day', 'night'] as const).map((m) => (
+            <button
+              key={m}
+              onClick={() => setMode(m)}
+              aria-pressed={mode === m}
+              className="px-3 py-2 rounded-[4px] text-[11px] tracking-wider uppercase transition-colors"
+              style={{
+                fontFamily: MONO,
+                background: mode === m ? '#1A1A1A' : 'transparent',
+                color: mode === m ? '#FFFFFF' : '#6E6E73',
+                border: '1px solid rgba(0,0,0,0.12)',
+              }}
+            >
+              {m}
+            </button>
+          ))}
           <button
-            key={m}
-            onClick={() => setMode(m)}
-            aria-pressed={mode === m}
-            className="px-3 py-2 rounded-[4px] text-[11px] tracking-wider uppercase transition-colors"
-            style={{
-              fontFamily: MONO,
-              background: mode === m ? '#1A1A1A' : 'transparent',
-              color: mode === m ? '#FFFFFF' : '#6E6E73',
-              border: '1px solid rgba(0,0,0,0.12)',
-            }}
+            onClick={save}
+            disabled={status === 'saving'}
+            className="px-4 py-2 rounded-[4px] text-[11px] tracking-wider text-white bg-[#1A1A1A] hover:bg-[#2E6AFF] transition-colors disabled:opacity-50"
+            style={{ fontFamily: MONO }}
           >
-            {m}
+            {status === 'saving'
+              ? 'SAVING...'
+              : status === 'saved'
+                ? 'SAVED ✓'
+                : status === 'failed'
+                  ? 'FAILED'
+                  : 'SAVE IMAGE'}
           </button>
-        ))}
-        <button
-          onClick={save}
-          disabled={status === 'saving'}
-          className="px-4 py-2 rounded-[4px] text-[11px] tracking-wider text-white bg-[#1A1A1A] hover:bg-[#2E6AFF] transition-colors disabled:opacity-50"
-          style={{ fontFamily: MONO }}
-        >
-          {status === 'saving'
-            ? 'SAVING...'
-            : status === 'saved'
-              ? 'SAVED ✓'
-              : status === 'failed'
-                ? 'FAILED'
-                : 'SAVE IMAGE'}
-        </button>
-      </div>
+        </div>
+      )}
     </div>
   );
 }
