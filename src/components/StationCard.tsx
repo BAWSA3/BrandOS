@@ -64,13 +64,21 @@ export interface StationCardProps {
   archetype: string; // archetype primary, e.g. 'SOURCE' or 'BUILD.EXE'
   username: string;
   score: number;
+  /** Day/Night + Save Image under the card. Off on the scan reveal: those
+      tools unlock after reserving, on the reserved sign card. */
+  controls?: boolean;
 }
 
 export function stationSlug(archetype: string): string | null {
   return STATION_SLUGS[archetype?.toUpperCase?.()] ?? null;
 }
 
-export default function StationCard({ archetype, username, score }: StationCardProps) {
+export default function StationCard({
+  archetype,
+  username,
+  score,
+  controls = true,
+}: StationCardProps) {
   const [mode, setMode] = useState<Mode>('day');
   const cardRef = useRef<HTMLDivElement>(null);
   const { status, prepare, save } = useCardImageSave(
@@ -142,7 +150,7 @@ export default function StationCard({ archetype, username, score }: StationCardP
               className="block w-full h-auto select-none"
               style={{ imageRendering: 'auto' }}
               draggable={false}
-              onLoad={prepare}
+              onLoad={controls ? prepare : undefined}
             />
             {[0, 1, 2, 3].map((k) => (
               <div
@@ -224,38 +232,40 @@ export default function StationCard({ archetype, username, score }: StationCardP
       </div>
 
       {/* Controls (outside the captured card) */}
-      <div className="mt-3 flex items-center justify-center gap-2">
-        {(['day', 'night'] as const).map((m) => (
+      {controls && (
+        <div className="mt-3 flex items-center justify-center gap-2">
+          {(['day', 'night'] as const).map((m) => (
+            <button
+              key={m}
+              onClick={() => setMode(m)}
+              aria-pressed={mode === m}
+              className="px-3 py-2 rounded-[4px] text-[11px] tracking-wider uppercase transition-colors"
+              style={{
+                fontFamily: MONO,
+                background: mode === m ? '#1A1A1A' : 'transparent',
+                color: mode === m ? '#FFFFFF' : '#6E6E73',
+                border: '1px solid rgba(0,0,0,0.12)',
+              }}
+            >
+              {m}
+            </button>
+          ))}
           <button
-            key={m}
-            onClick={() => setMode(m)}
-            aria-pressed={mode === m}
-            className="px-3 py-2 rounded-[4px] text-[11px] tracking-wider uppercase transition-colors"
-            style={{
-              fontFamily: MONO,
-              background: mode === m ? '#1A1A1A' : 'transparent',
-              color: mode === m ? '#FFFFFF' : '#6E6E73',
-              border: '1px solid rgba(0,0,0,0.12)',
-            }}
+            onClick={save}
+            disabled={status === 'saving'}
+            className="px-4 py-2 rounded-[4px] text-[11px] tracking-wider text-white bg-[#1A1A1A] hover:bg-[#2E6AFF] transition-colors disabled:opacity-50"
+            style={{ fontFamily: MONO }}
           >
-            {m}
+            {status === 'saving'
+              ? 'SAVING...'
+              : status === 'saved'
+                ? 'SAVED ✓'
+                : status === 'failed'
+                  ? 'FAILED'
+                  : 'SAVE IMAGE'}
           </button>
-        ))}
-        <button
-          onClick={save}
-          disabled={status === 'saving'}
-          className="px-4 py-2 rounded-[4px] text-[11px] tracking-wider text-white bg-[#1A1A1A] hover:bg-[#2E6AFF] transition-colors disabled:opacity-50"
-          style={{ fontFamily: MONO }}
-        >
-          {status === 'saving'
-            ? 'SAVING...'
-            : status === 'saved'
-              ? 'SAVED ✓'
-              : status === 'failed'
-                ? 'FAILED'
-                : 'SAVE IMAGE'}
-        </button>
-      </div>
+        </div>
+      )}
     </div>
   );
 }
