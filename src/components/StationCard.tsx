@@ -126,10 +126,11 @@ export default function StationCard({ archetype, username, score }: StationCardP
           {/* Idle animation (code-only, no extra art). The art has an opaque
               background with the grid baked in, so the station stays planted
               (floating it slid the whole picture against the CSS grid).
-              Instead: its screens and neon power on in hard, stepped flickers
-              through a per-station glow mask (public/worlds/stations/masks),
-              and a blueprint scan beam sweeps down every few seconds; night
-              adds a scanline drift. Off under prefers-reduced-motion and left
+              Instead it idles like a machine: its bright pixels (screens,
+              buttons, neon) are split into 4 "status LED" groups
+              (masks/<station>-led0..3.png, clusters dealt evenly across the
+              building) that blink on their own stepped beats. Night adds a
+              faint scanline drift. Off under prefers-reduced-motion and left
               out of saved images. */}
           <div className="station-bob relative">
             {/* eslint-disable-next-line @next/next/no-img-element -- art is pre-scaled; next/image would re-encode it */}
@@ -143,24 +144,26 @@ export default function StationCard({ archetype, username, score }: StationCardP
               draggable={false}
               onLoad={prepare}
             />
-            <div
-              aria-hidden
-              data-station-fx
-              className="station-glow pointer-events-none absolute inset-0"
-              style={{
-                backgroundImage: `url(/worlds/stations/${slug}-${mode}.png)`,
-                backgroundSize: '100% 100%',
-                imageRendering: 'auto',
-                filter:
-                  mode === 'day'
-                    ? 'brightness(1.35) saturate(1.25)'
-                    : 'brightness(1.6) saturate(1.3)',
-                WebkitMaskImage: `url(/worlds/stations/masks/${slug}-${mode}.png)`,
-                maskImage: `url(/worlds/stations/masks/${slug}-${mode}.png)`,
-                WebkitMaskSize: '100% 100%',
-                maskSize: '100% 100%',
-              }}
-            />
+            {[0, 1, 2, 3].map((k) => (
+              <div
+                key={k}
+                aria-hidden
+                data-station-fx
+                className={`station-led station-led-${k} pointer-events-none absolute inset-0`}
+                style={{
+                  backgroundImage: `url(/worlds/stations/${slug}-${mode}.png)`,
+                  backgroundSize: '100% 100%',
+                  filter:
+                    mode === 'day'
+                      ? 'brightness(1.7) saturate(1.5)'
+                      : 'brightness(2) saturate(1.4)',
+                  WebkitMaskImage: `url(/worlds/stations/masks/${slug}-${mode}-led${k}.png)`,
+                  maskImage: `url(/worlds/stations/masks/${slug}-${mode}-led${k}.png)`,
+                  WebkitMaskSize: '100% 100%',
+                  maskSize: '100% 100%',
+                }}
+              />
+            ))}
           </div>
           {mode === 'night' && (
             <div
@@ -173,18 +176,6 @@ export default function StationCard({ archetype, username, score }: StationCardP
               }}
             />
           )}
-          <div
-            aria-hidden
-            data-station-fx
-            className="station-beam pointer-events-none absolute inset-x-0"
-            style={{
-              height: '14%',
-              background:
-                mode === 'day'
-                  ? 'linear-gradient(to bottom, rgba(10,132,255,0) 0%, rgba(10,132,255,0.12) 85%, rgba(10,132,255,0.55) 100%)'
-                  : 'linear-gradient(to bottom, rgba(0,255,136,0) 0%, rgba(0,255,136,0.10) 85%, rgba(0,255,136,0.5) 100%)',
-            }}
-          />
           {/* Faint blueprint grid over the art */}
           <div
             aria-hidden

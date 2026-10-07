@@ -1738,53 +1738,106 @@ code {
 
 /* Station card idle animation (StationCard.tsx). Global on purpose: as a
    nested styled-jsx block it was never scoped onto the elements in production
-   builds, so nothing animated on prod (dev worked). */
-.station-art .station-glow {
+   builds, so nothing animated on prod (dev worked).
+
+   "Status LEDs": the station's bright pixels are split into 4 groups, each
+   blinking on its own stepped beat (steps(1) = hard on/off, never a fade).
+   Different lengths (2.3 / 3.1 / 4.3 / 5.9s) keep the groups from syncing up,
+   so the pattern doesn't visibly loop. */
+.station-art .station-led {
   opacity: 0;
-  /* steps(1) = hard on/off between keyframes, like a CRT, not a fade */
-  animation: station-glow 5s steps(1, end) infinite;
+  animation-timing-function: steps(1, end);
+  animation-iteration-count: infinite;
 }
-.station-art .station-beam {
-  top: -14%;
-  animation: station-beam 6s linear infinite;
+.station-art .station-led-0 {
+  animation-name: station-led-a;
+  animation-duration: 2.3s;
+}
+.station-art .station-led-1 {
+  animation-name: station-led-b;
+  animation-duration: 3.1s;
+  animation-delay: -0.7s;
+}
+.station-art .station-led-2 {
+  animation-name: station-led-c;
+  animation-duration: 4.3s;
+  animation-delay: -1.9s;
+}
+.station-art .station-led-3 {
+  animation-name: station-led-d;
+  animation-duration: 5.9s;
+  animation-delay: -3.2s;
 }
 .station-art .station-scan {
   animation: station-scan 9s linear infinite;
 }
-@keyframes station-glow {
-  /* power on: flicker, catch, hold; brief brown-out; power down */
+/* a: steady heartbeat, double blink */
+@keyframes station-led-a {
   0% {
+    opacity: 0.9;
+  }
+  12% {
     opacity: 0;
   }
-  6% {
-    opacity: 0.8;
+  20% {
+    opacity: 0.9;
   }
-  8% {
-    opacity: 0.15;
-  }
-  10% {
-    opacity: 0.95;
-  }
-  58% {
-    opacity: 0.35;
-  }
-  60% {
-    opacity: 0.95;
-  }
-  84% {
-    opacity: 0.5;
-  }
-  88% {
+  32% {
     opacity: 0;
   }
 }
-@keyframes station-beam {
+/* b: mostly on, brief drop-outs (a busy screen) */
+@keyframes station-led-b {
   0% {
-    top: -14%;
+    opacity: 0.85;
   }
-  45%,
-  100% {
-    top: 100%;
+  58% {
+    opacity: 0;
+  }
+  64% {
+    opacity: 0.85;
+  }
+  88% {
+    opacity: 0.2;
+  }
+  92% {
+    opacity: 0.85;
+  }
+}
+/* c: slow on/off (a status lamp) */
+@keyframes station-led-c {
+  0% {
+    opacity: 0;
+  }
+  40% {
+    opacity: 0.9;
+  }
+  80% {
+    opacity: 0;
+  }
+}
+/* d: rare bursty chatter (disk activity) */
+@keyframes station-led-d {
+  0% {
+    opacity: 0;
+  }
+  70% {
+    opacity: 0.9;
+  }
+  73% {
+    opacity: 0;
+  }
+  76% {
+    opacity: 0.9;
+  }
+  79% {
+    opacity: 0.3;
+  }
+  82% {
+    opacity: 0.9;
+  }
+  86% {
+    opacity: 0;
   }
 }
 @keyframes station-scan {
@@ -1796,12 +1849,8 @@ code {
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .station-art .station-glow,
-  .station-art .station-scan,
-  .station-art .station-beam {
+  .station-art .station-led,
+  .station-art .station-scan {
     animation: none;
-  }
-  .station-art .station-beam {
-    display: none;
   }
 }
