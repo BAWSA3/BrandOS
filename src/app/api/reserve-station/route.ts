@@ -3,7 +3,6 @@ import prisma from '@/lib/db';
 import { botGuard } from '@/lib/botid-guard';
 import { withRateLimit, rateLimiters } from '@/lib/rate-limit';
 import { normalizeArchetypeName } from '@/lib/archetype-names';
-import { FOUNDING_PRIORITY_CAP } from '@/lib/reservations';
 import { sendReserveConfirmation } from '@/lib/launch-emails';
 
 /**
@@ -135,7 +134,6 @@ async function handlePost(request: NextRequest) {
       number: final.reservationNumber,
       handle: final.xUsername,
       archetype: final.reservedArchetype,
-      foundingPriority: final.reservationNumber <= FOUNDING_PRIORITY_CAP,
     });
   } catch (error) {
     console.error('[reserve-station] Failed:', error);

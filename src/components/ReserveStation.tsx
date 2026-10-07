@@ -25,7 +25,6 @@ export default function ReserveStation({ username, archetype }: ReserveStationPr
     number: number;
     handle: string;
     archetype: string | null;
-    foundingPriority: boolean;
   } | null>(null);
 
   const submit = async (e: React.FormEvent) => {
@@ -57,7 +56,6 @@ export default function ReserveStation({ username, archetype }: ReserveStationPr
               number: data.number,
               handle: data.handle,
               archetype: typeof data.archetype === 'string' ? data.archetype : null,
-              foundingPriority: !!data.foundingPriority,
             }
           : null
       );
@@ -82,7 +80,6 @@ export default function ReserveStation({ username, archetype }: ReserveStationPr
             handle={station.handle}
             number={station.number}
             archetype={station.archetype}
-            foundingPriority={station.foundingPriority}
             shareUrl={`${window.location.origin}/station/${station.handle}`}
           />
         </div>
@@ -95,7 +92,7 @@ export default function ReserveStation({ username, archetype }: ReserveStationPr
       >
         <div className="text-[13px] tracking-wider text-[#1D1D1F]">RESERVED ✓</div>
         <div className="mt-1 text-[11px] tracking-wide text-[#6E6E73]">
-          We&apos;ll email you when the studio opens Oct 20.
+          We&apos;ll email you when the studio opens.
         </div>
       </div>
     );

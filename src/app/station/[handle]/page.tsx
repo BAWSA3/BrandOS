@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
   const name = getArchetypeInfo(r.archetype ?? '')?.name;
   const title = `@${r.handle} reserved Station #${formatStationNumber(r.number)} · BrandOS`;
-  const description = `${name ? `${name} station. ` : ''}The studio opens Oct 20. Reserve your own brand station.`;
+  const description = `${name ? `${name} station. ` : ''}BrandOS Studio is opening soon. Reserve your own brand station.`;
   return {
     title,
     description,
@@ -51,7 +51,6 @@ export default async function StationPage({ params }: Props) {
             handle={r.handle}
             number={r.number}
             archetype={r.archetype}
-            foundingPriority={r.foundingPriority}
             shareUrl={`${origin}/station/${r.handle}`}
             controls="none"
           />

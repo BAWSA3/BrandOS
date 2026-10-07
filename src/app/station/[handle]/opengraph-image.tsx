@@ -104,22 +104,6 @@ export default async function Image({ params }: { params: Promise<{ handle: stri
             {name}
           </div>
         )}
-        {r?.foundingPriority && (
-          <div style={{ display: 'flex', marginTop: 20 }}>
-            <div
-              style={{
-                fontFamily: 'VCR',
-                fontSize: 18,
-                letterSpacing: 3,
-                color: '#0A84FF',
-                border: '2px solid #0A84FF',
-                padding: '6px 10px',
-              }}
-            >
-              FOUNDING PRIORITY
-            </div>
-          </div>
-        )}
         <div
           style={{
             fontFamily: 'VCR',
@@ -129,7 +113,7 @@ export default async function Image({ params }: { params: Promise<{ handle: stri
             marginTop: 28,
           }}
         >
-          OPENS 10.20 · MYBRANDOS.APP
+          OPENING SOON · MYBRANDOS.APP
         </div>
       </div>
     </div>,

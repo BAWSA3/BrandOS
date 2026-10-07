@@ -22,7 +22,6 @@ export default function robots(): MetadataRoute.Robots {
         // Private or tokenized
         '/shared/',
         '/audit/',
-        '/poll',
         '/dashboard',
         '/admin',
         '/migrate-account',
