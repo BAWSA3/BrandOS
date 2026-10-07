@@ -65,9 +65,25 @@ function assert(cond, msg) {
 async function seedUserStack(label) {
   const supabaseId = randomUUID();
   const userId = `${SENTINEL}_${label}_${randomUUID().slice(0, 6)}`;
+  // Prod's "User" has NOT NULL columns the Prisma schema treats as optional
+  // (xId, xUsername, ... drift), so fill every required, default-less column
+  // with a placeholder of the right type. Works on staging and prod alike.
+  const { rows: required } = await db.query(
+    `SELECT column_name, data_type FROM information_schema.columns
+     WHERE table_schema = 'public' AND table_name = 'User' AND is_nullable = 'NO'
+       AND column_default IS NULL AND column_name NOT IN ('id', 'supabaseId')`,
+  );
+  const placeholder = (col, type) =>
+    /timestamp|date/.test(type) ? new Date()
+    : /int|numeric|double|real/.test(type) ? 0
+    : type === 'boolean' ? false
+    : `${userId}_${col}`;
+  const cols = ['id', 'supabaseId', ...required.map((r) => r.column_name)];
+  const vals = [userId, supabaseId, ...required.map((r) => placeholder(r.column_name, r.data_type))];
   await db.query(
-    `INSERT INTO "User" (id, "supabaseId", "createdAt", "updatedAt") VALUES ($1,$2,now(),now())`,
-    [userId, supabaseId],
+    `INSERT INTO "User" (${cols.map((c) => `"${c}"`).join(', ')})
+     VALUES (${cols.map((_, i) => `$${i + 1}`).join(', ')})`,
+    vals,
   );
   const ws = await db.query(
     `INSERT INTO "Workspace" (name, type, owner_user_id, created_at, updated_at)
