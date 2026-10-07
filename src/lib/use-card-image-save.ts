@@ -12,8 +12,12 @@ export type SaveStatus = 'idle' | 'saving' | 'saved' | 'failed';
  * sheet (iOS: "Save Image" -> Photos; Android: save to Gallery). iOS only opens
  * it while the tap's user activation is live, so the PNG is pre-rendered
  * (call `prepare` when the card's art loads) and the tap shares the cached file
- * immediately. Cancel resets quietly; a blocked share or no file-share support
- * (most desktops) falls back to a normal download.
+ * immediately. Cancel resets quietly; a blocked share falls back to a download.
+ *
+ * Desktop always downloads straight to the Downloads folder: Mac Safari and
+ * Chrome also support file sharing, so feature detection alone sent desktop
+ * users to the share menu instead of saving. The share sheet is used only on
+ * touch-first devices (phones/tablets), where it's the only route to Photos.
  *
  * Captures are clean stills: nodes marked `data-station-fx` are left out and
  * `.station-bob` animations are frozen at rest.
@@ -77,7 +81,9 @@ export function useCardImageSave(
       if (!blob) throw new Error('render failed');
       cache.current[cacheKey] = blob;
       const file = new File([blob], fileName, { type: 'image/png' });
-      if (typeof navigator !== 'undefined' && navigator.canShare?.({ files: [file] })) {
+      const touchFirst =
+        typeof window !== 'undefined' && window.matchMedia?.('(pointer: coarse)').matches;
+      if (touchFirst && navigator.canShare?.({ files: [file] })) {
         try {
           await navigator.share({ files: [file] });
         } catch (err) {
