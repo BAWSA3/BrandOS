@@ -137,6 +137,7 @@ model User {
 
   @@index([xUsername])
   @@index([stripeCustomerId])
+  station                    Station?   // claimed brand station (migration 026)
 }
 
 model Brand {
@@ -428,6 +429,20 @@ model EmailSignup {
   @@index([createdAt])
   @@index([xUsername])
   @@index([reservedAt])
+}
+
+// A brand station claimed by its owner via Sign in with X (migration 026).
+// Anchor for the polaroid board + brand reviews (docs/specs/STATION-BOARD-AND-BRAND-REVIEWS.md).
+model Station {
+  id                String   @id @default(dbgenerated("(gen_random_uuid())::text"))
+  handle            String   @unique // lowercase X handle
+  ownerUserId       String   @unique
+  ownerXId          String   @unique // X user id at claim time
+  reservationNumber Int?
+  archetype         String?
+  claimedAt         DateTime @default(now()) @db.Timestamptz
+  createdAt         DateTime @default(now()) @db.Timestamptz
+  owner             User     @relation(fields: [ownerUserId], references: [id], onDelete: Cascade)
 }
 
 // One row per (signup, campaign): the once-per-address guarantee for
