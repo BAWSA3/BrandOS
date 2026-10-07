@@ -5,6 +5,7 @@ import { headers } from 'next/headers';
 import { getReservationByHandle } from '@/lib/reservations';
 import { getStationClaim } from '@/lib/stations';
 import ClaimStation from '@/components/ClaimStation';
+import StationBoard from '@/components/StationBoard';
 import { getArchetypeInfo } from '@/lib/archetype-descriptions';
 import ReservedSignCard, { formatStationNumber } from '@/components/ReservedSignCard';
 
@@ -71,6 +72,9 @@ export default async function StationPage({ params }: Props) {
               <ClaimStation handle={r.handle} />
             </Suspense>
           )}
+          <Suspense>
+            <StationBoard handle={r.handle} />
+          </Suspense>
         </>
       ) : (
         <div
