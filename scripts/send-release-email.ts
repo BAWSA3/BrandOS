@@ -1,15 +1,15 @@
 /**
- * Launch-day email with the one-click "would you pay?" poll (Oct 8, 2026).
+ * Release-day email: "BrandOS is open, your first 30 days are free".
  *
  * DRY RUN BY DEFAULT: prints who would get it and renders one sample to
- * /tmp/launch-email-preview.html. Nothing is sent without --send.
+ * /tmp/release-email-preview.html. Nothing is sent without --send.
  *
  *   # preview (no sends)
- *   npx tsx --tsconfig tsconfig.json --env-file=<env> scripts/send-launch-email.ts
+ *   npx tsx --tsconfig tsconfig.json --env-file=<env> scripts/send-release-email.ts
  *   # send to ONE address that is already on the list (test)
- *   npx tsx --tsconfig tsconfig.json --env-file=<env> scripts/send-launch-email.ts --send --to you@example.com
+ *   npx tsx --tsconfig tsconfig.json --env-file=<env> scripts/send-release-email.ts --send --to you@example.com
  *   # the real send (optionally --limit N for a first wave)
- *   npx tsx --tsconfig tsconfig.json --env-file=<env> scripts/send-launch-email.ts --send
+ *   npx tsx --tsconfig tsconfig.json --env-file=<env> scripts/send-release-email.ts --send
  *
  * Safe to re-run: each address gets the campaign at most once (EmailSend),
  * unsubscribed rows are skipped, and a failed send releases its claim so the
@@ -17,7 +17,7 @@
  */
 import { writeFileSync } from 'fs';
 import prisma from '@/lib/db';
-import { CAMPAIGNS, launchEmailContent, sendOnce } from '@/lib/launch-emails';
+import { CAMPAIGNS, releaseEmailContent, sendOnce } from '@/lib/launch-emails';
 import { renderNewsletter } from '@/lib/newsletter-template';
 
 const args = process.argv.slice(2);
@@ -30,7 +30,7 @@ async function main() {
   console.log(`DB host: ${host}  |  mode: ${SEND ? 'SEND' : 'dry run'}`);
 
   const already = await prisma.emailSend.findMany({
-    where: { campaign: CAMPAIGNS.launch },
+    where: { campaign: CAMPAIGNS.release },
     select: { emailSignupId: true },
   });
   const sentIds = new Set(already.map((r) => r.emailSignupId));
@@ -47,9 +47,9 @@ async function main() {
   );
 
   if (pending[0]) {
-    const sample = renderNewsletter(launchEmailContent(pending[0].id), pending[0].email);
-    writeFileSync('/tmp/launch-email-preview.html', sample.html);
-    console.log('sample rendered: /tmp/launch-email-preview.html');
+    const sample = renderNewsletter(releaseEmailContent(), pending[0].email);
+    writeFileSync('/tmp/release-email-preview.html', sample.html);
+    console.log('sample rendered: /tmp/release-email-preview.html');
   }
   if (!SEND) {
     console.log('dry run: nothing sent. Add --send to send.');
@@ -58,7 +58,7 @@ async function main() {
 
   const tally: Record<string, number> = {};
   for (const [i, r] of pending.entries()) {
-    const res = await sendOnce(r.id, CAMPAIGNS.launch, (s) => launchEmailContent(s.id));
+    const res = await sendOnce(r.id, CAMPAIGNS.release, () => releaseEmailContent());
     tally[res] = (tally[res] ?? 0) + 1;
     if ((i + 1) % 50 === 0) console.log(`  ${i + 1}/${pending.length}`, tally);
     await new Promise((ok) => setTimeout(ok, 600));

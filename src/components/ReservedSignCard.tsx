@@ -26,7 +26,6 @@ export interface ReservedSignCardProps {
   handle: string;
   number: number;
   archetype: string | null;
-  foundingPriority: boolean;
   /** Absolute share URL for this station page. */
   shareUrl: string;
   /** Hide share/save controls (e.g. on someone else's public page). */
@@ -41,7 +40,6 @@ export default function ReservedSignCard({
   handle,
   number,
   archetype,
-  foundingPriority,
   shareUrl,
   controls = 'full',
 }: ReservedSignCardProps) {
@@ -219,19 +217,9 @@ export default function ReservedSignCard({
               className="mt-1 text-[10px] tracking-[0.15em] uppercase"
               style={{ fontFamily: MONO, color: t.muted }}
             >
-              opens 10.20 · mybrandos.app
+              opening soon · mybrandos.app
             </div>
           </div>
-          {foundingPriority && (
-            <span
-              className="shrink-0 px-2 py-1 rounded-[2px] text-[9px] tracking-[0.15em] uppercase text-center leading-tight"
-              style={{ fontFamily: MONO, border: `1px solid ${t.accent}`, color: t.accent }}
-            >
-              founding
-              <br />
-              priority
-            </span>
-          )}
         </div>
       </div>
 
