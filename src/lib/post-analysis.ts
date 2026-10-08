@@ -16,6 +16,11 @@ const RECENT_POSTS = 20;
 const CACHE_TTL_MS = 6 * 60 * 60 * 1000;
 const SITE = 'https://mybrandos.app';
 
+/** Landing link: opens mybrandos.app and runs this handle's full scan (?scan=), tagged for attribution. */
+export function brandLink(handle: string, tool: string): string {
+  return `${SITE}/?scan=${encodeURIComponent(handle)}&utm_source=mcp&utm_medium=${tool}&utm_campaign=brand_read`;
+}
+
 export interface PostBreakdown {
   post: { voice: string; format: string; structure: string; hook: string; tasteSignals: string[] };
   profile: {
@@ -207,10 +212,7 @@ export async function analyzePost(input: string): Promise<PostAnalysis> {
 /** The tight chat-ready breakdown (~10 lines). */
 export function renderPostAnalysis(a: PostAnalysis): string {
   const { post, profile, correlation } = a.breakdown;
-  const link =
-    a.score !== null
-      ? `${SITE}/scan/${a.handle}?s=${a.score}${a.archetype ? `&a=${encodeURIComponent(a.archetype)}` : ''}`
-      : SITE;
+  const link = brandLink(a.handle, 'analyze_post');
   return [
     `BrandOS breakdown · @${a.handle}: "${a.excerpt}${a.excerpt.length >= 90 ? '…' : ''}"`,
     '',
@@ -225,6 +227,7 @@ export function renderPostAnalysis(a: PostAnalysis): string {
     `WHY IT FITS (${correlation.fit}/100${a.performance ? `, ${a.performance}` : ''}): ${correlation.why}`,
     `Sharpen: ${correlation.sharpen.map((s, i) => `${i + 1}) ${s}`).join('  ')}`,
     '',
-    `Full brand read: ${link}`,
+    `Open @${a.handle}'s full brand dashboard: ${link}`,
+    `Get your own brand read: ${SITE}/?utm_source=mcp&utm_medium=analyze_post&utm_campaign=own_read`,
   ].join('\n');
 }

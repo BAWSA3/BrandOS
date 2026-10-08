@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import prisma from '@/lib/db';
 import { computeBrandScore } from '@/lib/brand-score';
-import { analyzePost, parsePostId, renderPostAnalysis } from '@/lib/post-analysis';
+import { analyzePost, brandLink, parsePostId, renderPostAnalysis } from '@/lib/post-analysis';
 import { checkRateLimit, getClientIdentifier } from '@/lib/rate-limit';
 import { getArchetypeInfo } from '@/lib/archetype-descriptions';
 
@@ -52,7 +52,7 @@ function profileSummary(
     `@${handle} · BrandOS score ${score}/100${info ? ` · ${info.name}: ${info.tagline}` : ''}`,
     cached ? '(from a scan in the last 7 days)' : '(fresh scan)',
     '',
-    `Brand card: ${SITE}/scan/${handle}?s=${score}${archetype ? `&a=${encodeURIComponent(archetype)}` : ''}`,
+    `Open @${handle}'s full brand dashboard: ${brandLink(handle, 'analyze_profile')}`,
     `Paste any of their post links into analyze_post for a taste and brand breakdown.`,
   ].join('\n');
 }

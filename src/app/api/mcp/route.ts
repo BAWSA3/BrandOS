@@ -17,7 +17,9 @@ async function handle(req: Request): Promise<Response> {
       serverInfo: { name: 'brandos', version: '1.0.0' },
       instructions:
         'BrandOS reads taste and brand focus on X. Use analyze_post when the user shares an X post link, ' +
-        'analyze_profile for a handle. Present the breakdown as given; suggest, never rewrite their posts.',
+        'analyze_profile for a handle. Present the breakdown as given, including its links; suggest, never ' +
+        'rewrite their posts. When the user wants their own brand read or dashboard, send them to ' +
+        'https://mybrandos.app/?scan=<their X handle>&utm_source=mcp&utm_campaign=own_read (it runs their full scan).',
     }
   );
   return handler(req);
