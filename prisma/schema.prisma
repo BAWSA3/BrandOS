@@ -138,6 +138,8 @@ model User {
   @@index([xUsername])
   @@index([stripeCustomerId])
   station                    Station?   // claimed brand station (migration 026)
+  stationNotes               StationNote[] @relation("StationNoteAuthor")
+  noteReports                NoteReport[]  @relation("NoteReporter")
 }
 
 model Brand {
@@ -443,6 +445,41 @@ model Station {
   claimedAt         DateTime @default(now()) @db.Timestamptz
   createdAt         DateTime @default(now()) @db.Timestamptz
   owner             User     @relation(fields: [ownerUserId], references: [id], onDelete: Cascade)
+  notes             StationNote[]
+}
+
+// A friend's note on a claimed station's polaroid board (migration 027)
+model StationNote {
+  id              String       @id @default(dbgenerated("(gen_random_uuid())::text"))
+  stationId       String
+  authorUserId    String
+  authorXHandle   String
+  authorAvatarUrl String?
+  body            String // 1-140 chars
+  sticker         String?
+  hiddenAt        DateTime?    @db.Timestamptz
+  hiddenBy        String? // owner | reports
+  reportCount     Int          @default(0)
+  createdAt       DateTime     @default(now()) @db.Timestamptz
+  updatedAt       DateTime     @default(now()) @updatedAt @db.Timestamptz
+  station         Station      @relation(fields: [stationId], references: [id], onDelete: Cascade)
+  author          User         @relation("StationNoteAuthor", fields: [authorUserId], references: [id], onDelete: Cascade)
+  reports         NoteReport[]
+
+  @@unique([stationId, authorUserId])
+  @@index([stationId, createdAt(sort: Desc)])
+}
+
+model NoteReport {
+  id             String      @id @default(dbgenerated("(gen_random_uuid())::text"))
+  noteId         String
+  reporterUserId String
+  reason         String?
+  createdAt      DateTime    @default(now()) @db.Timestamptz
+  note           StationNote @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  reporter       User        @relation("NoteReporter", fields: [reporterUserId], references: [id], onDelete: Cascade)
+
+  @@unique([noteId, reporterUserId])
 }
 
 // One row per (signup, campaign): the once-per-address guarantee for
