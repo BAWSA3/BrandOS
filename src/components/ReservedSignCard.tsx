@@ -3,6 +3,7 @@
 import { useRef, useState } from 'react';
 import { getArchetypeInfo } from '@/lib/archetype-descriptions';
 import { useCardImageSave } from '@/lib/use-card-image-save';
+import { formatStationNumber } from '@/lib/station-number';
 import { stationSlug, THEME, MONO, PIXEL, type Mode } from './StationCard';
 
 /**
@@ -30,10 +31,6 @@ export interface ReservedSignCardProps {
   shareUrl: string;
   /** Hide share/save controls (e.g. on someone else's public page). */
   controls?: 'full' | 'none';
-}
-
-export function formatStationNumber(n: number): string {
-  return String(n).padStart(4, '0');
 }
 
 export default function ReservedSignCard({
