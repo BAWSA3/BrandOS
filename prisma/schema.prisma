@@ -158,6 +158,7 @@ model User {
   station                    Station?   // claimed brand station (migration 026)
   stationNotes               StationNote[] @relation("StationNoteAuthor")
   noteReports                NoteReport[]  @relation("NoteReporter")
+  studio                     Studio?    // onboarding building game progress (migration 028)
 }
 
 model Brand {
@@ -464,6 +465,22 @@ model Station {
   createdAt         DateTime @default(now()) @db.Timestamptz
   owner             User     @relation(fields: [ownerUserId], references: [id], onDelete: Cascade)
   notes             StationNote[]
+}
+
+// Onboarding building game: the user's station and how far it's built
+// (migration 028, docs/specs/ONBOARDING-BUILDING-GAME.md). 0 plot, 1 foundation,
+// 2 workstation, 3 billboard (blueprint complete).
+model Studio {
+  id            String    @id @default(dbgenerated("(gen_random_uuid())::text"))
+  userId        String    @unique
+  archetype     String?
+  stage         Int       @default(0)
+  foundationAt  DateTime? @db.Timestamptz
+  workstationAt DateTime? @db.Timestamptz
+  billboardAt   DateTime? @db.Timestamptz
+  createdAt     DateTime  @default(now()) @db.Timestamptz
+  updatedAt     DateTime  @default(now()) @updatedAt @db.Timestamptz
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 // A friend's note on a claimed station's polaroid board (migration 027)
