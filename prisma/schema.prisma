@@ -158,7 +158,6 @@ model User {
   station                    Station?   // claimed brand station (migration 026)
   stationNotes               StationNote[] @relation("StationNoteAuthor")
   noteReports                NoteReport[]  @relation("NoteReporter")
-  apiKeys                    ApiKey[]   // self-serve API / MCP keys (migration 029)
 }
 
 model Brand {
@@ -925,19 +924,12 @@ model ApiKey {
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
 
-  // Owner (self-serve keys for the BrandOS MCP, migration 029). Null for
-  // admin-issued partner keys, which act on public data only.
-  userId        String?
-  workspaceId   String?
-  user          User?      @relation(fields: [userId], references: [id], onDelete: Cascade)
-
   // Usage log
   usageLogs     ApiUsageLog[]
 
   @@index([prefix])
   @@index([ownerEmail])
   @@index([isActive])
-  @@index([userId])
 }
 
 model ApiUsageLog {
