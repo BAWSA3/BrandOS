@@ -7,7 +7,8 @@ import { getStationClaim } from '@/lib/stations';
 import ClaimStation from '@/components/ClaimStation';
 import StationBoard from '@/components/StationBoard';
 import { getArchetypeInfo } from '@/lib/archetype-descriptions';
-import ReservedSignCard, { formatStationNumber } from '@/components/ReservedSignCard';
+import ReservedSignCard from '@/components/ReservedSignCard';
+import { formatStationNumber } from '@/lib/station-number';
 
 // Public page for a reserved station: the flex link people share on X. The
 // share image (opengraph-image.tsx) is what the X preview shows; tapping
