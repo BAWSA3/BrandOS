@@ -30,33 +30,45 @@ enum PlanTier {
   MAX
   TEAM
   ENTERPRISE
+
+  @@map("plan_tier")
 }
 
 enum WorkspaceType {
   personal
   team
+
+  @@map("workspace_type")
 }
 
 enum WorkspaceRole {
   owner
   admin
   member
+
+  @@map("workspace_role")
 }
 
 enum ConnectedAccountStatus {
   active
   dormant
+
+  @@map("connected_account_status")
 }
 
 enum ScanVisibility {
   private
   card_public
+
+  @@map("scan_visibility")
 }
 
 enum ScanStatus {
   active
   dormant
   archived
+
+  @@map("scan_status")
 }
 
 enum AuditEventCategory {
@@ -65,17 +77,23 @@ enum AuditEventCategory {
   payment
   security
   account
+
+  @@map("audit_event_category")
 }
 
 enum UserRole {
   user
   admin
+
+  @@map("user_role")
 }
 
 enum AccountMigrationStatus {
   legacy
   in_progress
   completed
+
+  @@map("migration_status")
 }
 
 model User {
