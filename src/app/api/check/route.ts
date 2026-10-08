@@ -1,14 +1,14 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { NextRequest, NextResponse } from 'next/server';
-import { buildCheckPrompt } from '@/prompts/brand-guardian';
 import { BrandDNA } from '@/lib/types';
 import { VoiceFingerprint, AuthenticityScore } from '@/lib/voice-fingerprint';
 import { buildAuthenticityCheckPrompt } from '@/prompts/voice-fingerprint';
 import { getWorkspaceContext } from '@/lib/workspace-auth';
 import { botGuard } from '@/lib/botid-guard';
 import { checkAndIncrementUsage } from '@/lib/usage';
-import { GUARD_PREAMBLE, wrapUntrusted } from '@/lib/prompt-safety';
+import { GUARD_PREAMBLE } from '@/lib/prompt-safety';
 import { clampScore, extractJson } from '@/lib/score-schemas';
+import { CHECK_MODEL as MODEL, MAX_CONTENT_CHARS, fenceDraft, runBrandCheck } from '@/lib/content-check';
 
 // Content Check — scores a draft against the user's brand DNA (consolidation
 // step 4). Hardened for the dashboard surface: the legacy route allowed
@@ -18,41 +18,6 @@ import { clampScore, extractJson } from '@/lib/score-schemas';
 
 // A draft plus the brand corpus; anything beyond this is abuse, not usage.
 const MAX_BODY_BYTES = 100_000;
-const MAX_CONTENT_CHARS = 10_000;
-// claude-sonnet-4-20250514 (previous model here) is deprecated, retires
-// 2026-06-15; claude-sonnet-5 is its designated replacement tier.
-const MODEL = 'claude-sonnet-5';
-
-const MAX_LIST_ITEMS = 10;
-const MAX_ITEM_CHARS = 500;
-
-function asStringList(value: unknown): string[] {
-  if (!Array.isArray(value)) return [];
-  return value
-    .filter((v): v is string => typeof v === 'string')
-    .slice(0, MAX_LIST_ITEMS)
-    .map((s) => s.slice(0, MAX_ITEM_CHARS));
-}
-
-// Validate + clamp the model's JSON into a CheckResult shape. Returns null
-// if the output doesn't look like a check result at all.
-function parseCheckResult(text: string) {
-  const raw = extractJson(text);
-  if (typeof raw !== 'object' || raw === null) return null;
-  const obj = raw as Record<string, unknown>;
-  // A non-numeric score means the model didn't produce a usable check —
-  // reject rather than clamp null/strings into a confident-looking 0.
-  if (typeof obj.score !== 'number') return null;
-
-  return {
-    score: clampScore(obj.score),
-    issues: asStringList(obj.issues),
-    strengths: asStringList(obj.strengths),
-    suggestions: asStringList(obj.suggestions),
-    revisedVersion:
-      typeof obj.revisedVersion === 'string' ? obj.revisedVersion.slice(0, MAX_CONTENT_CHARS) : '',
-  };
-}
 
 export async function POST(request: NextRequest) {
   try {
@@ -115,24 +80,12 @@ export async function POST(request: NextRequest) {
     // The draft is untrusted (users paste third-party text); fence it so it
     // can't override the rubric. The brand fields are the user's own data
     // and flow through buildCheckPrompt as before.
-    const fencedContent = wrapUntrusted(content, 'user_draft', MAX_CONTENT_CHARS);
+    const fencedContent = fenceDraft(content);
 
     // The authenticity check depends only on request inputs, so it runs
     // concurrently with the main check instead of doubling latency. It is
     // non-blocking: failures resolve to null rather than rejecting the pair.
-    const mainCall = anthropic.messages.create({
-      model: MODEL,
-      max_tokens: 2048,
-      // Sonnet 5 runs adaptive thinking when the field is omitted — keep the
-      // legacy no-thinking behavior so the token budget is all response.
-      thinking: { type: 'disabled' },
-      messages: [
-        {
-          role: 'user',
-          content: GUARD_PREAMBLE + buildCheckPrompt(brandDNA, fencedContent),
-        },
-      ],
-    });
+    const mainCall = runBrandCheck(anthropic, brandDNA, fencedContent);
 
     // Authenticity scoring rides on the PRO voice-fingerprint feature —
     // gate it here too, or a crafted request bypasses the extract route's
@@ -160,10 +113,7 @@ export async function POST(request: NextRequest) {
             })
         : Promise.resolve(null);
 
-    const [message, authMessage] = await Promise.all([mainCall, authCall]);
-
-    const responseText = message.content[0]?.type === 'text' ? message.content[0].text : '';
-    const result = parseCheckResult(responseText);
+    const [result, authMessage] = await Promise.all([mainCall, authCall]);
     if (!result) {
       console.error('[Check API] Model output failed validation');
       return NextResponse.json({ error: 'Analysis returned an invalid result' }, { status: 502 });
