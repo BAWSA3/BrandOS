@@ -1,49 +1,59 @@
 import { createClient } from '@supabase/supabase-js';
+import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import prisma from '@/lib/db';
 
-// Server-side Supabase client for Server Components and API routes
-export async function createServerSupabaseClient() {
+function supabaseEnv() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-
   if (!supabaseUrl || !supabaseAnonKey) {
     throw new Error('Missing Supabase environment variables');
   }
+  return { supabaseUrl, supabaseAnonKey };
+}
 
+// Server-side Supabase client for Server Components and API routes. Reads the
+// @supabase/ssr auth cookies the OAuth callback writes, so auth.getUser() works.
+export async function createServerSupabaseClient() {
+  const { supabaseUrl, supabaseAnonKey } = supabaseEnv();
   const cookieStore = await cookies();
 
-  const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-    auth: {
-      persistSession: false,
-    },
-    global: {
-      headers: {
-        cookie: cookieStore
-          .getAll()
-          .map((c) => `${c.name}=${c.value}`)
-          .join('; '),
+  return createServerClient(supabaseUrl, supabaseAnonKey, {
+    cookies: {
+      getAll() {
+        return cookieStore.getAll();
+      },
+      setAll(cookiesToSet) {
+        try {
+          cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options));
+        } catch {
+          // Called from a Server Component, where cookies are read-only.
+        }
       },
     },
   });
-
-  return supabase;
 }
 
-// Get current session from Supabase
+// The signed-in Supabase user, verified with Supabase Auth (not just decoded).
+// Tries the @supabase/ssr session first, then the legacy sb-access-token cookie
+// that /api/auth/callback also sets. Callers only rely on `session.user.id`.
 export async function getSession() {
-  const supabase = await createServerSupabaseClient();
-  const {
-    data: { session },
-    error,
-  } = await supabase.auth.getSession();
+  try {
+    const supabase = await createServerSupabaseClient();
+    const { data } = await supabase.auth.getUser();
+    if (data.user) return { user: data.user };
 
-  if (error) {
+    const accessToken = (await cookies()).get('sb-access-token')?.value;
+    if (accessToken) {
+      const { supabaseUrl, supabaseAnonKey } = supabaseEnv();
+      const legacy = createClient(supabaseUrl, supabaseAnonKey, { auth: { persistSession: false } });
+      const { data: legacyData } = await legacy.auth.getUser(accessToken);
+      if (legacyData.user) return { user: legacyData.user };
+    }
+  } catch (error) {
     console.error('[Auth] Session error:', error);
-    return null;
   }
-
-  return session;
+  return null;
 }
 
 // Get user from database by supabaseId
