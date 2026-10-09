@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
+import { needsStudio } from '@/lib/studio';
 import prisma from '@/lib/db';
 import { ensurePersonalWorkspace } from '@/lib/auth';
 import { encryptOauthToken, getCurrentKeyId } from '@/lib/crypto';
@@ -254,6 +255,9 @@ export async function GET(request: NextRequest) {
     let redirectTo = next;
     if (existingUser?.accountMigrationStatus === 'legacy' && provider === 'twitter') {
       redirectTo = '/migrate-account';
+    } else if (next === '/dashboard' && (await needsStudio(user.id))) {
+      // The default landing: users who haven't finished their station start in the studio.
+      redirectTo = '/studio';
     }
 
     const response = NextResponse.redirect(new URL(redirectTo, request.url));

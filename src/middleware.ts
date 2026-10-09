@@ -25,6 +25,7 @@ const allowedPages = [
   '/audit', // Score Boost Audit — post-purchase results page (/audit/[sessionId])
   '/migrate-account', // Phase 1: legacy user credential migration
   '/dashboard', // Phase 1: authenticated user dashboard
+  '/studio', // Onboarding building game: the user's station home (auth-gated)
   '/signup', // Phase 1: new account creation (email/Google/Apple)
   '/today', // Daily creator brief — 1 idea, 1 metric, 1 action
   '/world-preview', // V2 worlds: unauthenticated theme preview (dev)
