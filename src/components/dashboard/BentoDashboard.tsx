@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import BrandPass, { type BrandPassData } from '@/components/dashboard/BrandPass';
+import { DASH_FONTS } from '@/components/dashboard/dashFonts';
 import { STUDIO_STEPS, type StageNumber } from '@/lib/studio-stages';
 
 // The dashboard (docs/specs/TITLE-SCREEN-AND-DASHBOARD.md): dark bento grid,
@@ -163,9 +164,9 @@ export default function BentoDashboard({
         {
           background: C.canvas,
           color: C.ink,
-          ...(fonts
-            ? { '--dash-mono': fonts.mono, '--dash-big': fonts.big, '--pass-type': fonts.pass }
-            : {}),
+          '--dash-mono': (fonts ?? DASH_FONTS).mono,
+          '--dash-big': (fonts ?? DASH_FONTS).big,
+          '--pass-type': (fonts ?? DASH_FONTS).pass,
         } as React.CSSProperties
       }
     >

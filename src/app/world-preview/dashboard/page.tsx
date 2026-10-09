@@ -1,20 +1,12 @@
 'use client';
 
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
 import BentoDashboard, { type DashboardData } from '@/components/dashboard/BentoDashboard';
-import {
-  BIG_FONTS,
-  MONO_FONTS,
-  PASS_FONTS,
-  pick,
-  type FontOption,
-} from '@/components/dashboard/dashFonts';
 
 // Sign-in-free preview of the dashboard with sample data (design review):
 //   /world-preview/dashboard            active user
 //   /world-preview/dashboard?state=new  brand-new user (onboarding tiles)
-//   &mono=share&big=geist&pass=courier  try fonts (see /world-preview/fonts); a switcher sits bottom-right
 
 const SAMPLE: DashboardData = {
   handle: 'jbawsa',
@@ -76,66 +68,12 @@ const SAMPLE: DashboardData = {
   },
 };
 
-function FontSwitcher() {
-  const q = useSearchParams();
-  const router = useRouter();
-  const set = (role: string, key: string) => {
-    const next = new URLSearchParams(q.toString());
-    next.set(role, key);
-    router.replace(`?${next.toString()}`, { scroll: false });
-  };
-  const row = (role: string, label: string, list: FontOption[]) => (
-    <label className="flex items-center justify-between gap-3">
-      <span>{label}</span>
-      <select
-        value={pick(list, q.get(role)).key}
-        onChange={(e) => set(role, e.target.value)}
-        className="bg-transparent text-right outline-none"
-        style={{ color: '#E7E7E4' }}
-      >
-        {list.map((f) => (
-          <option key={f.key} value={f.key} style={{ background: '#161618' }}>
-            {f.label}
-          </option>
-        ))}
-      </select>
-    </label>
-  );
-  return (
-    <div
-      className="fixed bottom-4 right-4 z-50 w-[300px] space-y-2 border p-3 text-[12px]"
-      style={{
-        background: '#161618',
-        borderColor: '#0047FF',
-        color: '#8A8A86',
-        fontFamily: 'ui-monospace, monospace',
-      }}
-    >
-      <div className="text-[10px] uppercase tracking-[0.14em] text-[#0047FF]">Font review</div>
-      {row('mono', 'Labels', MONO_FONTS)}
-      {row('big', 'Numbers', BIG_FONTS)}
-      {row('pass', 'Pass', PASS_FONTS)}
-    </div>
-  );
-}
-
 function Preview() {
-  const q = useSearchParams();
-  const isNew = q.get('state') === 'new';
+  const isNew = useSearchParams().get('state') === 'new';
   const data: DashboardData = isNew
     ? { ...SAMPLE, stage: 0, ticker: { ...SAMPLE.ticker, streak: '—', avgFit: 0 } }
     : SAMPLE;
-  const fonts = {
-    mono: pick(MONO_FONTS, q.get('mono')).family,
-    big: pick(BIG_FONTS, q.get('big')).family,
-    pass: pick(PASS_FONTS, q.get('pass')).family,
-  };
-  return (
-    <>
-      <BentoDashboard data={data} isNew={isNew} fonts={fonts} />
-      <FontSwitcher />
-    </>
-  );
+  return <BentoDashboard data={data} isNew={isNew} />;
 }
 
 export default function DashboardPreviewPage() {
