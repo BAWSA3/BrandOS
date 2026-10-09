@@ -1854,3 +1854,17 @@ code {
     animation: none;
   }
 }
+
+/* Studio: a station floor builds upward when the stage rises (StationStage). */
+.studio-stage .studio-build {
+  transition: clip-path 1.8s cubic-bezier(0.16, 1, 0.3, 1) 0.15s;
+}
+.studio-stage .studio-build-line {
+  transition: top 1.8s cubic-bezier(0.16, 1, 0.3, 1) 0.15s;
+}
+@media (prefers-reduced-motion: reduce) {
+  .studio-stage .studio-build,
+  .studio-stage .studio-build-line {
+    transition: none;
+  }
+}
