@@ -64,12 +64,22 @@ function Callout({
     >
       <span
         className="border px-1 text-[9px] uppercase tracking-[0.08em]"
-        style={{ fontFamily: MONO, borderColor: 'rgba(231,231,228,0.5)', color: '#C9C8C2' }}
+        style={{
+          fontFamily: MONO,
+          borderColor: 'var(--d-callout-line, rgba(231,231,228,0.5))',
+          color: 'var(--d-callout, #C9C8C2)',
+        }}
       >
         {id}. {label}
       </span>
-      <span className="block h-px" style={{ width: line, background: 'rgba(231,231,228,0.45)' }} />
-      <span className="block h-[5px] w-[5px] rounded-full" style={{ background: '#E7E7E4' }} />
+      <span
+        className="block h-px"
+        style={{ width: line, background: 'var(--d-callout-line, rgba(231,231,228,0.45))' }}
+      />
+      <span
+        className="block h-[5px] w-[5px] rounded-full"
+        style={{ background: 'var(--d-callout, #E7E7E4)' }}
+      />
     </div>
   );
 }
