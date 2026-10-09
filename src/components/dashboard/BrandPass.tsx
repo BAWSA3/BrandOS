@@ -11,7 +11,7 @@ const BLUE = '#0047FF';
 const BONE = '#ECE9E1';
 const INK = '#141414';
 const MONO = "'VCR OSD Mono', 'JetBrains Mono', monospace";
-const TYPE = "'JetBrains Mono', ui-monospace, monospace";
+const TYPE = "var(--pass-type, 'JetBrains Mono', ui-monospace, monospace)";
 
 export interface BrandPassData {
   handle: string;
