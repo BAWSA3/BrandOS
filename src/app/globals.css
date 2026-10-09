@@ -1868,3 +1868,19 @@ code {
     transition: none;
   }
 }
+
+/* Title screen: letters hop in a stepped wave when a menu item is selected (HoverLetters). */
+@keyframes hover-letter-hop {
+  0% { transform: translateY(0); }
+  30% { transform: translateY(-0.22em); color: #0047ff; }
+  60% { transform: translateY(0.04em); }
+  100% { transform: translateY(0); }
+}
+.hover-letter {
+  animation: hover-letter-hop 360ms steps(4, end) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .hover-letter {
+    animation: none;
+  }
+}

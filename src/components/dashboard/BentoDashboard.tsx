@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import { Inter_Tight } from 'next/font/google';
 import BrandPass, { type BrandPassData } from '@/components/dashboard/BrandPass';
 import { STUDIO_STEPS, type StageNumber } from '@/lib/studio-stages';
 
@@ -9,8 +8,6 @@ import { STUDIO_STEPS, type StageNumber } from '@/lib/studio-stages';
 // Klein blue as the only accent, mono labels + Inter Tight for big numbers.
 // New users see the three onboarding steps as "start here" tiles; each one,
 // once done, becomes its real tile and builds a floor on the title screen.
-
-const big = Inter_Tight({ subsets: ['latin'], weight: ['500', '600'] });
 
 const C = {
   canvas: '#0B0B0C',
@@ -22,7 +19,9 @@ const C = {
   blue: '#0047FF',
   bone: '#ECE9E1',
 };
-const MONO = "'VCR OSD Mono', 'JetBrains Mono', monospace";
+// Type roles come from CSS vars so fonts can be swapped (see dashFonts.ts).
+const MONO = "var(--dash-mono, 'VCR OSD Mono', monospace)";
+const BIG = "var(--dash-big, 'Inter Tight', sans-serif)";
 
 export interface RecentPost {
   id: string;
@@ -82,8 +81,13 @@ function Big({ value, of }: { value: string | number; of?: string }) {
   return (
     <div className="flex items-end gap-2">
       <span
-        className={`${big.className} leading-none`}
-        style={{ fontSize: 'clamp(48px, 5.2vw, 76px)', fontWeight: 500, letterSpacing: '-0.03em' }}
+        className="leading-none"
+        style={{
+          fontFamily: BIG,
+          fontSize: 'clamp(48px, 5.2vw, 76px)',
+          fontWeight: 500,
+          letterSpacing: '-0.03em',
+        }}
       >
         {value}
       </span>
@@ -118,8 +122,7 @@ function Ring({ done, target }: { done: number; target: number }) {
         x="90"
         y="92"
         textAnchor="middle"
-        className={big.className}
-        style={{ fontSize: 44, fill: C.ink, fontWeight: 500 }}
+        style={{ fontFamily: BIG, fontSize: 44, fill: C.ink, fontWeight: 500 }}
       >
         {done} / {target}
       </text>
@@ -135,18 +138,37 @@ function Ring({ done, target }: { done: number; target: number }) {
   );
 }
 
+export interface DashFonts {
+  mono: string;
+  big: string;
+  pass: string;
+}
+
 export default function BentoDashboard({
   data,
   isNew = false,
+  fonts,
 }: {
   data: DashboardData;
   isNew?: boolean;
+  fonts?: DashFonts;
 }) {
   const maxScore = Math.max(...data.scoreHistory.map((p) => p.value), 1);
   const steps = STUDIO_STEPS;
 
   return (
-    <main className="min-h-screen" style={{ background: C.canvas, color: C.ink }}>
+    <main
+      className="min-h-screen"
+      style={
+        {
+          background: C.canvas,
+          color: C.ink,
+          ...(fonts
+            ? { '--dash-mono': fonts.mono, '--dash-big': fonts.big, '--pass-type': fonts.pass }
+            : {}),
+        } as React.CSSProperties
+      }
+    >
       <div className="mx-auto max-w-[1360px] px-4 pb-10 pt-4 md:px-8">
         {/* Top bar + ticker strip */}
         <header
@@ -286,8 +308,9 @@ export default function BentoDashboard({
                       <span>{done ? 'Built' : `Builds ${st.name}`}</span>
                     </div>
                     <div
-                      className={`${big.className} mt-auto text-[28px] leading-[1.05]`}
+                      className="mt-auto text-[28px] leading-[1.05]"
                       style={{
+                        fontFamily: BIG,
                         fontWeight: 600,
                         letterSpacing: '-0.02em',
                         color: next ? '#fff' : done ? C.muted : C.ink,
@@ -350,8 +373,8 @@ export default function BentoDashboard({
                         </div>
                       </div>
                       <span
-                        className={`${big.className} w-[64px] text-right text-[30px] leading-none`}
-                        style={{ fontWeight: 500, color: top ? '#fff' : C.ink }}
+                        className="w-[64px] text-right text-[30px] leading-none"
+                        style={{ fontFamily: BIG, fontWeight: 500, color: top ? '#fff' : C.ink }}
                       >
                         {p.fit}
                       </span>

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import StationStage from '@/components/studio/StationStage';
+import HoverLetters from '@/components/title/HoverLetters';
 import { getArchetypeInfo } from '@/lib/archetype-descriptions';
 import { STUDIO_STEPS, type StageNumber } from '@/lib/studio-stages';
 import type { Mode } from '@/components/StationCard';
@@ -98,6 +99,13 @@ export default function TitleScreen({
   const [sound, setSound] = useState(true);
   const [index, setIndex] = useState(0);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  // Bumps each time an item becomes the selection, replaying its letter wave.
+  const [plays, setPlays] = useState<number[]>([1, 0, 0, 0]);
+  const [handlePlay, setHandlePlay] = useState(0);
+  const select = (i: number) => {
+    setIndex(i);
+    setPlays((p) => p.map((n, k) => (k === i ? n + 1 : n)));
+  };
   const play = useMenuSounds(sound);
 
   // Day 06:00-18:00 by the user's clock, re-checked every minute.
@@ -142,11 +150,11 @@ export default function TitleScreen({
       if (e.key === 'ArrowDown' || e.key === 's') {
         e.preventDefault();
         play('move');
-        setIndex((i) => (i + 1) % items.length);
+        select((index + 1) % items.length);
       } else if (e.key === 'ArrowUp' || e.key === 'w') {
         e.preventDefault();
         play('move');
-        setIndex((i) => (i - 1 + items.length) % items.length);
+        select((index - 1 + items.length) % items.length);
       } else if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
         choose(index);
@@ -224,6 +232,7 @@ export default function TitleScreen({
           </div>
 
           <h1
+            onMouseEnter={() => setHandlePlay((n) => n + 1)}
             className="mt-5 leading-[0.9]"
             style={{
               fontFamily: "'PP NeueBit', 'VCR OSD Mono', monospace",
@@ -231,7 +240,7 @@ export default function TitleScreen({
               letterSpacing: '-0.01em',
             }}
           >
-            @{handle}
+            <HoverLetters text={`@${handle}`} play={handlePlay} />
           </h1>
 
           {/* Save file */}
@@ -267,7 +276,7 @@ export default function TitleScreen({
                       onMouseEnter={() => {
                         if (index !== i) {
                           play('move');
-                          setIndex(i);
+                          select(i);
                         }
                       }}
                       onFocus={() => setIndex(i)}
@@ -291,7 +300,7 @@ export default function TitleScreen({
                           transition: 'transform 0.15s steps(3), opacity 0.15s steps(3)',
                         }}
                       >
-                        {item.label}
+                        <HoverLetters text={item.label} play={plays[i]} />
                       </span>
                       <span
                         className="hidden text-[11px] uppercase tracking-[0.12em] sm:inline"
