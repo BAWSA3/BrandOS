@@ -7,6 +7,7 @@ import BentoDashboard, { type DashboardData } from '@/components/dashboard/Bento
 // Sign-in-free preview of the dashboard with sample data (design review):
 //   /world-preview/dashboard            active user
 //   /world-preview/dashboard?state=new  brand-new user (onboarding tiles)
+//   &theme=light                        start in light mode (toggle in the top bar)
 
 const SAMPLE: DashboardData = {
   handle: 'jbawsa',
@@ -69,11 +70,18 @@ const SAMPLE: DashboardData = {
 };
 
 function Preview() {
-  const isNew = useSearchParams().get('state') === 'new';
+  const q = useSearchParams();
+  const isNew = q.get('state') === 'new';
   const data: DashboardData = isNew
     ? { ...SAMPLE, stage: 0, ticker: { ...SAMPLE.ticker, streak: '—', avgFit: 0 } }
     : SAMPLE;
-  return <BentoDashboard data={data} isNew={isNew} />;
+  return (
+    <BentoDashboard
+      data={data}
+      isNew={isNew}
+      initialTheme={q.get('theme') === 'light' ? 'light' : 'dark'}
+    />
+  );
 }
 
 export default function DashboardPreviewPage() {

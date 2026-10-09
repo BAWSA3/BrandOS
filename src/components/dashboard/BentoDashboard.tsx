@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useState } from 'react';
 import BrandPass, { type BrandPassData } from '@/components/dashboard/BrandPass';
 import { DASH_FONTS } from '@/components/dashboard/dashFonts';
 import { STUDIO_STEPS, type StageNumber } from '@/lib/studio-stages';
@@ -11,14 +12,46 @@ import { STUDIO_STEPS, type StageNumber } from '@/lib/studio-stages';
 // once done, becomes its real tile and builds a floor on the title screen.
 
 const C = {
-  canvas: '#0B0B0C',
-  tile: '#161618',
-  rule: 'rgba(231,231,228,0.08)',
-  ink: '#E7E7E4',
-  muted: '#8A8A86',
-  dim: '#55554F',
+  canvas: 'var(--d-canvas)',
+  tile: 'var(--d-tile)',
+  rule: 'var(--d-rule)',
+  ink: 'var(--d-ink)',
+  muted: 'var(--d-muted)',
+  dim: 'var(--d-dim)',
+  bar: 'var(--d-bar)',
+  track: 'var(--d-track)',
   blue: '#0047FF',
   bone: '#ECE9E1',
+};
+
+export type DashTheme = 'dark' | 'light';
+
+// Neutral base per theme; Klein blue is the one bright signal in both.
+const THEMES: Record<DashTheme, Record<string, string>> = {
+  dark: {
+    '--d-canvas': '#0B0B0C',
+    '--d-tile': '#161618',
+    '--d-rule': 'rgba(231,231,228,0.08)',
+    '--d-ink': '#E7E7E4',
+    '--d-muted': '#8A8A86',
+    '--d-dim': '#55554F',
+    '--d-bar': '#B9B8AE',
+    '--d-track': 'rgba(231,231,228,0.1)',
+    '--d-callout': '#C9C8C2',
+    '--d-callout-line': 'rgba(231,231,228,0.45)',
+  },
+  light: {
+    '--d-canvas': '#E7E7E4',
+    '--d-tile': '#F6F5F1',
+    '--d-rule': 'rgba(14,14,14,0.09)',
+    '--d-ink': '#0E0E0E',
+    '--d-muted': '#6B6B6B',
+    '--d-dim': '#B5B4AE',
+    '--d-bar': '#1C1C1C',
+    '--d-track': 'rgba(14,14,14,0.08)',
+    '--d-callout': '#4A4A47',
+    '--d-callout-line': 'rgba(14,14,14,0.4)',
+  },
 };
 // Type roles come from CSS vars so fonts can be swapped (see dashFonts.ts).
 const MONO = "var(--dash-mono, 'VCR OSD Mono', monospace)";
@@ -65,13 +98,25 @@ function Tile({
   className?: string;
   accent?: boolean;
 }) {
+  // A Klein-blue tile flips the theme's ink to white so labels and numbers read on it.
+  const onBlue = accent
+    ? {
+        '--d-ink': '#FFFFFF',
+        '--d-muted': 'rgba(255,255,255,0.72)',
+        '--d-bar': 'rgba(255,255,255,0.38)',
+      }
+    : {};
   return (
     <section
       className={`relative flex flex-col p-5 ${className}`}
-      style={{
-        background: accent ? C.blue : C.tile,
-        border: `1px solid ${accent ? C.blue : C.rule}`,
-      }}
+      style={
+        {
+          ...onBlue,
+          background: accent ? C.blue : C.tile,
+          border: `1px solid ${accent ? C.blue : C.rule}`,
+          color: C.ink,
+        } as React.CSSProperties
+      }
     >
       {children}
     </section>
@@ -107,7 +152,7 @@ function Ring({ done, target }: { done: number; target: number }) {
   const pct = Math.min(1, done / Math.max(1, target));
   return (
     <svg viewBox="0 0 180 180" className="mx-auto w-full max-w-[200px]">
-      <circle cx="90" cy="90" r={r} fill="none" stroke="rgba(231,231,228,0.1)" strokeWidth="6" />
+      <circle cx="90" cy="90" r={r} fill="none" stroke={C.track} strokeWidth="6" />
       <circle
         cx="90"
         cy="90"
@@ -149,11 +194,14 @@ export default function BentoDashboard({
   data,
   isNew = false,
   fonts,
+  initialTheme = 'dark',
 }: {
   data: DashboardData;
   isNew?: boolean;
   fonts?: DashFonts;
+  initialTheme?: DashTheme;
 }) {
+  const [theme, setTheme] = useState<DashTheme>(initialTheme);
   const maxScore = Math.max(...data.scoreHistory.map((p) => p.value), 1);
   const steps = STUDIO_STEPS;
 
@@ -162,8 +210,10 @@ export default function BentoDashboard({
       className="min-h-screen"
       style={
         {
+          ...THEMES[theme],
           background: C.canvas,
           color: C.ink,
+          transition: 'background 0.3s ease, color 0.3s ease',
           '--dash-mono': (fonts ?? DASH_FONTS).mono,
           '--dash-big': (fonts ?? DASH_FONTS).big,
           '--pass-type': (fonts ?? DASH_FONTS).pass,
@@ -207,11 +257,17 @@ export default function BentoDashboard({
             className="ml-auto flex shrink-0 items-center gap-2 pl-4"
             style={{ fontFamily: MONO }}
           >
-            <span className="text-[11px] uppercase tracking-[0.1em]">@{data.handle}</span>
-            <span
-              className="h-7 w-7 overflow-hidden rounded-full"
-              style={{ background: '#2A2A2D' }}
+            <button
+              type="button"
+              onClick={() => setTheme((t) => (t === 'dark' ? 'light' : 'dark'))}
+              className="mr-3 border px-2 py-1 text-[10px] uppercase tracking-[0.14em]"
+              style={{ borderColor: C.rule, color: C.muted }}
+              aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
             >
+              {theme === 'dark' ? '◐ Light' : '◑ Dark'}
+            </button>
+            <span className="text-[11px] uppercase tracking-[0.1em]">@{data.handle}</span>
+            <span className="h-7 w-7 overflow-hidden rounded-full" style={{ background: C.dim }}>
               {data.avatarUrl && (
                 // eslint-disable-next-line @next/next/no-img-element -- remote avatar
                 <img src={data.avatarUrl} alt="" className="h-full w-full object-cover grayscale" />
@@ -248,7 +304,7 @@ export default function BentoDashboard({
           </Tile>
 
           {/* Brand score + trend */}
-          <Tile className="md:col-span-4">
+          <Tile className="md:col-span-4" accent>
             <Label right={<span>6 scans</span>}>Brand score</Label>
             <div className="mt-6 grid grid-cols-[1fr_auto] items-end gap-4">
               <Big value={data.ticker.score} of="100" />
@@ -266,7 +322,7 @@ export default function BentoDashboard({
                         className="w-[14px]"
                         style={{
                           height: `${(p.value / maxScore) * 70}px`,
-                          background: last ? C.blue : '#B9B8AE',
+                          background: last ? C.ink : C.bar,
                         }}
                       />
                     </div>
@@ -302,10 +358,10 @@ export default function BentoDashboard({
                 return (
                   <Tile key={st.stage} accent={next} className="min-h-[200px]">
                     <div
-                      className="flex items-center justify-between text-[11px] uppercase tracking-[0.14em]"
+                      className="flex items-center justify-between gap-3 text-[11px] uppercase tracking-[0.14em]"
                       style={{ fontFamily: MONO, color: next ? '#fff' : C.muted }}
                     >
-                      <span>Step 0{st.stage}</span>
+                      <span className="shrink-0">Step 0{st.stage}</span>
                       <span>{done ? 'Built' : `Builds ${st.name}`}</span>
                     </div>
                     <div
@@ -363,19 +419,16 @@ export default function BentoDashboard({
                         >
                           {p.when} · {p.likes} likes · {p.multiple} usual
                         </div>
-                        <div
-                          className="mt-2 h-[3px] w-full"
-                          style={{ background: 'rgba(231,231,228,0.08)' }}
-                        >
+                        <div className="mt-2 h-[3px] w-full" style={{ background: C.track }}>
                           <div
                             className="h-full"
-                            style={{ width: `${p.fit}%`, background: top ? C.blue : '#B9B8AE' }}
+                            style={{ width: `${p.fit}%`, background: top ? C.blue : C.bar }}
                           />
                         </div>
                       </div>
                       <span
                         className="w-[64px] text-right text-[30px] leading-none"
-                        style={{ fontFamily: BIG, fontWeight: 500, color: top ? '#fff' : C.ink }}
+                        style={{ fontFamily: BIG, fontWeight: 500, color: top ? C.blue : C.ink }}
                       >
                         {p.fit}
                       </span>
