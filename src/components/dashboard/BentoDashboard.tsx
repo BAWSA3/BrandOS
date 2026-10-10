@@ -2,11 +2,17 @@
 
 import Link from 'next/link';
 import { createContext, useContext, useState } from 'react';
-import { motion, useReducedMotion } from 'motion/react';
+import { useReducedMotion } from 'motion/react';
 import { Ticker } from 'motion-plus/react';
 import { DashCursor, RollNumber, ScrambleLabel, useBoot } from '@/components/dashboard/dashMotion';
 import BrandPass, { type BrandPassData } from '@/components/dashboard/BrandPass';
 import { DASH_FONTS } from '@/components/dashboard/dashFonts';
+import {
+  BrandScoreTile,
+  WeekTile,
+  type PhaseScore,
+  type WeekDay,
+} from '@/components/dashboard/StatTiles';
 import { STUDIO_STEPS, type StageNumber } from '@/lib/studio-stages';
 
 // The dashboard (docs/specs/TITLE-SCREEN-AND-DASHBOARD.md): dark bento grid,
@@ -81,6 +87,9 @@ export interface DashboardData {
   streak: { done: number; target: number };
   posts: RecentPost[];
   pass: BrandPassData;
+  scoreDelta?: { value: number; since: string };
+  phases?: PhaseScore[];
+  week?: { range: string; days: WeekDay[]; streakWeeks?: number };
 }
 
 function Label({ children, right }: { children: React.ReactNode; right?: React.ReactNode }) {
@@ -99,6 +108,19 @@ function Label({ children, right }: { children: React.ReactNode; right?: React.R
       </span>
       {right}
     </div>
+  );
+}
+
+/** A tile's mono label on its own (for tiles that lay out their own header row). */
+function TileLabel({ children }: { children: string }) {
+  const booted = useContext(BootCtx);
+  return (
+    <span
+      className="text-[11px] uppercase tracking-[0.14em]"
+      style={{ fontFamily: MONO, color: C.muted }}
+    >
+      <ScrambleLabel booted={booted}>{children}</ScrambleLabel>
+    </span>
   );
 }
 
@@ -137,65 +159,6 @@ function Tile({
     >
       {children}
     </section>
-  );
-}
-
-function Big({ value, of }: { value: number; of?: string }) {
-  const booted = useContext(BootCtx);
-  return (
-    <div className="flex items-end gap-2">
-      <span
-        className="leading-none"
-        style={{
-          fontFamily: BIG,
-          fontSize: 'clamp(48px, 5.2vw, 76px)',
-          fontWeight: 500,
-          letterSpacing: '-0.03em',
-        }}
-      >
-        <RollNumber value={value} booted={booted} delay={0.15} />
-      </span>
-      {of && (
-        <span className="pb-2 text-[13px]" style={{ fontFamily: MONO, color: C.muted }}>
-          / {of}
-        </span>
-      )}
-    </div>
-  );
-}
-
-function Ring({ done, target }: { done: number; target: number }) {
-  const booted = useContext(BootCtx);
-  const pct = Math.min(1, done / Math.max(1, target));
-  return (
-    <div className="relative mx-auto w-full max-w-[200px]">
-      <svg viewBox="0 0 180 180" className="w-full">
-        <circle cx="90" cy="90" r={70} fill="none" stroke={C.track} strokeWidth="6" />
-        <motion.circle
-          cx="90"
-          cy="90"
-          r={70}
-          fill="none"
-          stroke={C.blue}
-          strokeWidth="6"
-          transform="rotate(-90 90 90)"
-          initial={{ pathLength: 0 }}
-          animate={{ pathLength: booted ? pct : 0 }}
-          transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
-        />
-      </svg>
-      <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="leading-none" style={{ fontFamily: BIG, fontSize: 44, fontWeight: 500 }}>
-          <RollNumber value={done} booted={booted} delay={0.3} /> / {target}
-        </span>
-        <span
-          className="mt-2 text-[10px] tracking-[0.15em]"
-          style={{ fontFamily: MONO, color: C.muted }}
-        >
-          ON-BRAND POSTS
-        </span>
-      </div>
-    </div>
   );
 }
 
@@ -271,7 +234,6 @@ export default function BentoDashboard({
 }) {
   const [theme, setTheme] = useState<DashTheme>(initialTheme);
   const booted = useBoot();
-  const maxScore = Math.max(...data.scoreHistory.map((p) => p.value), 1);
   const steps = STUDIO_STEPS;
 
   return (
@@ -361,50 +323,41 @@ export default function BentoDashboard({
               </div>
             </Tile>
 
-            {/* Brand score + trend */}
+            {/* Brand score: hero number, delta, trend, phase meters */}
             <Tile className="md:col-span-4" accent open>
-              <Label right={<span>6 scans</span>}>Brand score</Label>
-              <div className="mt-6 grid grid-cols-[1fr_auto] items-end gap-4">
-                <Big value={data.ticker.score} of="100" />
-                <div className="flex h-[88px] items-end gap-[6px]" aria-label="Score history">
-                  {data.scoreHistory.map((p, i) => {
-                    const last = i === data.scoreHistory.length - 1;
-                    return (
-                      <div key={p.label} className="flex flex-col items-center gap-1">
-                        {last && (
-                          <span className="text-[9px]" style={{ fontFamily: MONO, color: C.ink }}>
-                            {p.value}
-                          </span>
-                        )}
-                        <span
-                          className="w-[14px]"
-                          style={{
-                            height: `${(p.value / maxScore) * 70}px`,
-                            background: last ? C.ink : C.bar,
-                          }}
-                        />
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
+              <BrandScoreTile
+                score={data.ticker.score}
+                history={data.scoreHistory}
+                delta={data.scoreDelta}
+                phases={data.phases}
+                booted={booted}
+                label={<TileLabel>Brand score</TileLabel>}
+              />
             </Tile>
 
-            {/* Posting streak */}
+            {/* This week: goal meter + day strip */}
             <Tile className="md:col-span-3" open={!isNew}>
-              <Label>This week</Label>
-              <div className="mt-2 flex flex-1 items-center">
-                {isNew ? (
+              {isNew || !data.week ? (
+                <>
+                  <Label>This week</Label>
                   <div
-                    className="w-full text-center text-[12px] uppercase tracking-[0.14em]"
+                    className="flex flex-1 items-center justify-center text-center text-[12px] uppercase tracking-[0.14em]"
                     style={{ fontFamily: MONO, color: C.muted }}
                   >
                     Set your first goal in step 03
                   </div>
-                ) : (
-                  <Ring done={data.streak.done} target={data.streak.target} />
-                )}
-              </div>
+                </>
+              ) : (
+                <WeekTile
+                  range={data.week.range}
+                  days={data.week.days}
+                  done={data.streak.done}
+                  target={data.streak.target}
+                  streakWeeks={data.week.streakWeeks}
+                  booted={booted}
+                  label={<TileLabel>This week</TileLabel>}
+                />
+              )}
             </Tile>
 
             {/* Onboarding (new) or Recent posts (active) */}

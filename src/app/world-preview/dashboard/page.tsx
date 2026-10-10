@@ -21,6 +21,26 @@ const SAMPLE: DashboardData = {
     { label: 'Oct', value: 72 },
   ],
   streak: { done: 2, target: 3 },
+  scoreDelta: { value: 4, since: 'Sep' },
+  phases: [
+    { key: 'Define', value: 78 },
+    { key: 'Check', value: 64 },
+    { key: 'Generate', value: 81 },
+    { key: 'Scale', value: 58 },
+  ],
+  week: {
+    range: 'Oct 6 – 12',
+    streakWeeks: 3,
+    days: [
+      { d: 'M', name: 'Mon', state: 'on', note: '1 on-brand post · fit 92' },
+      { d: 'T', name: 'Tue', state: 'none' },
+      { d: 'W', name: 'Wed', state: 'off', note: '1 post · fit 55' },
+      { d: 'T', name: 'Thu', state: 'on', note: '1 on-brand post · fit 84' },
+      { d: 'F', name: 'Fri', state: 'none', today: true },
+      { d: 'S', name: 'Sat', state: 'future' },
+      { d: 'S', name: 'Sun', state: 'future' },
+    ],
+  },
   posts: [
     {
       id: '1',
