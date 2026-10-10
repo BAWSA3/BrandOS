@@ -8,6 +8,7 @@ import BentoDashboard, { type DashboardData } from '@/components/dashboard/Bento
 //   /world-preview/dashboard            active user
 //   /world-preview/dashboard?state=new  brand-new user (onboarding tiles)
 //   &theme=dark                         start in dark mode (light is the default; toggle in the top bar)
+//   &alert=0                            hide the score-changed notification
 
 const SAMPLE: DashboardData = {
   handle: 'jbawsa',
@@ -100,6 +101,12 @@ function Preview() {
       data={data}
       isNew={isNew}
       initialTheme={q.get('theme') === 'dark' ? 'dark' : 'light'}
+      // the score-changed notification (?alert=0 hides it)
+      scoreAlert={
+        !isNew && q.get('alert') !== '0'
+          ? { delta: SAMPLE.scoreDelta?.value ?? 0, score: SAMPLE.ticker.score }
+          : null
+      }
     />
   );
 }

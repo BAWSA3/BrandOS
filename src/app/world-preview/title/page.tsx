@@ -7,7 +7,7 @@ import { clampStage } from '@/lib/studio-stages';
 
 // Sign-in-free preview of the title screen (design review):
 //   /world-preview/title?stage=0..3&archetype=BUILD.EXE&handle=jbawsa
-// Day/night follows your clock; override it in Settings.
+// Day by default; Settings switches night/auto. ?levelup=1 plays the level-up moment.
 
 function Preview() {
   const q = useSearchParams();
@@ -23,6 +23,16 @@ function Preview() {
       rescanHref="/"
       stationHref="/station/jbawsa"
       score={72}
+      // ?levelup=1 previews the level-up moment (the newest floor builds in)
+      levelUp={
+        q.get('levelup') === '1'
+          ? {
+              floor: ['Plot', 'Foundation', 'Workstation', 'Billboard'][
+                clampStage(Number(q.get('stage') ?? 3) || 0)
+              ],
+            }
+          : null
+      }
       pass={{
         handle: q.get('handle') ?? 'jbawsa',
         name: 'Jeffrey Basa',

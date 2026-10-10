@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useReducedMotion } from 'motion/react';
 import { curtains, pixels } from 'motion-plus/curtains';
 import TitleHero, { type HeroView } from '@/components/title/TitleHero';
+import { isSoundOn, onSoundSetting, playSound, primeSounds, setSoundOn } from '@/lib/ui-sounds';
 import type { BrandPassData } from '@/components/dashboard/BrandPass';
 import HoverLetters from '@/components/title/HoverLetters';
 import { getArchetypeInfo } from '@/lib/archetype-descriptions';
@@ -52,6 +53,8 @@ export interface TitleScreenProps {
   score?: number | null;
   /** Shown on the My station hero. */
   pass?: BrandPassData | null;
+  /** A floor was built since the last visit: play the level-up moment. */
+  levelUp?: { floor: string } | null;
 }
 
 /** Tiny synthesized UI sounds (no audio files). Created lazily on first interaction. */
@@ -100,6 +103,7 @@ export default function TitleScreen({
   stationHref,
   score,
   pass,
+  levelUp,
 }: TitleScreenProps) {
   const router = useRouter();
   const info = getArchetypeInfo(archetype);
@@ -117,6 +121,30 @@ export default function TitleScreen({
     setPlays((p) => p.map((n, k) => (k === i ? n + 1 : n)));
   };
   const play = useMenuSounds(sound);
+  // Shared sound setting (also used by the dashboard) + unlock/preload on first gesture.
+  useEffect(() => {
+    primeSounds();
+    const t = window.setTimeout(() => setSound(isSoundOn()), 0);
+    const off = onSoundSetting(setSound);
+    return () => {
+      window.clearTimeout(t);
+      off();
+    };
+  }, []);
+  // Level up: the station grew a floor since last time.
+  const [levelBanner, setLevelBanner] = useState(false);
+  useEffect(() => {
+    if (!levelUp) return;
+    const a = window.setTimeout(() => {
+      playSound('levelUp');
+      setLevelBanner(true);
+    }, 700);
+    const b = window.setTimeout(() => setLevelBanner(false), 3600);
+    return () => {
+      window.clearTimeout(a);
+      window.clearTimeout(b);
+    };
+  }, [levelUp]);
 
   // Day 06:00-18:00 by the user's clock, re-checked every minute.
   useEffect(() => {
@@ -136,9 +164,13 @@ export default function TitleScreen({
   // Continue: a Klein-blue pixel wipe covers the station, the dashboard loads
   // underneath, then the pixels clear to reveal it (like entering a level).
   const enterDashboard = () => {
-    if (reduce) return router.push(continueHref);
+    if (reduce) {
+      playSound('transition');
+      return router.push(continueHref);
+    }
     if (entering) return;
     setEntering(true);
+    playSound('transition');
     void curtains(
       () => {
         router.push(continueHref);
@@ -168,7 +200,8 @@ export default function TitleScreen({
   const view: HeroView = settingsOpen ? 'settings' : (VIEWS[index] ?? 'continue');
 
   const choose = (i: number) => {
-    play('select');
+    // Continue has its own transition sound; the others get the select blip.
+    if (i !== 0) play('select');
     // Let the confirm sound land before navigating.
     window.setTimeout(() => items[i].run(), 140);
   };
@@ -184,11 +217,11 @@ export default function TitleScreen({
       }
       if (e.key === 'ArrowDown' || e.key === 's') {
         e.preventDefault();
-        play('move');
+        playSound('hover');
         select((index + 1) % items.length);
       } else if (e.key === 'ArrowUp' || e.key === 'w') {
         e.preventDefault();
-        play('move');
+        playSound('hover');
         select((index - 1 + items.length) % items.length);
       } else if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
@@ -232,7 +265,21 @@ export default function TitleScreen({
 
       <div className="relative z-20 mx-auto grid min-h-screen max-w-[1400px] grid-cols-1 items-center gap-6 px-6 py-8 md:grid-cols-[minmax(0,420px)_1fr] md:px-12">
         {/* Station (first on phones) */}
-        <div className="order-first flex justify-center md:order-last">
+        <div className="relative order-first flex justify-center md:order-last">
+          {/* level up: a floor was built since last time */}
+          <div
+            aria-live="polite"
+            className="pointer-events-none absolute left-1/2 top-[2%] z-10 -translate-x-1/2 whitespace-nowrap px-3 py-[6px] text-[12px] uppercase tracking-[0.16em] text-white"
+            style={{
+              fontFamily: MONO,
+              background: BLUE,
+              opacity: levelBanner ? 1 : 0,
+              transform: `translate(-50%, ${levelBanner ? '0' : '-8px'})`,
+              transition: 'opacity 0.35s ease, transform 0.45s cubic-bezier(0.16,1,0.3,1)',
+            }}
+          >
+            {levelUp ? `Level up · ${levelUp.floor} built` : ''}
+          </div>
           <TitleHero
             view={view}
             archetype={archetype}
@@ -300,7 +347,7 @@ export default function TitleScreen({
                       role="menuitem"
                       onMouseEnter={() => {
                         if (index !== i) {
-                          play('move');
+                          playSound('hover');
                           select(i);
                         }
                       }}
@@ -370,7 +417,7 @@ export default function TitleScreen({
             </div>
             <div className="mt-5 flex items-center justify-between text-[14px] uppercase">
               <span>Sound</span>
-              <button type="button" onClick={() => setSound((v) => !v)} style={{ color: BLUE }}>
+              <button type="button" onClick={() => setSoundOn(!sound)} style={{ color: BLUE }}>
                 {sound ? 'On' : 'Off'}
               </button>
             </div>

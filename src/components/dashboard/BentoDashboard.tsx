@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useEffect, useRef, useState } from 'react';
+import { playSound, primeSounds } from '@/lib/ui-sounds';
 import { motion, useReducedMotion } from 'motion/react';
 import { Ticker } from 'motion-plus/react';
 import {
@@ -263,19 +264,53 @@ export default function BentoDashboard({
   isNew = false,
   fonts,
   initialTheme = 'light',
+  scoreAlert,
 }: {
   data: DashboardData;
   isNew?: boolean;
   fonts?: DashFonts;
   initialTheme?: DashTheme;
+  /** The brand score changed since the last visit: show the notification + sound. */
+  scoreAlert?: { delta: number; score: number } | null;
 }) {
   const [theme, setTheme] = useState<DashTheme>(initialTheme);
   const booted = useBoot();
+
+  // Sounds: unlock/preload on the first gesture; one short beep per button/link hovered.
+  useEffect(() => primeSounds(), []);
+  const lastHover = useRef<Element | null>(null);
+  const onPointerOver = (e: React.PointerEvent) => {
+    if (e.pointerType !== 'mouse') return;
+    const el = (e.target as HTMLElement).closest('a, button');
+    if (!el || el.getAttribute('data-cursor') === 'default') {
+      lastHover.current = null;
+      return;
+    }
+    if (el === lastHover.current) return;
+    lastHover.current = el;
+    playSound('hover');
+  };
+
+  // Score alert: slides in after the dashboard boots, with the alert sound.
+  const [alertOn, setAlertOn] = useState(false);
+  useEffect(() => {
+    if (!scoreAlert?.delta) return;
+    const a = window.setTimeout(() => {
+      setAlertOn(true);
+      playSound('alert');
+    }, 1600);
+    const b = window.setTimeout(() => setAlertOn(false), 6800);
+    return () => {
+      window.clearTimeout(a);
+      window.clearTimeout(b);
+    };
+  }, [scoreAlert?.delta, scoreAlert?.score]);
   const steps = STUDIO_STEPS;
 
   return (
     <main
       className="min-h-screen"
+      onPointerOver={onPointerOver}
       style={
         {
           ...THEMES[theme],
@@ -289,6 +324,33 @@ export default function BentoDashboard({
       }
     >
       <BootCtx.Provider value={booted}>
+        {scoreAlert && scoreAlert.delta !== 0 && (
+          <button
+            type="button"
+            role="status"
+            onClick={() => setAlertOn(false)}
+            className="fixed right-4 top-4 z-40 flex items-center gap-3 px-4 py-3 text-left text-white shadow-[0_12px_32px_rgba(0,0,0,0.25)]"
+            style={{
+              fontFamily: MONO,
+              background: C.blue,
+              opacity: alertOn ? 1 : 0,
+              transform: alertOn ? 'translateY(0)' : 'translateY(-12px)',
+              pointerEvents: alertOn ? 'auto' : 'none',
+              transition: 'opacity 0.35s ease, transform 0.45s cubic-bezier(0.16,1,0.3,1)',
+            }}
+          >
+            <span className="text-[18px] leading-none">{scoreAlert.delta > 0 ? '▲' : '▼'}</span>
+            <span className="flex flex-col">
+              <span className="text-[10px] uppercase tracking-[0.14em] opacity-80">
+                Brand score changed
+              </span>
+              <span className="mt-1 text-[13px] uppercase tracking-[0.1em]">
+                {scoreAlert.delta > 0 ? '+' : '−'}
+                {Math.abs(scoreAlert.delta)} · now {scoreAlert.score}
+              </span>
+            </span>
+          </button>
+        )}
         <DashCursor />
         <div className="mx-auto max-w-[1360px] px-4 pb-10 pt-4 md:px-8">
           {/* Top bar + ticker strip */}
