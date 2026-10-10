@@ -96,7 +96,8 @@ export default function TitleScreen({
 }: TitleScreenProps) {
   const router = useRouter();
   const info = getArchetypeInfo(archetype);
-  const [dayNight, setDayNight] = useState<DayNight>('auto');
+  // Day by default; Settings can switch to night or follow the clock (auto).
+  const [dayNight, setDayNight] = useState<DayNight>('day');
   const [clockMode, setClockMode] = useState<Mode>('day');
   const [sound, setSound] = useState(true);
   const [index, setIndex] = useState(0);
@@ -236,30 +237,23 @@ export default function TitleScreen({
 
         {/* Logo, save file, menu */}
         <div className="flex flex-col">
-          <div className="flex items-center gap-3">
-            <div className="grid grid-cols-3 gap-[2px]" aria-hidden>
-              {[1, 0, 1, 0, 1, 0, 1, 0, 1].map((on, i) => (
-                <span
-                  key={i}
-                  className="h-[5px] w-[5px]"
-                  style={{ background: on ? BLUE : 'transparent' }}
-                />
-              ))}
-            </div>
-            <span
-              className="text-[11px] uppercase tracking-[0.2em]"
-              style={{ fontFamily: MONO, color: s.muted }}
-            >
-              BrandOS
-            </span>
-          </div>
+          {/* The original BrandOS hero header, as the game's title logo */}
+          {/* eslint-disable-next-line @next/next/no-img-element -- pre-cropped wordmark */}
+          <img
+            src={mode === 'night' ? '/brandos-wordmark-night.png' : '/brandos-wordmark-day.png'}
+            alt="BrandOS"
+            width={1600}
+            height={319}
+            className="title-logo block h-auto w-full max-w-[240px] md:max-w-[440px]"
+            draggable={false}
+          />
 
           <h1
             onMouseEnter={() => setHandlePlay((n) => n + 1)}
-            className="mt-5 leading-[0.9]"
+            className="mt-6 leading-[0.9]"
             style={{
               fontFamily: "'PP NeueBit', 'VCR OSD Mono', monospace",
-              fontSize: 'clamp(44px, 8vw, 104px)',
+              fontSize: 'clamp(36px, 5vw, 64px)',
               letterSpacing: '-0.01em',
             }}
           >

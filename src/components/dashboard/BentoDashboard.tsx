@@ -225,7 +225,7 @@ export default function BentoDashboard({
   data,
   isNew = false,
   fonts,
-  initialTheme = 'dark',
+  initialTheme = 'light',
 }: {
   data: DashboardData;
   isNew?: boolean;

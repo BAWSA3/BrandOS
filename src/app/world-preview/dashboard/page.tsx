@@ -7,7 +7,7 @@ import BentoDashboard, { type DashboardData } from '@/components/dashboard/Bento
 // Sign-in-free preview of the dashboard with sample data (design review):
 //   /world-preview/dashboard            active user
 //   /world-preview/dashboard?state=new  brand-new user (onboarding tiles)
-//   &theme=light                        start in light mode (toggle in the top bar)
+//   &theme=dark                         start in dark mode (light is the default; toggle in the top bar)
 
 const SAMPLE: DashboardData = {
   handle: 'jbawsa',
@@ -99,7 +99,7 @@ function Preview() {
     <BentoDashboard
       data={data}
       isNew={isNew}
-      initialTheme={q.get('theme') === 'light' ? 'light' : 'dark'}
+      initialTheme={q.get('theme') === 'dark' ? 'dark' : 'light'}
     />
   );
 }
