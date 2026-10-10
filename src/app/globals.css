@@ -1899,3 +1899,34 @@ code {
 @media (prefers-reduced-motion: reduce) {
   .tile-pulse { animation: none; opacity: 0; }
 }
+
+/* Title screen: the station reacts to the selected menu item (StationStage `reaction`). */
+.studio-stage .station-scene {
+  transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1), filter 0.45s ease;
+}
+@keyframes station-power-flicker {
+  0% { opacity: 0; }
+  12% { opacity: 1; }
+  22% { opacity: 0.15; }
+  36% { opacity: 1; }
+  48% { opacity: 0.45; }
+  64% { opacity: 1; }
+  100% { opacity: 1; }
+}
+.station-power-on {
+  animation: station-power-flicker 0.75s steps(1, end) both;
+}
+@keyframes station-scan-sweep {
+  0% { top: 94%; opacity: 0; }
+  10% { opacity: 1; }
+  88% { opacity: 1; }
+  100% { top: var(--scan-end, 10%); opacity: 0; }
+}
+.station-scan-line {
+  animation: station-scan-sweep 2.4s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .studio-stage .station-scene { transition: none; }
+  .station-power-on { animation: none; opacity: 1; }
+  .station-scan-line { animation: none; top: 50%; }
+}
