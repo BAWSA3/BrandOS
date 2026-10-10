@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useReducedMotion } from 'motion/react';
 import { curtains, pixels } from 'motion-plus/curtains';
-import StationStage from '@/components/studio/StationStage';
+import StationStage, { type StationReaction } from '@/components/studio/StationStage';
 import HoverLetters from '@/components/title/HoverLetters';
 import { getArchetypeInfo } from '@/lib/archetype-descriptions';
 import { STUDIO_STEPS, type StageNumber } from '@/lib/studio-stages';
@@ -156,6 +156,12 @@ export default function TitleScreen({
     { label: 'Settings', hint: 'Sound, day/night, account', run: () => setSettingsOpen(true) },
   ];
 
+  // The station reacts to whichever item is selected: Continue powers it on,
+  // Rescan sweeps a scan line, My station eases toward the base, Settings shows
+  // the blueprint.
+  const REACTIONS: StationReaction[] = ['power', 'scan', 'focus', 'blueprint'];
+  const reaction: StationReaction = settingsOpen ? 'blueprint' : (REACTIONS[index] ?? null);
+
   const choose = (i: number) => {
     play('select');
     // Let the confirm sound land before navigating.
@@ -231,7 +237,7 @@ export default function TitleScreen({
               maskImage: 'radial-gradient(ellipse 72% 70% at 50% 52%, #000 62%, transparent 100%)',
             }}
           >
-            <StationStage archetype={archetype} stage={stage} mode={mode} />
+            <StationStage archetype={archetype} stage={stage} mode={mode} reaction={reaction} />
           </div>
         </div>
 
