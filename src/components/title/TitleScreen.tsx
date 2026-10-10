@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useReducedMotion } from 'motion/react';
+import { curtains, pixels } from 'motion-plus/curtains';
 import StationStage from '@/components/studio/StationStage';
 import HoverLetters from '@/components/title/HoverLetters';
 import { getArchetypeInfo } from '@/lib/archetype-descriptions';
@@ -121,8 +123,29 @@ export default function TitleScreen({
   const mode: Mode = dayNight === 'auto' ? clockMode : dayNight;
   const s = SKIN[mode];
 
+  const reduce = useReducedMotion();
+  const [entering, setEntering] = useState(false);
+  // Continue: a Klein-blue pixel wipe covers the station, the dashboard loads
+  // underneath, then the pixels clear to reveal it (like entering a level).
+  const enterDashboard = () => {
+    if (reduce) return router.push(continueHref);
+    if (entering) return;
+    setEntering(true);
+    void curtains(
+      () => {
+        router.push(continueHref);
+        // hold the cover while the dashboard renders underneath
+        return new Promise<void>((resolve) => window.setTimeout(resolve, 650));
+      },
+      {
+        effect: pixels({ size: 48, direction: 120, noise: 0.45 }),
+        transition: [{ duration: 0.55 }, { duration: 0.65 }],
+      }
+    );
+  };
+
   const items = [
-    { label: 'Continue', hint: 'Enter your dashboard', run: () => router.push(continueHref) },
+    { label: 'Continue', hint: 'Enter your dashboard', run: () => enterDashboard() },
     { label: 'Rescan', hint: 'Run a fresh scan', run: () => router.push(rescanHref) },
     {
       label: 'My station',
