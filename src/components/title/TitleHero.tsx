@@ -148,14 +148,14 @@ export default function TitleHero({
                 const row = Math.floor(i / SCAN_COLS);
                 const col = i % SCAN_COLS;
                 // bottom rows first, with a little per-cell jitter so the edge dithers
-                const jitter = ((col * 37 + row * 11) % 7) * 0.02;
+                const jitter = ((col * 37 + row * 11) % 7) * 0.012;
                 return (
                   <span
                     key={i}
                     className="hero-scan-pixel block"
                     style={{
                       background: BLUE,
-                      animationDelay: `${(SCAN_ROWS - 1 - row) * 0.05 + jitter}s`,
+                      animationDelay: `${(SCAN_ROWS - 1 - row) * 0.06 + jitter}s`,
                     }}
                   />
                 );
