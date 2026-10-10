@@ -1,7 +1,7 @@
 'use client';
 
-// Text whose letters hop up one after another (a stepped, 8-bit wave with a
-// Klein-blue flash) each time `play` changes. Used by the title-screen menu
+// Text whose letters brighten softly from left to right each time `play`
+// changes (kept quiet on purpose). Used by the title-screen menu
 // and handle. Screen readers get the plain text.
 
 export default function HoverLetters({
@@ -21,7 +21,7 @@ export default function HoverLetters({
           key={`${play}-${i}`}
           aria-hidden
           className={play > 0 ? 'hover-letter' : undefined}
-          style={{ display: 'inline-block', animationDelay: `${i * 32}ms`, whiteSpace: 'pre' }}
+          style={{ display: 'inline-block', animationDelay: `${i * 16}ms`, whiteSpace: 'pre' }}
         >
           {ch}
         </span>
