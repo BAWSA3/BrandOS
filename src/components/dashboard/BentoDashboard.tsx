@@ -23,6 +23,8 @@ import {
   type PhaseScore,
   type WeekDay,
 } from '@/components/dashboard/StatTiles';
+import XPBar from '@/components/dashboard/XPBar';
+import type { XPGain } from '@/lib/xp';
 import { STUDIO_STEPS, type StageNumber } from '@/lib/studio-stages';
 
 // The dashboard (docs/specs/TITLE-SCREEN-AND-DASHBOARD.md): dark bento grid,
@@ -265,6 +267,7 @@ export default function BentoDashboard({
   fonts,
   initialTheme = 'light',
   scoreAlert,
+  xp,
 }: {
   data: DashboardData;
   isNew?: boolean;
@@ -272,6 +275,8 @@ export default function BentoDashboard({
   initialTheme?: DashTheme;
   /** The brand score changed since the last visit: show the notification + sound. */
   scoreAlert?: { delta: number; score: number } | null;
+  /** XP total and what was earned since the last visit (the bar fills it in). */
+  xp?: { total: number; gains: XPGain[] } | null;
 }) {
   const [theme, setTheme] = useState<DashTheme>(initialTheme);
   const booted = useBoot();
@@ -394,6 +399,8 @@ export default function BentoDashboard({
               </span>
             </div>
           </header>
+
+          {xp && <XPBar total={xp.total} gains={xp.gains} booted={booted} />}
 
           <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-12">
             {/* Brand Pass (or its locked state for new users) */}
