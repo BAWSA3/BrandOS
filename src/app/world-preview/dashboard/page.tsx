@@ -2,6 +2,7 @@
 
 import { useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
+import { XP_RULES, xpAtLevel, type XPGain } from '@/lib/xp';
 import BentoDashboard, { type DashboardData } from '@/components/dashboard/BentoDashboard';
 
 // Sign-in-free preview of the dashboard with sample data (design review):
@@ -9,6 +10,7 @@ import BentoDashboard, { type DashboardData } from '@/components/dashboard/Bento
 //   /world-preview/dashboard?state=new  brand-new user (onboarding tiles)
 //   &theme=dark                         start in dark mode (light is the default; toggle in the top bar)
 //   &alert=0                            hide the score-changed notification
+//   &xp=levelup                         the XP gained this visit crosses a level (LV 07 -> 08)
 
 const SAMPLE: DashboardData = {
   handle: 'jbawsa',
@@ -90,6 +92,15 @@ const SAMPLE: DashboardData = {
   },
 };
 
+// XP earned since the last visit: daily visit, a 3-day streak, the +4 score, one on-brand post
+const XP_GAINS: XPGain[] = [
+  { label: 'Daily visit', xp: XP_RULES.dailyVisit },
+  { label: '3-day streak', xp: 3 * XP_RULES.streakDay },
+  { label: 'Score +4', xp: 4 * XP_RULES.scorePoint },
+  { label: 'On-brand post', xp: XP_RULES.onBrandPost },
+];
+const XP_EARNED = XP_GAINS.reduce((s, g) => s + g.xp, 0); // 275
+
 function Preview() {
   const q = useSearchParams();
   const isNew = q.get('state') === 'new';
@@ -102,6 +113,15 @@ function Preview() {
       isNew={isNew}
       initialTheme={q.get('theme') === 'dark' ? 'dark' : 'light'}
       // the score-changed notification (?alert=0 hides it)
+      // LV 07, 1,240 / 1,750 XP after this visit (or crossing into LV 08 with &xp=levelup)
+      xp={
+        isNew
+          ? { total: XP_RULES.dailyVisit, gains: [{ label: 'Daily visit', xp: XP_RULES.dailyVisit }] }
+          : {
+              total: xpAtLevel(7) + (q.get('xp') === 'levelup' ? 1600 + XP_EARNED : 1240),
+              gains: XP_GAINS,
+            }
+      }
       scoreAlert={
         !isNew && q.get('alert') !== '0'
           ? { delta: SAMPLE.scoreDelta?.value ?? 0, score: SAMPLE.ticker.score }
