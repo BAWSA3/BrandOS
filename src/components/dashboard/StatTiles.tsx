@@ -295,18 +295,37 @@ export function WeekTile({
       </div>
 
       {/* the goal */}
-      <div className="mt-4 flex items-end gap-2">
+      {/* 2 / 3: three equal-height pieces on one centre line, so the rolling
+          digit, the slash and the target sit level */}
+      <div
+        className="week-goal mt-4 flex items-center leading-none"
+        style={{
+          fontFamily: BIG,
+          fontSize: 'clamp(48px, 5vw, 72px)',
+          fontWeight: 500,
+          letterSpacing: '-0.04em',
+          height: '1em',
+        }}
+        aria-label={`${done} of ${target}`}
+      >
+        <span className="flex h-full items-center">
+          <RollNumber value={done} booted={booted} delay={0.3} />
+        </span>
         <span
-          className="leading-[0.85]"
+          aria-hidden
+          className="flex h-full items-center px-[0.1em]"
+          // Inter Tight's slash drops below the baseline; trim it to the digits' height
           style={{
-            fontFamily: BIG,
-            fontSize: 'clamp(48px, 5vw, 72px)',
-            fontWeight: 500,
-            letterSpacing: '-0.04em',
+            color: MUTED,
+            fontWeight: 400,
+            fontSize: '0.84em',
+            transform: 'translateY(-0.06em)',
           }}
         >
-          <RollNumber value={done} booted={booted} delay={0.3} />
-          <span style={{ color: MUTED }}> / {target}</span>
+          /
+        </span>
+        <span className="flex h-full items-center" style={{ color: MUTED }}>
+          {target}
         </span>
       </div>
       <div className="mt-2" style={{ color: MUTED }}>
