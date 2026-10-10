@@ -4,7 +4,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useReducedMotion } from 'motion/react';
 import { curtains, pixels } from 'motion-plus/curtains';
-import StationStage, { type StationReaction } from '@/components/studio/StationStage';
+import TitleHero, { type HeroView } from '@/components/title/TitleHero';
+import type { BrandPassData } from '@/components/dashboard/BrandPass';
 import HoverLetters from '@/components/title/HoverLetters';
 import { getArchetypeInfo } from '@/lib/archetype-descriptions';
 import { STUDIO_STEPS, type StageNumber } from '@/lib/studio-stages';
@@ -47,6 +48,10 @@ export interface TitleScreenProps {
   continueHref: string;
   rescanHref: string;
   stationHref: string;
+  /** Shown on the Continue hero (callout on the monitor). */
+  score?: number | null;
+  /** Shown on the My station hero. */
+  pass?: BrandPassData | null;
 }
 
 /** Tiny synthesized UI sounds (no audio files). Created lazily on first interaction. */
@@ -93,6 +98,8 @@ export default function TitleScreen({
   continueHref,
   rescanHref,
   stationHref,
+  score,
+  pass,
 }: TitleScreenProps) {
   const router = useRouter();
   const info = getArchetypeInfo(archetype);
@@ -156,11 +163,9 @@ export default function TitleScreen({
     { label: 'Settings', hint: 'Sound, day/night, account', run: () => setSettingsOpen(true) },
   ];
 
-  // The station reacts to whichever item is selected: Continue powers it on,
-  // Rescan sweeps a scan line, My station eases toward the base, Settings shows
-  // the blueprint.
-  const REACTIONS: StationReaction[] = ['power', 'scan', 'focus', 'blueprint'];
-  const reaction: StationReaction = settingsOpen ? 'blueprint' : (REACTIONS[index] ?? null);
+  // The hero visual swaps with the selected item (see TitleHero).
+  const VIEWS: HeroView[] = ['continue', 'rescan', 'station', 'settings'];
+  const view: HeroView = settingsOpen ? 'settings' : (VIEWS[index] ?? 'continue');
 
   const choose = (i: number) => {
     play('select');
@@ -228,17 +233,14 @@ export default function TitleScreen({
       <div className="relative z-20 mx-auto grid min-h-screen max-w-[1400px] grid-cols-1 items-center gap-6 px-6 py-8 md:grid-cols-[minmax(0,420px)_1fr] md:px-12">
         {/* Station (first on phones) */}
         <div className="order-first flex justify-center md:order-last">
-          <div
-            className="title-station w-full max-w-[min(300px,38vh)] md:max-w-[min(560px,62vh)]"
-            style={{
-              // feather the art's own background into the screen
-              WebkitMaskImage:
-                'radial-gradient(ellipse 72% 70% at 50% 52%, #000 62%, transparent 100%)',
-              maskImage: 'radial-gradient(ellipse 72% 70% at 50% 52%, #000 62%, transparent 100%)',
-            }}
-          >
-            <StationStage archetype={archetype} stage={stage} mode={mode} reaction={reaction} />
-          </div>
+          <TitleHero
+            view={view}
+            archetype={archetype}
+            stage={stage}
+            mode={mode}
+            score={score}
+            pass={pass}
+          />
         </div>
 
         {/* Logo, save file, menu */}
