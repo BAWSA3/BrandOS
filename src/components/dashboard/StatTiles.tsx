@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { motion } from 'motion/react';
+import { AnimateNumber } from 'motion-plus/react';
 import { RollNumber } from '@/components/dashboard/dashMotion';
 
 // The dashboard's two stat panels (dataviz: stat tile + meter forms).
@@ -72,7 +73,7 @@ export function BrandScoreTile({
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex items-baseline justify-between gap-3">
         {label}
         {delta && (
           <span
@@ -287,7 +288,7 @@ export function WeekTile({
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex items-baseline justify-between gap-3">
         {label}
         <span style={{ color: MUTED }}>
           <Micro>{range}</Micro>
@@ -324,8 +325,10 @@ export function WeekTile({
         >
           /
         </span>
+        {/* the target uses the same number component as the rolling digit, so
+            both sit identically in every browser (plain text didn't in Safari) */}
         <span className="flex h-full items-center" style={{ color: MUTED }}>
-          {target}
+          <AnimateNumber>{target}</AnimateNumber>
         </span>
       </div>
       <div className="mt-2" style={{ color: MUTED }}>
