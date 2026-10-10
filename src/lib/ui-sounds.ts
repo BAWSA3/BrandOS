@@ -12,7 +12,7 @@
 export type UISound = 'hover' | 'alert' | 'levelUp' | 'transition';
 
 const SOURCES: Record<UISound, { src: string; volume: number }> = {
-  hover: { src: '/sounds/ui-hover.mp3', volume: 0.32 },
+  hover: { src: '/sounds/ui-hover.mp3', volume: 0.14 },
   alert: { src: '/sounds/score-alert.mp3', volume: 0.6 },
   levelUp: { src: '/sounds/level-up.mp3', volume: 0.7 },
   transition: { src: '/sounds/transition.mp3', volume: 0.55 },
