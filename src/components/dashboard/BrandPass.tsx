@@ -2,7 +2,8 @@
 
 import { stationSlug } from '@/components/StationCard';
 import { getArchetypeInfo } from '@/lib/archetype-descriptions';
-import { useReducedMotion } from 'motion/react';
+import { motion, useMotionValue, useReducedMotion, useSpring } from 'motion/react';
+import { useFinePointer } from '@/components/dashboard/dashMotion';
 import { Typewriter } from 'motion-plus/react';
 
 // Brand Pass: the user's brand identity card (ref: Heron Preston pass card),
@@ -97,9 +98,31 @@ export default function BrandPass({
   const info = getArchetypeInfo(data.archetype);
   const slug = stationSlug(data.archetype);
   const no = String(data.stationNumber).padStart(4, '0');
+  // The card tilts a few degrees toward the cursor, like holding a real pass.
+  const fine = useFinePointer();
+  const tiltOn = fine && !reduce;
+  const rx = useMotionValue(0);
+  const ry = useMotionValue(0);
+  const rotateX = useSpring(rx, { stiffness: 220, damping: 20 });
+  const rotateY = useSpring(ry, { stiffness: 220, damping: 20 });
+  const onMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!tiltOn) return;
+    const r = e.currentTarget.getBoundingClientRect();
+    ry.set(((e.clientX - r.left) / r.width - 0.5) * 9);
+    rx.set(-((e.clientY - r.top) / r.height - 0.5) * 7);
+  };
+  const onLeave = () => {
+    rx.set(0);
+    ry.set(0);
+  };
 
   return (
-    <div className="relative px-0 py-2 md:px-[92px] md:py-6">
+    <div
+      className="relative px-0 py-2 md:px-[92px] md:py-6"
+      style={{ perspective: 900 }}
+      onMouseMove={onMove}
+      onMouseLeave={onLeave}
+    >
       <Callout id="a" label="Portrait" className="left-0 top-[26%]" line="16px" />
       <Callout
         id="b"
@@ -110,9 +133,9 @@ export default function BrandPass({
       <Callout id="c" label="Taste" className="right-0 top-[46%] flex-row-reverse" line="16px" />
       <Callout id="d" label="Station" className="left-0 bottom-[16%]" line="16px" />
 
-      <div
+      <motion.div
         className="relative overflow-hidden rounded-[10px] p-4 shadow-[0_18px_40px_rgba(0,0,0,0.45)]"
-        style={{ background: BONE, color: INK, containerType: 'inline-size' }}
+        style={{ background: BONE, color: INK, containerType: 'inline-size', rotateX, rotateY }}
       >
         {/* header */}
         <div className="flex items-start justify-between">
@@ -248,7 +271,7 @@ export default function BrandPass({
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }

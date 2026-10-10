@@ -2,9 +2,18 @@
 
 import Link from 'next/link';
 import { createContext, useContext, useState } from 'react';
-import { useReducedMotion } from 'motion/react';
+import { motion, useReducedMotion } from 'motion/react';
 import { Ticker } from 'motion-plus/react';
-import { DashCursor, RollNumber, ScrambleLabel, useBoot } from '@/components/dashboard/dashMotion';
+import {
+  CornerBrackets,
+  DashCursor,
+  RollNumber,
+  ScrambleLabel,
+  TileHoverCtx,
+  useBoot,
+  useFinePointer,
+  useTileHover,
+} from '@/components/dashboard/dashMotion';
 import BrandPass, { type BrandPassData } from '@/components/dashboard/BrandPass';
 import { DASH_FONTS } from '@/components/dashboard/dashFonts';
 import {
@@ -144,9 +153,21 @@ function Tile({
         '--d-bar': 'rgba(255,255,255,0.38)',
       }
     : {};
+  // Each cursor entry bumps the counter: children replay a small one-shot animation.
+  const reduce = useReducedMotion();
+  const fine = useFinePointer();
+  const [hv, setHv] = useState(0);
+  const [inside, setInside] = useState(false);
+  const live = fine && !reduce;
   return (
     <section
       data-cursor-zone={open ? 'open' : undefined}
+      onMouseEnter={() => {
+        if (!live) return;
+        setInside(true);
+        setHv((n) => n + 1);
+      }}
+      onMouseLeave={() => setInside(false)}
       className={`relative flex flex-col p-5 ${className}`}
       style={
         {
@@ -157,8 +178,24 @@ function Tile({
         } as React.CSSProperties
       }
     >
-      {children}
+      <TileHoverCtx.Provider value={hv}>{children}</TileHoverCtx.Provider>
+      <CornerBrackets active={inside} color={accent ? '#FFFFFF' : C.blue} />
     </section>
+  );
+}
+
+/** A post's fit bar; refills left to right each time its panel is entered. */
+function FitBar({ fit, top, i }: { fit: number; top: boolean; i: number }) {
+  const hv = useTileHover();
+  return (
+    <motion.div
+      key={hv}
+      className="h-full"
+      style={{ background: top ? C.blue : C.bar }}
+      initial={{ width: hv > 0 ? 0 : `${fit}%` }}
+      animate={{ width: `${fit}%` }}
+      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: hv > 0 ? i * 0.06 : 0 }}
+    />
   );
 }
 
@@ -431,10 +468,7 @@ export default function BentoDashboard({
                             {p.when} · {p.likes} likes · {p.multiple} usual
                           </div>
                           <div className="mt-2 h-[3px] w-full" style={{ background: C.track }}>
-                            <div
-                              className="h-full"
-                              style={{ width: `${p.fit}%`, background: top ? C.blue : C.bar }}
-                            />
+                            <FitBar fit={p.fit} top={top} i={i} />
                           </div>
                         </div>
                         <span

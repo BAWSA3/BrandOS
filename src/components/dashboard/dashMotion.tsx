@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import { useReducedMotion } from 'motion/react';
 import { AnimateNumber, Cursor, ScrambleText, useCursorState } from 'motion-plus/react';
 
@@ -101,14 +101,7 @@ function CursorLabel() {
  */
 export function DashCursor() {
   const reduce = useReducedMotion();
-  const [fine, setFine] = useState(false);
-  useEffect(() => {
-    const mq = window.matchMedia('(pointer: fine)');
-    const update = () => setFine(mq.matches);
-    update();
-    mq.addEventListener('change', update);
-    return () => mq.removeEventListener('change', update);
-  }, []);
+  const fine = useFinePointer();
   if (!fine || reduce) return null;
   return (
     <Cursor
@@ -121,5 +114,57 @@ export function DashCursor() {
     >
       <CursorLabel />
     </Cursor>
+  );
+}
+
+/**
+ * Panel hover: a counter that bumps each time the cursor enters a panel
+ * (desktop, motion allowed). Panels key small one-shot animations on it, so
+ * each entry replays them once; 0 means "never hovered".
+ */
+export const TileHoverCtx = createContext(0);
+export const useTileHover = () => useContext(TileHoverCtx);
+
+/** True on devices with a precise pointer (mouse/trackpad), false on touch. */
+export function useFinePointer(): boolean {
+  const [fine, setFine] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia('(pointer: fine)');
+    const update = () => setFine(mq.matches);
+    update();
+    mq.addEventListener('change', update);
+    return () => mq.removeEventListener('change', update);
+  }, []);
+  return fine;
+}
+
+/** Four thin corner brackets that ease in on hover: a quiet "lock-on". */
+export function CornerBrackets({ active, color }: { active: boolean; color: string }) {
+  const arm = 10;
+  const corners: React.CSSProperties[] = [
+    { top: 6, left: 6, borderTop: '1.5px solid', borderLeft: '1.5px solid' },
+    { top: 6, right: 6, borderTop: '1.5px solid', borderRight: '1.5px solid' },
+    { bottom: 6, left: 6, borderBottom: '1.5px solid', borderLeft: '1.5px solid' },
+    { bottom: 6, right: 6, borderBottom: '1.5px solid', borderRight: '1.5px solid' },
+  ];
+  return (
+    <>
+      {corners.map((c, i) => (
+        <span
+          key={i}
+          aria-hidden
+          className="pointer-events-none absolute"
+          style={{
+            ...c,
+            width: arm,
+            height: arm,
+            borderColor: color,
+            opacity: active ? 1 : 0,
+            transform: active ? 'scale(1)' : 'scale(1.6)',
+            transition: 'opacity 0.22s ease-out, transform 0.28s cubic-bezier(0.16,1,0.3,1)',
+          }}
+        />
+      ))}
+    </>
   );
 }

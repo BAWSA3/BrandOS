@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { motion } from 'motion/react';
 import { AnimateNumber } from 'motion-plus/react';
-import { RollNumber } from '@/components/dashboard/dashMotion';
+import { RollNumber, useTileHover } from '@/components/dashboard/dashMotion';
 
 // The dashboard's two stat panels (dataviz: stat tile + meter forms).
 //   BrandScoreTile: the one hero number, a delta vs a named period, a trend line
@@ -61,6 +61,7 @@ export function BrandScoreTile({
   label: React.ReactNode;
 }) {
   const [hover, setHover] = useState<number | null>(null);
+  const hv = useTileHover(); // bumps on each cursor entry: replay one-shot animations
   const values = history.map((p) => p.value);
   const lo = Math.min(...values) - 6;
   const hi = Math.max(...values) + 4;
@@ -110,10 +111,11 @@ export function BrandScoreTile({
         onMouseLeave={() => setHover(null)}
       >
         <motion.div
+          key={hv}
           className="absolute inset-0"
           initial={{ clipPath: 'inset(-10% 100% -10% 0)' }}
           animate={{ clipPath: booted ? 'inset(-10% 0% -10% 0)' : 'inset(-10% 100% -10% 0)' }}
-          transition={{ duration: 1.1, ease: EASE, delay: 0.2 }}
+          transition={{ duration: hv > 0 ? 0.7 : 1.1, ease: EASE, delay: hv > 0 ? 0 : 0.2 }}
         >
           <svg
             viewBox="0 0 100 100"
@@ -177,6 +179,20 @@ export function BrandScoreTile({
             }}
           />
         ))}
+        {/* one soft pulse from the latest point on each entry */}
+        {hv > 0 && (
+          <span
+            key={`pulse-${hv}`}
+            aria-hidden
+            className="tile-pulse pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 border border-white"
+            style={{
+              left: `${x(last)}%`,
+              top: `${y(history[last].value)}%`,
+              width: 10,
+              height: 10,
+            }}
+          />
+        )}
         {/* hover columns + tooltip */}
         <div className="absolute inset-0 flex">
           {history.map((p, i) => (
@@ -273,6 +289,7 @@ export function WeekTile({
   label: React.ReactNode;
 }) {
   const [hover, setHover] = useState<number | null>(null);
+  const hv = useTileHover(); // bumps on each cursor entry: replay one-shot animations
   const left = Math.max(0, target - done);
   const cell = (s: DayState, today?: boolean): React.CSSProperties => {
     const base: React.CSSProperties = {
@@ -370,11 +387,16 @@ export function WeekTile({
               aria-label={`${day.name}: ${day.note ?? day.state}`}
             >
               <motion.span
+                key={hv}
                 className="block aspect-square w-full"
                 style={cell(day.state, day.today)}
-                initial={{ opacity: 0, scale: 0.6 }}
+                initial={hv > 0 ? { opacity: 1, scale: 0.8 } : { opacity: 0, scale: 0.6 }}
                 animate={{ opacity: booted ? 1 : 0, scale: booted ? 1 : 0.6 }}
-                transition={{ duration: 0.25, delay: 0.2 + i * 0.05 }}
+                transition={
+                  hv > 0
+                    ? { type: 'spring', stiffness: 520, damping: 22, delay: i * 0.04 }
+                    : { duration: 0.25, delay: 0.2 + i * 0.05 }
+                }
               />
               <span style={{ color: day.today ? INK : MUTED }}>
                 <Micro>{day.d}</Micro>
