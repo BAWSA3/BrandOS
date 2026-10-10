@@ -1933,14 +1933,15 @@ code {
 
 /* Title screen Rescan hero: Klein-blue pixels sweep up the station in waves. */
 @keyframes hero-scan-pixel {
-  0% { opacity: 0; }
-  8% { opacity: 0.85; }
-  22% { opacity: 0; }
-  100% { opacity: 0; }
+  0% { opacity: 0; transform: scale(0.55); }
+  14% { opacity: 0.72; transform: scale(1); }
+  38% { opacity: 0; transform: scale(0.9); }
+  100% { opacity: 0; transform: scale(0.9); }
 }
 .hero-scan-pixel {
   opacity: 0;
-  animation: hero-scan-pixel 2.6s steps(3, end) infinite;
+  will-change: opacity, transform;
+  animation: hero-scan-pixel 2.6s cubic-bezier(0.45, 0, 0.55, 1) infinite;
 }
 @media (prefers-reduced-motion: reduce) {
   .hero-scan-pixel { animation: none; }
