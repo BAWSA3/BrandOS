@@ -2,6 +2,8 @@
 
 import { stationSlug } from '@/components/StationCard';
 import { getArchetypeInfo } from '@/lib/archetype-descriptions';
+import { useReducedMotion } from 'motion/react';
+import { Typewriter } from 'motion-plus/react';
 
 // Brand Pass: the user's brand identity card (ref: Heron Preston pass card),
 // recoloured to BrandOS (bone card, ink type, Klein blue stamps) with
@@ -84,7 +86,14 @@ function Callout({
   );
 }
 
-export default function BrandPass({ data }: { data: BrandPassData }) {
+export default function BrandPass({
+  data,
+  typeTaste,
+}: {
+  data: BrandPassData;
+  typeTaste?: boolean;
+}) {
+  const reduce = useReducedMotion();
   const info = getArchetypeInfo(data.archetype);
   const slug = stationSlug(data.archetype);
   const no = String(data.stationNumber).padStart(4, '0');
@@ -189,11 +198,28 @@ export default function BrandPass({ data }: { data: BrandPassData }) {
             {[
               ['Brand', `@${data.handle}`],
               ['Archetype', info?.name ?? data.archetype],
-              ['Taste', data.taste],
+              [
+                'Taste',
+                typeTaste !== undefined && !reduce ? (
+                  <Typewriter
+                    key="taste"
+                    play={typeTaste}
+                    speed="fast"
+                    cursorStyle={{ background: '#0047FF', width: 2 }}
+                  >
+                    {data.taste}
+                  </Typewriter>
+                ) : (
+                  data.taste
+                ),
+              ],
               ['Pillars', data.pillars.join(' / ')],
               ['Score', `${data.score} / 100`],
             ].map(([k, v]) => (
-              <div key={k} className="mb-[6px] grid grid-cols-[72px_1fr] items-baseline gap-2">
+              <div
+                key={String(k)}
+                className="mb-[6px] grid grid-cols-[72px_1fr] items-baseline gap-2"
+              >
                 <span className="text-[11px] font-bold">{k}:</span>
                 <span className="text-[11px] leading-[1.3]">{v}</span>
               </div>

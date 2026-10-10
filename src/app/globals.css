@@ -1884,3 +1884,8 @@ code {
     animation: none;
   }
 }
+
+/* Motion+ curtains (pixel wipes) fill in Klein blue everywhere. */
+.motion-curtain {
+  background: #0047ff;
+}
