@@ -1887,3 +1887,15 @@ code {
 .motion-curtain {
   background: #0047ff;
 }
+
+/* Dashboard: one soft pulse ring from the latest score point on panel hover. */
+@keyframes tile-pulse {
+  from { opacity: 0.9; transform: translate(-50%, -50%) scale(1); }
+  to { opacity: 0; transform: translate(-50%, -50%) scale(3.2); }
+}
+.tile-pulse {
+  animation: tile-pulse 750ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tile-pulse { animation: none; opacity: 0; }
+}
