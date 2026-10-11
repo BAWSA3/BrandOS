@@ -1,0 +1,71 @@
+'use client';
+
+import { Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { Canvas } from '@react-three/fiber';
+import { Bounds, Center, OrbitControls, useGLTF } from '@react-three/drei';
+
+// 3D test of the studio room (image -> 3D via Higgsfield/Meshy), to judge
+// whether a rotatable room is worth building. Drag to rotate (limited to the
+// open sides of the cutaway), scroll/pinch to zoom.
+//   /world-preview/studio-3d            ?az=<deg> starting angle (default -45: the original render's view)
+
+const MODEL = '/worlds/studio/3d/base-3.gltf'; // geometry .bin + texture .jpg (no blob: URLs, CSP-safe)
+const BONE = '#F2EFE8';
+
+function Room() {
+  const { scene } = useGLTF(MODEL);
+  return (
+    <Center>
+      <primitive object={scene} />
+    </Center>
+  );
+}
+
+function Viewer() {
+  const q = useSearchParams();
+  const az = ((Number(q.get('az') ?? -45) || 0) * Math.PI) / 180;
+  const r = 6;
+  return (
+    <main className="relative h-screen w-full" style={{ background: BONE }}>
+      <Canvas
+        orthographic
+        camera={{ position: [r * Math.sin(az), r * 0.82, r * Math.cos(az)], zoom: 110 }}
+        dpr={[1, 2]}
+      >
+        <color attach="background" args={[BONE]} />
+        <hemisphereLight args={['#ffffff', '#d9d2c4', 1.6]} />
+        <directionalLight position={[4, 8, 5]} intensity={1.4} />
+        <Suspense fallback={null}>
+          <Bounds fit clip observe margin={1.15}>
+            <Room />
+          </Bounds>
+        </Suspense>
+        <OrbitControls
+          makeDefault
+          enablePan={false}
+          minAzimuthAngle={az - Math.PI / 4}
+          maxAzimuthAngle={az + Math.PI / 4}
+          minPolarAngle={Math.PI / 5}
+          maxPolarAngle={Math.PI / 2.4}
+          minZoom={70}
+          maxZoom={260}
+        />
+      </Canvas>
+      <div
+        className="pointer-events-none absolute bottom-6 left-1/2 -translate-x-1/2 text-[11px] uppercase tracking-[0.16em]"
+        style={{ fontFamily: "'VCR OSD Mono', monospace", color: '#6B6B70' }}
+      >
+        Drag to rotate · scroll to zoom
+      </div>
+    </main>
+  );
+}
+
+export default function Studio3DPage() {
+  return (
+    <Suspense>
+      <Viewer />
+    </Suspense>
+  );
+}
