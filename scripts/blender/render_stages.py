@@ -18,6 +18,10 @@ sc = bpy.context.scene
 if samples:
     sc.cycles.samples = samples
 stages = sorted([c for c in bpy.data.collections if c.name[:1].isdigit() and "_" in c.name], key=lambda c: c.name)
+if not stages:  # single-model scenes (stations): one render
+    sc.render.filepath = os.path.join(out, "render.png")
+    bpy.ops.render.render(write_still=True)
+    print("rendered", sc.render.filepath)
 for s in ([only] if only is not None else range(len(stages))):
     for i, c in enumerate(stages):
         c.hide_render = i > s
