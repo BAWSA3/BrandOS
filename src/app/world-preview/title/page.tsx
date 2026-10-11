@@ -9,6 +9,7 @@ import { clampStage } from '@/lib/studio-stages';
 //   /world-preview/title?stage=0..3&archetype=BUILD.EXE&handle=jbawsa
 // Day by default; Settings switches night/auto. ?levelup=1 plays the level-up moment.
 // ?level=N sets the XP level (default 7), which unlocks studio themes in Settings.
+// ?hero=station shows the photoreal station loop instead of the studio room (BUILD.EXE).
 
 function Preview() {
   const q = useSearchParams();
@@ -25,6 +26,7 @@ function Preview() {
       stationHref="/station/jbawsa"
       score={72}
       level={Math.max(1, Number(q.get('level') ?? 7) || 1)}
+      hero={q.get('hero') === 'station' ? 'station' : 'studio'}
       // ?levelup=1 previews the level-up moment (the newest floor builds in)
       levelUp={
         q.get('levelup') === '1'

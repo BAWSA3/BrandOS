@@ -2,6 +2,8 @@
 
 import { useReducedMotion } from 'motion/react';
 import StudioRoom from '@/components/studio/StudioRoom';
+import TitleStationLoop, { TITLE_LOOPS } from '@/components/title/TitleStationLoop';
+import { stationSlug } from '@/components/StationCard';
 import type { StudioThemeId } from '@/lib/studio-themes';
 import BrandPass, { type BrandPassData } from '@/components/dashboard/BrandPass';
 import { getArchetypeInfo } from '@/lib/archetype-descriptions';
@@ -104,6 +106,7 @@ export default function TitleHero({
   score,
   pass,
   theme = 'base',
+  hero = 'studio',
 }: {
   view: HeroView;
   archetype: string;
@@ -113,11 +116,19 @@ export default function TitleHero({
   pass?: BrandPassData | null;
   /** Studio theme (applies once the studio is complete). */
   theme?: StudioThemeId;
+  /** 'station': the photoreal station loop instead of the studio room (where rendered). */
+  hero?: 'studio' | 'station';
 }) {
   const reduce = useReducedMotion();
   const info = getArchetypeInfo(archetype);
   const showPass = view === 'station' && !!pass;
   const stationOpacity = showPass ? 0.12 : view === 'rescan' ? 0.55 : 1;
+  const slug = stationSlug(archetype);
+  const useStation = hero === 'station' && !!slug && TITLE_LOOPS.has(slug);
+  // callouts: monitors / chair / floor in the studio; CRT / window / plinth on the station
+  const spots = useStation
+    ? { a: [60, 12] as const, b: [40, 33] as const, c: [56, 87] as const }
+    : { a: [30, 34] as const, b: [43, 47] as const, c: [62, 84] as const };
 
   return (
     <div className="title-hero relative w-full max-w-[min(300px,38vh)] md:max-w-[min(560px,62vh)]">
@@ -130,12 +141,20 @@ export default function TitleHero({
         }}
       >
         <div className="relative">
-          <StudioRoom
-            stage={stage}
-            theme={theme}
-            mode={mode}
-            reaction={view === 'settings' ? 'blueprint' : view === 'continue' ? 'power' : null}
-          />
+          {useStation ? (
+            <TitleStationLoop
+              slug={slug!}
+              mode={mode}
+              reaction={view === 'settings' ? 'blueprint' : null}
+            />
+          ) : (
+            <StudioRoom
+              stage={stage}
+              theme={theme}
+              mode={mode}
+              reaction={view === 'settings' ? 'blueprint' : view === 'continue' ? 'power' : null}
+            />
+          )}
           {/* Rescan: Klein-blue pixels sweep up the station in waves */}
           {view === 'rescan' && !reduce && (
             <div
@@ -169,8 +188,8 @@ export default function TitleHero({
 
       {/* Continue: the station, annotated */}
       <Callout
-        x={30}
-        y={34}
+        x={spots.a[0]}
+        y={spots.a[1]}
         side="left"
         id="a"
         label="Score"
@@ -180,8 +199,8 @@ export default function TitleHero({
         mode={mode}
       />
       <Callout
-        x={43}
-        y={47}
+        x={spots.b[0]}
+        y={spots.b[1]}
         side="left"
         id="b"
         label=""
@@ -191,8 +210,8 @@ export default function TitleHero({
         mode={mode}
       />
       <Callout
-        x={62}
-        y={84}
+        x={spots.c[0]}
+        y={spots.c[1]}
         side="right"
         id="c"
         label="Stage"
