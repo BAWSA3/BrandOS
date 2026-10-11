@@ -1894,6 +1894,13 @@ code {
 
 /* Dashboard: one soft pulse ring from the latest score point on panel hover. */
 /* dashboard XP bar: the next block blinks while XP fills; blocks flash on level up */
+/* title screen: PRESS START blinks like an arcade attract screen */
+@keyframes press-start-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
 @keyframes xp-blink {
   50% {
     opacity: 0.15;
