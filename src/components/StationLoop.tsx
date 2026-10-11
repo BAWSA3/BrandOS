@@ -10,6 +10,8 @@ import { stationSlug } from '@/components/StationCard';
 // render lands in public/worlds/stations/loops/.
 
 const LOOPS = new Set(['build-exe']);
+const FEATHER =
+  'linear-gradient(to right, transparent, #000 4%, #000 96%, transparent), linear-gradient(to bottom, transparent, #000 4%, #000 96%, transparent)';
 
 export function hasStationLoop(archetype: string | null | undefined) {
   const slug = archetype ? stationSlug(archetype) : null;
@@ -42,6 +44,13 @@ export default function StationLoop({ archetype }: { archetype: string | null | 
       <video
         ref={ref}
         className="block h-auto w-full"
+        // feather the edges into the page: video encoding shifts the background by a level or two
+        style={{
+          WebkitMaskImage: FEATHER,
+          maskImage: FEATHER,
+          WebkitMaskComposite: 'source-in',
+          maskComposite: 'intersect',
+        }}
         width={1000}
         height={1250}
         poster={`${base}.jpg`}
