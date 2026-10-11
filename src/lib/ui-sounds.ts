@@ -6,8 +6,8 @@
 //   levelUp     the station evolved (a floor was built) / the brand grew
 //   transition  the main menu -> dashboard transition
 // Web Audio for low latency and overlapping plays. Browsers block audio until
-// the first click/tap/keypress, so the context unlocks on that gesture; sounds
-// requested before it are skipped. One shared on/off setting (localStorage).
+// a click/tap/keypress, so the context (re)unlocks on gestures; sounds requested
+// while it can't run are skipped. One shared on/off setting (localStorage).
 
 export type UISound = 'hover' | 'alert' | 'levelUp' | 'transition';
 
@@ -54,18 +54,23 @@ function load(): Promise<void> {
   return loading;
 }
 
-/** Unlock + preload on the first user gesture (call once from a top-level component). */
+let primed = false;
+
+/** Preload, and (re)unlock audio on user gestures (call from top-level components). */
 export function primeSounds() {
   if (typeof window === 'undefined') return;
   void load();
+  if (primed) return;
+  primed = true;
+  // Not once-only: browsers can suspend the context again later (sleep, output
+  // device change, background tab, Safari "interrupted"), and a gesture is the
+  // reliable moment to wake it.
   const unlock = () => {
     const c = getCtx();
-    if (c && c.state === 'suspended') void c.resume();
-    window.removeEventListener('pointerdown', unlock);
-    window.removeEventListener('keydown', unlock);
+    if (c && c.state !== 'running') void c.resume().catch(() => {});
   };
-  window.addEventListener('pointerdown', unlock, { once: true });
-  window.addEventListener('keydown', unlock, { once: true });
+  window.addEventListener('pointerdown', unlock, true);
+  window.addEventListener('keydown', unlock, true);
 }
 
 export function isSoundOn(): boolean {
@@ -102,11 +107,20 @@ export function playSound(name: UISound) {
     void load();
     return;
   }
-  if (c.state === 'suspended') return; // browsers only allow audio after a gesture
-  const src = c.createBufferSource();
-  const gain = c.createGain();
-  gain.gain.value = SOURCES[name].volume;
-  src.buffer = buf;
-  src.connect(gain).connect(c.destination);
-  src.start();
+  const start = () => {
+    const src = c.createBufferSource();
+    const gain = c.createGain();
+    gain.gain.value = SOURCES[name].volume;
+    src.buffer = buf;
+    src.connect(gain).connect(c.destination);
+    src.start();
+  };
+  if (c.state === 'running') return start();
+  // suspended (no gesture yet, or the browser paused audio since): try to wake
+  // it; this succeeds once the page has had a gesture, else stays silent
+  c.resume()
+    .then(() => {
+      if (c.state === 'running') start();
+    })
+    .catch(() => {});
 }
