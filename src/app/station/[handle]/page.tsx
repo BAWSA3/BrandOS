@@ -1,13 +1,11 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Suspense } from 'react';
-import { headers } from 'next/headers';
 import { getReservationByHandle } from '@/lib/reservations';
 import { getStationClaim } from '@/lib/stations';
 import ClaimStation from '@/components/ClaimStation';
 import StationBoard from '@/components/StationBoard';
 import { getArchetypeInfo } from '@/lib/archetype-descriptions';
-import ReservedSignCard from '@/components/ReservedSignCard';
 import StationLoop from '@/components/StationLoop';
 import { formatStationNumber } from '@/lib/station-number';
 
@@ -42,27 +40,34 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function StationPage({ params }: Props) {
   const { handle } = await params;
   const [r, claim] = await Promise.all([getReservationByHandle(handle), getStationClaim(handle)]);
-  const h = await headers();
-  const origin = `${h.get('x-forwarded-proto') ?? 'https'}://${h.get('host') ?? 'mybrandos.app'}`;
 
   return (
     <main className="min-h-screen bg-[#F2F0EF] px-4 py-10 flex flex-col items-center">
       {r ? (
         <>
           <StationLoop archetype={r.archetype} />
-          <div
-            className="mb-4 text-center text-[11px] tracking-[0.15em] text-black/50 uppercase"
+          <section
+            className="w-full max-w-[480px] rounded-[8px] border border-black/10 bg-white/60 px-5 py-4"
             style={{ fontFamily: MONO }}
           >
-            {`// @${r.handle}'s plot is reserved`}
-          </div>
-          <ReservedSignCard
-            handle={r.handle}
-            number={r.number}
-            archetype={r.archetype}
-            shareUrl={`${origin}/station/${r.handle}`}
-            controls="none"
-          />
+            <div className="flex items-center justify-between">
+              <span className="rounded-[3px] bg-[#0A84FF] px-2 py-1 text-[11px] uppercase tracking-[0.14em] text-white">
+                Reserved
+              </span>
+              <span className="text-[18px] text-[#1D1D1F]">#{formatStationNumber(r.number)}</span>
+            </div>
+            <div className="mt-3 text-[11px] uppercase tracking-[0.15em] text-black/50">
+              Future home of @{r.handle}
+            </div>
+            {getArchetypeInfo(r.archetype ?? '')?.name && (
+              <div className="mt-3 text-[20px] text-[#0A84FF]">
+                {getArchetypeInfo(r.archetype ?? '')?.name}
+              </div>
+            )}
+            <div className="mt-1 text-[11px] uppercase tracking-[0.15em] text-black/50">
+              Opening soon · mybrandos.app
+            </div>
+          </section>
           {claim ? (
             <div
               className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-[4px] bg-[#0A84FF] text-white text-[11px] tracking-[0.15em] uppercase"

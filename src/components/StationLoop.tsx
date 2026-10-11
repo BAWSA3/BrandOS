@@ -9,13 +9,15 @@ import { stationSlug } from '@/components/StationCard';
 // still poster for reduced-motion users. Add each archetype to LOOPS as its
 // render lands in public/worlds/stations/loops/.
 
-const LOOPS = new Set(['build-exe']);
+const LOOPS = new Set(['build-exe', 'arc']);
+// 3D stills (frame 1 of the render) for archetypes whose loop is still rendering
+const STILLS = new Set(['entropy', 'foresight', 'freq', 'null', 'relay', 'source']);
 const FEATHER =
   'linear-gradient(to right, transparent, #000 4%, #000 96%, transparent), linear-gradient(to bottom, transparent, #000 4%, #000 96%, transparent)';
 
 export function hasStationLoop(archetype: string | null | undefined) {
   const slug = archetype ? stationSlug(archetype) : null;
-  return !!slug && LOOPS.has(slug);
+  return !!slug && (LOOPS.has(slug) || STILLS.has(slug));
 }
 
 export default function StationLoop({ archetype }: { archetype: string | null | undefined }) {
@@ -37,8 +39,28 @@ export default function StationLoop({ archetype }: { archetype: string | null | 
     return () => mq.removeEventListener('change', sync);
   }, []);
 
-  if (!slug || !LOOPS.has(slug)) return null;
+  if (!slug || !(LOOPS.has(slug) || STILLS.has(slug))) return null;
   const base = `/worlds/stations/loops/${slug}-day`;
+  if (!LOOPS.has(slug)) {
+    return (
+      <div className="mb-2 w-full max-w-[480px]">
+        {/* eslint-disable-next-line @next/next/no-img-element -- pre-sized render */}
+        <img
+          src={`${base}.jpg`}
+          alt="Brand station"
+          width={800}
+          height={1000}
+          className="block h-auto w-full"
+          style={{
+            WebkitMaskImage: FEATHER,
+            maskImage: FEATHER,
+            WebkitMaskComposite: 'source-in',
+            maskComposite: 'intersect',
+          }}
+        />
+      </div>
+    );
+  }
   return (
     <div className="mb-2 w-full max-w-[480px]">
       <video
