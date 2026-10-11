@@ -10,11 +10,17 @@ import { Bounds, Center, OrbitControls, useGLTF } from '@react-three/drei';
 // open sides of the cutaway), scroll/pinch to zoom.
 //   /world-preview/studio-3d            ?az=<deg> starting angle (default -45: the original render's view)
 
-const MODEL = '/worlds/studio/3d/base-3.gltf'; // geometry .bin + texture .jpg (no blob: URLs, CSP-safe)
+// geometry .bin + texture files (no blob: URLs, CSP-safe); ?model= picks a conversion
+const MODELS: Record<string, string> = {
+  meshy: '/worlds/studio/3d/base-3.gltf',
+  hunyuan: '/worlds/studio/3d/hunyuan.gltf',
+};
+// Hunyuan3D v3 (cleaner surfaces, 4K texture) is the pick; ?model=meshy for comparison
+const DEFAULT_MODEL = 'hunyuan';
 const BONE = '#F2EFE8';
 
-function Room() {
-  const { scene } = useGLTF(MODEL);
+function Room({ url }: { url: string }) {
+  const { scene } = useGLTF(url);
   return (
     <Center>
       <primitive object={scene} />
@@ -24,6 +30,7 @@ function Room() {
 
 function Viewer() {
   const q = useSearchParams();
+  const url = MODELS[q.get('model') ?? DEFAULT_MODEL] ?? MODELS[DEFAULT_MODEL];
   const az = ((Number(q.get('az') ?? -45) || 0) * Math.PI) / 180;
   const r = 6;
   return (
@@ -38,7 +45,7 @@ function Viewer() {
         <directionalLight position={[4, 8, 5]} intensity={1.4} />
         <Suspense fallback={null}>
           <Bounds fit clip observe margin={1.15}>
-            <Room />
+            <Room url={url} />
           </Bounds>
         </Suspense>
         <OrbitControls
