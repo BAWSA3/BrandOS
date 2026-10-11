@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useReducedMotion } from 'motion/react';
 import { curtains, pixels } from 'motion-plus/curtains';
+import BootIntro from '@/components/title/BootIntro';
 import TitleHero, { type HeroView } from '@/components/title/TitleHero';
 import { isSoundOn, onSoundSetting, playSound, primeSounds, setSoundOn } from '@/lib/ui-sounds';
 import type { BrandPassData } from '@/components/dashboard/BrandPass';
@@ -130,8 +131,13 @@ export default function TitleScreen({
   const reduceGate = useReducedMotion();
   const [started, setStarted] = useState(startedThisPage);
   const [gateOut, setGateOut] = useState(false); // fading out
+  // the boot sequence runs first; reduced motion goes straight to the logo
+  const [bootSeen, setBooted] = useState(startedThisPage);
+  const booted = bootSeen || !!reduceGate;
   const start = () => {
     if (startedThisPage) return;
+    // a press during the boot skips to the logo (and unlocks sound)
+    if (!booted) return setBooted(true);
     startedThisPage = true;
     play('select');
     setGateOut(true);
@@ -278,39 +284,62 @@ export default function TitleScreen({
             transition: reduceGate ? 'none' : 'opacity 0.5s ease',
           }}
         >
-          {/* eslint-disable-next-line @next/next/no-img-element -- pre-cropped wordmark */}
-          <img
-            src={mode === 'night' ? '/brandos-wordmark-night.png' : '/brandos-wordmark-day.png'}
-            alt="BrandOS"
-            className="h-auto w-[min(640px,82vw)]"
-            style={{
-              transform: gateOut ? 'scale(1.04)' : 'scale(1)',
-              transition: reduceGate ? 'none' : 'transform 0.5s cubic-bezier(0.16,1,0.3,1)',
-            }}
-          />
-          <span className="flex flex-col items-center gap-3" style={{ fontFamily: MONO }}>
-            <span
-              // beeps each time the cursor enters the words; only audible once the
-              // browser allows sound on the page (a hover can't unlock it)
-              onPointerEnter={(e) => {
-                if (e.pointerType === 'mouse') playSound('hover');
-              }}
-              className="text-[18px] uppercase tracking-[0.3em] md:text-[22px]"
-              style={{
-                color: BLUE,
-                // VCR OSD Mono has no bold cut: a same-colour stroke thickens it evenly
-                fontWeight: 700,
-                WebkitTextStroke: `0.8px ${BLUE}`,
-                animation:
-                  reduceGate || gateOut ? undefined : 'press-start-blink 1.1s steps(1) infinite',
-              }}
-            >
-              Press start
-            </span>
-            <span className="text-[11px] uppercase tracking-[0.16em]" style={{ color: s.muted }}>
-              Click or press any key{handle ? ` · @${handle}` : ''}
-            </span>
-          </span>
+          {!booted ? (
+            <BootIntro
+              handle={handle}
+              stationNumber={stationNumber}
+              ink={s.ink}
+              muted={s.muted}
+              onDone={() => setBooted(true)}
+            />
+          ) : (
+            <>
+              {/* eslint-disable-next-line @next/next/no-img-element -- pre-cropped wordmark */}
+              <img
+                src={mode === 'night' ? '/brandos-wordmark-night.png' : '/brandos-wordmark-day.png'}
+                alt="BrandOS"
+                className="h-auto w-[min(640px,82vw)]"
+                style={{
+                  transform: gateOut ? 'scale(1.04)' : 'scale(1)',
+                  transition: reduceGate ? 'none' : 'transform 0.5s cubic-bezier(0.16,1,0.3,1)',
+                  animation: reduceGate
+                    ? undefined
+                    : 'boot-logo-in 0.7s cubic-bezier(0.16,1,0.3,1) both',
+                }}
+              />
+              <span className="flex flex-col items-center gap-3" style={{ fontFamily: MONO }}>
+                <span
+                  // beeps each time the cursor enters the words; only audible once the
+                  // browser allows sound on the page (a hover can't unlock it)
+                  onPointerEnter={(e) => {
+                    if (e.pointerType === 'mouse') playSound('hover');
+                  }}
+                  className="text-[18px] uppercase tracking-[0.3em] md:text-[22px]"
+                  style={{
+                    color: BLUE,
+                    // VCR OSD Mono has no bold cut: a same-colour stroke thickens it evenly
+                    fontWeight: 700,
+                    WebkitTextStroke: `0.8px ${BLUE}`,
+                    animation:
+                      reduceGate || gateOut
+                        ? undefined
+                        : 'boot-fade-in 0.4s ease 0.45s both, press-start-blink 1.1s steps(1) 0.85s infinite',
+                  }}
+                >
+                  Press start
+                </span>
+                <span
+                  className="text-[11px] uppercase tracking-[0.16em]"
+                  style={{
+                    color: s.muted,
+                    animation: reduceGate ? undefined : 'boot-fade-in 0.4s ease 0.6s both',
+                  }}
+                >
+                  Click or press any key{handle ? ` · @${handle}` : ''}
+                </span>
+              </span>
+            </>
+          )}
         </button>
       )}
       {/* Night scanlines + vignette */}
