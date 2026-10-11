@@ -18,6 +18,12 @@ import type { Mode } from '@/components/StationCard';
 // interaction. Day/night follows the user's clock unless set in Settings.
 
 const BLUE = '#0047FF';
+
+// PRESS START: shown once per page load (not on client-side returns from the
+// dashboard). Browsers block sound until a click/keypress on each freshly
+// loaded page (e.g. right after the X sign-in redirect); the start press is
+// that gesture, so the level-up sound and everything after it can play.
+let startedThisPage = false;
 const MONO = "'VCR OSD Mono', 'JetBrains Mono', monospace";
 
 const SKIN: Record<Mode, { bg: string; ink: string; muted: string; rule: string; panel: string }> =
@@ -121,6 +127,16 @@ export default function TitleScreen({
     setPlays((p) => p.map((n, k) => (k === i ? n + 1 : n)));
   };
   const play = useMenuSounds(sound);
+  const reduceGate = useReducedMotion();
+  const [started, setStarted] = useState(startedThisPage);
+  const [gateOut, setGateOut] = useState(false); // fading out
+  const start = () => {
+    if (startedThisPage) return;
+    startedThisPage = true;
+    play('select');
+    setGateOut(true);
+    window.setTimeout(() => setStarted(true), reduceGate ? 0 : 520);
+  };
   // Shared sound setting (also used by the dashboard) + unlock/preload on first gesture.
   useEffect(() => {
     primeSounds();
@@ -134,7 +150,7 @@ export default function TitleScreen({
   // Level up: the station grew a floor since last time.
   const [levelBanner, setLevelBanner] = useState(false);
   useEffect(() => {
-    if (!levelUp) return;
+    if (!levelUp || !started) return;
     const a = window.setTimeout(() => {
       playSound('levelUp');
       setLevelBanner(true);
@@ -144,7 +160,7 @@ export default function TitleScreen({
       window.clearTimeout(a);
       window.clearTimeout(b);
     };
-  }, [levelUp]);
+  }, [levelUp, started]);
 
   // Day 06:00-18:00 by the user's clock, re-checked every minute.
   useEffect(() => {
@@ -208,6 +224,12 @@ export default function TitleScreen({
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      if (!startedThisPage) {
+        if (e.metaKey || e.ctrlKey || e.altKey || e.key === 'Tab') return;
+        e.preventDefault();
+        start();
+        return;
+      }
       if (settingsOpen) {
         if (e.key === 'Escape') {
           play('back');
@@ -244,6 +266,45 @@ export default function TitleScreen({
         transition: 'background 0.6s ease, color 0.6s ease',
       }}
     >
+      {!started && (
+        <button
+          type="button"
+          onClick={start}
+          aria-label="Press start"
+          className="absolute inset-0 z-50 flex cursor-pointer flex-col items-center justify-center gap-10 px-6"
+          style={{
+            background: s.bg,
+            opacity: gateOut ? 0 : 1,
+            transition: reduceGate ? 'none' : 'opacity 0.5s ease',
+          }}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element -- pre-cropped wordmark */}
+          <img
+            src={mode === 'night' ? '/brandos-wordmark-night.png' : '/brandos-wordmark-day.png'}
+            alt="BrandOS"
+            className="h-auto w-[min(640px,82vw)]"
+            style={{
+              transform: gateOut ? 'scale(1.04)' : 'scale(1)',
+              transition: reduceGate ? 'none' : 'transform 0.5s cubic-bezier(0.16,1,0.3,1)',
+            }}
+          />
+          <span className="flex flex-col items-center gap-3" style={{ fontFamily: MONO }}>
+            <span
+              className="text-[18px] uppercase tracking-[0.3em] md:text-[22px]"
+              style={{
+                color: BLUE,
+                animation:
+                  reduceGate || gateOut ? undefined : 'press-start-blink 1.1s steps(1) infinite',
+              }}
+            >
+              Press start
+            </span>
+            <span className="text-[11px] uppercase tracking-[0.16em]" style={{ color: s.muted }}>
+              Click or press any key{handle ? ` · @${handle}` : ''}
+            </span>
+          </span>
+        </button>
+      )}
       {/* Night scanlines + vignette */}
       {mode === 'night' && (
         <div
