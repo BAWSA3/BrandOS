@@ -261,6 +261,20 @@ export interface DashFonts {
   pass: string;
 }
 
+/** Top offset that clears fixed/sticky banners pinned to the top edge (staging, beta bars). */
+function belowTopBanners(gap = 12): number {
+  let bottom = 0;
+  for (const el of Array.from(document.body.querySelectorAll<HTMLElement>('body *'))) {
+    const pos = getComputedStyle(el).position;
+    if (pos !== 'fixed' && pos !== 'sticky') continue;
+    const r = el.getBoundingClientRect();
+    // a bar across the top: starts at the edge, wide, not too tall
+    if (r.top <= 1 && r.height > 0 && r.height < 120 && r.width > window.innerWidth * 0.6)
+      bottom = Math.max(bottom, r.bottom);
+  }
+  return bottom + gap;
+}
+
 export default function BentoDashboard({
   data,
   isNew = false,
@@ -298,9 +312,11 @@ export default function BentoDashboard({
 
   // Score alert: slides in after the dashboard boots, with the alert sound.
   const [alertOn, setAlertOn] = useState(false);
+  const [alertTop, setAlertTop] = useState(16);
   useEffect(() => {
     if (!scoreAlert?.delta) return;
     const a = window.setTimeout(() => {
+      setAlertTop(belowTopBanners());
       setAlertOn(true);
       playSound('alert');
     }, 1600);
@@ -334,9 +350,10 @@ export default function BentoDashboard({
             type="button"
             role="status"
             onClick={() => setAlertOn(false)}
-            className="fixed right-4 top-4 z-40 flex items-center gap-3 px-4 py-3 text-left text-white shadow-[0_12px_32px_rgba(0,0,0,0.25)]"
+            className="fixed right-4 z-[60] flex max-w-[calc(100vw-2rem)] items-center gap-3 px-4 py-3 text-left text-white shadow-[0_12px_32px_rgba(0,0,0,0.25)]"
             style={{
               fontFamily: MONO,
+              top: alertTop,
               background: C.blue,
               opacity: alertOn ? 1 : 0,
               transform: alertOn ? 'translateY(0)' : 'translateY(-12px)',
