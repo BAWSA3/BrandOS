@@ -293,6 +293,9 @@ export default function TitleScreen({
               className="text-[18px] uppercase tracking-[0.3em] md:text-[22px]"
               style={{
                 color: BLUE,
+                // VCR OSD Mono has no bold cut: a same-colour stroke thickens it evenly
+                fontWeight: 700,
+                WebkitTextStroke: `0.8px ${BLUE}`,
                 animation:
                   reduceGate || gateOut ? undefined : 'press-start-blink 1.1s steps(1) infinite',
               }}
