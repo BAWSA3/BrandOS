@@ -62,8 +62,8 @@ const THEMES: Record<DashTheme, Record<string, string>> = {
     '--d-callout-line': 'rgba(231,231,228,0.45)',
   },
   light: {
-    '--d-canvas': '#E7E7E4',
-    '--d-tile': '#F6F5F1',
+    '--d-canvas': '#F2EFE8', // warm bone
+    '--d-tile': '#FAF8F3',
     '--d-rule': 'rgba(14,14,14,0.09)',
     '--d-ink': '#0E0E0E',
     '--d-muted': '#6B6B6B',

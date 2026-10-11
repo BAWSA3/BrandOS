@@ -37,6 +37,11 @@ export interface StationStageProps {
   className?: string;
 }
 
+// Day art in warm bone (public/worlds/stations/bone: the originals with their
+// cool-grey backdrop shifted to #F2EFE8); night art unchanged.
+const stationArt = (name: string, mode: Mode) =>
+  mode === 'day' ? `/worlds/stations/bone/${name}-day.png` : `/worlds/stations/${name}-night.png`;
+
 export default function StationStage({
   archetype,
   stage,
@@ -66,13 +71,13 @@ export default function StationStage({
   return (
     <div
       className={`studio-stage relative w-full select-none overflow-hidden ${className}`}
-      style={{ aspectRatio: '1194 / 1492', background: mode === 'day' ? '#E8E9ED' : '#010B10' }}
+      style={{ aspectRatio: '1194 / 1492', background: mode === 'day' ? '#F2EFE8' : '#010B10' }}
     >
       <div
         className="station-scene absolute inset-0"
         style={{
           // same backdrop as the frame, so the blueprint tint covers it evenly
-          background: mode === 'day' ? '#E8E9ED' : '#010B10',
+          background: mode === 'day' ? '#F2EFE8' : '#010B10',
           transformOrigin: '50% 86%',
           transform: reaction === 'focus' ? 'scale(1.09) translateY(-2%)' : 'none',
           filter:
@@ -87,7 +92,7 @@ export default function StationStage({
           <>
             {/* eslint-disable-next-line @next/next/no-img-element -- pre-scaled pixel art */}
             <img
-              src={`/worlds/stations/plot-${mode}.png`}
+              src={stationArt('plot', mode)}
               alt={
                 slug ? 'Your empty plot, with your station blueprint above it' : 'Your empty plot'
               }
@@ -98,7 +103,7 @@ export default function StationStage({
               /* eslint-disable-next-line @next/next/no-img-element -- pixel art */
               <img
                 aria-hidden
-                src={`/worlds/stations/${slug}-${mode}.png`}
+                src={stationArt(slug, mode)}
                 alt=""
                 className="station-bob pointer-events-none absolute"
                 style={{
@@ -119,7 +124,7 @@ export default function StationStage({
             {/* eslint-disable-next-line @next/next/no-img-element -- pixel art */}
             <img
               aria-hidden
-              src={`/worlds/stations/${slug}-${mode}.png`}
+              src={stationArt(slug, mode)}
               alt=""
               className="pointer-events-none absolute inset-0 h-full w-full"
               style={{
@@ -132,7 +137,7 @@ export default function StationStage({
             {/* The built part, revealed from the bottom up */}
             {/* eslint-disable-next-line @next/next/no-img-element -- pixel art */}
             <img
-              src={`/worlds/stations/${slug}-${mode}.png`}
+              src={stationArt(slug, mode)}
               alt={stage === 3 ? 'Your finished brand station' : 'Your brand station, partly built'}
               className="studio-build absolute inset-0 h-full w-full"
               style={{ clipPath: `inset(${still ? target : top}% 0 0 0)` }}

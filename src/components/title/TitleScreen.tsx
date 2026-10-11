@@ -30,7 +30,7 @@ const MONO = "'VCR OSD Mono', 'JetBrains Mono', monospace";
 const SKIN: Record<Mode, { bg: string; ink: string; muted: string; rule: string; panel: string }> =
   {
     day: {
-      bg: '#E8E9ED',
+      bg: '#F2EFE8', // warm bone
       ink: '#0E0E0E',
       muted: '#6B6B70',
       rule: 'rgba(14,14,14,0.14)',
