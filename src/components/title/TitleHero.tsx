@@ -1,7 +1,8 @@
 'use client';
 
 import { useReducedMotion } from 'motion/react';
-import StationStage from '@/components/studio/StationStage';
+import StudioRoom from '@/components/studio/StudioRoom';
+import type { StudioThemeId } from '@/lib/studio-themes';
 import BrandPass, { type BrandPassData } from '@/components/dashboard/BrandPass';
 import { getArchetypeInfo } from '@/lib/archetype-descriptions';
 import type { StageNumber } from '@/lib/studio-stages';
@@ -9,12 +10,13 @@ import type { Mode } from '@/components/StationCard';
 
 // The title screen's hero visual, which swaps clearly with the selected menu
 // item (each change crossfades):
-//   Continue    your lit station, annotated: score -> monitor, archetype -> body, stage -> base
+//   Continue    your studio, annotated: score -> monitors, archetype -> chair, stage -> floor
 //   Rescan      the station dims and a Klein-blue pixel grid sweeps up over it
 //   My station  your Brand Pass card takes centre stage (tilts with the cursor)
 //   Settings    blueprint view
 
-export type HeroView = 'continue' | 'rescan' | 'station' | 'settings';
+// 'theme' = Settings is open: the room in full colour, so theme picks are visible
+export type HeroView = 'continue' | 'rescan' | 'station' | 'settings' | 'theme';
 
 const BLUE = '#0047FF';
 const MONO = "'VCR OSD Mono', 'JetBrains Mono', monospace";
@@ -101,6 +103,7 @@ export default function TitleHero({
   mode,
   score,
   pass,
+  theme = 'base',
 }: {
   view: HeroView;
   archetype: string;
@@ -108,6 +111,8 @@ export default function TitleHero({
   mode: Mode;
   score?: number | null;
   pass?: BrandPassData | null;
+  /** Studio theme (applies once the studio is complete). */
+  theme?: StudioThemeId;
 }) {
   const reduce = useReducedMotion();
   const info = getArchetypeInfo(archetype);
@@ -116,21 +121,18 @@ export default function TitleHero({
 
   return (
     <div className="title-hero relative w-full max-w-[min(300px,38vh)] md:max-w-[min(560px,62vh)]">
-      {/* the station (feathered into the screen) */}
+      {/* the studio room (transparent render, sits on either skin) */}
       <div
         style={{
-          WebkitMaskImage:
-            'radial-gradient(ellipse 72% 70% at 50% 52%, #000 62%, transparent 100%)',
-          maskImage: 'radial-gradient(ellipse 72% 70% at 50% 52%, #000 62%, transparent 100%)',
           opacity: stationOpacity,
           transform: showPass ? 'scale(0.94)' : 'none',
           transition: FADE,
         }}
       >
         <div className="relative">
-          <StationStage
-            archetype={archetype}
+          <StudioRoom
             stage={stage}
+            theme={theme}
             mode={mode}
             reaction={view === 'settings' ? 'blueprint' : view === 'continue' ? 'power' : null}
           />
@@ -167,9 +169,9 @@ export default function TitleHero({
 
       {/* Continue: the station, annotated */}
       <Callout
-        x={46}
-        y={13}
-        side="right"
+        x={30}
+        y={34}
+        side="left"
         id="a"
         label="Score"
         value={score != null ? String(score) : '—'}
@@ -178,8 +180,8 @@ export default function TitleHero({
         mode={mode}
       />
       <Callout
-        x={38}
-        y={46}
+        x={43}
+        y={47}
         side="left"
         id="b"
         label=""
@@ -189,7 +191,7 @@ export default function TitleHero({
         mode={mode}
       />
       <Callout
-        x={58}
+        x={62}
         y={84}
         side="right"
         id="c"

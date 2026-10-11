@@ -5,6 +5,14 @@ import { useRouter } from 'next/navigation';
 import { useReducedMotion } from 'motion/react';
 import { curtains, pixels } from 'motion-plus/curtains';
 import BootIntro from '@/components/title/BootIntro';
+import {
+  STUDIO_THEMES,
+  isUnlocked,
+  nextUnlock,
+  saveTheme,
+  savedTheme,
+  type StudioThemeId,
+} from '@/lib/studio-themes';
 import TitleHero, { type HeroView } from '@/components/title/TitleHero';
 import { isSoundOn, onSoundSetting, playSound, primeSounds, setSoundOn } from '@/lib/ui-sounds';
 import type { BrandPassData } from '@/components/dashboard/BrandPass';
@@ -62,6 +70,8 @@ export interface TitleScreenProps {
   pass?: BrandPassData | null;
   /** A floor was built since the last visit: play the level-up moment. */
   levelUp?: { floor: string } | null;
+  /** XP level (src/lib/xp.ts): unlocks studio themes. */
+  level?: number;
 }
 
 /** Tiny synthesized UI sounds (no audio files). Created lazily on first interaction. */
@@ -111,6 +121,7 @@ export default function TitleScreen({
   score,
   pass,
   levelUp,
+  level = 1,
 }: TitleScreenProps) {
   const router = useRouter();
   const info = getArchetypeInfo(archetype);
@@ -120,6 +131,21 @@ export default function TitleScreen({
   const [sound, setSound] = useState(true);
   const [index, setIndex] = useState(0);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  // Studio theme: saved choice if still unlocked at this level (read after mount)
+  const [theme, setTheme] = useState<StudioThemeId>('base');
+  useEffect(() => {
+    const t = window.setTimeout(() => setTheme(savedTheme(level)), 0);
+    return () => window.clearTimeout(t);
+  }, [level]);
+  const unlocked = STUDIO_THEMES.filter((t) => isUnlocked(t, level));
+  const cycleTheme = (dir: 1 | -1) => {
+    const i = unlocked.findIndex((t) => t.id === theme);
+    const next = unlocked[(i + dir + unlocked.length) % unlocked.length];
+    playSound('hover');
+    setTheme(next.id);
+    saveTheme(next.id);
+  };
+  const upcoming = nextUnlock(level);
   // Bumps each time an item becomes the selection, replaying its letter wave.
   const [plays, setPlays] = useState<number[]>([1, 0, 0, 0]);
   const [handlePlay, setHandlePlay] = useState(0);
@@ -219,7 +245,7 @@ export default function TitleScreen({
 
   // The hero visual swaps with the selected item (see TitleHero).
   const VIEWS: HeroView[] = ['continue', 'rescan', 'station', 'settings'];
-  const view: HeroView = settingsOpen ? 'settings' : (VIEWS[index] ?? 'continue');
+  const view: HeroView = settingsOpen ? 'theme' : (VIEWS[index] ?? 'continue');
 
   const choose = (i: number) => {
     // Continue has its own transition sound; the others get the select blip.
@@ -385,6 +411,7 @@ export default function TitleScreen({
             mode={mode}
             score={score}
             pass={pass}
+            theme={theme}
           />
         </div>
 
@@ -503,8 +530,8 @@ export default function TitleScreen({
       {/* Settings */}
       {settingsOpen && (
         <div
-          className="absolute inset-0 z-30 flex items-center justify-center p-6"
-          style={{ background: 'rgba(0,0,0,0.45)' }}
+          className="absolute inset-0 z-30 flex items-center justify-center p-6 md:justify-start md:pl-12"
+          style={{ background: 'rgba(0,0,0,0.18)' }}
         >
           <div
             className="w-full max-w-[380px] border p-6"
@@ -533,6 +560,38 @@ export default function TitleScreen({
                   </button>
                 ))}
               </span>
+            </div>
+            <div className="mt-4 flex items-center justify-between text-[14px] uppercase">
+              <span>Studio</span>
+              <span className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => cycleTheme(-1)}
+                  aria-label="Previous theme"
+                  style={{ color: BLUE }}
+                >
+                  ◀
+                </button>
+                <span className="min-w-[9.5em] text-center">
+                  {STUDIO_THEMES.find((t) => t.id === theme)?.name}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => cycleTheme(1)}
+                  aria-label="Next theme"
+                  style={{ color: BLUE }}
+                >
+                  ▶
+                </button>
+              </span>
+            </div>
+            <div
+              className="mt-1 text-right text-[11px] uppercase tracking-[0.1em]"
+              style={{ color: s.muted }}
+            >
+              {unlocked.length}/{STUDIO_THEMES.length} unlocked
+              {upcoming ? ` · next: ${upcoming.name}, LV ${upcoming.unlockLevel}` : ''}
+              {stage < 3 ? ' · shows once your studio is complete' : ''}
             </div>
             <div className="mt-4 flex items-center justify-between text-[14px] uppercase">
               <span>Account</span>
