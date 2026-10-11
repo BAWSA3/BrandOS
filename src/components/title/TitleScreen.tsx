@@ -290,6 +290,11 @@ export default function TitleScreen({
           />
           <span className="flex flex-col items-center gap-3" style={{ fontFamily: MONO }}>
             <span
+              // beeps each time the cursor enters the words; only audible once the
+              // browser allows sound on the page (a hover can't unlock it)
+              onPointerEnter={(e) => {
+                if (e.pointerType === 'mouse') playSound('hover');
+              }}
               className="text-[18px] uppercase tracking-[0.3em] md:text-[22px]"
               style={{
                 color: BLUE,
