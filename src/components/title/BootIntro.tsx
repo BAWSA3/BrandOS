@@ -3,14 +3,14 @@
 import { useEffect, useRef, useState } from 'react';
 
 // The title screen's startup: BIOS-style lines type in, a loading bar fills,
-// then onDone hands over to the wordmark + PRESS START. ~2s, silent (no sound
+// then onDone hands over to the wordmark + PRESS START. ~1s, silent (no sound
 // can play before the first click). The parent skips it on click/key.
 
 const BLUE = '#0047FF';
 const MONO = "'VCR OSD Mono', 'JetBrains Mono', monospace";
-const CHARS_PER_MS = 0.18; // typing speed
-const BAR = { from: 980, to: 1720, cells: 20 };
-const END = 2050;
+const CHARS_PER_MS = 0.34; // typing speed
+const BAR = { from: 500, to: 900, cells: 20 };
+const END = 1050;
 
 type Line = { at: number; text: string; ok?: string };
 
@@ -48,11 +48,11 @@ export default function BootIntro({
   const station = stationNumber ? `#${String(stationNumber).padStart(4, '0')}` : '';
   const lines: Line[] = [
     { at: 0, text: 'BRANDOS BIOS v2.0  (C) 2026 BRANDOS' },
-    { at: 230, text: 'TASTE ENGINE ..........', ok: 'OK' },
-    { at: 430, text: 'MEMORY CHECK ..........', ok: 'OK' },
-    { at: 630, text: 'AUDIO .................', ok: 'STANDBY' },
+    { at: 110, text: 'TASTE ENGINE ..........', ok: 'OK' },
+    { at: 210, text: 'MEMORY CHECK ..........', ok: 'OK' },
+    { at: 310, text: 'AUDIO .................', ok: 'STANDBY' },
     {
-      at: 830,
+      at: 410,
       text: `LOADING STATION ${station}${handle ? ` · @${handle.toUpperCase()}` : ''}`.trim(),
     },
   ];
@@ -99,7 +99,7 @@ export default function BootIntro({
           </span>
         </div>
       )}
-      {t >= BAR.to + 80 && (
+      {t >= BAR.to + 40 && (
         <div className="mt-2" style={{ color: BLUE }}>
           READY
           <Cursor />
