@@ -8,6 +8,7 @@ import ClaimStation from '@/components/ClaimStation';
 import StationBoard from '@/components/StationBoard';
 import { getArchetypeInfo } from '@/lib/archetype-descriptions';
 import ReservedSignCard from '@/components/ReservedSignCard';
+import StationLoop from '@/components/StationLoop';
 import { formatStationNumber } from '@/lib/station-number';
 
 // Public page for a reserved station: the flex link people share on X. The
@@ -48,6 +49,7 @@ export default async function StationPage({ params }: Props) {
     <main className="min-h-screen bg-[#F2F0EF] px-4 py-10 flex flex-col items-center">
       {r ? (
         <>
+          <StationLoop archetype={r.archetype} />
           <div
             className="mb-4 text-center text-[11px] tracking-[0.15em] text-black/50 uppercase"
             style={{ fontFamily: MONO }}
