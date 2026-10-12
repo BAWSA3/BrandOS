@@ -52,6 +52,7 @@ export function BrandScoreTile({
   phases,
   booted,
   label,
+  onPhase,
 }: {
   score: number;
   history: ScorePoint[];
@@ -59,6 +60,8 @@ export function BrandScoreTile({
   phases?: PhaseScore[];
   booted: boolean;
   label: React.ReactNode;
+  /** Open one phase's drill-down (the meters become buttons). */
+  onPhase?: (key: string) => void;
 }) {
   const [hover, setHover] = useState<number | null>(null);
   const hv = useTileHover(); // bumps on each cursor entry: replay one-shot animations
@@ -233,9 +236,40 @@ export function BrandScoreTile({
           style={{ borderColor: 'rgba(255,255,255,0.18)' }}
         >
           {phases.map((ph, i) => (
-            <div key={ph.key}>
+            <div
+              key={ph.key}
+              role={onPhase ? 'button' : undefined}
+              tabIndex={onPhase ? 0 : undefined}
+              aria-label={onPhase ? `${ph.key} ${ph.value}: open insights` : undefined}
+              onClick={
+                onPhase
+                  ? (e) => {
+                      e.stopPropagation();
+                      onPhase(ph.key);
+                    }
+                  : undefined
+              }
+              onKeyDown={
+                onPhase
+                  ? (e) => {
+                      if (e.key !== 'Enter' && e.key !== ' ') return;
+                      e.preventDefault();
+                      e.stopPropagation();
+                      onPhase(ph.key);
+                    }
+                  : undefined
+              }
+              className={
+                onPhase ? 'group -m-1.5 cursor-pointer p-1.5 hover:bg-white/10' : undefined
+              }
+            >
               <div className="flex justify-between" style={{ color: MUTED }}>
-                <Micro>{ph.key}</Micro>
+                <Micro>
+                  {ph.key}
+                  {onPhase && (
+                    <span className="opacity-0 transition-opacity group-hover:opacity-100"> ↗</span>
+                  )}
+                </Micro>
                 <Micro className="!text-[11px]">
                   <span style={{ color: INK }}>{ph.value}</span>
                 </Micro>
