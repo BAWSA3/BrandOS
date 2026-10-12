@@ -18,6 +18,8 @@ export interface ScanSummary {
   id: string;
   score: number;
   scannedAt: Date;
+  phases?: PhaseScore[];
+  summary?: string | null;
 }
 
 export interface HomeData {
@@ -117,7 +119,15 @@ export async function getHomeData(user: CurrentUser): Promise<HomeData> {
     stage: latest ? 3 : 0,
     stationNumber: station?.reservationNumber ?? reservation?.number ?? null,
     score: latest?.score ?? null,
-    scans: scans.map((s) => ({ id: s.id, score: s.score, scannedAt: s.scannedAt })).reverse(),
+    scans: scans
+      .map((s) => ({
+        id: s.id,
+        score: s.score,
+        scannedAt: s.scannedAt,
+        phases: toPhases(s.phaseScores),
+        summary: s.summary,
+      }))
+      .reverse(),
     phases: latest ? toPhases(latest.phaseScores) : [],
     pillars: latest ? toPillars(latest.contentPillars) : [],
     summary: latest?.summary ?? null,
@@ -168,6 +178,13 @@ export function toDashboardData(h: HomeData): DashboardData | null {
     scoreDelta: prev ? { value: h.score - prev.score, since: label(prev.scannedAt) } : undefined,
     phases: h.phases.length ? h.phases : undefined,
     posts: [],
+    scoreDetail: h.scans.map((s) => ({
+      id: s.id,
+      label: label(s.scannedAt),
+      value: s.score,
+      phases: s.phases ?? [],
+      summary: s.summary ?? null,
+    })),
     scans: h.scans
       .map((s, i) => ({
         id: s.id,

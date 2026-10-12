@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { haptic } from '@/lib/haptics';
 import { playSound, primeSounds } from '@/lib/ui-sounds';
-import { motion, useReducedMotion } from 'motion/react';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { Ticker } from 'motion-plus/react';
 import {
   CornerBrackets,
@@ -25,6 +25,7 @@ import {
   type WeekDay,
 } from '@/components/dashboard/StatTiles';
 import XPBar from '@/components/dashboard/XPBar';
+import ScoreDetail, { type ScoreDetailPoint } from '@/components/dashboard/ScoreDetail';
 import type { XPGain } from '@/lib/xp';
 import { STUDIO_STEPS, type StageNumber } from '@/lib/studio-stages';
 
@@ -108,6 +109,8 @@ export interface DashboardData {
   streak?: { done: number; target: number };
   /** Analysed posts with fit scores; when empty, the tile lists recent scans instead. */
   posts: RecentPost[];
+  /** Per-scan detail for the brand score drill-down (oldest first). */
+  scoreDetail?: ScoreDetailPoint[];
   scans?: { id: string; label: string; score: number; delta?: number }[];
   pass: BrandPassData;
   scoreDelta?: { value: number; since: string };
@@ -152,12 +155,17 @@ function Tile({
   className = '',
   accent = false,
   open = false,
+  onOpen,
+  layoutId,
 }: {
   children: React.ReactNode;
   className?: string;
   accent?: boolean;
   /** Shows the cursor's "OPEN ↗" label over this tile (desktop). */
   open?: boolean;
+  /** Makes the tile a button that opens its detail view (shared layoutId expand). */
+  onOpen?: () => void;
+  layoutId?: string;
 }) {
   // A Klein-blue tile flips the theme's ink to white so labels and numbers read on it.
   const onBlue = accent
@@ -177,7 +185,24 @@ function Tile({
   const live = fine && !reduce;
   const release = () => setPressed(false);
   return (
-    <section
+    <motion.section
+      layoutId={reduce ? undefined : layoutId}
+      transition={{ type: 'spring', duration: 0.45, bounce: 0 }}
+      animate={{ scale: pressed && open && !reduce ? 0.985 : 1 }}
+      role={onOpen ? 'button' : undefined}
+      tabIndex={onOpen ? 0 : undefined}
+      aria-haspopup={onOpen ? 'dialog' : undefined}
+      onClick={(e) => {
+        if (!onOpen || (e.target as HTMLElement).closest('a')) return;
+        onOpen();
+      }}
+      onKeyDown={(e) => {
+        if (!onOpen || e.target !== e.currentTarget) return;
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onOpen();
+        }
+      }}
       data-cursor-zone={open ? 'open' : undefined}
       onMouseEnter={() => {
         if (!live) return;
@@ -197,8 +222,7 @@ function Tile({
       style={
         {
           ...onBlue,
-          transform: pressed && open && !reduce ? 'scale(0.985)' : undefined,
-          transition: 'transform 0.12s steps(3, end)',
+          cursor: onOpen ? 'pointer' : undefined,
           background: accent ? C.blue : C.tile,
           border: `1px solid ${accent ? C.blue : C.rule}`,
           color: C.ink,
@@ -207,7 +231,7 @@ function Tile({
     >
       <TileHoverCtx.Provider value={hv}>{children}</TileHoverCtx.Provider>
       <CornerBrackets active={inside || pressed} color={accent ? '#FFFFFF' : C.blue} />
-    </section>
+    </motion.section>
   );
 }
 
@@ -320,6 +344,8 @@ export default function BentoDashboard({
   xp?: { total: number; gains: XPGain[] } | null;
 }) {
   const [theme, setTheme] = useState<DashTheme>(initialTheme);
+  // which tile's detail view is open (drill-downs)
+  const [detail, setDetail] = useState<'score' | null>(null);
   const booted = useBoot();
 
   // Sounds: unlock/preload on the first gesture; one short beep per button/link hovered.
@@ -479,7 +505,13 @@ export default function BentoDashboard({
             </Tile>
 
             {/* Brand score: hero number, delta, trend, phase meters */}
-            <Tile className={data.week || isNew ? 'md:col-span-4' : 'md:col-span-7'} accent open>
+            <Tile
+              className={data.week || isNew ? 'md:col-span-4' : 'md:col-span-7'}
+              accent
+              open
+              layoutId="tile-score"
+              onOpen={data.scoreDetail?.length ? () => setDetail('score') : undefined}
+            >
               <BrandScoreTile
                 score={data.ticker.score}
                 history={data.scoreHistory}
@@ -646,6 +678,16 @@ export default function BentoDashboard({
             )}
           </div>
         </div>
+        <AnimatePresence>
+          {detail === 'score' && !!data.scoreDetail?.length && (
+            <ScoreDetail
+              key="score"
+              points={data.scoreDetail}
+              layoutId="tile-score"
+              onClose={() => setDetail(null)}
+            />
+          )}
+        </AnimatePresence>
       </BootCtx.Provider>
     </main>
   );

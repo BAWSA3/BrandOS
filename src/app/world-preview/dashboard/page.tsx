@@ -24,6 +24,72 @@ const SAMPLE: DashboardData = {
     { label: 'Oct', value: 72 },
   ],
   streak: { done: 2, target: 3 },
+  scoreDetail: [
+    {
+      id: 's1',
+      label: 'Mar 14',
+      value: 58,
+      phases: [
+        { key: 'Define', value: 62 },
+        { key: 'Check', value: 55 },
+        { key: 'Generate', value: 60 },
+        { key: 'Scale', value: 54 },
+      ],
+      summary:
+        'A clear builder voice with a loose content mix. Positioning is there; consistency is not yet.',
+    },
+    {
+      id: 's2',
+      label: 'Apr 22',
+      value: 63,
+      phases: [
+        { key: 'Define', value: 70 },
+        { key: 'Check', value: 58 },
+        { key: 'Generate', value: 66 },
+        { key: 'Scale', value: 55 },
+      ],
+      summary:
+        'Positioning sharpened around building in public. Posting is steadier, voice still drifts on promo posts.',
+    },
+    {
+      id: 's3',
+      label: 'Jul 9',
+      value: 61,
+      phases: [
+        { key: 'Define', value: 71 },
+        { key: 'Check', value: 52 },
+        { key: 'Generate', value: 64 },
+        { key: 'Scale', value: 56 },
+      ],
+      summary: 'A quieter month: fewer posts and more off-voice replies pulled Check down.',
+    },
+    {
+      id: 's4',
+      label: 'Sep 18',
+      value: 68,
+      phases: [
+        { key: 'Define', value: 75 },
+        { key: 'Check', value: 62 },
+        { key: 'Generate', value: 76 },
+        { key: 'Scale', value: 57 },
+      ],
+      summary:
+        'The product reveal landed: Generate jumped on two posts that outperformed everything else.',
+    },
+    {
+      id: 's5',
+      label: 'Oct 6',
+      value: 72,
+      phases: [
+        { key: 'Define', value: 78 },
+        { key: 'Check', value: 64 },
+        { key: 'Generate', value: 81 },
+        { key: 'Scale', value: 58 },
+      ],
+      summary:
+        'Strongest read yet. Clear builder-educator positioning and content that converts; Scale is the next lever: post more often and lean into threads.',
+    },
+  ],
   scoreDelta: { value: 4, since: 'Sep' },
   phases: [
     { key: 'Define', value: 78 },
@@ -116,7 +182,10 @@ function Preview() {
       // LV 07, 1,240 / 1,750 XP after this visit (or crossing into LV 08 with &xp=levelup)
       xp={
         isNew
-          ? { total: XP_RULES.dailyVisit, gains: [{ label: 'Daily visit', xp: XP_RULES.dailyVisit }] }
+          ? {
+              total: XP_RULES.dailyVisit,
+              gains: [{ label: 'Daily visit', xp: XP_RULES.dailyVisit }],
+            }
           : {
               total: xpAtLevel(7) + (q.get('xp') === 'levelup' ? 1600 + XP_EARNED : 1240),
               gains: XP_GAINS,
