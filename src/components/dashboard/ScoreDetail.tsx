@@ -120,6 +120,7 @@ export default function ScoreDetail({
       />
       <motion.div
         layoutId={reduce ? undefined : layoutId}
+        data-surface="blue"
         role="dialog"
         aria-modal="true"
         aria-label={phase ? `${phase} phase` : 'Brand score history'}

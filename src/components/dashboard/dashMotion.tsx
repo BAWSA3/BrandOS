@@ -102,14 +102,31 @@ function CursorLabel() {
 export function DashCursor() {
   const reduce = useReducedMotion();
   const fine = useFinePointer();
+  // Over Klein-blue surfaces (the score tile, the score panel) a blue cursor
+  // vanishes, so it flips to white there. Surfaces opt in with data-surface="blue".
+  const [onBlue, setOnBlue] = useState(false);
+  useEffect(() => {
+    if (!fine || reduce) return;
+    const onMove = (e: PointerEvent) => {
+      const el = e.target instanceof Element ? e.target : null;
+      setOnBlue(!!el?.closest('[data-surface="blue"]'));
+    };
+    window.addEventListener('pointerover', onMove, { passive: true });
+    return () => window.removeEventListener('pointerover', onMove);
+  }, [fine, reduce]);
   if (!fine || reduce) return null;
   return (
     <Cursor
       magnetic={{ morph: true, padding: 4, snap: 0.6 }}
       style={{
-        backgroundColor: 'rgba(0,71,255,0.22)',
-        border: `1px solid ${BLUE}`,
+        zIndex: 9999,
+        width: 16,
+        height: 16,
+        backgroundColor: onBlue ? 'rgba(255,255,255,0.3)' : 'rgba(0,71,255,0.22)',
+        border: onBlue ? '1.5px solid #FFFFFF' : `1px solid ${BLUE}`,
+        boxShadow: onBlue ? '0 0 0 1px rgba(0,20,90,0.35)' : undefined,
         borderRadius: 0,
+        transition: 'background-color 0.12s, border-color 0.12s',
       }}
     >
       <CursorLabel />
