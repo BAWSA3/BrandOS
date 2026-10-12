@@ -524,7 +524,7 @@ def garage_interior():
             box(f"g_tleg{x}", x - 0.02, x + 0.02, gy0 + 0.1, gy1 - 0.1, Z0, Z0 + 0.4, "wood", bevel=0.004)
         bookcase("g_books", GX0 + 0.05, GX1 - 0.05, gy1 + 0.0, Z0 + 0.7, GZ1 - 0.05, depth=0.12)
     elif kind == "stage":
-        decal("g_checker", "checker", ((GX0 + GX1) / 2, (gy0 + gy1) / 2, Z0 + 0.025), GX1 - GX0, gy1 - gy0, "+z")
+        decal("g_checker", "checker", ((GX0 + GX1) / 2, (gy0 + gy1) / 2, Z0 + 0.036), GX1 - GX0, gy1 - gy0, "+z")
         box("g_stage", GX0 + 0.1, GX1 - 0.1, gy1 - 0.2, gy1, Z0 + 0.02, Z0 + 0.12, "rubber", bevel=0.01)
         rod("g_micstand", ((GX0 + GX1) / 2, gy0 + 0.15, Z0 + 0.02), ((GX0 + GX1) / 2, gy0 + 0.15, Z0 + 0.62), 0.008, "steel")
         bpy.ops.mesh.primitive_uv_sphere_add(segments=16, ring_count=8, radius=0.03, location=((GX0 + GX1) / 2, gy0 + 0.15, Z0 + 0.65))
@@ -877,7 +877,8 @@ G = box("ground", X0, X1, Y0, Y1, Z0, Z1, "shell", bevel=0.045)
 GX0, GX1, GZ1 = X0 + 0.12, X0 + 1.3, Z0 + 1.35
 cut(G, GX0, GX1, Y0 - 0.1, Y0 + 0.42, Z0 + 0.02, GZ1)
 box("garage_back", GX0, GX1, Y0 + 0.4, Y0 + 0.44, Z0, GZ1, "interior", bevel=0)
-box("garage_floor", GX0, GX1, Y0, Y0 + 0.42, Z0, Z0 + 0.02, "shell_shade", bevel=0)
+# floor plate sits clearly above the opening's cut face (coplanar faces flickered)
+box("garage_floor", GX0, GX1, Y0, Y0 + 0.42, Z0, Z0 + 0.032, "shell_shade", bevel=0)
 if ARCH == "build-exe":
     box("bench_top", GX0 + 0.12, GX1 - 0.12, Y0 + 0.1, Y0 + 0.38, Z0 + 0.48, Z0 + 0.53, "shell_shade", bevel=0.008)
     for x in (GX0 + 0.16, GX1 - 0.16):

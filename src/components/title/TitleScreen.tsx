@@ -72,7 +72,7 @@ export interface TitleScreenProps {
   levelUp?: { floor: string } | null;
   /** XP level (src/lib/xp.ts): unlocks studio themes. */
   level?: number;
-  /** Title hero: the studio room (default) or the photoreal station loop. */
+  /** Title hero: the photoreal 3D station (default) or the studio room. */
   hero?: 'studio' | 'station';
 }
 
@@ -124,7 +124,7 @@ export default function TitleScreen({
   pass,
   levelUp,
   level = 1,
-  hero = 'studio',
+  hero = 'station',
 }: TitleScreenProps) {
   const router = useRouter();
   const info = getArchetypeInfo(archetype);

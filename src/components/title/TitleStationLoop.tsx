@@ -10,6 +10,17 @@ import type { Mode } from '@/components/StationCard';
 // blueprint reaction tints it like the studio room.
 
 export const TITLE_LOOPS = new Set(['build-exe']);
+// every archetype has a 3D still for the title; a loop replaces it once rendered
+export const TITLE_STATIONS = new Set([
+  'build-exe',
+  'arc',
+  'entropy',
+  'foresight',
+  'freq',
+  'null',
+  'relay',
+  'source',
+]);
 const FEATHER =
   'linear-gradient(to right, transparent, #000 5%, #000 95%, transparent), linear-gradient(to bottom, transparent, #000 4%, #000 96%, transparent)';
 
@@ -38,6 +49,31 @@ export default function TitleStationLoop({
     return () => mq.removeEventListener('change', sync);
   }, [mode]);
   const base = `/worlds/stations/loops/${slug}-title-${mode === 'night' ? 'night' : 'day'}`;
+  const style = {
+    WebkitMaskImage: FEATHER,
+    maskImage: FEATHER,
+    WebkitMaskComposite: 'source-in',
+    maskComposite: 'intersect',
+    filter:
+      reaction === 'blueprint'
+        ? 'grayscale(1) sepia(1) hue-rotate(190deg) saturate(3.2) brightness(1.02)'
+        : 'none',
+    transition: 'filter 0.5s ease',
+  } as const;
+  if (!TITLE_LOOPS.has(slug)) {
+    const still = `/worlds/stations/3d/${slug}-title-${mode === 'night' ? 'night' : 'day'}.jpg`;
+    return (
+      // eslint-disable-next-line @next/next/no-img-element -- pre-sized render
+      <img
+        src={still}
+        alt="Your brand station"
+        width={800}
+        height={1000}
+        className="block h-auto w-full"
+        style={style}
+      />
+    );
+  }
   return (
     <video
       key={base}
@@ -52,17 +88,7 @@ export default function TitleStationLoop({
       playsInline
       preload="auto"
       aria-label="Your brand station"
-      style={{
-        WebkitMaskImage: FEATHER,
-        maskImage: FEATHER,
-        WebkitMaskComposite: 'source-in',
-        maskComposite: 'intersect',
-        filter:
-          reaction === 'blueprint'
-            ? 'grayscale(1) sepia(1) hue-rotate(190deg) saturate(3.2) brightness(1.02)'
-            : 'none',
-        transition: 'filter 0.5s ease',
-      }}
+      style={style}
     >
       <source src={`${base}.mp4`} type="video/mp4" />
     </video>
