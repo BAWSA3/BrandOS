@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
   const rawNext = requestUrl.searchParams.get('next');
   // Only allow same-origin relative paths to prevent open-redirect.
   const next =
-    rawNext && rawNext.startsWith('/') && !rawNext.startsWith('//') ? rawNext : '/dashboard';
+    rawNext && rawNext.startsWith('/') && !rawNext.startsWith('//') ? rawNext : '/home';
   // TOS acknowledgment version from the signup page (strict-format validated —
   // the param round-trips through OAuth providers / email links).
   const rawTos = requestUrl.searchParams.get('tos');
