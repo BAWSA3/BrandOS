@@ -28,6 +28,7 @@ import {
 import XPBar from '@/components/dashboard/XPBar';
 import ScoreDetail, { type ScoreDetailPoint } from '@/components/dashboard/ScoreDetail';
 import RescanOverlay from '@/components/dashboard/RescanOverlay';
+import PassShare from '@/components/dashboard/PassShare';
 import type { XPGain } from '@/lib/xp';
 import { STUDIO_STEPS, type StageNumber } from '@/lib/studio-stages';
 
@@ -550,7 +551,9 @@ export default function BentoDashboard({
           <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-12">
             {/* Brand Pass (or its locked state for new users) */}
             <Tile className="md:col-span-5 md:row-span-2" open={!isNew}>
-              <Label right={<span>{isNew ? 'Locked' : 'Share ↗'}</span>}>Brand Pass</Label>
+              <Label right={isNew ? <span>Locked</span> : <PassShare pass={data.pass} />}>
+                Brand Pass
+              </Label>
               <div className="flex flex-1 items-center">
                 {isNew ? (
                   <div className="w-full py-10 text-center">

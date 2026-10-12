@@ -134,6 +134,7 @@ export default function BrandPass({
       <Callout id="d" label="Station" className="left-0 bottom-[16%]" line="16px" />
 
       <motion.div
+        data-pass-card
         className="relative overflow-hidden rounded-[10px] p-4 shadow-[0_18px_40px_rgba(0,0,0,0.45)]"
         style={{ background: BONE, color: INK, containerType: 'inline-size', rotateX, rotateY }}
       >
