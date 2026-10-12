@@ -179,11 +179,12 @@ export default function BrandPass({
                   className="h-full w-full object-cover grayscale contrast-125"
                 />
               ) : slug ? (
-                // eslint-disable-next-line @next/next/no-img-element -- pixel art
+                // no avatar: the photoreal 3D station stands in for the portrait
+                // eslint-disable-next-line @next/next/no-img-element -- pre-sized render
                 <img
-                  src={`/worlds/stations/${slug}-day.png`}
+                  src={`/worlds/stations/3d/${slug}-card-day.jpg`}
                   alt=""
-                  className="h-full w-full object-cover object-top"
+                  className="h-full w-full object-cover object-center"
                 />
               ) : null}
               <span

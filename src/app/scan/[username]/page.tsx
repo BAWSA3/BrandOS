@@ -1,34 +1,31 @@
 import { Metadata } from 'next';
 import ScanPageClient from './ScanPageClient';
+import { getPublicScan } from '@/lib/public-scan';
 
 interface PageProps {
   params: Promise<{ username: string }>;
   searchParams: Promise<{ [key: string]: string | undefined }>;
 }
 
-export async function generateMetadata({ params, searchParams }: PageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { username } = await params;
-  const sp = await searchParams;
-  const score = sp.s || '0';
-  const archetype = sp.a || 'Unknown';
-  const define = sp.d || '0';
-  const check = sp.c || '0';
-  const generate = sp.g || '0';
-  const scale = sp.sc || '0';
-  const displayName = sp.n || username;
-
-  const title = `@${username} scored ${score}/100 on BrandOS`;
-  const description = `${displayName} is THE ${archetype.toUpperCase()}. Brand DNA: DEFINE ${define} | CHECK ${check} | GENERATE ${generate} | SCALE ${scale}. Get your free brand score at mybrandos.app`;
+  // Real result from our scan log; the URL's score params are never trusted
+  // for the preview (they could be edited into a fake score).
+  const scan = await getPublicScan(username);
+  const handle = scan?.handle ?? username.replace(/^@/, '').toLowerCase();
+  const title = scan
+    ? `@${handle} scored ${scan.score}/100 on BrandOS`
+    : `What's @${handle}'s brand score? · BrandOS`;
+  const description = scan
+    ? `${scan.name} is THE ${(scan.archetype ?? 'Unknown').toUpperCase()}.${
+        scan.phases
+          ? ` Brand DNA: DEFINE ${scan.phases.define} | CHECK ${scan.phases.check} | GENERATE ${scan.phases.generate} | SCALE ${scan.phases.scale}.`
+          : ''
+      } Get your free brand score at mybrandos.app`
+    : 'Get your free brand score at mybrandos.app';
 
   const ogUrl = new URL('/api/og', process.env.NEXT_PUBLIC_APP_URL || 'https://mybrandos.app');
-  ogUrl.searchParams.set('u', username);
-  ogUrl.searchParams.set('s', score);
-  ogUrl.searchParams.set('a', archetype);
-  ogUrl.searchParams.set('d', define);
-  ogUrl.searchParams.set('c', check);
-  ogUrl.searchParams.set('g', generate);
-  ogUrl.searchParams.set('sc', scale);
-  ogUrl.searchParams.set('n', displayName);
+  ogUrl.searchParams.set('u', handle);
 
   return {
     title,
