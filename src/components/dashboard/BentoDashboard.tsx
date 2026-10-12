@@ -341,6 +341,7 @@ export default function BentoDashboard({
   scoreAlert,
   xp,
   rescan,
+  homeHref = '/world-preview/title',
 }: {
   data: DashboardData;
   isNew?: boolean;
@@ -350,6 +351,8 @@ export default function BentoDashboard({
   scoreAlert?: { delta: number; score: number } | null;
   /** Show the Rescan button: 'live' scans for real (/api/dashboard/rescan), 'demo' simulates it. */
   rescan?: 'live' | 'demo';
+  /** Where the top-left grid goes: the main menu (/home) on the real dashboard. */
+  homeHref?: string;
   /** XP total and what was earned since the last visit (the bar fills it in). */
   xp?: { total: number; gains: XPGain[] } | null;
 }) {
@@ -512,7 +515,7 @@ export default function BentoDashboard({
             style={{ background: C.tile, borderColor: C.rule }}
           >
             <Link
-              href="/world-preview/title"
+              href={homeHref}
               className="grid shrink-0 grid-cols-3 gap-[2px]"
               aria-label="Back to title screen"
             >
@@ -564,7 +567,7 @@ export default function BentoDashboard({
 
           <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-12">
             {/* Brand Pass (or its locked state for new users) */}
-            <Tile className="md:col-span-5 md:row-span-2" open={!isNew}>
+            <Tile className="md:col-span-5 md:row-span-2">
               <Label right={isNew ? <span>Locked</span> : <PassShare pass={data.pass} />}>
                 Brand Pass
               </Label>
@@ -624,7 +627,7 @@ export default function BentoDashboard({
 
             {/* This week: goal meter + day strip (hidden until weekly data exists) */}
             {(isNew || data.week) && (
-              <Tile className="md:col-span-3" open={!isNew}>
+              <Tile className="md:col-span-3">
                 {isNew || !data.week ? (
                   <>
                     <Label>This week</Label>
@@ -656,7 +659,7 @@ export default function BentoDashboard({
                   const next = st.stage === data.stage + 1;
                   const done = st.stage <= data.stage;
                   return (
-                    <Tile key={st.stage} accent={next} open={next} className="min-h-[200px]">
+                    <Tile key={st.stage} accent={next} className="min-h-[200px]">
                       <div
                         className="flex items-center justify-between gap-3 text-[11px] uppercase tracking-[0.14em]"
                         style={{ fontFamily: MONO, color: next ? '#fff' : C.muted }}
@@ -700,7 +703,7 @@ export default function BentoDashboard({
                 })}
               </div>
             ) : data.posts.length === 0 ? (
-              <Tile className={listSpan} open>
+              <Tile className={listSpan}>
                 <Label right={<span>Score / 100</span>}>Recent scans</Label>
                 <ul className="mt-4">
                   {(data.scans ?? []).map((sc, i) => (
@@ -752,7 +755,7 @@ export default function BentoDashboard({
                 </ul>
               </Tile>
             ) : (
-              <Tile className={listSpan} open>
+              <Tile className={listSpan}>
                 <Label right={<span>Fit / 100</span>}>Recent posts analyzed</Label>
                 <ul className="mt-4">
                   {data.posts.map((p, i) => {

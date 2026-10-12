@@ -71,9 +71,9 @@ export default function RescanOverlay({
       <motion.div
         className="w-full max-w-[460px] border p-6"
         style={{
-          background: 'var(--d-tile)',
-          borderColor: 'var(--d-rule)',
-          color: 'var(--d-ink)',
+          background: 'var(--d-tile, #FAF8F3)',
+          borderColor: 'var(--d-rule, rgba(14,14,14,0.09))',
+          color: 'var(--d-ink, #0E0E0E)',
           fontFamily: MONO,
         }}
         initial={reduce ? false : { y: 12, opacity: 0 }}
@@ -81,7 +81,7 @@ export default function RescanOverlay({
         transition={{ type: 'spring', duration: 0.35, bounce: 0 }}
       >
         <div className="flex items-center justify-between text-[10px] uppercase tracking-[0.16em]">
-          <span style={{ color: 'var(--d-muted)' }}>
+          <span style={{ color: 'var(--d-muted, #6B6B6B)' }}>
             <ScrambleLabel booted>{`rescan · @${handle}`}</ScrambleLabel>
           </span>
           <span style={{ color: status === 'error' ? '#D70015' : BLUE }}>
@@ -102,12 +102,16 @@ export default function RescanOverlay({
             return (
               <li key={st.key} className="text-[11px] uppercase tracking-[0.1em]">
                 <div className="flex items-center justify-between gap-3">
-                  <span style={{ color: state === 'wait' ? 'var(--d-muted)' : 'var(--d-ink)' }}>
+                  <span
+                    style={{
+                      color: state === 'wait' ? 'var(--d-muted, #6B6B6B)' : 'var(--d-ink, #0E0E0E)',
+                    }}
+                  >
                     {String(i + 1).padStart(2, '0')} {st.key}
                   </span>
                   <span
                     className="tabular-nums"
-                    style={{ color: state === 'done' ? BLUE : 'var(--d-muted)' }}
+                    style={{ color: state === 'done' ? BLUE : 'var(--d-muted, #6B6B6B)' }}
                     aria-label={`${st.key} ${state === 'done' ? 'done' : state === 'run' ? 'scanning' : 'queued'}`}
                   >
                     [{'█'.repeat(fill)}
@@ -118,7 +122,7 @@ export default function RescanOverlay({
                 {state === 'run' && (
                   <div
                     className="mt-1 text-[10px] normal-case tracking-[0.04em]"
-                    style={{ color: 'var(--d-muted)' }}
+                    style={{ color: 'var(--d-muted, #6B6B6B)' }}
                   >
                     {'>'} {st.line}
                     <span className="animate-pulse">_</span>
@@ -139,7 +143,7 @@ export default function RescanOverlay({
               autoFocus
               onClick={onClose}
               className="mt-4 border px-3 py-2 text-[10px] uppercase tracking-[0.14em]"
-              style={{ borderColor: 'var(--d-rule)' }}
+              style={{ borderColor: 'var(--d-rule, rgba(14,14,14,0.09))' }}
             >
               Close
             </button>

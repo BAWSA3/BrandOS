@@ -22,7 +22,7 @@ export default async function HomePage() {
       stationNumber={h.stationNumber}
       lastSaved={h.lastScannedAt ? ago(h.lastScannedAt) : undefined}
       continueHref="/dashboard"
-      rescanHref="/dashboard#scan"
+      rescanHref="/dashboard?rescan=1"
       stationHref={h.stationNumber ? `/station/${h.handle}` : '/dashboard'}
       score={h.score}
       pass={toPass(h)}
