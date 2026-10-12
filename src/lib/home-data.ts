@@ -19,6 +19,7 @@ export interface ScanSummary {
   score: number;
   scannedAt: Date;
   phases?: PhaseScore[];
+  insights?: Record<string, string[]>;
   summary?: string | null;
 }
 
@@ -54,6 +55,30 @@ function phaseValue(v: unknown): number | null {
     if (typeof s === 'number' && Number.isFinite(s)) return Math.round(s);
   }
   return null;
+}
+
+/** Phase insights keyed by label ('Define' -> ['...']), up to 4 each. */
+function toInsights(raw: unknown): Record<string, string[]> {
+  if (!raw || typeof raw !== 'object') return {};
+  const src = raw as Record<string, unknown>;
+  const out: Record<string, string[]> = {};
+  for (const [k, label] of PHASES) {
+    const v = src[k];
+    const list = Array.isArray(v)
+      ? v
+      : v && typeof v === 'object' && 'insights' in v
+        ? (v as { insights: unknown }).insights
+        : null;
+    if (Array.isArray(list)) {
+      const items = list
+        .filter((x): x is string => typeof x === 'string')
+        .map((x) => x.trim().slice(0, 400))
+        .filter(Boolean)
+        .slice(0, 4);
+      if (items.length) out[label] = items;
+    }
+  }
+  return out;
 }
 
 function toPhases(raw: unknown): PhaseScore[] {
@@ -94,6 +119,7 @@ export async function getHomeData(user: CurrentUser): Promise<HomeData> {
         score: true,
         archetype: true,
         phaseScores: true,
+        insights: true,
         contentPillars: true,
         summary: true,
         scannedAt: true,
@@ -125,6 +151,7 @@ export async function getHomeData(user: CurrentUser): Promise<HomeData> {
         score: s.score,
         scannedAt: s.scannedAt,
         phases: toPhases(s.phaseScores),
+        insights: toInsights(s.insights),
         summary: s.summary,
       }))
       .reverse(),
@@ -183,6 +210,7 @@ export function toDashboardData(h: HomeData): DashboardData | null {
       label: label(s.scannedAt),
       value: s.score,
       phases: s.phases ?? [],
+      insights: s.insights ?? {},
       summary: s.summary ?? null,
     })),
     scans: h.scans

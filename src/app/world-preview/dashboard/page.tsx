@@ -73,6 +73,12 @@ const SAMPLE: DashboardData = {
         { key: 'Generate', value: 76 },
         { key: 'Scale', value: 57 },
       ],
+      insights: {
+        Define: ['Positioning is sharpening around BrandOS and creator brands.'],
+        Check: ['More on-topic than July; a few off-voice replies remain.'],
+        Generate: ['Two posts about the build outperformed the rest by a wide margin.'],
+        Scale: ['Growth came in one spike after the reveal, then flattened.'],
+      },
       summary:
         'The product reveal landed: Generate jumped on two posts that outperformed everything else.',
     },
@@ -86,6 +92,24 @@ const SAMPLE: DashboardData = {
         { key: 'Generate', value: 81 },
         { key: 'Scale', value: 58 },
       ],
+      insights: {
+        Define: [
+          'Clear builder-educator positioning: building tools for creators, in public.',
+          'Bio and pinned post now say the same thing: one niche, one promise.',
+        ],
+        Check: [
+          'Voice is recognisable across posts: direct, lowercase, taste-first.',
+          'Promo posts still drift into a more salesy tone than the rest.',
+        ],
+        Generate: [
+          'The product reveal outperformed everything else by 10x: reveals and demos are your format.',
+          'Short build updates with a visual land far better than text-only takes.',
+        ],
+        Scale: [
+          'Posting about twice a week caps momentum; reach jumps on weeks with 4+ posts.',
+          'Follower growth is steady but rides on single big posts rather than a cadence.',
+        ],
+      },
       summary:
         'Strongest read yet. Clear builder-educator positioning and content that converts; Scale is the next lever: post more often and lean into threads.',
     },

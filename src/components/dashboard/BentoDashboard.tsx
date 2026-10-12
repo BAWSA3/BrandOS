@@ -346,6 +346,11 @@ export default function BentoDashboard({
   const [theme, setTheme] = useState<DashTheme>(initialTheme);
   // which tile's detail view is open (drill-downs)
   const [detail, setDetail] = useState<'score' | null>(null);
+  const [detailPhase, setDetailPhase] = useState<string | null>(null);
+  const openScore = (phase: string | null = null) => {
+    setDetailPhase(phase);
+    setDetail('score');
+  };
   const booted = useBoot();
 
   // Sounds: unlock/preload on the first gesture; one short beep per button/link hovered.
@@ -510,7 +515,7 @@ export default function BentoDashboard({
               accent
               open
               layoutId="tile-score"
-              onOpen={data.scoreDetail?.length ? () => setDetail('score') : undefined}
+              onOpen={data.scoreDetail?.length ? () => openScore() : undefined}
             >
               <BrandScoreTile
                 score={data.ticker.score}
@@ -519,6 +524,7 @@ export default function BentoDashboard({
                 phases={data.phases}
                 booted={booted}
                 label={<TileLabel>Brand score</TileLabel>}
+                onPhase={data.scoreDetail?.length ? (key) => openScore(key) : undefined}
               />
             </Tile>
 
@@ -684,6 +690,7 @@ export default function BentoDashboard({
               key="score"
               points={data.scoreDetail}
               layoutId="tile-score"
+              initialPhase={detailPhase}
               onClose={() => setDetail(null)}
             />
           )}
