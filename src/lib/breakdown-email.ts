@@ -61,10 +61,13 @@ const strings = (v: unknown, max: number): string[] =>
         .slice(0, max)
     : [];
 
-/** The handle's latest full scan, or null if it was never scanned (or only a fallback score). */
+/**
+ * The handle's latest scan (the one they just saw), or null if never scanned.
+ * A quick/fallback scan has no write-up, so only the score and phases are set.
+ */
 export async function getScanBreakdown(handle: string): Promise<ScanBreakdown | null> {
   const row = await prisma.brandScans.findFirst({
-    where: { username: { equals: handle, mode: 'insensitive' }, NOT: { summary: null } },
+    where: { username: { equals: handle, mode: 'insensitive' } },
     orderBy: { createdAt: 'desc' },
     select: {
       username: true,
@@ -114,6 +117,13 @@ export function breakdownContent(b: ScanBreakdown): NewsletterContent {
     },
   ];
   if (b.summary) sections.push({ type: 'text', content: esc(b.summary) });
+  else
+    sections.push({
+      type: 'text',
+      content:
+        `Your scan ran in quick mode, so this breakdown covers your score${b.phases.length ? ' and four phases' : ''}. ` +
+        "Rescan for the full write-up: what's working, what to fix, and your next moves.",
+    });
   if (b.phases.length) {
     sections.push({ type: 'heading', content: 'Your four phases' });
     sections.push({
