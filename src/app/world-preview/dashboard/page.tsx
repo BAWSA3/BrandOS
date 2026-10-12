@@ -17,6 +17,7 @@ const SAMPLE: DashboardData = {
   stage: 3,
   ticker: { followers: '4,812', change7d: '+2.4%', score: 72, streak: '2 / 3', avgFit: 74 },
   scoreHistory: [
+    { label: 'Jan', value: 54 },
     { label: 'Mar', value: 58 },
     { label: 'Apr', value: 63 },
     { label: 'Jul', value: 61 },
@@ -26,7 +27,22 @@ const SAMPLE: DashboardData = {
   streak: { done: 2, target: 3 },
   scoreDetail: [
     {
+      id: 's0',
+      date: '2026-01-20T17:00:00Z',
+      label: 'Jan 20',
+      value: 54,
+      phases: [
+        { key: 'Define', value: 57 },
+        { key: 'Check', value: 52 },
+        { key: 'Generate', value: 55 },
+        { key: 'Scale', value: 52 },
+      ],
+      summary:
+        'First scan: a builder with ideas everywhere. The voice is there, the positioning is not yet.',
+    },
+    {
       id: 's1',
+      date: '2026-03-14T17:00:00Z',
       label: 'Mar 14',
       value: 58,
       phases: [
@@ -40,6 +56,7 @@ const SAMPLE: DashboardData = {
     },
     {
       id: 's2',
+      date: '2026-04-22T17:00:00Z',
       label: 'Apr 22',
       value: 63,
       phases: [
@@ -53,6 +70,7 @@ const SAMPLE: DashboardData = {
     },
     {
       id: 's3',
+      date: '2026-07-09T17:00:00Z',
       label: 'Jul 9',
       value: 61,
       phases: [
@@ -65,6 +83,7 @@ const SAMPLE: DashboardData = {
     },
     {
       id: 's4',
+      date: '2026-09-18T17:00:00Z',
       label: 'Sep 18',
       value: 68,
       phases: [
@@ -84,6 +103,7 @@ const SAMPLE: DashboardData = {
     },
     {
       id: 's5',
+      date: '2026-10-06T17:00:00Z',
       label: 'Oct 6',
       value: 72,
       phases: [

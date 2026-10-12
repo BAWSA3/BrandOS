@@ -45,6 +45,7 @@ function Micro({ children, className = '' }: { children: React.ReactNode; classN
 
 export default function PhaseDetail({
   phase,
+  all,
   points,
   sel,
   onSelect,
@@ -52,6 +53,9 @@ export default function PhaseDetail({
   onBack,
 }: {
   phase: string;
+  /** Every scan (the 'vs previous' comparison can reach outside the timeline). */
+  all?: ScoreDetailPoint[];
+  /** Scans inside the current timeline. */
   points: ScoreDetailPoint[];
   sel: number;
   onSelect: (i: number) => void;
@@ -60,7 +64,9 @@ export default function PhaseDetail({
 }) {
   const reduce = useReducedMotion();
   const cur = points[sel];
-  const prev = sel > 0 ? points[sel - 1] : null;
+  const list = all ?? points;
+  const at = list.findIndex((p) => p.id === cur.id);
+  const prev = at > 0 ? list[at - 1] : null;
   const valueAt = (p: ScoreDetailPoint) => p.phases.find((x) => x.key === phase)?.value;
   const value = valueAt(cur) ?? 0;
   const before = prev ? valueAt(prev) : undefined;

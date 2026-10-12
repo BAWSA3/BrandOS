@@ -208,6 +208,7 @@ export function toDashboardData(h: HomeData): DashboardData | null {
     scoreDetail: h.scans.map((s) => ({
       id: s.id,
       label: label(s.scannedAt),
+      date: s.scannedAt.toISOString(),
       value: s.score,
       phases: s.phases ?? [],
       insights: s.insights ?? {},
