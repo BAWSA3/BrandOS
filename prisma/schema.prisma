@@ -157,6 +157,8 @@ model User {
   @@index([stripeCustomerId])
   station                    Station?   // claimed brand station (migration 026)
   stationNotes               StationNote[] @relation("StationNoteAuthor")
+  xpEvents                   XPEvent[]     // XP ledger (migration 029)
+  progress                   UserProgress? // XP total + streaks (migration 029)
   noteReports                NoteReport[]  @relation("NoteReporter")
 }
 
@@ -1238,4 +1240,37 @@ model UserProfile {
   @@index([currentScore(sort: Desc)])
   @@index([lastScannedAt(sort: Desc)])
   @@map("user_profiles")
+}
+
+// XP ledger: one row per award, idempotent per user via dedupeKey (migration 029)
+model XPEvent {
+  id        String   @id @default(dbgenerated("(gen_random_uuid())::text"))
+  userId    String
+  kind      String // dailyVisit | streakDay | scorePoint | rescan | floorBuilt | task | onBrandPost | scoredPost
+  xp        Int
+  dedupeKey String // e.g. visit:2026-10-11, scan:<id>
+  label     String?
+  createdAt DateTime @default(now()) @db.Timestamptz
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, dedupeKey])
+  @@index([userId, createdAt(sort: Desc)])
+}
+
+// Running XP total, daily visit streak, weekly goal streak, last visit (migration 029)
+model UserProgress {
+  userId            String    @id
+  xpTotal           Int       @default(0)
+  currentStreakDays Int       @default(0)
+  longestStreakDays Int       @default(0)
+  lastActiveDate    DateTime? @db.Date
+  lastVisitAt       DateTime? @db.Timestamptz
+  prevVisitAt       DateTime? @db.Timestamptz
+  lastSeenScore     Int?
+  weeklyGoal        Int       @default(3)
+  streakWeeks       Int       @default(0)
+  lastGoalWeek      DateTime? @db.Date
+  createdAt         DateTime  @default(now()) @db.Timestamptz
+  updatedAt         DateTime  @default(now()) @updatedAt @db.Timestamptz
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
