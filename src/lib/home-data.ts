@@ -21,6 +21,11 @@ export interface ScanSummary {
   phases?: PhaseScore[];
   insights?: Record<string, string[]>;
   summary?: string | null;
+  archetype?: string | null;
+  strengths?: string[];
+  improvements?: string[];
+  nextMoves?: string[];
+  pillars?: string[];
 }
 
 export interface HomeData {
@@ -92,6 +97,16 @@ function toPhases(raw: unknown): PhaseScore[] {
   return out;
 }
 
+/** A JSON list of strings (scan strengths / fixes / next moves), capped. */
+function toList(raw: unknown, max = 4): string[] {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .filter((x): x is string => typeof x === 'string')
+    .map((x) => x.trim().slice(0, 400))
+    .filter(Boolean)
+    .slice(0, max);
+}
+
 function toPillars(raw: unknown): string[] {
   if (!Array.isArray(raw)) return [];
   return raw
@@ -120,6 +135,9 @@ export async function getHomeData(user: CurrentUser): Promise<HomeData> {
         archetype: true,
         phaseScores: true,
         insights: true,
+        strengths: true,
+        improvements: true,
+        nextMoves: true,
         contentPillars: true,
         summary: true,
         scannedAt: true,
@@ -153,6 +171,12 @@ export async function getHomeData(user: CurrentUser): Promise<HomeData> {
         phases: toPhases(s.phaseScores),
         insights: toInsights(s.insights),
         summary: s.summary,
+        archetype:
+          s.archetype && s.archetype !== 'unknown' ? normalizeArchetypeName(s.archetype) : null,
+        strengths: toList(s.strengths),
+        improvements: toList(s.improvements),
+        nextMoves: toList(s.nextMoves),
+        pillars: toPillars(s.contentPillars),
       }))
       .reverse(),
     phases: latest ? toPhases(latest.phaseScores) : [],
@@ -213,6 +237,11 @@ export function toDashboardData(h: HomeData): DashboardData | null {
       phases: s.phases ?? [],
       insights: s.insights ?? {},
       summary: s.summary ?? null,
+      archetype: s.archetype ?? null,
+      strengths: s.strengths ?? [],
+      improvements: s.improvements ?? [],
+      nextMoves: s.nextMoves ?? [],
+      pillars: s.pillars ?? [],
     })),
     scans: h.scans
       .map((s, i) => ({

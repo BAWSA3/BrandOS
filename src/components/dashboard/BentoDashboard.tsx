@@ -28,6 +28,7 @@ import {
 import XPBar from '@/components/dashboard/XPBar';
 import ScoreDetail, { type ScoreDetailPoint } from '@/components/dashboard/ScoreDetail';
 import RescanOverlay from '@/components/dashboard/RescanOverlay';
+import ScanReport from '@/components/dashboard/ScanReport';
 import PassShare from '@/components/dashboard/PassShare';
 import StationTile from '@/components/dashboard/StationTile';
 import { stationSlug } from '@/components/StationCard';
@@ -356,6 +357,14 @@ export default function BentoDashboard({
   // which tile's detail view is open (drill-downs)
   const [detail, setDetail] = useState<'score' | null>(null);
   const [detailPhase, setDetailPhase] = useState<string | null>(null);
+  // scan report: index into data.scoreDetail (oldest first)
+  const [report, setReport] = useState<number | null>(null);
+  const openReport = (id: string) => {
+    const i = data.scoreDetail?.findIndex((p) => p.id === id) ?? -1;
+    if (i < 0) return;
+    setDetail(null);
+    setReport(i);
+  };
 
   // Rescan: overlay while it runs, then the score rolls and the alert fires
   const router = useRouter();
@@ -695,37 +704,49 @@ export default function BentoDashboard({
                 <Label right={<span>Score / 100</span>}>Recent scans</Label>
                 <ul className="mt-4">
                   {(data.scans ?? []).map((sc, i) => (
-                    <li
-                      key={sc.id}
-                      className="grid grid-cols-[1fr_auto] items-center gap-4 border-t py-3"
-                      style={{ borderColor: C.rule }}
-                    >
-                      <div className="min-w-0">
-                        <div className="text-[14px]">{sc.label}</div>
-                        <div
-                          className="mt-1 text-[10px] uppercase tracking-[0.12em]"
-                          style={{ fontFamily: MONO, color: C.muted }}
-                        >
-                          {sc.delta === undefined
-                            ? 'First scan'
-                            : sc.delta === 0
-                              ? 'No change'
-                              : `${sc.delta > 0 ? '▲' : '▼'} ${Math.abs(sc.delta)} vs previous`}
-                        </div>
-                        <div className="mt-2 h-[3px] w-full" style={{ background: C.track }}>
-                          <FitBar fit={sc.score} top={i === 0} i={i} />
-                        </div>
-                      </div>
-                      <span
-                        className="w-[64px] text-right text-[30px] leading-none"
-                        style={{
-                          fontFamily: BIG,
-                          fontWeight: 500,
-                          color: i === 0 ? C.blue : C.ink,
-                        }}
+                    <li key={sc.id} className="border-t" style={{ borderColor: C.rule }}>
+                      <button
+                        type="button"
+                        onClick={() => openReport(sc.id)}
+                        disabled={!data.scoreDetail?.some((p) => p.id === sc.id)}
+                        aria-label={`Open the full report for the ${sc.label} scan`}
+                        className="group grid w-full grid-cols-[1fr_auto] items-center gap-4 py-3 text-left"
                       >
-                        <RollNumber value={sc.score} booted={booted} delay={0.25 + i * 0.12} />
-                      </span>
+                        <div className="min-w-0">
+                          <div className="text-[14px]">
+                            {sc.label}
+                            <span
+                              className="ml-2 text-[10px] uppercase tracking-[0.14em] opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100"
+                              style={{ fontFamily: MONO, color: C.blue }}
+                            >
+                              Full report ↗
+                            </span>
+                          </div>
+                          <div
+                            className="mt-1 text-[10px] uppercase tracking-[0.12em]"
+                            style={{ fontFamily: MONO, color: C.muted }}
+                          >
+                            {sc.delta === undefined
+                              ? 'First scan'
+                              : sc.delta === 0
+                                ? 'No change'
+                                : `${sc.delta > 0 ? '▲' : '▼'} ${Math.abs(sc.delta)} vs previous`}
+                          </div>
+                          <div className="mt-2 h-[3px] w-full" style={{ background: C.track }}>
+                            <FitBar fit={sc.score} top={i === 0} i={i} />
+                          </div>
+                        </div>
+                        <span
+                          className="w-[64px] text-right text-[30px] leading-none"
+                          style={{
+                            fontFamily: BIG,
+                            fontWeight: 500,
+                            color: i === 0 ? C.blue : C.ink,
+                          }}
+                        >
+                          <RollNumber value={sc.score} booted={booted} delay={0.25 + i * 0.12} />
+                        </span>
+                      </button>
                     </li>
                   ))}
                 </ul>
@@ -770,6 +791,18 @@ export default function BentoDashboard({
           </div>
         </div>
         <AnimatePresence>
+          {report !== null && !!data.scoreDetail?.length && (
+            <ScanReport
+              key="report"
+              points={data.scoreDetail}
+              index={report}
+              handle={data.handle}
+              onIndex={setReport}
+              onClose={() => setReport(null)}
+            />
+          )}
+        </AnimatePresence>
+        <AnimatePresence>
           {scan && (
             <RescanOverlay
               key="rescan"
@@ -788,6 +821,7 @@ export default function BentoDashboard({
               layoutId="tile-score"
               initialPhase={detailPhase}
               onClose={() => setDetail(null)}
+              onReport={openReport}
             />
           )}
         </AnimatePresence>
