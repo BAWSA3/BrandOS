@@ -204,6 +204,7 @@ function Tile({
         }
       }}
       data-cursor-zone={open ? 'open' : undefined}
+      data-surface={accent ? 'blue' : undefined}
       onMouseEnter={() => {
         if (!live) return;
         setInside(true);
