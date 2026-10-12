@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { getCurrentUser, getCurrentWorkspace } from '@/lib/auth';
 import { getHomeData, toDashboardData } from '@/lib/home-data';
+import { recordVisit } from '@/lib/progress';
 import BentoDashboard from '@/components/dashboard/BentoDashboard';
 import DashboardClient from './DashboardClient';
 
@@ -21,11 +22,21 @@ export default async function DashboardPage() {
   const workspace = await getCurrentWorkspace(user);
   const xConnections = user.platformConnections.filter((pc) => pc.platform === 'x');
   // Real-data bento on top once the user has a scan; the existing tools stay below.
-  const bento = toDashboardData(await getHomeData(user));
+  // The visit awards XP / advances the streak (null if migration 029 isn't applied).
+  const home = await getHomeData(user);
+  const progress = await recordVisit(user.id, home.scans);
+  const bento = toDashboardData(home);
+  if (bento && progress && progress.streakDays > 1) bento.ticker.streak = `${progress.streakDays}d`;
 
   return (
     <>
-      {bento && <BentoDashboard data={bento} />}
+      {bento && (
+        <BentoDashboard
+          data={bento}
+          xp={progress ? { total: progress.xpTotal, gains: progress.gains } : null}
+          scoreAlert={progress?.scoreAlert ?? null}
+        />
+      )}
       <DashboardClient
         user={{
           id: user.id,
