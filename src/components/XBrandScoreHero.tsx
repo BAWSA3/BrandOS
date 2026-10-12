@@ -13,8 +13,6 @@ import BrandIssuesSection from './BrandIssuesSection';
 import { SaveResultsPrompt } from './SaveResultsPrompt';
 import { useAuth } from '@/hooks/useAuth';
 import { domToPng } from 'modern-screenshot';
-import StationCard, { stationSlug } from './StationCard';
-import ReserveStation from './ReserveStation';
 import { AuthenticityAnalysis, ActivityAnalysis } from '@/lib/gemini';
 import { useXBrandScoreDemoCapture } from '@/hooks/useDemoCaptureIntegration';
 import DemoModeControls from './DemoModeControls';
@@ -1705,27 +1703,14 @@ export default function XBrandScoreHero({
                   </button>
                 </div>
               </div>
-              {/* Your brand station — archetype pixel-art card, shareable */}
-              {stationSlug(normalizeArchetypeName(brandScore.archetype?.primary || '')) && (
-                <div className="capture-hide mt-10 w-full">
-                  <div
-                    className="mb-3 text-center text-[11px] tracking-[0.15em] text-black/50 uppercase"
-                    style={{ fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace" }}
-                  >
-                    {'// your brand blueprint'}
-                  </div>
-                  <StationCard
-                    archetype={normalizeArchetypeName(brandScore.archetype?.primary || '')}
-                    username={profile.username}
-                    score={brandScore.overallScore}
-                    controls={false}
-                  />
-                  <ReserveStation
-                    username={profile.username}
-                    archetype={normalizeArchetypeName(brandScore.archetype?.primary || '')}
-                  />
-                </div>
-              )}
+              {/* One next step: keep attention on the score, then email the full breakdown */}
+              <a
+                href={`/breakdown?handle=${encodeURIComponent(profile.username)}`}
+                className="capture-hide mt-8 inline-flex items-center justify-center gap-2 rounded-[4px] bg-[#0047FF] px-7 py-4 text-[13px] font-semibold tracking-[0.12em] text-white uppercase transition-colors duration-200 hover:bg-[#0036C4]"
+                style={{ fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace" }}
+              >
+                Get The Full Breakdown <span aria-hidden>→</span>
+              </a>
             </div>
           </motion.div>
         )}
