@@ -20,12 +20,64 @@ export interface ScoreDetailPoint {
   id: string;
   /** "Oct 6" */
   label: string;
+  /** ISO timestamp of the scan (drives the timeline filter). */
+  date?: string;
   value: number;
   phases: PhaseScore[];
   /** Per-phase insights for this scan, keyed by phase label ('Define'). */
   insights?: Record<string, string[]>;
   /** The scan's written summary (latest scan at least). */
   summary?: string | null;
+}
+
+/* ------------------------------------------------------------- timeline */
+
+type Preset = '1M' | '3M' | '6M' | 'YTD' | '1Y' | 'ALL';
+type Range = { kind: 'preset'; key: Preset } | { kind: 'custom'; from: string; to: string }; // YYYY-MM
+const PRESETS: Preset[] = ['1M', '3M', '6M', 'YTD', '1Y', 'ALL'];
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const ym = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+const ymLabel = (v: string) => `${MONTHS[Number(v.slice(5, 7)) - 1]} ${v.slice(0, 4)}`;
+
+/** [start, end) bounds in ms for a range; null = unbounded. */
+function bounds(r: Range, now = new Date()): [number | null, number | null] {
+  if (r.kind === 'custom') {
+    const [fy, fm] = r.from.split('-').map(Number);
+    const [ty, tm] = r.to.split('-').map(Number);
+    return [new Date(fy, fm - 1, 1).getTime(), new Date(ty, tm, 1).getTime()];
+  }
+  const d = new Date(now);
+  switch (r.key) {
+    case '1M':
+      d.setMonth(d.getMonth() - 1);
+      return [d.getTime(), null];
+    case '3M':
+      d.setMonth(d.getMonth() - 3);
+      return [d.getTime(), null];
+    case '6M':
+      d.setMonth(d.getMonth() - 6);
+      return [d.getTime(), null];
+    case '1Y':
+      d.setFullYear(d.getFullYear() - 1);
+      return [d.getTime(), null];
+    case 'YTD':
+      return [new Date(now.getFullYear(), 0, 1).getTime(), null];
+    default:
+      return [null, null];
+  }
+}
+
+function rangeLabel(r: Range, now = new Date()): string {
+  if (r.kind === 'custom')
+    return r.from === r.to ? ymLabel(r.from) : `${ymLabel(r.from)} – ${ymLabel(r.to)}`;
+  return {
+    '1M': 'Last month',
+    '3M': 'Last 3 months',
+    '6M': 'Last 6 months',
+    YTD: `${now.getFullYear()} so far`,
+    '1Y': 'Last 12 months',
+    ALL: 'All time',
+  }[r.key];
 }
 
 function Micro({ children, className = '' }: { children: React.ReactNode; className?: string }) {
@@ -40,7 +92,7 @@ function Micro({ children, className = '' }: { children: React.ReactNode; classN
 }
 
 export default function ScoreDetail({
-  points,
+  points: all,
   layoutId,
   onClose,
   initialPhase = null,
@@ -53,13 +105,50 @@ export default function ScoreDetail({
 }) {
   const [phase, setPhase] = useState<string | null>(initialPhase);
   const reduce = useReducedMotion();
+  const dated = all.every((p) => p.date);
+
+  // timeline: which slice of history is on screen (all of it by default)
+  const [range, setRange] = useState<Range>({ kind: 'preset', key: 'ALL' });
+  const [customOpen, setCustomOpen] = useState(false);
+  const [lo0, hi0] = dated ? bounds(range) : [null, null];
+  const points = all.filter((p) => {
+    if (!p.date) return true;
+    const t = new Date(p.date).getTime();
+    return (lo0 === null || t >= lo0) && (hi0 === null || t < hi0);
+  });
+  const monthOptions = (() => {
+    if (!dated || !all.length) return [];
+    const out: string[] = [];
+    const d = new Date(all[0].date!);
+    d.setDate(1);
+    const end = ym(new Date());
+    while (ym(d) <= end && out.length < 120) {
+      out.push(ym(d));
+      d.setMonth(d.getMonth() + 1);
+    }
+    return out;
+  })();
+
   const last = points.length - 1;
-  const [sel, setSel] = useState(last);
+  const [sel, setSel] = useState(all.length - 1);
   const [hover, setHover] = useState<number | null>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
-  const shown = hover ?? sel;
+  const pickRange = (r: Range) => {
+    setRange(r);
+    setHover(null);
+    // select the latest scan inside the new range
+    const [a, b] = bounds(r);
+    const n = all.filter((p) => {
+      const t = p.date ? new Date(p.date).getTime() : 0;
+      return (a === null || t >= a) && (b === null || t < b);
+    }).length;
+    setSel(Math.max(0, n - 1));
+  };
+  const shown = Math.min(hover ?? sel, Math.max(0, last));
   const cur = points[shown];
-  const prev = shown > 0 ? points[shown - 1] : null;
+  // "vs previous" always compares with the scan just before, even if it's outside the range
+  const curAt = cur ? all.findIndex((p) => p.id === cur.id) : -1;
+  const prev = curAt > 0 ? all[curAt - 1] : null;
 
   useEffect(() => {
     // focus the close button; give focus back to whatever opened the panel
@@ -81,7 +170,7 @@ export default function ScoreDetail({
   }, [last, onClose]);
 
   // chart geometry (0-100 viewBox; padded range so the line never touches the edges)
-  const values = points.map((p) => p.value);
+  const values = points.length ? points.map((p) => p.value) : [0];
   const lo = Math.max(0, Math.min(...values) - 8);
   const hi = Math.min(100, Math.max(...values) + 6);
   const x = (i: number) => (points.length === 1 ? 50 : (i / last) * 100);
@@ -91,7 +180,7 @@ export default function ScoreDetail({
   const ticks = [lo, Math.round((lo + hi) / 2), hi];
 
   // what moved it: phase deltas vs the previous scan
-  const moves = cur.phases.map((ph) => {
+  const moves = (cur?.phases ?? []).map((ph) => {
     const before = prev?.phases.find((p) => p.key === ph.key)?.value;
     return { ...ph, delta: before === undefined ? null : ph.value - before };
   });
@@ -102,7 +191,11 @@ export default function ScoreDetail({
         : b,
     null
   );
-  const delta = prev ? cur.value - prev.value : null;
+  const delta = prev && cur ? cur.value - prev.value : null;
+  const span =
+    points.length > 1
+      ? { from: points[0], to: points[last], change: points[last].value - points[0].value }
+      : null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 md:p-8">
@@ -139,6 +232,8 @@ export default function ScoreDetail({
         <div className="flex items-start justify-between gap-4">
           {phase ? (
             <Micro className="opacity-80">Brand score · {phase}</Micro>
+          ) : !cur ? (
+            <Micro className="opacity-80">Brand score · history</Micro>
           ) : (
             <div>
               <Micro className="opacity-80">Brand score · history</Micro>
@@ -167,7 +262,7 @@ export default function ScoreDetail({
                       : `${delta > 0 ? '▲' : '▼'} ${Math.abs(delta)} vs ${prev!.label}`}
                   </Micro>
                 )}
-                {shown === last && (
+                {cur.id === all[all.length - 1]?.id && (
                   <Micro className="bg-white px-2 py-[3px] !text-[#0047FF]">Latest</Micro>
                 )}
               </div>
@@ -184,10 +279,112 @@ export default function ScoreDetail({
           </button>
         </div>
 
-        {phase ? (
+        {/* timeline: presets + a custom month range (filters in one row above the chart) */}
+        {dated && all.length > 1 && (
+          <div className="mt-6 border-y border-white/20 py-3">
+            <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label="Timeline">
+              {PRESETS.map((k) => {
+                const on = range.kind === 'preset' && range.key === k;
+                return (
+                  <button
+                    key={k}
+                    type="button"
+                    aria-pressed={on}
+                    onClick={() => {
+                      setCustomOpen(false);
+                      pickRange({ kind: 'preset', key: k });
+                    }}
+                    className={`border px-2.5 py-1.5 ${on ? 'border-white bg-white text-[#0047FF]' : 'border-white/30 hover:border-white'}`}
+                  >
+                    <Micro>{k === 'ALL' ? 'All' : k}</Micro>
+                  </button>
+                );
+              })}
+              <button
+                type="button"
+                aria-expanded={customOpen}
+                onClick={() => setCustomOpen((o) => !o)}
+                className={`border px-2.5 py-1.5 ${range.kind === 'custom' ? 'border-white bg-white text-[#0047FF]' : 'border-white/30 hover:border-white'}`}
+              >
+                <Micro>Custom {customOpen ? '▴' : '▾'}</Micro>
+              </button>
+              <span className="ml-auto opacity-80">
+                <Micro>
+                  {rangeLabel(range)}
+                  {span
+                    ? ` · ${span.from.value} → ${span.to.value} · ${span.change === 0 ? 'no change' : `${span.change > 0 ? '▲' : '▼'} ${Math.abs(span.change)}`}`
+                    : ''}
+                  {` · ${points.length} scan${points.length === 1 ? '' : 's'}`}
+                </Micro>
+              </span>
+            </div>
+            {customOpen && monthOptions.length > 0 && (
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                {(['from', 'to'] as const).map((end) => {
+                  const value =
+                    range.kind === 'custom'
+                      ? range[end]
+                      : end === 'from'
+                        ? monthOptions[0]
+                        : monthOptions[monthOptions.length - 1];
+                  return (
+                    <label key={end} className="flex items-center gap-2">
+                      <Micro className="opacity-80">{end === 'from' ? 'From' : 'To'}</Micro>
+                      <select
+                        value={value}
+                        onChange={(e) => {
+                          const cur0 =
+                            range.kind === 'custom'
+                              ? range
+                              : {
+                                  from: monthOptions[0],
+                                  to: monthOptions[monthOptions.length - 1],
+                                };
+                          let next = { ...cur0, [end]: e.target.value };
+                          // keep from <= to
+                          if (next.from > next.to)
+                            next =
+                              end === 'from'
+                                ? { ...next, to: next.from }
+                                : { ...next, from: next.to };
+                          pickRange({ kind: 'custom', from: next.from, to: next.to });
+                        }}
+                        className="border border-white/50 bg-[#0047FF] px-2 py-1.5 text-white"
+                        style={{ fontFamily: MONO, fontSize: 11, letterSpacing: '0.1em' }}
+                      >
+                        {monthOptions.map((m) => (
+                          <option key={m} value={m}>
+                            {ymLabel(m)}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {!cur ? (
+          <div className="py-14 text-center">
+            <p className="text-[16px] text-white/90">No scans in {rangeLabel(range)}.</p>
+            <button
+              type="button"
+              onClick={() => {
+                setCustomOpen(false);
+                pickRange({ kind: 'preset', key: 'ALL' });
+              }}
+              className="mt-4 border border-white px-3 py-2 hover:bg-white hover:text-[#0047FF]"
+            >
+              <Micro>Show all time</Micro>
+            </button>
+          </div>
+        ) : phase ? (
           <div className="mt-6">
             <PhaseDetail
               phase={phase}
+              all={all}
               points={points}
               sel={sel}
               onSelect={setSel}
@@ -292,8 +489,13 @@ export default function ScoreDetail({
                   ))}
                 </div>
                 <div
-                  className="pointer-events-none absolute -top-2 -translate-x-1/2 -translate-y-full whitespace-nowrap bg-white px-2 py-[3px]"
-                  style={{ left: `${Math.min(92, Math.max(8, x(shown)))}%`, color: BLUE }}
+                  className="pointer-events-none absolute -top-2 whitespace-nowrap bg-white px-2 py-[3px]"
+                  style={{
+                    left: `${x(shown)}%`,
+                    // keep the label inside the chart at either end
+                    transform: `translate(${x(shown) > 80 ? '-100%' : x(shown) < 20 ? '0%' : '-50%'}, -100%)`,
+                    color: BLUE,
+                  }}
                 >
                   <Micro>
                     {cur.label} · {cur.value}
