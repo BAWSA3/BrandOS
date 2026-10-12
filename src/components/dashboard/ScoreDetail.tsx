@@ -28,6 +28,12 @@ export interface ScoreDetailPoint {
   insights?: Record<string, string[]>;
   /** The scan's written summary (latest scan at least). */
   summary?: string | null;
+  /** Full-report fields (scan report view). */
+  archetype?: string | null;
+  strengths?: string[];
+  improvements?: string[];
+  nextMoves?: string[];
+  pillars?: string[];
 }
 
 /* ------------------------------------------------------------- timeline */
@@ -96,12 +102,15 @@ export default function ScoreDetail({
   layoutId,
   onClose,
   initialPhase = null,
+  onReport,
 }: {
   points: ScoreDetailPoint[];
   layoutId: string;
   onClose: () => void;
   /** Open straight into one phase (from a phase meter on the tile). */
   initialPhase?: string | null;
+  /** Open a scan's full report (by id). */
+  onReport?: (id: string) => void;
 }) {
   const [phase, setPhase] = useState<string | null>(initialPhase);
   const reduce = useReducedMotion();
@@ -156,8 +165,15 @@ export default function ScoreDetail({
     closeRef.current?.focus();
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
-      if (e.key === 'ArrowLeft') setSel((s) => Math.max(0, s - 1));
-      if (e.key === 'ArrowRight') setSel((s) => Math.min(last, s + 1));
+      // arrows win over a resting mouse: clear the hover preview
+      if (e.key === 'ArrowLeft') {
+        setHover(null);
+        setSel((s) => Math.max(0, s - 1));
+      }
+      if (e.key === 'ArrowRight') {
+        setHover(null);
+        setSel((s) => Math.min(last, s + 1));
+      }
     };
     window.addEventListener('keydown', onKey);
     const overflow = document.body.style.overflow;
@@ -264,6 +280,15 @@ export default function ScoreDetail({
                 )}
                 {cur.id === all[all.length - 1]?.id && (
                   <Micro className="bg-white px-2 py-[3px] !text-[#0047FF]">Latest</Micro>
+                )}
+                {onReport && (
+                  <button
+                    type="button"
+                    onClick={() => onReport(cur.id)}
+                    className="border border-white px-2 py-[3px] hover:bg-white hover:text-[#0047FF]"
+                  >
+                    <Micro>Full report →</Micro>
+                  </button>
                 )}
               </div>
             </div>

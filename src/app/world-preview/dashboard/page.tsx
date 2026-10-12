@@ -10,6 +10,7 @@ import BentoDashboard, { type DashboardData } from '@/components/dashboard/Bento
 //   /world-preview/dashboard?state=new  brand-new user (onboarding tiles)
 //   &theme=dark                         start in dark mode (light is the default; toggle in the top bar)
 //   &alert=0                            hide the score-changed notification
+//   &list=scans                       Recent scans (click a row for its full report)
 //   &xp=levelup                         the XP gained this visit crosses a level (LV 07 -> 08)
 
 const SAMPLE: DashboardData = {
@@ -84,6 +85,20 @@ const SAMPLE: DashboardData = {
     {
       id: 's4',
       date: '2026-09-18T17:00:00Z',
+      archetype: 'BUILD.EXE',
+      strengths: [
+        'The product reveal landed: two posts outperformed the rest.',
+        'Positioning is sharpening around creator brands.',
+      ],
+      improvements: [
+        'Growth came in one spike, then flattened.',
+        'A few off-voice replies remain.',
+      ],
+      nextMoves: [
+        'Follow the reveal with a build series while attention is high.',
+        'Pin the reveal post.',
+      ],
+      pillars: ['Building in public', 'Creator economy'],
       label: 'Sep 18',
       value: 68,
       phases: [
@@ -104,6 +119,23 @@ const SAMPLE: DashboardData = {
     {
       id: 's5',
       date: '2026-10-06T17:00:00Z',
+      archetype: 'BUILD.EXE',
+      strengths: [
+        'Clear builder-educator positioning: you build tools for creators, in public.',
+        'The BrandOS reveal outperformed everything else by 10x: demos are your format.',
+        'A consistent, taste-first voice that stands apart from trend-chasing.',
+      ],
+      improvements: [
+        'Posting about twice a week caps momentum; reach jumps on 4+ post weeks.',
+        'Promo posts drift into a more salesy tone than the rest of your feed.',
+        'Text-only takes underperform: pair build updates with a visual.',
+      ],
+      nextMoves: [
+        'Post 4x a week for the next month: two build updates, one take, one demo.',
+        'Turn the reveal format into a weekly series ("what I shipped this week").',
+        'Reply to your top replies with real takes to move from broadcast to conversation.',
+      ],
+      pillars: ['Building in public', 'Creator economy', 'Personal brand strategy'],
       label: 'Oct 6',
       value: 72,
       phases: [
@@ -214,9 +246,26 @@ const XP_EARNED = XP_GAINS.reduce((s, g) => s + g.xp, 0); // 275
 function Preview() {
   const q = useSearchParams();
   const isNew = q.get('state') === 'new';
+  // &list=scans shows "Recent scans" (what a real account sees today) instead of posts
+  const scansList = q.get('list') === 'scans';
+  const history = SAMPLE.scoreDetail ?? [];
   const data: DashboardData = isNew
     ? { ...SAMPLE, stage: 0, ticker: { ...SAMPLE.ticker, streak: '—', avgFit: 0 } }
-    : SAMPLE;
+    : scansList
+      ? {
+          ...SAMPLE,
+          posts: [],
+          scans: history
+            .map((p, i) => ({
+              id: p.id,
+              label: `Scan · ${p.label}`,
+              score: p.value,
+              delta: i > 0 ? p.value - history[i - 1].value : undefined,
+            }))
+            .reverse()
+            .slice(0, 4),
+        }
+      : SAMPLE;
   return (
     <BentoDashboard
       data={data}
