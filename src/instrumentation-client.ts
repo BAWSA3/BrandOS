@@ -31,6 +31,8 @@ initBotId({
     { path: '/api/reserve-station', method: 'POST' },
     // Full breakdown by email — email capture after the scan (spam surface)
     { path: '/api/breakdown', method: 'POST' },
+    // Dashboard rescan — signed-in AI cost surface
+    { path: '/api/dashboard/rescan', method: 'POST' },
     // Checkout — payment abuse surface
     { path: '/api/stripe/checkout', method: 'POST' },
   ],

@@ -222,6 +222,8 @@ function Preview() {
       data={data}
       isNew={isNew}
       initialTheme={q.get('theme') === 'dark' ? 'dark' : 'light'}
+      // Rescan simulates a scan here (no API call): +3 after ~9s
+      rescan={isNew ? undefined : 'demo'}
       // the score-changed notification (?alert=0 hides it)
       // LV 07, 1,240 / 1,750 XP after this visit (or crossing into LV 08 with &xp=levelup)
       xp={
