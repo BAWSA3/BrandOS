@@ -2,7 +2,7 @@
 
 import { useReducedMotion } from 'motion/react';
 import StudioRoom from '@/components/studio/StudioRoom';
-import TitleStationLoop, { TITLE_LOOPS } from '@/components/title/TitleStationLoop';
+import TitleStationLoop, { TITLE_STATIONS } from '@/components/title/TitleStationLoop';
 import { stationSlug } from '@/components/StationCard';
 import type { StudioThemeId } from '@/lib/studio-themes';
 import BrandPass, { type BrandPassData } from '@/components/dashboard/BrandPass';
@@ -106,7 +106,7 @@ export default function TitleHero({
   score,
   pass,
   theme = 'base',
-  hero = 'studio',
+  hero = 'station',
 }: {
   view: HeroView;
   archetype: string;
@@ -116,7 +116,7 @@ export default function TitleHero({
   pass?: BrandPassData | null;
   /** Studio theme (applies once the studio is complete). */
   theme?: StudioThemeId;
-  /** 'station': the photoreal station loop instead of the studio room (where rendered). */
+  /** 'station' (default): the photoreal 3D station; 'studio': the studio room. */
   hero?: 'studio' | 'station';
 }) {
   const reduce = useReducedMotion();
@@ -124,7 +124,7 @@ export default function TitleHero({
   const showPass = view === 'station' && !!pass;
   const stationOpacity = showPass ? 0.12 : view === 'rescan' ? 0.55 : 1;
   const slug = stationSlug(archetype);
-  const useStation = hero === 'station' && !!slug && TITLE_LOOPS.has(slug);
+  const useStation = hero === 'station' && !!slug && TITLE_STATIONS.has(slug);
   // callouts: monitors / chair / floor in the studio; CRT / window / plinth on the station
   const spots = useStation
     ? { a: [60, 12] as const, b: [40, 33] as const, c: [56, 87] as const }
