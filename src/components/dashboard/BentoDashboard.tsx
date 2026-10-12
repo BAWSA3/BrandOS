@@ -28,6 +28,8 @@ import {
 import XPBar from '@/components/dashboard/XPBar';
 import ScoreDetail, { type ScoreDetailPoint } from '@/components/dashboard/ScoreDetail';
 import RescanOverlay from '@/components/dashboard/RescanOverlay';
+import StationTile from '@/components/dashboard/StationTile';
+import { stationSlug } from '@/components/StationCard';
 import type { XPGain } from '@/lib/xp';
 import { STUDIO_STEPS, type StageNumber } from '@/lib/studio-stages';
 
@@ -396,6 +398,9 @@ export default function BentoDashboard({
     }
   };
   const alert = rescanAlert ?? scoreAlert;
+  // Station tile sits beside the score; the week tile then drops to row 2 next to posts.
+  const hasStation = !isNew && !!stationSlug(data.pass.archetype);
+  const listSpan = hasStation && data.week ? 'md:col-span-4' : 'md:col-span-7';
   const openScore = (phase: string | null = null) => {
     setDetailPhase(phase);
     setDetail('score');
@@ -576,7 +581,7 @@ export default function BentoDashboard({
 
             {/* Brand score: hero number, delta, trend, phase meters */}
             <Tile
-              className={data.week || isNew ? 'md:col-span-4' : 'md:col-span-7'}
+              className={data.week || isNew || hasStation ? 'md:col-span-4' : 'md:col-span-7'}
               accent
               open
               layoutId="tile-score"
@@ -592,6 +597,18 @@ export default function BentoDashboard({
                 onPhase={data.scoreDetail?.length ? (key) => openScore(key) : undefined}
               />
             </Tile>
+
+            {/* Your station: photoreal loop, day/night with the theme */}
+            {hasStation && (
+              <Tile className="md:col-span-3" open>
+                <StationTile
+                  archetype={data.pass.archetype}
+                  handle={data.handle}
+                  stationNumber={data.pass.stationNumber}
+                  mode={theme === 'dark' ? 'night' : 'day'}
+                />
+              </Tile>
+            )}
 
             {/* This week: goal meter + day strip (hidden until weekly data exists) */}
             {(isNew || data.week) && (
@@ -671,7 +688,7 @@ export default function BentoDashboard({
                 })}
               </div>
             ) : data.posts.length === 0 ? (
-              <Tile className="md:col-span-7" open>
+              <Tile className={listSpan} open>
                 <Label right={<span>Score / 100</span>}>Recent scans</Label>
                 <ul className="mt-4">
                   {(data.scans ?? []).map((sc, i) => (
@@ -711,7 +728,7 @@ export default function BentoDashboard({
                 </ul>
               </Tile>
             ) : (
-              <Tile className="md:col-span-7" open>
+              <Tile className={listSpan} open>
                 <Label right={<span>Fit / 100</span>}>Recent posts analyzed</Label>
                 <ul className="mt-4">
                   {data.posts.map((p, i) => {
