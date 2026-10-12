@@ -28,7 +28,7 @@ export default function SignupPage() {
   const rawNext = searchParams.get('next');
   // Only allow same-origin relative paths to prevent open-redirect.
   const next =
-    rawNext && rawNext.startsWith('/') && !rawNext.startsWith('//') ? rawNext : '/dashboard';
+    rawNext && rawNext.startsWith('/') && !rawNext.startsWith('//') ? rawNext : '/home';
   // tos param rides the callback URL so the acknowledgment survives OAuth
   // redirects AND the email-confirmation link; the callback persists it.
   const callbackUrl =

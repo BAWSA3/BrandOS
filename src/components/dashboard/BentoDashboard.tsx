@@ -94,10 +94,20 @@ export interface DashboardData {
   handle: string;
   avatarUrl?: string | null;
   stage: StageNumber;
-  ticker: { followers: string; change7d: string; score: number; streak: string; avgFit: number };
+  /** Stats with no real source yet are left out and hidden from the ticker. */
+  ticker: {
+    followers?: string;
+    change7d?: string;
+    score: number;
+    streak?: string;
+    avgFit?: number;
+    scans?: number;
+  };
   scoreHistory: { label: string; value: number }[];
-  streak: { done: number; target: number };
+  streak?: { done: number; target: number };
+  /** Analysed posts with fit scores; when empty, the tile lists recent scans instead. */
   posts: RecentPost[];
+  scans?: { id: string; label: string; score: number; delta?: number }[];
   pass: BrandPassData;
   scoreDelta?: { value: number; since: string };
   phases?: PhaseScore[];
@@ -224,13 +234,16 @@ function StatValue({ text }: { text: string }) {
 /** The top stat strip as a slow market-style ticker; pauses on hover. */
 function StatTicker({ data }: { data: DashboardData }) {
   const reduce = useReducedMotion();
-  const stats: [string, string][] = [
-    ['Followers', data.ticker.followers],
-    ['7D change', data.ticker.change7d],
-    ['Brand score', String(data.ticker.score)],
-    ['Streak', data.ticker.streak],
-    ['Avg fit', data.ticker.avgFit ? String(data.ticker.avgFit) : '—'],
-  ];
+  const stats = (
+    [
+      ['Followers', data.ticker.followers],
+      ['7D change', data.ticker.change7d],
+      ['Brand score', String(data.ticker.score)],
+      ['Streak', data.ticker.streak],
+      ['Avg fit', data.ticker.avgFit ? String(data.ticker.avgFit) : undefined],
+      ['Scans', data.ticker.scans ? String(data.ticker.scans) : undefined],
+    ] as [string, string | undefined][]
+  ).filter((s): s is [string, string] => !!s[1]);
   const items = stats.map(([k, v]) => (
     <div
       key={k}
@@ -447,7 +460,7 @@ export default function BentoDashboard({
             </Tile>
 
             {/* Brand score: hero number, delta, trend, phase meters */}
-            <Tile className="md:col-span-4" accent open>
+            <Tile className={data.week || isNew ? 'md:col-span-4' : 'md:col-span-7'} accent open>
               <BrandScoreTile
                 score={data.ticker.score}
                 history={data.scoreHistory}
@@ -458,30 +471,32 @@ export default function BentoDashboard({
               />
             </Tile>
 
-            {/* This week: goal meter + day strip */}
-            <Tile className="md:col-span-3" open={!isNew}>
-              {isNew || !data.week ? (
-                <>
-                  <Label>This week</Label>
-                  <div
-                    className="flex flex-1 items-center justify-center text-center text-[12px] uppercase tracking-[0.14em]"
-                    style={{ fontFamily: MONO, color: C.muted }}
-                  >
-                    Set your first goal in step 03
-                  </div>
-                </>
-              ) : (
-                <WeekTile
-                  range={data.week.range}
-                  days={data.week.days}
-                  done={data.streak.done}
-                  target={data.streak.target}
-                  streakWeeks={data.week.streakWeeks}
-                  booted={booted}
-                  label={<TileLabel>This week</TileLabel>}
-                />
-              )}
-            </Tile>
+            {/* This week: goal meter + day strip (hidden until weekly data exists) */}
+            {(isNew || data.week) && (
+              <Tile className="md:col-span-3" open={!isNew}>
+                {isNew || !data.week ? (
+                  <>
+                    <Label>This week</Label>
+                    <div
+                      className="flex flex-1 items-center justify-center text-center text-[12px] uppercase tracking-[0.14em]"
+                      style={{ fontFamily: MONO, color: C.muted }}
+                    >
+                      Set your first goal in step 03
+                    </div>
+                  </>
+                ) : (
+                  <WeekTile
+                    range={data.week.range}
+                    days={data.week.days}
+                    done={data.streak?.done ?? 0}
+                    target={data.streak?.target ?? 3}
+                    streakWeeks={data.week.streakWeeks}
+                    booted={booted}
+                    label={<TileLabel>This week</TileLabel>}
+                  />
+                )}
+              </Tile>
+            )}
 
             {/* Onboarding (new) or Recent posts (active) */}
             {isNew ? (
@@ -533,6 +548,46 @@ export default function BentoDashboard({
                   );
                 })}
               </div>
+            ) : data.posts.length === 0 ? (
+              <Tile className="md:col-span-7" open>
+                <Label right={<span>Score / 100</span>}>Recent scans</Label>
+                <ul className="mt-4">
+                  {(data.scans ?? []).map((sc, i) => (
+                    <li
+                      key={sc.id}
+                      className="grid grid-cols-[1fr_auto] items-center gap-4 border-t py-3"
+                      style={{ borderColor: C.rule }}
+                    >
+                      <div className="min-w-0">
+                        <div className="text-[14px]">{sc.label}</div>
+                        <div
+                          className="mt-1 text-[10px] uppercase tracking-[0.12em]"
+                          style={{ fontFamily: MONO, color: C.muted }}
+                        >
+                          {sc.delta === undefined
+                            ? 'First scan'
+                            : sc.delta === 0
+                              ? 'No change'
+                              : `${sc.delta > 0 ? '▲' : '▼'} ${Math.abs(sc.delta)} vs previous`}
+                        </div>
+                        <div className="mt-2 h-[3px] w-full" style={{ background: C.track }}>
+                          <FitBar fit={sc.score} top={i === 0} i={i} />
+                        </div>
+                      </div>
+                      <span
+                        className="w-[64px] text-right text-[30px] leading-none"
+                        style={{
+                          fontFamily: BIG,
+                          fontWeight: 500,
+                          color: i === 0 ? C.blue : C.ink,
+                        }}
+                      >
+                        <RollNumber value={sc.score} booted={booted} delay={0.25 + i * 0.12} />
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </Tile>
             ) : (
               <Tile className="md:col-span-7" open>
                 <Label right={<span>Fit / 100</span>}>Recent posts analyzed</Label>
