@@ -35,6 +35,7 @@ export default async function DashboardPage() {
           data={bento}
           xp={progress ? { total: progress.xpTotal, gains: progress.gains } : null}
           scoreAlert={progress?.scoreAlert ?? null}
+          rescan="live"
         />
       )}
       <DashboardClient

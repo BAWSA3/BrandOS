@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { haptic } from '@/lib/haptics';
 import { playSound, primeSounds } from '@/lib/ui-sounds';
@@ -26,6 +27,7 @@ import {
 } from '@/components/dashboard/StatTiles';
 import XPBar from '@/components/dashboard/XPBar';
 import ScoreDetail, { type ScoreDetailPoint } from '@/components/dashboard/ScoreDetail';
+import RescanOverlay from '@/components/dashboard/RescanOverlay';
 import type { XPGain } from '@/lib/xp';
 import { STUDIO_STEPS, type StageNumber } from '@/lib/studio-stages';
 
@@ -334,6 +336,7 @@ export default function BentoDashboard({
   initialTheme = 'light',
   scoreAlert,
   xp,
+  rescan,
 }: {
   data: DashboardData;
   isNew?: boolean;
@@ -341,6 +344,8 @@ export default function BentoDashboard({
   initialTheme?: DashTheme;
   /** The brand score changed since the last visit: show the notification + sound. */
   scoreAlert?: { delta: number; score: number } | null;
+  /** Show the Rescan button: 'live' scans for real (/api/dashboard/rescan), 'demo' simulates it. */
+  rescan?: 'live' | 'demo';
   /** XP total and what was earned since the last visit (the bar fills it in). */
   xp?: { total: number; gains: XPGain[] } | null;
 }) {
@@ -348,6 +353,49 @@ export default function BentoDashboard({
   // which tile's detail view is open (drill-downs)
   const [detail, setDetail] = useState<'score' | null>(null);
   const [detailPhase, setDetailPhase] = useState<string | null>(null);
+
+  // Rescan: overlay while it runs, then the score rolls and the alert fires
+  const router = useRouter();
+  const [scan, setScan] = useState<{ status: 'running' | 'done' | 'error'; error?: string } | null>(
+    null
+  );
+  const [scoreNow, setScoreNow] = useState<number | null>(null);
+  const [rescanAlert, setRescanAlert] = useState<{ delta: number; score: number } | null>(null);
+  const runRescan = async () => {
+    if (scan?.status === 'running') return;
+    setScan({ status: 'running' });
+    const before = scoreNow ?? data.ticker.score;
+    try {
+      let next: number;
+      if (rescan === 'demo') {
+        await new Promise((r) => window.setTimeout(r, 9000));
+        next = Math.min(100, before + 3);
+      } else {
+        const res = await fetch('/api/dashboard/rescan', { method: 'POST' });
+        const body = await res.json().catch(() => ({}));
+        if (!res.ok || typeof body.score !== 'number') {
+          setScan({
+            status: 'error',
+            error:
+              res.status === 429 && !body.error
+                ? 'Too many scans right now. Try again in a minute.'
+                : body.error,
+          });
+          return;
+        }
+        next = body.score;
+      }
+      setScan({ status: 'done' });
+      await new Promise((r) => window.setTimeout(r, 700));
+      setScan(null);
+      setScoreNow(next);
+      setRescanAlert({ delta: next - before, score: next });
+      if (rescan === 'live') router.refresh();
+    } catch {
+      setScan({ status: 'error', error: 'Scan failed. Check your connection and try again.' });
+    }
+  };
+  const alert = rescanAlert ?? scoreAlert;
   const openScore = (phase: string | null = null) => {
     setDetailPhase(phase);
     setDetail('score');
@@ -373,19 +421,23 @@ export default function BentoDashboard({
   const [alertOn, setAlertOn] = useState(false);
   const [alertTop, setAlertTop] = useState(16);
   useEffect(() => {
-    if (!scoreAlert?.delta) return;
-    const a = window.setTimeout(() => {
-      setAlertTop(belowTopBanners());
-      setAlertOn(true);
-      playSound('alert');
-      haptic('alert');
-    }, 1600);
+    if (!alert?.delta) return;
+    const a = window.setTimeout(
+      () => {
+        setAlertTop(belowTopBanners());
+        setAlertOn(true);
+        playSound('alert');
+        haptic('alert');
+      },
+      rescanAlert ? 300 : 1600
+    );
     const b = window.setTimeout(() => setAlertOn(false), 6800);
     return () => {
       window.clearTimeout(a);
       window.clearTimeout(b);
     };
-  }, [scoreAlert?.delta, scoreAlert?.score]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- replay only when the alert changes
+  }, [alert?.delta, alert?.score]);
   const steps = STUDIO_STEPS;
 
   return (
@@ -409,7 +461,7 @@ export default function BentoDashboard({
       }
     >
       <BootCtx.Provider value={booted}>
-        {scoreAlert && scoreAlert.delta !== 0 && (
+        {alert && alert.delta !== 0 && (
           <button
             type="button"
             role="status"
@@ -425,14 +477,14 @@ export default function BentoDashboard({
               transition: 'opacity 0.35s ease, transform 0.45s cubic-bezier(0.16,1,0.3,1)',
             }}
           >
-            <span className="text-[18px] leading-none">{scoreAlert.delta > 0 ? '▲' : '▼'}</span>
+            <span className="text-[18px] leading-none">{alert.delta > 0 ? '▲' : '▼'}</span>
             <span className="flex flex-col">
               <span className="text-[10px] uppercase tracking-[0.14em] opacity-80">
                 Brand score changed
               </span>
               <span className="mt-1 text-[13px] uppercase tracking-[0.1em]">
-                {scoreAlert.delta > 0 ? '+' : '−'}
-                {Math.abs(scoreAlert.delta)} · now {scoreAlert.score}
+                {alert.delta > 0 ? '+' : '−'}
+                {Math.abs(alert.delta)} · now {alert.score}
               </span>
             </span>
           </button>
@@ -458,6 +510,18 @@ export default function BentoDashboard({
               className="ml-auto flex shrink-0 items-center gap-2 pl-4"
               style={{ fontFamily: MONO }}
             >
+              {rescan && (
+                <button
+                  type="button"
+                  onClick={runRescan}
+                  disabled={scan?.status === 'running'}
+                  className="mr-1 border px-2 py-1 text-[10px] uppercase tracking-[0.14em] text-white disabled:opacity-60"
+                  style={{ background: C.blue, borderColor: C.blue }}
+                  aria-label="Rescan my brand"
+                >
+                  ↻ Rescan
+                </button>
+              )}
               <button
                 type="button"
                 onClick={() => setTheme((t) => (t === 'dark' ? 'light' : 'dark'))}
@@ -519,7 +583,7 @@ export default function BentoDashboard({
               onOpen={data.scoreDetail?.length ? () => openScore() : undefined}
             >
               <BrandScoreTile
-                score={data.ticker.score}
+                score={scoreNow ?? data.ticker.score}
                 history={data.scoreHistory}
                 delta={data.scoreDelta}
                 phases={data.phases}
@@ -685,6 +749,17 @@ export default function BentoDashboard({
             )}
           </div>
         </div>
+        <AnimatePresence>
+          {scan && (
+            <RescanOverlay
+              key="rescan"
+              handle={data.handle}
+              status={scan.status}
+              error={scan.error}
+              onClose={() => setScan(null)}
+            />
+          )}
+        </AnimatePresence>
         <AnimatePresence>
           {detail === 'score' && !!data.scoreDetail?.length && (
             <ScoreDetail
