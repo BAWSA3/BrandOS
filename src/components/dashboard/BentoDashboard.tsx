@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { createContext, useContext, useEffect, useRef, useState } from 'react';
+import { haptic } from '@/lib/haptics';
 import { playSound, primeSounds } from '@/lib/ui-sounds';
 import { motion, useReducedMotion } from 'motion/react';
 import { Ticker } from 'motion-plus/react';
@@ -171,7 +172,10 @@ function Tile({
   const fine = useFinePointer();
   const [hv, setHv] = useState(0);
   const [inside, setInside] = useState(false);
+  // Touch has no hover: a press locks the brackets on and presses the tile in.
+  const [pressed, setPressed] = useState(false);
   const live = fine && !reduce;
+  const release = () => setPressed(false);
   return (
     <section
       data-cursor-zone={open ? 'open' : undefined}
@@ -181,10 +185,20 @@ function Tile({
         setHv((n) => n + 1);
       }}
       onMouseLeave={() => setInside(false)}
+      onPointerDown={(e) => {
+        if (e.pointerType === 'mouse') return;
+        setPressed(true);
+        if (!reduce) setHv((n) => n + 1);
+      }}
+      onPointerUp={release}
+      onPointerCancel={release}
+      onPointerLeave={release}
       className={`relative flex flex-col p-5 ${className}`}
       style={
         {
           ...onBlue,
+          transform: pressed && open && !reduce ? 'scale(0.985)' : undefined,
+          transition: 'transform 0.12s steps(3, end)',
           background: accent ? C.blue : C.tile,
           border: `1px solid ${accent ? C.blue : C.rule}`,
           color: C.ink,
@@ -192,7 +206,7 @@ function Tile({
       }
     >
       <TileHoverCtx.Provider value={hv}>{children}</TileHoverCtx.Provider>
-      <CornerBrackets active={inside} color={accent ? '#FFFFFF' : C.blue} />
+      <CornerBrackets active={inside || pressed} color={accent ? '#FFFFFF' : C.blue} />
     </section>
   );
 }
@@ -332,6 +346,7 @@ export default function BentoDashboard({
       setAlertTop(belowTopBanners());
       setAlertOn(true);
       playSound('alert');
+      haptic('alert');
     }, 1600);
     const b = window.setTimeout(() => setAlertOn(false), 6800);
     return () => {
@@ -345,6 +360,10 @@ export default function BentoDashboard({
     <main
       className="min-h-screen"
       onPointerOver={onPointerOver}
+      onPointerDown={(e) => {
+        if (e.pointerType !== 'mouse' && (e.target as HTMLElement).closest('a, button'))
+          haptic('tap');
+      }}
       style={
         {
           ...THEMES[theme],

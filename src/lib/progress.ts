@@ -52,6 +52,17 @@ function scanAwards(scans: ScanSummary[]): Award[] {
   return out;
 }
 
+/** One chip per kind of gain: two rescans read "Rescan ×2 +60", not two "Rescan" chips. */
+function groupGains(events: { xp: number; label: string | null; kind: string }[]): XPGain[] {
+  const by = new Map<string, { xp: number; n: number }>();
+  for (const e of events) {
+    const label = e.label ?? e.kind;
+    const g = by.get(label) ?? { xp: 0, n: 0 };
+    by.set(label, { xp: g.xp + e.xp, n: g.n + 1 });
+  }
+  return [...by].map(([label, g]) => ({ label: g.n > 1 ? `${label} ×${g.n}` : label, xp: g.xp }));
+}
+
 /** Record this dashboard visit for the user and return their XP + streak. */
 export async function recordVisit(
   userId: string,
@@ -142,7 +153,7 @@ export async function recordVisit(
       return {
         xpTotal,
         level: levelFor(xpTotal).level,
-        gains: recent.map((e) => ({ label: e.label ?? e.kind, xp: e.xp })),
+        gains: groupGains(recent),
         streakDays: streak,
         scoreAlert,
       };

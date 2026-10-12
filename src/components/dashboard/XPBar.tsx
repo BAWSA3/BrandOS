@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { useReducedMotion } from 'motion/react';
+import { motion, useAnimationControls, useReducedMotion } from 'motion/react';
 import { AnimateNumber } from 'motion-plus/react';
+import { haptic } from '@/lib/haptics';
 import { playSound } from '@/lib/ui-sounds';
 import { levelFor, xpAtLevel, xpToNext, type XPGain } from '@/lib/xp';
 
@@ -40,6 +41,16 @@ export default function XPBar({
   const [flash, setFlash] = useState(false);
   const [filling, setFilling] = useState(false);
   const raf = useRef(0);
+  // the LV badge "thunks" (stepped squash, game feel) when XP lands or a level is reached
+  const badge = useAnimationControls();
+  const thunk = (big = false) => {
+    if (reduce) return;
+    void badge.start({
+      scaleX: [1, big ? 1.14 : 1.07, 0.97, 1],
+      scaleY: [1, big ? 0.82 : 0.9, 1.05, 1],
+      transition: { duration: big ? 0.36 : 0.26, ease: 'linear', times: [0, 0.35, 0.7, 1] },
+    });
+  };
 
   useEffect(() => {
     if (!booted || earned <= 0) return;
@@ -65,6 +76,8 @@ export default function XPBar({
     const levelUp = async () => {
       setFlash(true);
       playSound('levelUp');
+      haptic('levelUp');
+      thunk(true);
       await wait(reduce ? 1800 : 1400);
       if (!cancelled) setFlash(false);
     };
@@ -72,7 +85,14 @@ export default function XPBar({
     (async () => {
       await wait(delayMs);
       if (cancelled) return;
-      gains.forEach((_, i) => timers.push(window.setTimeout(() => setGainsOn(i + 1), i * 220)));
+      gains.forEach((_, i) =>
+        timers.push(
+          window.setTimeout(() => {
+            setGainsOn(i + 1);
+            haptic('tick');
+          }, i * 220)
+        )
+      );
       if (reduce) {
         setShown(total);
         if (levelFor(total).level > levelFor(start).level) await levelUp();
@@ -91,7 +111,10 @@ export default function XPBar({
         lv++;
       }
       if (!cancelled) await tween(from, total, 1100);
-      if (!cancelled) setFilling(false);
+      if (!cancelled) {
+        setFilling(false);
+        thunk();
+      }
     })();
 
     return () => {
@@ -120,8 +143,9 @@ export default function XPBar({
     >
       <div className="flex items-center gap-3 md:gap-4">
         {/* LV badge */}
-        <div
-          className="flex shrink-0 items-baseline gap-1.5 px-2.5 py-1.5 text-white"
+        <motion.div
+          animate={badge}
+          className="flex shrink-0 origin-bottom items-baseline gap-1.5 px-2.5 py-1.5 text-white"
           style={{ background: BLUE }}
         >
           <span className="text-[10px] uppercase tracking-[0.14em] opacity-80">LV</span>
@@ -132,7 +156,7 @@ export default function XPBar({
               <AnimateNumber format={{ minimumIntegerDigits: 2 }}>{level}</AnimateNumber>
             )}
           </span>
-        </div>
+        </motion.div>
 
         {/* segmented bar */}
         <div
