@@ -29,8 +29,19 @@ interface HandlerCtx {
   http?: { req?: Request };
 }
 
+// Using the MCP needs a BrandOS account (sign-in with usage limits is next).
+// Until that ships it stays open only on staging / local for testing.
+const ACCOUNT_REQUIRED =
+  'BrandOS in Claude and ChatGPT needs a BrandOS account. Create yours at ' +
+  `${SITE}/signup?utm_source=mcp. Connecting your account here is coming soon.`;
+function openForTesting(ctx: HandlerCtx): boolean {
+  const host = ctx.http?.req ? new URL(ctx.http.req.url).hostname : '';
+  return host === 'localhost' || host === '127.0.0.1' || host.includes('staging');
+}
+
 /** Null when allowed; otherwise the message to return. */
 function overLimit(tool: string, ctx: HandlerCtx): string | null {
+  if (!openForTesting(ctx)) return ACCOUNT_REQUIRED;
   const ip = ctx.http?.req ? getClientIdentifier(ctx.http.req) : 'unknown';
   if (checkRateLimit(`mcp:${tool}:${ip}`, PER_IP).limited) {
     return `You've hit the hourly limit. Try again later, or get your full brand read at ${SITE}.`;
@@ -64,9 +75,9 @@ export function registerBrandTools(server: any, origin: string) {
     {
       title: 'Analyze an X post',
       description:
-        'BrandOS brand breakdown of an X (Twitter) post: its voice, format, structure and taste signals; ' +
-        'the profile behind it (brand focus, pillars, taste); and why this post correlates with their brand, ' +
-        'with an on-brand fit score and two ways to sharpen it. Input: the post link.',
+        'BrandOS brand breakdown of an X (Twitter) post, judged against the author’s brand (their BrandOS ' +
+        'scan): an on-brand fit score and why, voice, format and hook, what fit, what drifted, and what to ' +
+        'try next time. The same read as the BrandOS dashboard. Input: the post link.',
       inputSchema: z.object({
         url: z.string().max(300).describe('Link to the X post, e.g. https://x.com/name/status/123'),
       }),
@@ -99,6 +110,7 @@ export function registerBrandTools(server: any, origin: string) {
       inputSchema: z.object({ handle: z.string().max(20).describe('X handle, with or without @') }),
     },
     async ({ handle }: { handle: string }, ctx: HandlerCtx): Promise<ToolResult> => {
+      if (!openForTesting(ctx)) return text(ACCOUNT_REQUIRED, true);
       if (!HANDLE_RE.test(handle)) return text('That is not a valid X handle.', true);
       const clean = handle.replace(/^@/, '').toLowerCase();
 
