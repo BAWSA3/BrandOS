@@ -5,6 +5,7 @@ import { recordVisit } from '@/lib/progress';
 import BentoDashboard from '@/components/dashboard/BentoDashboard';
 import RescanOnLoad from '@/components/dashboard/RescanOnLoad';
 import DashboardClient from './DashboardClient';
+import FirstScan from './FirstScan';
 
 // Auth-gated page: render per-request, never statically prerender at build.
 export const dynamic = 'force-dynamic';
@@ -33,8 +34,11 @@ export default async function DashboardPage({
   const bento = toDashboardData(home);
   if (bento && progress && progress.streakDays > 1) bento.ticker.streak = `${progress.streakDays}d`;
 
-  // "Rescan" on the main menu (/home) lands here with ?rescan=1
-  const autoRescan = (await searchParams).rescan === '1';
+  // "Rescan" on the main menu (/home) lands here with ?rescan=1. A signed-in
+  // account with X connected but no scan yet gets its first scan the same way,
+  // so the real dashboard (not the legacy tools) is what they land on.
+  const firstScan = !bento && xConnections.length > 0;
+  const autoRescan = (await searchParams).rescan === '1' || firstScan;
 
   return (
     <>
@@ -48,33 +52,37 @@ export default async function DashboardPage({
           homeHref="/home"
         />
       )}
-      <DashboardClient
-        user={{
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          xUsername: user.xUsername,
-          avatar: user.avatar,
-          role: user.role,
-        }}
-        workspace={
-          workspace
-            ? {
-                id: workspace.id,
-                name: workspace.name,
-                type: workspace.type,
-                plan: workspace.plan,
-                activeWorldId: workspace.activeWorldId,
-              }
-            : null
-        }
-        xConnections={xConnections.map((pc) => ({
-          id: pc.id,
-          username: pc.platformUsername,
-          status: pc.status,
-          connectedAt: pc.connectedAt.toISOString(),
-        }))}
-      />
+      {firstScan ? (
+        <FirstScan handle={home.handle} />
+      ) : (
+        <DashboardClient
+          user={{
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            xUsername: user.xUsername,
+            avatar: user.avatar,
+            role: user.role,
+          }}
+          workspace={
+            workspace
+              ? {
+                  id: workspace.id,
+                  name: workspace.name,
+                  type: workspace.type,
+                  plan: workspace.plan,
+                  activeWorldId: workspace.activeWorldId,
+                }
+              : null
+          }
+          xConnections={xConnections.map((pc) => ({
+            id: pc.id,
+            username: pc.platformUsername,
+            status: pc.status,
+            connectedAt: pc.connectedAt.toISOString(),
+          }))}
+        />
+      )}
     </>
   );
 }
