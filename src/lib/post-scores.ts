@@ -40,13 +40,14 @@ const list = (v: unknown, n: number, max: number) =>
         .map((x) => x.trim().slice(0, max))
     : [];
 
-const clean = (t: string) =>
+export const clean = (t: string) =>
   t
     .replace(/https:\/\/t\.co\/\S+/g, '')
     .replace(/\s+/g, ' ')
     .trim();
 /** Originals only: no retweets or replies. */
-const isOriginal = (t: SocialDataTweet) => !/^RT @/.test(t.text) && !/^@\w/.test(t.text.trim());
+export const isOriginal = (t: SocialDataTweet) =>
+  !/^RT @/.test(t.text) && !/^@\w/.test(t.text.trim());
 
 /** The post's time; falls back to the time inside the tweet id (snowflake). */
 function postedAt(t: SocialDataTweet): Date {
@@ -59,14 +60,18 @@ function postedAt(t: SocialDataTweet): Date {
   }
 }
 
-function median(nums: number[]): number {
+export function median(nums: number[]): number {
   if (!nums.length) return 0;
   const s = [...nums].sort((a, b) => a - b);
   const m = Math.floor(s.length / 2);
   return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
 }
 
+/** 'owner' writes to the person ("you"); 'viewer' writes about them (@handle / they). */
+export type Audience = 'owner' | 'viewer';
+
 function buildPrompt(opts: {
+  audience: Audience;
   handle: string;
   archetype: string | null;
   pillars: string[];
@@ -95,7 +100,11 @@ You are BrandOS, a brand strategist who reads taste. Score each TARGET post by @
 
 Rules:
 - Be specific to the evidence. No generic social-media advice.
-- Write every field TO the person, in second person ("you", "your posts"). Never "they", "their" or "the account". Never assume gender.
+${
+  opts.audience === 'owner'
+    ? '- Write every field TO the person, in second person ("you", "your posts"). Never "they", "their" or "the account". Never assume gender.'
+    : `- The reader is not @${opts.handle}: refer to them as @${opts.handle} or "they". Never assume gender.`
+}
 - Never rewrite a post. "sharpen" items are short, concrete suggestions for the next post like it; the person decides.
 - Every string is one short line. Return ONLY JSON, exactly:
 {"posts":[{"id":"","fit":0,"voice":"","format":"","hook":"","why":"","fits":["",""],"misses":[""],"sharpen":["",""]}]}
@@ -142,6 +151,7 @@ function parse(
  * Returns fit + breakdown per tweet id (posts the model skipped are absent).
  */
 export async function scoreTweets(input: {
+  audience?: Audience;
   handle: string;
   archetype: string | null;
   pillars: string[];
@@ -159,7 +169,12 @@ export async function scoreTweets(input: {
     model: MODEL,
     max_tokens: 2400,
     thinking: { type: 'disabled' },
-    messages: [{ role: 'user', content: buildPrompt({ ...input, archetype }) }],
+    messages: [
+      {
+        role: 'user',
+        content: buildPrompt({ ...input, audience: input.audience ?? 'owner', archetype }),
+      },
+    ],
   });
   const text = message.content[0]?.type === 'text' ? message.content[0].text : '';
   return parse(text, new Set(input.targets.map((t) => t.id)));
@@ -176,13 +191,9 @@ export async function scoreLatestPosts(userId: string): Promise<{ scored: number
   });
   if (!x) throw new Error('Connect your X account first.');
 
-  const [{ tweets, error }, scan, done] = await Promise.all([
+  const [{ tweets, error }, brand, done] = await Promise.all([
     fetchUserTweets(x.platformUserId, BASELINE + MAX_NEW + 10),
-    prisma.brandScan.findFirst({
-      where: { userId, status: 'active' },
-      orderBy: { scannedAt: 'desc' },
-      select: { archetype: true, contentPillars: true, summary: true },
-    }),
+    brandForUser(userId),
     prisma.postScore.findMany({ where: { userId }, select: { tweetId: true } }),
   ]);
   if (error && !tweets.length)
@@ -193,22 +204,48 @@ export async function scoreLatestPosts(userId: string): Promise<{ scored: number
   const targets = originals.filter((t) => !seen.has(t.id)).slice(0, MAX_NEW);
   if (!targets.length) return { scored: 0 };
 
-  const pillars = Array.isArray(scan?.contentPillars)
-    ? (scan.contentPillars as unknown[])
-        .filter((p): p is string => typeof p === 'string')
-        .slice(0, 4)
-    : [];
   const scores = await scoreTweets({
     handle: x.platformUsername,
-    archetype: scan?.archetype ?? null,
-    pillars,
-    summary: scan?.summary ?? null,
+    archetype: brand.archetype,
+    pillars: brand.pillars,
+    summary: brand.summary,
     baseline: originals.slice(0, BASELINE),
     targets,
   });
   if (!scores.size) throw new Error('The analysis came back incomplete. Try again.');
 
-  const base = median(originals.slice(0, BASELINE).map((t) => t.public_metrics.like_count));
+  const count = await saveScores(userId, targets, scores, originals.slice(0, BASELINE));
+  return { scored: count };
+}
+
+/** The brand an X post is judged against: its author's latest BrandOS scan. */
+export async function brandForUser(userId: string) {
+  const scan = await prisma.brandScan.findFirst({
+    where: { userId, status: 'active' },
+    orderBy: { scannedAt: 'desc' },
+    select: { archetype: true, contentPillars: true, summary: true, score: true },
+  });
+  const pillars = Array.isArray(scan?.contentPillars)
+    ? (scan.contentPillars as unknown[])
+        .filter((p): p is string => typeof p === 'string')
+        .slice(0, 4)
+    : [];
+  return {
+    archetype: scan?.archetype ?? null,
+    pillars,
+    summary: scan?.summary ?? null,
+    score: scan?.score ?? null,
+  };
+}
+
+/** Store scored posts for a user (once per post); returns how many were new. */
+export async function saveScores(
+  userId: string,
+  targets: SocialDataTweet[],
+  scores: Map<string, { fit: number; data: PostBreakdownData }>,
+  baseline: SocialDataTweet[]
+): Promise<number> {
+  const base = median(baseline.map((t) => t.public_metrics.like_count));
   const rows = targets
     .filter((t) => scores.has(t.id))
     .map((t) => {
@@ -216,7 +253,7 @@ export async function scoreLatestPosts(userId: string): Promise<{ scored: number
       return {
         userId,
         tweetId: t.id,
-        excerpt: clean(t.text).slice(0, 280),
+        excerpt: clean(t.text.split(/\n\[(?:attached|quoting)/)[0]).slice(0, 280),
         postedAt: postedAt(t),
         likes: t.public_metrics.like_count,
         replies: t.public_metrics.reply_count,
@@ -227,6 +264,7 @@ export async function scoreLatestPosts(userId: string): Promise<{ scored: number
         breakdown: s.data as unknown as object,
       };
     });
+  if (!rows.length) return 0;
   const { count } = await prisma.postScore.createMany({ data: rows, skipDuplicates: true });
-  return { scored: count };
+  return count;
 }

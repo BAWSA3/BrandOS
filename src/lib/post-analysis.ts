@@ -1,17 +1,30 @@
-import Anthropic from '@anthropic-ai/sdk';
 import prisma from '@/lib/db';
-import { fetchTweetById, fetchUserTweets, type SocialDataPost } from '@/lib/socialdata';
-import { GUARD_PREAMBLE, wrapUntrusted } from '@/lib/prompt-safety';
-import { clampScore, extractJson } from '@/lib/score-schemas';
+import {
+  fetchTweetById,
+  fetchUserTweets,
+  type SocialDataPost,
+  type SocialDataTweet,
+} from '@/lib/socialdata';
 import { getArchetypeInfo } from '@/lib/archetype-descriptions';
+import {
+  brandForUser,
+  clean,
+  isOriginal,
+  median,
+  saveScores,
+  scoreTweets,
+  type PostBreakdownData,
+} from '@/lib/post-scores';
 
-// BrandOS post breakdown (the MCP's analyze_post): read an X post the way a
-// brand strategist would, then the profile behind it, then why the two
-// correlate. Order follows the funnel: post (voice, format, structure) ->
-// profile (brand focus, taste) -> correlation (fit, why, what to sharpen).
+// BrandOS post breakdown (the MCP's analyze_post). Same engine as the
+// dashboard's "Recent posts analyzed" (src/lib/post-scores.ts), so a post gets
+// the same read in Claude / ChatGPT as on the dashboard:
+//   - the post is judged against its author's brand (their latest BrandOS scan
+//     when they have an account, else their public scan, else their posts);
+//   - when the person asking IS the author, the answer is written to them and
+//     saved to their dashboard (or the dashboard's existing read is reused).
 // Suggests, never rewrites the post.
 
-const MODEL = 'claude-sonnet-5';
 const RECENT_POSTS = 20;
 const CACHE_TTL_MS = 6 * 60 * 60 * 1000;
 const SITE = 'https://mybrandos.app';
@@ -21,25 +34,18 @@ export function brandLink(handle: string, tool: string): string {
   return `${SITE}/?scan=${encodeURIComponent(handle)}&utm_source=mcp&utm_medium=${tool}&utm_campaign=brand_read`;
 }
 
-export interface PostBreakdown {
-  post: { voice: string; format: string; structure: string; hook: string; tasteSignals: string[] };
-  profile: {
-    focus: string;
-    pillars: string[];
-    taste: string;
-    consistency: 'high' | 'medium' | 'low';
-  };
-  correlation: { fit: number; why: string; sharpen: string[] };
-}
-
 export interface PostAnalysis {
   handle: string;
   postId: string;
   excerpt: string;
   performance: string | null; // e.g. "3.2x their usual likes"
   archetype: string | null;
+  pillars: string[];
   score: number | null;
-  breakdown: PostBreakdown;
+  fit: number;
+  breakdown: PostBreakdownData;
+  /** Written to the author (it's their post) and on their dashboard. */
+  own: boolean;
 }
 
 /** Post id from an x.com / twitter.com status URL (or a bare id). */
@@ -54,99 +60,35 @@ export function parsePostId(input: string): string | null {
 
 const cache = new Map<string, { at: number; value: PostAnalysis }>();
 
-const str = (v: unknown, max: number) => (typeof v === 'string' ? v.trim().slice(0, max) : '');
-const list = (v: unknown, n: number, max: number) =>
-  Array.isArray(v)
-    ? v
-        .filter((x): x is string => typeof x === 'string' && !!x.trim())
-        .slice(0, n)
-        .map((x) => x.trim().slice(0, max))
-    : [];
-
-/** Validate + clamp the model's JSON. Null when it isn't a usable breakdown. */
-function parseBreakdown(text: string): PostBreakdown | null {
-  const raw = extractJson(text) as Record<string, Record<string, unknown>> | null;
-  if (!raw || typeof raw !== 'object' || !raw.post || !raw.profile || !raw.correlation) return null;
-  const { post, profile, correlation } = raw;
-  if (typeof correlation.fit !== 'number') return null;
-  const consistency = ['high', 'medium', 'low'].includes(String(profile.consistency))
-    ? (profile.consistency as 'high' | 'medium' | 'low')
-    : 'medium';
-  const out: PostBreakdown = {
-    post: {
-      voice: str(post.voice, 140),
-      format: str(post.format, 100),
-      structure: str(post.structure, 160),
-      hook: str(post.hook, 160),
-      tasteSignals: list(post.tasteSignals, 4, 60),
-    },
-    profile: {
-      focus: str(profile.focus, 180),
-      pillars: list(profile.pillars, 4, 60),
-      taste: str(profile.taste, 180),
-      consistency,
-    },
-    correlation: {
-      fit: clampScore(correlation.fit),
-      why: str(correlation.why, 320),
-      sharpen: list(correlation.sharpen, 2, 160),
+function toTweet(p: SocialDataPost): SocialDataTweet {
+  return {
+    id: p.id,
+    text: [
+      p.text,
+      p.media.length ? `[attached: ${p.media.join(' + ')}]` : '',
+      p.quotedText ? `[quoting] ${p.quotedText}` : '',
+    ]
+      .filter(Boolean)
+      .join('\n'),
+    created_at: p.createdAt,
+    public_metrics: {
+      like_count: p.metrics.likes,
+      retweet_count: p.metrics.reposts,
+      reply_count: p.metrics.replies,
+      quote_count: p.metrics.quotes,
+      impression_count: p.metrics.views,
     },
   };
-  return out.post.voice && out.profile.focus && out.correlation.why ? out : null;
 }
 
-function median(nums: number[]): number {
-  if (!nums.length) return 0;
-  const s = [...nums].sort((a, b) => a - b);
-  const mid = Math.floor(s.length / 2);
-  return s.length % 2 ? s[mid] : (s[mid - 1] + s[mid]) / 2;
-}
-
-function buildPrompt(
-  post: SocialDataPost,
-  recent: { text: string; likes: number }[],
-  performance: string | null,
-  archetype: string | null
-): string {
-  const a = post.author;
-  const recentBlock = recent
-    .map((t, i) => `${i + 1}. (${t.likes} likes) ${t.text.replace(/\s+/g, ' ').slice(0, 280)}`)
-    .join('\n');
-  return `${GUARD_PREAMBLE}
-You are BrandOS, a brand strategist who reads taste. Break down one X post, then the profile behind it, then explain why the post correlates with (or drifts from) that person's brand.
-
-Rules:
-- Be specific to the evidence below. No generic social-media advice.
-- "Taste" means what they are drawn to and how they express it: aesthetic, references, vocabulary, rhythm, formats.
-- Refer to the person as @handle or "they". Never assume gender.
-- The reader can't see the numbered list: never cite "post 7"; quote a few words instead.
-- Never rewrite the post. "sharpen" items are short, concrete suggestions; the person decides.
-- Keep every field short (one line). Pillars are 2-4 word labels. Return ONLY JSON in exactly this shape:
-{"post":{"voice":"","format":"","structure":"","hook":"","tasteSignals":["",""]},
- "profile":{"focus":"","pillars":["",""],"taste":"","consistency":"high|medium|low"},
- "correlation":{"fit":0,"why":"","sharpen":["",""]}}
-"fit" is 0-100: how on-brand this post is for THIS person, judged against their recent posts.
-
-THE POST (by @${a.username}${post.media.length ? `, with ${post.media.join(' + ')}` : ''}${post.isReply ? ', a reply' : ''}):
-${wrapUntrusted(post.text, 'post_text', 2000)}
-${post.quotedText ? `It quotes:\n${wrapUntrusted(post.quotedText, 'quoted_post', 1000)}\n` : ''}Engagement: ${post.metrics.likes} likes, ${post.metrics.reposts} reposts, ${post.metrics.replies} replies, ${post.metrics.bookmarks} bookmarks, ${post.metrics.views} views.${performance ? ` That is ${performance}.` : ''}
-
-THE PROFILE: ${a.name} (@${a.username}), ${a.public_metrics.followers_count} followers${archetype ? `, BrandOS archetype ${archetype}` : ''}.
-Bio:
-${wrapUntrusted(a.description || '(empty)', 'bio', 400)}
-
-THEIR RECENT ORIGINAL POSTS:
-${wrapUntrusted(recentBlock || '(none available)', 'recent_posts', 7000)}`;
-}
-
-/** Analyze a post. Throws Error with a user-facing message on failure. */
-export async function analyzePost(input: string): Promise<PostAnalysis> {
+/**
+ * Analyze a post. `viewerId` is the signed-in BrandOS user asking (if known).
+ * Throws Error with a user-facing message on failure.
+ */
+export async function analyzePost(input: string, viewerId?: string | null): Promise<PostAnalysis> {
   const id = parsePostId(input);
   if (!id)
     throw new Error('That is not an X post link. Paste a link like https://x.com/name/status/123.');
-
-  const hit = cache.get(id);
-  if (hit && Date.now() - hit.at < CACHE_TTL_MS) return hit.value;
 
   const { post, status } = await fetchTweetById(id);
   if (!post)
@@ -156,10 +98,25 @@ export async function analyzePost(input: string): Promise<PostAnalysis> {
         : 'Could not load the post. Try again shortly.'
     );
   if (post.author.protected) throw new Error('That account is private, so BrandOS can’t read it.');
-
   const handle = post.author.username;
-  const [{ tweets }, scan] = await Promise.all([
+
+  // Is the author on BrandOS? Then their own scan is the brand, and if they're
+  // the one asking, this is their post: answer to them, on their dashboard.
+  const author = await prisma.platformConnection
+    .findFirst({
+      where: { platform: 'x', platformUserId: post.author.id, status: 'active' },
+      select: { userId: true },
+    })
+    .catch(() => null);
+  const own = !!viewerId && author?.userId === viewerId;
+
+  const cacheKey = `${id}:${own ? 'own' : 'viewer'}`;
+  const hit = cache.get(cacheKey);
+  if (hit && Date.now() - hit.at < CACHE_TTL_MS) return hit.value;
+
+  const [{ tweets }, brand, publicScan, stored] = await Promise.all([
     fetchUserTweets(post.author.id, RECENT_POSTS + 5),
+    author ? brandForUser(author.userId) : null,
     prisma.brandScans
       .findFirst({
         where: { username: { equals: handle, mode: 'insensitive' } },
@@ -167,67 +124,95 @@ export async function analyzePost(input: string): Promise<PostAnalysis> {
         select: { score: true, archetype: true },
       })
       .catch(() => null),
+    own
+      ? prisma.postScore
+          .findUnique({
+            where: { userId_tweetId: { userId: viewerId!, tweetId: post.id } },
+            select: { fit: true, breakdown: true },
+          })
+          .catch(() => null)
+      : null,
   ]);
-  const recent = tweets
-    .filter((t) => t.id !== post.id)
-    .slice(0, RECENT_POSTS)
-    .map((t) => ({ text: t.text, likes: t.public_metrics.like_count }));
-
-  const base = median(recent.map((r) => r.likes));
+  const baseline = tweets.filter((t) => t.id !== post.id && isOriginal(t)).slice(0, RECENT_POSTS);
+  const base = median(baseline.map((t) => t.public_metrics.like_count));
   const performance =
-    base > 0 ? `${(post.metrics.likes / base).toFixed(1)}x their usual likes` : null;
-  const archetype = scan?.archetype
-    ? (getArchetypeInfo(scan.archetype)?.name ?? scan.archetype)
-    : null;
+    base > 0
+      ? `${(post.metrics.likes / base).toFixed(1)}x ${own ? 'your' : 'their'} usual likes`
+      : null;
+  const archetypeId = brand?.archetype ?? publicScan?.archetype ?? null;
+  const archetype =
+    archetypeId && archetypeId !== 'unknown'
+      ? (getArchetypeInfo(archetypeId)?.name ?? archetypeId)
+      : null;
 
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) throw new Error('Analysis is unavailable right now.');
-  const message = await new Anthropic({ apiKey }).messages.create({
-    model: MODEL,
-    max_tokens: 1200,
-    thinking: { type: 'disabled' },
-    messages: [{ role: 'user', content: buildPrompt(post, recent, performance, archetype) }],
-  });
-  const text = message.content[0]?.type === 'text' ? message.content[0].text : '';
-  const breakdown = parseBreakdown(text);
-  if (!breakdown) throw new Error('The analysis came back incomplete. Try again.');
+  let fit: number;
+  let breakdown: PostBreakdownData;
+  if (stored) {
+    // already on their dashboard: the same read, no model call
+    fit = stored.fit;
+    breakdown = stored.breakdown as unknown as PostBreakdownData;
+  } else {
+    const target = toTweet(post);
+    const scores = await scoreTweets({
+      audience: own ? 'owner' : 'viewer',
+      handle,
+      archetype: archetypeId,
+      pillars: brand?.pillars ?? [],
+      summary: brand?.summary ?? null,
+      baseline,
+      targets: [target],
+    });
+    const s = scores.get(post.id);
+    if (!s) throw new Error('The analysis came back incomplete. Try again.');
+    fit = s.fit;
+    breakdown = s.data;
+    if (own) await saveScores(viewerId!, [target], scores, baseline).catch(() => 0);
+  }
 
   const value: PostAnalysis = {
     handle,
     postId: post.id,
-    excerpt: post.text
-      .replace(/\s+/g, ' ')
-      .replace(/https:\/\/t\.co\/\S+/g, '')
-      .trim()
-      .slice(0, 90),
+    excerpt: clean(post.text).slice(0, 90),
     performance,
     archetype,
-    score: scan?.score ?? null,
+    pillars: brand?.pillars ?? [],
+    score: brand?.score ?? publicScan?.score ?? null,
+    fit,
     breakdown,
+    own,
   };
-  cache.set(id, { at: Date.now(), value });
+  cache.set(cacheKey, { at: Date.now(), value });
   return value;
 }
 
 /** The tight chat-ready breakdown (~10 lines). */
 export function renderPostAnalysis(a: PostAnalysis): string {
-  const { post, profile, correlation } = a.breakdown;
-  const link = brandLink(a.handle, 'analyze_post');
+  const b = a.breakdown;
+  const verdict = a.fit >= 80 ? 'On-brand' : a.fit >= 60 ? 'Close' : 'Off-brand';
+  const brandBits = [
+    a.archetype,
+    a.score !== null ? `brand score ${a.score}/100` : null,
+    a.pillars.length ? `pillars: ${a.pillars.join(' · ')}` : null,
+  ].filter(Boolean);
   return [
     `BrandOS breakdown · @${a.handle}: "${a.excerpt}${a.excerpt.length >= 90 ? '…' : ''}"`,
     '',
-    `THE POST: ${post.voice}. ${post.format}. ${post.structure}.`,
-    `Hook: ${post.hook}`,
-    `Taste signals: ${post.tasteSignals.join(' · ')}`,
+    `${verdict} · ${a.fit}/100${a.performance ? ` · ${a.performance}` : ''}`,
+    b.why,
     '',
-    `THE PROFILE${a.archetype ? ` (${a.archetype})` : ''}: ${profile.focus}`,
-    `Pillars: ${profile.pillars.join(' · ')} · Consistency: ${profile.consistency}`,
-    `Taste: ${profile.taste}`,
+    [b.voice && `Voice: ${b.voice}`, b.format && `Format: ${b.format}`].filter(Boolean).join(' · '),
+    b.hook ? `Hook: ${b.hook}` : '',
+    b.fits.length ? `What fit: ${b.fits.join(' · ')}` : '',
+    b.misses.length ? `What drifted: ${b.misses.join(' · ')}` : '',
+    b.sharpen.length ? `Next time: ${b.sharpen.map((t, i) => `${i + 1}) ${t}`).join('  ')}` : '',
+    brandBits.length
+      ? `\n${a.own ? 'Your brand' : `@${a.handle}'s brand`}: ${brandBits.join(' · ')}`
+      : '',
     '',
-    `WHY IT FITS (${correlation.fit}/100${a.performance ? `, ${a.performance}` : ''}): ${correlation.why}`,
-    `Sharpen: ${correlation.sharpen.map((s, i) => `${i + 1}) ${s}`).join('  ')}`,
-    '',
-    `Open @${a.handle}'s full brand dashboard: ${link}`,
-    `Get your own brand read: ${SITE}/?utm_source=mcp&utm_medium=analyze_post&utm_campaign=own_read`,
-  ].join('\n');
+    a.own
+      ? `Saved to your dashboard: ${SITE}/dashboard?utm_source=mcp&utm_medium=analyze_post`
+      : `Open @${a.handle}'s full brand read: ${brandLink(a.handle, 'analyze_post')}`,
+  ]
+    .filter((l, i, all) => l !== '' || (i > 0 && all[i - 1] !== ''))
+    .join('\n');
 }
