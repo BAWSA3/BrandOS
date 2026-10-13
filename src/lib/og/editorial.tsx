@@ -81,6 +81,10 @@ export type EditorialCard =
       score: number;
       archetype: string | null;
       phases: { define: number; check: number; generate: number; scale: number } | null;
+      /** Brand Pass on the right (approved P1): X avatar, taste line, station number. */
+      avatarUrl?: string | null;
+      taste?: string | null;
+      stationNumber?: string | null;
     }
   | { kind: 'invite'; handle: string | null }
   | { kind: 'home' };
@@ -93,12 +97,206 @@ const LABEL: Record<EditorialCard['kind'], string> = {
   home: 'BRAND INTELLIGENCE',
 };
 
+/**
+ * The person's X avatar as a data URL, or null. Fetched here (not by the
+ * renderer) so it's host-restricted and time-boxed: only X's image CDN, 3s,
+ * <= 2MB. Any failure falls back to the 3D station in the pass portrait.
+ */
+async function loadAvatar(url: string | null | undefined): Promise<string | null> {
+  if (!url) return null;
+  try {
+    const u = new URL(url.replace('_normal', '_400x400'));
+    if (u.protocol !== 'https:' || u.hostname !== 'pbs.twimg.com') return null;
+    const res = await fetch(u, { signal: AbortSignal.timeout(3000) });
+    const type = res.headers.get('content-type') ?? '';
+    if (!res.ok || !/^image\/(jpeg|png|webp)/.test(type)) return null;
+    const buf = Buffer.from(await res.arrayBuffer());
+    if (buf.length > 2_000_000) return null;
+    return `data:${type.split(';')[0]};base64,${buf.toString('base64')}`;
+  } catch {
+    return null;
+  }
+}
+
+/** The simplified Brand Pass for previews (big portrait, handle, stamp, score). */
+function Pass({
+  handle,
+  archetype,
+  taste,
+  score,
+  stationNumber,
+  portrait,
+  portraitIsArt,
+}: {
+  handle: string;
+  archetype: string | null;
+  taste: string | null;
+  score: number;
+  stationNumber: string | null;
+  portrait: string;
+  portraitIsArt: boolean;
+}) {
+  const s = 430 / 420;
+  const code = `BOS-${stationNumber ?? '0000'}-${handle.toUpperCase().slice(0, 8)}`;
+  const rows: [string, string][] = [
+    ['BRAND', `@${handle}`],
+    ['ARCHETYPE', archetype ?? '—'],
+    ...(taste ? ([['TASTE', taste]] as [string, string][]) : []),
+    ['SCORE', `${score} / 100`],
+  ];
+  return (
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        width: 430,
+        background: '#ECE9E1',
+        borderRadius: 16 * s,
+        padding: `${26 * s}px ${26 * s}px ${22 * s}px`,
+        boxShadow: '0 22px 50px rgba(0,0,0,0.28)',
+        transform: 'rotate(4deg)',
+        color: INK,
+      }}
+    >
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <span
+            style={{ fontFamily: 'Grotesk', fontSize: 40 * s, letterSpacing: -1, lineHeight: 1 }}
+          >
+            BRAND PASS
+          </span>
+          <span
+            style={{
+              fontFamily: 'VCR',
+              fontSize: 12 * s,
+              letterSpacing: 2,
+              color: MUTED,
+              marginTop: 6 * s,
+            }}
+          >
+            {`CARD CODE: ${code}`}
+          </span>
+        </div>
+        {archetype && (
+          <div
+            style={{
+              display: 'flex',
+              width: 70 * s,
+              height: 70 * s,
+              borderRadius: 35 * s,
+              border: `${3 * s}px solid ${BLUE}`,
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: BLUE,
+              fontFamily: 'VCR',
+              fontSize: (archetype.length > 6 ? 11 : 15) * s,
+              transform: 'rotate(-12deg)',
+            }}
+          >
+            {archetype}
+          </div>
+        )}
+      </div>
+      <div style={{ display: 'flex', marginTop: 18 * s }}>
+        <div style={{ display: 'flex', flexDirection: 'column', width: 168 * s }}>
+          <div
+            style={{
+              display: 'flex',
+              width: 168 * s,
+              height: 210 * s,
+              background: '#D9D5CB',
+              alignItems: 'center',
+              justifyContent: 'center',
+              overflow: 'hidden',
+            }}
+          >
+            {portraitIsArt ? (
+              <img src={portrait} height={196 * s} style={{ objectFit: 'contain' }} />
+            ) : (
+              <img
+                src={portrait}
+                width={168 * s}
+                height={210 * s}
+                style={{ objectFit: 'cover', filter: 'grayscale(100%) contrast(1.2)' }}
+              />
+            )}
+          </div>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'center',
+              background: BLUE,
+              color: '#FFFFFF',
+              fontFamily: 'VCR',
+              fontSize: 13 * s,
+              letterSpacing: 2,
+              padding: `${6 * s}px 0`,
+              marginTop: 8 * s,
+            }}
+          >
+            {stationNumber ? `* STATION ${stationNumber} *` : '* BRANDOS *'}
+          </div>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', marginLeft: 18 * s, flex: 1 }}>
+          {rows.map(([k, v]) => (
+            <div key={k} style={{ display: 'flex', flexDirection: 'column', marginBottom: 11 * s }}>
+              <span style={{ fontFamily: 'VCR', fontSize: 11 * s, letterSpacing: 2, color: MUTED }}>
+                {k}
+              </span>
+              <span
+                style={{
+                  fontFamily: 'Grotesk',
+                  fontSize: (v.length > 16 ? 16 : 19) * s,
+                  lineHeight: 1.15,
+                  marginTop: 2 * s,
+                }}
+              >
+                {v}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-end',
+          marginTop: 14 * s,
+        }}
+      >
+        <div style={{ display: 'flex' }}>
+          {Array.from({ length: 34 }, (_, i) => (
+            <div
+              key={i}
+              style={{
+                display: 'flex',
+                width: (i * 7 + handle.length) % 3 === 0 ? 4 * s : 1.6 * s,
+                height: 30 * s,
+                background: INK,
+                marginRight: 2 * s,
+              }}
+            />
+          ))}
+        </div>
+        <span style={{ fontFamily: 'VCR', fontSize: 11 * s, color: MUTED, letterSpacing: 2 }}>
+          MYBRANDOS.APP
+        </span>
+      </div>
+    </div>
+  );
+}
+
 /** Handle size that fits the left column (long handles step down). */
 const handleSize = (h: string) => (h.length > 15 ? 26 : h.length > 11 ? 30 : 34);
 
 export async function editorialImage(card: EditorialCard, headers?: Record<string, string>) {
   const slug = card.kind === 'station' || card.kind === 'score' ? artSlug(card.archetype) : null;
-  const [art, f] = await Promise.all([(slug ? ART[slug] : ART.lineup)(), fonts()]);
+  const [art, f, avatar] = await Promise.all([
+    (slug ? ART[slug] : ART.lineup)(),
+    fonts(),
+    card.kind === 'score' ? loadAvatar(card.avatarUrl) : Promise.resolve(null),
+  ]);
   const artSrc = `data:image/png;base64,${art.toString('base64')}`;
   const lineup = !slug;
 
@@ -286,8 +484,21 @@ export async function editorialImage(card: EditorialCard, headers?: Record<strin
         )}
       </div>
 
-      {/* right: the photoreal station (or the three-station lineup) */}
-      {lineup ? (
+      {/* right: score links show the person's Brand Pass (P1); the rest show
+          the photoreal station (or the three-station lineup) */}
+      {card.kind === 'score' ? (
+        <div style={{ position: 'absolute', right: 64, top: 124, display: 'flex' }}>
+          <Pass
+            handle={card.handle}
+            archetype={card.archetype}
+            taste={card.taste ?? null}
+            score={card.score}
+            stationNumber={card.stationNumber ?? null}
+            portrait={avatar ?? artSrc}
+            portraitIsArt={!avatar}
+          />
+        </div>
+      ) : lineup ? (
         <img
           src={artSrc}
           width={480}

@@ -1,5 +1,6 @@
 import prisma from '@/lib/db';
 import { normalizeArchetypeName } from '@/lib/archetype-names';
+import { getArchetypeInfo } from '@/lib/archetype-descriptions';
 
 /**
  * Server-only. The latest public scan for an X handle, from our own scan log
@@ -14,6 +15,10 @@ export interface PublicScan {
   score: number;
   archetype: string | null;
   phases: { define: number; check: number; generate: number; scale: number } | null;
+  /** X avatar URL from our profile cache (pbs.twimg.com), if known. */
+  avatarUrl: string | null;
+  /** Short taste line: the scan's first sentence if short, else the archetype tagline. */
+  taste: string | null;
 }
 
 const HANDLE_RE = /^[a-z0-9_]{1,30}$/;
@@ -26,7 +31,7 @@ export async function getPublicScan(rawHandle: string): Promise<PublicScan | nul
       prisma.brandScans.findFirst({
         where: { username: { equals: handle, mode: 'insensitive' } },
         orderBy: { createdAt: 'desc' },
-        select: { username: true, score: true, archetype: true, phaseScores: true },
+        select: { username: true, score: true, archetype: true, phaseScores: true, summary: true },
       }),
       prisma.xProfileCache
         .findUnique({ where: { username: handle }, select: { profileData: true } })
@@ -44,21 +49,24 @@ export async function getPublicScan(rawHandle: string): Promise<PublicScan | nul
       phases = null;
     }
     let name = handle;
+    let avatarUrl: string | null = null;
     try {
       const pd = profile?.profileData
         ? (JSON.parse(profile.profileData) as { name?: unknown })
         : null;
       if (typeof pd?.name === 'string' && pd.name.trim()) name = pd.name.trim().slice(0, 50);
+      const img = (pd as { profile_image_url?: unknown } | null)?.profile_image_url;
+      if (typeof img === 'string' && img.startsWith('https://pbs.twimg.com/')) avatarUrl = img;
     } catch {
       // keep the handle as the name
     }
-    return {
-      handle,
-      name,
-      score: row.score,
-      archetype: row.archetype ? normalizeArchetypeName(row.archetype) : null,
-      phases,
-    };
+    const archetype = row.archetype ? normalizeArchetypeName(row.archetype) : null;
+    const first = row.summary?.split(/(?<=[.!?])\s/)[0]?.trim();
+    const taste =
+      first && first.length <= 60
+        ? first
+        : ((archetype ? getArchetypeInfo(archetype)?.tagline : null) ?? null);
+    return { handle, name, score: row.score, archetype, phases, avatarUrl, taste };
   } catch (e) {
     console.error('[public-scan] lookup failed', e);
     return null;
