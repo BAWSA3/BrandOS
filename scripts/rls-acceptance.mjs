@@ -11,7 +11,7 @@
 //
 // What it asserts:
 //   A. Anon surface     — base tables locked, public view + PlanLimit readable
-//   B. Legacy guard     — anon BrandScans INSERT is value-constrained (mig 010)
+//   B. Scan + email lock — anon can't INSERT BrandScans or touch EmailSignup (mig 031)
 //   C. Cross-user RLS   — members see only their workspace; insert needs an
 //                         owned, active X connection (simulated via SET ROLE)
 // ============================================================================
@@ -42,7 +42,10 @@ function relaxedUrl(cs) {
 }
 
 const anon = createClient(sbUrl, anonKey, { auth: { persistSession: false } });
-const db = new pg.Client({ connectionString: relaxedUrl(pgUrl), ssl: { rejectUnauthorized: false } });
+const db = new pg.Client({
+  connectionString: relaxedUrl(pgUrl),
+  ssl: { rejectUnauthorized: false },
+});
 
 // ---- tiny test harness ------------------------------------------------------
 let passed = 0;
@@ -71,36 +74,43 @@ async function seedUserStack(label) {
   const { rows: required } = await db.query(
     `SELECT column_name, data_type FROM information_schema.columns
      WHERE table_schema = 'public' AND table_name = 'User' AND is_nullable = 'NO'
-       AND column_default IS NULL AND column_name NOT IN ('id', 'supabaseId')`,
+       AND column_default IS NULL AND column_name NOT IN ('id', 'supabaseId')`
   );
   const placeholder = (col, type) =>
-    /timestamp|date/.test(type) ? new Date()
-    : /int|numeric|double|real/.test(type) ? 0
-    : type === 'boolean' ? false
-    : `${userId}_${col}`;
+    /timestamp|date/.test(type)
+      ? new Date()
+      : /int|numeric|double|real/.test(type)
+        ? 0
+        : type === 'boolean'
+          ? false
+          : `${userId}_${col}`;
   const cols = ['id', 'supabaseId', ...required.map((r) => r.column_name)];
-  const vals = [userId, supabaseId, ...required.map((r) => placeholder(r.column_name, r.data_type))];
+  const vals = [
+    userId,
+    supabaseId,
+    ...required.map((r) => placeholder(r.column_name, r.data_type)),
+  ];
   await db.query(
     `INSERT INTO "User" (${cols.map((c) => `"${c}"`).join(', ')})
      VALUES (${cols.map((_, i) => `$${i + 1}`).join(', ')})`,
-    vals,
+    vals
   );
   const ws = await db.query(
     `INSERT INTO "Workspace" (name, type, owner_user_id, created_at, updated_at)
      VALUES ($1,'personal',$2, now(), now()) RETURNING id`,
-    [`${SENTINEL}_${label}`, userId],
+    [`${SENTINEL}_${label}`, userId]
   );
   const workspaceId = ws.rows[0].id;
   await db.query(
     `INSERT INTO "WorkspaceMember" (workspace_id, user_id, role) VALUES ($1,$2,'owner')`,
-    [workspaceId, userId],
+    [workspaceId, userId]
   );
   const connId = `${SENTINEL}_conn_${label}_${randomUUID().slice(0, 6)}`;
   await db.query(
     `INSERT INTO "PlatformConnection"
        ("id","platform","platformUserId","platformUsername","accessToken","scopes","userId","updatedAt","workspace_id","status")
      VALUES ($1,'x',$2,$3,'tok','[]',$4,now(),$5,'active')`,
-    [connId, `xid_${label}_${RUN}`, `handle_${label}`, userId, workspaceId],
+    [connId, `xid_${label}_${RUN}`, `handle_${label}`, userId, workspaceId]
   );
   return { userId, supabaseId, workspaceId, connId };
 }
@@ -110,7 +120,7 @@ async function seedScan(stack, username) {
     `INSERT INTO "BrandScan"
        (user_id, workspace_id, platform_connection_id, x_username, score, archetype, phase_scores, strengths, improvements)
      VALUES ($1,$2,$3,$4,80,'Test','{}'::jsonb,'[]'::jsonb,'[]'::jsonb) RETURNING id`,
-    [stack.userId, stack.workspaceId, stack.connId, username],
+    [stack.userId, stack.workspaceId, stack.connId, username]
   );
   return r.rows[0].id;
 }
@@ -143,7 +153,9 @@ async function main() {
   // ---- A. Anon surface (read-only) -----------------------------------------
   console.log('A. Anon read surface');
   await test('BrandScan (Phase 1 base table) is NOT anon-readable', async () => {
-    const { error, count } = await anon.from('BrandScan').select('*', { count: 'exact', head: true });
+    const { error, count } = await anon
+      .from('BrandScan')
+      .select('*', { count: 'exact', head: true });
     assert(error || count === 0, `expected block/empty, got count=${count}`);
   });
   await test('Workspace returns zero rows to anon', async () => {
@@ -151,30 +163,52 @@ async function main() {
     assert(count === 0, `expected 0, got ${count}`);
   });
   await test('SecurityAuditLog returns zero rows to anon', async () => {
-    const { count } = await anon.from('SecurityAuditLog').select('*', { count: 'exact', head: true });
+    const { count } = await anon
+      .from('SecurityAuditLog')
+      .select('*', { count: 'exact', head: true });
     assert(count === 0, `expected 0, got ${count}`);
   });
   await test('brand_scans_public_card view is anon-readable', async () => {
-    const { error } = await anon.from('brand_scans_public_card').select('*', { count: 'exact', head: true });
+    const { error } = await anon
+      .from('brand_scans_public_card')
+      .select('*', { count: 'exact', head: true });
     assert(!error, `expected readable, got ${error?.message}`);
   });
   await test('PlanLimit is anon-readable (intended public config)', async () => {
-    const { error, count } = await anon.from('PlanLimit').select('*', { count: 'exact', head: true });
+    const { error, count } = await anon
+      .from('PlanLimit')
+      .select('*', { count: 'exact', head: true });
     assert(!error && count > 0, `expected readable rows, got count=${count} err=${error?.message}`);
   });
 
-  // ---- B. Legacy BrandScans anon-insert guard (migration 010) --------------
-  console.log('\nB. Legacy BrandScans anti-poisoning guard');
-  await test('valid anon insert (score 80) is accepted', async () => {
-    const { error } = await anon.from('BrandScans').insert({ username: SENTINEL, score: 80, archetype: 'Test' });
-    assert(!error, `expected accept, got ${error?.message}`);
+  // ---- B. Scan + email-list lock (migration 031) ----------------------------
+  // Scans are written server-side (Prisma) since 031; any anon insert, even a
+  // well-formed one, must be rejected so nobody can forge a handle's score.
+  console.log('\nB. Scan + email-list lock (anon writes blocked, list unreadable)');
+  await test('valid anon BrandScans insert (score 80) is rejected', async () => {
+    const { error } = await anon
+      .from('BrandScans')
+      .insert({ username: SENTINEL, score: 80, archetype: 'Test' });
+    assert(!!error, 'expected rejection but anon insert succeeded — migration 031 not applied?');
+  });
+  await test('anon cannot read the email list (EmailSignup)', async () => {
+    const { data, error } = await anon.from('EmailSignup').select('id').limit(1);
+    assert(!!error || (data ?? []).length === 0, `expected no rows, got ${data?.length}`);
+  });
+  await test('anon cannot add to the email list (EmailSignup insert)', async () => {
+    const { error } = await anon.from('EmailSignup').insert({ email: `${SENTINEL}@example.com` });
+    assert(!!error, 'expected rejection but anon insert succeeded — migration 031 not applied?');
   });
   await test('out-of-range score (9999) is rejected', async () => {
-    const { error } = await anon.from('BrandScans').insert({ username: SENTINEL, score: 9999, archetype: 'Test' });
+    const { error } = await anon
+      .from('BrandScans')
+      .insert({ username: SENTINEL, score: 9999, archetype: 'Test' });
     assert(!!error, 'expected rejection but insert succeeded — guard (migration 010) not applied?');
   });
   await test('oversized username is rejected', async () => {
-    const { error } = await anon.from('BrandScans').insert({ username: 'x'.repeat(50), score: 50, archetype: 'Test' });
+    const { error } = await anon
+      .from('BrandScans')
+      .insert({ username: 'x'.repeat(50), score: 50, archetype: 'Test' });
     assert(!!error, 'expected rejection but insert succeeded — guard (migration 010) not applied?');
   });
 
@@ -209,7 +243,7 @@ async function main() {
         `INSERT INTO "BrandScan"
            (user_id, workspace_id, platform_connection_id, x_username, score, archetype, phase_scores, strengths, improvements)
          VALUES ($1,$2,$3,'alice',77,'Test','{}'::jsonb,'[]'::jsonb,'[]'::jsonb) RETURNING id`,
-        [a.userId, a.workspaceId, a.connId],
+        [a.userId, a.workspaceId, a.connId]
       );
       assert(r.rows.length === 1, 'expected insert to succeed');
     });
@@ -225,7 +259,7 @@ async function main() {
           `INSERT INTO "BrandScan"
              (user_id, workspace_id, platform_connection_id, x_username, score, archetype, phase_scores, strengths, improvements)
            VALUES ($1,$2,$3,'alice',77,'Test','{}'::jsonb,'[]'::jsonb,'[]'::jsonb)`,
-          [a.userId, a.workspaceId, b.connId],
+          [a.userId, a.workspaceId, b.connId]
         );
       } catch {
         threw = true;
@@ -244,7 +278,7 @@ async function main() {
           `INSERT INTO "BrandScan"
              (user_id, workspace_id, platform_connection_id, x_username, score, archetype, phase_scores, strengths, improvements)
            VALUES ($1,$2,$3,'alice',77,'Test','{}'::jsonb,'[]'::jsonb,'[]'::jsonb)`,
-          [b.userId, a.workspaceId, a.connId],
+          [b.userId, a.workspaceId, a.connId]
         );
       } catch {
         threw = true;
