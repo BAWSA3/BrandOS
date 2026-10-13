@@ -159,6 +159,7 @@ model User {
   stationNotes               StationNote[] @relation("StationNoteAuthor")
   xpEvents                   XPEvent[]     // XP ledger (migration 029)
   progress                   UserProgress? // XP total + streaks (migration 029)
+  postScores                 PostScore[]   // per-post brand fit (migration 033)
   noteReports                NoteReport[]  @relation("NoteReporter")
 }
 
@@ -1273,4 +1274,25 @@ model UserProgress {
   createdAt         DateTime  @default(now()) @db.Timestamptz
   updatedAt         DateTime  @default(now()) @updatedAt @db.Timestamptz
   user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// Per-post brand-fit breakdown for "Recent posts analyzed" (migration 033)
+model PostScore {
+  id         String   @id @default(dbgenerated("(gen_random_uuid())::text"))
+  userId     String
+  tweetId    String
+  excerpt    String
+  postedAt   DateTime @db.Timestamptz
+  likes      Int      @default(0)
+  replies    Int      @default(0)
+  reposts    Int      @default(0)
+  views      Int      @default(0)
+  multiple   Float?
+  fit        Int
+  breakdown  Json
+  analyzedAt DateTime @default(now()) @db.Timestamptz
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, tweetId])
+  @@index([userId, postedAt(sort: Desc)])
 }

@@ -29,10 +29,12 @@ import XPBar from '@/components/dashboard/XPBar';
 import ScoreDetail, { type ScoreDetailPoint } from '@/components/dashboard/ScoreDetail';
 import RescanOverlay from '@/components/dashboard/RescanOverlay';
 import ScanReport from '@/components/dashboard/ScanReport';
+import PostRow from '@/components/dashboard/PostRow';
 import PassShare from '@/components/dashboard/PassShare';
 import StationTile from '@/components/dashboard/StationTile';
 import { stationSlug } from '@/components/StationCard';
 import type { XPGain } from '@/lib/xp';
+import type { PostBreakdownData } from '@/lib/post-scores';
 import { STUDIO_STEPS, type StageNumber } from '@/lib/studio-stages';
 
 // The dashboard (docs/specs/TITLE-SCREEN-AND-DASHBOARD.md): dark bento grid,
@@ -96,6 +98,10 @@ export interface RecentPost {
   fit: number;
   likes: number;
   multiple: string; // "2.0x"
+  /** Why it scored that way + what to sharpen (the row's dropdown). */
+  breakdown?: PostBreakdownData;
+  /** Link to the post on X. */
+  url?: string;
 }
 
 export interface DashboardData {
@@ -411,6 +417,49 @@ export default function BentoDashboard({
     }
   };
   const alert = rescanAlert ?? scoreAlert;
+
+  // Recent posts: one breakdown open at a time; "Analyze my latest posts"
+  const [openPost, setOpenPost] = useState<string | null>(null);
+  const [postRun, setPostRun] = useState<{ busy: boolean; note?: string }>({ busy: false });
+  const analyzePosts = async () => {
+    if (postRun.busy) return;
+    setPostRun({ busy: true });
+    try {
+      if (rescan === 'demo') {
+        await new Promise((r) => window.setTimeout(r, 2000));
+        setPostRun({ busy: false, note: 'Preview: nothing new to score' });
+        return;
+      }
+      const res = await fetch('/api/dashboard/post-scores', { method: 'POST' });
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setPostRun({ busy: false, note: body.error ?? 'Could not analyze right now' });
+        return;
+      }
+      setPostRun({
+        busy: false,
+        note: body.scored
+          ? `${body.scored} new post${body.scored > 1 ? 's' : ''} scored`
+          : 'No new posts since last time',
+      });
+      if (body.scored) router.refresh();
+    } catch {
+      setPostRun({ busy: false, note: 'Could not analyze right now' });
+    }
+  };
+  const analyzeButton = rescan ? (
+    <button
+      type="button"
+      onClick={analyzePosts}
+      disabled={postRun.busy}
+      className="uppercase hover:underline disabled:opacity-60"
+      style={{ color: C.blue }}
+    >
+      {postRun.busy ? 'Analyzing…' : (postRun.note ?? '↻ Analyze new posts')}
+    </button>
+  ) : (
+    <span>Fit / 100</span>
+  );
   // Station tile sits beside the score; the week tile then drops to row 2 next to posts.
   const hasStation = !isNew && !!stationSlug(data.pass.archetype);
   const listSpan = hasStation && data.week ? 'md:col-span-4' : 'md:col-span-7';
@@ -705,6 +754,27 @@ export default function BentoDashboard({
             ) : data.posts.length === 0 ? (
               <Tile className={listSpan}>
                 <Label right={<span>Score / 100</span>}>Recent scans</Label>
+                {rescan && (
+                  <button
+                    type="button"
+                    onClick={analyzePosts}
+                    disabled={postRun.busy}
+                    className="mt-3 flex w-full items-center justify-between border px-3 py-2.5 text-left disabled:opacity-60"
+                    style={{ borderColor: C.rule }}
+                  >
+                    <span className="text-[13px]">
+                      {postRun.busy
+                        ? 'Reading your latest posts…'
+                        : (postRun.note ?? 'See how your latest posts score for your brand')}
+                    </span>
+                    <span
+                      className="text-[10px] uppercase tracking-[0.14em]"
+                      style={{ fontFamily: MONO, color: C.blue }}
+                    >
+                      {postRun.busy ? '…' : 'Analyze ↗'}
+                    </span>
+                  </button>
+                )}
                 <ul className="mt-4">
                   {(data.scans ?? []).map((sc, i) => (
                     <li key={sc.id} className="border-t" style={{ borderColor: C.rule }}>
@@ -756,36 +826,22 @@ export default function BentoDashboard({
               </Tile>
             ) : (
               <Tile className={listSpan}>
-                <Label right={<span>Fit / 100</span>}>Recent posts analyzed</Label>
+                <Label right={analyzeButton}>Recent posts analyzed</Label>
                 <ul className="mt-4">
                   {data.posts.map((p, i) => {
                     const top = p.fit === Math.max(...data.posts.map((x) => x.fit));
                     return (
-                      <li
+                      <PostRow
                         key={p.id}
-                        className="grid grid-cols-[1fr_auto] items-center gap-4 border-t py-3"
-                        style={{ borderColor: C.rule }}
-                      >
-                        <div className="min-w-0">
-                          <div className="truncate text-[14px]">{p.excerpt}</div>
-                          <div
-                            className="mt-1 text-[10px] uppercase tracking-[0.12em]"
-                            style={{ fontFamily: MONO, color: C.muted }}
-                          >
-                            {p.when} · {p.likes} likes · {p.multiple} usual
-                          </div>
-                          <div className="mt-2 h-[3px] w-full" style={{ background: C.track }}>
-                            <FitBar fit={p.fit} top={top} i={i} />
-                          </div>
-                        </div>
-                        <span
-                          className="w-[64px] text-right text-[30px] leading-none"
-                          style={{ fontFamily: BIG, fontWeight: 500, color: top ? C.blue : C.ink }}
-                        >
+                        post={p}
+                        top={top}
+                        open={openPost === p.id}
+                        onToggle={() => setOpenPost((o) => (o === p.id ? null : p.id))}
+                        bar={<FitBar fit={p.fit} top={top} i={i} />}
+                        figure={
                           <RollNumber value={p.fit} booted={booted} delay={0.25 + i * 0.12} />
-                        </span>
-                        {i === 0 && <span className="sr-only">Most recent</span>}
-                      </li>
+                        }
+                      />
                     );
                   })}
                 </ul>

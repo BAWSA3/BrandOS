@@ -29,7 +29,7 @@ export default async function DashboardPage({
   // Real-data bento on top once the user has a scan; the existing tools stay below.
   // The visit awards XP / advances the streak (null if migration 029 isn't applied).
   const home = await getHomeData(user);
-  const progress = await recordVisit(user.id, home.scans);
+  const progress = await recordVisit(user.id, home.scans, new Date(), home.posts);
   const bento = toDashboardData(home);
   if (bento && progress && progress.streakDays > 1) bento.ticker.streak = `${progress.streakDays}d`;
 

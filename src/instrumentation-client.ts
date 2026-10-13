@@ -33,6 +33,8 @@ initBotId({
     { path: '/api/breakdown', method: 'POST' },
     // Dashboard rescan — signed-in AI cost surface
     { path: '/api/dashboard/rescan', method: 'POST' },
+    // Dashboard post breakdowns — signed-in AI cost surface
+    { path: '/api/dashboard/post-scores', method: 'POST' },
     // Early-access signup form — email capture (spam surface)
     { path: '/api/early-access', method: 'POST' },
     // Checkout — payment abuse surface
