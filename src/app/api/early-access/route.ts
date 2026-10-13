@@ -1,79 +1,81 @@
-import { NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
+import { NextRequest, NextResponse } from 'next/server';
+import prisma from '@/lib/db';
+import { botGuard } from '@/lib/botid-guard';
+import { withRateLimit, rateLimiters } from '@/lib/rate-limit';
 
-interface EarlyAccessEntry {
-  email: string;
-  ref?: string;
-  signedUpAt: string;
-}
+/**
+ * POST /api/early-access — the /early-access signup form.
+ *
+ * Saves to the EmailSignup list (Prisma, server-side). It used to write a
+ * JSON file under process.cwd(), which Vercel's read-only filesystem rejects,
+ * so every signup from this page was silently lost.
+ *
+ * Public, so: BotID + 5/min per IP, strict validation. Existing addresses are
+ * never re-subscribed or re-sourced, and new vs existing emails get the same
+ * response (no list enumeration). A referral code (?ref=CODE on the page) is
+ * kept in `source` as "early-access:ref:CODE" so GET can count referrals.
+ *
+ * GET /api/early-access?ref=CODE — how many signups came in with this code.
+ */
 
-const DATA_PATH = path.join(process.cwd(), 'data', 'early-access.json');
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+const REF_RE = /^[A-Z0-9_-]{3,24}$/;
+const SOURCES = new Set(['early-access', 'breakdown-teaser']);
 
-function readEntries(): EarlyAccessEntry[] {
+async function handlePost(request: NextRequest) {
+  const botBlock = await botGuard(request);
+  if (botBlock) return botBlock;
+
+  let body: { email?: unknown; ref?: unknown; source?: unknown };
   try {
-    const raw = fs.readFileSync(DATA_PATH, 'utf-8');
-    const parsed = JSON.parse(raw);
-    // Migrate old format (plain string array) to new format
-    if (Array.isArray(parsed) && parsed.length > 0 && typeof parsed[0] === 'string') {
-      return parsed.map((email: string) => ({ email, signedUpAt: new Date().toISOString() }));
-    }
-    return parsed;
+    body = await request.json();
   } catch {
-    return [];
+    return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
   }
-}
 
-function writeEntries(entries: EarlyAccessEntry[]) {
-  fs.writeFileSync(DATA_PATH, JSON.stringify(entries, null, 2));
-}
+  const email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : '';
+  if (!email || email.length > 254 || !EMAIL_RE.test(email)) {
+    return NextResponse.json({ error: 'Enter a valid email' }, { status: 400 });
+  }
+  const ref = typeof body.ref === 'string' ? body.ref.trim().toUpperCase() : '';
+  const base =
+    typeof body.source === 'string' && SOURCES.has(body.source) ? body.source : 'early-access';
+  const source = REF_RE.test(ref) ? `${base}:ref:${ref}` : base;
 
-export async function POST(request: Request) {
   try {
-    const { email, ref } = await request.json();
-
-    if (!email || typeof email !== 'string' || !email.includes('@')) {
-      return NextResponse.json({ error: 'Valid email is required' }, { status: 400 });
-    }
-
-    const entries = readEntries();
-
-    if (entries.some((e) => e.email === email.toLowerCase())) {
-      return NextResponse.json({ message: 'Already signed up' });
-    }
-
-    entries.push({
-      email: email.toLowerCase(),
-      ref: ref && typeof ref === 'string' ? ref.toUpperCase() : undefined,
-      signedUpAt: new Date().toISOString(),
+    const existing = await prisma.emailSignup.findUnique({
+      where: { email },
+      select: { id: true },
     });
-    writeEntries(entries);
-
+    if (!existing) {
+      await prisma.emailSignup.create({ data: { email, source } });
+    }
     return NextResponse.json({ message: 'Signed up successfully' });
-  } catch {
-    return NextResponse.json({ error: 'Something went wrong' }, { status: 500 });
-  }
-}
-
-// GET /api/early-access?ref=CODE — check if anyone signed up with this referral code
-export async function GET(request: Request) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const ref = searchParams.get('ref');
-
-    if (!ref) {
-      return NextResponse.json({ error: 'ref parameter is required' }, { status: 400 });
+  } catch (error) {
+    // a concurrent duplicate is still a successful signup
+    if ((error as { code?: string }).code === 'P2002') {
+      return NextResponse.json({ message: 'Signed up successfully' });
     }
-
-    const entries = readEntries();
-    const referrals = entries.filter((e) => e.ref === ref.toUpperCase());
-
-    return NextResponse.json({
-      code: ref.toUpperCase(),
-      referralCount: referrals.length,
-      unlocked: referrals.length >= 1,
-    });
-  } catch {
+    console.error('[early-access] Failed:', error);
     return NextResponse.json({ error: 'Something went wrong' }, { status: 500 });
   }
 }
+
+async function handleGet(request: NextRequest) {
+  const ref = (request.nextUrl.searchParams.get('ref') ?? '').trim().toUpperCase();
+  if (!REF_RE.test(ref)) {
+    return NextResponse.json({ error: 'ref parameter is required' }, { status: 400 });
+  }
+  try {
+    const referralCount = await prisma.emailSignup.count({
+      where: { source: { endsWith: `:ref:${ref}` } },
+    });
+    return NextResponse.json({ code: ref, referralCount, unlocked: referralCount >= 1 });
+  } catch (error) {
+    console.error('[early-access] Referral lookup failed:', error);
+    return NextResponse.json({ error: 'Something went wrong' }, { status: 500 });
+  }
+}
+
+export const POST = withRateLimit(handlePost, rateLimiters.strict);
+export const GET = withRateLimit(handleGet, rateLimiters.standard);

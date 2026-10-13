@@ -29,6 +29,8 @@ initBotId({
     { path: '/api/import/analyze-social', method: 'POST' },
     // Reserve your brand station — email capture after the scan (spam surface)
     { path: '/api/reserve-station', method: 'POST' },
+    // Early-access signup form — email capture (spam surface)
+    { path: '/api/early-access', method: 'POST' },
     // Checkout — payment abuse surface
     { path: '/api/stripe/checkout', method: 'POST' },
   ],
