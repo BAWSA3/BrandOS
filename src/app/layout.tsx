@@ -40,7 +40,7 @@ export const metadata: Metadata = {
       'AI-powered brand analysis that reveals your unique creator identity. Get your Brand Score and unlock personalized growth insights.',
     images: [
       {
-        url: '/og-image-wide.png',
+        url: '/og-home.png',
         width: 1200,
         height: 630,
         alt: 'BrandOS - Discover Your Brand DNA',
@@ -52,7 +52,7 @@ export const metadata: Metadata = {
     title: 'BrandOS — Discover Your Brand DNA',
     description:
       'AI-powered brand analysis that reveals your unique creator identity. Get your Brand Score and unlock personalized growth insights.',
-    images: ['/og-image-wide.png'],
+    images: ['/og-home.png'],
     creator: '@mybrandos',
   },
   robots: {
