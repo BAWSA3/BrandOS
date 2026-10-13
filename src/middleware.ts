@@ -30,6 +30,7 @@ const allowedPages = [
   '/signup', // Phase 1: new account creation (email/Google/Apple)
   '/today', // Daily creator brief — 1 idea, 1 metric, 1 action
   '/world-preview', // V2 worlds: unauthenticated theme preview (dev)
+  '/oauth', // "Sign in with BrandOS" consent for the MCP (Claude / ChatGPT)
 ];
 
 export function middleware(request: NextRequest) {
