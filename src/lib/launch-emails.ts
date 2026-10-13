@@ -18,6 +18,7 @@ import { renderNewsletter, type NewsletterContent } from '@/lib/newsletter-templ
 export const CAMPAIGNS = {
   reserveConfirm: 'reserve-confirm',
   release: 'release-v1',
+  reengage: 'reengage-oct26',
 } as const;
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://mybrandos.app';
@@ -66,6 +67,54 @@ export function reserveConfirmContent(r: {
     subject: `Station #${no} is yours`,
     preheader: 'Your BrandOS brand station is reserved. The studio is opening soon.',
     sections,
+  };
+}
+
+/**
+ * Re-engagement (Oct 2026): for people who scanned before stations existed and
+ * never reserved one. Personal ("you scanned in march"), one action (rescan +
+ * reserve), honest scarcity (live count of claimed stations), and owns the
+ * unsubscribe bug fixed 2026-10-12.
+ */
+export function reengageContent(r: {
+  handle: string | null;
+  claimed: number;
+}): NonNullable<NewsletterContent> {
+  const who = r.handle ? `@${esc(r.handle)}` : 'there';
+  return {
+    subject: r.handle
+      ? `@${r.handle}, your brand station is waiting`
+      : 'your brand station is waiting',
+    preheader: 'You scanned your brand in March. Since then we built something for it.',
+    sections: [
+      {
+        type: 'text',
+        content: `hey ${who},<br/><br/>back in march you scanned your X on BrandOS and got your brand score. thanks for being early.`,
+      },
+      {
+        type: 'text',
+        content:
+          'since then we&#39;ve been building. every creator on BrandOS now gets a <b>brand station</b>: a 3D building that&#39;s yours, shaped by your archetype, and it grows as your brand does.',
+      },
+      { type: 'heading', content: "what's live now" },
+      {
+        type: 'text',
+        content: `• <b>a fresh scan</b>: your score, your archetype, and what to fix next<br/>• <b>your station</b>: reserve your number before the good ones go (${r.claimed} claimed so far)<br/>• <b>your brand pass</b>: your identity card with archetype, taste, pillars and score`,
+      },
+      {
+        type: 'text',
+        content:
+          'and coming next: <b>BrandOS dashboards</b>. track your score over time, see exactly which part of your brand to work on, and level up as you post. people with a reserved station get in first.',
+      },
+      { type: 'cta', content: 'Rescan + reserve your station →', url: APP_URL },
+      { type: 'text', content: 'takes about a minute.<br/><br/>— jeffrey' },
+      { type: 'divider', content: '' },
+      {
+        type: 'text',
+        content:
+          '<span style="color:#888;font-size:13px">p.s. if you ever tried to unsubscribe from our emails and it didn&#39;t work, that&#39;s on us. it&#39;s fixed now, and the link below works.</span>',
+      },
+    ],
   };
 }
 
