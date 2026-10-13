@@ -1,7 +1,6 @@
 import { z } from 'zod';
-import prisma from '@/lib/db';
 import { computeBrandScore } from '@/lib/brand-score';
-import { analyzePost, brandLink, parsePostId, renderPostAnalysis } from '@/lib/post-analysis';
+import { analyzePost, parsePostId, renderPostAnalysis } from '@/lib/post-analysis';
 import { checkRateLimit } from '@/lib/rate-limit';
 import type { McpAuthExtra } from '@/lib/mcp/auth';
 import {
@@ -12,7 +11,7 @@ import {
   type Allowance,
   type McpAccount,
 } from '@/lib/mcp/usage';
-import { getArchetypeInfo } from '@/lib/archetype-descriptions';
+import { freshRead, renderProfileRead, storedRead } from '@/lib/mcp/profile-read';
 
 // BrandOS MCP tools, for signed-in BrandOS accounts (sign-in: src/lib/mcp/auth.ts,
 // weekly allowance: src/lib/mcp/usage.ts). BrandOS reads taste and brand focus:
@@ -23,7 +22,6 @@ import { getArchetypeInfo } from '@/lib/archetype-descriptions';
 
 const SITE = 'https://mybrandos.app';
 const HANDLE_RE = /^@?[A-Za-z0-9_]{1,15}$/;
-const RECENT_SCAN_DAYS = 7;
 const HOUR = 60 * 60 * 1000;
 // Burst ceilings on top of the weekly allowance: per account and global.
 const PER_USER = { interval: HOUR, maxRequests: 30 };
@@ -80,22 +78,6 @@ async function finish(
   return text(`${body}\n\n${allowanceLine(g.allow, fresh)}`);
 }
 
-function profileSummary(
-  handle: string,
-  score: number,
-  archetype: string | null,
-  cached: boolean
-): string {
-  const info = archetype ? getArchetypeInfo(archetype) : null;
-  return [
-    `@${handle} · BrandOS score ${score}/100${info ? ` · ${info.name}: ${info.tagline}` : ''}`,
-    cached ? '(from a scan in the last 7 days)' : '(fresh scan)',
-    '',
-    `Open @${handle}'s full brand dashboard: ${brandLink(handle, 'analyze_profile')}`,
-    `Paste any of their post links into analyze_post for a taste and brand breakdown.`,
-  ].join('\n');
-}
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- the SDK's server type is generic over transports
 export function registerBrandTools(server: any, origin: string) {
   server.registerTool(
@@ -135,7 +117,9 @@ export function registerBrandTools(server: any, origin: string) {
     {
       title: 'Analyze an X profile',
       description:
-        'BrandOS brand score (0-100) and creator archetype for a public X (Twitter) handle, with a link to the brand card.',
+        'Full BrandOS brand read of a public X (Twitter) handle: brand score (0-100), archetype, a short ' +
+        'assessment, the four phase scores (Define, Check, Generate, Scale), content pillars, what is working, ' +
+        'what is holding it back, and three next moves. Present it as given.',
       inputSchema: z.object({ handle: z.string().max(20).describe('X handle, with or without @') }),
     },
     async ({ handle }: { handle: string }, ctx: HandlerCtx): Promise<ToolResult> => {
@@ -144,20 +128,9 @@ export function registerBrandTools(server: any, origin: string) {
       if (!g.ok) return g.result;
       const clean = handle.replace(/^@/, '').toLowerCase();
 
-      // A recent scan answers for free (no model call).
-      const since = new Date(Date.now() - RECENT_SCAN_DAYS * 24 * HOUR);
-      const recent = await prisma.brandScans.findFirst({
-        where: { username: { equals: clean, mode: 'insensitive' }, createdAt: { gte: since } },
-        orderBy: { createdAt: 'desc' },
-        select: { score: true, archetype: true },
-      });
-      if (recent)
-        return finish(
-          g,
-          'analyze_profile',
-          profileSummary(clean, recent.score, recent.archetype, true),
-          false
-        );
+      // A stored full read answers for free (no scan, not metered).
+      const stored = await storedRead(clean, g.account.id);
+      if (stored) return finish(g, 'analyze_profile', renderProfileRead(stored), false);
 
       const result = await computeBrandScore(clean, origin);
       if (result.status !== 200) {
@@ -168,20 +141,8 @@ export function registerBrandTools(server: any, origin: string) {
           true
         );
       }
-      const brandScore = result.body.brandScore as
-        | { overallScore?: number; archetype?: { primary?: string } }
-        | undefined;
-      return finish(
-        g,
-        'analyze_profile',
-        profileSummary(
-          clean,
-          Math.round(brandScore?.overallScore ?? 0),
-          brandScore?.archetype?.primary ?? null,
-          false
-        ),
-        true
-      );
+      const brandScore = (result.body.brandScore ?? {}) as Record<string, unknown>;
+      return finish(g, 'analyze_profile', renderProfileRead(freshRead(clean, brandScore)), true);
     }
   );
 }
