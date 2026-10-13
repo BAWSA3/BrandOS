@@ -46,6 +46,8 @@ export interface PostAnalysis {
   breakdown: PostBreakdownData;
   /** Written to the author (it's their post) and on their dashboard. */
   own: boolean;
+  /** Did fresh work (model call). False for cache hits / dashboard reuse: not metered. */
+  fresh: boolean;
 }
 
 /** Post id from an x.com / twitter.com status URL (or a bare id). */
@@ -112,7 +114,7 @@ export async function analyzePost(input: string, viewerId?: string | null): Prom
 
   const cacheKey = `${id}:${own ? 'own' : 'viewer'}`;
   const hit = cache.get(cacheKey);
-  if (hit && Date.now() - hit.at < CACHE_TTL_MS) return hit.value;
+  if (hit && Date.now() - hit.at < CACHE_TTL_MS) return { ...hit.value, fresh: false };
 
   const [{ tweets }, brand, publicScan, stored] = await Promise.all([
     fetchUserTweets(post.author.id, RECENT_POSTS + 5),
@@ -180,6 +182,7 @@ export async function analyzePost(input: string, viewerId?: string | null): Prom
     fit,
     breakdown,
     own,
+    fresh: !stored,
   };
   cache.set(cacheKey, { at: Date.now(), value });
   return value;

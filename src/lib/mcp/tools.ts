@@ -2,10 +2,20 @@ import { z } from 'zod';
 import prisma from '@/lib/db';
 import { computeBrandScore } from '@/lib/brand-score';
 import { analyzePost, brandLink, parsePostId, renderPostAnalysis } from '@/lib/post-analysis';
-import { checkRateLimit, getClientIdentifier } from '@/lib/rate-limit';
+import { checkRateLimit } from '@/lib/rate-limit';
+import type { McpAuthExtra } from '@/lib/mcp/auth';
+import {
+  allowance,
+  allowanceLine,
+  limitReached,
+  recordUse,
+  type Allowance,
+  type McpAccount,
+} from '@/lib/mcp/usage';
 import { getArchetypeInfo } from '@/lib/archetype-descriptions';
 
-// BrandOS MCP tools (v1, no key needed). BrandOS reads taste and brand focus:
+// BrandOS MCP tools, for signed-in BrandOS accounts (sign-in: src/lib/mcp/auth.ts,
+// weekly allowance: src/lib/mcp/usage.ts). BrandOS reads taste and brand focus:
 //   analyze_post     an X post link -> voice, format, structure; the profile
 //                    behind it; why the post correlates with their brand
 //   analyze_profile  an X handle -> brand score + archetype
@@ -15,8 +25,8 @@ const SITE = 'https://mybrandos.app';
 const HANDLE_RE = /^@?[A-Za-z0-9_]{1,15}$/;
 const RECENT_SCAN_DAYS = 7;
 const HOUR = 60 * 60 * 1000;
-// Each fresh analysis costs model + data calls: per-IP and global ceilings.
-const PER_IP = { interval: HOUR, maxRequests: 10 };
+// Burst ceilings on top of the weekly allowance: per account and global.
+const PER_USER = { interval: HOUR, maxRequests: 30 };
 const GLOBAL = { interval: HOUR, maxRequests: 400 };
 
 type ToolResult = { content: { type: 'text'; text: string }[]; isError?: boolean };
@@ -26,30 +36,48 @@ const text = (t: string, isError = false): ToolResult => ({
 });
 
 interface HandlerCtx {
-  http?: { req?: Request };
+  http?: { req?: Request; authInfo?: { extra?: McpAuthExtra } };
 }
 
-// Using the MCP needs a BrandOS account (sign-in with usage limits is next).
-// Until that ships it stays open only on staging / local for testing.
-const ACCOUNT_REQUIRED =
-  'BrandOS in Claude and ChatGPT needs a BrandOS account. Create yours at ' +
-  `${SITE}/signup?utm_source=mcp. Connecting your account here is coming soon.`;
-function openForTesting(ctx: HandlerCtx): boolean {
-  const host = ctx.http?.req ? new URL(ctx.http.req.url).hostname : '';
-  return host === 'localhost' || host === '127.0.0.1' || host.includes('staging');
-}
+type Gate = { ok: false; result: ToolResult } | { ok: true; account: McpAccount; allow: Allowance };
 
-/** Null when allowed; otherwise the message to return. */
-function overLimit(tool: string, ctx: HandlerCtx): string | null {
-  if (!openForTesting(ctx)) return ACCOUNT_REQUIRED;
-  const ip = ctx.http?.req ? getClientIdentifier(ctx.http.req) : 'unknown';
-  if (checkRateLimit(`mcp:${tool}:${ip}`, PER_IP).limited) {
-    return `You've hit the hourly limit. Try again later, or get your full brand read at ${SITE}.`;
+/**
+ * Every tool call: a BrandOS account (the OAuth sign-in guarantees a token),
+ * the weekly allowance, and an hourly burst ceiling per account + global.
+ */
+async function gate(tool: string, ctx: HandlerCtx): Promise<Gate> {
+  const account = ctx.http?.authInfo?.extra?.account ?? null;
+  if (!account) {
+    return {
+      ok: false,
+      result: text(
+        `Finish creating your BrandOS account first: ${SITE}/signup?utm_source=mcp. Then try again here.`,
+        true
+      ),
+    };
+  }
+  const allow = await allowance(account);
+  if (allow.kind === 'metered' && allow.left <= 0) {
+    return { ok: false, result: text(limitReached(allow, SITE), true) };
+  }
+  if (checkRateLimit(`mcp:${tool}:${account.id}`, PER_USER).limited) {
+    return { ok: false, result: text('Slow down a little: try again in a few minutes.', true) };
   }
   if (checkRateLimit(`mcp:${tool}:global`, GLOBAL).limited) {
-    return `BrandOS is busy right now. Try again shortly, or visit ${SITE}.`;
+    return { ok: false, result: text(`BrandOS is busy right now. Try again shortly.`, true) };
   }
-  return null;
+  return { ok: true, account, allow };
+}
+
+/** Count the use (only when fresh work happened) and add the allowance line. */
+async function finish(
+  g: Extract<Gate, { ok: true }>,
+  tool: string,
+  body: string,
+  fresh: boolean
+): Promise<ToolResult> {
+  if (fresh && g.allow.kind === 'metered') await recordUse(g.account.id, tool);
+  return text(`${body}\n\n${allowanceLine(g.allow, fresh)}`);
 }
 
 function profileSummary(
@@ -88,10 +116,11 @@ export function registerBrandTools(server: any, origin: string) {
           'That is not an X post link. Paste a link like https://x.com/name/status/123.',
           true
         );
-      const limited = overLimit('post', ctx);
-      if (limited) return text(limited, true);
+      const g = await gate('analyze_post', ctx);
+      if (!g.ok) return g.result;
       try {
-        return text(renderPostAnalysis(await analyzePost(url)));
+        const a = await analyzePost(url, g.account.id);
+        return finish(g, 'analyze_post', renderPostAnalysis(a), a.fresh);
       } catch (error) {
         const msg =
           error instanceof Error ? error.message : 'The analysis failed. Try again shortly.';
@@ -110,8 +139,9 @@ export function registerBrandTools(server: any, origin: string) {
       inputSchema: z.object({ handle: z.string().max(20).describe('X handle, with or without @') }),
     },
     async ({ handle }: { handle: string }, ctx: HandlerCtx): Promise<ToolResult> => {
-      if (!openForTesting(ctx)) return text(ACCOUNT_REQUIRED, true);
       if (!HANDLE_RE.test(handle)) return text('That is not a valid X handle.', true);
+      const g = await gate('analyze_profile', ctx);
+      if (!g.ok) return g.result;
       const clean = handle.replace(/^@/, '').toLowerCase();
 
       // A recent scan answers for free (no model call).
@@ -121,10 +151,13 @@ export function registerBrandTools(server: any, origin: string) {
         orderBy: { createdAt: 'desc' },
         select: { score: true, archetype: true },
       });
-      if (recent) return text(profileSummary(clean, recent.score, recent.archetype, true));
-
-      const limited = overLimit('profile', ctx);
-      if (limited) return text(limited, true);
+      if (recent)
+        return finish(
+          g,
+          'analyze_profile',
+          profileSummary(clean, recent.score, recent.archetype, true),
+          false
+        );
 
       const result = await computeBrandScore(clean, origin);
       if (result.status !== 200) {
@@ -138,13 +171,16 @@ export function registerBrandTools(server: any, origin: string) {
       const brandScore = result.body.brandScore as
         | { overallScore?: number; archetype?: { primary?: string } }
         | undefined;
-      return text(
+      return finish(
+        g,
+        'analyze_profile',
         profileSummary(
           clean,
           Math.round(brandScore?.overallScore ?? 0),
           brandScore?.archetype?.primary ?? null,
           false
-        )
+        ),
+        true
       );
     }
   );
