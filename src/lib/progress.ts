@@ -1,6 +1,6 @@
 import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/db';
-import { XP_RULES, levelFor, type XPGain } from '@/lib/xp';
+import { ON_BRAND_FIT, XP_RULES, levelFor, type XPGain } from '@/lib/xp';
 import type { ScanSummary } from '@/lib/home-data';
 
 // Server-only (Prisma). XP + daily streak for the signed-in user (tables from
@@ -67,7 +67,9 @@ function groupGains(events: { xp: number; label: string | null; kind: string }[]
 export async function recordVisit(
   userId: string,
   scans: ScanSummary[],
-  now = new Date()
+  now = new Date(),
+  /** Scored posts (migration 033): XP per post, once each. */
+  posts: { tweetId: string; fit: number }[] = []
 ): Promise<Progress | null> {
   try {
     return await prisma.$transaction(async (tx) => {
@@ -83,7 +85,24 @@ export async function recordVisit(
       const firstToday = !last || last.getTime() !== today.getTime();
       if (firstToday) streak = last && today.getTime() - last.getTime() === DAY_MS ? streak + 1 : 1;
 
-      const awards: Award[] = scanAwards(scans);
+      const awards: Award[] = [
+        ...scanAwards(scans),
+        ...posts.map((p) =>
+          p.fit >= ON_BRAND_FIT
+            ? {
+                kind: 'onBrandPost' as const,
+                xp: XP_RULES.onBrandPost,
+                dedupeKey: `post:${p.tweetId}`,
+                label: 'On-brand post',
+              }
+            : {
+                kind: 'scoredPost' as const,
+                xp: XP_RULES.scoredPost,
+                dedupeKey: `post:${p.tweetId}`,
+                label: 'Post scored',
+              }
+        ),
+      ];
       if (firstToday) {
         awards.push({
           kind: 'dailyVisit',

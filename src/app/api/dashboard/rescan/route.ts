@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse, after } from 'next/server';
 import prisma from '@/lib/db';
 import { getCurrentUser, getCurrentWorkspace } from '@/lib/auth';
 import { botGuard } from '@/lib/botid-guard';
@@ -6,6 +6,7 @@ import { withRateLimit, rateLimiters } from '@/lib/rate-limit';
 import { computeBrandScore } from '@/lib/brand-score';
 import { extractIntelligence } from '@/lib/scan-tracking';
 import { normalizeArchetypeName } from '@/lib/archetype-names';
+import { scoreLatestPosts } from '@/lib/post-scores';
 
 /**
  * POST /api/dashboard/rescan — the signed-in user rescans their own brand from
@@ -106,6 +107,14 @@ async function handlePost(request: NextRequest) {
       },
       select: { id: true, score: true },
     });
+
+    // Fresh scan, fresh read on recent posts: score any new ones after the
+    // response (best-effort; the dashboard shows them on the next load).
+    after(() =>
+      scoreLatestPosts(user.id).catch((e) =>
+        console.error('[dashboard/rescan] post scoring failed:', e)
+      )
+    );
 
     return NextResponse.json({
       saved: true,

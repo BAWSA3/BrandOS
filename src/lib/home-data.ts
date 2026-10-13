@@ -6,6 +6,8 @@ import { getArchetypeInfo } from '@/lib/archetype-descriptions';
 import type { BrandPassData } from '@/components/dashboard/BrandPass';
 import type { PhaseScore } from '@/components/dashboard/StatTiles';
 import type { DashboardData } from '@/components/dashboard/BentoDashboard';
+import type { WeekDay } from '@/components/dashboard/StatTiles';
+import type { PostBreakdownData } from '@/lib/post-scores';
 import type { StageNumber } from '@/lib/studio-stages';
 
 // Server-only (Prisma). Real, per-user data for the title screen (/home) and the dashboard bento.
@@ -28,6 +30,21 @@ export interface ScanSummary {
   pillars?: string[];
 }
 
+export interface PostSummary {
+  id: string;
+  tweetId: string;
+  excerpt: string;
+  postedAt: Date;
+  likes: number;
+  multiple: number | null;
+  fit: number;
+  breakdown: PostBreakdownData;
+}
+
+/** A post at or above this fit counts as on-brand (This week, XP). */
+export const ON_BRAND = 80;
+const WEEKLY_GOAL = 3;
+
 export interface HomeData {
   handle: string;
   name: string;
@@ -44,6 +61,8 @@ export interface HomeData {
   pillars: string[];
   summary: string | null;
   lastScannedAt: Date | null;
+  /** Latest analyzed posts, newest first (empty until scored / migration 033). */
+  posts: PostSummary[];
 }
 
 const PHASES: [string, string][] = [
@@ -124,7 +143,7 @@ function toPillars(raw: unknown): string[] {
 
 export async function getHomeData(user: CurrentUser): Promise<HomeData> {
   const handle = (user.xUsername ?? '').replace(/^@/, '');
-  const [scans, station, reservation] = await Promise.all([
+  const [scans, station, reservation, posts] = await Promise.all([
     prisma.brandScan.findMany({
       where: { userId: user.id, status: 'active' },
       orderBy: { scannedAt: 'desc' },
@@ -148,6 +167,24 @@ export async function getHomeData(user: CurrentUser): Promise<HomeData> {
       select: { reservationNumber: true, archetype: true },
     }),
     handle ? getReservationByHandle(handle).catch(() => null) : Promise.resolve(null),
+    // PostScore (migration 033) may not exist yet: no posts, not an error
+    prisma.postScore
+      .findMany({
+        where: { userId: user.id },
+        orderBy: { postedAt: 'desc' },
+        take: 12,
+        select: {
+          id: true,
+          tweetId: true,
+          excerpt: true,
+          postedAt: true,
+          likes: true,
+          multiple: true,
+          fit: true,
+          breakdown: true,
+        },
+      })
+      .catch(() => []),
   ]);
   const latest = scans[0] ?? null;
   const rawArchetype =
@@ -183,7 +220,37 @@ export async function getHomeData(user: CurrentUser): Promise<HomeData> {
     pillars: latest ? toPillars(latest.contentPillars) : [],
     summary: latest?.summary ?? null,
     lastScannedAt: latest?.scannedAt ?? null,
+    posts: posts.map((p) => ({ ...p, breakdown: p.breakdown as unknown as PostBreakdownData })),
   };
+}
+
+const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+/** This week (Mon-Sun, UTC) from scored posts: per-day state + on-brand count. */
+export function weekFromPosts(posts: PostSummary[], now = new Date()) {
+  const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  const dow = (today.getUTCDay() + 6) % 7; // Mon = 0
+  const monday = new Date(today.getTime() - dow * 86_400_000);
+  const fmt = (d: Date) =>
+    d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
+  let onBrand = 0;
+  const days: WeekDay[] = DAYS.map((name, i) => {
+    const start = monday.getTime() + i * 86_400_000;
+    const inDay = posts.filter(
+      (p) => p.postedAt.getTime() >= start && p.postedAt.getTime() < start + 86_400_000
+    );
+    const best = inDay.reduce((m, p) => Math.max(m, p.fit), 0);
+    const on = inDay.filter((p) => p.fit >= ON_BRAND).length;
+    onBrand += on;
+    const state: WeekDay['state'] =
+      i > dow ? 'future' : on > 0 ? 'on' : inDay.length ? 'off' : 'none';
+    const note = inDay.length
+      ? `${on ? `${on} on-brand post${on > 1 ? 's' : ''}` : `${inDay.length} post${inDay.length > 1 ? 's' : ''}`} · fit ${best}`
+      : undefined;
+    return { d: name[0], name, state, note, today: i === dow };
+  });
+  const sunday = new Date(monday.getTime() + 6 * 86_400_000);
+  return { range: `${fmt(monday)} – ${fmt(sunday)}`, days, done: onBrand, target: WEEKLY_GOAL };
 }
 
 /** "2h ago", "3d ago" */
@@ -214,21 +281,41 @@ export function toPass(h: HomeData): BrandPassData | null {
   };
 }
 
-/** The dashboard bento from real data only (no fit scores, streak, followers or XP yet), or null before the first scan. */
+/** The dashboard bento from real data (followers still hidden), or null before the first scan. */
 export function toDashboardData(h: HomeData): DashboardData | null {
   const pass = toPass(h);
   if (!pass || h.score === null) return null;
   const label = (d: Date) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   const prev = h.scans.length > 1 ? h.scans[h.scans.length - 2] : null;
+  const recent = h.posts.slice(0, 5);
+  const avgFit = recent.length
+    ? Math.round(recent.reduce((t, p) => t + p.fit, 0) / recent.length)
+    : undefined;
+  const week = h.posts.length ? weekFromPosts(h.posts) : null;
   return {
     handle: h.handle,
     avatarUrl: h.avatarUrl,
     stage: h.stage,
-    ticker: { score: h.score, scans: h.scans.length },
+    ticker: { score: h.score, scans: h.scans.length, avgFit },
+    ...(week
+      ? {
+          week: { range: week.range, days: week.days },
+          streak: { done: week.done, target: week.target },
+        }
+      : {}),
     scoreHistory: h.scans.map((s) => ({ label: label(s.scannedAt), value: s.score })),
     scoreDelta: prev ? { value: h.score - prev.score, since: label(prev.scannedAt) } : undefined,
     phases: h.phases.length ? h.phases : undefined,
-    posts: [],
+    posts: h.posts.slice(0, 5).map((p) => ({
+      id: p.id,
+      excerpt: p.excerpt,
+      when: ago(p.postedAt),
+      fit: p.fit,
+      likes: p.likes,
+      multiple: p.multiple ? `${p.multiple.toFixed(1)}x` : '—',
+      breakdown: p.breakdown,
+      url: `https://x.com/${h.handle}/status/${p.tweetId}`,
+    })),
     scoreDetail: h.scans.map((s) => ({
       id: s.id,
       label: label(s.scannedAt),

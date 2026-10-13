@@ -195,6 +195,23 @@ const SAMPLE: DashboardData = {
       fit: 92,
       likes: 287,
       multiple: '28.7x',
+      url: 'https://x.com/jbawsa',
+      breakdown: {
+        voice: 'direct, builder-first, lowercase',
+        format: 'product reveal + demo clip',
+        hook: 'a concrete "I built X" line in the first five words',
+        why: 'Your core promise in one post: you build tools for creators, in public, and show the thing working.',
+        fits: [
+          'Leads with what you built, not what you think',
+          'Demo format, your strongest performer',
+          'Speaks straight to creators',
+        ],
+        misses: [],
+        sharpen: [
+          'Pin it, then reply with a one-line result from a real user',
+          'Turn this format into a weekly "what I shipped" series',
+        ],
+      },
     },
     {
       id: '2',
@@ -203,6 +220,23 @@ const SAMPLE: DashboardData = {
       fit: 55,
       likes: 11,
       multiple: '1.0x',
+      url: 'https://x.com/jbawsa',
+      breakdown: {
+        voice: 'hype, event-promo',
+        format: 'announcement with tags',
+        hook: 'an inside reference new followers won’t know',
+        why: 'An event promo that reads like someone else’s brand: lots of tags, no line about what you think or build.',
+        fits: ['Community-minded, which matches the builder angle'],
+        misses: [
+          'No point of view or lesson',
+          'Tags carry the post instead of your voice',
+          'Off your three content pillars',
+        ],
+        sharpen: [
+          'Open with why you’re hosting it, in one line',
+          'Add one takeaway people get even if they can’t attend',
+        ],
+      },
     },
     {
       id: '3',
@@ -212,6 +246,19 @@ const SAMPLE: DashboardData = {
       fit: 84,
       likes: 64,
       multiple: '6.1x',
+      url: 'https://x.com/jbawsa',
+      breakdown: {
+        voice: 'conviction, short-form',
+        format: 'one-line take',
+        hook: 'a contrarian ">" comparison up front',
+        why: 'A clean statement of your taste-over-output thesis, the idea your audience follows you for.',
+        fits: ['Your signature belief, stated plainly', 'Short and quotable'],
+        misses: ['No example, so it reads as a slogan'],
+        sharpen: [
+          'Follow up with one concrete example of "good" you noticed this week',
+          'Quote-post it later with proof from your own work',
+        ],
+      },
     },
     {
       id: '4',
