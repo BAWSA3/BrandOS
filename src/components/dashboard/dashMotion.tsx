@@ -95,8 +95,8 @@ function CursorLabel() {
 }
 
 /**
- * Desktop-only magnetic cursor: a small Klein-blue pixel that morphs around
- * buttons and links, and shows "OPEN ↗" over tiles marked
+ * Desktop-only magnetic cursor: a small Klein-blue pixel that morphs into an
+ * outline around buttons and links, and shows "OPEN ↗" over tiles marked
  * data-cursor-zone="open". Off on touch devices and under reduced motion.
  */
 export function DashCursor() {
@@ -114,15 +114,23 @@ export function DashCursor() {
     window.addEventListener('pointerover', onMove, { passive: true });
     return () => window.removeEventListener('pointerover', onMove);
   }, [fine, reduce]);
+  // Morphed around a button/link it's an outline on the button's edge, never a
+  // fill: a filled box over a wide control reads as a big blue rectangle.
+  const { targetBoundingBox } = useCursorState();
+  const morphed = !!targetBoundingBox;
   if (!fine || reduce) return null;
   return (
     <Cursor
-      magnetic={{ morph: true, padding: 4, snap: 0.6 }}
+      magnetic={{ morph: true, padding: 3, snap: 0.6 }}
       style={{
         zIndex: 9999,
         width: 16,
         height: 16,
-        backgroundColor: onBlue ? 'rgba(255,255,255,0.3)' : 'rgba(0,71,255,0.22)',
+        backgroundColor: morphed
+          ? 'transparent'
+          : onBlue
+            ? 'rgba(255,255,255,0.3)'
+            : 'rgba(0,71,255,0.22)',
         border: onBlue ? '1.5px solid #FFFFFF' : `1px solid ${BLUE}`,
         boxShadow: onBlue ? '0 0 0 1px rgba(0,20,90,0.35)' : undefined,
         borderRadius: 0,

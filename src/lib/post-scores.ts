@@ -48,6 +48,17 @@ const clean = (t: string) =>
 /** Originals only: no retweets or replies. */
 const isOriginal = (t: SocialDataTweet) => !/^RT @/.test(t.text) && !/^@\w/.test(t.text.trim());
 
+/** The post's time; falls back to the time inside the tweet id (snowflake). */
+function postedAt(t: SocialDataTweet): Date {
+  const d = new Date(t.created_at);
+  if (!Number.isNaN(d.getTime())) return d;
+  try {
+    return new Date(Number((BigInt(t.id) >> BigInt(22)) + BigInt(1288834974657)));
+  } catch {
+    return new Date();
+  }
+}
+
 function median(nums: number[]): number {
   if (!nums.length) return 0;
   const s = [...nums].sort((a, b) => a - b);
@@ -206,7 +217,7 @@ export async function scoreLatestPosts(userId: string): Promise<{ scored: number
         userId,
         tweetId: t.id,
         excerpt: clean(t.text).slice(0, 280),
-        postedAt: new Date(t.created_at),
+        postedAt: postedAt(t),
         likes: t.public_metrics.like_count,
         replies: t.public_metrics.reply_count,
         reposts: t.public_metrics.retweet_count,
