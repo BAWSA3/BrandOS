@@ -38,6 +38,8 @@ export interface PostAnalysis {
   handle: string;
   postId: string;
   excerpt: string;
+  /** A longer excerpt (word boundary) for the card. */
+  quote: string;
   performance: string | null; // e.g. "3.2x their usual likes"
   archetype: string | null;
   pillars: string[];
@@ -61,6 +63,13 @@ export function parsePostId(input: string): string | null {
 }
 
 const cache = new Map<string, { at: number; value: PostAnalysis }>();
+
+/** Up to ~180 chars, cut on a word boundary. */
+function quoteOf(t: string): string {
+  if (t.length <= 180) return t;
+  const cut = t.slice(0, 180);
+  return `${cut.slice(0, Math.max(cut.lastIndexOf(' '), 120)).trim()}…`;
+}
 
 function toTweet(p: SocialDataPost): SocialDataTweet {
   return {
@@ -175,6 +184,7 @@ export async function analyzePost(input: string, viewerId?: string | null): Prom
     handle,
     postId: post.id,
     excerpt: clean(post.text).slice(0, 90),
+    quote: quoteOf(clean(post.text)),
     performance,
     archetype,
     pillars: brand?.pillars ?? [],
@@ -218,4 +228,37 @@ export function renderPostAnalysis(a: PostAnalysis): string {
   ]
     .filter((l, i, all) => l !== '' || (i > 0 && all[i - 1] !== ''))
     .join('\n');
+}
+
+/** Structured data for the BrandOS card (MCP App view). */
+export function postCard(a: PostAnalysis) {
+  const b = a.breakdown;
+  const brand = [
+    a.archetype,
+    a.score !== null ? `score ${a.score}/100` : null,
+    a.pillars.length ? a.pillars.slice(0, 3).join(' · ') : null,
+  ]
+    .filter(Boolean)
+    .join(' · ');
+  return {
+    kind: 'post' as const,
+    handle: a.handle,
+    own: a.own,
+    excerpt: a.quote ?? a.excerpt,
+    fit: a.fit,
+    verdict: a.fit >= 80 ? 'On-brand' : a.fit >= 60 ? 'Close' : 'Off-brand',
+    performance: a.performance,
+    voice: b.voice,
+    format: b.format,
+    hook: b.hook,
+    why: b.why,
+    fits: b.fits,
+    misses: b.misses,
+    sharpen: b.sharpen,
+    brand: brand || null,
+    postUrl: `https://x.com/${a.handle}/status/${a.postId}`,
+    dashboardUrl: a.own
+      ? `${SITE}/dashboard?utm_source=mcp&utm_medium=analyze_post`
+      : brandLink(a.handle, 'analyze_post'),
+  };
 }
