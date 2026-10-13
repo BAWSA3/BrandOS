@@ -27,7 +27,8 @@ export default async function DashboardPage({
 
   const workspace = await getCurrentWorkspace(user);
   const xConnections = user.platformConnections.filter((pc) => pc.platform === 'x');
-  // Real-data bento on top once the user has a scan; the existing tools stay below.
+  // Real-data bento once the user has a scan (the legacy tools page only shows
+  // for accounts without X connected, which can't scan yet).
   // The visit awards XP / advances the streak (null if migration 029 isn't applied).
   const home = await getHomeData(user);
   const progress = await recordVisit(user.id, home.scans, new Date(), home.posts);
@@ -54,7 +55,7 @@ export default async function DashboardPage({
       )}
       {firstScan ? (
         <FirstScan handle={home.handle} />
-      ) : (
+      ) : bento ? null : (
         <DashboardClient
           user={{
             id: user.id,
