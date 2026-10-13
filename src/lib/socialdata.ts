@@ -128,7 +128,8 @@ export async function fetchProfile(
  */
 function mapTweet(raw: Record<string, unknown>): SocialDataTweet {
   const fullText = (raw.full_text || raw.text || '') as string;
-  const createdAt = (raw.created_at as string) || '';
+  // SocialData's v1.1 tweets carry tweet_created_at (ISO); created_at is absent
+  const createdAt = ((raw.tweet_created_at || raw.created_at) as string) || '';
 
   // v1.1 metrics
   const likeCount = (raw.favorite_count as number) || 0;
@@ -137,7 +138,7 @@ function mapTweet(raw: Record<string, unknown>): SocialDataTweet {
   const quoteCount = (raw.quote_count as number) || 0;
   // SocialData may include bookmark/view counts on some endpoints
   const viewsObj = raw.ext_views as Record<string, unknown> | undefined;
-  const impressionCount = (viewsObj?.count as number) || 0;
+  const impressionCount = (raw.views_count as number) || Number(viewsObj?.count) || 0;
 
   // Entities mapping
   const rawEntities = raw.entities as Record<string, Record<string, unknown>[]> | undefined;

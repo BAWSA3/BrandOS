@@ -755,11 +755,8 @@ export default function BentoDashboard({
               <Tile className={listSpan}>
                 <Label right={<span>Score / 100</span>}>Recent scans</Label>
                 {rescan && (
-                  <button
-                    type="button"
-                    onClick={analyzePosts}
-                    disabled={postRun.busy}
-                    className="mt-3 flex w-full items-center justify-between border px-3 py-2.5 text-left disabled:opacity-60"
+                  <div
+                    className="mt-3 flex w-full items-center justify-between gap-3 border px-3 py-2.5"
                     style={{ borderColor: C.rule }}
                   >
                     <span className="text-[13px]">
@@ -767,13 +764,16 @@ export default function BentoDashboard({
                         ? 'Reading your latest posts…'
                         : (postRun.note ?? 'See how your latest posts score for your brand')}
                     </span>
-                    <span
-                      className="text-[10px] uppercase tracking-[0.14em]"
+                    <button
+                      type="button"
+                      onClick={analyzePosts}
+                      disabled={postRun.busy}
+                      className="shrink-0 px-1 py-0.5 text-[10px] uppercase tracking-[0.14em] hover:underline disabled:opacity-60"
                       style={{ fontFamily: MONO, color: C.blue }}
                     >
                       {postRun.busy ? '…' : 'Analyze ↗'}
-                    </span>
-                  </button>
+                    </button>
+                  </div>
                 )}
                 <ul className="mt-4">
                   {(data.scans ?? []).map((sc, i) => (
