@@ -27,11 +27,11 @@ import {
 
 const RECENT_POSTS = 20;
 const CACHE_TTL_MS = 6 * 60 * 60 * 1000;
-const SITE = 'https://mybrandos.app';
+const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://mybrandos.app';
 
-/** Landing link: opens mybrandos.app and runs this handle's full scan (?scan=), tagged for attribution. */
+/** A handle's public brand page (mybrandos.app/@handle), tagged for attribution. */
 export function brandLink(handle: string, tool: string): string {
-  return `${SITE}/?scan=${encodeURIComponent(handle)}&utm_source=mcp&utm_medium=${tool}&utm_campaign=brand_read`;
+  return `${SITE}/@${encodeURIComponent(handle)}?utm_source=mcp&utm_medium=${tool}&utm_campaign=brand_read`;
 }
 
 export interface PostAnalysis {

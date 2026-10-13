@@ -12,7 +12,7 @@ import { brandLink } from '@/lib/post-analysis';
  * public scan from the last 7 days with its full read, else a fresh scan.
  */
 
-const SITE = 'https://mybrandos.app';
+const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://mybrandos.app';
 const RECENT_DAYS = 7;
 const DAY_MS = 86_400_000;
 
@@ -103,6 +103,11 @@ export async function storedRead(handle: string, viewerId: string): Promise<Prof
         };
     }
   }
+  return publicRead(handle);
+}
+
+/** The latest public scan of a handle with a full read, if it's under 7 days old. */
+export async function publicRead(handle: string): Promise<ProfileRead | null> {
   const pub = await prisma.brandScans
     .findFirst({
       where: {

@@ -37,6 +37,9 @@ initBotId({
     { path: '/api/dashboard/post-scores', method: 'POST' },
     // Early-access signup form — email capture (spam surface)
     { path: '/api/early-access', method: 'POST' },
+    // public brand page (/@handle) + its compare funnel: scans / model calls
+    { path: '/api/public-brand', method: 'POST' },
+    { path: '/api/brand-compare', method: 'POST' },
     // Checkout — payment abuse surface
     { path: '/api/stripe/checkout', method: 'POST' },
   ],

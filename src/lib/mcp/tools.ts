@@ -21,7 +21,7 @@ import { CARD_HTML, CARD_URI } from '@/lib/mcp/card-html';
 //   analyze_profile  an X handle -> brand score + archetype
 // AI suggests; it never rewrites anyone's posts.
 
-const SITE = 'https://mybrandos.app';
+const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://mybrandos.app';
 const HANDLE_RE = /^@?[A-Za-z0-9_]{1,15}$/;
 const HOUR = 60 * 60 * 1000;
 // Burst ceilings on top of the weekly allowance: per account and global.
