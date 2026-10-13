@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { computeBrandScore } from '@/lib/brand-score';
-import { analyzePost, parsePostId, renderPostAnalysis } from '@/lib/post-analysis';
+import { analyzePost, parsePostId, postCard, renderPostAnalysis } from '@/lib/post-analysis';
 import { checkRateLimit } from '@/lib/rate-limit';
 import type { McpAuthExtra } from '@/lib/mcp/auth';
 import {
@@ -11,7 +11,8 @@ import {
   type Allowance,
   type McpAccount,
 } from '@/lib/mcp/usage';
-import { freshRead, renderProfileRead, storedRead } from '@/lib/mcp/profile-read';
+import { freshRead, profileCard, renderProfileRead, storedRead } from '@/lib/mcp/profile-read';
+import { CARD_HTML, CARD_URI } from '@/lib/mcp/card-html';
 
 // BrandOS MCP tools, for signed-in BrandOS accounts (sign-in: src/lib/mcp/auth.ts,
 // weekly allowance: src/lib/mcp/usage.ts). BrandOS reads taste and brand focus:
@@ -27,7 +28,19 @@ const HOUR = 60 * 60 * 1000;
 const PER_USER = { interval: HOUR, maxRequests: 30 };
 const GLOBAL = { interval: HOUR, maxRequests: 400 };
 
-type ToolResult = { content: { type: 'text'; text: string }[]; isError?: boolean };
+type ToolResult = {
+  content: { type: 'text'; text: string }[];
+  structuredContent?: Record<string, unknown>;
+  isError?: boolean;
+};
+
+// MCP Apps: both tools render the BrandOS card (src/lib/mcp/card-html.ts) in
+// hosts that support it; the text stays for the model and for hosts that don't.
+const CARD_META = {
+  ui: { resourceUri: CARD_URI },
+  'ui/resourceUri': CARD_URI,
+  'openai/outputTemplate': CARD_URI,
+};
 const text = (t: string, isError = false): ToolResult => ({
   content: [{ type: 'text', text: t }],
   ...(isError ? { isError } : {}),
@@ -72,14 +85,45 @@ async function finish(
   g: Extract<Gate, { ok: true }>,
   tool: string,
   body: string,
-  fresh: boolean
+  fresh: boolean,
+  card?: Record<string, unknown>
 ): Promise<ToolResult> {
   if (fresh && g.allow.kind === 'metered') await recordUse(g.account.id, tool);
-  return text(`${body}\n\n${allowanceLine(g.allow, fresh)}`);
+  const line = allowanceLine(g.allow, fresh);
+  return {
+    content: [
+      {
+        type: 'text',
+        text: `${body}\n\n${line}${card ? "\n\n(Shown to the user as a BrandOS card above. Add at most a one-line takeaway; don't repeat the breakdown.)" : ''}`,
+      },
+    ],
+    ...(card ? { structuredContent: { ...card, allowance: line } } : {}),
+  };
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- the SDK's server type is generic over transports
 export function registerBrandTools(server: any, origin: string) {
+  server.registerResource(
+    'brandos-card',
+    CARD_URI,
+    {
+      title: 'BrandOS card',
+      description: 'The BrandOS brand / post breakdown card',
+      mimeType: 'text/html;profile=mcp-app',
+      _meta: { ui: { prefersBorder: false } },
+    },
+    async (uri: URL) => ({
+      contents: [
+        {
+          uri: uri.href,
+          mimeType: 'text/html;profile=mcp-app',
+          text: CARD_HTML,
+          _meta: { ui: { prefersBorder: false } },
+        },
+      ],
+    })
+  );
+
   server.registerTool(
     'analyze_post',
     {
@@ -91,6 +135,7 @@ export function registerBrandTools(server: any, origin: string) {
       inputSchema: z.object({
         url: z.string().max(300).describe('Link to the X post, e.g. https://x.com/name/status/123'),
       }),
+      _meta: CARD_META,
     },
     async ({ url }: { url: string }, ctx: HandlerCtx): Promise<ToolResult> => {
       if (!parsePostId(url))
@@ -102,7 +147,7 @@ export function registerBrandTools(server: any, origin: string) {
       if (!g.ok) return g.result;
       try {
         const a = await analyzePost(url, g.account.id);
-        return finish(g, 'analyze_post', renderPostAnalysis(a), a.fresh);
+        return finish(g, 'analyze_post', renderPostAnalysis(a), a.fresh, postCard(a));
       } catch (error) {
         const msg =
           error instanceof Error ? error.message : 'The analysis failed. Try again shortly.';
@@ -121,6 +166,7 @@ export function registerBrandTools(server: any, origin: string) {
         'assessment, the four phase scores (Define, Check, Generate, Scale), content pillars, what is working, ' +
         'what is holding it back, and three next moves. Present it as given.',
       inputSchema: z.object({ handle: z.string().max(20).describe('X handle, with or without @') }),
+      _meta: CARD_META,
     },
     async ({ handle }: { handle: string }, ctx: HandlerCtx): Promise<ToolResult> => {
       if (!HANDLE_RE.test(handle)) return text('That is not a valid X handle.', true);
@@ -130,7 +176,8 @@ export function registerBrandTools(server: any, origin: string) {
 
       // A stored full read answers for free (no scan, not metered).
       const stored = await storedRead(clean, g.account.id);
-      if (stored) return finish(g, 'analyze_profile', renderProfileRead(stored), false);
+      if (stored)
+        return finish(g, 'analyze_profile', renderProfileRead(stored), false, profileCard(stored));
 
       const result = await computeBrandScore(clean, origin);
       if (result.status !== 200) {
@@ -142,7 +189,8 @@ export function registerBrandTools(server: any, origin: string) {
         );
       }
       const brandScore = (result.body.brandScore ?? {}) as Record<string, unknown>;
-      return finish(g, 'analyze_profile', renderProfileRead(freshRead(clean, brandScore)), true);
+      const read = freshRead(clean, brandScore);
+      return finish(g, 'analyze_profile', renderProfileRead(read), true, profileCard(read));
     }
   );
 }

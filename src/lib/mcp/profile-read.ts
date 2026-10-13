@@ -188,3 +188,33 @@ export function renderProfileRead(r: ProfileRead): string {
   );
   return lines.join('\n');
 }
+
+/** Structured data for the BrandOS card (MCP App view). */
+export function profileCard(r: ProfileRead) {
+  const info = r.archetype ? getArchetypeInfo(r.archetype) : null;
+  const i = r.intel;
+  return {
+    kind: 'profile' as const,
+    handle: r.handle,
+    own: r.own,
+    score: r.score,
+    archetype: info ? { name: info.name, tagline: info.tagline } : null,
+    // the card keeps the read scannable: the first two sentences of the summary
+    summary: i.summary
+      ? (i.summary
+          .match(/[^.!?]+[.!?]+/g)
+          ?.slice(0, 2)
+          .join('')
+          .trim() ?? i.summary)
+      : null,
+    phases: i.phaseScores ?? null,
+    pillars: i.contentPillars?.slice(0, 4) ?? [],
+    influence: i.influenceTier ? i.influenceTier.split(/[\s(]/)[0] : null,
+    strengths: i.strengths?.slice(0, 3) ?? [],
+    improvements: i.improvements?.slice(0, 3) ?? [],
+    nextMoves: i.nextMoves?.slice(0, 3) ?? [],
+    dashboardUrl: r.own
+      ? `${SITE}/dashboard?utm_source=mcp&utm_medium=analyze_profile`
+      : brandLink(r.handle, 'analyze_profile'),
+  };
+}
