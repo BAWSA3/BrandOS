@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { Suspense } from 'react';
 import { getReservationByHandle } from '@/lib/reservations';
 import { getStationClaim } from '@/lib/stations';
@@ -7,6 +6,7 @@ import ClaimStation from '@/components/ClaimStation';
 import StationBoard from '@/components/StationBoard';
 import { getArchetypeInfo } from '@/lib/archetype-descriptions';
 import StationLoop from '@/components/StationLoop';
+import StationCta from '@/components/StationCta';
 import { formatStationNumber } from '@/lib/station-number';
 
 // Public page for a reserved station: the flex link people share on X. The
@@ -52,12 +52,12 @@ export default async function StationPage({ params }: Props) {
           >
             <div className="flex items-center justify-between">
               <span className="rounded-[3px] bg-[#0A84FF] px-2 py-1 text-[11px] uppercase tracking-[0.14em] text-white">
-                Reserved
+                {claim ? 'Claimed' : 'Reserved'}
               </span>
               <span className="text-[18px] text-[#1D1D1F]">#{formatStationNumber(r.number)}</span>
             </div>
             <div className="mt-3 text-[11px] uppercase tracking-[0.15em] text-black/50">
-              Future home of @{r.handle}
+              {claim ? 'Home of' : 'Future home of'} @{r.handle}
             </div>
             {getArchetypeInfo(r.archetype ?? '')?.name && (
               <div className="mt-3 text-[20px] text-[#0A84FF]">
@@ -92,13 +92,7 @@ export default async function StationPage({ params }: Props) {
           No station reserved for @{handle.replace(/^@/, '')} yet.
         </div>
       )}
-      <Link
-        href="/"
-        className="mt-6 w-full max-w-[480px] text-center px-4 py-3.5 rounded-[6px] bg-[#0A84FF] hover:bg-[#0070E0] text-white text-[12px] tracking-[0.15em] uppercase transition-colors"
-        style={{ fontFamily: MONO }}
-      >
-        Reserve your brand station →
-      </Link>
+      <StationCta handle={r?.handle ?? null} claimed={!!claim} />
     </main>
   );
 }
