@@ -107,7 +107,7 @@ export function reengageContent(r: {
           'and coming next: <b>BrandOS dashboards</b>. track your score over time, see exactly which part of your brand to work on, and level up as you post. people with a reserved station get in first.',
       },
       { type: 'cta', content: 'Rescan + reserve your station →', url: APP_URL },
-      { type: 'text', content: 'takes about a minute.<br/><br/>— jeffrey' },
+      { type: 'text', content: 'takes about a minute.<br/><br/>— Bawsa' },
       { type: 'divider', content: '' },
       {
         type: 'text',

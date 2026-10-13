@@ -6,6 +6,9 @@
  */
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://mybrandos.app';
+// Where email images load from (the live site by default). EMAIL_ASSET_BASE
+// lets a test send point at staging before an asset reaches prod.
+const ASSET_BASE = process.env.EMAIL_ASSET_BASE || APP_URL;
 
 export interface NewsletterContent {
   subject: string;
@@ -63,7 +66,7 @@ export function renderNewsletter(
           <!-- Header -->
           <tr>
             <td style="padding: 32px 36px 24px 36px; border-bottom: 1px solid #f0f0f0;">
-              <div style="font-family: 'VCR OSD Mono', 'JetBrains Mono', monospace; font-size: 14px; font-weight: 700; color: #111; letter-spacing: 2px;">BRANDOS</div>
+              <a href="${APP_URL}" style="text-decoration: none;"><img src="${ASSET_BASE}/email/brandos-header.png" width="260" height="52" alt="BrandOS" style="display: block; width: 260px; height: auto; border: 0; outline: none;" /></a>
             </td>
           </tr>
           <!-- Content -->
