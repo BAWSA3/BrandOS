@@ -882,6 +882,13 @@ export default function BentoDashboard({
                         open={openPost === p.id}
                         onToggle={() => setOpenPost((o) => (o === p.id ? null : p.id))}
                         bar={<FitBar fit={p.fit} top={top} i={i} />}
+                        studioHref={
+                          rescan === 'live'
+                            ? (k) => `/dashboard/studio?post=${encodeURIComponent(p.id)}&s=${k}`
+                            : rescan === 'demo'
+                              ? (k) => `/world-preview/studio-brainstorm?s=${k}`
+                              : undefined
+                        }
                         figure={
                           <RollNumber value={p.fit} booted={booted} delay={0.25 + i * 0.12} />
                         }

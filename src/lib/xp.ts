@@ -21,6 +21,8 @@ export const XP_RULES = {
   onBrandPost: 60,
   /** any other scored post */
   scoredPost: 20,
+  /** an idea from the studio idea board marked as posted */
+  ideaPosted: 40,
 } as const;
 
 export const ON_BRAND_FIT = 80;

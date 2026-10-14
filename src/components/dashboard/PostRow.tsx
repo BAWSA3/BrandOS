@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import type { RecentPost } from '@/components/dashboard/BentoDashboard';
 
@@ -34,6 +35,7 @@ export default function PostRow({
   onToggle,
   bar,
   figure,
+  studioHref,
 }: {
   post: RecentPost;
   top: boolean;
@@ -43,6 +45,8 @@ export default function PostRow({
   bar: React.ReactNode;
   /** The rolling fit number. */
   figure: React.ReactNode;
+  /** "Build on this" link for Next-time suggestion #i (the studio brainstorm). */
+  studioHref?: (i: number) => string;
 }) {
   const reduce = useReducedMotion();
   const b = post.breakdown;
@@ -161,7 +165,18 @@ export default function PostRow({
                         <span aria-hidden style={{ color: BLUE, fontFamily: MONO, fontSize: 11 }}>
                           {String(i + 1).padStart(2, '0')}
                         </span>
-                        <span>{t}</span>
+                        <span className="flex-1">
+                          {t}
+                          {studioHref && (
+                            <Link
+                              href={studioHref(i)}
+                              className="ml-2 whitespace-nowrap text-[10px] uppercase tracking-[0.14em] hover:underline"
+                              style={{ fontFamily: MONO, color: BLUE }}
+                            >
+                              Build on this →
+                            </Link>
+                          )}
+                        </span>
                       </li>
                     ))}
                   </ul>

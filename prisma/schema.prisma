@@ -157,6 +157,7 @@ model User {
   xpEvents             XPEvent[] // XP ledger (migration 029)
   progress             UserProgress? // XP total + streaks (migration 029)
   mcpUsage             McpUsage[] // metered MCP uses (migration 034)
+  ideas                Idea[] // studio idea board (migration 035)
   postScores           PostScore[] // per-post brand fit (migration 033)
   noteReports          NoteReport[]       @relation("NoteReporter")
 
@@ -1304,6 +1305,25 @@ model McpUsage {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   tool      String
   createdAt DateTime @default(now()) @db.Timestamptz
+
+  @@index([userId, createdAt(sort: Desc)])
+}
+
+// Studio idea board (migration 035): post ideas built on a "Next time" suggestion.
+model Idea {
+  id          String    @id @default(uuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  postScoreId String?
+  postExcerpt String?
+  suggestion  String
+  title       String
+  hook        String
+  format      String
+  why         String
+  status      String    @default("saved")
+  createdAt   DateTime  @default(now()) @db.Timestamptz
+  postedAt    DateTime? @db.Timestamptz
 
   @@index([userId, createdAt(sort: Desc)])
 }
