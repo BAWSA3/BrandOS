@@ -85,7 +85,7 @@ const createDefaultBrandDNA = (name: string = ''): BrandDNA => ({
   name,
   colors: {
     primary: '#000000',
-    secondary: '#F2F0EF',
+    secondary: '#F2EFE8',
     accent: '#6366f1',
   },
   tone: {

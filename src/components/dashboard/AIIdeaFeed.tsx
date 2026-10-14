@@ -13,7 +13,7 @@ interface AIIdeaFeedProps {
 const tonePillColors: Record<string, { bg: string; text: string }> = {
   'hot-take': { bg: 'rgba(255,69,58,0.12)', text: '#FF453A' },
   educational: { bg: 'rgba(48,209,88,0.12)', text: '#30D158' },
-  casual: { bg: 'rgba(10,132,255,0.12)', text: '#0A84FF' },
+  casual: { bg: 'rgba(0,71,255,0.12)', text: '#0047FF' },
   launch: { bg: 'rgba(191,90,242,0.12)', text: '#BF5AF2' },
   'behind-the-scenes': { bg: 'rgba(255,159,10,0.12)', text: '#FF9F0A' },
   announcement: { bg: 'rgba(100,210,255,0.12)', text: '#64D2FF' },
@@ -65,7 +65,7 @@ export default function AIIdeaFeed({
           className="flex items-center gap-1.5"
           style={{
             fontSize: 13,
-            color: '#0A84FF',
+            color: '#0047FF',
             background: 'transparent',
             border: 'none',
             cursor: 'pointer',
@@ -183,8 +183,8 @@ export default function AIIdeaFeed({
                       style={{
                         fontSize: 12,
                         fontWeight: 500,
-                        color: '#0A84FF',
-                        background: 'rgba(10,132,255,0.1)',
+                        color: '#0047FF',
+                        background: 'rgba(0,71,255,0.1)',
                         border: 'none',
                         borderRadius: 8,
                         padding: '6px 14px',
@@ -193,10 +193,10 @@ export default function AIIdeaFeed({
                         transition: 'all 150ms ease',
                       }}
                       onMouseEnter={(e) => {
-                        e.currentTarget.style.background = 'rgba(10,132,255,0.18)';
+                        e.currentTarget.style.background = 'rgba(0,71,255,0.18)';
                       }}
                       onMouseLeave={(e) => {
-                        e.currentTarget.style.background = 'rgba(10,132,255,0.1)';
+                        e.currentTarget.style.background = 'rgba(0,71,255,0.1)';
                       }}
                     >
                       Create Post

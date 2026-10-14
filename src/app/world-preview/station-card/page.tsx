@@ -11,7 +11,7 @@ import StationCard from '@/components/StationCard';
 function Preview() {
   const q = useSearchParams();
   return (
-    <main className="min-h-screen bg-[#F2F0EF] px-4 py-10">
+    <main className="min-h-screen bg-[#F2EFE8] px-4 py-10">
       <StationCard
         archetype={(q.get('archetype') ?? 'BUILD.EXE').toUpperCase()}
         username={q.get('handle') ?? 'jbawsa'}

@@ -1953,7 +1953,7 @@ export default function XBrandScoreHero({
                   fontSize: 'clamp(16px, 4vw, 22px)',
                   fontWeight: 400,
                   letterSpacing: '0.08em',
-                  color: '#F2F0EF',
+                  color: '#F2EFE8',
                   margin: 0,
                   lineHeight: 1.4,
                   textTransform: 'uppercase',
@@ -2111,7 +2111,7 @@ export default function XBrandScoreHero({
                       borderRadius: '4px',
                       border: '1px solid rgba(255,255,255,0.12)',
                       background: 'rgba(255,255,255,0.04)',
-                      color: '#F2F0EF',
+                      color: '#F2EFE8',
                       outline: 'none',
                       transition: 'all 0.3s ease',
                     }}

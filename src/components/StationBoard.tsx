@@ -66,7 +66,7 @@ function Polaroid({
       {/* pushpin */}
       <span
         aria-hidden
-        className="absolute left-1/2 -top-1.5 -ml-1.5 h-3 w-3 rounded-[2px] bg-[#0A84FF] shadow-[0_1px_0_rgba(0,0,0,0.3)]"
+        className="absolute left-1/2 -top-1.5 -ml-1.5 h-3 w-3 rounded-[2px] bg-[#0047FF] shadow-[0_1px_0_rgba(0,0,0,0.3)]"
       />
       <div className="aspect-square w-full overflow-hidden bg-[#E8E8ED]">
         {note.avatar ? (
@@ -229,7 +229,7 @@ export default function StationBoard({ handle }: { handle: string }) {
           onClick={() =>
             viewer.canPost ? openComposer(board) : (window.location.href = signInUrl)
           }
-          className="shrink-0 px-3 py-2 rounded-[4px] bg-[#0A84FF] hover:bg-[#0070E0] text-white text-[11px] tracking-wider uppercase transition-colors"
+          className="shrink-0 px-3 py-2 rounded-[4px] bg-[#0047FF] hover:bg-[#0035CC] text-white text-[11px] tracking-wider uppercase transition-colors"
           style={{ fontFamily: MONO }}
         >
           {viewer.canPost
@@ -278,7 +278,7 @@ export default function StationBoard({ handle }: { handle: string }) {
                     autoFocus
                     placeholder={`Leave @${handle} a note`}
                     aria-label="Your note"
-                    className="w-full resize-none rounded-[6px] border border-black/15 bg-white px-3 py-2 text-[16px] text-[#1D1D1F] outline-none focus:border-[#0A84FF]"
+                    className="w-full resize-none rounded-[6px] border border-black/15 bg-white px-3 py-2 text-[16px] text-[#1D1D1F] outline-none focus:border-[#0047FF]"
                     style={{ fontFamily: PIXEL }}
                   />
                   <div className="mt-1 text-right text-[10px] text-[#6E6E73]">
@@ -292,7 +292,7 @@ export default function StationBoard({ handle }: { handle: string }) {
                       onClick={() => setSticker(null)}
                       aria-pressed={sticker === null}
                       className="h-9 w-9 rounded-[4px] border text-[10px] text-[#6E6E73]"
-                      style={{ borderColor: sticker === null ? '#0A84FF' : 'rgba(0,0,0,0.12)' }}
+                      style={{ borderColor: sticker === null ? '#0047FF' : 'rgba(0,0,0,0.12)' }}
                     >
                       none
                     </button>
@@ -303,7 +303,7 @@ export default function StationBoard({ handle }: { handle: string }) {
                         aria-label={id}
                         aria-pressed={sticker === id}
                         className="flex h-9 w-9 items-center justify-center rounded-[4px] border bg-white"
-                        style={{ borderColor: sticker === id ? '#0A84FF' : 'rgba(0,0,0,0.12)' }}
+                        style={{ borderColor: sticker === id ? '#0047FF' : 'rgba(0,0,0,0.12)' }}
                       >
                         <PixelSticker id={id} size={22} />
                       </button>
@@ -358,7 +358,7 @@ export default function StationBoard({ handle }: { handle: string }) {
               style={{
                 background: '#ECEAE6',
                 backgroundImage:
-                  'linear-gradient(rgba(10,132,255,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(10,132,255,0.06) 1px, transparent 1px)',
+                  'linear-gradient(rgba(0,71,255,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(0,71,255,0.06) 1px, transparent 1px)',
                 backgroundSize: '24px 24px',
               }}
             >
@@ -396,7 +396,7 @@ export default function StationBoard({ handle }: { handle: string }) {
                 setShowAll(true);
                 void load(true);
               }}
-              className="mt-4 w-full text-center text-[11px] tracking-wider uppercase text-[#0A84FF]"
+              className="mt-4 w-full text-center text-[11px] tracking-wider uppercase text-[#0047FF]"
               style={{ fontFamily: MONO }}
             >
               See all {board.total} notes

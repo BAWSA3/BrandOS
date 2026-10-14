@@ -31,7 +31,7 @@ interface MarketScannerViewProps {
 
 const patternColors: Record<string, string> = {
   'bold-claim': '#FF453A',
-  question: '#0A84FF',
+  question: '#0047FF',
   contrarian: '#FF9F0A',
   story: '#BF5AF2',
   data: '#30D158',

@@ -95,7 +95,7 @@ function TweetCard({
         transition: 'border-color 200ms ease',
       }}
       onMouseEnter={(e) => {
-        e.currentTarget.style.borderColor = 'rgba(10,132,255,0.3)';
+        e.currentTarget.style.borderColor = 'rgba(0,71,255,0.3)';
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.borderColor = 'var(--border)';
@@ -244,7 +244,7 @@ function TweetCard({
                 transition: 'color 150ms ease',
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.color = '#0A84FF';
+                e.currentTarget.style.color = '#0047FF';
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.color = 'var(--text-tertiary)';

@@ -77,7 +77,7 @@ export default function ClaimStation({ handle }: { handle: string }) {
         <div className="mt-2 text-[11px] leading-relaxed text-[#FF3B30]">
           {message}{' '}
           {/sign in/i.test(message) && (
-            <a href={signInUrl} className="underline text-[#0A84FF]">
+            <a href={signInUrl} className="underline text-[#0047FF]">
               Sign in with X
             </a>
           )}

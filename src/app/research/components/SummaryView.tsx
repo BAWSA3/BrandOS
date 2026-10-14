@@ -8,7 +8,7 @@ export default function SummaryView({ summary }: { summary: InterviewSummary }) 
       {/* Headline */}
       <div
         style={{
-          background: '#F2F0EF',
+          background: '#F2EFE8',
           border: '1px solid rgba(0,0,0,0.08)',
           borderLeft: '3px solid #0047FF',
           borderRadius: 4,
@@ -44,7 +44,7 @@ export default function SummaryView({ summary }: { summary: InterviewSummary }) 
       {/* Profile Summary */}
       <div
         style={{
-          background: '#F2F0EF',
+          background: '#F2EFE8',
           border: '1px solid rgba(0,0,0,0.08)',
           borderRadius: 4,
           padding: '16px 20px',
@@ -150,7 +150,7 @@ function BulletList({
   return (
     <div
       style={{
-        background: '#F2F0EF',
+        background: '#F2EFE8',
         border: '1px solid rgba(0,0,0,0.08)',
         borderRadius: 4,
         padding: '16px 20px',

@@ -173,7 +173,7 @@ export default function PerformanceTracker({ brandId }: PerformanceTrackerProps)
                 <p style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 2 }}>
                   Avg Imp
                 </p>
-                <Sparkline values={impressionHistory} color="#0A84FF" />
+                <Sparkline values={impressionHistory} color="#0047FF" />
               </div>
               <p style={{ fontSize: 22, fontWeight: 700, color: 'var(--text-primary)' }}>
                 {formatNumber(data.avgImpressions)}

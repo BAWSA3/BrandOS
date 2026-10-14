@@ -60,7 +60,7 @@ export const brandTemplates: BrandTemplate[] = [
     preview: {
       colors: {
         primary: '#000000',
-        secondary: '#F2F0EF',
+        secondary: '#F2EFE8',
         accent: '#0071e3',
       },
       tone: {
@@ -96,7 +96,7 @@ export const brandTemplates: BrandTemplate[] = [
     preview: {
       colors: {
         primary: '#111111',
-        secondary: '#F2F0EF',
+        secondary: '#F2EFE8',
         accent: '#ff6b00',
       },
       tone: {
@@ -128,7 +128,7 @@ export const brandTemplates: BrandTemplate[] = [
     preview: {
       colors: {
         primary: '#4a154b',
-        secondary: '#F2F0EF',
+        secondary: '#F2EFE8',
         accent: '#36c5f0',
       },
       tone: {
@@ -236,7 +236,7 @@ export const brandTemplates: BrandTemplate[] = [
     preview: {
       colors: {
         primary: '#003d6b',
-        secondary: '#F2F0EF',
+        secondary: '#F2EFE8',
         accent: '#00a0df',
       },
       tone: {

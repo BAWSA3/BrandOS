@@ -4,7 +4,7 @@ import { useState, useMemo, useCallback, useRef } from 'react';
 import { useBrandHealthScore, type HealthHistoryPoint } from '@/hooks/useBrandHealthScore';
 
 const DIMENSIONS = [
-  { key: 'score' as const, label: 'Overall', color: '#0A84FF' },
+  { key: 'score' as const, label: 'Overall', color: '#0047FF' },
   { key: 'completeness' as const, label: 'Completeness', color: '#5E5CE6' },
   { key: 'consistency' as const, label: 'Consistency', color: '#30D158' },
   { key: 'voiceMatch' as const, label: 'Voice Match', color: '#BF5AF2' },
@@ -210,8 +210,8 @@ function Chart({
 
         <defs>
           <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#0A84FF" />
-            <stop offset="100%" stopColor="#0A84FF" stopOpacity="0" />
+            <stop offset="0%" stopColor="#0047FF" />
+            <stop offset="100%" stopColor="#0047FF" stopOpacity="0" />
           </linearGradient>
         </defs>
       </svg>
@@ -423,7 +423,7 @@ export default function BrandConsistencyChart() {
                 fontSize: 13,
                 fontWeight: 600,
                 color: '#fff',
-                background: 'linear-gradient(135deg, #0A84FF, #30D158)',
+                background: 'linear-gradient(135deg, #0047FF, #30D158)',
                 border: 'none',
                 padding: '8px 20px',
                 borderRadius: 8,

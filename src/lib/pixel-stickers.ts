@@ -10,7 +10,7 @@ const PALETTE: Record<string, string> = {
   Y: '#FFC93C', // yellow / gold
   W: '#FFFFFF', // white highlight
   K: '#1D1D1F', // ink
-  B: '#0A84FF', // BrandOS blue
+  B: '#0047FF', // BrandOS blue
   G: '#34C759', // green
   P: '#FF6FB5', // petal pink
   M: '#C8A27A', // milk tea
