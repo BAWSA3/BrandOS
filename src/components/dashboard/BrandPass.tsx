@@ -90,9 +90,12 @@ function Callout({
 export default function BrandPass({
   data,
   typeTaste,
+  compact = false,
 }: {
   data: BrandPassData;
   typeTaste?: boolean;
+  /** Narrow tile (swapped layout): no callouts, the card drawn at a fixed size and scaled to fit. */
+  compact?: boolean;
 }) {
   const reduce = useReducedMotion();
   const info = getArchetypeInfo(data.archetype);
@@ -118,20 +121,29 @@ export default function BrandPass({
 
   return (
     <div
-      className="relative px-0 py-2 md:px-[92px] md:py-6"
-      style={{ perspective: 900 }}
+      className={compact ? 'relative mx-auto py-2' : 'relative px-0 py-2 md:px-[92px] md:py-6'}
+      style={{ perspective: 900, ...(compact ? { width: 300, zoom: 0.78 } : {}) }}
       onMouseMove={onMove}
       onMouseLeave={onLeave}
     >
-      <Callout id="a" label="Portrait" className="left-0 top-[26%]" line="16px" />
-      <Callout
-        id="b"
-        label="Archetype"
-        className="right-0 top-[12%] flex-row-reverse"
-        line="16px"
-      />
-      <Callout id="c" label="Taste" className="right-0 top-[46%] flex-row-reverse" line="16px" />
-      <Callout id="d" label="Station" className="left-0 bottom-[16%]" line="16px" />
+      {!compact && (
+        <>
+          <Callout id="a" label="Portrait" className="left-0 top-[26%]" line="16px" />
+          <Callout
+            id="b"
+            label="Archetype"
+            className="right-0 top-[12%] flex-row-reverse"
+            line="16px"
+          />
+          <Callout
+            id="c"
+            label="Taste"
+            className="right-0 top-[46%] flex-row-reverse"
+            line="16px"
+          />
+          <Callout id="d" label="Station" className="left-0 bottom-[16%]" line="16px" />
+        </>
+      )}
 
       <motion.div
         data-pass-card

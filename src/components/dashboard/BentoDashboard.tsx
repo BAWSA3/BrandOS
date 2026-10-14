@@ -348,6 +348,7 @@ export default function BentoDashboard({
   xp,
   rescan,
   homeHref = '/world-preview/title',
+  swapPassStation = false,
 }: {
   data: DashboardData;
   isNew?: boolean;
@@ -359,6 +360,8 @@ export default function BentoDashboard({
   rescan?: 'live' | 'demo';
   /** Where the top-left grid goes: the main menu (/home) on the real dashboard. */
   homeHref?: string;
+  /** Layout trial: the station takes the big left tile, the Brand Pass the small right one. */
+  swapPassStation?: boolean;
   /** XP total and what was earned since the last visit (the bar fills it in). */
   xp?: { total: number; gains: XPGain[] } | null;
 }) {
@@ -463,6 +466,45 @@ export default function BentoDashboard({
   // Station tile sits beside the score; the week tile then drops to row 2 next to posts.
   const hasStation = !isNew && !!stationSlug(data.pass.archetype);
   const listSpan = hasStation && data.week ? 'md:col-span-4' : 'md:col-span-7';
+  // Brand Pass and station tiles, placed by layout (swapPassStation trial).
+  const swap = swapPassStation && hasStation;
+  const passTile = (cls: string, compact = false) => (
+    <Tile className={cls}>
+      <Label right={isNew ? <span>Locked</span> : <PassShare pass={data.pass} />}>Brand Pass</Label>
+      <div className="flex flex-1 items-center">
+        {isNew ? (
+          <div className="w-full py-10 text-center">
+            <div
+              className="mx-auto w-[70%] rounded-[10px] border border-dashed p-8"
+              style={{ borderColor: C.dim }}
+            >
+              <div
+                style={{ fontFamily: MONO, color: C.muted }}
+                className="text-[12px] uppercase tracking-[0.14em]"
+              >
+                Unlocks after your Taste Profile
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="w-full">
+            <BrandPass data={data.pass} typeTaste={booted} compact={compact} />
+          </div>
+        )}
+      </div>
+    </Tile>
+  );
+  const stationTile = (cls: string, large = false) => (
+    <Tile className={cls} open>
+      <StationTile
+        archetype={data.pass.archetype}
+        handle={data.handle}
+        stationNumber={data.pass.stationNumber}
+        mode={theme === 'dark' ? 'night' : 'day'}
+        large={large}
+      />
+    </Tile>
+  );
   const openScore = (phase: string | null = null) => {
     setDetailPhase(phase);
     setDetail('score');
@@ -615,33 +657,9 @@ export default function BentoDashboard({
           {xp && <XPBar total={xp.total} gains={xp.gains} booted={booted} />}
 
           <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-12">
-            {/* Brand Pass (or its locked state for new users) */}
-            <Tile className="md:col-span-5 md:row-span-2">
-              <Label right={isNew ? <span>Locked</span> : <PassShare pass={data.pass} />}>
-                Brand Pass
-              </Label>
-              <div className="flex flex-1 items-center">
-                {isNew ? (
-                  <div className="w-full py-10 text-center">
-                    <div
-                      className="mx-auto w-[70%] rounded-[10px] border border-dashed p-8"
-                      style={{ borderColor: C.dim }}
-                    >
-                      <div
-                        style={{ fontFamily: MONO, color: C.muted }}
-                        className="text-[12px] uppercase tracking-[0.14em]"
-                      >
-                        Unlocks after your Taste Profile
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="w-full">
-                    <BrandPass data={data.pass} typeTaste={booted} />
-                  </div>
-                )}
-              </div>
-            </Tile>
+            {swap
+              ? stationTile('md:col-span-5 md:row-span-2', true)
+              : passTile('md:col-span-5 md:row-span-2')}
 
             {/* Brand score: hero number, delta, trend, phase meters */}
             <Tile
@@ -662,17 +680,8 @@ export default function BentoDashboard({
               />
             </Tile>
 
-            {/* Your station: photoreal loop, day/night with the theme */}
-            {hasStation && (
-              <Tile className="md:col-span-3" open>
-                <StationTile
-                  archetype={data.pass.archetype}
-                  handle={data.handle}
-                  stationNumber={data.pass.stationNumber}
-                  mode={theme === 'dark' ? 'night' : 'day'}
-                />
-              </Tile>
-            )}
+            {/* Your station (or, swapped, the Brand Pass) on the right */}
+            {swap ? passTile('md:col-span-3', true) : hasStation && stationTile('md:col-span-3')}
 
             {/* This week: goal meter + day strip (hidden until weekly data exists) */}
             {(isNew || data.week) && (
