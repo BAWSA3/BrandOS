@@ -1,6 +1,7 @@
 'use client';
 
 import { getArchetypeInfo } from '@/lib/archetype-descriptions';
+import { useRef, useState } from 'react';
 import { motion, useMotionValue, useReducedMotion, useSpring } from 'motion/react';
 import { useFinePointer } from '@/components/dashboard/dashMotion';
 import { Typewriter } from 'motion-plus/react';
@@ -95,14 +96,33 @@ export default function BrandPass({
   data,
   typeTaste,
   compact = false,
+  selfHeal = false,
 }: {
   data: BrandPassData;
   typeTaste?: boolean;
+  /** The owner's own Pass: if the stored X photo fails to load (changed on X), fetch the current one. */
+  selfHeal?: boolean;
   /** Narrow tile (swapped layout): no callouts, the card drawn at a fixed size and scaled to fit. */
   compact?: boolean;
 }) {
   const reduce = useReducedMotion();
   const info = getArchetypeInfo(data.archetype);
+  // the photo shown; null after it failed and no fresh one could be found
+  const [photo, setPhoto] = useState<string | null>(
+    data.avatarUrl ? hiResAvatar(data.avatarUrl) : null
+  );
+  const healed = useRef(false);
+  const onPhotoError = async () => {
+    if (!selfHeal || healed.current) return setPhoto(null);
+    healed.current = true;
+    try {
+      const res = await fetch('/api/me/avatar', { method: 'POST' });
+      const body = (await res.json().catch(() => ({}))) as { avatar?: string | null };
+      setPhoto(res.ok && body.avatar ? body.avatar : null);
+    } catch {
+      setPhoto(null);
+    }
+  };
   const no = String(data.stationNumber).padStart(4, '0');
   // The card tilts a few degrees toward the cursor, like holding a real pass.
   const fine = useFinePointer();
@@ -186,12 +206,14 @@ export default function BrandPass({
               className="relative aspect-[3/4] overflow-hidden"
               style={{ background: '#D9D5CB' }}
             >
-              {data.avatarUrl ? (
+              {photo ? (
                 // eslint-disable-next-line @next/next/no-img-element -- remote avatar
                 <img
-                  src={hiResAvatar(data.avatarUrl)}
+                  key={photo}
+                  src={photo}
                   alt={`@${data.handle}`}
                   className="h-full w-full object-cover grayscale contrast-125"
+                  onError={() => void onPhotoError()}
                 />
               ) : (
                 // no photo: their initial on Klein blue (the Pass is always the person)

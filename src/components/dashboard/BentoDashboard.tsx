@@ -488,7 +488,12 @@ export default function BentoDashboard({
           </div>
         ) : (
           <div className="w-full">
-            <BrandPass data={data.pass} typeTaste={booted} compact={compact} />
+            <BrandPass
+              data={data.pass}
+              typeTaste={booted}
+              compact={compact}
+              selfHeal={rescan === 'live'}
+            />
           </div>
         )}
       </div>

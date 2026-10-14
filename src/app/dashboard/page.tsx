@@ -1,4 +1,6 @@
 import { redirect } from 'next/navigation';
+import { after } from 'next/server';
+import { refreshAvatar } from '@/lib/avatar-refresh';
 import { getCurrentUser, getCurrentWorkspace } from '@/lib/auth';
 import { getHomeData, toDashboardData } from '@/lib/home-data';
 import { recordVisit } from '@/lib/progress';
@@ -31,6 +33,8 @@ export default async function DashboardPage({
   // for accounts without X connected, which can't scan yet).
   // The visit awards XP / advances the streak (null if migration 029 isn't applied).
   const home = await getHomeData(user);
+  // first visit of the day: check X for a new profile photo (background)
+  after(() => refreshAvatar(user.id).catch(() => null));
   const progress = await recordVisit(user.id, home.scans, new Date(), home.posts);
   const bento = toDashboardData(home);
   if (bento && progress && progress.streakDays > 1) bento.ticker.streak = `${progress.streakDays}d`;
