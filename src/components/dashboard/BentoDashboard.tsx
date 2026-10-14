@@ -348,7 +348,7 @@ export default function BentoDashboard({
   xp,
   rescan,
   homeHref = '/world-preview/title',
-  swapPassStation = false,
+  swapPassStation = true,
 }: {
   data: DashboardData;
   isNew?: boolean;
@@ -360,7 +360,7 @@ export default function BentoDashboard({
   rescan?: 'live' | 'demo';
   /** Where the top-left grid goes: the main menu (/home) on the real dashboard. */
   homeHref?: string;
-  /** Layout trial: the station takes the big left tile, the Brand Pass the small right one. */
+  /** Layout (picked 2026-10-13): the station takes the big left tile, the Brand Pass the small right one. */
   swapPassStation?: boolean;
   /** XP total and what was earned since the last visit (the bar fills it in). */
   xp?: { total: number; gains: XPGain[] } | null;
@@ -466,7 +466,7 @@ export default function BentoDashboard({
   // Station tile sits beside the score; the week tile then drops to row 2 next to posts.
   const hasStation = !isNew && !!stationSlug(data.pass.archetype);
   const listSpan = hasStation && data.week ? 'md:col-span-4' : 'md:col-span-7';
-  // Brand Pass and station tiles, placed by layout (swapPassStation trial).
+  // Brand Pass and station tiles, placed by layout (station big when swapPassStation).
   const swap = swapPassStation && hasStation;
   const passTile = (cls: string, compact = false) => (
     <Tile className={cls}>
