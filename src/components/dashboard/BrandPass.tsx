@@ -1,6 +1,5 @@
 'use client';
 
-import { stationSlug } from '@/components/StationCard';
 import { getArchetypeInfo } from '@/lib/archetype-descriptions';
 import { motion, useMotionValue, useReducedMotion, useSpring } from 'motion/react';
 import { useFinePointer } from '@/components/dashboard/dashMotion';
@@ -87,6 +86,11 @@ function Callout({
   );
 }
 
+/** X serves 48px avatars by default ("_normal"); the Pass wants the 400px one. */
+function hiResAvatar(url: string): string {
+  return url.replace(/_normal(\.\w+)$/, '_400x400$1');
+}
+
 export default function BrandPass({
   data,
   typeTaste,
@@ -99,7 +103,6 @@ export default function BrandPass({
 }) {
   const reduce = useReducedMotion();
   const info = getArchetypeInfo(data.archetype);
-  const slug = stationSlug(data.archetype);
   const no = String(data.stationNumber).padStart(4, '0');
   // The card tilts a few degrees toward the cursor, like holding a real pass.
   const fine = useFinePointer();
@@ -186,19 +189,20 @@ export default function BrandPass({
               {data.avatarUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element -- remote avatar
                 <img
-                  src={data.avatarUrl}
+                  src={hiResAvatar(data.avatarUrl)}
                   alt={`@${data.handle}`}
                   className="h-full w-full object-cover grayscale contrast-125"
                 />
-              ) : slug ? (
-                // no avatar: the photoreal 3D station stands in for the portrait
-                // eslint-disable-next-line @next/next/no-img-element -- pre-sized render
-                <img
-                  src={`/worlds/stations/3d/${slug}-card-day.jpg`}
-                  alt=""
-                  className="h-full w-full object-cover object-center"
-                />
-              ) : null}
+              ) : (
+                // no photo: their initial on Klein blue (the Pass is always the person)
+                <div
+                  className="flex h-full w-full items-center justify-center text-[44px] font-bold text-white"
+                  style={{ background: BLUE, fontFamily: TYPE }}
+                  aria-hidden
+                >
+                  {data.handle.replace(/^@/, '').charAt(0).toUpperCase()}
+                </div>
+              )}
               <span
                 className="absolute left-1 top-1 text-[8px] uppercase tracking-[0.1em]"
                 style={{ fontFamily: MONO, writingMode: 'vertical-rl' }}
