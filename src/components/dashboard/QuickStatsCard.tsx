@@ -102,7 +102,7 @@ export default function QuickStatsCard({
       value: postsThisWeek.toString(),
       trend: postsThisWeek > 0 ? ('up' as const) : ('stable' as const),
       sparkline: postsSparkline,
-      color: '#0A84FF',
+      color: '#0047FF',
     },
     {
       label: 'Avg. engagement',

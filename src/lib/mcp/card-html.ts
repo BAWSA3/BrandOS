@@ -4,7 +4,7 @@
  * full breakdown always shows in BrandOS's own design instead of being
  * re-worded by the model.
  *
- * Self-contained HTML (no network: system fonts, inline CSS/JS) speaking the
+ * Self-contained HTML (no network: fonts + wordmark embedded, inline CSS/JS) speaking the
  * MCP Apps postMessage protocol (JSON-RPC 2.0 with the host):
  *   View -> Host  ui/initialize, ui/notifications/initialized,
  *                 ui/notifications/size-changed, ui/open-link
@@ -13,7 +13,39 @@
  * All text is set with textContent (scan text is model output: never HTML).
  */
 
+import { readFile } from 'node:fs/promises';
+import { join } from 'node:path';
+
 export const CARD_URI = 'ui://brandos/card.html';
+
+let built: Promise<string> | null = null;
+
+/**
+ * The card HTML with the brand fonts (Inter Tight, VCR OSD Mono) and the hero
+ * wordmark embedded as data URIs: the view runs sandboxed with no network, so
+ * nothing can load from mybrandos.app. Built once per server instance.
+ */
+export function cardHtml(): Promise<string> {
+  built ??= (async () => {
+    const [inter, vcr, day, night] = await Promise.all([
+      readFile(join(process.cwd(), 'public', 'fonts', 'InterTight-latin.woff2')),
+      readFile(join(process.cwd(), 'public', 'fonts', 'VCR_OSD_MONO_1.001.ttf')),
+      readFile(join(process.cwd(), 'public', 'brand', 'wordmark-day-480.png')),
+      readFile(join(process.cwd(), 'public', 'brand', 'wordmark-night-480.png')),
+    ]);
+    const faces =
+      `@font-face { font-family: "Inter Tight"; font-weight: 100 900; font-display: block; src: url(data:font/woff2;base64,${inter.toString('base64')}) format("woff2"); }` +
+      `@font-face { font-family: "VCR OSD Mono"; font-weight: 400; font-display: block; src: url(data:font/ttf;base64,${vcr.toString('base64')}) format("truetype"); }`;
+    return CARD_HTML.replace('__FONT_FACES__', faces)
+      .replace('__WORDMARK_DAY__', `data:image/png;base64,${day.toString('base64')}`)
+      .replace('__WORDMARK_NIGHT__', `data:image/png;base64,${night.toString('base64')}`);
+  })().catch((e) => {
+    built = null;
+    console.error('[mcp] card assets failed, serving without them:', e);
+    return CARD_HTML.replace('__FONT_FACES__', '').replace(/__WORDMARK_(DAY|NIGHT)__/g, '');
+  });
+  return built;
+}
 
 export const CARD_HTML = `<!doctype html>
 <html lang="en">
@@ -22,10 +54,11 @@ export const CARD_HTML = `<!doctype html>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>BrandOS</title>
 <style>
+  __FONT_FACES__
   :root {
     --bg: #F2EFE8; --panel: #FFFFFF; --ink: #0E0E0E; --muted: #6B6862; --rule: rgba(14,14,14,0.12);
     --track: rgba(14,14,14,0.08); --blue: #0047FF; --on-blue: #FFFFFF;
-    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    --mono: "VCR OSD Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
     --big: "Inter Tight", "Helvetica Neue", Helvetica, Arial, sans-serif;
   }
   :root[data-theme="dark"] {
@@ -39,6 +72,11 @@ export const CARD_HTML = `<!doctype html>
   .micro { font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
   .top { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
   .brand { color: var(--blue); }
+  .wm { height: 18px; width: auto; display: block; }
+  .wm.night { display: none; }
+  :root[data-theme="dark"] .wm.day { display: none; }
+  :root[data-theme="dark"] .wm.night { display: block; }
+  .who { display: flex; align-items: center; gap: 10px; }
   .chip { font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
           padding: 4px 8px; border: 1px solid var(--blue); color: var(--blue); border-radius: 3px; white-space: nowrap; }
   .chip.fill { background: var(--blue); color: var(--on-blue); }
@@ -86,6 +124,7 @@ export const CARD_HTML = `<!doctype html>
 <script>
 (function () {
   var root = document.getElementById('root');
+  var WORDMARK = { day: '__WORDMARK_DAY__', night: '__WORDMARK_NIGHT__' };
   var nextId = 1;
   var pending = {};
 
@@ -122,9 +161,14 @@ export const CARD_HTML = `<!doctype html>
   }
   function header(d, chip) {
     var top = el('div', 'top');
-    var left = el('div', 'micro');
-    left.appendChild(el('span', 'brand', 'BrandOS'));
-    left.appendChild(document.createTextNode(' · ' + (d.own ? 'Your brand' : '@' + d.handle)));
+    var left = el('div', 'who');
+    ['day', 'night'].forEach(function (m) {
+      var img = el('img', 'wm ' + m);
+      img.src = WORDMARK[m];
+      img.alt = 'BrandOS';
+      left.appendChild(img);
+    });
+    left.appendChild(el('span', 'micro', d.own ? 'Your brand' : '@' + d.handle));
     top.appendChild(left);
     if (chip) top.appendChild(chip);
     return top;

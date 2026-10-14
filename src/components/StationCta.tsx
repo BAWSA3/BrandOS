@@ -47,7 +47,7 @@ export default function StationCta({
   return (
     <Link
       href={href}
-      className="mt-6 w-full max-w-[480px] text-center px-4 py-3.5 rounded-[6px] bg-[#0A84FF] hover:bg-[#0070E0] text-white text-[12px] tracking-[0.15em] uppercase transition-colors"
+      className="mt-6 w-full max-w-[480px] text-center px-4 py-3.5 rounded-[6px] bg-[#0047FF] hover:bg-[#0035CC] text-white text-[12px] tracking-[0.15em] uppercase transition-colors"
       style={{ fontFamily: MONO }}
     >
       {label}

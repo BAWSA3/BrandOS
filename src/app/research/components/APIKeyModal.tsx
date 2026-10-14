@@ -27,7 +27,7 @@ export default function APIKeyModal({ onSave, onClose, currentKey }: Props) {
     >
       <div
         style={{
-          background: '#F2F0EF',
+          background: '#F2EFE8',
           border: '1px solid rgba(0,0,0,0.15)',
           borderRadius: 4,
           padding: 32,
@@ -70,7 +70,7 @@ export default function APIKeyModal({ onSave, onClose, currentKey }: Props) {
           placeholder="sk-ant-..."
           style={{
             width: '100%',
-            background: '#F2F0EF',
+            background: '#F2EFE8',
             border: '1px solid rgba(0,0,0,0.15)',
             borderRadius: 4,
             padding: '12px 14px',

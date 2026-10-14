@@ -103,7 +103,7 @@ export default function ReserveStation({ username, archetype }: ReserveStationPr
       <div className="w-full max-w-[480px] mx-auto mt-4">
         <button
           onClick={() => setOpen(true)}
-          className="w-full px-4 py-3.5 rounded-[6px] bg-[#0A84FF] hover:bg-[#0070E0] text-white text-[12px] tracking-[0.15em] uppercase transition-colors"
+          className="w-full px-4 py-3.5 rounded-[6px] bg-[#0047FF] hover:bg-[#0035CC] text-white text-[12px] tracking-[0.15em] uppercase transition-colors"
           style={{ fontFamily: MONO }}
         >
           Reserve your brand station →
@@ -125,13 +125,13 @@ export default function ReserveStation({ username, archetype }: ReserveStationPr
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           aria-label="Email to reserve your brand station"
-          className="min-w-0 flex-1 px-3 py-3 rounded-[6px] border border-black/15 bg-white text-[16px] text-[#1D1D1F] outline-none focus:border-[#0A84FF]"
+          className="min-w-0 flex-1 px-3 py-3 rounded-[6px] border border-black/15 bg-white text-[16px] text-[#1D1D1F] outline-none focus:border-[#0047FF]"
           style={{ fontFamily: MONO }}
         />
         <button
           type="submit"
           disabled={state === 'sending'}
-          className="shrink-0 px-4 py-3 rounded-[6px] bg-[#0A84FF] hover:bg-[#0070E0] text-white text-[12px] tracking-[0.15em] uppercase transition-colors disabled:opacity-50"
+          className="shrink-0 px-4 py-3 rounded-[6px] bg-[#0047FF] hover:bg-[#0035CC] text-white text-[12px] tracking-[0.15em] uppercase transition-colors disabled:opacity-50"
           style={{ fontFamily: MONO }}
         >
           {state === 'sending' ? '...' : 'Reserve'}

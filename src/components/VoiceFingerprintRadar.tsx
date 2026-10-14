@@ -103,8 +103,8 @@ export default function VoiceFingerprintRadar({
       {animated ? (
         <motion.path
           d={dataPath}
-          fill="rgba(10, 132, 255, 0.12)"
-          stroke="#0A84FF"
+          fill="rgba(0, 71, 255, 0.12)"
+          stroke="#0047FF"
           strokeWidth={2}
           initial={{ opacity: 0, scale: 0.5 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -112,7 +112,7 @@ export default function VoiceFingerprintRadar({
           style={{ transformOrigin: `${cx}px ${cy}px` }}
         />
       ) : (
-        <path d={dataPath} fill="rgba(10, 132, 255, 0.12)" stroke="#0A84FF" strokeWidth={2} />
+        <path d={dataPath} fill="rgba(0, 71, 255, 0.12)" stroke="#0047FF" strokeWidth={2} />
       )}
 
       {/* Data points */}
@@ -125,7 +125,7 @@ export default function VoiceFingerprintRadar({
             cx={x}
             cy={y}
             r={4}
-            fill="#0A84FF"
+            fill="#0047FF"
             stroke="var(--surface)"
             strokeWidth={2}
             initial={{ opacity: 0, scale: 0 }}
@@ -138,7 +138,7 @@ export default function VoiceFingerprintRadar({
             cx={x}
             cy={y}
             r={4}
-            fill="#0A84FF"
+            fill="#0047FF"
             stroke="var(--surface)"
             strokeWidth={2}
           />

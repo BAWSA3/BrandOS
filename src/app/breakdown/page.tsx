@@ -50,7 +50,7 @@ function BreakdownForm() {
   return (
     <main
       className="flex min-h-screen items-center justify-center px-4 py-16"
-      style={{ background: '#F2F0EF', color: '#111' }}
+      style={{ background: '#F2EFE8', color: '#111' }}
     >
       <div className="w-full max-w-[440px]">
         <div

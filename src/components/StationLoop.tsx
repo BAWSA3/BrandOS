@@ -5,7 +5,7 @@ import { stationSlug } from '@/components/StationCard';
 
 // The photoreal station loop (rendered in Blender: scripts/blender/station.py)
 // as the station page hero. A 6 s seamless loop encoded on the station page's
-// background (#F2F0EF), so it sits on the page with no visible frame. Shows a
+// background (#F2EFE8), so it sits on the page with no visible frame. Shows a
 // still poster for reduced-motion users. Add each archetype to LOOPS as its
 // render lands in public/worlds/stations/loops/.
 
