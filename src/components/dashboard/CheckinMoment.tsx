@@ -23,7 +23,11 @@ const KEY = 'brandos:checkin-day';
 
 const T_CARD = 2700;
 const T_SETTLE = 5200;
-const T_DONE = 6000;
+const T_DONE = 6050;
+const EXIT_MS = 850;
+/** Smooth ease-in-out for the exit; long ease-out for entrances. */
+const EASE_OUT = [0.16, 1, 0.3, 1] as const;
+const EASE_EXIT = [0.4, 0, 0.2, 1] as const;
 
 function readPlayed(): string | null {
   try {
@@ -72,11 +76,13 @@ export default function CheckinMoment({
   const crosses = to.level > from.level;
   const sinceXp = sinceLast.reduce((t, g) => t + g.xp, 0);
 
+  // tap / key: jump to the end state and play the same exit, sooner
   const finish = () => {
     timers.current.forEach((t) => window.clearTimeout(t));
     cancelAnimationFrame(raf.current);
     setShown(total);
-    setMode('idle');
+    setPhase('settle');
+    timers.current = [window.setTimeout(() => setMode('idle'), EXIT_MS)];
   };
 
   // decide once on mount: the moment (first time today), a toast, or nothing
@@ -172,18 +178,28 @@ export default function CheckinMoment({
           className="fixed inset-0 z-[70] flex cursor-pointer items-center justify-center px-4"
           style={{ background: veil, color: ink }}
           initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0, transition: { duration: 0.35 } }}
-          onClick={finish}
+          animate={{ opacity: phase === 'settle' ? 0 : 1 }}
+          exit={{ opacity: 0 }}
+          transition={
+            phase === 'settle'
+              ? { duration: 0.6, delay: 0.2, ease: EASE_EXIT }
+              : { duration: 0.45, ease: EASE_OUT }
+          }
+          onClick={phase === 'settle' ? undefined : finish}
         >
           <motion.div
             className="w-full max-w-[560px]"
+            initial={{ opacity: 0, y: 14, scale: 0.98 }}
             animate={
               phase === 'settle'
-                ? { scale: 0.35, y: '-42vh', opacity: 0 }
+                ? { scale: 0.55, y: '-38vh', opacity: 0 }
                 : { scale: 1, y: 0, opacity: 1 }
             }
-            transition={{ duration: 0.75, ease: [0.65, 0, 0.35, 1] }}
+            transition={
+              phase === 'settle'
+                ? { duration: 0.7, delay: 0.12, ease: EASE_EXIT }
+                : { duration: 0.6, ease: EASE_OUT }
+            }
           >
             <div
               className="text-[11px] uppercase tracking-[0.16em]"
@@ -240,62 +256,81 @@ export default function CheckinMoment({
               </span>
             </div>
 
-            <AnimatePresence>
-              {leveled && (
+            {/* reserved row: the badge appears without moving anything */}
+            <div className="mt-4 h-[28px]">
+              {crosses && (
                 <motion.div
-                  key="lvup"
-                  className="mt-4 inline-block px-3 py-1.5 text-[11px] uppercase tracking-[0.16em] text-white"
+                  className="inline-block px-3 py-1.5 text-[11px] uppercase tracking-[0.16em] text-white"
                   style={{ fontFamily: MONO, background: BLUE }}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
+                  initial={false}
+                  animate={
+                    leveled ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 8, scale: 0.96 }
+                  }
+                  transition={{ duration: 0.45, ease: EASE_OUT }}
                 >
                   Level up · LV {String(from.level).padStart(2, '0')} → LV{' '}
                   {String(to.level).padStart(2, '0')}
                 </motion.div>
               )}
-            </AnimatePresence>
+            </div>
 
-            {/* 2. today's gains + streak */}
-            <AnimatePresence>
-              {phase !== 'takeover' && (
-                <motion.div
-                  key="card"
-                  className="mt-6 rounded-[10px] border p-5"
-                  style={{
-                    background: panel,
-                    borderColor: dark ? 'rgba(242,239,232,0.14)' : 'rgba(14,14,14,0.12)',
-                  }}
-                  initial={{ opacity: 0, y: 16 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            {/* 2. today's gains + streak: always laid out, so it glides in without a jump */}
+            <motion.div
+              className="mt-4 rounded-[10px] border p-5"
+              style={{
+                background: panel,
+                borderColor: dark ? 'rgba(242,239,232,0.14)' : 'rgba(14,14,14,0.12)',
+              }}
+              initial={false}
+              animate={
+                phase === 'card'
+                  ? { opacity: 1, y: 0, scale: 1 }
+                  : phase === 'settle'
+                    ? { opacity: 0, y: 12, scale: 0.99 }
+                    : { opacity: 0, y: 22, scale: 0.98 }
+              }
+              transition={
+                phase === 'settle'
+                  ? { duration: 0.28, ease: EASE_EXIT }
+                  : { duration: 0.65, ease: EASE_OUT }
+              }
+              aria-hidden={phase === 'takeover'}
+            >
+              <div className="flex items-center justify-between">
+                <span
+                  className="text-[10px] uppercase tracking-[0.14em]"
+                  style={{ fontFamily: MONO, color: muted }}
                 >
-                  <div className="flex items-center justify-between">
-                    <span
-                      className="text-[10px] uppercase tracking-[0.14em]"
-                      style={{ fontFamily: MONO, color: muted }}
-                    >
-                      Today
-                    </span>
-                    {streakDays > 1 && (
-                      <span
-                        className="text-[10px] uppercase tracking-[0.14em]"
-                        style={{ fontFamily: MONO, color: BLUE }}
-                      >
-                        {streakDays}-day streak
-                      </span>
-                    )}
-                  </div>
-                  <ul className="mt-3 space-y-2">
-                    {today.gains.map((g) => (
-                      <li key={g.label} className="flex justify-between text-[15px]">
-                        <span>{g.label}</span>
-                        <span style={{ fontFamily: MONO, color: BLUE }}>+{g.xp}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </motion.div>
-              )}
-            </AnimatePresence>
+                  Today
+                </span>
+                {streakDays > 1 && (
+                  <span
+                    className="text-[10px] uppercase tracking-[0.14em]"
+                    style={{ fontFamily: MONO, color: BLUE }}
+                  >
+                    {streakDays}-day streak
+                  </span>
+                )}
+              </div>
+              <ul className="mt-3 space-y-2">
+                {today.gains.map((g, i) => (
+                  <motion.li
+                    key={g.label}
+                    className="flex justify-between text-[15px]"
+                    initial={false}
+                    animate={phase === 'card' ? { opacity: 1, x: 0 } : { opacity: 0, x: -6 }}
+                    transition={{
+                      duration: 0.4,
+                      delay: phase === 'card' ? 0.18 + i * 0.07 : 0,
+                      ease: EASE_OUT,
+                    }}
+                  >
+                    <span>{g.label}</span>
+                    <span style={{ fontFamily: MONO, color: BLUE }}>+{g.xp}</span>
+                  </motion.li>
+                ))}
+              </ul>
+            </motion.div>
 
             <div
               className="mt-5 text-center text-[10px] uppercase tracking-[0.14em]"
