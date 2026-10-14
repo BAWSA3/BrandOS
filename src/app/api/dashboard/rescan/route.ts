@@ -4,6 +4,7 @@ import { getCurrentUser, getCurrentWorkspace } from '@/lib/auth';
 import { botGuard } from '@/lib/botid-guard';
 import { withRateLimit, rateLimiters } from '@/lib/rate-limit';
 import { computeBrandScore } from '@/lib/brand-score';
+import { saveAvatar } from '@/lib/avatar-refresh';
 import { extractIntelligence } from '@/lib/scan-tracking';
 import { normalizeArchetypeName } from '@/lib/archetype-names';
 import { scoreLatestPosts } from '@/lib/post-scores';
@@ -71,6 +72,12 @@ async function handlePost(request: NextRequest) {
     if (!bs || score === null) {
       return NextResponse.json({ error: 'Scan failed' }, { status: 502 });
     }
+
+    // the scan just read their X profile: keep the stored photo current
+    await saveAvatar(
+      user.id,
+      (result.body.profile as { profile_image_url?: string } | undefined)?.profile_image_url
+    );
 
     // Inside the scorer's cache window the result is unchanged: don't save a
     // duplicate if this user already has a scan from that analysis.

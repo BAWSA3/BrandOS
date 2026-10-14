@@ -271,7 +271,7 @@ const SAMPLE: DashboardData = {
     },
   ],
   pass: {
-    avatarUrl: 'https://pbs.twimg.com/profile_images/2066740453211582465/tO24SiNn_400x400.jpg',
+    avatarUrl: 'https://pbs.twimg.com/profile_images/2109992170694524928/g96qzcxd_400x400.jpg',
     handle: 'jbawsa',
     name: 'Jeffrey Basa',
     archetype: 'BUILD.EXE',
