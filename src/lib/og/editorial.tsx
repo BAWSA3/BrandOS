@@ -15,7 +15,7 @@ import { join } from 'node:path';
  */
 
 const BLUE = '#0047FF';
-const BONE = '#F2F0EF';
+const BONE = '#F2EFE8';
 const INK = '#0E0E0E';
 const MUTED = '#6B6B6B';
 export const OG_SIZE = { width: 1200, height: 630 };
@@ -46,6 +46,9 @@ export function artSlug(archetype: string | null | undefined): string | null {
   const s = (archetype ?? '').trim().toLowerCase().replace(/\./g, '-');
   return s && s !== 'lineup' && ART[s] ? s : null;
 }
+
+/** The hero wordmark (brand tokens: the logo is never typed). */
+const wordmark = () => readFile(join(process.cwd(), 'public', 'brand', 'wordmark-day-480.png'));
 
 async function fonts() {
   const [grotesk, vcr] = await Promise.all([
@@ -292,10 +295,11 @@ const handleSize = (h: string) => (h.length > 15 ? 26 : h.length > 11 ? 30 : 34)
 
 export async function editorialImage(card: EditorialCard, headers?: Record<string, string>) {
   const slug = card.kind === 'station' || card.kind === 'score' ? artSlug(card.archetype) : null;
-  const [art, f, avatar] = await Promise.all([
+  const [art, f, avatar, wm] = await Promise.all([
     (slug ? ART[slug] : ART.lineup)(),
     fonts(),
     card.kind === 'score' ? loadAvatar(card.avatarUrl) : Promise.resolve(null),
+    wordmark(),
   ]);
   const artSrc = `data:image/png;base64,${art.toString('base64')}`;
   const lineup = !slug;
@@ -337,9 +341,16 @@ export async function editorialImage(card: EditorialCard, headers?: Record<strin
           top: 52,
           display: 'flex',
           justifyContent: 'space-between',
+          alignItems: 'center',
         }}
       >
-        <Micro color={INK}>BRANDOS</Micro>
+        {/* eslint-disable-next-line @next/next/no-img-element -- satori */}
+        <img
+          src={`data:image/png;base64,${wm.toString('base64')}`}
+          width={120}
+          height={24}
+          alt="BrandOS"
+        />
         <Micro>{LABEL[card.kind]}</Micro>
         <Micro>MYBRANDOS.APP</Micro>
       </div>

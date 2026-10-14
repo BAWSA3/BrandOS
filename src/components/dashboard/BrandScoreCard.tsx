@@ -53,7 +53,7 @@ function HealthSparkline({ values }: { values: number[] }) {
       />
       <defs>
         <linearGradient id="sparkGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stopColor="#0A84FF" />
+          <stop offset="0%" stopColor="#0047FF" />
           <stop offset="100%" stopColor="#30D158" />
         </linearGradient>
       </defs>
@@ -182,7 +182,7 @@ export default function BrandScoreCard() {
   const archetype = tone ? deriveArchetype(tone) : null;
 
   const dimensionConfig = [
-    { key: 'completeness', label: 'Completeness', color: '#0A84FF' },
+    { key: 'completeness', label: 'Completeness', color: '#0047FF' },
     { key: 'consistency', label: 'Consistency', color: '#30D158' },
     { key: 'voiceMatch', label: 'Voice Match', color: '#BF5AF2' },
     { key: 'engagement', label: 'Engagement', color: '#FF9F0A' },
@@ -198,7 +198,7 @@ export default function BrandScoreCard() {
         background: 'linear-gradient(135deg, #E8EDF5 0%, #EEF2F9 40%, #F0F4FA 100%)',
         borderRadius: 16,
         padding: 24,
-        border: '1px solid rgba(10, 132, 255, 0.12)',
+        border: '1px solid rgba(0, 71, 255, 0.12)',
         boxShadow: 'var(--shadow-card)',
       }}
     >
@@ -206,7 +206,7 @@ export default function BrandScoreCard() {
       <div
         className="absolute -top-20 -right-20 w-48 h-48 rounded-full pointer-events-none"
         style={{
-          background: 'radial-gradient(circle, rgba(10,132,255,0.06) 0%, transparent 70%)',
+          background: 'radial-gradient(circle, rgba(0,71,255,0.06) 0%, transparent 70%)',
         }}
       />
 
@@ -233,7 +233,7 @@ export default function BrandScoreCard() {
             />
             <defs>
               <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#0A84FF" />
+                <stop offset="0%" stopColor="#0047FF" />
                 <stop offset="100%" stopColor="#30D158" />
               </linearGradient>
             </defs>
@@ -277,8 +277,8 @@ export default function BrandScoreCard() {
                 style={{
                   fontSize: 11,
                   fontWeight: 600,
-                  color: '#0A84FF',
-                  background: 'rgba(10,132,255,0.12)',
+                  color: '#0047FF',
+                  background: 'rgba(0,71,255,0.12)',
                   padding: '3px 10px',
                   borderRadius: 20,
                   letterSpacing: '0.02em',
@@ -300,8 +300,8 @@ export default function BrandScoreCard() {
                 disabled={health.isComputing}
                 style={{
                   fontSize: 11,
-                  color: health.isComputing ? 'var(--text-tertiary)' : '#0A84FF',
-                  background: 'rgba(10,132,255,0.08)',
+                  color: health.isComputing ? 'var(--text-tertiary)' : '#0047FF',
+                  background: 'rgba(0,71,255,0.08)',
                   border: 'none',
                   padding: '2px 8px',
                   borderRadius: 4,
@@ -323,7 +323,7 @@ export default function BrandScoreCard() {
                 fontSize: 13,
                 fontWeight: 600,
                 color: '#fff',
-                background: 'linear-gradient(135deg, #0A84FF, #30D158)',
+                background: 'linear-gradient(135deg, #0047FF, #30D158)',
                 border: 'none',
                 padding: '8px 16px',
                 borderRadius: 8,

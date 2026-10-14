@@ -81,7 +81,7 @@ export default function TestArchetypesPage() {
     <div
       style={{
         minHeight: '100vh',
-        background: '#F2F0EF',
+        background: '#F2EFE8',
         padding: '48px 24px',
         fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace",
       }}

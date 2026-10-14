@@ -41,9 +41,9 @@ export const THEME: Record<
     bg: '#E8E8ED',
     ink: '#1D1D1F',
     muted: '#6E6E73',
-    accent: '#0A84FF',
+    accent: '#0047FF',
     border: 'rgba(0,0,0,0.08)',
-    panel: '#F2F0EF',
+    panel: '#F2EFE8',
   },
   night: {
     bg: '#060A0F',

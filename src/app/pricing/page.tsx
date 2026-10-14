@@ -16,9 +16,9 @@ const MONO = "'VCR OSD Mono', 'JetBrains Mono', monospace";
 
 export default function PricingPage() {
   return (
-    <main className="min-h-screen bg-[#F2F0EF] px-4 py-16 flex flex-col items-center justify-center">
+    <main className="min-h-screen bg-[#F2EFE8] px-4 py-16 flex flex-col items-center justify-center">
       <div className="w-full max-w-[480px] text-center" style={{ fontFamily: MONO }}>
-        <span className="inline-block px-2 py-1 rounded-[2px] bg-[#0A84FF] text-white text-[11px] tracking-[0.15em] uppercase">
+        <span className="inline-block px-2 py-1 rounded-[2px] bg-[#0047FF] text-white text-[11px] tracking-[0.15em] uppercase">
           Opening soon
         </span>
         <h1 className="mt-5 text-[22px] leading-snug tracking-wider text-[#1D1D1F] uppercase">
@@ -30,7 +30,7 @@ export default function PricingPage() {
         </p>
         <Link
           href="/"
-          className="mt-8 block w-full px-4 py-3.5 rounded-[6px] bg-[#0A84FF] hover:bg-[#0070E0] text-white text-[12px] tracking-[0.15em] uppercase transition-colors"
+          className="mt-8 block w-full px-4 py-3.5 rounded-[6px] bg-[#0047FF] hover:bg-[#0035CC] text-white text-[12px] tracking-[0.15em] uppercase transition-colors"
         >
           Reserve your brand station →
         </Link>

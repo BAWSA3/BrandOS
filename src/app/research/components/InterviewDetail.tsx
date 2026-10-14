@@ -301,7 +301,7 @@ export default function InterviewDetail({
           {loading && (
             <div
               style={{
-                background: '#F2F0EF',
+                background: '#F2EFE8',
                 border: '1px solid rgba(0,0,0,0.08)',
                 borderRadius: 4,
                 padding: '32px 24px',
@@ -328,7 +328,7 @@ export default function InterviewDetail({
           {!loading && !iv.summary && !error && (
             <div
               style={{
-                background: '#F2F0EF',
+                background: '#F2EFE8',
                 border: '1px solid rgba(0,0,0,0.08)',
                 borderRadius: 4,
                 padding: '40px 24px',

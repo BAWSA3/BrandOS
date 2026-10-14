@@ -3,9 +3,10 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { getSupabaseBrowser } from '@/lib/supabase-browser';
+import Wordmark from '@/components/Wordmark';
 
 const MONO = "'VCR OSD Mono', 'JetBrains Mono', monospace";
-const BIG = "'Inter Tight', 'Helvetica Neue', sans-serif";
+const BIG = "'Helvetica Custom', 'Helvetica Neue', Helvetica, Arial, sans-serif";
 const BLUE = '#0047FF';
 
 type State =
@@ -71,6 +72,9 @@ export default function ConsentClient() {
       style={{ background: '#F2EFE8', color: '#0E0E0E' }}
     >
       <div className="w-full max-w-[440px]">
+        <div className="mb-8">
+          <Wordmark height={30} href={null} />
+        </div>
         <div
           className="text-[11px] uppercase tracking-[0.14em]"
           style={{ fontFamily: MONO, color: BLUE }}

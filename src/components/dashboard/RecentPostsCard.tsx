@@ -109,7 +109,7 @@ export default function RecentPostsCard({ posts, isLoading }: RecentPostsCardPro
                   transition: 'border-color 200ms ease',
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = 'rgba(10,132,255,0.3)';
+                  e.currentTarget.style.borderColor = 'rgba(0,71,255,0.3)';
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.borderColor = 'var(--border)';

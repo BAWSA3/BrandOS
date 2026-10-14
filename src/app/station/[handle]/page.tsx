@@ -7,6 +7,7 @@ import StationBoard from '@/components/StationBoard';
 import { getArchetypeInfo } from '@/lib/archetype-descriptions';
 import StationLoop from '@/components/StationLoop';
 import StationCta from '@/components/StationCta';
+import Wordmark from '@/components/Wordmark';
 import { formatStationNumber } from '@/lib/station-number';
 
 // Public page for a reserved station: the flex link people share on X. The
@@ -27,7 +28,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return { title: 'Reserve your brand station · BrandOS', robots: { index: false } };
   }
   const name = getArchetypeInfo(r.archetype ?? '')?.name;
-  const title = `@${r.handle} reserved Station #${formatStationNumber(r.number)} · BrandOS`;
+  const title = `@${r.handle} · Station #${formatStationNumber(r.number)} · BrandOS`;
   const description = `${name ? `${name} station. ` : ''}BrandOS Studio is opening soon. Reserve your own brand station.`;
   return {
     title,
@@ -42,7 +43,10 @@ export default async function StationPage({ params }: Props) {
   const [r, claim] = await Promise.all([getReservationByHandle(handle), getStationClaim(handle)]);
 
   return (
-    <main className="min-h-screen bg-[#F2F0EF] px-4 py-10 flex flex-col items-center">
+    <main className="min-h-screen bg-[#F2EFE8] px-4 py-10 flex flex-col items-center">
+      <header className="mb-6 flex w-full max-w-[480px] justify-start">
+        <Wordmark height={24} />
+      </header>
       {r ? (
         <>
           <StationLoop archetype={r.archetype} />
@@ -51,7 +55,7 @@ export default async function StationPage({ params }: Props) {
             style={{ fontFamily: MONO }}
           >
             <div className="flex items-center justify-between">
-              <span className="rounded-[3px] bg-[#0A84FF] px-2 py-1 text-[11px] uppercase tracking-[0.14em] text-white">
+              <span className="rounded-[3px] bg-[#0047FF] px-2 py-1 text-[11px] uppercase tracking-[0.14em] text-white">
                 {claim ? 'Claimed' : 'Reserved'}
               </span>
               <span className="text-[18px] text-[#1D1D1F]">#{formatStationNumber(r.number)}</span>
@@ -60,7 +64,7 @@ export default async function StationPage({ params }: Props) {
               {claim ? 'Home of' : 'Future home of'} @{r.handle}
             </div>
             {getArchetypeInfo(r.archetype ?? '')?.name && (
-              <div className="mt-3 text-[20px] text-[#0A84FF]">
+              <div className="mt-3 text-[20px] text-[#0047FF]">
                 {getArchetypeInfo(r.archetype ?? '')?.name}
               </div>
             )}
@@ -70,7 +74,7 @@ export default async function StationPage({ params }: Props) {
           </section>
           {claim ? (
             <div
-              className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-[4px] bg-[#0A84FF] text-white text-[11px] tracking-[0.15em] uppercase"
+              className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-[4px] bg-[#0047FF] text-white text-[11px] tracking-[0.15em] uppercase"
               style={{ fontFamily: MONO }}
             >
               ✓ Claimed by @{r.handle}

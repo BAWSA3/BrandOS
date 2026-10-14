@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Wordmark from '@/components/Wordmark';
 import { useEffect, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { DASH_FONTS } from '@/components/dashboard/dashFonts';
@@ -402,13 +403,7 @@ export default function PublicBrand({
     >
       <div className="mx-auto w-full max-w-[920px]">
         <header className="flex items-center justify-between">
-          <Link
-            href="/"
-            className="text-[18px]"
-            style={{ fontFamily: BIG, fontWeight: 600, letterSpacing: '-0.02em' }}
-          >
-            Brand<span style={{ color: BLUE }}>OS</span>
-          </Link>
+          <Wordmark height={26} />
           <Link
             href={viewer ? '/dashboard' : '/signup?next=/dashboard'}
             className="text-[11px] uppercase tracking-[0.14em] hover:underline"

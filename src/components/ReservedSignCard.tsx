@@ -164,7 +164,7 @@ export default function ReservedSignCard({
               style={{
                 fontFamily: MONO,
                 fontSize: '1.9cqw',
-                color: mode === 'day' ? '#0A84FF' : '#002FA7',
+                color: mode === 'day' ? '#0047FF' : '#002FA7',
               }}
             >
               STATION #{no}
@@ -240,7 +240,7 @@ export default function ReservedSignCard({
           ))}
           <button
             onClick={shareOnX}
-            className="px-4 py-2 rounded-[4px] text-[11px] tracking-wider text-white bg-[#0A84FF] hover:bg-[#0070E0] transition-colors"
+            className="px-4 py-2 rounded-[4px] text-[11px] tracking-wider text-white bg-[#0047FF] hover:bg-[#0035CC] transition-colors"
             style={{ fontFamily: MONO }}
           >
             SHARE ON X

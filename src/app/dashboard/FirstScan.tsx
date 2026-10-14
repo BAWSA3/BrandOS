@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import Wordmark from '@/components/Wordmark';
+import { DASH_FONTS } from '@/components/dashboard/dashFonts';
 
 // Shown behind the first-scan overlay (and if that scan fails): the dashboard
 // fills in from the scan, so there's nothing else to show yet.
@@ -12,12 +14,13 @@ export default function FirstScan({ handle }: { handle: string }) {
       className="flex min-h-screen flex-col items-center justify-center gap-6 px-6 text-center"
       style={{ background: '#F2EFE8', color: '#0E0E0E' }}
     >
+      <Wordmark height={30} href="/home" />
       <div className="text-[11px] uppercase tracking-[0.14em]" style={{ fontFamily: MONO }}>
         Dashboard · @{handle}
       </div>
       <h1
         className="max-w-[18ch] text-[40px] leading-[1.02] md:text-[56px]"
-        style={{ fontFamily: "'Inter Tight', sans-serif", fontWeight: 500 }}
+        style={{ fontFamily: DASH_FONTS.big, fontWeight: 500 }}
       >
         Your dashboard starts with your first scan.
       </h1>

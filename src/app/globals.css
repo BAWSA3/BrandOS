@@ -164,7 +164,7 @@
   /* Core Surfaces */
   --background: #e8e8ed;
   --foreground: #1d1d1f;
-  --surface: #f2f0ef;
+  --surface: #F2EFE8;
   --surface-hover: #f5f5f7;
   --surface-tertiary: #e8e8ed;
   --muted: #86868b;
@@ -181,23 +181,23 @@
   --text-quaternary: #aeaeb2;
 
   /* Accent Colors — Apple System Palette */
-  --accent: #0a84ff;
-  --accent-hover: #0070e0;
+  --accent: #0047FF;
+  --accent-hover: #0035CC;
   --success: #34c759;
   --warning: #ff9f0a;
   --danger: #ff3b30;
 
   /* Legacy aliases (keep landing page working) */
   --blue-klein: #002fa7;
-  --blue-electric: #0a84ff;
+  --blue-electric: #0047FF;
   --blue-deep: #001847;
-  --blue-glow: rgba(10, 132, 255, 0.3);
-  --blue-subtle: rgba(10, 132, 255, 0.1);
-  --blue-hover: #0070e0;
+  --blue-glow: rgba(0, 71, 255, 0.3);
+  --blue-subtle: rgba(0, 71, 255, 0.1);
+  --blue-hover: #0035CC;
 
   /* Legacy dashboard palette (landing page) */
   --brand-black: #050505;
-  --brand-blue: #0a84ff;
+  --brand-blue: #0047FF;
   --brand-green: #30d158;
   --brand-yellow: #ffd60a;
   --brand-gray: #1c1c1e;
@@ -208,10 +208,10 @@
   --glass-hover: rgba(0, 0, 0, 0.04);
 
   /* Legacy gradients (landing page) */
-  --gradient-hero: linear-gradient(135deg, #e8e8ed 0%, rgba(10, 132, 255, 0.1) 50%, #e8e8ed 100%);
+  --gradient-hero: linear-gradient(135deg, #e8e8ed 0%, rgba(0, 71, 255, 0.1) 50%, #e8e8ed 100%);
   --gradient-card: linear-gradient(180deg, rgba(0, 0, 0, 0.02) 0%, rgba(0, 0, 0, 0.01) 100%);
   --gradient-orb: radial-gradient(circle, var(--accent) 0%, transparent 70%);
-  --gradient-text: linear-gradient(135deg, #1d1d1f 0%, #0a84ff 50%, #1d1d1f 100%);
+  --gradient-text: linear-gradient(135deg, #1d1d1f 0%, #0047FF 50%, #1d1d1f 100%);
 
   /* Radii */
   --radius-sm: 8px;
@@ -232,9 +232,9 @@
   --shadow-modal: 0 16px 48px rgba(0, 0, 0, 0.16);
 
   /* Legacy glow aliases (landing page) */
-  --glow-sm: 0 0 20px rgba(10, 132, 255, 0.15);
-  --glow-md: 0 0 40px rgba(10, 132, 255, 0.2);
-  --glow-lg: 0 0 80px rgba(10, 132, 255, 0.25);
+  --glow-sm: 0 0 20px rgba(0, 71, 255, 0.15);
+  --glow-md: 0 0 40px rgba(0, 71, 255, 0.2);
+  --glow-lg: 0 0 80px rgba(0, 71, 255, 0.25);
 
   /* Spring Animations (kept — purposeful motion) */
   --spring-snappy: 300ms
@@ -433,7 +433,7 @@
   --color-input: var(--border);
   --color-ring: var(--accent);
   --color-surface: var(--surface);
-  --color-chart-1: #0a84ff;
+  --color-chart-1: #0047FF;
   --color-chart-2: #34c759;
   --color-chart-3: #ff9f0a;
   --color-chart-4: #af52de;
@@ -614,7 +614,7 @@ body {
   background: radial-gradient(
     circle,
     var(--accent) 0%,
-    rgba(10, 132, 255, 0.5) 30%,
+    rgba(0, 71, 255, 0.5) 30%,
     transparent 70%
   );
   border-radius: 50%;
@@ -634,7 +634,7 @@ body {
   height: 800px;
 }
 .blue-orb-secondary {
-  background: radial-gradient(circle, rgba(10, 132, 255, 0.3) 0%, transparent 60%);
+  background: radial-gradient(circle, rgba(0, 71, 255, 0.3) 0%, transparent 60%);
   animation-delay: -2s;
   animation-duration: 5s, 25s;
 }
@@ -1075,7 +1075,7 @@ textarea:focus,
 select:focus {
   outline: none;
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.15);
+  box-shadow: 0 0 0 3px rgba(0, 71, 255, 0.15);
 }
 
 input::placeholder,
@@ -1197,11 +1197,11 @@ input[type="range"]::-webkit-slider-thumb:hover {
 .os-shimmer {
   background: linear-gradient(
     90deg,
-    #0a84ff 0%,
+    #0047FF 0%,
     #4499ff 25%,
-    #0a84ff 50%,
+    #0047FF 50%,
     #4499ff 75%,
-    #0a84ff 100%
+    #0047FF 100%
   );
   background-size: 200% 100%;
   -webkit-background-clip: text !important;
@@ -1335,7 +1335,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
 }
 .tag-blue {
   background: var(--blue-subtle);
-  border-color: rgba(10, 132, 255, 0.2);
+  border-color: rgba(0, 71, 255, 0.2);
   color: var(--accent);
 }
 
@@ -1395,7 +1395,7 @@ code {
 .dropzone:hover,
 .dropzone.dragover {
   border-color: var(--accent);
-  background-color: rgba(10, 132, 255, 0.05);
+  background-color: rgba(0, 71, 255, 0.05);
 }
 
 /* Card spring — simplified for app shell */
@@ -1605,8 +1605,8 @@ code {
   box-shadow: 0 0 8px currentColor;
 }
 .workflow-canvas .react-flow__selection {
-  background: rgba(10, 132, 255, 0.05);
-  border: 1px solid rgba(10, 132, 255, 0.3);
+  background: rgba(0, 71, 255, 0.05);
+  border: 1px solid rgba(0, 71, 255, 0.3);
 }
 .workflow-controls {
   background: var(--surface) !important;

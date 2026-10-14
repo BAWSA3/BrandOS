@@ -12,7 +12,7 @@ import {
   type McpAccount,
 } from '@/lib/mcp/usage';
 import { freshRead, profileCard, renderProfileRead, storedRead } from '@/lib/mcp/profile-read';
-import { CARD_HTML, CARD_URI } from '@/lib/mcp/card-html';
+import { CARD_URI, cardHtml } from '@/lib/mcp/card-html';
 
 // BrandOS MCP tools, for signed-in BrandOS accounts (sign-in: src/lib/mcp/auth.ts,
 // weekly allowance: src/lib/mcp/usage.ts). BrandOS reads taste and brand focus:
@@ -117,7 +117,7 @@ export function registerBrandTools(server: any, origin: string) {
         {
           uri: uri.href,
           mimeType: 'text/html;profile=mcp-app',
-          text: CARD_HTML,
+          text: await cardHtml(),
           _meta: { ui: { prefersBorder: false } },
         },
       ],
