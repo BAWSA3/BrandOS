@@ -3,7 +3,8 @@ import { after } from 'next/server';
 import { refreshAvatar } from '@/lib/avatar-refresh';
 import { getCurrentUser, getCurrentWorkspace } from '@/lib/auth';
 import { getHomeData, toDashboardData } from '@/lib/home-data';
-import { recordVisit } from '@/lib/progress';
+import { cookies } from 'next/headers';
+import { recordVisit, safeTz } from '@/lib/progress';
 import BentoDashboard from '@/components/dashboard/BentoDashboard';
 import RescanOnLoad from '@/components/dashboard/RescanOnLoad';
 import DashboardClient from './DashboardClient';
@@ -35,7 +36,9 @@ export default async function DashboardPage({
   const home = await getHomeData(user);
   // first visit of the day: check X for a new profile photo (background)
   after(() => refreshAvatar(user.id).catch(() => null));
-  const progress = await recordVisit(user.id, home.scans, new Date(), home.posts);
+  // days + streaks follow the user's own midnight (timezone cookie set by the dashboard)
+  const tz = safeTz((await cookies()).get('bos_tz')?.value);
+  const progress = await recordVisit(user.id, home.scans, new Date(), home.posts, tz);
   const bento = toDashboardData(home);
   if (bento && progress && progress.streakDays > 1) bento.ticker.streak = `${progress.streakDays}d`;
 
@@ -51,7 +54,17 @@ export default async function DashboardPage({
       {bento && (
         <BentoDashboard
           data={bento}
-          xp={progress ? { total: progress.xpTotal, gains: progress.gains } : null}
+          xp={
+            progress
+              ? {
+                  total: progress.xpTotal,
+                  gains: progress.gains,
+                  today: progress.today,
+                  day: progress.day,
+                  streakDays: progress.streakDays,
+                }
+              : null
+          }
           scoreAlert={progress?.scoreAlert ?? null}
           rescan="live"
           homeHref="/home"
