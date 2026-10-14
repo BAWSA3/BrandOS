@@ -23,6 +23,10 @@ export interface Progress {
   streakDays: number;
   /** Score change since the previous visit (null when unchanged or first visit). */
   scoreAlert: { delta: number; score: number } | null;
+  /** The user's current day (their timezone when known), e.g. "2026-10-14". */
+  day: string;
+  /** XP earned since the user's local midnight (the daily check-in moment). */
+  today: { xp: number; gains: XPGain[] };
 }
 
 /** UTC calendar day, as a Date at 00:00 UTC. */
@@ -30,6 +34,40 @@ function utcDay(d: Date): Date {
   return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
 }
 const dayKey = (d: Date) => d.toISOString().slice(0, 10);
+
+/** A valid IANA timezone, or null. */
+export function safeTz(tz: string | null | undefined): string | null {
+  if (!tz || tz.length > 64) return null;
+  try {
+    new Intl.DateTimeFormat('en-US', { timeZone: tz });
+    return tz;
+  } catch {
+    return null;
+  }
+}
+
+/** The calendar day in `tz` (UTC when unknown), as a Date at 00:00 UTC of that date. */
+function localDay(d: Date, tz: string | null): Date {
+  if (!tz) return utcDay(d);
+  const ymd = new Intl.DateTimeFormat('en-CA', { timeZone: tz }).format(d); // YYYY-MM-DD
+  return new Date(`${ymd}T00:00:00Z`);
+}
+
+/** The instant of the most recent midnight in `tz` (UTC when unknown). */
+function localMidnight(d: Date, tz: string | null): Date {
+  if (!tz) return utcDay(d);
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: tz,
+    hourCycle: 'h23',
+    hour: 'numeric',
+    minute: 'numeric',
+    second: 'numeric',
+  }).formatToParts(d);
+  const n = (t: string) => Number(parts.find((p) => p.type === t)?.value ?? 0);
+  return new Date(
+    d.getTime() - ((n('hour') * 60 + n('minute')) * 60 + n('second')) * 1000 - d.getMilliseconds()
+  );
+}
 
 type Award = { kind: keyof typeof XP_RULES; xp: number; dedupeKey: string; label: string };
 
@@ -69,19 +107,21 @@ export async function recordVisit(
   scans: ScanSummary[],
   now = new Date(),
   /** Scored posts (migration 033): XP per post, once each. */
-  posts: { tweetId: string; fit: number }[] = []
+  posts: { tweetId: string; fit: number }[] = [],
+  /** The user's IANA timezone (bos_tz cookie): days and streaks follow their midnight. */
+  tz: string | null = null
 ): Promise<Progress | null> {
   try {
     return await prisma.$transaction(async (tx) => {
       const prev = await tx.userProgress.findUnique({ where: { userId } });
-      const today = utcDay(now);
+      const today = localDay(now, tz);
       const newVisit =
         !prev?.lastVisitAt || now.getTime() - prev.lastVisitAt.getTime() > VISIT_GAP_MS;
       const prevVisitAt = newVisit ? (prev?.lastVisitAt ?? null) : (prev?.prevVisitAt ?? null);
 
-      // daily streak: consecutive UTC days with a visit
+      // daily streak: consecutive days (the user's timezone) with a visit
       let streak = prev?.currentStreakDays ?? 0;
-      const last = prev?.lastActiveDate ? utcDay(prev.lastActiveDate) : null;
+      const last = prev?.lastActiveDate ? utcDay(prev.lastActiveDate) : null; // stored as the day's 00:00Z
       const firstToday = !last || last.getTime() !== today.getTime();
       if (firstToday) streak = last && today.getTime() - last.getTime() === DAY_MS ? streak + 1 : 1;
 
@@ -124,7 +164,8 @@ export async function recordVisit(
         skipDuplicates: true,
       });
 
-      const [sum, recent] = await Promise.all([
+      const midnight = localMidnight(now, tz);
+      const [sum, recent, todays] = await Promise.all([
         tx.xPEvent.aggregate({ where: { userId }, _sum: { xp: true } }),
         prevVisitAt
           ? tx.xPEvent.findMany({
@@ -134,6 +175,12 @@ export async function recordVisit(
               take: 20,
             })
           : Promise.resolve([]),
+        tx.xPEvent.findMany({
+          where: { userId, createdAt: { gte: midnight } },
+          orderBy: { createdAt: 'asc' },
+          select: { xp: true, label: true, kind: true },
+          take: 50,
+        }),
       ]);
       const xpTotal = sum._sum.xp ?? 0;
       const latest = scans[scans.length - 1];
@@ -175,6 +222,8 @@ export async function recordVisit(
         gains: groupGains(recent),
         streakDays: streak,
         scoreAlert,
+        day: dayKey(today),
+        today: { xp: todays.reduce((t, e) => t + e.xp, 0), gains: groupGains(todays) },
       };
     });
   } catch (e) {

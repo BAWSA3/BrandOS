@@ -1,7 +1,7 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import { Suspense } from 'react';
+import { Suspense, useState } from 'react';
 import { XP_RULES, xpAtLevel, type XPGain } from '@/lib/xp';
 import BentoDashboard, { type DashboardData } from '@/components/dashboard/BentoDashboard';
 
@@ -12,6 +12,7 @@ import BentoDashboard, { type DashboardData } from '@/components/dashboard/Bento
 //   &alert=0                            hide the score-changed notification
 //   &list=scans                       Recent scans (click a row for its full report)
 //   &swap=0                           Previous layout: Brand Pass big on the left
+//   &checkin=1                        Replay the daily check-in moment (&xp=levelup: with a level-up)
 //   &xp=levelup                         the XP gained this visit crosses a level (LV 07 -> 08)
 
 const SAMPLE: DashboardData = {
@@ -297,6 +298,7 @@ function Preview() {
   const isNew = q.get('state') === 'new';
   // &list=scans shows "Recent scans" (what a real account sees today) instead of posts
   const scansList = q.get('list') === 'scans';
+  const [replayKey] = useState(() => Date.now());
   const history = SAMPLE.scoreDetail ?? [];
   const data: DashboardData = isNew
     ? { ...SAMPLE, stage: 0, ticker: { ...SAMPLE.ticker, streak: '—', avgFit: 0 } }
@@ -335,6 +337,13 @@ function Preview() {
           : {
               total: xpAtLevel(7) + (q.get('xp') === 'levelup' ? 1600 + XP_EARNED : 1240),
               gains: XP_GAINS,
+              // daily check-in moment: plays once per day per browser; &checkin=1 replays it
+              today: { xp: XP_EARNED, gains: XP_GAINS },
+              day:
+                q.get('checkin') === '1'
+                  ? `replay-${replayKey}`
+                  : new Date().toISOString().slice(0, 10),
+              streakDays: 3,
             }
       }
       scoreAlert={

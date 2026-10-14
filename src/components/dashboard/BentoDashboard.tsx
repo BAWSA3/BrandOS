@@ -26,6 +26,7 @@ import {
   type WeekDay,
 } from '@/components/dashboard/StatTiles';
 import XPBar from '@/components/dashboard/XPBar';
+import CheckinMoment from '@/components/dashboard/CheckinMoment';
 import ScoreDetail, { type ScoreDetailPoint } from '@/components/dashboard/ScoreDetail';
 import RescanOverlay from '@/components/dashboard/RescanOverlay';
 import ScanReport from '@/components/dashboard/ScanReport';
@@ -363,7 +364,15 @@ export default function BentoDashboard({
   /** Layout (picked 2026-10-13): the station takes the big left tile, the Brand Pass the small right one. */
   swapPassStation?: boolean;
   /** XP total and what was earned since the last visit (the bar fills it in). */
-  xp?: { total: number; gains: XPGain[] } | null;
+  xp?: {
+    total: number;
+    gains: XPGain[];
+    /** XP since the user's local midnight: drives the daily check-in moment. */
+    today?: { xp: number; gains: XPGain[] };
+    /** The user's current day key ("2026-10-14"): the moment plays once per day. */
+    day?: string;
+    streakDays?: number;
+  } | null;
 }) {
   const [theme, setTheme] = useState<DashTheme>(initialTheme);
   // which tile's detail view is open (drill-downs)
@@ -515,6 +524,17 @@ export default function BentoDashboard({
     setDetail('score');
   };
   const booted = useBoot();
+  // the user's timezone, so daily XP / streaks / the check-in follow their midnight
+  useEffect(() => {
+    if (rescan !== 'live') return;
+    try {
+      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      if (tz)
+        document.cookie = `bos_tz=${encodeURIComponent(tz)}; path=/; max-age=31536000; samesite=lax`;
+    } catch {
+      // no Intl timezone: days stay in UTC
+    }
+  }, [rescan]);
 
   // Sounds: unlock/preload on the first gesture; one short beep per button/link hovered.
   useEffect(() => primeSounds(), []);
@@ -660,6 +680,16 @@ export default function BentoDashboard({
           </header>
 
           {xp && <XPBar total={xp.total} gains={xp.gains} booted={booted} />}
+          {xp?.today && xp.day && (
+            <CheckinMoment
+              total={xp.total}
+              today={xp.today}
+              sinceLast={xp.gains}
+              day={xp.day}
+              streakDays={xp.streakDays ?? 0}
+              dark={theme === 'dark'}
+            />
+          )}
 
           <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-12">
             {swap
