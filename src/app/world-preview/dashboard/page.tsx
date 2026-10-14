@@ -11,6 +11,7 @@ import BentoDashboard, { type DashboardData } from '@/components/dashboard/Bento
 //   &theme=dark                         start in dark mode (light is the default; toggle in the top bar)
 //   &alert=0                            hide the score-changed notification
 //   &list=scans                       Recent scans (click a row for its full report)
+//   &swap=0                           Previous layout: Brand Pass big on the left
 //   &xp=levelup                         the XP gained this visit crosses a level (LV 07 -> 08)
 
 const SAMPLE: DashboardData = {
@@ -270,6 +271,7 @@ const SAMPLE: DashboardData = {
     },
   ],
   pass: {
+    avatarUrl: 'https://pbs.twimg.com/profile_images/2066740453211582465/tO24SiNn_400x400.jpg',
     handle: 'jbawsa',
     name: 'Jeffrey Basa',
     archetype: 'BUILD.EXE',
@@ -317,6 +319,8 @@ function Preview() {
     <BentoDashboard
       data={data}
       isNew={isNew}
+      // &swap=0: the previous layout (Brand Pass big on the left)
+      swapPassStation={q.get('swap') !== '0'}
       initialTheme={q.get('theme') === 'dark' ? 'dark' : 'light'}
       // Rescan simulates a scan here (no API call): +3 after ~9s
       rescan={isNew ? undefined : 'demo'}

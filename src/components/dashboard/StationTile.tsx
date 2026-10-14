@@ -24,11 +24,14 @@ export default function StationTile({
   handle,
   stationNumber,
   mode,
+  large = false,
 }: {
   archetype: string;
   handle: string;
   stationNumber?: number | null;
   mode: 'day' | 'night';
+  /** The big left tile (swapped layout): larger art, centred in the tile. */
+  large?: boolean;
 }) {
   const slug = stationSlug(archetype);
   const reduce = useReducedMotion();
@@ -78,7 +81,14 @@ export default function StationTile({
         </span>
       </div>
 
-      <div ref={box} className="relative mx-auto mt-2 w-full max-w-[300px] flex-1">
+      <div
+        ref={box}
+        className={
+          large
+            ? 'relative mx-auto mt-2 flex w-full max-w-[460px] flex-1 items-center'
+            : 'relative mx-auto mt-2 w-full max-w-[300px] flex-1'
+        }
+      >
         {loop ? (
           <video
             key={mode}
