@@ -14,14 +14,77 @@ const MONO = DASH_FONTS.mono;
 const BIG = DASH_FONTS.big;
 const BLUE = '#0047FF';
 const INK = '#0E0E0E';
-const MUTED = '#6B6862';
-const BONE = '#F2EFE8';
+
+/** Card skins (2026-10-14), all from the BrandOS palette. */
+export type CardSkin = 'bone' | 'klein' | 'night';
+const SKINS: Record<
+  CardSkin,
+  {
+    label: string;
+    bg: string;
+    ink: string;
+    muted: string;
+    score: string;
+    rule: string;
+    up: string;
+    down: string;
+    chipUp: [string, string];
+    chipDown: [string, string];
+    wordmark: string;
+    initialBg: string;
+  }
+> = {
+  bone: {
+    label: 'Bone',
+    bg: '#F2EFE8',
+    ink: INK,
+    muted: '#6B6862',
+    score: BLUE,
+    rule: 'rgba(14,14,14,0.14)',
+    up: BLUE,
+    down: INK,
+    chipUp: [BLUE, '#FFFFFF'],
+    chipDown: [INK, '#FFFFFF'],
+    wordmark: '/brand/wordmark-day-480.png',
+    initialBg: BLUE,
+  },
+  klein: {
+    label: 'Klein',
+    bg: BLUE,
+    ink: '#FFFFFF',
+    muted: 'rgba(255,255,255,0.72)',
+    score: '#FFFFFF',
+    rule: 'rgba(255,255,255,0.3)',
+    up: '#FFFFFF',
+    down: '#F2EFE8',
+    chipUp: ['#FFFFFF', BLUE],
+    chipDown: [INK, '#FFFFFF'],
+    wordmark: '/brand/wordmark-white-480.png',
+    initialBg: INK,
+  },
+  night: {
+    label: 'Night',
+    bg: '#0B0D10',
+    ink: '#F2EFE8',
+    muted: '#9A978F',
+    score: '#4D7BFF',
+    rule: 'rgba(242,239,232,0.14)',
+    up: '#4D7BFF',
+    down: '#F2EFE8',
+    chipUp: ['#4D7BFF', '#0B0D10'],
+    chipDown: ['#F2EFE8', '#0B0D10'],
+    wordmark: '/brand/wordmark-white-480.png',
+    initialBg: '#4D7BFF',
+  },
+};
+export const CARD_SKINS = Object.keys(SKINS) as CardSkin[];
 /** Card size in CSS px; exported at 2x = 1080×1080. */
 const SIZE = 540;
 
 const hiRes = (u: string) => u.replace(/_normal(\.\w+)$/, '_400x400$1');
 
-export function ScoreCard({ d }: { d: ScoreCardData }) {
+export function ScoreCard({ d, skin = 'bone' }: { d: ScoreCardData; skin?: CardSkin }) {
+  const k = SKINS[skin];
   const delta =
     d.delta === null
       ? null
@@ -29,9 +92,9 @@ export function ScoreCard({ d }: { d: ScoreCardData }) {
         ? 'No change'
         : `${d.delta > 0 ? '▲ +' : '▼ −'}${Math.abs(d.delta)}`;
   const rows: [string, string | null, string][] = [
-    ['↑', d.bullets.up, BLUE],
-    ['↓', d.bullets.down, INK],
-    ['★', d.bullets.best, BLUE],
+    ['↑', d.bullets.up, k.up],
+    ['↓', d.bullets.down, k.down],
+    ['★', d.bullets.best, k.up],
   ];
   return (
     <div
@@ -39,8 +102,8 @@ export function ScoreCard({ d }: { d: ScoreCardData }) {
       style={{
         width: SIZE,
         height: SIZE,
-        background: BONE,
-        color: INK,
+        background: k.bg,
+        color: k.ink,
         padding: 36,
         display: 'flex',
         flexDirection: 'column',
@@ -51,12 +114,8 @@ export function ScoreCard({ d }: { d: ScoreCardData }) {
       {/* top: wordmark + date */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         {/* eslint-disable-next-line @next/next/no-img-element -- captured to PNG */}
-        <img
-          src="/brand/wordmark-day-480.png"
-          alt="BrandOS"
-          style={{ height: 22, width: 'auto' }}
-        />
-        <span style={{ fontFamily: MONO, fontSize: 11, letterSpacing: '0.14em', color: MUTED }}>
+        <img src={k.wordmark} alt="BrandOS" style={{ height: 22, width: 'auto' }} />
+        <span style={{ fontFamily: MONO, fontSize: 11, letterSpacing: '0.14em', color: k.muted }}>
           {d.date.toUpperCase()} CHECK-IN
         </span>
       </div>
@@ -80,7 +139,7 @@ export function ScoreCard({ d }: { d: ScoreCardData }) {
             style={{
               width: 48,
               height: 48,
-              background: BLUE,
+              background: k.initialBg,
               color: '#fff',
               display: 'flex',
               alignItems: 'center',
@@ -100,7 +159,7 @@ export function ScoreCard({ d }: { d: ScoreCardData }) {
                 fontFamily: MONO,
                 fontSize: 11,
                 letterSpacing: '0.12em',
-                color: MUTED,
+                color: k.muted,
                 marginTop: 3,
               }}
             >
@@ -119,13 +178,13 @@ export function ScoreCard({ d }: { d: ScoreCardData }) {
             lineHeight: 0.82,
             fontWeight: 500,
             letterSpacing: '-0.05em',
-            color: BLUE,
+            color: k.score,
           }}
         >
           {d.score}
         </div>
         <div style={{ paddingBottom: 10 }}>
-          <div style={{ fontFamily: MONO, fontSize: 12, color: MUTED, letterSpacing: '0.12em' }}>
+          <div style={{ fontFamily: MONO, fontSize: 12, color: k.muted, letterSpacing: '0.12em' }}>
             BRAND SCORE /100
           </div>
           {delta && (
@@ -137,8 +196,8 @@ export function ScoreCard({ d }: { d: ScoreCardData }) {
                 fontFamily: MONO,
                 fontSize: 14,
                 letterSpacing: '0.08em',
-                color: '#fff',
-                background: (d.delta ?? 0) < 0 ? INK : BLUE,
+                color: (d.delta ?? 0) < 0 ? k.chipDown[1] : k.chipUp[1],
+                background: (d.delta ?? 0) < 0 ? k.chipDown[0] : k.chipUp[0],
               }}
             >
               {delta}
@@ -148,9 +207,7 @@ export function ScoreCard({ d }: { d: ScoreCardData }) {
       </div>
 
       {/* three bullets */}
-      <div
-        style={{ marginTop: 'auto', borderTop: '1px solid rgba(14,14,14,0.14)', paddingTop: 14 }}
-      >
+      <div style={{ marginTop: 'auto', borderTop: `1px solid ${k.rule}`, paddingTop: 14 }}>
         {rows
           .filter(([, t]) => t)
           .map(([mark, t, col]) => (
@@ -173,10 +230,10 @@ export function ScoreCard({ d }: { d: ScoreCardData }) {
           fontFamily: MONO,
           fontSize: 11,
           letterSpacing: '0.14em',
-          color: MUTED,
+          color: k.muted,
         }}
       >
-        <span style={{ color: INK }}>MYBRANDOS.APP/@{d.handle.toUpperCase()}</span>
+        <span style={{ color: k.ink }}>MYBRANDOS.APP/@{d.handle.toUpperCase()}</span>
         <span>YOUR BRAND, SCORED</span>
       </div>
     </div>
@@ -220,6 +277,24 @@ export default function ScoreCardShare({
 }) {
   const card = useRef<HTMLDivElement>(null);
   const [state, setState] = useState<'idle' | 'busy' | 'copied' | 'downloaded' | 'error'>('idle');
+  // the chosen skin, remembered in this browser (this only renders after a
+  // click or the check-in, never on the server, so reading storage here is safe)
+  const [skin, setSkin] = useState<CardSkin>(() => {
+    try {
+      const v = window.localStorage.getItem('brandos:card-skin') as CardSkin | null;
+      return v && CARD_SKINS.includes(v) ? v : 'bone';
+    } catch {
+      return 'bone';
+    }
+  });
+  const pick = (v: CardSkin) => {
+    setSkin(v);
+    try {
+      window.localStorage.setItem('brandos:card-skin', v);
+    } catch {
+      // not remembered, still applied
+    }
+  };
   const scale = preview / SIZE;
 
   const onCopy = async (e: React.MouseEvent) => {
@@ -251,7 +326,7 @@ export default function ScoreCardShare({
         }}
       >
         <div style={{ transform: `scale(${scale})`, transformOrigin: 'top left' }}>
-          <ScoreCard d={d} />
+          <ScoreCard d={d} skin={skin} />
         </div>
       </div>
       <div>
@@ -260,6 +335,26 @@ export default function ScoreCardShare({
           style={{ fontFamily: MONO, opacity: 0.8 }}
         >
           Today&apos;s score card
+        </div>
+        <div className="mt-2 flex gap-1.5" role="radiogroup" aria-label="Card colour">
+          {CARD_SKINS.map((v) => (
+            <button
+              key={v}
+              type="button"
+              role="radio"
+              aria-checked={skin === v}
+              aria-label={SKINS[v].label}
+              title={SKINS[v].label}
+              onClick={() => pick(v)}
+              className="h-6 w-6"
+              style={{
+                background: SKINS[v].bg,
+                outline: skin === v ? `2px solid ${onBlue ? '#FFFFFF' : BLUE}` : 'none',
+                outlineOffset: 2,
+                border: `1px solid ${onBlue ? 'rgba(255,255,255,0.5)' : 'rgba(14,14,14,0.2)'}`,
+              }}
+            />
+          ))}
         </div>
         <button
           type="button"
