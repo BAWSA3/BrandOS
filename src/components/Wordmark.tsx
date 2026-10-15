@@ -3,7 +3,7 @@ import Link from 'next/link';
 /**
  * The BrandOS hero wordmark ("Brand" + halftone "OS"): the only way the logo
  * appears in the product. Never type "BrandOS" as a logo (brand tokens,
- * 2026-10-13). Day art on light surfaces, night art on dark ones.
+ * 2026-10-13). Day art on light surfaces, night art on dark ones, white on Klein blue.
  */
 export default function Wordmark({
   height = 28,
@@ -12,7 +12,7 @@ export default function Wordmark({
   className,
 }: {
   height?: number;
-  mode?: 'day' | 'night';
+  mode?: 'day' | 'night' | 'white';
   /** null: not a link */
   href?: string | null;
   className?: string;
@@ -20,7 +20,13 @@ export default function Wordmark({
   const img = (
     // eslint-disable-next-line @next/next/no-img-element -- pre-sized brand art
     <img
-      src={mode === 'night' ? '/brandos-wordmark-night.png' : '/brandos-wordmark-day.png'}
+      src={
+        mode === 'white'
+          ? '/brand/wordmark-white-480.png'
+          : mode === 'night'
+            ? '/brandos-wordmark-night.png'
+            : '/brandos-wordmark-day.png'
+      }
       alt="BrandOS"
       width={Math.round(height * (1600 / 319))}
       height={height}

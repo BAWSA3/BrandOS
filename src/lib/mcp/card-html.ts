@@ -27,18 +27,20 @@ let built: Promise<string> | null = null;
  */
 export function cardHtml(): Promise<string> {
   built ??= (async () => {
-    const [inter, vcr, day, night] = await Promise.all([
+    const [inter, vcr, day, night, white] = await Promise.all([
       readFile(join(process.cwd(), 'public', 'fonts', 'InterTight-latin.woff2')),
       readFile(join(process.cwd(), 'public', 'fonts', 'VCR_OSD_MONO_1.001.ttf')),
       readFile(join(process.cwd(), 'public', 'brand', 'wordmark-day-480.png')),
       readFile(join(process.cwd(), 'public', 'brand', 'wordmark-night-480.png')),
+      readFile(join(process.cwd(), 'public', 'brand', 'wordmark-white-480.png')),
     ]);
     const faces =
       `@font-face { font-family: "Inter Tight"; font-weight: 100 900; font-display: block; src: url(data:font/woff2;base64,${inter.toString('base64')}) format("woff2"); }` +
       `@font-face { font-family: "VCR OSD Mono"; font-weight: 400; font-display: block; src: url(data:font/ttf;base64,${vcr.toString('base64')}) format("truetype"); }`;
     return CARD_HTML.replace('__FONT_FACES__', faces)
       .replace('__WORDMARK_DAY__', `data:image/png;base64,${day.toString('base64')}`)
-      .replace('__WORDMARK_NIGHT__', `data:image/png;base64,${night.toString('base64')}`);
+      .replace('__WORDMARK_NIGHT__', `data:image/png;base64,${night.toString('base64')}`)
+      .replace('__WORDMARK_WHITE__', `data:image/png;base64,${white.toString('base64')}`);
   })().catch((e) => {
     built = null;
     console.error('[mcp] card assets failed, serving without them:', e);
@@ -65,6 +67,19 @@ export const CARD_HTML = `<!doctype html>
     --bg: #0B0D10; --panel: #12151A; --ink: #F2EFE8; --muted: #9A978F; --rule: rgba(242,239,232,0.14);
     --track: rgba(242,239,232,0.10); --blue: #3D6BFF;
   }
+  /* The creator's skin (Settings → Dashboard) wins over the host theme; Bone follows the host. */
+  :root[data-skin="night"] {
+    --bg: #0B0D10; --panel: #12151A; --ink: #F2EFE8; --muted: #9A978F; --rule: rgba(242,239,232,0.14);
+    --track: rgba(242,239,232,0.10); --blue: #3D6BFF; --on-blue: #FFFFFF;
+  }
+  :root[data-skin="klein"] {
+    --bg: #0047FF; --panel: #0047FF; --ink: #FFFFFF; --muted: rgba(255,255,255,0.75); --rule: rgba(255,255,255,0.3);
+    --track: rgba(255,255,255,0.22); --blue: #FFFFFF; --on-blue: #0047FF;
+  }
+  :root[data-skin="paper"] {
+    --bg: #FFFFFF; --panel: #FFFFFF; --ink: #0A0A0A; --muted: #6B6B6B; --rule: rgba(14,14,14,0.16);
+    --track: rgba(14,14,14,0.07); --blue: #0047FF; --on-blue: #FFFFFF;
+  }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { background: transparent; }
   body { font-family: var(--big); color: var(--ink); -webkit-font-smoothing: antialiased; }
@@ -76,6 +91,9 @@ export const CARD_HTML = `<!doctype html>
   .wm.night { display: none; }
   :root[data-theme="dark"] .wm.day { display: none; }
   :root[data-theme="dark"] .wm.night { display: block; }
+  .wm.white { display: none; }
+  :root[data-skin] .wm { display: none; }
+  :root[data-skin="night"] .wm.night, :root[data-skin="paper"] .wm.day, :root[data-skin="klein"] .wm.white { display: block; }
   .who { display: flex; align-items: center; gap: 10px; }
   .chip { font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
           padding: 4px 8px; border: 1px solid var(--blue); color: var(--blue); border-radius: 3px; white-space: nowrap; }
@@ -124,7 +142,7 @@ export const CARD_HTML = `<!doctype html>
 <script>
 (function () {
   var root = document.getElementById('root');
-  var WORDMARK = { day: '__WORDMARK_DAY__', night: '__WORDMARK_NIGHT__' };
+  var WORDMARK = { day: '__WORDMARK_DAY__', night: '__WORDMARK_NIGHT__', white: '__WORDMARK_WHITE__' };
   var nextId = 1;
   var pending = {};
 
@@ -162,7 +180,7 @@ export const CARD_HTML = `<!doctype html>
   function header(d, chip) {
     var top = el('div', 'top');
     var left = el('div', 'who');
-    ['day', 'night'].forEach(function (m) {
+    ['day', 'night', 'white'].forEach(function (m) {
       var img = el('img', 'wm ' + m);
       img.src = WORDMARK[m];
       img.alt = 'BrandOS';
@@ -308,6 +326,11 @@ export const CARD_HTML = `<!doctype html>
 
   function render(data) {
     if (!data || (data.kind !== 'profile' && data.kind !== 'post')) return;
+    if (data.skin === 'night' || data.skin === 'klein' || data.skin === 'paper') {
+      document.documentElement.setAttribute('data-skin', data.skin);
+    } else {
+      document.documentElement.removeAttribute('data-skin');
+    }
     root.replaceChildren(data.kind === 'profile' ? renderProfile(data) : renderPost(data));
     resize();
   }

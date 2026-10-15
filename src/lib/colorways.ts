@@ -119,3 +119,58 @@ export async function saveColorwayToAccount(c: Colorway): Promise<boolean> {
     return false;
   }
 }
+
+/**
+ * The public /@handle page in the creator's skin. `head*` is type on the page
+ * canvas (header, handle); panels carry their own ink.
+ */
+export const PUBLIC_TOKENS: Record<Colorway, Record<string, string>> = {
+  bone: {
+    '--p-bg': '#F2EFE8',
+    '--p-panel': '#FFFFFF',
+    '--p-ink': '#0E0E0E',
+    '--p-muted': '#6B6862',
+    '--p-rule': 'rgba(14,14,14,0.12)',
+    '--p-track': 'rgba(14,14,14,0.08)',
+    '--p-head': '#0E0E0E',
+    '--p-head-muted': '#6B6862',
+    '--p-cta-edge': '#0047FF',
+  },
+  night: {
+    '--p-bg': '#0B0B0C',
+    '--p-panel': '#161618',
+    '--p-ink': '#E7E7E4',
+    '--p-muted': '#8A8A86',
+    '--p-rule': 'rgba(231,231,228,0.1)',
+    '--p-track': 'rgba(231,231,228,0.1)',
+    '--p-head': '#E7E7E4',
+    '--p-head-muted': '#8A8A86',
+    '--p-cta-edge': '#0047FF',
+  },
+  klein: {
+    '--p-bg': '#0047FF',
+    '--p-panel': '#FAF8F3',
+    '--p-ink': '#0E0E0E',
+    '--p-muted': '#5E5E5A',
+    '--p-rule': 'rgba(14,14,14,0.1)',
+    '--p-track': 'rgba(14,14,14,0.08)',
+    '--p-head': '#FFFFFF',
+    '--p-head-muted': 'rgba(255,255,255,0.75)',
+    '--p-cta-edge': 'rgba(255,255,255,0.7)',
+  },
+  paper: {
+    '--p-bg': '#FFFFFF',
+    '--p-panel': '#FFFFFF',
+    '--p-ink': '#0A0A0A',
+    '--p-muted': '#6B6B6B',
+    '--p-rule': 'rgba(14,14,14,0.16)',
+    '--p-track': 'rgba(14,14,14,0.07)',
+    '--p-head': '#0A0A0A',
+    '--p-head-muted': '#6B6B6B',
+    '--p-cta-edge': '#0047FF',
+  },
+};
+
+/** Which wordmark art sits on this skin's canvas. */
+export const wordmarkFor = (c: Colorway): 'day' | 'night' | 'white' =>
+  c === 'klein' ? 'white' : c === 'night' ? 'night' : 'day';

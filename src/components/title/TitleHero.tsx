@@ -5,6 +5,7 @@ import StudioRoom from '@/components/studio/StudioRoom';
 import TitleStationLoop, { TITLE_STATIONS } from '@/components/title/TitleStationLoop';
 import { stationSlug } from '@/components/StationCard';
 import type { StudioThemeId } from '@/lib/studio-themes';
+import type { Colorway } from '@/lib/colorways';
 import BrandPass, { type BrandPassData } from '@/components/dashboard/BrandPass';
 import { getArchetypeInfo } from '@/lib/archetype-descriptions';
 import type { StageNumber } from '@/lib/studio-stages';
@@ -105,6 +106,7 @@ export default function TitleHero({
   mode,
   score,
   pass,
+  passSkin,
   theme = 'base',
   hero = 'station',
 }: {
@@ -114,6 +116,8 @@ export default function TitleHero({
   mode: Mode;
   score?: number | null;
   pass?: BrandPassData | null;
+  /** The creator's dashboard skin: the Pass recolors with it. */
+  passSkin?: Colorway;
   /** Studio theme (applies once the studio is complete). */
   theme?: StudioThemeId;
   /** 'station' (default): the photoreal 3D station; 'studio': the studio room. */
@@ -257,7 +261,7 @@ export default function TitleHero({
               } as React.CSSProperties
             }
           >
-            <BrandPass data={pass} />
+            <BrandPass data={pass} skin={passSkin} />
           </div>
         </div>
       )}

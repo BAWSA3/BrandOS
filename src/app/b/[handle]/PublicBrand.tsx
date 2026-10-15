@@ -7,6 +7,7 @@ import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { DASH_FONTS } from '@/components/dashboard/dashFonts';
 import { RollNumber, useBoot } from '@/components/dashboard/dashMotion';
 import type { BrandCard } from '@/lib/public-brand';
+import { PUBLIC_TOKENS, wordmarkFor, type Colorway } from '@/lib/colorways';
 
 // The public brand page (mybrandos.app/@handle): the BrandOS read of one
 // handle, then "Compare your brand to @handle". Signed out: type your handle
@@ -16,13 +17,16 @@ import type { BrandCard } from '@/lib/public-brand';
 const MONO = DASH_FONTS.mono;
 const BIG = DASH_FONTS.big;
 const BLUE = '#0047FF';
+// Tokens come from the creator's skin (PUBLIC_TOKENS, set on <main>).
 const C = {
-  bg: '#F2EFE8',
-  panel: '#FFFFFF',
-  ink: '#0E0E0E',
-  muted: '#6B6862',
-  rule: 'rgba(14,14,14,0.12)',
-  track: 'rgba(14,14,14,0.08)',
+  bg: 'var(--p-bg)',
+  panel: 'var(--p-panel)',
+  ink: 'var(--p-ink)',
+  muted: 'var(--p-muted)',
+  rule: 'var(--p-rule)',
+  track: 'var(--p-track)',
+  head: 'var(--p-head)',
+  headMuted: 'var(--p-head-muted)',
 };
 const PHASES = [
   ['define', 'Define'],
@@ -85,7 +89,7 @@ function BrandRead({ card }: { card: BrandCard }) {
   return (
     <section
       className="rounded-[12px] border p-5 md:p-8"
-      style={{ background: C.panel, borderColor: C.rule }}
+      style={{ background: C.panel, borderColor: C.rule, color: C.ink }}
     >
       <div className="flex items-center justify-between gap-3">
         <Micro>Brand read · @{card.handle}</Micro>
@@ -205,7 +209,7 @@ function CompareView({ data, signedIn }: { data: Compare; signedIn: boolean }) {
   return (
     <div
       className="mt-6 rounded-[12px] border p-5 md:p-8"
-      style={{ background: C.panel, borderColor: C.rule }}
+      style={{ background: C.panel, borderColor: C.rule, color: C.ink }}
     >
       <Micro>You vs @{them.handle}</Micro>
       <div className="mt-4 grid grid-cols-2 gap-4">
@@ -321,9 +325,12 @@ export default function PublicBrand({
   valid,
   initial,
   viewer,
+  skin = 'bone',
 }: {
   handle: string;
   valid: boolean;
+  /** The creator's dashboard skin (Bone for handles without an account). */
+  skin?: Colorway;
   initial: BrandCard | null;
   /** null: signed out */
   viewer: { handle: string | null } | null;
@@ -399,11 +406,11 @@ export default function PublicBrand({
   return (
     <main
       className="min-h-screen px-4 pb-16 pt-6 md:px-8"
-      style={{ background: C.bg, color: C.ink }}
+      style={{ ...PUBLIC_TOKENS[skin], background: C.bg, color: C.head } as React.CSSProperties}
     >
       <div className="mx-auto w-full max-w-[920px]">
         <header className="flex items-center justify-between">
-          <Wordmark height={26} />
+          <Wordmark height={26} mode={wordmarkFor(skin)} />
           <Link
             href={viewer ? '/dashboard' : '/signup?next=/dashboard'}
             className="text-[11px] uppercase tracking-[0.14em] hover:underline"
@@ -420,7 +427,7 @@ export default function PublicBrand({
           @{handle}
         </h1>
         <div className="mt-2">
-          <Micro>BrandOS brand dashboard · public read</Micro>
+          <Micro color={C.headMuted}>BrandOS brand dashboard · public read</Micro>
         </div>
 
         <div className="mt-8">
@@ -429,7 +436,7 @@ export default function PublicBrand({
           ) : (
             <div
               className="rounded-[12px] border px-5 py-16 text-center"
-              style={{ background: C.panel, borderColor: C.rule }}
+              style={{ background: C.panel, borderColor: C.rule, color: C.ink }}
             >
               <Micro color={loadError ? C.ink : BLUE}>
                 {loadError ?? `Reading @${handle}'s brand… about 20 seconds`}
@@ -441,7 +448,7 @@ export default function PublicBrand({
         {card && (
           <section
             className="mt-8 rounded-[12px] p-5 text-white md:p-8"
-            style={{ background: BLUE }}
+            style={{ background: BLUE, border: '1px solid var(--p-cta-edge)' }}
           >
             <div
               className="text-[28px] leading-[1.05] md:text-[40px]"

@@ -21,3 +21,27 @@ export async function setColorway(userId: string, colorway: Colorway): Promise<v
     update: { dashboardColorway: colorway },
   });
 }
+
+/**
+ * A creator's skin by X handle (public page, MCP card). Handles without a
+ * BrandOS account, or before migration 036: the default.
+ */
+export async function colorwayForHandle(handle: string): Promise<Colorway> {
+  try {
+    const conn = await prisma.platformConnection.findFirst({
+      where: { platform: 'x', platformUsername: { equals: handle, mode: 'insensitive' } },
+      select: { userId: true },
+    });
+    const userId =
+      conn?.userId ??
+      (
+        await prisma.user.findFirst({
+          where: { xUsername: { equals: handle, mode: 'insensitive' } },
+          select: { id: true },
+        })
+      )?.id;
+    return userId ? await getColorway(userId) : DEFAULT_COLORWAY;
+  } catch {
+    return DEFAULT_COLORWAY;
+  }
+}

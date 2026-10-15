@@ -20,7 +20,7 @@ const SIZE = 540;
 const hiRes = (u: string) => u.replace(/_normal(\.\w+)$/, '_400x400$1');
 
 /** Card skins (2026-10-14), all from the BrandOS palette. Klein = the dashboard tile. */
-export type CardSkin = 'bone' | 'klein' | 'night';
+export type CardSkin = 'bone' | 'klein' | 'night' | 'paper';
 interface Skin {
   label: string;
   bg: string;
@@ -86,8 +86,26 @@ const SKINS: Record<CardSkin, Skin> = {
     wordmark: '/brand/wordmark-white-480.png',
     initialBg: '#4D7BFF',
   },
+  // Paper: pure white, ink type, Klein only on the score and its line.
+  paper: {
+    label: 'Paper',
+    bg: '#FFFFFF',
+    ink: INK,
+    muted: '#6B6B6B',
+    score: BLUE,
+    line: BLUE,
+    fill: 'rgba(0,71,255,0.07)',
+    grid: 'rgba(14,14,14,0.08)',
+    bar: INK,
+    track: 'rgba(14,14,14,0.09)',
+    chip: BLUE,
+    rule: 'rgba(14,14,14,0.16)',
+    wordmark: '/brand/wordmark-day-480.png',
+    initialBg: INK,
+  },
 };
-export const CARD_SKINS: CardSkin[] = ['klein', 'bone', 'night'];
+/** Same order as the dashboard colorways (Settings). */
+export const CARD_SKINS: CardSkin[] = ['bone', 'night', 'klein', 'paper'];
 
 /** The score history line, drawn like the dashboard tile (grid, area, square markers). */
 function Chart({ points, k }: { points: { label: string; value: number }[]; k: Skin }) {
@@ -334,32 +352,20 @@ export default function ScoreCardShare({
   d,
   tone = 'light',
   preview = 200,
+  defaultSkin = 'klein',
 }: {
   d: ScoreCardData;
+  /** The creator's dashboard colorway; the card opens in it. */
+  defaultSkin?: CardSkin;
   tone?: 'light' | 'blue';
   /** Preview width in px (the card is scaled down to it). */
   preview?: number;
 }) {
   const card = useRef<HTMLDivElement>(null);
   const [state, setState] = useState<'idle' | 'busy' | 'copied' | 'downloaded' | 'error'>('idle');
-  // the chosen skin, remembered in this browser (this only renders after a
-  // click or the check-in, never on the server, so reading storage here is safe)
-  const [skin, setSkin] = useState<CardSkin>(() => {
-    try {
-      const v = window.localStorage.getItem('brandos:card-skin') as CardSkin | null;
-      return v && CARD_SKINS.includes(v) ? v : 'klein';
-    } catch {
-      return 'klein';
-    }
-  });
-  const pick = (v: CardSkin) => {
-    setSkin(v);
-    try {
-      window.localStorage.setItem('brandos:card-skin', v);
-    } catch {
-      // not remembered, still applied
-    }
-  };
+  // Opens in the creator's dashboard skin (Settings); picking another is a one-off.
+  const [skin, setSkin] = useState<CardSkin>(defaultSkin);
+  const pick = (v: CardSkin) => setSkin(v);
   const scale = preview / SIZE;
 
   const onCopy = async (e: React.MouseEvent) => {
@@ -369,7 +375,10 @@ export default function ScoreCardShare({
     setState('busy');
     try {
       setState(
-        await copyCard(node, `brandos-score-${d.handle}-${new Date().toISOString().slice(0, 10)}.png`)
+        await copyCard(
+          node,
+          `brandos-score-${d.handle}-${new Date().toISOString().slice(0, 10)}.png`
+        )
       );
     } catch {
       setState('error');

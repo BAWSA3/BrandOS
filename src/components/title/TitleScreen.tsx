@@ -448,6 +448,7 @@ export default function TitleScreen({
             mode={mode}
             score={score}
             pass={pass}
+            passSkin={colorway}
             theme={theme}
             hero={hero}
           />
