@@ -5,6 +5,7 @@ import { getCurrentUser, getCurrentWorkspace } from '@/lib/auth';
 import { getHomeData, toDashboardData } from '@/lib/home-data';
 import { cookies } from 'next/headers';
 import { recordVisit, safeTz } from '@/lib/progress';
+import { getColorway } from '@/lib/user-preferences';
 import BentoDashboard from '@/components/dashboard/BentoDashboard';
 import RescanOnLoad from '@/components/dashboard/RescanOnLoad';
 import DashboardClient from './DashboardClient';
@@ -38,7 +39,10 @@ export default async function DashboardPage({
   after(() => refreshAvatar(user.id).catch(() => null));
   // days + streaks follow the user's own midnight (timezone cookie set by the dashboard)
   const tz = safeTz((await cookies()).get('bos_tz')?.value);
-  const progress = await recordVisit(user.id, home.scans, new Date(), home.posts, tz);
+  const [progress, colorway] = await Promise.all([
+    recordVisit(user.id, home.scans, new Date(), home.posts, tz),
+    getColorway(user.id),
+  ]);
   const bento = toDashboardData(home);
   if (bento && progress && progress.streakDays > 1) bento.ticker.streak = `${progress.streakDays}d`;
 
@@ -54,6 +58,7 @@ export default async function DashboardPage({
       {bento && (
         <BentoDashboard
           data={bento}
+          colorway={colorway}
           xp={
             progress
               ? {

@@ -39,6 +39,7 @@ import { stationSlug } from '@/components/StationCard';
 import type { XPGain } from '@/lib/xp';
 import type { PostBreakdownData } from '@/lib/post-scores';
 import { STUDIO_STEPS, type StageNumber } from '@/lib/studio-stages';
+import { COLORWAY_TOKENS, isDarkColorway, type Colorway } from '@/lib/colorways';
 
 // The dashboard (docs/specs/TITLE-SCREEN-AND-DASHBOARD.md): dark bento grid,
 // Klein blue as the only accent, mono labels + Inter Tight for big numbers.
@@ -58,35 +59,9 @@ const C = {
   bone: '#ECE9E1',
 };
 
+/** Kept for callers: the old light/dark switch maps onto the colorways. */
 export type DashTheme = 'dark' | 'light';
 
-// Neutral base per theme; Klein blue is the one bright signal in both.
-const THEMES: Record<DashTheme, Record<string, string>> = {
-  dark: {
-    '--d-canvas': '#0B0B0C',
-    '--d-tile': '#161618',
-    '--d-rule': 'rgba(231,231,228,0.08)',
-    '--d-ink': '#E7E7E4',
-    '--d-muted': '#8A8A86',
-    '--d-dim': '#55554F',
-    '--d-bar': '#B9B8AE',
-    '--d-track': 'rgba(231,231,228,0.1)',
-    '--d-callout': '#C9C8C2',
-    '--d-callout-line': 'rgba(231,231,228,0.45)',
-  },
-  light: {
-    '--d-canvas': '#F2EFE8', // warm bone
-    '--d-tile': '#FAF8F3',
-    '--d-rule': 'rgba(14,14,14,0.09)',
-    '--d-ink': '#0E0E0E',
-    '--d-muted': '#6B6B6B',
-    '--d-dim': '#B5B4AE',
-    '--d-bar': '#1C1C1C',
-    '--d-track': 'rgba(14,14,14,0.08)',
-    '--d-callout': '#4A4A47',
-    '--d-callout-line': 'rgba(14,14,14,0.4)',
-  },
-};
 // Type roles come from CSS vars so fonts can be swapped (see dashFonts.ts).
 const MONO = "var(--dash-mono, 'VCR OSD Mono', monospace)";
 const BIG = "var(--dash-big, 'Inter Tight', sans-serif)";
@@ -240,7 +215,7 @@ function Tile({
           ...onBlue,
           cursor: onOpen ? 'pointer' : undefined,
           background: accent ? C.blue : C.tile,
-          border: `1px solid ${accent ? C.blue : C.rule}`,
+          border: `1px solid ${accent ? 'var(--d-accent-edge, #0047FF)' : C.rule}`,
           color: C.ink,
         } as React.CSSProperties
       }
@@ -346,7 +321,8 @@ export default function BentoDashboard({
   data,
   isNew = false,
   fonts,
-  initialTheme = 'light',
+  initialTheme,
+  colorway: colorwayProp,
   scoreAlert,
   xp,
   rescan,
@@ -356,7 +332,10 @@ export default function BentoDashboard({
   data: DashboardData;
   isNew?: boolean;
   fonts?: DashFonts;
+  /** @deprecated use colorway ('dark' = night, 'light' = bone). */
   initialTheme?: DashTheme;
+  /** The dashboard colorway from Settings (bone | night | klein | paper). */
+  colorway?: Colorway;
   /** The brand score changed since the last visit: show the notification + sound. */
   scoreAlert?: { delta: number; score: number } | null;
   /** Show the Rescan button: 'live' scans for real (/api/dashboard/rescan), 'demo' simulates it. */
@@ -376,7 +355,8 @@ export default function BentoDashboard({
     streakDays?: number;
   } | null;
 }) {
-  const [theme, setTheme] = useState<DashTheme>(initialTheme);
+  const colorway: Colorway = colorwayProp ?? (initialTheme === 'dark' ? 'night' : 'bone');
+  const theme: DashTheme = isDarkColorway(colorway) ? 'dark' : 'light';
   // which tile's detail view is open (drill-downs)
   const [detail, setDetail] = useState<'score' | null>(null);
   const [detailPhase, setDetailPhase] = useState<string | null>(null);
@@ -586,7 +566,7 @@ export default function BentoDashboard({
       }}
       style={
         {
-          ...THEMES[theme],
+          ...COLORWAY_TOKENS[colorway],
           background: C.canvas,
           color: C.ink,
           transition: 'background 0.3s ease, color 0.3s ease',
@@ -651,22 +631,13 @@ export default function BentoDashboard({
                   type="button"
                   onClick={runRescan}
                   disabled={scan?.status === 'running'}
-                  className="mr-1 border px-2 py-1 text-[10px] uppercase tracking-[0.14em] text-white disabled:opacity-60"
+                  className="mr-3 border px-2 py-1 text-[10px] uppercase tracking-[0.14em] text-white disabled:opacity-60"
                   style={{ background: C.blue, borderColor: C.blue }}
                   aria-label="Rescan my brand"
                 >
                   ↻ Rescan
                 </button>
               )}
-              <button
-                type="button"
-                onClick={() => setTheme((t) => (t === 'dark' ? 'light' : 'dark'))}
-                className="mr-3 border px-2 py-1 text-[10px] uppercase tracking-[0.14em]"
-                style={{ borderColor: C.rule, color: C.muted }}
-                aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-              >
-                {theme === 'dark' ? '◐ Light' : '◑ Dark'}
-              </button>
               <span className="text-[11px] uppercase tracking-[0.1em]">@{data.handle}</span>
               <span className="h-7 w-7 overflow-hidden rounded-full" style={{ background: C.dim }}>
                 {data.avatarUrl && (

@@ -20,6 +20,14 @@ import HoverLetters from '@/components/title/HoverLetters';
 import { getArchetypeInfo } from '@/lib/archetype-descriptions';
 import { STUDIO_STEPS, type StageNumber } from '@/lib/studio-stages';
 import type { Mode } from '@/components/StationCard';
+import {
+  COLORWAYS,
+  COLORWAY_SWATCH,
+  DEFAULT_COLORWAY,
+  readLocalColorway,
+  writeLocalColorway,
+  type Colorway,
+} from '@/lib/colorways';
 
 // The title screen (docs/specs/TITLE-SCREEN-AND-DASHBOARD.md): the user's
 // station as the game's cover art, built as far as they've got, with a main
@@ -74,6 +82,10 @@ export interface TitleScreenProps {
   level?: number;
   /** Title hero: the photoreal 3D station (default) or the studio room. */
   hero?: 'studio' | 'station';
+  /** The account's dashboard colorway (Settings → Dashboard). */
+  colorway?: Colorway;
+  /** Save picks to the account (/api/me/preferences); off in previews (this device only). */
+  saveColorway?: boolean;
 }
 
 /** Tiny synthesized UI sounds (no audio files). Created lazily on first interaction. */
@@ -125,6 +137,8 @@ export default function TitleScreen({
   levelUp,
   level = 1,
   hero = 'station',
+  colorway: accountColorway,
+  saveColorway = false,
 }: TitleScreenProps) {
   const router = useRouter();
   const info = getArchetypeInfo(archetype);
@@ -149,6 +163,32 @@ export default function TitleScreen({
     saveTheme(next.id);
   };
   const upcoming = nextUnlock(level);
+  // Dashboard colorway: the account's choice (or this device's in previews).
+  const [colorway, setColorwayState] = useState<Colorway>(accountColorway ?? DEFAULT_COLORWAY);
+  useEffect(() => {
+    if (accountColorway) return;
+    const t = window.setTimeout(() => {
+      const local = readLocalColorway();
+      if (local) setColorwayState(local);
+    }, 0);
+    return () => window.clearTimeout(t);
+  }, [accountColorway]);
+  const [colorwayNote, setColorwayNote] = useState<string | null>(null);
+  const pickColorway = (c: Colorway) => {
+    if (c === colorway) return;
+    play('move');
+    setColorwayState(c);
+    writeLocalColorway(c);
+    setColorwayNote(null);
+    if (!saveColorway) return;
+    fetch('/api/me/preferences', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ dashboardColorway: c }),
+    })
+      .then((r) => setColorwayNote(r.ok ? null : 'Not saved, try again'))
+      .catch(() => setColorwayNote('Not saved, try again'));
+  };
   // Bumps each time an item becomes the selection, replaying its letter wave.
   const [plays, setPlays] = useState<number[]>([1, 0, 0, 0]);
   const [handlePlay, setHandlePlay] = useState(0);
@@ -243,7 +283,7 @@ export default function TitleScreen({
       hint: 'Your public station + board',
       run: () => router.push(stationHref),
     },
-    { label: 'Settings', hint: 'Sound, day/night, account', run: () => setSettingsOpen(true) },
+    { label: 'Settings', hint: 'Sound, day/night, dashboard', run: () => setSettingsOpen(true) },
   ];
 
   // The hero visual swaps with the selected item (see TitleHero).
@@ -597,6 +637,68 @@ export default function TitleScreen({
               {upcoming ? ` · next: ${upcoming.name}, LV ${upcoming.unlockLevel}` : ''}
               {stage < 3 ? ' · shows once your studio is complete' : ''}
             </div>
+            <div className="mt-5 text-[14px] uppercase">Dashboard</div>
+            <div
+              className="mt-2 grid grid-cols-4 gap-2"
+              role="radiogroup"
+              aria-label="Dashboard colorway"
+            >
+              {COLORWAYS.map((c) => {
+                const sw = COLORWAY_SWATCH[c.id];
+                const on = c.id === colorway;
+                return (
+                  <button
+                    key={c.id}
+                    type="button"
+                    role="radio"
+                    aria-checked={on}
+                    title={c.hint}
+                    onClick={() => pickColorway(c.id)}
+                    className="flex flex-col items-center gap-1.5"
+                  >
+                    {/* mini dashboard: the station layout in this colorway */}
+                    <span
+                      className="grid h-[46px] w-full grid-cols-[5fr_4fr_3fr] grid-rows-2 gap-[3px] p-[4px]"
+                      style={{
+                        background: sw.canvas,
+                        outline: on ? `2px solid ${BLUE}` : `1px solid ${s.rule}`,
+                        outlineOffset: on ? 2 : 0,
+                      }}
+                    >
+                      <span
+                        className="row-span-2"
+                        style={{ background: sw.tile, border: `1px solid ${sw.edge}` }}
+                      />
+                      <span
+                        style={{
+                          background: BLUE,
+                          border: `1px solid ${c.id === 'klein' ? 'rgba(255,255,255,0.7)' : BLUE}`,
+                        }}
+                      />
+                      <span style={{ background: sw.tile, border: `1px solid ${sw.edge}` }} />
+                      <span
+                        className="col-span-2"
+                        style={{ background: sw.tile, border: `1px solid ${sw.edge}` }}
+                      />
+                    </span>
+                    <span
+                      className="text-[11px] tracking-[0.1em]"
+                      style={{ color: on ? BLUE : s.muted }}
+                    >
+                      {c.name}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+            {colorwayNote && (
+              <div
+                className="mt-1 text-right text-[11px] uppercase tracking-[0.1em]"
+                style={{ color: s.muted }}
+              >
+                {colorwayNote}
+              </div>
+            )}
             <div className="mt-4 flex items-center justify-between text-[14px] uppercase">
               <span>Account</span>
               <span style={{ color: s.muted }}>@{handle} · X connected</span>
