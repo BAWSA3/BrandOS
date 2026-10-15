@@ -282,7 +282,10 @@ function Masthead({
   streakDays,
   day,
   controls,
+  handleSize,
 }: {
+  /** Max @handle size in px (preview slider); default 136. */
+  handleSize?: number;
   data: DashboardData;
   homeHref: string;
   level: number | null;
@@ -316,7 +319,9 @@ function Masthead({
         className="mt-8 break-all leading-[0.88] md:mt-10"
         style={{
           fontFamily: BIG,
-          fontSize: 'clamp(52px, 9vw, 136px)',
+          fontSize: handleSize
+            ? `clamp(${Math.min(52, handleSize)}px, ${(handleSize / 1440) * 100 * 0.95}vw, ${handleSize}px)`
+            : 'clamp(52px, 9vw, 136px)',
           fontWeight: 500,
           letterSpacing: '-0.05em',
         }}
@@ -418,7 +423,10 @@ export default function BentoDashboard({
   homeHref = '/world-preview/title',
   swapPassStation = true,
   design = 'v1',
+  handleSize,
 }: {
+  /** v2 masthead @handle max size in px (design preview). */
+  handleSize?: number;
   /** v2 (2026-10-15 preview): @handle masthead, wide score, roomier grid, one blue. */
   design?: 'v1' | 'v2';
   data: DashboardData;
@@ -718,6 +726,7 @@ export default function BentoDashboard({
               level={xp ? levelFor(xp.total).level : null}
               streakDays={xp?.streakDays ?? 0}
               day={xp?.day ?? null}
+              handleSize={handleSize}
               controls={
                 <>
                   {rescan && (
