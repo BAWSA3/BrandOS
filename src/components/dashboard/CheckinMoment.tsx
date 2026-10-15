@@ -51,6 +51,7 @@ export default function CheckinMoment({
   day,
   streakDays,
   dark,
+  share,
 }: {
   total: number;
   today: { xp: number; gains: XPGain[] };
@@ -59,6 +60,8 @@ export default function CheckinMoment({
   day: string;
   streakDays: number;
   dark: boolean;
+  /** Score card + "Copy image" (days the brand score changed): the moment then waits for a tap. */
+  share?: React.ReactNode;
 }) {
   const reduce = useReducedMotion();
   const [mode, setMode] = useState<'idle' | 'moment' | 'toast'>('idle');
@@ -132,8 +135,13 @@ export default function CheckinMoment({
     raf.current = requestAnimationFrame(step);
     timers.current = [
       window.setTimeout(() => setPhase('card'), T_CARD),
-      window.setTimeout(() => setPhase('settle'), T_SETTLE),
-      window.setTimeout(() => setMode('idle'), T_DONE),
+      // with a score card to copy, stay on the card until they tap
+      ...(share
+        ? []
+        : [
+            window.setTimeout(() => setPhase('settle'), T_SETTLE),
+            window.setTimeout(() => setMode('idle'), T_DONE),
+          ]),
     ];
     const skip = () => finish();
     window.addEventListener('keydown', skip, { once: true });
@@ -330,6 +338,14 @@ export default function CheckinMoment({
                   </motion.li>
                 ))}
               </ul>
+              {share && (
+                <div
+                  className="mt-4 border-t pt-4"
+                  style={{ borderColor: dark ? 'rgba(242,239,232,0.14)' : 'rgba(14,14,14,0.12)' }}
+                >
+                  {share}
+                </div>
+              )}
             </motion.div>
 
             <div

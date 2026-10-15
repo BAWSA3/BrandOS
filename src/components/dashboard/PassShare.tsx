@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
-import { domToBlob } from 'modern-screenshot';
+import { captureNode } from '@/lib/capture-node';
 import { getArchetypeInfo } from '@/lib/archetype-descriptions';
 import type { BrandPassData } from '@/components/dashboard/BrandPass';
 
@@ -18,46 +18,7 @@ const BLUE = '#0047FF';
 /** Width the pass is exported at, whatever size it is on screen. */
 const EXPORT_W = 440;
 
-async function capture(card: HTMLElement): Promise<Blob> {
-  // Export a fixed-width copy rendered off-screen, so the image looks the same
-  // from any screen size (the on-screen pass can be squeezed on narrow tiles).
-  const stage = document.createElement('div');
-  stage.style.cssText = `position:fixed;left:-10000px;top:0;width:${EXPORT_W}px;pointer-events:none;`;
-  const clone = card.cloneNode(true) as HTMLElement;
-  clone.style.transform = 'none';
-  clone.style.boxShadow = 'none';
-  // no blinking typewriter caret in the image
-  clone.querySelectorAll('.motion-typewriter-cursor').forEach((c) => c.remove());
-  stage.appendChild(clone);
-  document.body.appendChild(stage);
-  try {
-    // remote avatars -> same-origin data URLs, or the portrait exports blank
-    const imgs = [...clone.querySelectorAll('img')].filter(
-      (i) => i.src.startsWith('http') && !i.src.startsWith(window.location.origin)
-    );
-    await Promise.all(
-      imgs.map(async (img) => {
-        const res = await fetch(`/api/image-proxy?url=${encodeURIComponent(img.src)}`);
-        if (!res.ok) return;
-        const blob = await res.blob();
-        img.src = await new Promise<string>((r) => {
-          const fr = new FileReader();
-          fr.onloadend = () => r(fr.result as string);
-          fr.readAsDataURL(blob);
-        });
-      })
-    );
-    await Promise.all(
-      [...clone.querySelectorAll('img')].map((img) =>
-        img.complete ? null : new Promise((r) => ((img.onload = r), (img.onerror = r)))
-      )
-    );
-    // (domToBlob, not domToPng + fetch: the CSP blocks fetching data: URLs)
-    return await domToBlob(clone, { scale: 3, type: 'image/png' });
-  } finally {
-    stage.remove();
-  }
-}
+const capture = (card: HTMLElement) => captureNode(card, EXPORT_W);
 
 export default function PassShare({ pass }: { pass: BrandPassData }) {
   const reduce = useReducedMotion();

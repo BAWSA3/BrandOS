@@ -103,6 +103,7 @@ export default function ScoreDetail({
   onClose,
   initialPhase = null,
   onReport,
+  share,
 }: {
   points: ScoreDetailPoint[];
   layoutId: string;
@@ -111,6 +112,8 @@ export default function ScoreDetail({
   initialPhase?: string | null;
   /** Open a scan's full report (by id). */
   onReport?: (id: string) => void;
+  /** The shareable score card + "Copy image" (shown at the top, not in a phase view). */
+  share?: React.ReactNode;
 }) {
   const [phase, setPhase] = useState<string | null>(initialPhase);
   const reduce = useReducedMotion();
@@ -303,6 +306,8 @@ export default function ScoreDetail({
             ESC ✕
           </button>
         </div>
+
+        {share && !phase && <div className="mt-6 border-t border-white/25 pt-5">{share}</div>}
 
         {/* timeline: presets + a custom month range (filters in one row above the chart) */}
         {dated && all.length > 1 && (
