@@ -105,3 +105,17 @@ export function writeLocalColorway(c: Colorway) {
     // storage blocked: the account save still applies
   }
 }
+
+/** Save a pick to the account (signed-in pages). Resolves false if it didn't save. */
+export async function saveColorwayToAccount(c: Colorway): Promise<boolean> {
+  try {
+    const r = await fetch('/api/me/preferences', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ dashboardColorway: c }),
+    });
+    return r.ok;
+  } catch {
+    return false;
+  }
+}

@@ -40,6 +40,7 @@ import type { XPGain } from '@/lib/xp';
 import type { PostBreakdownData } from '@/lib/post-scores';
 import { STUDIO_STEPS, type StageNumber } from '@/lib/studio-stages';
 import { COLORWAY_TOKENS, isDarkColorway, type Colorway } from '@/lib/colorways';
+import DashSettings from '@/components/dashboard/DashSettings';
 
 // The dashboard (docs/specs/TITLE-SCREEN-AND-DASHBOARD.md): dark bento grid,
 // Klein blue as the only accent, mono labels + Inter Tight for big numbers.
@@ -355,7 +356,10 @@ export default function BentoDashboard({
     streakDays?: number;
   } | null;
 }) {
-  const colorway: Colorway = colorwayProp ?? (initialTheme === 'dark' ? 'night' : 'bone');
+  // Settings (top bar) switches it live; the prop is the saved choice.
+  const [colorwayPick, setColorwayPick] = useState<Colorway | null>(null);
+  const colorway: Colorway =
+    colorwayPick ?? colorwayProp ?? (initialTheme === 'dark' ? 'night' : 'bone');
   const theme: DashTheme = isDarkColorway(colorway) ? 'dark' : 'light';
   // which tile's detail view is open (drill-downs)
   const [detail, setDetail] = useState<'score' | null>(null);
@@ -631,13 +635,18 @@ export default function BentoDashboard({
                   type="button"
                   onClick={runRescan}
                   disabled={scan?.status === 'running'}
-                  className="mr-3 border px-2 py-1 text-[10px] uppercase tracking-[0.14em] text-white disabled:opacity-60"
+                  className="mr-1 border px-2 py-1 text-[10px] uppercase tracking-[0.14em] text-white disabled:opacity-60"
                   style={{ background: C.blue, borderColor: C.blue }}
                   aria-label="Rescan my brand"
                 >
                   ↻ Rescan
                 </button>
               )}
+              <DashSettings
+                colorway={colorway}
+                onColorway={setColorwayPick}
+                save={rescan === 'live'}
+              />
               <span className="text-[11px] uppercase tracking-[0.1em]">@{data.handle}</span>
               <span className="h-7 w-7 overflow-hidden rounded-full" style={{ background: C.dim }}>
                 {data.avatarUrl && (
