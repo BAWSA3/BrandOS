@@ -9,7 +9,16 @@ import type { Mode } from '@/components/StationCard';
 // the screen, edges feathered. Reduced motion: the still poster. Settings'
 // blueprint reaction tints it like the studio room.
 
-export const TITLE_LOOPS = new Set(['build-exe']);
+export const TITLE_LOOPS = new Set([
+  'build-exe',
+  'arc',
+  'entropy',
+  'foresight',
+  'freq',
+  'null',
+  'relay',
+  'source',
+]);
 // every archetype has a 3D still for the title; a loop replaces it once rendered
 export const TITLE_STATIONS = new Set([
   'build-exe',

@@ -15,7 +15,16 @@ import { getArchetypeInfo } from '@/lib/archetype-descriptions';
 const MONO = "var(--dash-mono, 'VCR OSD Mono', monospace)";
 const BLUE = '#0047FF';
 /** Archetypes with a rendered day + night tile loop. */
-const TILE_LOOPS = new Set(['build-exe', 'arc', 'entropy', 'foresight']);
+const TILE_LOOPS = new Set([
+  'build-exe',
+  'arc',
+  'entropy',
+  'foresight',
+  'freq',
+  'null',
+  'relay',
+  'source',
+]);
 const FEATHER =
   'linear-gradient(to right, transparent, #000 5%, #000 95%, transparent), linear-gradient(to bottom, transparent, #000 4%, #000 96%, transparent)';
 
