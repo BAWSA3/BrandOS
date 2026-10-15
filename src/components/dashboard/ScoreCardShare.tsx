@@ -334,27 +334,41 @@ export default function ScoreCardShare({
           className="text-[10px] uppercase tracking-[0.14em]"
           style={{ fontFamily: MONO, opacity: 0.8 }}
         >
-          Today&apos;s score card
+          Today&apos;s score card · pick a colour
         </div>
-        <div className="mt-2 flex gap-1.5" role="radiogroup" aria-label="Card colour">
-          {CARD_SKINS.map((v) => (
-            <button
-              key={v}
-              type="button"
-              role="radio"
-              aria-checked={skin === v}
-              aria-label={SKINS[v].label}
-              title={SKINS[v].label}
-              onClick={() => pick(v)}
-              className="h-6 w-6"
-              style={{
-                background: SKINS[v].bg,
-                outline: skin === v ? `2px solid ${onBlue ? '#FFFFFF' : BLUE}` : 'none',
-                outlineOffset: 2,
-                border: `1px solid ${onBlue ? 'rgba(255,255,255,0.5)' : 'rgba(14,14,14,0.2)'}`,
-              }}
-            />
-          ))}
+        <div className="mt-2 flex flex-wrap gap-1.5" role="radiogroup" aria-label="Card colour">
+          {CARD_SKINS.map((v) => {
+            const on = skin === v;
+            return (
+              <button
+                key={v}
+                type="button"
+                role="radio"
+                aria-checked={on}
+                onClick={() => pick(v)}
+                className="flex items-center gap-1.5 px-2 py-1.5 text-[10px] uppercase tracking-[0.12em]"
+                style={{
+                  fontFamily: MONO,
+                  border: `1px solid ${on ? (onBlue ? '#FFFFFF' : BLUE) : onBlue ? 'rgba(255,255,255,0.45)' : 'rgba(14,14,14,0.2)'}`,
+                  background: on
+                    ? onBlue
+                      ? 'rgba(255,255,255,0.16)'
+                      : 'rgba(0,71,255,0.08)'
+                    : 'transparent',
+                }}
+              >
+                <span
+                  aria-hidden
+                  className="inline-block h-3.5 w-3.5"
+                  style={{
+                    background: SKINS[v].bg,
+                    border: `1px solid ${onBlue ? '#FFFFFF' : 'rgba(14,14,14,0.3)'}`,
+                  }}
+                />
+                {SKINS[v].label}
+              </button>
+            );
+          })}
         </div>
         <button
           type="button"
