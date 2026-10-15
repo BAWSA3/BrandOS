@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import { getCurrentUser } from '@/lib/auth';
 import { profileCard, publicRead } from '@/lib/mcp/profile-read';
 import { HANDLE_RE } from '@/lib/public-brand';
+import { colorwayForHandle } from '@/lib/user-preferences';
+import { isColorway, type Colorway } from '@/lib/colorways';
 import PublicBrand from './PublicBrand';
 
 // The public brand page, served at mybrandos.app/@handle (middleware rewrite).
@@ -10,7 +12,10 @@ import PublicBrand from './PublicBrand';
 // (scan yours -> side by side -> create your account).
 export const dynamic = 'force-dynamic';
 
-type Props = { params: Promise<{ handle: string }> };
+type Props = {
+  params: Promise<{ handle: string }>;
+  searchParams: Promise<{ skin?: string }>;
+};
 
 const APP = process.env.NEXT_PUBLIC_APP_URL || 'https://mybrandos.app';
 
@@ -28,12 +33,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function PublicBrandPage({ params }: Props) {
+export default async function PublicBrandPage({ params, searchParams }: Props) {
   const handle = (await params).handle.replace(/^(@|%40)/, '');
   const valid = HANDLE_RE.test(handle);
-  const [read, user] = await Promise.all([
+  const [read, user, skin] = await Promise.all([
     valid ? publicRead(handle) : null,
     getCurrentUser().catch(() => null),
+    valid ? colorwayForHandle(handle) : ('bone' as const),
   ]);
   const mine =
     user?.platformConnections.find((pc) => pc.platform === 'x')?.platformUsername ??
@@ -45,6 +51,12 @@ export default async function PublicBrandPage({ params }: Props) {
       valid={valid}
       initial={read ? profileCard(read) : null}
       viewer={user ? { handle: mine } : null}
+      // local dev only: ?skin= previews another skin
+      skin={
+        process.env.NODE_ENV !== 'production' && isColorway((await searchParams).skin)
+          ? ((await searchParams).skin as Colorway)
+          : skin
+      }
     />
   );
 }

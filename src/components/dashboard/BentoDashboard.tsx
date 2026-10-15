@@ -484,6 +484,7 @@ export default function BentoDashboard({
         ) : (
           <div className="w-full">
             <BrandPass
+              skin={colorway}
               data={data.pass}
               typeTaste={booted}
               compact={compact}
@@ -665,7 +666,9 @@ export default function BentoDashboard({
           {xp?.today && xp.day && (
             <CheckinMoment
               share={
-                scoreAlert ? <ScoreCardShare d={scoreCardData(data)} preview={150} /> : undefined
+                scoreAlert ? (
+                  <ScoreCardShare d={scoreCardData(data)} preview={150} defaultSkin={colorway} />
+                ) : undefined
               }
               total={xp.total}
               today={xp.today}
@@ -917,7 +920,7 @@ export default function BentoDashboard({
               initialPhase={detailPhase}
               onClose={() => setDetail(null)}
               onReport={openReport}
-              share={<ScoreCardShare d={scoreCardData(data)} tone="blue" />}
+              share={<ScoreCardShare d={scoreCardData(data)} tone="blue" defaultSkin={colorway} />}
             />
           )}
         </AnimatePresence>

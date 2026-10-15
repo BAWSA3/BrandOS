@@ -10,11 +10,61 @@ import { Typewriter } from 'motion-plus/react';
 // recoloured to BrandOS (bone card, ink type, Klein blue stamps) with
 // annotated-diagram callouts around it. Dashboard tile + shareable image.
 
+import type { Colorway } from '@/lib/colorways';
 const BLUE = '#0047FF';
 const BONE = '#ECE9E1';
 const INK = '#141414';
 const MONO = "'VCR OSD Mono', 'JetBrains Mono', monospace";
 const TYPE = "var(--pass-type, 'JetBrains Mono', ui-monospace, monospace)";
+
+/** The Pass recolors with the creator's dashboard skin (Settings → Dashboard). */
+interface PassSkin {
+  bg: string;
+  ink: string;
+  /** Stamp, station strip, the no-photo portrait. */
+  accent: string;
+  /** Type on the accent strip. */
+  onAccent: string;
+  portrait: string;
+  dashed: string;
+  /** Paper: a hairline so the white card reads on white. */
+  edge?: string;
+}
+const PASS_SKINS: Record<Colorway, PassSkin> = {
+  bone: {
+    bg: BONE,
+    ink: INK,
+    accent: BLUE,
+    onAccent: '#FFFFFF',
+    portrait: '#D9D5CB',
+    dashed: 'rgba(20,20,20,0.35)',
+  },
+  night: {
+    bg: '#17181B',
+    ink: '#F2EFE8',
+    accent: '#4D7BFF',
+    onAccent: '#FFFFFF',
+    portrait: '#2A2B2F',
+    dashed: 'rgba(242,239,232,0.3)',
+  },
+  klein: {
+    bg: BLUE,
+    ink: '#FFFFFF',
+    accent: '#FFFFFF',
+    onAccent: BLUE,
+    portrait: 'rgba(255,255,255,0.16)',
+    dashed: 'rgba(255,255,255,0.45)',
+  },
+  paper: {
+    bg: '#FFFFFF',
+    ink: '#0A0A0A',
+    accent: BLUE,
+    onAccent: '#FFFFFF',
+    portrait: '#EDEDED',
+    dashed: 'rgba(10,10,10,0.3)',
+    edge: 'rgba(10,10,10,0.16)',
+  },
+};
 
 export interface BrandPassData {
   handle: string;
@@ -97,8 +147,11 @@ export default function BrandPass({
   typeTaste,
   compact = false,
   selfHeal = false,
+  skin = 'bone',
 }: {
   data: BrandPassData;
+  /** The creator's dashboard skin. */
+  skin?: Colorway;
   typeTaste?: boolean;
   /** The owner's own Pass: if the stored X photo fails to load (changed on X), fetch the current one. */
   selfHeal?: boolean;
@@ -107,6 +160,7 @@ export default function BrandPass({
 }) {
   const reduce = useReducedMotion();
   const info = getArchetypeInfo(data.archetype);
+  const k = PASS_SKINS[skin];
   // the photo shown; null after it failed and no fresh one could be found
   const [photo, setPhoto] = useState<string | null>(
     data.avatarUrl ? hiResAvatar(data.avatarUrl) : null
@@ -171,7 +225,14 @@ export default function BrandPass({
       <motion.div
         data-pass-card
         className="relative overflow-hidden rounded-[10px] p-4 shadow-[0_18px_40px_rgba(0,0,0,0.45)]"
-        style={{ background: BONE, color: INK, containerType: 'inline-size', rotateX, rotateY }}
+        style={{
+          background: k.bg,
+          color: k.ink,
+          boxShadow: k.edge ? `inset 0 0 0 1px ${k.edge}` : undefined,
+          containerType: 'inline-size',
+          rotateX,
+          rotateY,
+        }}
       >
         {/* header */}
         <div className="flex items-start justify-between">
@@ -192,7 +253,7 @@ export default function BrandPass({
           {/* stamp */}
           <div
             className="flex h-[54px] w-[54px] shrink-0 rotate-[-12deg] items-center justify-center rounded-full border-2 text-center text-[9px] font-bold leading-tight"
-            style={{ borderColor: BLUE, color: BLUE, fontFamily: MONO }}
+            style={{ borderColor: k.accent, color: k.accent, fontFamily: MONO }}
           >
             {info?.name ?? data.archetype}
             <br />★
@@ -204,7 +265,7 @@ export default function BrandPass({
           <div>
             <div
               className="relative aspect-[3/4] overflow-hidden"
-              style={{ background: '#D9D5CB' }}
+              style={{ background: k.portrait }}
             >
               {photo ? (
                 // eslint-disable-next-line @next/next/no-img-element -- remote avatar
@@ -218,8 +279,8 @@ export default function BrandPass({
               ) : (
                 // no photo: their initial on Klein blue (the Pass is always the person)
                 <div
-                  className="flex h-full w-full items-center justify-center text-[44px] font-bold text-white"
-                  style={{ background: BLUE, fontFamily: TYPE }}
+                  className="flex h-full w-full items-center justify-center text-[44px] font-bold"
+                  style={{ background: k.accent, color: k.onAccent, fontFamily: TYPE }}
                   aria-hidden
                 >
                   {data.handle.replace(/^@/, '').charAt(0).toUpperCase()}
@@ -233,11 +294,14 @@ export default function BrandPass({
               </span>
             </div>
             <div
-              className="mt-2 flex items-center justify-center gap-1 py-[3px] text-white"
-              style={{ background: BLUE, fontFamily: TYPE }}
+              className="mt-2 flex items-center justify-center gap-1 py-[3px]"
+              style={{ background: k.accent, color: k.onAccent, fontFamily: TYPE }}
             >
               <span className="text-[10px]">✱ STATION</span>
-              <span className="rounded-full border border-white px-[5px] text-[10px] leading-[14px]">
+              <span
+                className="rounded-full border px-[5px] text-[10px] leading-[14px]"
+                style={{ borderColor: k.onAccent }}
+              >
                 {no}
               </span>
               <span className="text-[10px]">✱</span>
@@ -247,7 +311,7 @@ export default function BrandPass({
                 <span
                   key={i}
                   className="h-full"
-                  style={{ width: w, background: i % 2 ? 'transparent' : INK }}
+                  style={{ width: w, background: i % 2 ? 'transparent' : k.ink }}
                 />
               ))}
             </div>
@@ -256,7 +320,7 @@ export default function BrandPass({
           {/* fields */}
           <div
             className="flex min-w-0 flex-col border-l border-dashed pl-3"
-            style={{ borderColor: 'rgba(20,20,20,0.35)', fontFamily: TYPE }}
+            style={{ borderColor: k.dashed, fontFamily: TYPE }}
           >
             {[
               ['Brand', `@${data.handle}`],
@@ -268,7 +332,7 @@ export default function BrandPass({
                     key="taste"
                     play={typeTaste}
                     speed="fast"
-                    cursorStyle={{ background: '#0047FF', width: 2 }}
+                    cursorStyle={{ background: k.accent, width: 2 }}
                   >
                     {data.taste}
                   </Typewriter>
@@ -304,7 +368,7 @@ export default function BrandPass({
                   <span
                     key={i}
                     className="block aspect-square"
-                    style={{ background: on ? INK : 'transparent' }}
+                    style={{ background: on ? k.ink : 'transparent' }}
                   />
                 ))}
               </div>

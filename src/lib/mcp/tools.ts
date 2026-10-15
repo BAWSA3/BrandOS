@@ -11,6 +11,7 @@ import {
   type Allowance,
   type McpAccount,
 } from '@/lib/mcp/usage';
+import { colorwayForHandle } from '@/lib/user-preferences';
 import { freshRead, profileCard, renderProfileRead, storedRead } from '@/lib/mcp/profile-read';
 import { CARD_URI, cardHtml } from '@/lib/mcp/card-html';
 
@@ -81,6 +82,11 @@ async function gate(tool: string, ctx: HandlerCtx): Promise<Gate> {
 }
 
 /** Count the use (only when fresh work happened) and add the allowance line. */
+/** The card wears the looked-up creator's skin (Bone / host theme without an account). */
+async function cardSkin(card: Record<string, unknown>) {
+  return typeof card.handle === 'string' ? colorwayForHandle(card.handle) : 'bone';
+}
+
 async function finish(
   g: Extract<Gate, { ok: true }>,
   tool: string,
@@ -97,7 +103,9 @@ async function finish(
         text: `${body}\n\n${line}${card ? "\n\n(Shown to the user as a BrandOS card above. Add at most a one-line takeaway; don't repeat the breakdown.)" : ''}`,
       },
     ],
-    ...(card ? { structuredContent: { ...card, allowance: line } } : {}),
+    ...(card
+      ? { structuredContent: { ...card, skin: await cardSkin(card), allowance: line } }
+      : {}),
   };
 }
 
