@@ -104,6 +104,7 @@ export default function StationTile({
             ref={ref}
             className="block h-auto w-full"
             style={{
+              filter: 'var(--d-station-filter, none)',
               WebkitMaskImage: FEATHER,
               maskImage: FEATHER,
               WebkitMaskComposite: 'source-in',
@@ -129,6 +130,7 @@ export default function StationTile({
             height={800}
             className="block h-auto w-full"
             style={{
+              filter: 'var(--d-station-filter, none)',
               WebkitMaskImage: FEATHER,
               maskImage: FEATHER,
               WebkitMaskComposite: 'source-in',

@@ -157,6 +157,7 @@ model User {
   xpEvents             XPEvent[] // XP ledger (migration 029)
   progress             UserProgress? // XP total + streaks (migration 029)
   mcpUsage             McpUsage[] // metered MCP uses (migration 034)
+  preference           UserPreference? // display settings (migration 036)
   ideas                Idea[] // studio idea board (migration 035)
   postScores           PostScore[] // per-post brand fit (migration 033)
   noteReports          NoteReport[]       @relation("NoteReporter")
@@ -1307,6 +1308,14 @@ model McpUsage {
   createdAt DateTime @default(now()) @db.Timestamptz
 
   @@index([userId, createdAt(sort: Desc)])
+}
+
+// Per-account display settings (migration 036): the dashboard colorway.
+model UserPreference {
+  userId            String   @id
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dashboardColorway String   @default("bone")
+  updatedAt         DateTime @default(now()) @updatedAt @db.Timestamptz
 }
 
 // Studio idea board (migration 035): post ideas built on a "Next time" suggestion.

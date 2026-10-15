@@ -1,14 +1,15 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import { Suspense, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { XP_RULES, xpAtLevel, type XPGain } from '@/lib/xp';
 import BentoDashboard, { type DashboardData } from '@/components/dashboard/BentoDashboard';
+import { isColorway, readLocalColorway, type Colorway } from '@/lib/colorways';
 
 // Sign-in-free preview of the dashboard with sample data (design review):
 //   /world-preview/dashboard            active user
 //   /world-preview/dashboard?state=new  brand-new user (onboarding tiles)
-//   &theme=dark                         start in dark mode (light is the default; toggle in the top bar)
+//   &colorway=night|klein|paper         colorway (bone default; else the preview title's Settings pick)
 //   &alert=0                            hide the score-changed notification
 //   &list=scans                       Recent scans (click a row for its full report)
 //   &swap=0                           Previous layout: Brand Pass big on the left
@@ -299,6 +300,15 @@ function Preview() {
   // &list=scans shows "Recent scans" (what a real account sees today) instead of posts
   const scansList = q.get('list') === 'scans';
   const [replayKey] = useState(() => Date.now());
+  const [savedColorway, setSavedColorway] = useState<Colorway | null>(null);
+  useEffect(() => {
+    const t = window.setTimeout(() => setSavedColorway(readLocalColorway()), 0);
+    return () => window.clearTimeout(t);
+  }, []);
+  const qc = q.get('colorway');
+  const colorway: Colorway = isColorway(qc)
+    ? qc
+    : (savedColorway ?? (q.get('theme') === 'dark' ? 'night' : 'bone'));
   const history = SAMPLE.scoreDetail ?? [];
   const data: DashboardData = isNew
     ? { ...SAMPLE, stage: 0, ticker: { ...SAMPLE.ticker, streak: '—', avgFit: 0 } }
@@ -323,7 +333,8 @@ function Preview() {
       isNew={isNew}
       // &swap=0: the previous layout (Brand Pass big on the left)
       swapPassStation={q.get('swap') !== '0'}
-      initialTheme={q.get('theme') === 'dark' ? 'dark' : 'light'}
+      // ?colorway=bone|night|klein|paper, else the one picked in the preview title's Settings
+      colorway={colorway}
       // Rescan simulates a scan here (no API call): +3 after ~9s
       rescan={isNew ? undefined : 'demo'}
       // the score-changed notification (?alert=0 hides it)
