@@ -9,6 +9,7 @@ import { isColorway, readLocalColorway, type Colorway } from '@/lib/colorways';
 // Sign-in-free preview of the dashboard with sample data (design review):
 //   /world-preview/dashboard            active user
 //   /world-preview/dashboard?state=new  brand-new user (onboarding tiles)
+//   &design=v2                          redesign preview (masthead, wide score, roomy grid)
 //   &colorway=night|klein|paper         colorway (bone default; else the preview title's Settings pick)
 //   &alert=0                            hide the score-changed notification
 //   &list=scans                       Recent scans (click a row for its full report)
@@ -335,6 +336,8 @@ function Preview() {
       swapPassStation={q.get('swap') !== '0'}
       // ?colorway=bone|night|klein|paper, else the one picked in the preview title's Settings
       colorway={colorway}
+      // &design=v2: the 2026-10-15 redesign preview
+      design={q.get('design') === 'v2' ? 'v2' : 'v1'}
       // Rescan simulates a scan here (no API call): +3 after ~9s
       rescan={isNew ? undefined : 'demo'}
       // the score-changed notification (?alert=0 hides it)

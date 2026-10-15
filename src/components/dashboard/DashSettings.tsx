@@ -18,7 +18,10 @@ export default function DashSettings({
   colorway,
   onColorway,
   save,
+  onCanvas = false,
 }: {
+  /** The button sits on the page canvas (v2 masthead), not in a tile. */
+  onCanvas?: boolean;
   colorway: Colorway;
   onColorway: (c: Colorway) => void;
   /** Signed in: save the colorway to the account (previews: this device only). */
@@ -90,8 +93,8 @@ export default function DashSettings({
         aria-haspopup="dialog"
         className="border px-2 py-1 text-[10px] uppercase tracking-[0.14em]"
         style={{
-          borderColor: open ? BLUE : 'var(--d-rule)',
-          color: open ? BLUE : 'var(--d-muted)',
+          borderColor: onCanvas ? 'var(--d-head-muted)' : open ? BLUE : 'var(--d-rule)',
+          color: onCanvas ? 'var(--d-head)' : open ? BLUE : 'var(--d-muted)',
           fontFamily: MONO,
         }}
       >

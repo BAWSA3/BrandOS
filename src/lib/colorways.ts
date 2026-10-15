@@ -33,6 +33,8 @@ export const COLORWAY_TOKENS: Record<Colorway, Record<string, string>> = {
     '--d-callout': '#C9C8C2',
     '--d-callout-line': 'rgba(231,231,228,0.45)',
     '--d-accent-edge': '#0047FF',
+    '--d-head': '#E7E7E4', // type on the canvas (v2 masthead)
+    '--d-head-muted': '#8A8A86',
   },
   bone: {
     '--d-canvas': '#F2EFE8', // warm bone
@@ -46,6 +48,8 @@ export const COLORWAY_TOKENS: Record<Colorway, Record<string, string>> = {
     '--d-callout': '#4A4A47',
     '--d-callout-line': 'rgba(14,14,14,0.4)',
     '--d-accent-edge': '#0047FF',
+    '--d-head': '#0E0E0E', // type on the canvas (v2 masthead)
+    '--d-head-muted': '#6B6B6B',
   },
   // Klein canvas, bone tiles (the station's own background); the blue score tile keeps a white edge so it
   // still reads as a tile against the blue.
@@ -61,6 +65,8 @@ export const COLORWAY_TOKENS: Record<Colorway, Record<string, string>> = {
     '--d-callout': '#4A4A47',
     '--d-callout-line': 'rgba(14,14,14,0.4)',
     '--d-accent-edge': 'rgba(255,255,255,0.7)',
+    '--d-head': '#FFFFFF', // type on the canvas (v2 masthead)
+    '--d-head-muted': 'rgba(255,255,255,0.75)',
   },
   // Pure white, hairline rules, ink only.
   paper: {
@@ -75,6 +81,8 @@ export const COLORWAY_TOKENS: Record<Colorway, Record<string, string>> = {
     '--d-callout': '#3F3F3F',
     '--d-callout-line': 'rgba(14,14,14,0.4)',
     '--d-accent-edge': '#0047FF',
+    '--d-head': '#0A0A0A', // type on the canvas (v2 masthead)
+    '--d-head-muted': '#6B6B6B',
     // the station renders on #F9F8F3: lift it to white so no box shows
     '--d-station-filter': 'brightness(1.024)',
   },

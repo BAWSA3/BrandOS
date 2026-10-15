@@ -36,7 +36,10 @@ export default function PostRow({
   bar,
   figure,
   studioHref,
+  roomy = false,
 }: {
+  /** Dashboard v2: two-line excerpt, bigger score, quieter "why" link. */
+  roomy?: boolean;
   post: RecentPost;
   top: boolean;
   open: boolean;
@@ -60,22 +63,35 @@ export default function PostRow({
         aria-expanded={b ? open : undefined}
         aria-controls={b ? panelId : undefined}
         disabled={!b}
-        className="group grid w-full grid-cols-[1fr_auto] items-center gap-4 py-3 text-left"
+        className={`group grid w-full grid-cols-[1fr_auto] items-center gap-4 text-left ${roomy ? 'py-4' : 'py-3'}`}
       >
         <div className="min-w-0">
-          <div className="truncate text-[14px]">{post.excerpt}</div>
+          <div
+            className={roomy ? 'line-clamp-2 text-[15px] leading-[1.4]' : 'truncate text-[14px]'}
+          >
+            {post.excerpt}
+          </div>
           <div className="mt-1 flex flex-wrap items-center gap-x-2">
             <Micro>
               {post.when} · {post.likes} likes · {post.multiple} usual
             </Micro>
-            {b && <Micro color={BLUE}>{open ? 'Hide breakdown ▴' : 'Why this score ▾'}</Micro>}
+            {b &&
+              (roomy ? (
+                <span className="opacity-60 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
+                  <Micro color={open ? BLUE : 'var(--d-ink)'}>
+                    {open ? 'Hide breakdown ▴' : 'Why this score ▾'}
+                  </Micro>
+                </span>
+              ) : (
+                <Micro color={BLUE}>{open ? 'Hide breakdown ▴' : 'Why this score ▾'}</Micro>
+              ))}
           </div>
           <div className="mt-2 h-[3px] w-full" style={{ background: 'var(--d-track)' }}>
             {bar}
           </div>
         </div>
         <span
-          className="w-[64px] text-right text-[30px] leading-none"
+          className={`text-right leading-none ${roomy ? 'w-[72px] text-[40px]' : 'w-[64px] text-[30px]'}`}
           style={{ fontFamily: BIG, fontWeight: 500, color: top ? BLUE : 'var(--d-ink)' }}
         >
           {figure}
