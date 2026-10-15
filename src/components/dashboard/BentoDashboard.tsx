@@ -27,6 +27,8 @@ import {
 } from '@/components/dashboard/StatTiles';
 import XPBar from '@/components/dashboard/XPBar';
 import CheckinMoment from '@/components/dashboard/CheckinMoment';
+import ScoreCardShare from '@/components/dashboard/ScoreCardShare';
+import { scoreCardData } from '@/lib/score-card';
 import ScoreDetail, { type ScoreDetailPoint } from '@/components/dashboard/ScoreDetail';
 import RescanOverlay from '@/components/dashboard/RescanOverlay';
 import ScanReport from '@/components/dashboard/ScanReport';
@@ -682,6 +684,9 @@ export default function BentoDashboard({
           {xp && <XPBar total={xp.total} gains={xp.gains} booted={booted} />}
           {xp?.today && xp.day && (
             <CheckinMoment
+              share={
+                scoreAlert ? <ScoreCardShare d={scoreCardData(data)} preview={150} /> : undefined
+              }
               total={xp.total}
               today={xp.today}
               sinceLast={xp.gains}
@@ -932,6 +937,7 @@ export default function BentoDashboard({
               initialPhase={detailPhase}
               onClose={() => setDetail(null)}
               onReport={openReport}
+              share={<ScoreCardShare d={scoreCardData(data)} tone="blue" />}
             />
           )}
         </AnimatePresence>
