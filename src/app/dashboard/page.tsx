@@ -17,7 +17,7 @@ export const dynamic = 'force-dynamic';
 export default async function DashboardPage({
   searchParams,
 }: {
-  searchParams: Promise<{ rescan?: string }>;
+  searchParams: Promise<{ rescan?: string; design?: string }>;
 }) {
   const user = await getCurrentUser();
 
@@ -50,7 +50,8 @@ export default async function DashboardPage({
   // account with X connected but no scan yet gets its first scan the same way,
   // so the real dashboard (not the legacy tools) is what they land on.
   const firstScan = !bento && xConnections.length > 0;
-  const autoRescan = (await searchParams).rescan === '1' || firstScan;
+  const sp = await searchParams;
+  const autoRescan = sp.rescan === '1' || firstScan;
 
   return (
     <>
@@ -59,6 +60,8 @@ export default async function DashboardPage({
         <BentoDashboard
           data={bento}
           colorway={colorway}
+          // ?design=v2: the 2026-10-15 redesign, previewed with real data
+          design={sp.design === 'v2' ? 'v2' : 'v1'}
           xp={
             progress
               ? {

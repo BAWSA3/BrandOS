@@ -148,7 +148,10 @@ export default function BrandPass({
   compact = false,
   selfHeal = false,
   skin = 'bone',
+  width,
 }: {
+  /** Fixed card width with no callouts (dashboard v2's mid-size tile). */
+  width?: number;
   data: BrandPassData;
   /** The creator's dashboard skin. */
   skin?: Colorway;
@@ -198,12 +201,19 @@ export default function BrandPass({
 
   return (
     <div
-      className={compact ? 'relative mx-auto py-2' : 'relative px-0 py-2 md:px-[92px] md:py-6'}
-      style={{ perspective: 900, ...(compact ? { width: 300, zoom: 0.78 } : {}) }}
+      className={
+        compact || width
+          ? 'relative mx-auto max-w-full py-2'
+          : 'relative px-0 py-2 md:px-[92px] md:py-6'
+      }
+      style={{
+        perspective: 900,
+        ...(width ? { width } : compact ? { width: 300, zoom: 0.78 } : {}),
+      }}
       onMouseMove={onMove}
       onMouseLeave={onLeave}
     >
-      {!compact && (
+      {!compact && !width && (
         <>
           <Callout id="a" label="Portrait" className="left-0 top-[26%]" line="16px" />
           <Callout

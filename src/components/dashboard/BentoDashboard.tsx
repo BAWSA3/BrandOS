@@ -36,7 +36,7 @@ import PostRow from '@/components/dashboard/PostRow';
 import PassShare from '@/components/dashboard/PassShare';
 import StationTile from '@/components/dashboard/StationTile';
 import { stationSlug } from '@/components/StationCard';
-import type { XPGain } from '@/lib/xp';
+import { levelFor, type XPGain } from '@/lib/xp';
 import type { PostBreakdownData } from '@/lib/post-scores';
 import { STUDIO_STEPS, type StageNumber } from '@/lib/studio-stages';
 import { COLORWAY_TOKENS, isDarkColorway, type Colorway } from '@/lib/colorways';
@@ -262,7 +262,91 @@ function StatValue({ text }: { text: string }) {
 }
 
 /** The top stat strip as a slow market-style ticker; pauses on hover. */
-function StatTicker({ data }: { data: DashboardData }) {
+/** "2026-10-15" -> "Oct 15" (the user's local day from the server). */
+function dayLabel(day: string | null): string | null {
+  const m = day?.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!m) return null;
+  const months = 'Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec'.split(' ');
+  return `${months[Number(m[2]) - 1]} ${Number(m[3])}`;
+}
+
+/**
+ * Dashboard v2 masthead: menu + controls on a quiet row, the @handle huge (the
+ * brand is the person), one micro line (day · level · streak · station), then
+ * the stat ticker between hairlines. Sits on the canvas, not in a tile.
+ */
+function Masthead({
+  data,
+  homeHref,
+  level,
+  streakDays,
+  day,
+  controls,
+}: {
+  data: DashboardData;
+  homeHref: string;
+  level: number | null;
+  streakDays: number;
+  day: string | null;
+  controls: React.ReactNode;
+}) {
+  const meta = [
+    dayLabel(day),
+    level ? `LV ${String(level).padStart(2, '0')}` : null,
+    streakDays > 1 ? `${streakDays}-day streak` : null,
+    data.pass.stationNumber ? `Station #${String(data.pass.stationNumber).padStart(4, '0')}` : null,
+  ].filter(Boolean);
+  return (
+    <header style={{ color: 'var(--d-head)' }}>
+      <div className="flex items-center justify-between gap-4 pt-2">
+        <Link
+          href={homeHref}
+          className="grid shrink-0 grid-cols-3 gap-[2px]"
+          aria-label="Back to title screen"
+        >
+          {[1, 1, 1, 1, 1, 1, 1, 1, 1].map((_, i) => (
+            <span key={i} className="h-[4px] w-[4px]" style={{ background: 'var(--d-head)' }} />
+          ))}
+        </Link>
+        <div className="flex shrink-0 items-center gap-2" style={{ fontFamily: MONO }}>
+          {controls}
+        </div>
+      </div>
+      <h1
+        className="mt-8 break-all leading-[0.88] md:mt-10"
+        style={{
+          fontFamily: BIG,
+          fontSize: 'clamp(52px, 9vw, 136px)',
+          fontWeight: 500,
+          letterSpacing: '-0.05em',
+        }}
+      >
+        @{data.handle}
+      </h1>
+      <div
+        className="mt-4 text-[11px] uppercase tracking-[0.16em]"
+        style={{ fontFamily: MONO, color: 'var(--d-head-muted)' }}
+      >
+        {meta.join('  ·  ')}
+      </div>
+      <div
+        className="mt-6 border-y py-3"
+        style={
+          {
+            borderColor: 'var(--d-rule)',
+            color: 'var(--d-head)',
+            // labels sit on the canvas here, not in a tile
+            '--d-muted': 'var(--d-head-muted)',
+          } as React.CSSProperties
+        }
+      >
+        <StatTicker data={data} bare />
+      </div>
+    </header>
+  );
+}
+
+function StatTicker({ data, bare = false }: { data: DashboardData; bare?: boolean }) {
   const reduce = useReducedMotion();
   const stats = (
     [
@@ -290,7 +374,11 @@ function StatTicker({ data }: { data: DashboardData }) {
   ));
   return (
     <div
-      className="order-last w-full min-w-0 border-t pt-3 md:order-none md:w-auto md:flex-1 md:border-t-0 md:pt-0"
+      className={
+        bare
+          ? 'w-full min-w-0'
+          : 'order-last w-full min-w-0 border-t pt-3 md:order-none md:w-auto md:flex-1 md:border-t-0 md:pt-0'
+      }
       style={{ borderColor: C.rule }}
     >
       <Ticker items={items} velocity={18} hoverFactor={0} fade={40} isStatic={!!reduce} />
@@ -329,7 +417,10 @@ export default function BentoDashboard({
   rescan,
   homeHref = '/world-preview/title',
   swapPassStation = true,
+  design = 'v1',
 }: {
+  /** v2 (2026-10-15 preview): @handle masthead, wide score, roomier grid, one blue. */
+  design?: 'v1' | 'v2';
   data: DashboardData;
   isNew?: boolean;
   fonts?: DashFonts;
@@ -460,10 +551,17 @@ export default function BentoDashboard({
   );
   // Station tile sits beside the score; the week tile then drops to row 2 next to posts.
   const hasStation = !isNew && !!stationSlug(data.pass.archetype);
-  const listSpan = hasStation && data.week ? 'md:col-span-4' : 'md:col-span-7';
+  const listSpan =
+    design === 'v2' && !isNew
+      ? 'md:col-span-12 md:p-7'
+      : hasStation && data.week
+        ? 'md:col-span-4'
+        : 'md:col-span-7';
   // Brand Pass and station tiles, placed by layout (station big when swapPassStation).
   const swap = swapPassStation && hasStation;
-  const passTile = (cls: string, compact = false) => (
+  const v2 = design === 'v2' && !isNew;
+  const pad = v2 ? ' md:p-7' : '';
+  const passTile = (cls: string, compact = false, width?: number) => (
     <Tile className={cls}>
       <Label right={isNew ? <span>Locked</span> : <PassShare pass={data.pass} />}>Brand Pass</Label>
       <div className="flex flex-1 items-center">
@@ -488,6 +586,7 @@ export default function BentoDashboard({
               data={data.pass}
               typeTaste={booted}
               compact={compact}
+              width={width}
               selfHeal={rescan === 'live'}
             />
           </div>
@@ -612,55 +711,105 @@ export default function BentoDashboard({
         )}
         <DashCursor />
         <div className="mx-auto max-w-[1360px] px-4 pb-10 pt-4 md:px-8">
-          {/* Top bar + ticker strip */}
-          <header
-            className="flex flex-wrap items-center gap-x-6 gap-y-3 border px-4 py-3 md:flex-nowrap"
-            style={{ background: C.tile, borderColor: C.rule }}
-          >
-            <Link
-              href={homeHref}
-              className="grid shrink-0 grid-cols-3 gap-[2px]"
-              aria-label="Back to title screen"
-            >
-              {[1, 1, 1, 1, 1, 1, 1, 1, 1].map((_, i) => (
-                <span key={i} className="h-[4px] w-[4px]" style={{ background: C.ink }} />
-              ))}
-            </Link>
-            <StatTicker data={data} />
-            <div
-              className="ml-auto flex shrink-0 items-center gap-2 pl-4"
-              style={{ fontFamily: MONO }}
-            >
-              {rescan && (
-                <button
-                  type="button"
-                  onClick={runRescan}
-                  disabled={scan?.status === 'running'}
-                  className="mr-1 border px-2 py-1 text-[10px] uppercase tracking-[0.14em] text-white disabled:opacity-60"
-                  style={{ background: C.blue, borderColor: C.blue }}
-                  aria-label="Rescan my brand"
-                >
-                  ↻ Rescan
-                </button>
-              )}
-              <DashSettings
-                colorway={colorway}
-                onColorway={setColorwayPick}
-                save={rescan === 'live'}
-              />
-              <span className="text-[11px] uppercase tracking-[0.1em]">@{data.handle}</span>
-              <span className="h-7 w-7 overflow-hidden rounded-full" style={{ background: C.dim }}>
-                {data.avatarUrl && (
-                  // eslint-disable-next-line @next/next/no-img-element -- remote avatar
-                  <img
-                    src={data.avatarUrl}
-                    alt=""
-                    className="h-full w-full object-cover grayscale"
+          {v2 ? (
+            <Masthead
+              data={data}
+              homeHref={homeHref}
+              level={xp ? levelFor(xp.total).level : null}
+              streakDays={xp?.streakDays ?? 0}
+              day={xp?.day ?? null}
+              controls={
+                <>
+                  {rescan && (
+                    <button
+                      type="button"
+                      onClick={runRescan}
+                      disabled={scan?.status === 'running'}
+                      className="mr-1 border px-2 py-1 text-[10px] uppercase tracking-[0.14em] disabled:opacity-60"
+                      style={{ borderColor: 'var(--d-head)', color: 'var(--d-head)' }}
+                      aria-label="Rescan my brand"
+                    >
+                      ↻ Rescan
+                    </button>
+                  )}
+                  <DashSettings
+                    colorway={colorway}
+                    onColorway={setColorwayPick}
+                    save={rescan === 'live'}
+                    onCanvas
                   />
-                )}
-              </span>
-            </div>
-          </header>
+                  <span
+                    className="h-8 w-8 overflow-hidden rounded-full"
+                    style={{ background: C.dim }}
+                  >
+                    {data.avatarUrl && (
+                      // eslint-disable-next-line @next/next/no-img-element -- remote avatar
+                      <img
+                        src={data.avatarUrl}
+                        alt=""
+                        className="h-full w-full object-cover grayscale"
+                      />
+                    )}
+                  </span>
+                </>
+              }
+            />
+          ) : (
+            <>
+              {/* Top bar + ticker strip */}
+              <header
+                className="flex flex-wrap items-center gap-x-6 gap-y-3 border px-4 py-3 md:flex-nowrap"
+                style={{ background: C.tile, borderColor: C.rule }}
+              >
+                <Link
+                  href={homeHref}
+                  className="grid shrink-0 grid-cols-3 gap-[2px]"
+                  aria-label="Back to title screen"
+                >
+                  {[1, 1, 1, 1, 1, 1, 1, 1, 1].map((_, i) => (
+                    <span key={i} className="h-[4px] w-[4px]" style={{ background: C.ink }} />
+                  ))}
+                </Link>
+                <StatTicker data={data} />
+                <div
+                  className="ml-auto flex shrink-0 items-center gap-2 pl-4"
+                  style={{ fontFamily: MONO }}
+                >
+                  {rescan && (
+                    <button
+                      type="button"
+                      onClick={runRescan}
+                      disabled={scan?.status === 'running'}
+                      className="mr-1 border px-2 py-1 text-[10px] uppercase tracking-[0.14em] text-white disabled:opacity-60"
+                      style={{ background: C.blue, borderColor: C.blue }}
+                      aria-label="Rescan my brand"
+                    >
+                      ↻ Rescan
+                    </button>
+                  )}
+                  <DashSettings
+                    colorway={colorway}
+                    onColorway={setColorwayPick}
+                    save={rescan === 'live'}
+                  />
+                  <span className="text-[11px] uppercase tracking-[0.1em]">@{data.handle}</span>
+                  <span
+                    className="h-7 w-7 overflow-hidden rounded-full"
+                    style={{ background: C.dim }}
+                  >
+                    {data.avatarUrl && (
+                      // eslint-disable-next-line @next/next/no-img-element -- remote avatar
+                      <img
+                        src={data.avatarUrl}
+                        alt=""
+                        className="h-full w-full object-cover grayscale"
+                      />
+                    )}
+                  </span>
+                </div>
+              </header>
+            </>
+          )}
 
           {xp && <XPBar total={xp.total} gains={xp.gains} booted={booted} />}
           {xp?.today && xp.day && (
@@ -679,14 +828,20 @@ export default function BentoDashboard({
             />
           )}
 
-          <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-12">
-            {swap
-              ? stationTile('md:col-span-5 md:row-span-2', true)
-              : passTile('md:col-span-5 md:row-span-2')}
+          <div className={`grid grid-cols-1 md:grid-cols-12 ${v2 ? 'mt-5 gap-5' : 'mt-3 gap-3'}`}>
+            {swap || (v2 && hasStation)
+              ? stationTile('md:col-span-5 md:row-span-2' + pad, true)
+              : passTile('md:col-span-5 md:row-span-2' + pad)}
 
             {/* Brand score: hero number, delta, trend, phase meters */}
             <Tile
-              className={data.week || isNew || hasStation ? 'md:col-span-4' : 'md:col-span-7'}
+              className={
+                v2
+                  ? 'md:col-span-7' + pad
+                  : data.week || isNew || hasStation
+                    ? 'md:col-span-4'
+                    : 'md:col-span-7'
+              }
               accent
               open
               layoutId="tile-score"
@@ -699,16 +854,21 @@ export default function BentoDashboard({
                 phases={data.phases}
                 booted={booted}
                 label={<TileLabel>Brand score</TileLabel>}
+                wide={v2}
                 onPhase={data.scoreDetail?.length ? (key) => openScore(key) : undefined}
               />
             </Tile>
 
             {/* Your station (or, swapped, the Brand Pass) on the right */}
-            {swap ? passTile('md:col-span-3', true) : hasStation && stationTile('md:col-span-3')}
+            {v2
+              ? hasStation && passTile('md:col-span-4' + pad, false, 340)
+              : swap
+                ? passTile('md:col-span-3', true)
+                : hasStation && stationTile('md:col-span-3')}
 
             {/* This week: goal meter + day strip (hidden until weekly data exists) */}
             {(isNew || data.week) && (
-              <Tile className="md:col-span-3">
+              <Tile className={'md:col-span-3' + pad}>
                 {isNew || !data.week ? (
                   <>
                     <Label>This week</Label>
@@ -728,6 +888,7 @@ export default function BentoDashboard({
                     streakWeeks={data.week.streakWeeks}
                     booted={booted}
                     label={<TileLabel>This week</TileLabel>}
+                    simple={v2}
                   />
                 )}
               </Tile>
@@ -859,7 +1020,7 @@ export default function BentoDashboard({
             ) : (
               <Tile className={listSpan}>
                 <Label right={analyzeButton}>Recent posts analyzed</Label>
-                <ul className="mt-4">
+                <ul className={v2 ? 'mt-4 md:grid md:grid-cols-2 md:gap-x-10' : 'mt-4'}>
                   {data.posts.map((p, i) => {
                     const top = p.fit === Math.max(...data.posts.map((x) => x.fit));
                     return (
@@ -870,6 +1031,7 @@ export default function BentoDashboard({
                         open={openPost === p.id}
                         onToggle={() => setOpenPost((o) => (o === p.id ? null : p.id))}
                         bar={<FitBar fit={p.fit} top={top} i={i} />}
+                        roomy={v2}
                         studioHref={
                           rescan === 'live'
                             ? (k) => `/dashboard/studio?post=${encodeURIComponent(p.id)}&s=${k}`
