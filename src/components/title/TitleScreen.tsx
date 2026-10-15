@@ -20,10 +20,10 @@ import HoverLetters from '@/components/title/HoverLetters';
 import { getArchetypeInfo } from '@/lib/archetype-descriptions';
 import { STUDIO_STEPS, type StageNumber } from '@/lib/studio-stages';
 import type { Mode } from '@/components/StationCard';
+import ColorwayPicker from '@/components/settings/ColorwayPicker';
 import {
-  COLORWAYS,
-  COLORWAY_SWATCH,
   DEFAULT_COLORWAY,
+  saveColorwayToAccount,
   readLocalColorway,
   writeLocalColorway,
   type Colorway,
@@ -181,13 +181,7 @@ export default function TitleScreen({
     writeLocalColorway(c);
     setColorwayNote(null);
     if (!saveColorway) return;
-    fetch('/api/me/preferences', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ dashboardColorway: c }),
-    })
-      .then((r) => setColorwayNote(r.ok ? null : 'Not saved, try again'))
-      .catch(() => setColorwayNote('Not saved, try again'));
+    saveColorwayToAccount(c).then((ok) => setColorwayNote(ok ? null : 'Not saved, try again'));
   };
   // Bumps each time an item becomes the selection, replaying its letter wave.
   const [plays, setPlays] = useState<number[]>([1, 0, 0, 0]);
@@ -638,58 +632,13 @@ export default function TitleScreen({
               {stage < 3 ? ' · shows once your studio is complete' : ''}
             </div>
             <div className="mt-5 text-[14px] uppercase">Dashboard</div>
-            <div
-              className="mt-2 grid grid-cols-4 gap-2"
-              role="radiogroup"
-              aria-label="Dashboard colorway"
-            >
-              {COLORWAYS.map((c) => {
-                const sw = COLORWAY_SWATCH[c.id];
-                const on = c.id === colorway;
-                return (
-                  <button
-                    key={c.id}
-                    type="button"
-                    role="radio"
-                    aria-checked={on}
-                    title={c.hint}
-                    onClick={() => pickColorway(c.id)}
-                    className="flex flex-col items-center gap-1.5"
-                  >
-                    {/* mini dashboard: the station layout in this colorway */}
-                    <span
-                      className="grid h-[46px] w-full grid-cols-[5fr_4fr_3fr] grid-rows-2 gap-[3px] p-[4px]"
-                      style={{
-                        background: sw.canvas,
-                        outline: on ? `2px solid ${BLUE}` : `1px solid ${s.rule}`,
-                        outlineOffset: on ? 2 : 0,
-                      }}
-                    >
-                      <span
-                        className="row-span-2"
-                        style={{ background: sw.tile, border: `1px solid ${sw.edge}` }}
-                      />
-                      <span
-                        style={{
-                          background: BLUE,
-                          border: `1px solid ${c.id === 'klein' ? 'rgba(255,255,255,0.7)' : BLUE}`,
-                        }}
-                      />
-                      <span style={{ background: sw.tile, border: `1px solid ${sw.edge}` }} />
-                      <span
-                        className="col-span-2"
-                        style={{ background: sw.tile, border: `1px solid ${sw.edge}` }}
-                      />
-                    </span>
-                    <span
-                      className="text-[11px] tracking-[0.1em]"
-                      style={{ color: on ? BLUE : s.muted }}
-                    >
-                      {c.name}
-                    </span>
-                  </button>
-                );
-              })}
+            <div className="mt-2">
+              <ColorwayPicker
+                value={colorway}
+                onPick={pickColorway}
+                rule={s.rule}
+                muted={s.muted}
+              />
             </div>
             {colorwayNote && (
               <div
