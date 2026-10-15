@@ -306,6 +306,11 @@ function Preview() {
     const t = window.setTimeout(() => setSavedColorway(readLocalColorway()), 0);
     return () => window.clearTimeout(t);
   }, []);
+  // &hsize=: v2 masthead @handle size (px); the slider below plays with it live
+  const [handleSize, setHandleSize] = useState<number>(() => {
+    const n = Number(q.get('hsize'));
+    return n >= 40 && n <= 320 ? n : 136;
+  });
   const qc = q.get('colorway');
   const colorway: Colorway = isColorway(qc)
     ? qc
@@ -329,43 +334,79 @@ function Preview() {
         }
       : SAMPLE;
   return (
-    <BentoDashboard
-      data={data}
-      isNew={isNew}
-      // &swap=0: the previous layout (Brand Pass big on the left)
-      swapPassStation={q.get('swap') !== '0'}
-      // ?colorway=bone|night|klein|paper, else the one picked in the preview title's Settings
-      colorway={colorway}
-      // &design=v2: the 2026-10-15 redesign preview
-      design={q.get('design') === 'v2' ? 'v2' : 'v1'}
-      // Rescan simulates a scan here (no API call): +3 after ~9s
-      rescan={isNew ? undefined : 'demo'}
-      // the score-changed notification (?alert=0 hides it)
-      // LV 07, 1,240 / 1,750 XP after this visit (or crossing into LV 08 with &xp=levelup)
-      xp={
-        isNew
-          ? {
-              total: XP_RULES.dailyVisit,
-              gains: [{ label: 'Daily visit', xp: XP_RULES.dailyVisit }],
-            }
-          : {
-              total: xpAtLevel(7) + (q.get('xp') === 'levelup' ? 1600 + XP_EARNED : 1240),
-              gains: XP_GAINS,
-              // daily check-in moment: plays once per day per browser; &checkin=1 replays it
-              today: { xp: XP_EARNED, gains: XP_GAINS },
-              day:
-                q.get('checkin') === '1'
-                  ? `replay-${replayKey}`
-                  : new Date().toISOString().slice(0, 10),
-              streakDays: 3,
-            }
-      }
-      scoreAlert={
-        !isNew && q.get('alert') !== '0'
-          ? { delta: SAMPLE.scoreDelta?.value ?? 0, score: SAMPLE.ticker.score }
-          : null
-      }
-    />
+    <>
+      <BentoDashboard
+        data={data}
+        isNew={isNew}
+        // &swap=0: the previous layout (Brand Pass big on the left)
+        swapPassStation={q.get('swap') !== '0'}
+        // ?colorway=bone|night|klein|paper, else the one picked in the preview title's Settings
+        colorway={colorway}
+        // &design=v2: the 2026-10-15 redesign preview
+        design={q.get('design') === 'v2' ? 'v2' : 'v1'}
+        handleSize={handleSize}
+        // Rescan simulates a scan here (no API call): +3 after ~9s
+        rescan={isNew ? undefined : 'demo'}
+        // the score-changed notification (?alert=0 hides it)
+        // LV 07, 1,240 / 1,750 XP after this visit (or crossing into LV 08 with &xp=levelup)
+        xp={
+          isNew
+            ? {
+                total: XP_RULES.dailyVisit,
+                gains: [{ label: 'Daily visit', xp: XP_RULES.dailyVisit }],
+              }
+            : {
+                total: xpAtLevel(7) + (q.get('xp') === 'levelup' ? 1600 + XP_EARNED : 1240),
+                gains: XP_GAINS,
+                // daily check-in moment: plays once per day per browser; &checkin=1 replays it
+                today: { xp: XP_EARNED, gains: XP_GAINS },
+                day:
+                  q.get('checkin') === '1'
+                    ? `replay-${replayKey}`
+                    : new Date().toISOString().slice(0, 10),
+                streakDays: 3,
+              }
+        }
+        scoreAlert={
+          !isNew && q.get('alert') !== '0'
+            ? { delta: SAMPLE.scoreDelta?.value ?? 0, score: SAMPLE.ticker.score }
+            : null
+        }
+      />
+      {q.get('design') === 'v2' && (
+        <div
+          className="fixed bottom-4 left-1/2 z-[80] flex -translate-x-1/2 items-center gap-3 whitespace-nowrap border bg-white px-4 py-3 text-[11px] uppercase tracking-[0.14em] text-[#0E0E0E] shadow-[0_12px_32px_rgba(0,0,0,0.18)]"
+          style={{ fontFamily: "'VCR OSD Mono', monospace", borderColor: 'rgba(14,14,14,0.15)' }}
+        >
+          <span>@handle size</span>
+          <input
+            type="range"
+            min={56}
+            max={280}
+            step={4}
+            value={handleSize}
+            onChange={(e) => setHandleSize(Number(e.target.value))}
+            aria-label="Handle size"
+            className="w-[180px] accent-[#0047FF]"
+          />
+          <span className="w-[48px] text-right tabular-nums text-[#0047FF]">{handleSize}px</span>
+          {[96, 136, 180, 240].map((n) => (
+            <button
+              key={n}
+              type="button"
+              onClick={() => setHandleSize(n)}
+              className="border px-1.5 py-0.5"
+              style={{
+                borderColor: n === handleSize ? '#0047FF' : 'rgba(14,14,14,0.2)',
+                color: n === handleSize ? '#0047FF' : undefined,
+              }}
+            >
+              {n}
+            </button>
+          ))}
+        </div>
+      )}
+    </>
   );
 }
 
