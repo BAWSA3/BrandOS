@@ -9,9 +9,19 @@ import { stationSlug } from '@/components/StationCard';
 // still poster for reduced-motion users. Add each archetype to LOOPS as its
 // render lands in public/worlds/stations/loops/.
 
-const LOOPS = new Set(['build-exe', 'arc', 'entropy', 'foresight', 'freq']);
-// 3D stills (frame 1 of the render) for archetypes whose loop is still rendering
-const STILLS = new Set(['null', 'relay', 'source']);
+// every archetype's loop is rendered (2026-10-14); STILLS is for any future archetype
+// whose loop is still rendering (frame 1 of the render as a still)
+const LOOPS = new Set([
+  'build-exe',
+  'arc',
+  'entropy',
+  'foresight',
+  'freq',
+  'null',
+  'relay',
+  'source',
+]);
+const STILLS = new Set<string>([]);
 const FEATHER =
   'linear-gradient(to right, transparent, #000 4%, #000 96%, transparent), linear-gradient(to bottom, transparent, #000 4%, #000 96%, transparent)';
 
