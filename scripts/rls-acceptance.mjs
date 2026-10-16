@@ -168,11 +168,21 @@ async function main() {
       .select('*', { count: 'exact', head: true });
     assert(count === 0, `expected 0, got ${count}`);
   });
-  await test('brand_scans_public_card view is anon-readable', async () => {
-    const { error } = await anon
+  // Since 031 locked "BrandScan" and 037 made this view security_invoker, the
+  // view follows the table's RLS: anon may see zero rows or be refused, but it
+  // must never be able to write through it (it is an auto-updatable view).
+  await test('brand_scans_public_card leaks no scans to anon', async () => {
+    const { error, count } = await anon
       .from('brand_scans_public_card')
       .select('*', { count: 'exact', head: true });
-    assert(!error, `expected readable, got ${error?.message}`);
+    assert(error || count === 0, `expected no rows, got count=${count}`);
+  });
+  await test('brand_scans_public_card cannot be written by anon', async () => {
+    const { error, count } = await anon
+      .from('brand_scans_public_card')
+      .delete({ count: 'exact' })
+      .eq('id', '00000000-0000-0000-0000-000000000000');
+    assert(error, `expected a permission error, got count=${count}`);
   });
   await test('PlanLimit is anon-readable (intended public config)', async () => {
     const { error, count } = await anon

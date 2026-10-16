@@ -57,6 +57,10 @@ const TABLES = [
   ['XPEvent', ['userId', 'kind', 'xp', 'dedupeKey'], '029', true],
   ['UserProgress', ['userId', 'xpTotal', 'currentStreakDays', 'lastVisitAt'], '029', true],
   ['ApiUsageLog', ['apiKeyId', 'endpoint'], '032 (optional)', false],
+  ['PostScore', ['userId', 'tweetId', 'postedAt'], '033', true],
+  ['McpUsage', ['userId', 'tool', 'createdAt'], '034', true],
+  ['Idea', ['userId', 'suggestion', 'title'], '035', true],
+  ['UserPreference', ['userId', 'dashboardColorway'], '036 (falls back to Bone)', false],
 ];
 const ENUMS = [
   'plan_tier',
