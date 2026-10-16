@@ -6,7 +6,8 @@ import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { haptic } from '@/lib/haptics';
 import { playSound, primeSounds } from '@/lib/ui-sounds';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
-import { Ticker } from 'motion-plus/react';
+import { Ticker, useCurtains } from 'motion-plus/react';
+import { pixels } from 'motion-plus/curtains';
 import {
   CornerBrackets,
   DashCursor,
@@ -457,6 +458,16 @@ export default function BentoDashboard({
 }) {
   // Settings (top bar) switches it live; the prop is the saved choice.
   const [colorwayPick, setColorwayPick] = useState<Colorway | null>(null);
+  // Switching skins is a moment: a Klein pixel wipe covers the page, the new
+  // skin lands underneath, then it clears (reduced motion: instant swap).
+  const [curtains] = useCurtains();
+  const switchColorway = (c: Colorway) => {
+    playSound('transition');
+    void curtains(() => setColorwayPick(c), {
+      effect: pixels({ size: 48, direction: 135, noise: 0.45 }),
+      transition: [{ duration: 0.42 }, { duration: 0.5 }],
+    });
+  };
   const colorway: Colorway =
     colorwayPick ?? colorwayProp ?? (initialTheme === 'dark' ? 'night' : 'bone');
   const theme: DashTheme = isDarkColorway(colorway) ? 'dark' : 'light';
@@ -743,7 +754,7 @@ export default function BentoDashboard({
                   )}
                   <DashSettings
                     colorway={colorway}
-                    onColorway={setColorwayPick}
+                    onColorway={switchColorway}
                     save={rescan === 'live'}
                     onCanvas
                   />
@@ -798,7 +809,7 @@ export default function BentoDashboard({
                   )}
                   <DashSettings
                     colorway={colorway}
-                    onColorway={setColorwayPick}
+                    onColorway={switchColorway}
                     save={rescan === 'live'}
                   />
                   <span className="text-[11px] uppercase tracking-[0.1em]">@{data.handle}</span>

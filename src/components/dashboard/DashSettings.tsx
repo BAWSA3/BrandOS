@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import ColorwayPicker from '@/components/settings/ColorwayPicker';
 import { saveColorwayToAccount, writeLocalColorway, type Colorway } from '@/lib/colorways';
-import { isSoundOn, onSoundSetting, playSound, setSoundOn } from '@/lib/ui-sounds';
+import { isSoundOn, onSoundSetting, setSoundOn } from '@/lib/ui-sounds';
 
 const MONO = "var(--dash-mono, 'VCR OSD Mono', monospace)";
 const BLUE = '#0047FF';
@@ -76,7 +76,6 @@ export default function DashSettings({
 
   const pick = (c: Colorway) => {
     if (c === colorway) return;
-    playSound('hover');
     onColorway(c);
     writeLocalColorway(c);
     setNote(null);
