@@ -53,7 +53,14 @@ export async function verifyMcpToken(
   const user = await prisma.user
     .findUnique({
       where: { supabaseId: data.user.id },
-      select: { id: true, createdAt: true, subscriptionTier: true, subscriptionStatus: true },
+      select: {
+        id: true,
+        createdAt: true,
+        subscriptionTier: true,
+        subscriptionStatus: true,
+        currentPeriodEnd: true,
+        role: true,
+      },
     })
     .catch(() => null);
   const c = claims(bearer);
@@ -69,6 +76,8 @@ export async function verifyMcpToken(
             createdAt: user.createdAt,
             subscriptionTier: String(user.subscriptionTier),
             subscriptionStatus: String(user.subscriptionStatus),
+            currentPeriodEnd: user.currentPeriodEnd,
+            role: String(user.role),
           }
         : null,
     },

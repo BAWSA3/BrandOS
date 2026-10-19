@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import { getCurrentUser } from '@/lib/auth';
+import { hasPro, PRO_REQUIRED } from '@/lib/billing';
 import { botGuard } from '@/lib/botid-guard';
 import { checkRateLimit, rateLimiters, withRateLimit } from '@/lib/rate-limit';
 import { brandForUser } from '@/lib/post-scores';
@@ -19,6 +20,7 @@ async function handlePost(request: NextRequest) {
   if (botBlock) return botBlock;
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: 'Sign in to brainstorm' }, { status: 401 });
+  if (!hasPro(user)) return NextResponse.json(PRO_REQUIRED, { status: 402 });
   if (
     checkRateLimit(`brainstorm:${user.id}`, { interval: 60 * 60 * 1000, maxRequests: 20 }).limited
   )

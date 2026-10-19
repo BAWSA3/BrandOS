@@ -96,7 +96,7 @@ export default function ConsentClient() {
             >
               <li>✓ Break down X posts against your brand</li>
               <li>✓ Posts you analyze save to your dashboard</li>
-              <li>✓ Free plan: 10 reads a week (unlimited your first 30 days)</li>
+              <li>✓ Free plan: 10 reads a week (unlimited on Pro)</li>
               <li style={{ color: '#6B6B6B' }}>It never posts or writes anything for you.</li>
             </ul>
             {state.email && (

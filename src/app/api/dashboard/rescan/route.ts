@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse, after } from 'next/server';
 import prisma from '@/lib/db';
 import { getCurrentUser, getCurrentWorkspace } from '@/lib/auth';
+import { hasPro, PRO_REQUIRED } from '@/lib/billing';
 import { botGuard } from '@/lib/botid-guard';
 import { withRateLimit, rateLimiters } from '@/lib/rate-limit';
 import { computeBrandScore } from '@/lib/brand-score';
@@ -32,6 +33,10 @@ async function handlePost(request: NextRequest) {
 
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: 'Sign in to rescan' }, { status: 401 });
+  // Free accounts get their first scan; rescans are Pro (trial included).
+  if (!hasPro(user) && (await prisma.brandScan.count({ where: { userId: user.id } })) > 0) {
+    return NextResponse.json(PRO_REQUIRED, { status: 402 });
+  }
 
   const workspace = await getCurrentWorkspace(user);
   const x = user.platformConnections.find((pc) => pc.platform === 'x');

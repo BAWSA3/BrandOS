@@ -42,6 +42,10 @@ import type { PostBreakdownData } from '@/lib/post-scores';
 import { STUDIO_STEPS, type StageNumber } from '@/lib/studio-stages';
 import { COLORWAY_TOKENS, isDarkColorway, type Colorway } from '@/lib/colorways';
 import DashSettings from '@/components/dashboard/DashSettings';
+import PlanChip from '@/components/billing/PlanChip';
+
+/** The workstation (studio brainstorm, #144) is parked for the launch (docs/LAUNCH-PLAN.md). */
+const SHOW_WORKSTATION = process.env.NEXT_PUBLIC_SHOW_WORKSTATION === 'true';
 
 // The dashboard (docs/specs/TITLE-SCREEN-AND-DASHBOARD.md): dark bento grid,
 // Klein blue as the only accent, mono labels + Inter Tight for big numbers.
@@ -425,7 +429,10 @@ export default function BentoDashboard({
   swapPassStation = true,
   design = 'v1',
   handleSize,
+  trialEndsAt,
 }: {
+  /** Pro trial end (ISO): shows the trial badge in the top bar. */
+  trialEndsAt?: string | null;
   /** v2 masthead @handle max size in px (design preview). */
   handleSize?: number;
   /** v2 (2026-10-15 preview): @handle masthead, wide score, roomier grid, one blue. */
@@ -752,6 +759,7 @@ export default function BentoDashboard({
                       ↻ Rescan
                     </button>
                   )}
+                  {trialEndsAt && <PlanChip trialEndsAt={trialEndsAt} onCanvas />}
                   <DashSettings
                     colorway={colorway}
                     onColorway={switchColorway}
@@ -807,6 +815,7 @@ export default function BentoDashboard({
                       ↻ Rescan
                     </button>
                   )}
+                  {trialEndsAt && <PlanChip trialEndsAt={trialEndsAt} />}
                   <DashSettings
                     colorway={colorway}
                     onColorway={switchColorway}
@@ -1053,11 +1062,13 @@ export default function BentoDashboard({
                         bar={<FitBar fit={p.fit} top={top} i={i} />}
                         roomy={v2}
                         studioHref={
-                          rescan === 'live'
-                            ? (k) => `/dashboard/studio?post=${encodeURIComponent(p.id)}&s=${k}`
-                            : rescan === 'demo'
-                              ? (k) => `/world-preview/studio-brainstorm?s=${k}`
-                              : undefined
+                          !SHOW_WORKSTATION
+                            ? undefined
+                            : rescan === 'live'
+                              ? (k) => `/dashboard/studio?post=${encodeURIComponent(p.id)}&s=${k}`
+                              : rescan === 'demo'
+                                ? (k) => `/world-preview/studio-brainstorm?s=${k}`
+                                : undefined
                         }
                         figure={
                           <RollNumber value={p.fit} booted={booted} delay={0.25 + i * 0.12} />
