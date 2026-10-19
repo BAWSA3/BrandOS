@@ -52,7 +52,7 @@ Line to test: "Know your reputation score before brands check it."
 
 **First buyer:** crypto creators and founders.
 
-### What's free vs Pro (proposed, needs sign-off)
+### What's free vs Pro (decided Oct 18)
 
 |                                                                        | Free (no card)                      | Pro / trial |
 | ---------------------------------------------------------------------- | ----------------------------------- | ----------- |
@@ -197,15 +197,18 @@ Every Sunday (`node --env-file=.env.prod.local scripts/weekly-review.mjs` prints
 
 ---
 
-## Open decisions
+## Decisions (Oct 18)
+
+- [x] Trial length: **7 days** (`TRIAL_DAYS = 7`)
+- [x] Free without a card: **homepage scan + public `/@handle` page + compare**. The Brand
+      Dashboard is trial/Pro only; free users see a locked preview with "Start free trial"
+- [x] MCP: **free 10 reads/week; unlimited on trial/Pro**. The "first 30 days unlimited for
+      every signup" rule goes away
+- [x] Dashboard at launch: **workstation hidden; v2 design is the default**
+
+Still open:
 
 - [ ] Launch date Mon Nov 2, pending the Oct 28 payment check
-- [ ] Trial length (recommendation: **7 days**, so a Nov 2 trial converts by Nov 9 and the
-      30-day window sees 3–4 conversion cycles; 14 days pushes first revenue to Nov 16)
-- [ ] Free vs Pro split (table above)
-- [ ] MCP: drop the "first 30 days unlimited for every signup" rule and use the trial instead?
-- [ ] Workstation hidden at launch (recommended: yes)
-- [ ] Dashboard design at launch: v1 or v2
 - [ ] 4-week B2B kill rule (or another deadline)
 
 ---
@@ -240,7 +243,7 @@ automatically at trial end.
 - New entitlement helper (one place): Pro = tier `PRO` and status `ACTIVE` or `TRIALING`
 - `src/app/pricing/page.tsx`: replace the holding page
 - Dashboard: paywall for non-entitled users; trial badge + end date
-- `src/lib/mcp/usage.ts`: align with the decision on the 30-day rule
+- `src/lib/mcp/usage.ts`: remove the 30-day unlimited rule; free = 10/week, trial/Pro = unlimited
 - Founding 100: number paying members 1–100 (small migration: `User.foundingNumber`)
 
 **Non-goals:** annual plans, discounts/coupons, Agency/Enterprise tiers, the workstation.
