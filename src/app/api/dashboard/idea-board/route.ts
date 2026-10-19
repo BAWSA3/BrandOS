@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { Prisma } from '@prisma/client';
 import prisma from '@/lib/db';
 import { getCurrentUser } from '@/lib/auth';
+import { hasPro, PRO_REQUIRED } from '@/lib/billing';
 import { rateLimiters, withRateLimit } from '@/lib/rate-limit';
 import { XP_RULES } from '@/lib/xp';
 
@@ -36,6 +37,7 @@ const SELECT = {
 async function handleGet() {
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: 'Sign in' }, { status: 401 });
+  if (!hasPro(user)) return NextResponse.json(PRO_REQUIRED, { status: 402 });
   try {
     const ideas = await prisma.idea.findMany({
       where: { userId: user.id },
@@ -53,6 +55,7 @@ async function handleGet() {
 async function handlePost(request: NextRequest) {
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: 'Sign in' }, { status: 401 });
+  if (!hasPro(user)) return NextResponse.json(PRO_REQUIRED, { status: 402 });
   const body = (await request.json().catch(() => ({}))) as Record<string, unknown>;
   const idea = (body.idea ?? {}) as Record<string, unknown>;
   const data = {
@@ -82,6 +85,7 @@ async function handlePost(request: NextRequest) {
 async function handlePatch(request: NextRequest) {
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: 'Sign in' }, { status: 401 });
+  if (!hasPro(user)) return NextResponse.json(PRO_REQUIRED, { status: 402 });
   const body = (await request.json().catch(() => ({}))) as { id?: unknown; status?: unknown };
   const id = s(body.id, 64);
   if (!id || body.status !== 'posted')

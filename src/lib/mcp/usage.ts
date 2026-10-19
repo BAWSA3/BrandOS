@@ -1,11 +1,12 @@
 import prisma from '@/lib/db';
+import { hasPro, trialEndsAt } from '@/lib/billing';
 
 /**
  * BrandOS MCP allowance (migration 034, "McpUsage").
  *
  *   Free plan     10 uses per calendar week, resets Monday 00:00 UTC
- *   First 30 days unlimited (every new signup)
- *   Paid          unlimited while the subscription is active / trialing
+ *   Pro / trial   unlimited (docs/LAUNCH-PLAN.md, decided 2026-10-18; the old
+ *                 "first 30 days unlimited for every signup" rule is gone)
  *
  * A use = one tool call that did fresh work (model / data calls). Cache hits,
  * posts already on the dashboard and failures are free, so callers record a
@@ -13,7 +14,6 @@ import prisma from '@/lib/db';
  */
 
 export const FREE_PER_WEEK = 10;
-const TRIAL_DAYS = 30;
 const DAY_MS = 86_400_000;
 
 export interface McpAccount {
@@ -21,6 +21,8 @@ export interface McpAccount {
   createdAt: Date;
   subscriptionTier: string;
   subscriptionStatus: string;
+  currentPeriodEnd?: Date | null;
+  role?: string | null;
 }
 
 export type Allowance =
@@ -34,14 +36,13 @@ export function weekStart(now = new Date()): Date {
   return new Date(d.getTime() - sinceMonday * DAY_MS);
 }
 
-function isPaid(a: McpAccount): boolean {
-  return a.subscriptionTier !== 'FREE' && ['ACTIVE', 'TRIALING'].includes(a.subscriptionStatus);
-}
-
 export async function allowance(a: McpAccount, now = new Date()): Promise<Allowance> {
-  if (isPaid(a)) return { kind: 'unlimited', reason: 'paid' };
-  const trialEnds = new Date(a.createdAt.getTime() + TRIAL_DAYS * DAY_MS);
-  if (now < trialEnds) return { kind: 'unlimited', reason: 'trial', trialEnds };
+  if (hasPro(a)) {
+    const ends = trialEndsAt(a);
+    return ends
+      ? { kind: 'unlimited', reason: 'trial', trialEnds: ends }
+      : { kind: 'unlimited', reason: 'paid' };
+  }
   const start = weekStart(now);
   const used = await prisma.mcpUsage.count({ where: { userId: a.id, createdAt: { gte: start } } });
   return {
@@ -71,7 +72,7 @@ export function allowanceLine(a: Allowance, spent: boolean): string {
   if (a.kind === 'unlimited') {
     return a.reason === 'paid'
       ? 'BrandOS: unlimited reads on your plan.'
-      : `BrandOS: unlimited reads during your first 30 days (until ${day(a.trialEnds!)}).`;
+      : `BrandOS: unlimited reads during your Pro trial (until ${day(a.trialEnds!)}).`;
   }
   const left = Math.max(0, a.left - (spent ? 1 : 0));
   return `BrandOS: ${left} of ${FREE_PER_WEEK} free reads left this week · resets Mon.`;
@@ -80,6 +81,6 @@ export function allowanceLine(a: Allowance, spent: boolean): string {
 export function limitReached(a: Extract<Allowance, { kind: 'metered' }>, site: string): string {
   return (
     `You've used your ${FREE_PER_WEEK} free BrandOS reads this week. They reset ${day(a.resetsAt)} ` +
-    `(Monday 00:00 UTC). Want unlimited reads? ${site}/pricing?utm_source=mcp`
+    `(Monday 00:00 UTC). Want unlimited reads? Start a 7-day Pro trial: ${site}/pricing?utm_source=mcp`
   );
 }

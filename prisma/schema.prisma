@@ -158,6 +158,7 @@ model User {
   progress             UserProgress? // XP total + streaks (migration 029)
   mcpUsage             McpUsage[] // metered MCP uses (migration 034)
   preference           UserPreference? // display settings (migration 036)
+  foundingMember       FoundingMember? // Founding 100 spot (migration 038)
   ideas                Idea[] // studio idea board (migration 035)
   postScores           PostScore[] // per-post brand fit (migration 033)
   noteReports          NoteReport[]       @relation("NoteReporter")
@@ -1308,6 +1309,14 @@ model McpUsage {
   createdAt DateTime @default(now()) @db.Timestamptz
 
   @@index([userId, createdAt(sort: Desc)])
+}
+
+// Founding 100 (migration 038): numbered 1–100 on the first real paid invoice.
+model FoundingMember {
+  number    Int      @id
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now()) @db.Timestamptz
 }
 
 // Per-account display settings (migration 036): the dashboard colorway.

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import { getCurrentUser } from '@/lib/auth';
+import { hasPro, PRO_REQUIRED } from '@/lib/billing';
 import { botGuard } from '@/lib/botid-guard';
 import { withRateLimit, rateLimiters } from '@/lib/rate-limit';
 import { scoreLatestPosts } from '@/lib/post-scores';
@@ -23,6 +24,7 @@ async function handlePost(request: NextRequest) {
 
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: 'Sign in to analyze your posts' }, { status: 401 });
+  if (!hasPro(user)) return NextResponse.json(PRO_REQUIRED, { status: 402 });
 
   try {
     // each run inserts its rows with one analyzedAt instant: count distinct runs today

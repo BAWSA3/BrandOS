@@ -74,14 +74,14 @@ Legend: ✅ done · 🟡 on staging, not prod · 🔨 to build · 👤 Bawsa (no
 | Public `/@handle` + compare                     | 🟡 staging | The teardown + "drop your handle" payoff surface                                             |
 | MCP (Claude / ChatGPT)                          | 🟡 staging | OAuth configured on prod Supabase                                                            |
 | Skins, score card copy, check-in, XP            | 🟡 staging |                                                                                              |
-| Workstation / studio brainstorm (#144)          | 🟡 staging | **Hide at launch** (parked)                                                                  |
-| Dashboard v2 design (`?design=v2`)              | 🟡 opt-in  | Decide: make default before launch, or leave v1                                              |
+| Workstation / studio brainstorm (#144)          | ✅ hidden  | `NEXT_PUBLIC_SHOW_WORKSTATION=true` brings it back                                           |
+| Dashboard v2 design (`?design=v2`)              | ✅ default | `?design=v1` for the old layout                                                              |
 | Stripe account, product, price, webhook, portal | 👤         | No Stripe env on prod or staging                                                             |
-| Card-required trial                             | 🔨         | Handoff spec below                                                                           |
-| Pricing page                                    | 🔨         | Currently the "Studio opening soon" holding page                                             |
-| Dashboard paywall for FREE users                | 🔨         | Dashboard is open to any signed-in user today                                                |
-| Founding 100 counter + flag                     | 🔨         | Number each paying member 1–100                                                              |
-| Trial-ending note (email)                       | 🔨         | Stripe `customer.subscription.trial_will_end` → Resend                                       |
+| Card-required trial                             | ✅ built   | Needs Stripe keys + price id to go live; migration 038                                       |
+| Pricing page                                    | ✅ built   | $29, 7-day trial, Free vs Pro, Founding counter, manage billing                              |
+| Dashboard paywall for FREE users                | ✅ built   | Locked preview (their real dashboard, blurred) + start trial; admins bypass                  |
+| Founding 100 counter + flag                     | ✅ built   | `FoundingMember` (migration 038), numbered on first real payment                             |
+| Trial-ending note (email)                       | ✅ built   | `trial_will_end` → score + weakest phase + charge date + cancel link                         |
 | Weekly review numbers                           | 🔨         | `scripts/weekly-review.mjs` (scans, trials, paid, cancels)                                   |
 | Teardown kit                                    | 🔨         | Handle → scan + `/@handle` + score card PNG (reuse the video capture pipeline)               |
 | "What I built" email to the list                | 🟡         | Launch-email infra exists (#41); rewrite copy; the held 981-recipient send becomes this      |

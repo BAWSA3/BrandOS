@@ -14,6 +14,8 @@ export default async function StudioBrainstormPage({
 }: {
   searchParams: Promise<{ post?: string; s?: string }>;
 }) {
+  // Parked for the launch (docs/LAUNCH-PLAN.md): the workstation stays hidden.
+  if (process.env.NEXT_PUBLIC_SHOW_WORKSTATION !== 'true') redirect('/dashboard');
   const user = await getCurrentUser();
   if (!user) redirect('/signup?next=/dashboard');
   const q = await searchParams;

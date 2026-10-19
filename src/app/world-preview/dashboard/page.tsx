@@ -4,12 +4,15 @@ import { useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useState } from 'react';
 import { XP_RULES, xpAtLevel, type XPGain } from '@/lib/xp';
 import BentoDashboard, { type DashboardData } from '@/components/dashboard/BentoDashboard';
+import Paywall from '@/components/billing/Paywall';
 import { isColorway, readLocalColorway, type Colorway } from '@/lib/colorways';
 
 // Sign-in-free preview of the dashboard with sample data (design review):
 //   /world-preview/dashboard            active user
 //   /world-preview/dashboard?state=new  brand-new user (onboarding tiles)
 //   &design=v2                          redesign preview (masthead, wide score, roomy grid)
+//   &paywall=1                          the locked preview a free account sees
+//   &trial=1                            the trial badge (5 days left)
 //   &colorway=night|klein|paper         colorway (bone default; else the preview title's Settings pick)
 //   &alert=0                            hide the score-changed notification
 //   &list=scans                       Recent scans (click a row for its full report)
@@ -311,6 +314,9 @@ function Preview() {
     const n = Number(q.get('hsize'));
     return n >= 40 && n <= 320 ? n : 136;
   });
+  const [trialEnd] = useState(() =>
+    q.get('trial') === '1' ? new Date(Date.now() + 5 * 86_400_000).toISOString() : null
+  );
   const qc = q.get('colorway');
   const colorway: Colorway = isColorway(qc)
     ? qc
@@ -345,6 +351,7 @@ function Preview() {
         // &design=v2: the 2026-10-15 redesign preview
         design={q.get('design') === 'v2' ? 'v2' : 'v1'}
         handleSize={handleSize}
+        trialEndsAt={trialEnd}
         // Rescan simulates a scan here (no API call): +3 after ~9s
         rescan={isNew ? undefined : 'demo'}
         // the score-changed notification (?alert=0 hides it)
@@ -373,7 +380,10 @@ function Preview() {
             : null
         }
       />
-      {q.get('design') === 'v2' && (
+      {q.get('paywall') === '1' && (
+        <Paywall handle={data.handle} score={data.ticker.score} foundingLeft={63} />
+      )}
+      {q.get('design') === 'v2' && q.get('paywall') !== '1' && (
         <div
           className="fixed bottom-4 left-1/2 z-[80] flex -translate-x-1/2 items-center gap-3 whitespace-nowrap border bg-white px-4 py-3 text-[11px] uppercase tracking-[0.14em] text-[#0E0E0E] shadow-[0_12px_32px_rgba(0,0,0,0.18)]"
           style={{ fontFamily: "'VCR OSD Mono', monospace", borderColor: 'rgba(14,14,14,0.15)' }}
