@@ -1,47 +1,9 @@
-# Killed & Parked Ideas
+# Killed ideas
 
-Two sections:
-- **Killed**: rejected, don't bring back unless a new insight invalidates the reason.
-- **Parked**: shelved for now, can revisit when conditions change.
+Ideas we stopped, and what we learned. Parked ideas live in docs/LAUNCH-PLAN.md
+("Not doing for 30 days") until they're killed or revived.
 
-Without this file, dead ideas crawl back every few weeks.
-
----
-
-## Killed
-
-<!-- Template — add real entries:
-
-## [Idea name] — killed YYYY-MM-DD
-What it was (1 sentence).
-Why killed — the specific reason, ideally tied to a decision or constraint.
-Do NOT revive unless: [condition that would invalidate the reason].
--->
-
----
-
-## Parked (revisit later)
-
-<!-- Template:
-
-## [Idea name] — parked YYYY-MM-DD
-What it was.
-Why parked (not killed) — usually "good idea, wrong time."
-Revisit when: [specific trigger — MRR threshold, user ask, market signal].
-
-Example structure — delete when replacing:
-
-## Chrome extension — parked
-Had extension-auth code partially built. Not killed — useful eventually.
-Parked: distracts from April paying-customer goal; no evidence users
-want it over the web flow.
-Revisit when: hit $15k MRR, or 3+ users ask for it.
--->
-
----
-
-## How to use this file
-Before Claude recommends something, it checks here. If it matches a
-killed idea, it gets rejected with a pointer to the reason.
-If it matches a parked idea, Claude flags it and asks whether the
-revisit trigger has been hit.
+| Date       | Idea                      | Why it was killed     | What we learned                                           |
+| ---------- | ------------------------- | --------------------- | --------------------------------------------------------- |
+| 2026-04-13 | Kreatorsverse partnership | Dropped (no traction) | One optional re-touch allowed in the Nov launch B2B track |
+| 2026-04-23 | TasteOS vision            | Retired               | —                                                         |
