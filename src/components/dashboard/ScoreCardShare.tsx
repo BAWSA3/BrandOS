@@ -1,6 +1,7 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { AnimateNumber } from 'motion-plus/react';
 import { DASH_FONTS } from '@/components/dashboard/dashFonts';
 import { captureNode } from '@/lib/capture-node';
 import type { ScoreCardData } from '@/lib/score-card';
@@ -161,7 +162,27 @@ function Chart({ points, k }: { points: { label: string; value: number }[]; k: S
   );
 }
 
-export function ScoreCard({ d, skin = 'klein' }: { d: ScoreCardData; skin?: CardSkin }) {
+/** The score, optionally rolling up from 0 once (the scan reveal). */
+function Score({ value, roll }: { value: number; roll: boolean }) {
+  const [shown, setShown] = useState(roll ? 0 : value);
+  useEffect(() => {
+    if (!roll) return;
+    const t = window.setTimeout(() => setShown(value), 350);
+    return () => window.clearTimeout(t);
+  }, [roll, value]);
+  return roll ? <AnimateNumber>{shown}</AnimateNumber> : <>{value}</>;
+}
+
+export function ScoreCard({
+  d,
+  skin = 'klein',
+  roll = false,
+}: {
+  d: ScoreCardData;
+  skin?: CardSkin;
+  /** Roll the score up from 0 (the scan reveal's one headline moment). */
+  roll?: boolean;
+}) {
   const k = SKINS[skin];
   const micro = {
     fontFamily: MONO,
@@ -268,16 +289,42 @@ export function ScoreCard({ d, skin = 'klein' }: { d: ScoreCardData; skin?: Card
             color: k.score,
           }}
         >
-          {d.score}
+          <Score value={d.score} roll={roll} />
         </span>
         <span style={{ ...micro, color: k.ink, fontSize: 14, marginTop: 6, marginLeft: 4 }}>
           /100
         </span>
       </div>
 
-      {/* history */}
+      {/* history, or on a first scan the archetype (there's no line to draw yet) */}
       <div style={{ marginTop: 'auto' }}>
-        <Chart points={hist} k={k} />
+        {hist.length < 2 && d.archetype ? (
+          <div style={{ paddingBottom: 2 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span style={micro}>ARCHETYPE</span>
+              <span style={micro}>SCAN YOURS · MYBRANDOS.APP</span>
+            </div>
+            <div
+              style={{
+                marginTop: 8,
+                fontSize: 46,
+                lineHeight: 0.95,
+                fontWeight: 500,
+                letterSpacing: '-0.035em',
+                color: k.ink,
+              }}
+            >
+              {d.archetype.name}
+            </div>
+            {d.archetype.tagline && (
+              <div style={{ marginTop: 6, fontSize: 16, color: k.muted }}>
+                {d.archetype.tagline}
+              </div>
+            )}
+          </div>
+        ) : (
+          <Chart points={hist} k={k} />
+        )}
       </div>
 
       {/* phases */}
@@ -353,7 +400,15 @@ export default function ScoreCardShare({
   tone = 'light',
   preview = 200,
   defaultSkin = 'klein',
+  layout = 'row',
+  roll = false,
+  actions,
 }: {
+  /** 'stack': card on top, controls centred under it (the scan reveal). */
+  layout?: 'row' | 'stack';
+  roll?: boolean;
+  /** Extra buttons under "Copy image" (e.g. Post to X). */
+  actions?: React.ReactNode;
   d: ScoreCardData;
   /** The creator's dashboard colorway; the card opens in it. */
   defaultSkin?: CardSkin;
@@ -388,7 +443,12 @@ export default function ScoreCardShare({
 
   const onBlue = tone === 'blue';
   return (
-    <div className="flex items-center gap-4" onClick={(e) => e.stopPropagation()}>
+    <div
+      className={
+        layout === 'stack' ? 'flex flex-col items-center gap-5' : 'flex items-center gap-4'
+      }
+      onClick={(e) => e.stopPropagation()}
+    >
       <div
         ref={card}
         aria-hidden
@@ -400,17 +460,23 @@ export default function ScoreCardShare({
         }}
       >
         <div style={{ transform: `scale(${scale})`, transformOrigin: 'top left' }}>
-          <ScoreCard d={d} skin={skin} />
+          <ScoreCard d={d} skin={skin} roll={roll} />
         </div>
       </div>
-      <div>
+      <div className={layout === 'stack' ? 'flex flex-col items-center text-center' : ''}>
         <div
           className="text-[10px] uppercase tracking-[0.14em]"
           style={{ fontFamily: MONO, opacity: 0.8 }}
         >
-          Today&apos;s score card · pick a colour
+          {layout === 'stack'
+            ? 'Your score card · pick a colour'
+            : "Today's score card · pick a colour"}
         </div>
-        <div className="mt-2 flex flex-wrap gap-1.5" role="radiogroup" aria-label="Card colour">
+        <div
+          className={`mt-2 flex flex-wrap gap-1.5 ${layout === 'stack' ? 'justify-center' : ''}`}
+          role="radiogroup"
+          aria-label="Card colour"
+        >
           {CARD_SKINS.map((v) => {
             const on = skin === v;
             return (
@@ -465,8 +531,11 @@ export default function ScoreCardShare({
                   ? 'Try again'
                   : 'Copy image'}
         </button>
+        {actions}
         <div className="mt-2 text-[11px]" style={{ opacity: 0.7 }}>
-          1080×1080 · score, history + phases
+          {layout === 'stack'
+            ? 'Copy the image, then paste it into your post'
+            : '1080×1080 · score, history + phases'}
         </div>
       </div>
     </div>

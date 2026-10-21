@@ -17,6 +17,8 @@ export interface ScoreCardData {
   history: { label: string; value: number }[];
   /** Define / Check / Generate / Scale. */
   phases: { key: string; value: number }[];
+  /** First scan (no history yet): the archetype fills the chart's space. */
+  archetype?: { name: string; tagline?: string } | null;
 }
 
 export function scoreCardData(d: DashboardData): ScoreCardData {

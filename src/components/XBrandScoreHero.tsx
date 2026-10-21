@@ -8,11 +8,10 @@ import BrandAdvisorChat from './BrandAdvisorChat';
 import DNAWalkthrough from './DNAWalkthrough';
 import BrandBreakdown from './BrandBreakdown';
 import BrandOSDashboard, { BrandOSDashboardData } from './BrandOSDashboard';
-import BrandScoreCard from './BrandScoreCard';
+import RevealScoreCard from './RevealScoreCard';
 import BrandIssuesSection from './BrandIssuesSection';
 import { SaveResultsPrompt } from './SaveResultsPrompt';
 import { useAuth } from '@/hooks/useAuth';
-import { domToPng } from 'modern-screenshot';
 import { AuthenticityAnalysis, ActivityAnalysis } from '@/lib/gemini';
 import { useXBrandScoreDemoCapture } from '@/hooks/useDemoCaptureIntegration';
 import DemoModeControls from './DemoModeControls';
@@ -646,7 +645,6 @@ export default function XBrandScoreHero({
   const [signupStatus, setSignupStatus] = useState<'idle' | 'loading' | 'success' | 'error'>(
     'idle'
   );
-  const [copyStatus, setCopyStatus] = useState<'idle' | 'copying' | 'copied' | 'failed'>('idle');
   const [scoreCardImage, setScoreCardImage] = useState<string | null>(null);
   const [showAdvisorChat, setShowAdvisorChat] = useState(false);
 
@@ -1515,194 +1513,20 @@ export default function XBrandScoreHero({
                 position: 'relative',
               }}
             >
-              {/* BrandOS logo — hidden normally, visible in screenshot capture */}
-              <div
-                className="capture-logo"
-                style={{
-                  display: 'none',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  marginBottom: '16px',
-                  padding: '0 4px',
-                }}
-              >
-                <img
-                  src="/brandos-logo-capture.svg"
-                  alt="BrandOS"
-                  style={{ height: '40px', width: 'auto' }}
-                />
-                <span
-                  style={{
-                    fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace",
-                    fontSize: '12px',
-                    letterSpacing: '0.12em',
-                    color: 'rgba(0,0,0,0.4)',
-                  }}
-                >
-                  mybrandos.app
-                </span>
-              </div>
-              <BrandScoreCard
+              {/* The shareable square score card (the dashboard's card): score rolls
+                  up, the archetype fills the space a history chart takes later */}
+              <RevealScoreCard
+                handle={profile.username}
+                avatarUrl={profile.profile_image_url || null}
                 score={brandScore.overallScore}
-                voiceConsistency={
-                  generatedBrandDNA?.performanceInsights?.voiceConsistency ||
-                  brandScore.phases.check.score
-                }
-                engagementScore={brandScore.phases.scale.score}
-                profileImageUrl={profile.profile_image_url?.replace('_normal', '_200x200') || ''}
-                username={profile.username}
-                displayName={profile.name}
-                phaseScores={{
+                archetype={normalizeArchetypeName(brandScore.archetype?.primary || '')}
+                phases={{
                   define: brandScore.phases.define.score,
                   check: brandScore.phases.check.score,
                   generate: brandScore.phases.generate.score,
                   scale: brandScore.phases.scale.score,
                 }}
-                scoreContext={scoreMeta?.scoreContext}
               />
-              {/* Share buttons */}
-              <div className="capture-hide flex flex-col sm:flex-row justify-center items-center gap-3 mt-6 pt-4 border-t border-black/10">
-                <span className="font-os text-[10px] text-gray-500 tracking-widest mr-2 hidden sm:inline">
-                  SHARE_DNA
-                </span>
-                <div className="flex gap-2">
-                  <button
-                    onClick={async () => {
-                      const scoreCard = document.getElementById('brandos-score-card');
-                      if (!scoreCard) return;
-                      setCopyStatus('copying');
-                      try {
-                        const pfpImg = scoreCard.querySelector(
-                          `img[alt="${profile.name}"]`
-                        ) as HTMLImageElement | null;
-                        const originalSrc = pfpImg?.src || '';
-                        try {
-                          const pfpRes = await fetch(
-                            `/api/image-proxy?url=${encodeURIComponent(profile.profile_image_url?.replace('_normal', '_200x200') || '')}`
-                          );
-                          if (pfpRes.ok && pfpImg) {
-                            const blob = await pfpRes.blob();
-                            const dataUrl = await new Promise<string>((r) => {
-                              const fr = new FileReader();
-                              fr.onloadend = () => r(fr.result as string);
-                              fr.readAsDataURL(blob);
-                            });
-                            pfpImg.src = dataUrl;
-                            await new Promise((r) => setTimeout(r, 50));
-                          }
-                        } catch {}
-                        const dataUrl = await domToPng(scoreCard, {
-                          scale: 2,
-                          quality: 1,
-                          timeout: 30000,
-                        });
-                        if (pfpImg) pfpImg.src = originalSrc;
-                        // Convert data URL to blob directly (fetch can fail on large data URLs)
-                        const byteString = atob(dataUrl.split(',')[1]);
-                        const mimeString = dataUrl.split(',')[0].split(':')[1].split(';')[0];
-                        const ab = new ArrayBuffer(byteString.length);
-                        const ia = new Uint8Array(ab);
-                        for (let i = 0; i < byteString.length; i++)
-                          ia[i] = byteString.charCodeAt(i);
-                        const blob = new Blob([ab], { type: mimeString });
-                        try {
-                          await navigator.clipboard.write([
-                            new ClipboardItem({ 'image/png': blob }),
-                          ]);
-                          setCopyStatus('copied');
-                        } catch {
-                          // Clipboard write failed — fallback to download
-                          const a = document.createElement('a');
-                          a.href = URL.createObjectURL(blob);
-                          a.download = `brandos-${profile.username || 'score'}.png`;
-                          a.click();
-                          URL.revokeObjectURL(a.href);
-                          setCopyStatus('copied');
-                        }
-                        setTimeout(() => setCopyStatus('idle'), 2000);
-                      } catch (err) {
-                        console.error('[Copy] Failed:', err);
-                        setCopyStatus('failed');
-                        setTimeout(() => setCopyStatus('idle'), 2000);
-                      }
-                    }}
-                    disabled={copyStatus === 'copying'}
-                    className="flex items-center gap-2 px-4 py-2.5 bg-[#1A1A1A] hover:bg-[#2E6AFF] border border-[#333] hover:border-[#2E6AFF] rounded-[4px] text-white font-os text-[11px] tracking-wider transition-all duration-300 disabled:opacity-50"
-                  >
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                    >
-                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-                    </svg>
-                    {copyStatus === 'copying'
-                      ? 'COPYING...'
-                      : copyStatus === 'copied'
-                        ? 'COPIED ✓'
-                        : copyStatus === 'failed'
-                          ? 'FAILED'
-                          : 'COPY'}
-                  </button>
-                  <button
-                    onClick={async () => {
-                      const scoreCard = document.getElementById('brandos-score-card');
-                      if (!scoreCard) return;
-                      // Swap PFP to base64 on the LIVE element to bypass CORS
-                      const pfpImg = scoreCard.querySelector(
-                        `img[alt="${profile.name}"]`
-                      ) as HTMLImageElement | null;
-                      const originalSrc = pfpImg?.src || '';
-                      try {
-                        const pfpRes = await fetch(
-                          `/api/image-proxy?url=${encodeURIComponent(profile.profile_image_url?.replace('_normal', '_200x200') || '')}`
-                        );
-                        if (pfpRes.ok && pfpImg) {
-                          const blob = await pfpRes.blob();
-                          const dataUrl = await new Promise<string>((r) => {
-                            const fr = new FileReader();
-                            fr.onloadend = () => r(fr.result as string);
-                            fr.readAsDataURL(blob);
-                          });
-                          pfpImg.src = dataUrl;
-                          await new Promise((r) => setTimeout(r, 50));
-                        }
-                      } catch {}
-                      // Capture the actual on-screen element directly
-                      const dataUrl = await domToPng(scoreCard, {
-                        scale: 2,
-                        quality: 1,
-                        timeout: 30000,
-                      });
-                      // Restore original PFP src
-                      if (pfpImg) pfpImg.src = originalSrc;
-                      const a = document.createElement('a');
-                      a.href = dataUrl;
-                      a.download = `brandos-score-${profile.username}.png`;
-                      a.click();
-                    }}
-                    className="flex items-center gap-2 px-4 py-2.5 bg-[#1A1A1A] hover:bg-[#2E6AFF] border border-[#333] hover:border-[#2E6AFF] rounded-[4px] text-white font-os text-[11px] tracking-wider transition-all duration-300"
-                  >
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                    >
-                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                      <polyline points="7 10 12 15 17 10" />
-                      <line x1="12" y1="15" x2="12" y2="3" />
-                    </svg>
-                    DOWNLOAD
-                  </button>
-                </div>
-              </div>
               {/* One next step: keep attention on the score, then email the full breakdown */}
               <a
                 href={`/breakdown?handle=${encodeURIComponent(profile.username)}`}
