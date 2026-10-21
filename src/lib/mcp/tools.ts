@@ -12,6 +12,7 @@ import {
   type McpAccount,
 } from '@/lib/mcp/usage';
 import { colorwayForHandle } from '@/lib/user-preferences';
+import { recordLookup } from '@/lib/lookups';
 import { freshRead, profileCard, renderProfileRead, storedRead } from '@/lib/mcp/profile-read';
 import { CARD_URI, cardHtml } from '@/lib/mcp/card-html';
 
@@ -181,6 +182,8 @@ export function registerBrandTools(server: any, origin: string) {
       const g = await gate('analyze_profile', ctx);
       if (!g.ok) return g.result;
       const clean = handle.replace(/^@/, '').toLowerCase();
+      // "your brand was looked up" via Claude/ChatGPT (counts only)
+      await recordLookup({ handle: clean, kind: 'mcp', viewerUserId: g.account.id });
 
       // A stored full read answers for free (no scan, not metered).
       const stored = await storedRead(clean, g.account.id);

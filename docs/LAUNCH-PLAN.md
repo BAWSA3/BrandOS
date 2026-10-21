@@ -142,6 +142,33 @@ otherwise push one week.
 
 ---
 
+## Retention thesis (Oct 21)
+
+Consumer products retain through **desire** (dopamine: games, feeds) or **dependency** (have-to: email,
+banking, credit). BrandOS has the desire layer (XP, streaks, check-in, skins) but no dependency yet, so
+a trial user can scan once and drift: the "third space" that kills a 7-day trial.
+
+The dependency is the credit-score model: **people maintain a score because someone else checks it.**
+"Know your reputation score before brands check it" only works if checking is visible and, later, has
+consequences (a B2B pilot using BrandOS to vet creators).
+
+Three crisp jobs to own:
+
+1. "How do brands see me right now?" (score + public page) → dependency
+2. "Did that post help or hurt my brand?" (post analysis) → the daily desire hook
+3. "What should I post next?" (next moves) → the weekly ritual
+
+**Built pre-launch (Bawsa's call, Oct 21; an exception to "no new features"):**
+
+- **Nightly post scoring** for trial/Pro accounts (05:00 UTC), so there's something new every morning
+- **"Your brand was looked up"**: counts of `/@handle` views, Claude/ChatGPT lookups and compares
+  (counts and type only, never who), on a dashboard strip, in the daily check-in, and in a Monday email
+  digest. Migration 039.
+
+Watch in the Sunday review: do trial users with lookups or overnight scores convert better?
+
+---
+
 ## Brand and agency track (≈10% of time, no code)
 
 - [ ] Reach out to 5 crypto projects or agencies you know that pay creators

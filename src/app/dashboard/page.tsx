@@ -11,6 +11,7 @@ import { syncSubscription } from '@/lib/billing-sync';
 import { foundingSpotsLeft } from '@/lib/founding';
 import { stripe } from '@/lib/stripe';
 import Paywall from '@/components/billing/Paywall';
+import { lookupStats } from '@/lib/lookups';
 import BentoDashboard from '@/components/dashboard/BentoDashboard';
 import RescanOnLoad from '@/components/dashboard/RescanOnLoad';
 import DashboardClient from './DashboardClient';
@@ -79,6 +80,14 @@ export default async function DashboardPage({
   const autoRescan = (sp.rescan === '1' && pro) || firstScan;
   const foundingLeft = !pro && bento ? await foundingSpotsLeft() : 0;
   const trialEnd = trialEndsAt(user);
+  // "your brand was looked up": last 7 days + last 24h (counts only)
+  const now = Date.now();
+  const [lookWeek, lookDay] = bento
+    ? await Promise.all([
+        lookupStats(bento.handle, new Date(now - 7 * 86_400_000)),
+        lookupStats(bento.handle, new Date(now - 86_400_000)),
+      ])
+    : [null, null];
 
   return (
     <>
@@ -90,6 +99,7 @@ export default async function DashboardPage({
           // v2 is the launch default (decided 2026-10-18); ?design=v1 for the old layout
           design={sp.design === 'v1' ? 'v1' : 'v2'}
           trialEndsAt={trialEnd ? trialEnd.toISOString() : null}
+          lookups={lookWeek && lookDay ? { week: lookWeek, today: lookDay.total } : null}
           xp={
             progress
               ? {

@@ -4,6 +4,8 @@
  */
 import { hasPro, mapStripeStatus, trialEndsAt } from '../src/lib/billing';
 import { TRIAL_DAYS, FOUNDING_SPOTS, PLAN_CONFIGS } from '../src/lib/plans';
+import { viewerKey } from '../src/lib/lookups';
+import { digestContent } from '../src/lib/lookup-digest';
 
 let pass = 0;
 let fail = 0;
@@ -62,6 +64,28 @@ console.log('D. Launch settings');
 test('trial is 7 days', TRIAL_DAYS === 7);
 test('Founding spots = 100', FOUNDING_SPOTS === 100);
 test('Pro is $29/mo', PLAN_CONFIGS.PRO.monthlyPrice === 29);
+
+console.log('E. Lookups (counts only, deduped)');
+const a1 = viewerKey({ ip: '1.2.3.4', ua: 'Safari' });
+const a2 = viewerKey({ ip: '1.2.3.4', ua: 'Safari' });
+test('same anonymous visitor, same day → same key', a1 === a2);
+test('different visitor → different key', a1 !== viewerKey({ ip: '5.6.7.8', ua: 'Safari' }));
+test('anonymous key is a hash, not the IP', a1.startsWith('v:') && !a1.includes('1.2.3.4'));
+test('signed-in viewer keyed by account', viewerKey({ userId: 'abc', ip: '1.2.3.4' }) === 'u:abc');
+const one = digestContent('jbawsa', { total: 1, page: 1, mcp: 0, compare: 0 }, 72);
+const many = digestContent('jbawsa', { total: 12, page: 5, mcp: 4, compare: 3 }, null);
+test(
+  'digest subject singular',
+  one.subject === '@jbawsa, your brand was looked up 1 time this week'
+);
+test(
+  'digest subject plural',
+  many.subject === '@jbawsa, your brand was looked up 12 times this week'
+);
+test(
+  'digest never names viewers (counts + type only)',
+  !JSON.stringify(many).match(/@(?!jbawsa)[a-z0-9_]+/i)
+);
 
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

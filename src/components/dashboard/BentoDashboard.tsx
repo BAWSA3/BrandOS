@@ -43,6 +43,7 @@ import { STUDIO_STEPS, type StageNumber } from '@/lib/studio-stages';
 import { COLORWAY_TOKENS, isDarkColorway, type Colorway } from '@/lib/colorways';
 import DashSettings from '@/components/dashboard/DashSettings';
 import PlanChip from '@/components/billing/PlanChip';
+import LookupStrip, { type LookupSummary } from '@/components/dashboard/LookupStrip';
 
 /** The workstation (studio brainstorm, #144) is parked for the launch (docs/LAUNCH-PLAN.md). */
 const SHOW_WORKSTATION = process.env.NEXT_PUBLIC_SHOW_WORKSTATION === 'true';
@@ -430,7 +431,10 @@ export default function BentoDashboard({
   design = 'v1',
   handleSize,
   trialEndsAt,
+  lookups,
 }: {
+  /** "Your brand was looked up" counts (dashboard strip + check-in). */
+  lookups?: LookupSummary | null;
   /** Pro trial end (ISO): shows the trial badge in the top bar. */
   trialEndsAt?: string | null;
   /** v2 masthead @handle max size in px (design preview). */
@@ -841,6 +845,7 @@ export default function BentoDashboard({
           )}
 
           {xp && <XPBar total={xp.total} gains={xp.gains} booted={booted} />}
+          {lookups && <LookupStrip handle={data.handle} data={lookups} />}
           {xp?.today && xp.day && (
             <CheckinMoment
               share={
@@ -853,6 +858,7 @@ export default function BentoDashboard({
               sinceLast={xp.gains}
               day={xp.day}
               streakDays={xp.streakDays ?? 0}
+              lookupsToday={lookups?.today ?? 0}
               dark={theme === 'dark'}
             />
           )}

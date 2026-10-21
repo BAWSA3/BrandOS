@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { botGuard } from '@/lib/botid-guard';
+import { getCurrentUser } from '@/lib/auth';
+import { recordLookup, requestIp } from '@/lib/lookups';
 import { withRateLimit, rateLimiters } from '@/lib/rate-limit';
 import { profileCard } from '@/lib/mcp/profile-read';
 import { BrandLookupError, compareGaps, readOrScan } from '@/lib/public-brand';
@@ -27,6 +29,15 @@ async function handlePost(request: NextRequest) {
     const origin = request.nextUrl.origin;
     const [a, b] = await Promise.all([readOrScan(me, origin), readOrScan(them, origin)]);
     const gaps = await compareGaps(a, b);
+    // "your brand was looked up": the compared-against creator (counts only)
+    const viewer = await getCurrentUser().catch(() => null);
+    await recordLookup({
+      handle: them,
+      kind: 'compare',
+      viewerUserId: viewer?.id ?? null,
+      ip: requestIp(request.headers),
+      ua: request.headers.get('user-agent'),
+    });
     return NextResponse.json({ me: profileCard(a), them: profileCard(b), gaps });
   } catch (e) {
     if (e instanceof BrandLookupError)

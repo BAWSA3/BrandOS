@@ -142,5 +142,18 @@ export async function unsubscribeEmail(email: string): Promise<boolean> {
     where: { email: normalized },
     data: { unsubscribed: true, unsubscribedAt: new Date() },
   });
-  return count > 0;
+  if (count > 0) return true;
+  // Not on the list (e.g. an account email unsubscribing from the weekly
+  // lookup digest): remember the opt-out so no BrandOS email goes to it.
+  await prisma.emailSignup
+    .create({
+      data: {
+        email: normalized,
+        source: 'unsubscribe',
+        unsubscribed: true,
+        unsubscribedAt: new Date(),
+      },
+    })
+    .catch(() => {});
+  return true;
 }
