@@ -352,6 +352,12 @@ function Preview() {
         design={q.get('design') === 'v2' ? 'v2' : 'v1'}
         handleSize={handleSize}
         trialEndsAt={trialEnd}
+        // &lookups=0 shows the empty state
+        lookups={
+          q.get('lookups') === '0'
+            ? { week: { total: 0, page: 0, mcp: 0, compare: 0 }, today: 0 }
+            : { week: { total: 12, page: 5, mcp: 4, compare: 3 }, today: 3 }
+        }
         // Rescan simulates a scan here (no API call): +3 after ~9s
         rescan={isNew ? undefined : 'demo'}
         // the score-changed notification (?alert=0 hides it)

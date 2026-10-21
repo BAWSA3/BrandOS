@@ -336,6 +336,23 @@ export default function PublicBrand({
   viewer: { handle: string | null } | null;
 }) {
   const reduce = useReducedMotion();
+  // count the view (once per tab session; the server dedupes per day and skips the owner)
+  useEffect(() => {
+    if (!valid) return;
+    const key = `brandos:looked:${handle.toLowerCase()}`;
+    try {
+      if (sessionStorage.getItem(key)) return;
+      sessionStorage.setItem(key, '1');
+    } catch {
+      // storage blocked: still send once for this render
+    }
+    fetch('/api/brand-lookup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ handle }),
+      keepalive: true,
+    }).catch(() => {});
+  }, [handle, valid]);
   const [card, setCard] = useState<BrandCard | null>(initial);
   const [loadError, setLoadError] = useState<string | null>(
     valid ? null : 'That is not a valid X handle.'

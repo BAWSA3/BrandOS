@@ -50,6 +50,7 @@ export default function CheckinMoment({
   sinceLast,
   day,
   streakDays,
+  lookupsToday = 0,
   dark,
   share,
 }: {
@@ -59,6 +60,8 @@ export default function CheckinMoment({
   sinceLast: XPGain[];
   day: string;
   streakDays: number;
+  /** Brand lookups in the last day ("your brand was looked up"). */
+  lookupsToday?: number;
   dark: boolean;
   /** Score card + "Copy image" (days the brand score changed): the moment then waits for a tap. */
   share?: React.ReactNode;
@@ -338,6 +341,15 @@ export default function CheckinMoment({
                   </motion.li>
                 ))}
               </ul>
+              {lookupsToday > 0 && (
+                <div
+                  className="mt-3 flex items-center justify-between border-t pt-3 text-[13px]"
+                  style={{ borderColor: dark ? 'rgba(242,239,232,0.14)' : 'rgba(14,14,14,0.12)' }}
+                >
+                  <span>Your brand was looked up</span>
+                  <span style={{ fontFamily: MONO, color: BLUE }}>{lookupsToday}× today</span>
+                </div>
+              )}
               {share && (
                 <div
                   className="mt-4 border-t pt-4"

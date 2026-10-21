@@ -159,6 +159,7 @@ model User {
   mcpUsage             McpUsage[] // metered MCP uses (migration 034)
   preference           UserPreference? // display settings (migration 036)
   foundingMember       FoundingMember? // Founding 100 spot (migration 038)
+  lookupDigests        LookupDigest[] // weekly lookup email claims (migration 039)
   ideas                Idea[] // studio idea board (migration 035)
   postScores           PostScore[] // per-post brand fit (migration 033)
   noteReports          NoteReport[]       @relation("NoteReporter")
@@ -1309,6 +1310,29 @@ model McpUsage {
   createdAt DateTime @default(now()) @db.Timestamptz
 
   @@index([userId, createdAt(sort: Desc)])
+}
+
+// "Your brand was looked up" (migration 039): one row per handle/kind/viewer/day.
+model BrandLookup {
+  id        String   @id @default(dbgenerated("(gen_random_uuid())::text"))
+  handle    String
+  kind      String // page | mcp | compare
+  viewerKey String
+  day       DateTime @default(dbgenerated("((now() AT TIME ZONE 'utc'::text))::date")) @db.Date
+  createdAt DateTime @default(now()) @db.Timestamptz
+
+  @@unique([handle, kind, viewerKey, day])
+  @@index([handle, createdAt(sort: Desc)])
+}
+
+// Weekly lookup digest send claim (migration 039).
+model LookupDigest {
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  week      DateTime @db.Date
+  createdAt DateTime @default(now()) @db.Timestamptz
+
+  @@id([userId, week])
 }
 
 // Founding 100 (migration 038): numbered 1–100 on the first real paid invoice.

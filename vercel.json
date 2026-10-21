@@ -19,6 +19,14 @@
     {
       "path": "/api/cron/content-intelligence",
       "schedule": "0 10 * * *"
+    },
+    {
+      "path": "/api/cron/score-posts",
+      "schedule": "0 5 * * *"
+    },
+    {
+      "path": "/api/cron/lookup-digest",
+      "schedule": "0 16 * * 1"
     }
   ]
 }
