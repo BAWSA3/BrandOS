@@ -164,7 +164,7 @@
   /* Core Surfaces */
   --background: #e8e8ed;
   --foreground: #1d1d1f;
-  --surface: #F2EFE8;
+  --surface: #f2efe8;
   --surface-hover: #f5f5f7;
   --surface-tertiary: #e8e8ed;
   --muted: #86868b;
@@ -181,23 +181,23 @@
   --text-quaternary: #aeaeb2;
 
   /* Accent Colors — Apple System Palette */
-  --accent: #0047FF;
-  --accent-hover: #0035CC;
+  --accent: #0047ff;
+  --accent-hover: #0035cc;
   --success: #34c759;
   --warning: #ff9f0a;
   --danger: #ff3b30;
 
   /* Legacy aliases (keep landing page working) */
   --blue-klein: #002fa7;
-  --blue-electric: #0047FF;
+  --blue-electric: #0047ff;
   --blue-deep: #001847;
   --blue-glow: rgba(0, 71, 255, 0.3);
   --blue-subtle: rgba(0, 71, 255, 0.1);
-  --blue-hover: #0035CC;
+  --blue-hover: #0035cc;
 
   /* Legacy dashboard palette (landing page) */
   --brand-black: #050505;
-  --brand-blue: #0047FF;
+  --brand-blue: #0047ff;
   --brand-green: #30d158;
   --brand-yellow: #ffd60a;
   --brand-gray: #1c1c1e;
@@ -211,7 +211,7 @@
   --gradient-hero: linear-gradient(135deg, #e8e8ed 0%, rgba(0, 71, 255, 0.1) 50%, #e8e8ed 100%);
   --gradient-card: linear-gradient(180deg, rgba(0, 0, 0, 0.02) 0%, rgba(0, 0, 0, 0.01) 100%);
   --gradient-orb: radial-gradient(circle, var(--accent) 0%, transparent 70%);
-  --gradient-text: linear-gradient(135deg, #1d1d1f 0%, #0047FF 50%, #1d1d1f 100%);
+  --gradient-text: linear-gradient(135deg, #1d1d1f 0%, #0047ff 50%, #1d1d1f 100%);
 
   /* Radii */
   --radius-sm: 8px;
@@ -433,7 +433,7 @@
   --color-input: var(--border);
   --color-ring: var(--accent);
   --color-surface: var(--surface);
-  --color-chart-1: #0047FF;
+  --color-chart-1: #0047ff;
   --color-chart-2: #34c759;
   --color-chart-3: #ff9f0a;
   --color-chart-4: #af52de;
@@ -611,12 +611,7 @@ body {
   position: absolute;
   width: 500px;
   height: 500px;
-  background: radial-gradient(
-    circle,
-    var(--accent) 0%,
-    rgba(0, 71, 255, 0.5) 30%,
-    transparent 70%
-  );
+  background: radial-gradient(circle, var(--accent) 0%, rgba(0, 71, 255, 0.5) 30%, transparent 70%);
   border-radius: 50%;
   filter: blur(80px);
   animation:
@@ -1197,11 +1192,11 @@ input[type="range"]::-webkit-slider-thumb:hover {
 .os-shimmer {
   background: linear-gradient(
     90deg,
-    #0047FF 0%,
+    #0047ff 0%,
     #4499ff 25%,
-    #0047FF 50%,
+    #0047ff 50%,
     #4499ff 75%,
-    #0047FF 100%
+    #0047ff 100%
   );
   background-size: 200% 100%;
   -webkit-background-clip: text !important;

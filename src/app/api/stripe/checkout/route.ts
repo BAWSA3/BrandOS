@@ -81,7 +81,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid plan tier' }, { status: 400 });
     }
     if (hasPro(user)) {
-      return NextResponse.json({ error: 'You already have Pro', url: '/dashboard' }, { status: 409 });
+      return NextResponse.json(
+        { error: 'You already have Pro', url: '/dashboard' },
+        { status: 409 }
+      );
     }
     const priceId = PLAN_CONFIGS.PRO.stripePriceIdMonthly;
     if (!priceId) {
@@ -89,7 +92,11 @@ export async function POST(request: NextRequest) {
     }
 
     // One trial per customer: anyone who has ever had a subscription pays from day one.
-    const prior = await stripe.subscriptions.list({ customer: customerId, status: 'all', limit: 1 });
+    const prior = await stripe.subscriptions.list({
+      customer: customerId,
+      status: 'all',
+      limit: 1,
+    });
     const trial = prior.data.length === 0;
     const app = process.env.NEXT_PUBLIC_APP_URL;
 
