@@ -8,7 +8,12 @@ import { botGuard } from '@/lib/botid-guard';
 import { checkAndIncrementUsage } from '@/lib/usage';
 import { GUARD_PREAMBLE } from '@/lib/prompt-safety';
 import { clampScore, extractJson } from '@/lib/score-schemas';
-import { CHECK_MODEL as MODEL, MAX_CONTENT_CHARS, fenceDraft, runBrandCheck } from '@/lib/content-check';
+import {
+  CHECK_MODEL as MODEL,
+  MAX_CONTENT_CHARS,
+  fenceDraft,
+  runBrandCheck,
+} from '@/lib/content-check';
 
 // Content Check — scores a draft against the user's brand DNA (consolidation
 // step 4). Hardened for the dashboard surface: the legacy route allowed

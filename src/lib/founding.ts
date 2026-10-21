@@ -19,7 +19,10 @@ export async function foundingSpotsLeft(): Promise<number> {
 /** The user's founding number, or null. */
 export async function foundingNumber(userId: string): Promise<number | null> {
   try {
-    const m = await prisma.foundingMember.findUnique({ where: { userId }, select: { number: true } });
+    const m = await prisma.foundingMember.findUnique({
+      where: { userId },
+      select: { number: true },
+    });
     return m?.number ?? null;
   } catch {
     return null;

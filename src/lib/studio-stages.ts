@@ -11,9 +11,24 @@ export interface StudioStep {
 }
 
 export const STUDIO_STEPS: StudioStep[] = [
-  { stage: 1, name: 'Foundation', verb: 'Find your taste', line: 'React to brand cards and add what inspires you.' },
-  { stage: 2, name: 'Workstation', verb: 'Shape your brand', line: 'Turn your taste into your first Brand Kit.' },
-  { stage: 3, name: 'Billboard', verb: 'Stay on brand', line: 'Connect X and set your first posting streak.' },
+  {
+    stage: 1,
+    name: 'Foundation',
+    verb: 'Find your taste',
+    line: 'React to brand cards and add what inspires you.',
+  },
+  {
+    stage: 2,
+    name: 'Workstation',
+    verb: 'Shape your brand',
+    line: 'Turn your taste into your first Brand Kit.',
+  },
+  {
+    stage: 3,
+    name: 'Billboard',
+    verb: 'Stay on brand',
+    line: 'Connect X and set your first posting streak.',
+  },
 ];
 
 export const STAGE_HEADLINES: Record<StageNumber, string> = {

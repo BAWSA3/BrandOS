@@ -20,7 +20,10 @@ const PHASES: [string, string][] = [
   ['scale', 'Scale'],
 ];
 
-export async function sendTrialEndingEmail(userId: string, endsAt: Date): Promise<'sent' | 'skipped' | 'failed'> {
+export async function sendTrialEndingEmail(
+  userId: string,
+  endsAt: Date
+): Promise<'sent' | 'skipped' | 'failed'> {
   if (!process.env.RESEND_API_KEY) return 'skipped';
   const user = await prisma.user.findUnique({
     where: { id: userId },
@@ -40,13 +43,22 @@ export async function sendTrialEndingEmail(userId: string, endsAt: Date): Promis
   const weakest = PHASES.filter(([k]) => typeof phases[k] === 'number').sort(
     (a, b) => phases[a[0]] - phases[b[0]]
   )[0];
-  const day = endsAt.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+  const day = endsAt.toLocaleDateString('en-US', {
+    weekday: 'long',
+    month: 'short',
+    day: 'numeric',
+  });
 
   const content: NewsletterContent = {
     subject: `Your BrandOS trial ends ${day}`,
-    preheader: scan ? `Your brand score is ${scan.score}. Here's what your dashboard says.` : undefined,
+    preheader: scan
+      ? `Your brand score is ${scan.score}. Here's what your dashboard says.`
+      : undefined,
     sections: [
-      { type: 'heading', content: `Here's what your dashboard says${user.xUsername ? `, @${user.xUsername}` : ''}` },
+      {
+        type: 'heading',
+        content: `Here's what your dashboard says${user.xUsername ? `, @${user.xUsername}` : ''}`,
+      },
       ...(scan
         ? ([
             { type: 'stat', label: String(scan.score), content: 'Your brand score / 100' },
@@ -64,7 +76,11 @@ export async function sendTrialEndingEmail(userId: string, endsAt: Date): Promis
         type: 'text',
         content: `Your free trial ends <strong>${day}</strong>. After that it's $29/month and you keep everything: score history, every post analyzed, your Brand Pass, and BrandOS inside Claude and ChatGPT. If you're one of the first 100, $29 is locked in for good.`,
       },
-      { type: 'cta', content: 'Open my dashboard', url: `${APP_URL}/dashboard?utm_source=trial_email` },
+      {
+        type: 'cta',
+        content: 'Open my dashboard',
+        url: `${APP_URL}/dashboard?utm_source=trial_email`,
+      },
       {
         type: 'text',
         content: `Not for you? Cancel before ${day} in <a href="${APP_URL}/pricing">billing</a> and you won't be charged. A one-line reply telling me why helps more than you'd think. — Bawsa`,
