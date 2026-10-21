@@ -128,7 +128,8 @@ export async function fetchProfile(
  */
 function mapTweet(raw: Record<string, unknown>): SocialDataTweet {
   const fullText = (raw.full_text || raw.text || '') as string;
-  const createdAt = (raw.created_at as string) || '';
+  // SocialData's v1.1 tweets carry tweet_created_at (ISO); created_at is absent
+  const createdAt = ((raw.tweet_created_at || raw.created_at) as string) || '';
 
   // v1.1 metrics
   const likeCount = (raw.favorite_count as number) || 0;
@@ -137,7 +138,7 @@ function mapTweet(raw: Record<string, unknown>): SocialDataTweet {
   const quoteCount = (raw.quote_count as number) || 0;
   // SocialData may include bookmark/view counts on some endpoints
   const viewsObj = raw.ext_views as Record<string, unknown> | undefined;
-  const impressionCount = (viewsObj?.count as number) || 0;
+  const impressionCount = (raw.views_count as number) || Number(viewsObj?.count) || 0;
 
   // Entities mapping
   const rawEntities = raw.entities as Record<string, Record<string, unknown>[]> | undefined;
@@ -214,6 +215,89 @@ export async function fetchUserTweets(
   } catch (error) {
     console.error('[SOCIALDATA] Tweet fetch error:', error);
     return { tweets: [], error: 'SocialData request failed' };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Single post (with its author)
+// ---------------------------------------------------------------------------
+
+export interface SocialDataPost {
+  id: string;
+  text: string;
+  createdAt: string;
+  metrics: {
+    likes: number;
+    reposts: number;
+    replies: number;
+    quotes: number;
+    bookmarks: number;
+    views: number;
+  };
+  media: string[]; // 'photo' | 'video' | 'animated_gif'
+  isReply: boolean;
+  quotedText?: string;
+  author: SocialDataProfile;
+}
+
+/** Fetch one post by id, with its author's profile (one request). */
+export async function fetchTweetById(
+  id: string
+): Promise<{ post?: SocialDataPost; status: number; error?: string }> {
+  try {
+    const response = await socialDataFetch(`/twitter/tweets/${encodeURIComponent(id)}`);
+    console.log(`[SOCIALDATA] tweet ${id} -> ${response.status}`);
+    if (!response.ok) {
+      if (response.status === 404 || response.status === 400)
+        return { status: 404, error: 'Post not found' };
+      return { status: response.status, error: `SocialData error (${response.status})` };
+    }
+    const d = (await response.json()) as Record<string, unknown>;
+    const u = (d.user || {}) as Record<string, unknown>;
+    if (!d.id_str || !u.id_str) return { status: 404, error: 'Post not found' };
+
+    const ents = (d.extended_entities || d.entities || {}) as { media?: { type?: string }[] };
+    const quoted = d.quoted_status as Record<string, unknown> | null | undefined;
+    return {
+      status: 200,
+      post: {
+        id: String(d.id_str),
+        text: String(d.full_text || d.text || ''),
+        createdAt: String(d.tweet_created_at || d.created_at || ''),
+        metrics: {
+          likes: Number(d.favorite_count) || 0,
+          reposts: Number(d.retweet_count) || 0,
+          replies: Number(d.reply_count) || 0,
+          quotes: Number(d.quote_count) || 0,
+          bookmarks: Number(d.bookmark_count) || 0,
+          views: Number(d.views_count) || 0,
+        },
+        media: (ents.media || []).map((m) => m.type || 'photo'),
+        isReply: !!d.in_reply_to_status_id_str,
+        quotedText: quoted ? String(quoted.full_text || quoted.text || '') : undefined,
+        author: {
+          id: String(u.id_str),
+          name: String(u.name || ''),
+          username: String(u.screen_name || ''),
+          description: String(u.description || ''),
+          profile_image_url: String(u.profile_image_url_https || '').replace('_normal', '_400x400'),
+          public_metrics: {
+            followers_count: Number(u.followers_count) || 0,
+            following_count: Number(u.friends_count) || 0,
+            tweet_count: Number(u.statuses_count) || 0,
+            listed_count: Number(u.listed_count) || 0,
+          },
+          created_at: String(u.created_at || ''),
+          verified: !!(u.verified || u.is_blue_verified),
+          location: (u.location as string) || undefined,
+          url: (u.url as string) || undefined,
+          protected: !!u.protected,
+        },
+      },
+    };
+  } catch (error) {
+    console.error('[SOCIALDATA] Tweet fetch error:', error);
+    return { status: 500, error: 'SocialData request failed' };
   }
 }
 

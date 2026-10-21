@@ -2,12 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
 import { getUser } from '@/lib/auth';
 import prisma from '@/lib/db';
-import {
-  PLAN_CONFIGS,
-  SELF_SERVE_TIERS,
-  ONE_TIME_PRODUCTS,
-  type SubscriptionTier,
-} from '@/lib/plans';
+import { PLAN_CONFIGS, ONE_TIME_PRODUCTS, TRIAL_DAYS, type SubscriptionTier } from '@/lib/plans';
+import { hasPro } from '@/lib/billing';
 import { botGuard } from '@/lib/botid-guard';
 import { captureFunnelEvent } from '@/lib/funnel-events';
 
@@ -20,10 +16,12 @@ export async function POST(request: NextRequest) {
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+    if (!process.env.STRIPE_SECRET_KEY) {
+      return NextResponse.json({ error: 'Billing is not open yet' }, { status: 503 });
+    }
 
-    const { tier, interval, productType } = (await request.json()) as {
+    const { tier, productType } = (await request.json().catch(() => ({}))) as {
       tier?: SubscriptionTier;
-      interval?: 'monthly' | 'annual';
       productType?: string;
     };
 
@@ -65,7 +63,7 @@ export async function POST(request: NextRequest) {
           userId: user.id,
           productType,
         },
-        success_url: `${process.env.NEXT_PUBLIC_APP_URL}/app?purchase=success&product=${productType}`,
+        success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?purchase=success&product=${productType}`,
         cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/pricing?canceled=true`,
       });
 
@@ -77,49 +75,56 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ url: session.url });
     }
 
-    // Subscription checkout
-    if (!tier || !SELF_SERVE_TIERS.includes(tier)) {
+    // Subscription checkout (launch): Pro, monthly, card-required trial.
+    // Annual plans, coupons and Agency/Enterprise are out of scope.
+    if ((tier ?? 'PRO') !== 'PRO') {
       return NextResponse.json({ error: 'Invalid plan tier' }, { status: 400 });
     }
-
-    const plan = PLAN_CONFIGS[tier];
-    const billingInterval = interval || 'monthly';
-    const priceId =
-      billingInterval === 'annual' ? plan.stripePriceIdAnnual : plan.stripePriceIdMonthly;
-
+    if (hasPro(user)) {
+      return NextResponse.json(
+        { error: 'You already have Pro', url: '/dashboard' },
+        { status: 409 }
+      );
+    }
+    const priceId = PLAN_CONFIGS.PRO.stripePriceIdMonthly;
     if (!priceId) {
       return NextResponse.json({ error: 'Price not configured' }, { status: 400 });
     }
 
+    // One trial per customer: anyone who has ever had a subscription pays from day one.
+    const prior = await stripe.subscriptions.list({
+      customer: customerId,
+      status: 'all',
+      limit: 1,
+    });
+    const trial = prior.data.length === 0;
+    const app = process.env.NEXT_PUBLIC_APP_URL;
+
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       mode: 'subscription',
-      line_items: [
-        {
-          price: priceId,
-          quantity: 1,
-        },
-      ],
-      metadata: {
-        userId: user.id,
-        tier,
-        billingInterval,
-      },
+      line_items: [{ price: priceId, quantity: 1 }],
+      // the trial won't start without a card
+      payment_method_collection: 'always',
+      metadata: { userId: user.id, tier: 'PRO', billingInterval: 'monthly' },
       subscription_data: {
-        metadata: {
-          userId: user.id,
-          tier,
-        },
+        metadata: { userId: user.id, tier: 'PRO' },
+        ...(trial
+          ? {
+              trial_period_days: TRIAL_DAYS,
+              // no card on file at trial end → cancel, never a free ride
+              trial_settings: { end_behavior: { missing_payment_method: 'cancel' } },
+            }
+          : {}),
       },
-      allow_promotion_codes: true,
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/app?upgrade=success&plan=${tier}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/pricing?canceled=true`,
+      success_url: `${app}/dashboard?checkout={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${app}/pricing?canceled=true`,
     });
 
     await captureFunnelEvent(user.supabaseId, 'checkout_started', {
       mode: 'subscription',
-      tier,
-      interval: billingInterval,
+      tier: 'PRO',
+      trial,
     });
 
     return NextResponse.json({ url: session.url });

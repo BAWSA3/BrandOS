@@ -6,11 +6,9 @@ import { getArchetypeInfo } from '@/lib/archetype-descriptions';
 
 /**
  * "Your brand station" — the shareable card shown after a scan. Each archetype
- * has its own pixel-art station (public/worlds/stations/<slug>-<mode>.png),
- * cleaned to a 48-colour, 597x746 pixel grid, then shipped 2x (1194x1492, each
- * art pixel an exact 2x2 block) and scaled smoothly. Hard-edged scaling by a
- * non-integer factor (~1.8x on phones) made pixels uneven widths, so diagonals
- * looked choppy; smooth scaling from the 2x master keeps every pixel even. Day = BrandOS light palette, Night = Terminal OS. The handle and score
+ * has its own photoreal 3D station (Blender render, scripts/blender/station.py)
+ * at public/worlds/stations/3d/<slug>-card-<mode>.jpg, composited on this card's
+ * own background. Day = BrandOS light palette, Night = Terminal OS. The handle and score
  * are drawn in code (the art's signs are blank on purpose) so text is always
  * crisp. Saving captures the card element only, not the controls below.
  *
@@ -43,9 +41,9 @@ export const THEME: Record<
     bg: '#E8E8ED',
     ink: '#1D1D1F',
     muted: '#6E6E73',
-    accent: '#0A84FF',
+    accent: '#0047FF',
     border: 'rgba(0,0,0,0.08)',
-    panel: '#F2F0EF',
+    panel: '#F2EFE8',
   },
   night: {
     bg: '#060A0F',
@@ -124,54 +122,24 @@ export default function StationCard({
           the station you&apos;re building
         </div>
 
-        {/* Station art — 2x master (see top comment), scaled smoothly. The scan
-            shows the finished station as a BLUEPRINT ("the station you're
-            building"); in the studio users start on an empty plot and build it. */}
-        {/* Animation CSS lives in globals.css under .station-art. It used to be a
-            nested <style jsx> block, which the production build never scoped
-            onto these elements, so the station didn't animate on prod. */}
+        {/* Station art: the photoreal 3D render. The scan shows the finished
+            station ("the station you're building"); in the studio users start
+            on an empty plot and build it. Night adds a faint scanline drift
+            (CSS in globals.css under .station-art), left out of saved images. */}
         <div className="station-art relative overflow-hidden" style={{ background: t.bg }}>
-          {/* Idle animation (code-only, no extra art). The art has an opaque
-              background with the grid baked in, so the station stays planted
-              (floating it slid the whole picture against the CSS grid).
-              Instead it idles like a machine: its bright pixels (screens,
-              buttons, neon) are split into 4 "status LED" groups
-              (masks/<station>-led0..3.png, clusters dealt evenly across the
-              building) that blink on their own stepped beats. Night adds a
-              faint scanline drift. Off under prefers-reduced-motion and left
-              out of saved images. */}
           <div className="station-bob relative">
-            {/* eslint-disable-next-line @next/next/no-img-element -- art is pre-scaled; next/image would re-encode it */}
+            {/* The photoreal 3D station (Blender render, scripts/blender/station.py),
+                composited on this card's own day / night background. */}
+            {/* eslint-disable-next-line @next/next/no-img-element -- pre-sized render */}
             <img
-              src={`/worlds/stations/${slug}-${mode}.png`}
-              alt={`${info?.name ?? archetype} brand station blueprint`}
-              width={597}
-              height={746}
+              src={`/worlds/stations/3d/${slug}-card-${mode}.jpg`}
+              alt={`${info?.name ?? archetype} brand station`}
+              width={800}
+              height={1000}
               className="block w-full h-auto select-none"
-              style={{ imageRendering: 'auto' }}
               draggable={false}
               onLoad={controls ? prepare : undefined}
             />
-            {[0, 1, 2, 3].map((k) => (
-              <div
-                key={k}
-                aria-hidden
-                data-station-fx
-                className={`station-led station-led-${k} pointer-events-none absolute inset-0`}
-                style={{
-                  backgroundImage: `url(/worlds/stations/${slug}-${mode}.png)`,
-                  backgroundSize: '100% 100%',
-                  filter:
-                    mode === 'day'
-                      ? 'brightness(1.7) saturate(1.5)'
-                      : 'brightness(2) saturate(1.4)',
-                  WebkitMaskImage: `url(/worlds/stations/masks/${slug}-${mode}-led${k}.png)`,
-                  maskImage: `url(/worlds/stations/masks/${slug}-${mode}-led${k}.png)`,
-                  WebkitMaskSize: '100% 100%',
-                  maskSize: '100% 100%',
-                }}
-              />
-            ))}
           </div>
           {mode === 'night' && (
             <div

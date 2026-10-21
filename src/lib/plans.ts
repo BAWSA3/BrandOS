@@ -197,6 +197,11 @@ export function canAccessFeature(tier: SubscriptionTier, feature: keyof PlanLimi
 }
 
 export const PAID_TIERS: SubscriptionTier[] = ['PRO', 'AGENCY', 'ENTERPRISE'];
+
+/** Launch (docs/LAUNCH-PLAN.md): card-required Pro trial, then $29/mo. One setting. */
+export const TRIAL_DAYS = 7;
+/** Founding 100: the first paying members keep $29/mo forever. */
+export const FOUNDING_SPOTS = 100;
 export const SELF_SERVE_TIERS: SubscriptionTier[] = ['PRO', 'AGENCY'];
 
 // Normalize legacy CREATOR tier to FREE for feature access checks

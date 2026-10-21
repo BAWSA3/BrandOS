@@ -3,6 +3,12 @@
 import { useState } from 'react';
 import { createBrowserClient } from '@supabase/ssr';
 import { TOS_VERSION } from '@/lib/tos';
+import Wordmark from '@/components/Wordmark';
+
+// Brand tokens (2026-10-13): Helvetica display, VCR OSD Mono labels/buttons.
+const DISPLAY = "'Helvetica Custom', 'Helvetica Neue', Helvetica, Arial, sans-serif";
+const BODY = DISPLAY;
+const LABEL = "'VCR OSD Mono', 'JetBrains Mono', monospace";
 
 const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -27,8 +33,7 @@ export default function SignupPage() {
   const ref = searchParams.get('ref');
   const rawNext = searchParams.get('next');
   // Only allow same-origin relative paths to prevent open-redirect.
-  const next =
-    rawNext && rawNext.startsWith('/') && !rawNext.startsWith('//') ? rawNext : '/dashboard';
+  const next = rawNext && rawNext.startsWith('/') && !rawNext.startsWith('//') ? rawNext : '/home';
   // tos param rides the callback URL so the acknowledgment survives OAuth
   // redirects AND the email-confirmation link; the callback persists it.
   const callbackUrl =
@@ -103,16 +108,22 @@ export default function SignupPage() {
 
   if (checkEmail) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center p-6">
+      <div className="min-h-screen bg-[#F2EFE8] text-[#0E0E0E] flex items-center justify-center p-6">
         <div className="max-w-md w-full text-center space-y-4">
-          <h1 className="text-2xl font-bold" style={{ fontFamily: 'JetBrains Mono, monospace' }}>
+          <div className="flex justify-center">
+            <Wordmark height={30} />
+          </div>
+          <h1
+            className="text-[32px] leading-tight"
+            style={{ fontFamily: DISPLAY, fontWeight: 500 }}
+          >
             Check your email
           </h1>
-          <p className="text-gray-600 text-sm">
+          <p className="text-[#6B6862] text-sm">
             We sent a confirmation link to <strong>{email}</strong>. Click it to activate your
             account, then connect your X handle from the dashboard.
           </p>
-          <p className="text-gray-400 text-xs">
+          <p className="text-[#6B6862] text-xs">
             Didn&apos;t get it? Check spam, or try again in a minute.
           </p>
         </div>
@@ -121,19 +132,22 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center p-6">
-      <div className="max-w-md w-full space-y-8">
+    <div className="min-h-screen bg-[#F2EFE8] text-[#0E0E0E] flex items-center justify-center p-6">
+      <div className="max-w-md w-full space-y-8" style={{ fontFamily: BODY }}>
         <div className="text-center">
+          <div className="mb-6 flex justify-center">
+            <Wordmark height={34} />
+          </div>
           <h1
-            className="text-2xl font-bold tracking-tight"
-            style={{ fontFamily: 'JetBrains Mono, monospace' }}
+            className="text-[32px] leading-tight tracking-tight"
+            style={{ fontFamily: DISPLAY, fontWeight: 500 }}
           >
             Create your BrandOS account
           </h1>
-          <p className="mt-2 text-gray-500 text-sm">
+          <p className="mt-2 text-[#6B6862] text-sm">
             Sign up, connect your X account, scan your brand.
           </p>
-          {ref && <p className="mt-1 text-xs text-blue-600">Invited via referral link</p>}
+          {ref && <p className="mt-1 text-xs text-[#0047FF]">Invited via referral link</p>}
         </div>
 
         {error && (
@@ -142,20 +156,20 @@ export default function SignupPage() {
           </div>
         )}
 
-        <label className="flex items-start gap-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+        <label className="flex items-start gap-3 p-3 border border-black/10 bg-white/60 rounded-[8px] cursor-pointer hover:border-[#0047FF] transition-colors">
           <input
             type="checkbox"
             checked={tosAccepted}
             onChange={(e) => setTosAccepted(e.target.checked)}
-            className="mt-0.5 h-4 w-4 accent-black cursor-pointer"
+            className="mt-0.5 h-4 w-4 accent-[#0047FF] cursor-pointer"
           />
-          <span className="text-xs text-gray-600">
+          <span className="text-xs text-[#6B6862]">
             I agree to the{' '}
-            <a href="/terms" target="_blank" className="underline hover:text-gray-900">
+            <a href="/terms" target="_blank" className="underline hover:text-[#0047FF]">
               Terms of Service
             </a>{' '}
             and{' '}
-            <a href="/privacy" target="_blank" className="underline hover:text-gray-900">
+            <a href="/privacy" target="_blank" className="underline hover:text-[#0047FF]">
               Privacy Policy
             </a>
             .
@@ -167,7 +181,8 @@ export default function SignupPage() {
             <button
               onClick={handleGoogleSignup}
               disabled={loading || !tosAccepted}
-              className="w-full py-3 px-4 bg-white border border-gray-300 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+              className="w-full py-3 px-4 bg-white border border-black/15 text-[11px] uppercase tracking-[0.14em] rounded-[6px] hover:border-[#0047FF] transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+              style={{ fontFamily: LABEL }}
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path
@@ -192,34 +207,46 @@ export default function SignupPage() {
 
             <div className="relative my-4">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-200" />
+                <div className="w-full border-t border-black/10" />
               </div>
               <div className="relative flex justify-center text-xs">
-                <span className="bg-white px-4 text-gray-400">or</span>
+                <span
+                  className="bg-[#F2EFE8] px-4 text-[10px] uppercase tracking-[0.14em] text-[#6B6862]"
+                  style={{ fontFamily: LABEL }}
+                >
+                  or
+                </span>
               </div>
             </div>
 
             <button
               onClick={() => setMethod('email')}
               disabled={loading}
-              className="w-full py-3 px-4 bg-gray-100 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50"
+              className="w-full py-3 px-4 bg-[#0047FF] text-white text-[11px] uppercase tracking-[0.14em] rounded-[6px] hover:bg-[#0035CC] transition-colors disabled:opacity-50"
+              style={{ fontFamily: LABEL }}
             >
               Sign up with email
             </button>
 
             <div className="relative my-4">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-200" />
+                <div className="w-full border-t border-black/10" />
               </div>
               <div className="relative flex justify-center text-xs">
-                <span className="bg-white px-4 text-gray-400">already have X connected?</span>
+                <span
+                  className="bg-[#F2EFE8] px-4 text-[10px] uppercase tracking-[0.14em] text-[#6B6862]"
+                  style={{ fontFamily: LABEL }}
+                >
+                  already have X connected?
+                </span>
               </div>
             </div>
 
             <button
               onClick={handleXSignup}
               disabled={loading || !tosAccepted}
-              className="w-full py-3 px-4 bg-gray-100 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50"
+              className="w-full py-3 px-4 bg-[#0E0E0E] text-white text-[11px] uppercase tracking-[0.14em] rounded-[6px] hover:bg-black transition-colors disabled:opacity-50"
+              style={{ fontFamily: LABEL }}
             >
               Sign in with X (existing users)
             </button>
@@ -229,39 +256,50 @@ export default function SignupPage() {
         {method === 'email' && (
           <form onSubmit={handleEmailSignup} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+              <label
+                className="block mb-1 text-[10px] uppercase tracking-[0.14em] text-[#6B6862]"
+                style={{ fontFamily: LABEL }}
+              >
+                Email
+              </label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black"
+                className="w-full px-3 py-2 bg-white border border-black/15 rounded-[6px] text-sm focus:outline-none focus:ring-2 focus:ring-[#0047FF]"
                 placeholder="you@example.com"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+              <label
+                className="block mb-1 text-[10px] uppercase tracking-[0.14em] text-[#6B6862]"
+                style={{ fontFamily: LABEL }}
+              >
+                Password
+              </label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={8}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black"
+                className="w-full px-3 py-2 bg-white border border-black/15 rounded-[6px] text-sm focus:outline-none focus:ring-2 focus:ring-[#0047FF]"
                 placeholder="At least 8 characters"
               />
             </div>
             <button
               type="submit"
               disabled={loading || !tosAccepted}
-              className="w-full py-3 px-4 bg-black text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50"
+              className="w-full py-3 px-4 bg-[#0047FF] text-white text-[11px] uppercase tracking-[0.14em] rounded-[6px] hover:bg-[#0035CC] transition-colors disabled:opacity-50"
+              style={{ fontFamily: LABEL }}
             >
               {loading ? 'Creating account...' : 'Create account'}
             </button>
             <button
               type="button"
               onClick={() => setMethod('choose')}
-              className="w-full py-2 text-sm text-gray-500 hover:text-gray-700"
+              className="w-full py-2 text-sm text-[#6B6862] hover:text-[#0E0E0E]"
             >
               Back to all options
             </button>
@@ -269,7 +307,7 @@ export default function SignupPage() {
         )}
 
         {!tosAccepted && (
-          <p className="text-center text-xs text-gray-400">Accept the terms above to continue.</p>
+          <p className="text-center text-xs text-[#6B6862]">Accept the terms above to continue.</p>
         )}
       </div>
     </div>

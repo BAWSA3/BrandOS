@@ -36,7 +36,7 @@ export default function ImportPageClient() {
             colors: {
               primary: extracted.colors.primary?.value || current?.colors?.primary || '#000000',
               secondary:
-                extracted.colors.secondary?.value || current?.colors?.secondary || '#F2F0EF',
+                extracted.colors.secondary?.value || current?.colors?.secondary || '#F2EFE8',
               accent: extracted.colors.accent?.value || current?.colors?.accent || '#6366f1',
             },
           }

@@ -6,6 +6,9 @@
  */
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://mybrandos.app';
+// Where email images load from (the live site by default). EMAIL_ASSET_BASE
+// lets a test send point at staging before an asset reaches prod.
+const ASSET_BASE = process.env.EMAIL_ASSET_BASE || APP_URL;
 
 export interface NewsletterContent {
   subject: string;
@@ -35,13 +38,13 @@ export function renderNewsletter(
         case 'heading':
           return `<h2 style="font-family: 'VCR OSD Mono', 'JetBrains Mono', monospace; font-size: 18px; font-weight: 600; color: #111; margin: 32px 0 12px 0; letter-spacing: -0.3px;">${section.content}</h2>`;
         case 'text':
-          return `<p style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 15px; color: #333; line-height: 1.7; margin: 0 0 16px 0;">${section.content}</p>`;
+          return `<p style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 15px; color: #333; line-height: 1.7; margin: 0 0 16px 0;">${section.content}</p>`;
         case 'cta':
           return `<div style="text-align: center; margin: 28px 0;"><a href="${section.url || APP_URL}" style="display: inline-block; padding: 14px 32px; background: #0047FF; color: #fff; font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 600; text-decoration: none; border-radius: 6px; letter-spacing: 0.5px;">${section.content}</a></div>`;
         case 'divider':
           return `<hr style="border: none; border-top: 1px solid #eee; margin: 28px 0;" />`;
         case 'stat':
-          return `<div style="text-align: center; margin: 20px 0; padding: 20px; background: #f8f8f8; border-radius: 8px;"><div style="font-family: 'JetBrains Mono', monospace; font-size: 28px; font-weight: 700; color: #0047FF;">${section.label}</div><div style="font-family: -apple-system, sans-serif; font-size: 13px; color: #666; margin-top: 4px;">${section.content}</div></div>`;
+          return `<div style="text-align: center; margin: 20px 0; padding: 20px; background: #f8f8f8; border-radius: 8px;"><div style="font-family: 'JetBrains Mono', monospace; font-size: 28px; font-weight: 700; color: #0047FF;">${section.label}</div><div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 13px; color: #666; margin-top: 4px;">${section.content}</div></div>`;
         default:
           return '';
       }
@@ -55,15 +58,15 @@ export function renderNewsletter(
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   ${content.preheader ? `<span style="display:none;max-height:0;overflow:hidden;">${content.preheader}</span>` : ''}
 </head>
-<body style="margin: 0; padding: 0; background: #f4f4f4; -webkit-font-smoothing: antialiased;">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background: #f4f4f4;">
+<body style="margin: 0; padding: 0; background: #F2EFE8; -webkit-font-smoothing: antialiased;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background: #F2EFE8;">
     <tr>
       <td align="center" style="padding: 40px 16px;">
         <table role="presentation" width="560" cellpadding="0" cellspacing="0" style="background: #ffffff; border-radius: 12px; overflow: hidden; max-width: 560px; width: 100%;">
           <!-- Header -->
           <tr>
             <td style="padding: 32px 36px 24px 36px; border-bottom: 1px solid #f0f0f0;">
-              <div style="font-family: 'VCR OSD Mono', 'JetBrains Mono', monospace; font-size: 14px; font-weight: 700; color: #111; letter-spacing: 2px;">BRANDOS</div>
+              <a href="${APP_URL}" style="text-decoration: none;"><img src="${ASSET_BASE}/email/brandos-header.png" width="260" height="52" alt="BrandOS" style="display: block; width: 260px; height: auto; border: 0; outline: none;" /></a>
             </td>
           </tr>
           <!-- Content -->
@@ -75,7 +78,7 @@ export function renderNewsletter(
           <!-- Footer -->
           <tr>
             <td style="padding: 24px 36px; background: #fafafa; border-top: 1px solid #f0f0f0;">
-              <p style="font-family: -apple-system, sans-serif; font-size: 12px; color: #999; margin: 0; line-height: 1.6; text-align: center;">
+              <p style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 12px; color: #999; margin: 0; line-height: 1.6; text-align: center;">
                 You're receiving this because you signed up at <a href="${APP_URL}" style="color: #999;">mybrandos.app</a>.<br>
                 <a href="${unsubscribeUrl}" style="color: #999; text-decoration: underline;">Unsubscribe</a>
               </p>

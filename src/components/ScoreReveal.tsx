@@ -236,7 +236,7 @@ Check yours  brandos.xyz`;
           border: 'none',
           borderRadius: '4px',
           color: '#FFFFFF',
-          fontFamily: "'JetBrains Mono', monospace",
+          fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace",
           fontSize: '12px',
           letterSpacing: '0.1em',
           cursor: 'pointer',
@@ -262,7 +262,7 @@ Check yours  brandos.xyz`;
           border: `2px solid ${copied ? '#00FF41' : theme === 'dark' ? '#333' : '#DDD'}`,
           borderRadius: '4px',
           color: copied ? '#00FF41' : theme === 'dark' ? '#FFFFFF' : '#000000',
-          fontFamily: "'JetBrains Mono', monospace",
+          fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace",
           fontSize: '12px',
           letterSpacing: '0.1em',
           cursor: 'pointer',
@@ -336,7 +336,7 @@ export default function ScoreReveal({ profile, brandScore, isVisible, theme }: S
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}
           style={{
-            fontFamily: "'JetBrains Mono', monospace",
+            fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace",
             fontSize: '14px',
             color: '#666',
             letterSpacing: '0.2em',
@@ -380,7 +380,7 @@ export default function ScoreReveal({ profile, brandScore, isVisible, theme }: S
         <div style={{ textAlign: 'center' }}>
           <span
             style={{
-              fontFamily: "'JetBrains Mono', monospace",
+              fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace",
               fontSize: '10px',
               letterSpacing: '0.2em',
               color: '#666',
@@ -467,7 +467,7 @@ export default function ScoreReveal({ profile, brandScore, isVisible, theme }: S
               border: '1px solid #333',
               borderRadius: '4px',
               color: '#888',
-              fontFamily: "'JetBrains Mono', monospace",
+              fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace",
               fontSize: '11px',
               letterSpacing: '0.1em',
               cursor: 'pointer',
@@ -484,7 +484,7 @@ export default function ScoreReveal({ profile, brandScore, isVisible, theme }: S
               border: 'none',
               borderRadius: '4px',
               color: '#FFFFFF',
-              fontFamily: "'JetBrains Mono', monospace",
+              fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace",
               fontSize: '11px',
               letterSpacing: '0.1em',
               cursor: 'pointer',

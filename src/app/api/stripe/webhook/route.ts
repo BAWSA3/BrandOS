@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { stripe, STRIPE_WEBHOOK_SECRET } from '@/lib/stripe';
 import prisma from '@/lib/db';
-import type { SubscriptionTier, SubscriptionStatus } from '@prisma/client';
 import Stripe from 'stripe';
 import {
   claimWebhookEvent,
@@ -10,7 +9,9 @@ import {
 } from '@/lib/webhook-idempotency';
 import { logSecurityEvent } from '@/lib/audit-log';
 import { captureFunnelEvent } from '@/lib/funnel-events';
-import { legacyTierToPlanTier } from '@/lib/plans';
+import { syncSubscription, endSubscription } from '@/lib/billing-sync';
+import { claimFoundingSpot } from '@/lib/founding';
+import { sendTrialEndingEmail } from '@/lib/trial-email';
 
 export async function POST(request: NextRequest) {
   const body = await request.text();
@@ -53,13 +54,28 @@ export async function POST(request: NextRequest) {
       case 'customer.subscription.created':
       case 'customer.subscription.updated': {
         const subscription = event.data.object as Stripe.Subscription;
-        await handleSubscriptionChange(subscription);
+        await syncSubscription(subscription);
+        // turned off auto-renew (cancel during trial = never charged)
+        const prev = (event.data as { previous_attributes?: Partial<Stripe.Subscription> })
+          .previous_attributes;
+        if (prev?.cancel_at_period_end === false && subscription.cancel_at_period_end) {
+          await captureCancel(subscription);
+        }
         break;
       }
 
       case 'customer.subscription.deleted': {
         const subscription = event.data.object as Stripe.Subscription;
-        await handleSubscriptionDeleted(subscription);
+        await endSubscription(subscription);
+        break;
+      }
+
+      case 'customer.subscription.trial_will_end': {
+        const subscription = event.data.object as Stripe.Subscription;
+        const userId = subscription.metadata?.userId;
+        if (userId && subscription.trial_end && !subscription.cancel_at_period_end) {
+          await sendTrialEndingEmail(userId, new Date(subscription.trial_end * 1000));
+        }
         break;
       }
 
@@ -140,62 +156,16 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   }
 }
 
-async function handleSubscriptionChange(subscription: Stripe.Subscription) {
+async function captureCancel(subscription: Stripe.Subscription) {
   const userId = subscription.metadata?.userId;
   if (!userId) return;
-
-  const tier = (subscription.metadata?.tier || 'FREE') as SubscriptionTier;
-  const status = mapStripeStatus(subscription.status);
-  const firstItem = subscription.items.data[0];
-  const interval = firstItem?.plan?.interval;
-  const periodEnd = firstItem?.current_period_end;
-
-  await prisma.user.update({
-    where: { id: userId },
-    data: {
-      stripeSubscriptionId: subscription.id,
-      subscriptionTier: tier,
-      subscriptionStatus: status,
-      billingInterval: interval === 'year' ? 'annual' : 'monthly',
-      currentPeriodEnd: periodEnd ? new Date(periodEnd * 1000) : null,
-    },
-  });
-
-  // Sync the Phase 1 workspace plan (drives assertCanScan + PlanLimit caps).
-  // Without this a paying subscriber keeps FREE workspace limits. PAST_DUE /
-  // INCOMPLETE keep the current plan — Stripe dunning decides, deletion resets.
-  if (status === 'ACTIVE' || status === 'TRIALING') {
-    await syncWorkspacePlan(userId, tier);
+  const u = await prisma.user.findUnique({ where: { id: userId }, select: { supabaseId: true } });
+  if (u) {
+    await captureFunnelEvent(u.supabaseId, 'subscription_canceled', {
+      tier: subscription.metadata?.tier ?? null,
+      during_trial: subscription.status === 'trialing',
+    });
   }
-}
-
-async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
-  const userId = subscription.metadata?.userId;
-  if (!userId) return;
-
-  await prisma.user.update({
-    where: { id: userId },
-    data: {
-      subscriptionTier: 'FREE',
-      subscriptionStatus: 'CANCELED',
-      stripeSubscriptionId: null,
-      billingInterval: null,
-      currentPeriodEnd: null,
-    },
-  });
-
-  await syncWorkspacePlan(userId, 'FREE');
-}
-
-// Legacy SubscriptionTier (what Stripe metadata carries) → PlanTier on the
-// buyer's personal workspace. updateMany: safe no-op if the user has no
-// personal workspace (can't happen for new signups — the auth callback
-// creates one before checkout is reachable).
-async function syncWorkspacePlan(userId: string, tier: SubscriptionTier) {
-  await prisma.workspace.updateMany({
-    where: { ownerUserId: userId, type: 'personal' },
-    data: { plan: legacyTierToPlanTier(tier) },
-  });
 }
 
 async function handlePaymentFailed(invoice: Stripe.Invoice) {
@@ -211,10 +181,19 @@ async function handlePaymentFailed(invoice: Stripe.Invoice) {
 async function handleInvoicePaid(invoice: Stripe.Invoice) {
   const customerId = typeof invoice.customer === 'string' ? invoice.customer : invoice.customer?.id;
   if (!customerId) return;
+  // The $0 invoice at trial start is "paid" too. Only real money activates;
+  // subscription events own the status otherwise.
+  if (!invoice.amount_paid) return;
 
-  // Reset usage counters on successful payment (new billing period)
-  await prisma.user.updateMany({
+  const user = await prisma.user.findFirst({
     where: { stripeCustomerId: customerId },
+    select: { id: true, supabaseId: true, subscriptionStatus: true },
+  });
+  if (!user) return;
+
+  // Reset usage counters on a successful payment (new billing period)
+  await prisma.user.update({
+    where: { id: user.id },
     data: {
       subscriptionStatus: 'ACTIVE',
       checksUsedThisMonth: 0,
@@ -222,22 +201,13 @@ async function handleInvoicePaid(invoice: Stripe.Invoice) {
       usageResetDate: new Date(),
     },
   });
-}
 
-function mapStripeStatus(status: Stripe.Subscription.Status): SubscriptionStatus {
-  switch (status) {
-    case 'active':
-      return 'ACTIVE';
-    case 'past_due':
-      return 'PAST_DUE';
-    case 'canceled':
-      return 'CANCELED';
-    case 'trialing':
-      return 'TRIALING';
-    case 'incomplete':
-    case 'incomplete_expired':
-      return 'INCOMPLETE';
-    default:
-      return 'ACTIVE';
+  // First real payment: a founding spot while they last
+  const founding = await claimFoundingSpot(user.id);
+  if (user.subscriptionStatus === 'TRIALING') {
+    await captureFunnelEvent(user.supabaseId, 'trial_converted', {
+      amount_cents: invoice.amount_paid,
+      founding_number: founding,
+    });
   }
 }

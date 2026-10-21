@@ -98,7 +98,7 @@ export default function ResearchPage() {
       style={{
         display: 'flex',
         minHeight: '100vh',
-        background: '#F2F0EF',
+        background: '#F2EFE8',
         color: 'rgba(0,0,0,0.85)',
       }}
     >
@@ -125,7 +125,7 @@ export default function ResearchPage() {
           borderRight: '1px solid rgba(0,0,0,0.08)',
           display: 'flex',
           flexDirection: 'column',
-          background: '#F2F0EF',
+          background: '#F2EFE8',
           flexShrink: 0,
           position: 'relative',
         }}

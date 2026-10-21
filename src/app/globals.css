@@ -164,7 +164,7 @@
   /* Core Surfaces */
   --background: #e8e8ed;
   --foreground: #1d1d1f;
-  --surface: #f2f0ef;
+  --surface: #f2efe8;
   --surface-hover: #f5f5f7;
   --surface-tertiary: #e8e8ed;
   --muted: #86868b;
@@ -181,23 +181,23 @@
   --text-quaternary: #aeaeb2;
 
   /* Accent Colors — Apple System Palette */
-  --accent: #0a84ff;
-  --accent-hover: #0070e0;
+  --accent: #0047ff;
+  --accent-hover: #0035cc;
   --success: #34c759;
   --warning: #ff9f0a;
   --danger: #ff3b30;
 
   /* Legacy aliases (keep landing page working) */
   --blue-klein: #002fa7;
-  --blue-electric: #0a84ff;
+  --blue-electric: #0047ff;
   --blue-deep: #001847;
-  --blue-glow: rgba(10, 132, 255, 0.3);
-  --blue-subtle: rgba(10, 132, 255, 0.1);
-  --blue-hover: #0070e0;
+  --blue-glow: rgba(0, 71, 255, 0.3);
+  --blue-subtle: rgba(0, 71, 255, 0.1);
+  --blue-hover: #0035cc;
 
   /* Legacy dashboard palette (landing page) */
   --brand-black: #050505;
-  --brand-blue: #0a84ff;
+  --brand-blue: #0047ff;
   --brand-green: #30d158;
   --brand-yellow: #ffd60a;
   --brand-gray: #1c1c1e;
@@ -208,10 +208,10 @@
   --glass-hover: rgba(0, 0, 0, 0.04);
 
   /* Legacy gradients (landing page) */
-  --gradient-hero: linear-gradient(135deg, #e8e8ed 0%, rgba(10, 132, 255, 0.1) 50%, #e8e8ed 100%);
+  --gradient-hero: linear-gradient(135deg, #e8e8ed 0%, rgba(0, 71, 255, 0.1) 50%, #e8e8ed 100%);
   --gradient-card: linear-gradient(180deg, rgba(0, 0, 0, 0.02) 0%, rgba(0, 0, 0, 0.01) 100%);
   --gradient-orb: radial-gradient(circle, var(--accent) 0%, transparent 70%);
-  --gradient-text: linear-gradient(135deg, #1d1d1f 0%, #0a84ff 50%, #1d1d1f 100%);
+  --gradient-text: linear-gradient(135deg, #1d1d1f 0%, #0047ff 50%, #1d1d1f 100%);
 
   /* Radii */
   --radius-sm: 8px;
@@ -232,9 +232,9 @@
   --shadow-modal: 0 16px 48px rgba(0, 0, 0, 0.16);
 
   /* Legacy glow aliases (landing page) */
-  --glow-sm: 0 0 20px rgba(10, 132, 255, 0.15);
-  --glow-md: 0 0 40px rgba(10, 132, 255, 0.2);
-  --glow-lg: 0 0 80px rgba(10, 132, 255, 0.25);
+  --glow-sm: 0 0 20px rgba(0, 71, 255, 0.15);
+  --glow-md: 0 0 40px rgba(0, 71, 255, 0.2);
+  --glow-lg: 0 0 80px rgba(0, 71, 255, 0.25);
 
   /* Spring Animations (kept — purposeful motion) */
   --spring-snappy: 300ms
@@ -433,7 +433,7 @@
   --color-input: var(--border);
   --color-ring: var(--accent);
   --color-surface: var(--surface);
-  --color-chart-1: #0a84ff;
+  --color-chart-1: #0047ff;
   --color-chart-2: #34c759;
   --color-chart-3: #ff9f0a;
   --color-chart-4: #af52de;
@@ -611,12 +611,7 @@ body {
   position: absolute;
   width: 500px;
   height: 500px;
-  background: radial-gradient(
-    circle,
-    var(--accent) 0%,
-    rgba(10, 132, 255, 0.5) 30%,
-    transparent 70%
-  );
+  background: radial-gradient(circle, var(--accent) 0%, rgba(0, 71, 255, 0.5) 30%, transparent 70%);
   border-radius: 50%;
   filter: blur(80px);
   animation:
@@ -634,7 +629,7 @@ body {
   height: 800px;
 }
 .blue-orb-secondary {
-  background: radial-gradient(circle, rgba(10, 132, 255, 0.3) 0%, transparent 60%);
+  background: radial-gradient(circle, rgba(0, 71, 255, 0.3) 0%, transparent 60%);
   animation-delay: -2s;
   animation-duration: 5s, 25s;
 }
@@ -1075,7 +1070,7 @@ textarea:focus,
 select:focus {
   outline: none;
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.15);
+  box-shadow: 0 0 0 3px rgba(0, 71, 255, 0.15);
 }
 
 input::placeholder,
@@ -1197,11 +1192,11 @@ input[type="range"]::-webkit-slider-thumb:hover {
 .os-shimmer {
   background: linear-gradient(
     90deg,
-    #0a84ff 0%,
+    #0047ff 0%,
     #4499ff 25%,
-    #0a84ff 50%,
+    #0047ff 50%,
     #4499ff 75%,
-    #0a84ff 100%
+    #0047ff 100%
   );
   background-size: 200% 100%;
   -webkit-background-clip: text !important;
@@ -1335,7 +1330,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
 }
 .tag-blue {
   background: var(--blue-subtle);
-  border-color: rgba(10, 132, 255, 0.2);
+  border-color: rgba(0, 71, 255, 0.2);
   color: var(--accent);
 }
 
@@ -1395,7 +1390,7 @@ code {
 .dropzone:hover,
 .dropzone.dragover {
   border-color: var(--accent);
-  background-color: rgba(10, 132, 255, 0.05);
+  background-color: rgba(0, 71, 255, 0.05);
 }
 
 /* Card spring — simplified for app shell */
@@ -1605,8 +1600,8 @@ code {
   box-shadow: 0 0 8px currentColor;
 }
 .workflow-canvas .react-flow__selection {
-  background: rgba(10, 132, 255, 0.05);
-  border: 1px solid rgba(10, 132, 255, 0.3);
+  background: rgba(0, 71, 255, 0.05);
+  border: 1px solid rgba(0, 71, 255, 0.3);
 }
 .workflow-controls {
   background: var(--surface) !important;
@@ -1851,6 +1846,213 @@ code {
 @media (prefers-reduced-motion: reduce) {
   .station-art .station-led,
   .station-art .station-scan {
+    animation: none;
+  }
+}
+
+/* Studio: a station floor builds upward when the stage rises (StationStage). */
+.studio-stage .studio-build {
+  transition: clip-path 1.8s cubic-bezier(0.16, 1, 0.3, 1) 0.15s;
+}
+.studio-stage .studio-build-line {
+  transition: top 1.8s cubic-bezier(0.16, 1, 0.3, 1) 0.15s;
+}
+@media (prefers-reduced-motion: reduce) {
+  .studio-stage .studio-build,
+  .studio-stage .studio-build-line {
+    transition: none;
+  }
+}
+
+/* Title screen: a quiet left-to-right brighten when a menu item is selected (HoverLetters). */
+@keyframes hover-letter-in {
+  from {
+    opacity: 0.35;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.hover-letter {
+  animation: hover-letter-in 260ms ease-out both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .hover-letter {
+    animation: none;
+  }
+}
+
+/* Motion+ curtains (pixel wipes) fill in Klein blue everywhere. */
+.motion-curtain {
+  background: #0047ff;
+}
+
+/* Dashboard: one soft pulse ring from the latest score point on panel hover. */
+/* dashboard XP bar: the next block blinks while XP fills; blocks flash on level up */
+/* title screen: PRESS START blinks like an arcade attract screen */
+/* title studio: Continue powers the room up (a soft brighten) */
+@keyframes studio-power {
+  0% {
+    filter: brightness(0.82) saturate(0.85);
+  }
+  35% {
+    filter: brightness(1.08) saturate(1.1);
+  }
+  100% {
+    filter: none;
+  }
+}
+
+@keyframes boot-logo-in {
+  from {
+    opacity: 0;
+    filter: blur(8px);
+    transform: scale(0.96);
+  }
+}
+@keyframes boot-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes press-start-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes xp-blink {
+  50% {
+    opacity: 0.15;
+  }
+}
+@keyframes xp-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+@keyframes xp-flash {
+  0%,
+  100% {
+    background: #0047ff;
+  }
+  50% {
+    background: #ffffff;
+  }
+}
+
+@keyframes tile-pulse {
+  from {
+    opacity: 0.9;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(3.2);
+  }
+}
+.tile-pulse {
+  animation: tile-pulse 750ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tile-pulse {
+    animation: none;
+    opacity: 0;
+  }
+}
+
+/* Title screen: the station reacts to the selected menu item (StationStage `reaction`). */
+.studio-stage .station-scene {
+  transition:
+    transform 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.45s ease;
+}
+@keyframes station-power-flicker {
+  0% {
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  22% {
+    opacity: 0.15;
+  }
+  36% {
+    opacity: 1;
+  }
+  48% {
+    opacity: 0.45;
+  }
+  64% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+.station-power-on {
+  animation: station-power-flicker 0.75s steps(1, end) both;
+}
+@keyframes station-scan-sweep {
+  0% {
+    top: 94%;
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  88% {
+    opacity: 1;
+  }
+  100% {
+    top: var(--scan-end, 10%);
+    opacity: 0;
+  }
+}
+.station-scan-line {
+  animation: station-scan-sweep 2.4s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .studio-stage .station-scene {
+    transition: none;
+  }
+  .station-power-on {
+    animation: none;
+    opacity: 1;
+  }
+  .station-scan-line {
+    animation: none;
+    top: 50%;
+  }
+}
+
+/* Title screen Rescan hero: Klein-blue pixels sweep up the station in waves. */
+@keyframes hero-scan-pixel {
+  0% {
+    opacity: 0;
+    transform: scale(0.55);
+  }
+  14% {
+    opacity: 0.72;
+    transform: scale(1);
+  }
+  38% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+}
+.hero-scan-pixel {
+  opacity: 0;
+  will-change: opacity, transform;
+  animation: hero-scan-pixel 2.6s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-scan-pixel {
     animation: none;
   }
 }

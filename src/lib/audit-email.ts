@@ -37,7 +37,8 @@ export async function sendAuditEmail(params: {
 
   const html = `<!DOCTYPE html>
 <html>
-<body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:560px;margin:0 auto;padding:32px 24px;background:#ffffff;color:#111;">
+<body style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;max-width:560px;margin:0 auto;padding:32px 24px;background:#ffffff;color:#0E0E0E;">
+  <img src="${process.env.EMAIL_ASSET_BASE || process.env.NEXT_PUBLIC_APP_URL || 'https://mybrandos.app'}/email/brandos-header.png" width="200" alt="BrandOS" style="display:block;width:200px;height:auto;border:0;margin:0 0 24px 0;" />
   <p style="font-family:monospace;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:#737373;margin:0 0 8px 0;">
     // score boost audit
   </p>

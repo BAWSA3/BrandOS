@@ -3,6 +3,7 @@
 import { useBrandStore } from '@/lib/store';
 import XBrandScoreHero from '@/components/XBrandScoreHero';
 import { Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useInnerCircle } from '@/components/InnerCircleBadge';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -24,7 +25,7 @@ export default function LandingPage() {
       className="aura-background"
       style={{
         minHeight: '100vh',
-        background: '#F2F0EF',
+        background: '#F2EFE8',
         position: 'relative',
         overflowX: 'hidden',
         overflowY: 'auto',
@@ -45,8 +46,19 @@ export default function LandingPage() {
 
       {/* Main Content - X Brand Score Lead Magnet */}
       <Suspense fallback={null}>
-        <XBrandScoreHero theme={theme} />
+        <LandingScan theme={theme} />
       </Suspense>
     </div>
   );
+}
+
+const HANDLE_RE = /^@?[A-Za-z0-9_]{1,15}$/;
+
+// `/?scan=<handle>` opens the site and runs that handle's scan straight away.
+// It's the landing link from the BrandOS MCP (Claude / ChatGPT breakdowns), so
+// people arrive at their full brand read without retyping their handle.
+function LandingScan({ theme }: { theme: string }) {
+  const raw = useSearchParams().get('scan')?.trim() ?? '';
+  const handle = HANDLE_RE.test(raw) ? raw.replace(/^@/, '') : undefined;
+  return <XBrandScoreHero theme={theme} initialUsername={handle} autoStart={!!handle} />;
 }

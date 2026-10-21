@@ -97,25 +97,25 @@ enum AccountMigrationStatus {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  supabaseId    String    @unique    // Links to Supabase Auth
-  email         String?   @unique    // Optional - for account recovery
-  xUsername     String?              // From X OAuth — null until X is connected
-  xId           String?   @unique    // X user ID — null until X is connected
+  id            String   @id @default(cuid())
+  supabaseId    String   @unique // Links to Supabase Auth
+  email         String?  @unique // Optional - for account recovery
+  xUsername     String? // From X OAuth — null until X is connected
+  xId           String?  @unique // X user ID — null until X is connected
   name          String?
   avatar        String?
-  isInnerCircle Boolean   @default(false)
-  invitedBy     String?              // Username who invited them
-  walletAddress String?   @unique    // Embedded wallet address for onchain attestations
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  isInnerCircle Boolean  @default(false)
+  invitedBy     String? // Username who invited them
+  walletAddress String?  @unique // Embedded wallet address for onchain attestations
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   // Subscription & billing
   stripeCustomerId     String?            @unique
   stripeSubscriptionId String?            @unique
   subscriptionTier     SubscriptionTier   @default(FREE)
   subscriptionStatus   SubscriptionStatus @default(ACTIVE)
-  billingInterval      String?            // "monthly" | "annual"
+  billingInterval      String? // "monthly" | "annual"
   currentPeriodEnd     DateTime?
 
   // Usage tracking (resets monthly)
@@ -124,12 +124,12 @@ model User {
   usageResetDate           DateTime @default(now())
 
   // Phase 1: account model
-  role                       UserRole               @default(user)
-  accountMigrationStatus     AccountMigrationStatus @default(legacy) @map("account_migration_status")
+  role                   UserRole               @default(user)
+  accountMigrationStatus AccountMigrationStatus @default(legacy) @map("account_migration_status")
 
   // TOS/privacy acknowledgment (Launch Bar Week 3) — null = pre-feature account
-  tosAcceptedAt              DateTime?              @map("tos_accepted_at") @db.Timestamptz
-  tosVersion                 String?                @map("tos_version")
+  tosAcceptedAt DateTime? @map("tos_accepted_at") @db.Timestamptz
+  tosVersion    String?   @map("tos_version")
 
   // Relationships
   brands              Brand[]
@@ -138,43 +138,54 @@ model User {
   feedback            Feedback[]
   purchases           Purchase[]
   platformConnections PlatformConnection[]
-  submittedApprovals  ApprovalRequest[]  @relation("SubmittedApprovals")
-  reviewedApprovals   ApprovalRequest[]  @relation("ReviewedApprovals")
+  submittedApprovals  ApprovalRequest[]    @relation("SubmittedApprovals")
+  reviewedApprovals   ApprovalRequest[]    @relation("ReviewedApprovals")
   sessions            UserSession[]
   deals               Deal[]
   invoices            Invoice[]
   transactions        Transaction[]
 
   // Phase 1 relationships
-  ownedWorkspaces     Workspace[]        @relation("WorkspaceOwner")
+  ownedWorkspaces      Workspace[]        @relation("WorkspaceOwner")
   workspaceMemberships WorkspaceMember[]
-  brandScans          BrandScan[]
-  auditReportShares   AuditReportShare[]
-  securityAuditEvents SecurityAuditLog[]
-  dailyBriefs         DailyBrief[]
+  brandScans           BrandScan[]
+  auditReportShares    AuditReportShare[]
+  securityAuditEvents  SecurityAuditLog[]
+  dailyBriefs          DailyBrief[]
+  station              Station? // claimed brand station (migration 026)
+  stationNotes         StationNote[]      @relation("StationNoteAuthor")
+  xpEvents             XPEvent[] // XP ledger (migration 029)
+  progress             UserProgress? // XP total + streaks (migration 029)
+  mcpUsage             McpUsage[] // metered MCP uses (migration 034)
+  preference           UserPreference? // display settings (migration 036)
+  foundingMember       FoundingMember? // Founding 100 spot (migration 038)
+  lookupDigests        LookupDigest[] // weekly lookup email claims (migration 039)
+  ideas                Idea[] // studio idea board (migration 035)
+  postScores           PostScore[] // per-post brand fit (migration 033)
+  noteReports          NoteReport[]       @relation("NoteReporter")
 
   @@index([xUsername])
   @@index([stripeCustomerId])
 }
 
 model Brand {
-  id        String   @id @default(cuid())
-  name      String
-  colors    String   // JSON string
-  tone      String   // JSON string
-  keywords  String   // JSON array string
-  doPatterns String  // JSON array string
-  dontPatterns String // JSON array string
-  voiceSamples String // JSON array string
+  id               String   @id @default(cuid())
+  name             String
+  colors           String // JSON string
+  tone             String // JSON string
+  keywords         String // JSON array string
+  doPatterns       String // JSON array string
+  dontPatterns     String // JSON array string
+  voiceSamples     String // JSON array string
   voiceFingerprint String? // JSON string of VoiceFingerprint
-  isPublic  Boolean  @default(false)
-  shareToken String? @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  isPublic         Boolean  @default(false)
+  shareToken       String?  @unique
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
   // Owner
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   // Workspace scope (Phase 1 model). Nullable: legacy brands are adopted
   // into the owner's personal workspace on first authed read.
@@ -182,14 +193,14 @@ model Brand {
   workspace   Workspace? @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
 
   // Team access
-  team      Team?    @relation(fields: [teamId], references: [id])
-  teamId    String?
+  team   Team?   @relation(fields: [teamId], references: [id])
+  teamId String?
 
   // Shared access
   sharedWith SharedBrand[]
 
   // History
-  history   HistoryEntry[]
+  history HistoryEntry[]
 
   // Health Snapshots
   healthSnapshots BrandHealthSnapshot[]
@@ -231,8 +242,8 @@ model Team {
   updatedAt DateTime @updatedAt
 
   // Relationships
-  members   TeamMember[]
-  brands    Brand[]
+  members TeamMember[]
+  brands  Brand[]
 }
 
 model TeamMember {
@@ -240,11 +251,11 @@ model TeamMember {
   role      String   @default("member") // "owner", "admin", "member", "viewer"
   createdAt DateTime @default(now())
 
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  teamId    String
-  team      Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  teamId String
+  team   Team   @relation(fields: [teamId], references: [id], onDelete: Cascade)
 
   @@unique([userId, teamId])
   @@index([teamId])
@@ -255,11 +266,11 @@ model SharedBrand {
   permission String   @default("view") // "view", "edit"
   createdAt  DateTime @default(now())
 
-  userId     String
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  brandId    String
-  brand      Brand    @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  brandId String
+  brand   Brand  @relation(fields: [brandId], references: [id], onDelete: Cascade)
 
   @@unique([userId, brandId])
   @@index([brandId])
@@ -267,15 +278,15 @@ model SharedBrand {
 
 model BrandHealthSnapshot {
   id              String   @id @default(cuid())
-  overallScore    Int      // Composite 0-100
-  completeness    Int      // Sub-dimension 0-100
-  consistency     Int      // Sub-dimension 0-100
-  voiceMatch      Int      // Sub-dimension 0-100
-  engagement      Int      // Sub-dimension 0-100
-  activity        Int      // Sub-dimension 0-100
-  trendDirection  String   // "up", "down", "stable"
-  trendDelta      Int      // Absolute delta from previous
-  computationData String   // JSON audit trail of raw inputs
+  overallScore    Int // Composite 0-100
+  completeness    Int // Sub-dimension 0-100
+  consistency     Int // Sub-dimension 0-100
+  voiceMatch      Int // Sub-dimension 0-100
+  engagement      Int // Sub-dimension 0-100
+  activity        Int // Sub-dimension 0-100
+  trendDirection  String // "up", "down", "stable"
+  trendDelta      Int // Absolute delta from previous
+  computationData String // JSON audit trail of raw inputs
   periodStart     DateTime
   periodEnd       DateTime
   createdAt       DateTime @default(now())
@@ -289,18 +300,18 @@ model BrandHealthSnapshot {
 }
 
 model BrandTweet {
-  id              String   @id @default(cuid())
-  tweetId         String   @unique        // X tweet ID (dedup key)
-  text            String
-  postedAt        DateTime               // When tweet was posted on X
-  metrics         String                 // JSON: {likes, retweets, replies, impressions, quotes}
-  entities        String?                // JSON: {hashtags, mentions, urls}
-  alignmentScore  Int?                   // 0-100, null = not yet scored
-  engagementRate  Float?                 // Computed: (likes+RTs+replies)/impressions
-  brandId         String
-  brand           Brand    @relation(fields: [brandId], references: [id], onDelete: Cascade)
-  syncedAt        DateTime @default(now())
-  createdAt       DateTime @default(now())
+  id             String   @id @default(cuid())
+  tweetId        String   @unique // X tweet ID (dedup key)
+  text           String
+  postedAt       DateTime // When tweet was posted on X
+  metrics        String // JSON: {likes, retweets, replies, impressions, quotes}
+  entities       String? // JSON: {hashtags, mentions, urls}
+  alignmentScore Int? // 0-100, null = not yet scored
+  engagementRate Float? // Computed: (likes+RTs+replies)/impressions
+  brandId        String
+  brand          Brand    @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  syncedAt       DateTime @default(now())
+  createdAt      DateTime @default(now())
 
   @@index([brandId, postedAt(sort: Desc)])
 }
@@ -308,25 +319,25 @@ model BrandTweet {
 // ===== CROSS-PLATFORM CONTENT =====
 
 model BrandContent {
-  id              String   @id @default(cuid())
-  externalId      String                 // Platform-specific content ID (dedup key per platform)
-  platform        String                 // x, linkedin, instagram, youtube, tiktok, threads
-  contentType     String                 // text, image, video, carousel, story, reel, thread, article, short, poll
-  textContent     String?                // Post text, caption, description
-  transcript      String?                // Video/audio transcript
-  mediaUrls       String?                // JSON array of media URLs
-  metrics         String                 // JSON: EngagementMetrics
-  hashtags        String?                // JSON array
-  mentions        String?                // JSON array
-  url             String?                // Permalink to original content
-  authorUsername  String?
-  alignmentScore  Int?                   // 0-100, null = not yet scored
-  voiceScore      Int?                   // 0-100, voice consistency score
-  visualScore     Int?                   // 0-100, visual consistency score
-  rawData         String?                // JSON: original platform response
-  postedAt        DateTime               // When content was posted on the platform
-  syncedAt        DateTime @default(now())
-  createdAt       DateTime @default(now())
+  id             String   @id @default(cuid())
+  externalId     String // Platform-specific content ID (dedup key per platform)
+  platform       String // x, linkedin, instagram, youtube, tiktok, threads
+  contentType    String // text, image, video, carousel, story, reel, thread, article, short, poll
+  textContent    String? // Post text, caption, description
+  transcript     String? // Video/audio transcript
+  mediaUrls      String? // JSON array of media URLs
+  metrics        String // JSON: EngagementMetrics
+  hashtags       String? // JSON array
+  mentions       String? // JSON array
+  url            String? // Permalink to original content
+  authorUsername String?
+  alignmentScore Int? // 0-100, null = not yet scored
+  voiceScore     Int? // 0-100, voice consistency score
+  visualScore    Int? // 0-100, visual consistency score
+  rawData        String? // JSON: original platform response
+  postedAt       DateTime // When content was posted on the platform
+  syncedAt       DateTime @default(now())
+  createdAt      DateTime @default(now())
 
   brandId String
   brand   Brand  @relation(fields: [brandId], references: [id], onDelete: Cascade)
@@ -338,32 +349,32 @@ model BrandContent {
 }
 
 model PlatformConnection {
-  id                String    @id @default(cuid())
-  platform          String    // x, linkedin, instagram, youtube, tiktok, threads
-  platformUserId    String    // User's ID on the external platform
-  platformUsername  String    // Display username on the external platform
-  accessToken       String    // OAuth access token (legacy — migrating to ciphertext)
-  refreshToken      String?   // OAuth refresh token (legacy — migrating to ciphertext)
-  tokenExpiresAt    DateTime?
-  scopes            String    // JSON array of granted scopes
-  profileData       String?   // JSON: platform-specific profile info
-  lastSyncAt        DateTime?
-  connectedAt       DateTime  @default(now())
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
+  id               String    @id @default(cuid())
+  platform         String // x, linkedin, instagram, youtube, tiktok, threads
+  platformUserId   String // User's ID on the external platform
+  platformUsername String // Display username on the external platform
+  accessToken      String // OAuth access token (legacy — migrating to ciphertext)
+  refreshToken     String? // OAuth refresh token (legacy — migrating to ciphertext)
+  tokenExpiresAt   DateTime?
+  scopes           String // JSON array of granted scopes
+  profileData      String? // JSON: platform-specific profile info
+  lastSyncAt       DateTime?
+  connectedAt      DateTime  @default(now())
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   // Phase 1: workspace scoping + encrypted tokens
-  workspaceId            String?                 @map("workspace_id") @db.Uuid
-  workspace              Workspace?              @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  status                 ConnectedAccountStatus  @default(active)
-  keyId                  String                  @default("v1") @map("key_id")
-  accessTokenCiphertext  String?                 @map("access_token_ciphertext")
-  refreshTokenCiphertext String?                 @map("refresh_token_ciphertext")
-  disconnectedAt         DateTime?               @map("disconnected_at") @db.Timestamptz
-  lastVerifiedAt         DateTime                @default(now()) @map("last_verified_at") @db.Timestamptz
+  workspaceId            String?                @map("workspace_id") @db.Uuid
+  workspace              Workspace?             @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  status                 ConnectedAccountStatus @default(active)
+  keyId                  String                 @default("v1") @map("key_id")
+  accessTokenCiphertext  String?                @map("access_token_ciphertext")
+  refreshTokenCiphertext String?                @map("refresh_token_ciphertext")
+  disconnectedAt         DateTime?              @map("disconnected_at") @db.Timestamptz
+  lastVerifiedAt         DateTime               @default(now()) @map("last_verified_at") @db.Timestamptz
   brandScans             BrandScan[]
 
   @@unique([userId, platform])
@@ -374,15 +385,15 @@ model PlatformConnection {
 // ===== VISUAL DNA =====
 
 model BrandVisualDNA {
-  id              String   @id @default(cuid())
-  logoUsageRules  String   // JSON array of rules
-  colorPalette    String   // JSON: {primary, secondary, accent, tolerancePercent}
-  typography      String   // JSON: {headingFont, bodyFont, style}
-  imageStyle      String   // photography, illustration, flat-design, mixed, minimal
-  filterPreset    String?
-  moodKeywords    String   // JSON array
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id             String   @id @default(cuid())
+  logoUsageRules String // JSON array of rules
+  colorPalette   String // JSON: {primary, secondary, accent, tolerancePercent}
+  typography     String // JSON: {headingFont, bodyFont, style}
+  imageStyle     String // photography, illustration, flat-design, mixed, minimal
+  filterPreset   String?
+  moodKeywords   String // JSON array
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   brandId String @unique
   brand   Brand  @relation(fields: [brandId], references: [id], onDelete: Cascade)
@@ -396,7 +407,7 @@ model ApprovalRequest {
   platform        String
   contentType     String?
   status          String    @default("pending") // pending, approved, rejected, revision_requested
-  brandCheckScore Int?      // 0-100
+  brandCheckScore Int? // 0-100
   feedback        String?
   submittedById   String
   submittedBy     User      @relation("SubmittedApprovals", fields: [submittedById], references: [id])
@@ -414,15 +425,15 @@ model ApprovalRequest {
 
 model HistoryEntry {
   id          String   @id @default(cuid())
-  type        String   // "check" or "generate"
+  type        String // "check" or "generate"
   input       String
-  output      String   // JSON string
+  output      String // JSON string
   contentType String?
   score       Int?
   createdAt   DateTime @default(now())
 
-  brandId     String
-  brand       Brand    @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  brandId String
+  brand   Brand  @relation(fields: [brandId], references: [id], onDelete: Cascade)
 
   @@index([brandId])
   @@index([createdAt])
@@ -430,22 +441,71 @@ model HistoryEntry {
 
 // Newsletter signup for early access
 model EmailSignup {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  xUsername String?  // X username if provided
-  source        String    @default("landing") // where they signed up from
-  unsubscribed  Boolean?  @default(false)
-  unsubscribedAt DateTime?
-  createdAt     DateTime  @default(now())
+  id                String      @id @default(cuid())
+  email             String      @unique
+  xUsername         String? // X username if provided
+  source            String      @default("landing") // where they signed up from
+  unsubscribed      Boolean?    @default(false)
+  unsubscribedAt    DateTime?
+  createdAt         DateTime    @default(now())
   // "Reserve your brand station" (migration 018); set for new and existing emails
-  reservedAt        DateTime? @db.Timestamptz
+  reservedAt        DateTime?   @db.Timestamptz
   reservedArchetype String?
-  reservationNumber Int?    @unique // permanent "Station #N" (migration 019)
+  reservationNumber Int?        @unique // permanent "Station #N" (migration 019)
   emailSends        EmailSend[]
 
   @@index([createdAt])
   @@index([xUsername])
   @@index([reservedAt])
+}
+
+// A brand station claimed by its owner via Sign in with X (migration 026).
+// Anchor for the polaroid board + brand reviews (docs/specs/STATION-BOARD-AND-BRAND-REVIEWS.md).
+model Station {
+  id                String        @id @default(dbgenerated("(gen_random_uuid())::text"))
+  handle            String        @unique // lowercase X handle
+  ownerUserId       String        @unique
+  ownerXId          String        @unique // X user id at claim time
+  reservationNumber Int?
+  archetype         String?
+  claimedAt         DateTime      @default(now()) @db.Timestamptz
+  createdAt         DateTime      @default(now()) @db.Timestamptz
+  owner             User          @relation(fields: [ownerUserId], references: [id], onDelete: Cascade)
+  notes             StationNote[]
+}
+
+// A friend's note on a claimed station's polaroid board (migration 027)
+model StationNote {
+  id              String       @id @default(dbgenerated("(gen_random_uuid())::text"))
+  stationId       String
+  authorUserId    String
+  authorXHandle   String
+  authorAvatarUrl String?
+  body            String // 1-140 chars
+  sticker         String?
+  hiddenAt        DateTime?    @db.Timestamptz
+  hiddenBy        String? // owner | reports
+  reportCount     Int          @default(0)
+  createdAt       DateTime     @default(now()) @db.Timestamptz
+  updatedAt       DateTime     @default(now()) @updatedAt @db.Timestamptz
+  station         Station      @relation(fields: [stationId], references: [id], onDelete: Cascade)
+  author          User         @relation("StationNoteAuthor", fields: [authorUserId], references: [id], onDelete: Cascade)
+  reports         NoteReport[]
+
+  @@unique([stationId, authorUserId])
+  @@index([stationId, createdAt(sort: Desc)])
+}
+
+model NoteReport {
+  id             String      @id @default(dbgenerated("(gen_random_uuid())::text"))
+  noteId         String
+  reporterUserId String
+  reason         String?
+  createdAt      DateTime    @default(now()) @db.Timestamptz
+  note           StationNote @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  reporter       User        @relation("NoteReporter", fields: [reporterUserId], references: [id], onDelete: Cascade)
+
+  @@unique([noteId, reporterUserId])
 }
 
 // One row per (signup, campaign): the once-per-address guarantee for
@@ -469,15 +529,15 @@ model BrandScans {
   score          Int
   archetype      String?
   enhanced       Boolean?
-  userId         String?              // Optional link to auth user
-  phaseScores    String?   @map("phase_scores")     // JSON: {"define":72,"check":65,"generate":80,"scale":58}
-  insights       String?   @map("insights")          // JSON: phase insights from Gemini
-  strengths      String?   @map("strengths")         // JSON: top 3 strengths
-  improvements   String?   @map("improvements")      // JSON: top 3 improvements
-  summary        String?   @map("summary")           // 2-3 sentence assessment
-  influenceTier  String?   @map("influence_tier")    // emerging|micro|mid|macro|elite
-  nextMoves      String?   @map("next_moves")        // JSON: 3 archetype-specific action items
-  contentPillars String?   @map("content_pillars")   // JSON: detected content topics/pillars
+  userId         String? // Optional link to auth user
+  phaseScores    String?   @map("phase_scores") // JSON: {"define":72,"check":65,"generate":80,"scale":58}
+  insights       String?   @map("insights") // JSON: phase insights from Gemini
+  strengths      String?   @map("strengths") // JSON: top 3 strengths
+  improvements   String?   @map("improvements") // JSON: top 3 improvements
+  summary        String?   @map("summary") // 2-3 sentence assessment
+  influenceTier  String?   @map("influence_tier") // emerging|micro|mid|macro|elite
+  nextMoves      String?   @map("next_moves") // JSON: 3 archetype-specific action items
+  contentPillars String?   @map("content_pillars") // JSON: detected content topics/pillars
   createdAt      DateTime? @default(now()) @map("created_at") @db.Timestamptz
 
   @@index([username])
@@ -487,15 +547,15 @@ model BrandScans {
 
 // Invite codes for Inner Circle referrals
 model InviteCode {
-  id          String    @id @default(cuid())
-  code        String    @unique
-  createdBy   String    // X username of creator
-  maxUses     Int       @default(3)
-  usedCount   Int       @default(0)
-  usedBy      String    @default("[]") // JSON array of usernames
-  expiresAt   DateTime?
-  createdAt   DateTime  @default(now())
-  isActive    Boolean   @default(true)
+  id        String    @id @default(cuid())
+  code      String    @unique
+  createdBy String // X username of creator
+  maxUses   Int       @default(3)
+  usedCount Int       @default(0)
+  usedBy    String    @default("[]") // JSON array of usernames
+  expiresAt DateTime?
+  createdAt DateTime  @default(now())
+  isActive  Boolean   @default(true)
 
   @@index([code])
   @@index([createdBy])
@@ -504,15 +564,15 @@ model InviteCode {
 // ===== PURCHASES (one-time payments) =====
 
 model Purchase {
-  id               String   @id @default(cuid())
-  type             String   // "brand_dna_report", "workshop_ticket", etc.
-  amount           Int      // in cents
-  currency         String   @default("usd")
-  stripePaymentId  String   @unique
-  stripeSessionId  String?
-  status           String   @default("completed") // "completed", "refunded"
-  metadata         String?  // JSON for extra context
-  createdAt        DateTime @default(now())
+  id              String   @id @default(cuid())
+  type            String // "brand_dna_report", "workshop_ticket", etc.
+  amount          Int // in cents
+  currency        String   @default("usd")
+  stripePaymentId String   @unique
+  stripeSessionId String?
+  status          String   @default("completed") // "completed", "refunded"
+  metadata        String? // JSON for extra context
+  createdAt       DateTime @default(now())
 
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -527,8 +587,8 @@ model Purchase {
 model ResearchRun {
   id          String    @id @default(cuid())
   status      String    @default("pending") // pending, running, completed, failed
-  verticals   String    // JSON array of verticals covered
-  sources     String    // JSON array of sources used
+  verticals   String // JSON array of verticals covered
+  sources     String // JSON array of sources used
   startedAt   DateTime  @default(now())
   completedAt DateTime?
   topicsFound Int       @default(0)
@@ -547,25 +607,25 @@ model ResearchRun {
 }
 
 model ResearchTopic {
-  id              String   @id @default(cuid())
+  id              String  @id @default(cuid())
   title           String
   summary         String
-  vertical        String   // pokemon, mtg, yugioh, sports-cards, collectibles
-  category        String   // news, trend, controversy, product-launch, price-alert
-  relevanceScore  Int      @default(50) // 0-100
-  sentimentScore  Int?     // -100 to 100
-  engagementLevel String?  // low, medium, high, viral
+  vertical        String // pokemon, mtg, yugioh, sports-cards, collectibles
+  category        String // news, trend, controversy, product-launch, price-alert
+  relevanceScore  Int     @default(50) // 0-100
+  sentimentScore  Int? // -100 to 100
+  engagementLevel String? // low, medium, high, viral
 
   // Source data
   sources  String // JSON array of source references
-  keywords String  // JSON array of extracted keywords
+  keywords String // JSON array of extracted keywords
   hashtags String? // JSON array of related hashtags
   mentions String? // JSON array of mentioned accounts/products
 
   // Timing
-  trendingPeriod String?  // last-24h, last-week, last-month
-  firstSeen      DateTime @default(now())
-  lastUpdated    DateTime @default(now())
+  trendingPeriod String? // last-24h, last-week, last-month
+  firstSeen      DateTime  @default(now())
+  lastUpdated    DateTime  @default(now())
   expiresAt      DateTime?
 
   // Relationships
@@ -605,7 +665,7 @@ model ResearchSourceConfig {
   enabled     Boolean   @default(true)
   apiStatus   String    @default("unknown") // healthy, degraded, down, unknown
   lastChecked DateTime?
-  config      String?   // JSON config (rate limits, etc.)
+  config      String? // JSON config (rate limits, etc.)
 
   @@index([enabled])
 }
@@ -619,9 +679,9 @@ model ContentDraft {
   tone         String    @default("casual")
   status       String    @default("idea") // idea, draft, scheduled, published
   scheduledFor DateTime?
-  sourceType   String?   // idea-feed, manual, repurpose
-  sourceId     String?   // ID of the parent draft (for repurpose chain)
-  authenticity Int?      // 0-100 from fingerprint pipeline
+  sourceType   String? // idea-feed, manual, repurpose
+  sourceId     String? // ID of the parent draft (for repurpose chain)
+  authenticity Int? // 0-100 from fingerprint pipeline
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
@@ -642,20 +702,20 @@ model ContentDraft {
 // ===== FEEDBACK SYSTEM =====
 
 model Feedback {
-  id          String   @id @default(cuid())
-  userId      String?  // Optional - allow anonymous feedback
-  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
-  type        String   // 'bug', 'idea', 'other', 'nps', 'feature_request'
-  category    String?  // 'score_journey', 'brand_dna', 'agents', 'ui', 'performance'
-  message     String
-  rating      Int?     // 1-5 stars or 0-10 NPS
-  url         String?  // Page where feedback was given
-  metadata    String?  // JSON - browser, screen size, etc.
-  status      String   @default("new") // 'new', 'reviewed', 'in_progress', 'resolved', 'wont_fix'
-  priority    String?  // 'low', 'medium', 'high', 'critical'
-  adminNotes  String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id         String   @id @default(cuid())
+  userId     String? // Optional - allow anonymous feedback
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  type       String // 'bug', 'idea', 'other', 'nps', 'feature_request'
+  category   String? // 'score_journey', 'brand_dna', 'agents', 'ui', 'performance'
+  message    String
+  rating     Int? // 1-5 stars or 0-10 NPS
+  url        String? // Page where feedback was given
+  metadata   String? // JSON - browser, screen size, etc.
+  status     String   @default("new") // 'new', 'reviewed', 'in_progress', 'resolved', 'wont_fix'
+  priority   String? // 'low', 'medium', 'high', 'critical'
+  adminNotes String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   @@index([type])
   @@index([status])
@@ -667,13 +727,13 @@ model Feedback {
 
 model DriftAlert {
   id            String   @id @default(cuid())
-  type          String   // "dimension_drop", "low_alignment", "overall_drop"
-  severity      String   // "critical", "warning"
-  metric        String   // which dimension dropped, or "overall"
+  type          String // "dimension_drop", "low_alignment", "overall_drop"
+  severity      String // "critical", "warning"
+  metric        String // which dimension dropped, or "overall"
   previousScore Int
   currentScore  Int
-  delta         Int      // absolute drop amount
-  message       String   // human-readable description
+  delta         Int // absolute drop amount
+  message       String // human-readable description
   status        String   @default("new") // "new", "dismissed"
   createdAt     DateTime @default(now())
 
@@ -688,15 +748,15 @@ model DriftAlert {
 // ===== CONTENT INTELLIGENCE =====
 
 model ContentNiche {
-  id               String   @id @default(cuid())
-  name             String                // e.g. "creator economy", "crypto creators"
-  keywords         String                // JSON array of search keywords
-  hashtags         String                // JSON array of hashtags to monitor
-  referenceAccounts String               // JSON array of X handles to monitor
-  platform         String   @default("x") // x, linkedin, etc.
-  isActive         Boolean  @default(true)
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  id                String   @id @default(cuid())
+  name              String // e.g. "creator economy", "crypto creators"
+  keywords          String // JSON array of search keywords
+  hashtags          String // JSON array of hashtags to monitor
+  referenceAccounts String // JSON array of X handles to monitor
+  platform          String   @default("x") // x, linkedin, etc.
+  isActive          Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
   brandId String
   brand   Brand  @relation(fields: [brandId], references: [id], onDelete: Cascade)
@@ -707,17 +767,17 @@ model ContentNiche {
 }
 
 model ViralBenchmark {
-  id          String   @id @default(cuid())
-  platform    String   @default("x")
-  externalId  String                    // Tweet ID for dedup
+  id             String   @id @default(cuid())
+  platform       String   @default("x")
+  externalId     String // Tweet ID for dedup
   authorUsername String?
-  content     String                    // Full text of the viral post
-  metrics     String                    // JSON: {likes, retweets, replies, impressions, quotes}
-  viralScore  Int                       // 0-100 computed viral score
-  patterns    String                    // JSON: {hookType, format, tone, cta, length, topic}
-  niche       String                    // Which niche this benchmark belongs to
-  scannedAt   DateTime @default(now())
-  createdAt   DateTime @default(now())
+  content        String // Full text of the viral post
+  metrics        String // JSON: {likes, retweets, replies, impressions, quotes}
+  viralScore     Int // 0-100 computed viral score
+  patterns       String // JSON: {hookType, format, tone, cta, length, topic}
+  niche          String // Which niche this benchmark belongs to
+  scannedAt      DateTime @default(now())
+  createdAt      DateTime @default(now())
 
   brandId String
   brand   Brand  @relation(fields: [brandId], references: [id], onDelete: Cascade)
@@ -730,24 +790,24 @@ model ViralBenchmark {
 }
 
 model PerformanceSnapshot {
-  id              String   @id @default(cuid())
-  windowDays      Int                    // 3, 7, or 30
-  totalPosts      Int
-  totalImpressions Int
-  totalLikes      Int
-  totalRetweets   Int
-  totalReplies    Int
+  id                String   @id @default(cuid())
+  windowDays        Int // 3, 7, or 30
+  totalPosts        Int
+  totalImpressions  Int
+  totalLikes        Int
+  totalRetweets     Int
+  totalReplies      Int
   avgEngagementRate Float
-  avgImpressions  Float
-  bestPostingHour Int?                   // 0-23
-  bestPostingDay  String?                // monday, tuesday, etc.
-  bestContentType String?                // tweet, thread, etc.
-  avgPostLength   Int?
-  topTweetId      String?
-  bottomTweetId   String?
-  postingPattern  String?                // JSON: frequency, timing breakdown
-  computedAt      DateTime @default(now())
-  createdAt       DateTime @default(now())
+  avgImpressions    Float
+  bestPostingHour   Int? // 0-23
+  bestPostingDay    String? // monday, tuesday, etc.
+  bestContentType   String? // tweet, thread, etc.
+  avgPostLength     Int?
+  topTweetId        String?
+  bottomTweetId     String?
+  postingPattern    String? // JSON: frequency, timing breakdown
+  computedAt        DateTime @default(now())
+  createdAt         DateTime @default(now())
 
   brandId String
   brand   Brand  @relation(fields: [brandId], references: [id], onDelete: Cascade)
@@ -758,20 +818,20 @@ model PerformanceSnapshot {
 }
 
 model GapAnalysis {
-  id                String   @id @default(cuid())
-  overallGapScore   Int                    // 0-100 average of all dimensions
-  hookStrength      Int                    // 0-100
-  formatMatch       Int                    // 0-100
-  toneAlignment     Int                    // 0-100
-  ctaEffectiveness  Int                    // 0-100
-  engagementVelocity Int                   // 0-100
-  postingConsistency Int                   // 0-100
-  strengths         String                 // JSON array of strength descriptions
-  gaps              String                 // JSON array of gap descriptions
-  actionItems       String                 // JSON array of prioritized action items
-  rawAnalysis       String?                // Full AI analysis text
-  computedAt        DateTime @default(now())
-  createdAt         DateTime @default(now())
+  id                 String   @id @default(cuid())
+  overallGapScore    Int // 0-100 average of all dimensions
+  hookStrength       Int // 0-100
+  formatMatch        Int // 0-100
+  toneAlignment      Int // 0-100
+  ctaEffectiveness   Int // 0-100
+  engagementVelocity Int // 0-100
+  postingConsistency Int // 0-100
+  strengths          String // JSON array of strength descriptions
+  gaps               String // JSON array of gap descriptions
+  actionItems        String // JSON array of prioritized action items
+  rawAnalysis        String? // Full AI analysis text
+  computedAt         DateTime @default(now())
+  createdAt          DateTime @default(now())
 
   brandId String
   brand   Brand  @relation(fields: [brandId], references: [id], onDelete: Cascade)
@@ -786,7 +846,7 @@ model UserSession {
   id         String    @id @default(cuid())
   userId     String
   user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  feature    String    // "content-engine", "dashboard", "growth-plan"
+  feature    String // "content-engine", "dashboard", "growth-plan"
   startedAt  DateTime  @default(now())
   endedAt    DateTime?
   durationMs Int?
@@ -798,14 +858,14 @@ model UserSession {
 // ===== X PROFILE CACHE (persistent across deploys) =====
 
 model XProfileCache {
-  id               String   @id @default(cuid())
-  username         String   @unique // lowercase X username
-  profileData      String   // JSON: full XProfile object
-  followersCount   Int      @default(0)
-  tweetCount       Int      @default(0)
-  fetchedAt        DateTime @default(now()) // when we last hit X API
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  id             String   @id @default(cuid())
+  username       String   @unique // lowercase X username
+  profileData    String // JSON: full XProfile object
+  followersCount Int      @default(0)
+  tweetCount     Int      @default(0)
+  fetchedAt      DateTime @default(now()) // when we last hit X API
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   @@index([username])
   @@index([fetchedAt])
@@ -814,22 +874,22 @@ model XProfileCache {
 // ===== ONCHAIN ATTESTATIONS =====
 
 model OnchainAttestation {
-  id                String   @id @default(cuid())
-  uid               String   @unique // EAS attestation UID (bytes32 hex)
-  txHash            String   // Transaction hash
-  chain             String   // "avalanche" | "avalanche-fuji" | "base" | "base-sepolia"
-  attestationType   String   // "brand-dna", "content-check", "brand-score", "voice-fingerprint", "brand-health"
-  schemaUid         String   // EAS schema UID used
-  attester          String   // Address that created the attestation (platform wallet)
-  recipient         String   // Recipient address (user wallet or zero address)
-  dataHash          String   // SHA-256 hash of the attested data
-  metadata          String?  // JSON: extra context (brandId, score, username, etc.)
-  explorerUrl       String   // Direct link to view on EAS explorer
-  createdAt         DateTime @default(now())
+  id              String   @id @default(cuid())
+  uid             String   @unique // EAS attestation UID (bytes32 hex)
+  txHash          String // Transaction hash
+  chain           String // "avalanche" | "avalanche-fuji" | "base" | "base-sepolia"
+  attestationType String // "brand-dna", "content-check", "brand-score", "voice-fingerprint", "brand-health"
+  schemaUid       String // EAS schema UID used
+  attester        String // Address that created the attestation (platform wallet)
+  recipient       String // Recipient address (user wallet or zero address)
+  dataHash        String // SHA-256 hash of the attested data
+  metadata        String? // JSON: extra context (brandId, score, username, etc.)
+  explorerUrl     String // Direct link to view on EAS explorer
+  createdAt       DateTime @default(now())
 
   // Optional links to BrandOS entities
-  brandId           String?
-  userId            String?
+  brandId String?
+  userId  String?
 
   @@index([attestationType])
   @@index([brandId])
@@ -841,39 +901,39 @@ model OnchainAttestation {
 // ===== API KEYS (Enterprise / Partner access) =====
 
 enum ApiKeyTier {
-  FREE       // 100 req/day, 10 req/min
-  STARTER    // 1,000 req/day, 30 req/min
-  GROWTH     // 10,000 req/day, 60 req/min
+  FREE // 100 req/day, 10 req/min
+  STARTER // 1,000 req/day, 30 req/min
+  GROWTH // 10,000 req/day, 60 req/min
   ENTERPRISE // 100,000 req/day, 120 req/min
 }
 
 model ApiKey {
-  id            String     @id @default(cuid())
-  key           String     @unique              // hashed API key (sha256)
-  prefix        String                          // first 8 chars of raw key for display (bos_xxxx)
-  name          String                          // "Kreatorsverse Production", etc.
-  ownerEmail    String                          // contact email for this key
-  tier          ApiKeyTier @default(FREE)
-  isActive      Boolean    @default(true)
+  id         String     @id @default(cuid())
+  key        String     @unique // hashed API key (sha256)
+  prefix     String // first 8 chars of raw key for display (bos_xxxx)
+  name       String // "Kreatorsverse Production", etc.
+  ownerEmail String // contact email for this key
+  tier       ApiKeyTier @default(FREE)
+  isActive   Boolean    @default(true)
 
   // Rate limits (override tier defaults if set)
-  dailyLimit    Int?                            // custom daily request cap
-  minuteLimit   Int?                            // custom per-minute cap
+  dailyLimit  Int? // custom daily request cap
+  minuteLimit Int? // custom per-minute cap
 
   // Usage tracking
-  requestsToday Int        @default(0)
-  requestsTotal Int        @default(0)
+  requestsToday Int       @default(0)
+  requestsTotal Int       @default(0)
   lastUsedAt    DateTime?
-  lastResetAt   DateTime   @default(now())      // when daily counter was last reset
+  lastResetAt   DateTime  @default(now()) // when daily counter was last reset
 
   // Metadata
-  metadata      String?                         // JSON: company, notes, etc.
-  expiresAt     DateTime?                       // optional expiration
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
+  metadata  String? // JSON: company, notes, etc.
+  expiresAt DateTime? // optional expiration
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
   // Usage log
-  usageLogs     ApiUsageLog[]
+  usageLogs ApiUsageLog[]
 
   @@index([prefix])
   @@index([ownerEmail])
@@ -882,16 +942,16 @@ model ApiKey {
 
 model ApiUsageLog {
   id         String   @id @default(cuid())
-  endpoint   String                            // "/v1/score", "/v1/batch", etc.
-  method     String                            // "GET", "POST"
-  statusCode Int                               // 200, 400, 401, 429, etc.
-  latencyMs  Int                               // response time
-  username   String?                           // which username was scored (if applicable)
-  metadata   String?                           // JSON: extra context
+  endpoint   String // "/v1/score", "/v1/batch", etc.
+  method     String // "GET", "POST"
+  statusCode Int // 200, 400, 401, 429, etc.
+  latencyMs  Int // response time
+  username   String? // which username was scored (if applicable)
+  metadata   String? // JSON: extra context
   createdAt  DateTime @default(now())
 
-  apiKeyId   String
-  apiKey     ApiKey   @relation(fields: [apiKeyId], references: [id], onDelete: Cascade)
+  apiKeyId String
+  apiKey   ApiKey @relation(fields: [apiKeyId], references: [id], onDelete: Cascade)
 
   @@index([apiKeyId])
   @@index([apiKeyId, createdAt])
@@ -908,10 +968,10 @@ model ApiUsageLog {
 
 model Deal {
   id        String    @id @default(cuid())
-  title     String                          // "Nike collaboration"
-  brand     String?                         // Sponsor/brand name
-  status    String    @default("lead")      // lead, negotiating, active, completed, lost
-  amount    Int?                            // in cents
+  title     String // "Nike collaboration"
+  brand     String? // Sponsor/brand name
+  status    String    @default("lead") // lead, negotiating, active, completed, lost
+  amount    Int? // in cents
   currency  String    @default("usd")
   notes     String?
   startDate DateTime?
@@ -919,9 +979,9 @@ model Deal {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
-  userId    String
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  invoices  Invoice[]
+  userId   String
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  invoices Invoice[]
 
   @@index([userId])
   @@index([userId, status])
@@ -929,23 +989,23 @@ model Deal {
 
 model Invoice {
   id        String    @id @default(cuid())
-  number    String                          // INV-001
-  client    String                          // Client name
-  amount    Int                             // in cents
+  number    String // INV-001
+  client    String // Client name
+  amount    Int // in cents
   currency  String    @default("usd")
-  status    String    @default("draft")     // draft, sent, paid, overdue, cancelled
+  status    String    @default("draft") // draft, sent, paid, overdue, cancelled
   dueDate   DateTime?
   paidAt    DateTime?
-  txId      String?                         // Crypto TX hash (optional)
-  txChain   String?                         // eth, sol, btc, base, etc.
+  txId      String? // Crypto TX hash (optional)
+  txChain   String? // eth, sol, btc, base, etc.
   notes     String?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
-  userId    String
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  dealId    String?
-  deal      Deal?     @relation(fields: [dealId], references: [id], onDelete: SetNull)
+  userId String
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dealId String?
+  deal   Deal?   @relation(fields: [dealId], references: [id], onDelete: SetNull)
 
   @@index([userId])
   @@index([userId, status])
@@ -953,19 +1013,19 @@ model Invoice {
 }
 
 model Transaction {
-  id          String    @id @default(cuid())
-  type        String                        // income, expense
-  source      String                        // deal, invoice, manual
-  amount      Int                           // in cents
-  currency    String    @default("usd")
+  id          String   @id @default(cuid())
+  type        String // income, expense
+  source      String // deal, invoice, manual
+  amount      Int // in cents
+  currency    String   @default("usd")
   description String?
-  txId        String?                       // Blockchain TX hash
-  txChain     String?                       // eth, sol, btc, base, etc.
-  occurredAt  DateTime  @default(now())
-  createdAt   DateTime  @default(now())
+  txId        String? // Blockchain TX hash
+  txChain     String? // eth, sol, btc, base, etc.
+  occurredAt  DateTime @default(now())
+  createdAt   DateTime @default(now())
 
-  userId      String
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([userId, occurredAt(sort: Desc)])
@@ -974,59 +1034,59 @@ model Transaction {
 // ===== PHASE 1: WORKSPACES + OWNED SCANS =====
 
 model Workspace {
-  id                   String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id                   String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name                 String
   type                 WorkspaceType
-  ownerUserId          String         @map("owner_user_id")
-  owner                User           @relation("WorkspaceOwner", fields: [ownerUserId], references: [id], onDelete: Restrict)
-  plan                 PlanTier       @default(FREE)
-  seatCount            Int            @default(1) @map("seat_count")
-  stripeCustomerId     String?        @unique @map("stripe_customer_id")
-  stripeSubscriptionId String?        @unique @map("stripe_subscription_id")
-  trialEndsAt          DateTime?      @map("trial_ends_at") @db.Timestamptz
-  createdAt            DateTime       @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt            DateTime       @updatedAt @map("updated_at") @db.Timestamptz
+  ownerUserId          String        @map("owner_user_id")
+  owner                User          @relation("WorkspaceOwner", fields: [ownerUserId], references: [id], onDelete: Restrict)
+  plan                 PlanTier      @default(FREE)
+  seatCount            Int           @default(1) @map("seat_count")
+  stripeCustomerId     String?       @unique @map("stripe_customer_id")
+  stripeSubscriptionId String?       @unique @map("stripe_subscription_id")
+  trialEndsAt          DateTime?     @map("trial_ends_at") @db.Timestamptz
+  createdAt            DateTime      @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt            DateTime      @updatedAt @map("updated_at") @db.Timestamptz
 
   // Themed worlds — registry id for starter worlds, FK for paid custom worlds
-  activeWorldId        String?        @map("active_world_id")
-  customWorldId        String?        @unique @map("custom_world_id") @db.Uuid
-  customWorld          CustomWorld?   @relation(fields: [customWorldId], references: [id], onDelete: SetNull)
+  activeWorldId String?      @map("active_world_id")
+  customWorldId String?      @unique @map("custom_world_id") @db.Uuid
+  customWorld   CustomWorld? @relation(fields: [customWorldId], references: [id], onDelete: SetNull)
 
-  members              WorkspaceMember[]
-  platformConnections  PlatformConnection[]
-  brandScans           BrandScan[]
-  auditReportShares    AuditReportShare[]
-  securityAuditEvents  SecurityAuditLog[]
-  dailyBriefs          DailyBrief[]
-  brands               Brand[]
+  members             WorkspaceMember[]
+  platformConnections PlatformConnection[]
+  brandScans          BrandScan[]
+  auditReportShares   AuditReportShare[]
+  securityAuditEvents SecurityAuditLog[]
+  dailyBriefs         DailyBrief[]
+  brands              Brand[]
 
   @@index([ownerUserId])
   @@map("Workspace")
 }
 
 model CustomWorld {
-  id           String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  workspaceId  String     @unique @map("workspace_id") @db.Uuid
-  baseWorldId  String     @map("base_world_id")
-  manifest     Json       @default("{}")
-  name         String     @default("My World")
-  createdAt    DateTime   @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt    DateTime   @updatedAt @map("updated_at") @db.Timestamptz
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workspaceId String   @unique @map("workspace_id") @db.Uuid
+  baseWorldId String   @map("base_world_id")
+  manifest    Json     @default("{}")
+  name        String   @default("My World")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
-  workspace    Workspace?
+  workspace Workspace?
 
   @@index([workspaceId])
   @@map("CustomWorld")
 }
 
 model WorkspaceMember {
-  workspaceId        String         @map("workspace_id") @db.Uuid
-  workspace          Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  userId             String         @map("user_id")
-  user               User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  role               WorkspaceRole  @default(member)
-  invitedByUserId    String?        @map("invited_by_user_id")
-  joinedAt           DateTime       @default(now()) @map("joined_at") @db.Timestamptz
+  workspaceId     String        @map("workspace_id") @db.Uuid
+  workspace       Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  userId          String        @map("user_id")
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role            WorkspaceRole @default(member)
+  invitedByUserId String?       @map("invited_by_user_id")
+  joinedAt        DateTime      @default(now()) @map("joined_at") @db.Timestamptz
 
   @@id([workspaceId, userId])
   @@index([userId])
@@ -1034,49 +1094,49 @@ model WorkspaceMember {
 }
 
 model PlanLimit {
-  plan                         PlanTier  @id
-  scansPerDay                  Int       @map("scans_per_day")
-  xAccountsPerSeat             Int       @map("x_accounts_per_seat")
-  multiPlatformEnabled         Boolean   @default(false) @map("multi_platform_enabled")
-  competitorWatchlistEnabled   Boolean   @default(false) @map("competitor_watchlist_enabled")
-  scheduledRescansEnabled      Boolean   @default(false) @map("scheduled_rescans_enabled")
-  priorityQueueEnabled         Boolean   @default(false) @map("priority_queue_enabled")
-  maxFlaggedTweets             Int       @default(3) @map("max_flagged_tweets")
-  auditSummaryMaxChars         Int       @default(800) @map("audit_summary_max_chars")
-  maxStrengths                 Int       @default(3) @map("max_strengths")
-  maxImprovements              Int       @default(3) @map("max_improvements")
-  customWorldBuilderEnabled    Boolean   @default(false) @map("custom_world_builder_enabled")
-  premiumWorldsEnabled         Boolean   @default(false) @map("premium_worlds_enabled")
+  plan                       PlanTier @id
+  scansPerDay                Int      @map("scans_per_day")
+  xAccountsPerSeat           Int      @map("x_accounts_per_seat")
+  multiPlatformEnabled       Boolean  @default(false) @map("multi_platform_enabled")
+  competitorWatchlistEnabled Boolean  @default(false) @map("competitor_watchlist_enabled")
+  scheduledRescansEnabled    Boolean  @default(false) @map("scheduled_rescans_enabled")
+  priorityQueueEnabled       Boolean  @default(false) @map("priority_queue_enabled")
+  maxFlaggedTweets           Int      @default(3) @map("max_flagged_tweets")
+  auditSummaryMaxChars       Int      @default(800) @map("audit_summary_max_chars")
+  maxStrengths               Int      @default(3) @map("max_strengths")
+  maxImprovements            Int      @default(3) @map("max_improvements")
+  customWorldBuilderEnabled  Boolean  @default(false) @map("custom_world_builder_enabled")
+  premiumWorldsEnabled       Boolean  @default(false) @map("premium_worlds_enabled")
 
   @@map("PlanLimit")
 }
 
 model BrandScan {
-  id                     String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId                 String              @map("user_id")
-  user                   User                @relation(fields: [userId], references: [id], onDelete: Restrict)
-  workspaceId            String              @map("workspace_id") @db.Uuid
-  workspace              Workspace           @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  platformConnectionId   String              @map("platform_connection_id")
-  platformConnection     PlatformConnection  @relation(fields: [platformConnectionId], references: [id], onDelete: Restrict)
-  xUsername              String              @map("x_username")
+  id                   String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId               String             @map("user_id")
+  user                 User               @relation(fields: [userId], references: [id], onDelete: Restrict)
+  workspaceId          String             @map("workspace_id") @db.Uuid
+  workspace            Workspace          @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  platformConnectionId String             @map("platform_connection_id")
+  platformConnection   PlatformConnection @relation(fields: [platformConnectionId], references: [id], onDelete: Restrict)
+  xUsername            String             @map("x_username")
 
-  score                  Int
-  archetype              String
-  phaseScores            Json                @map("phase_scores")
-  strengths              Json
-  improvements           Json
-  insights               Json?
-  summary                String?
-  influenceTier          String?             @map("influence_tier")
-  nextMoves              Json?               @map("next_moves")
-  contentPillars         Json?               @map("content_pillars")
+  score          Int
+  archetype      String
+  phaseScores    Json    @map("phase_scores")
+  strengths      Json
+  improvements   Json
+  insights       Json?
+  summary        String?
+  influenceTier  String? @map("influence_tier")
+  nextMoves      Json?   @map("next_moves")
+  contentPillars Json?   @map("content_pillars")
 
-  visibility             ScanVisibility      @default(card_public)
-  status                 ScanStatus          @default(active)
-  scannedAt              DateTime            @default(now()) @map("scanned_at") @db.Timestamptz
+  visibility ScanVisibility @default(card_public)
+  status     ScanStatus     @default(active)
+  scannedAt  DateTime       @default(now()) @map("scanned_at") @db.Timestamptz
 
-  shares                 AuditReportShare[]
+  shares AuditReportShare[]
 
   @@index([userId])
   @@index([workspaceId])
@@ -1106,18 +1166,18 @@ model AuditReportShare {
 }
 
 model SecurityAuditLog {
-  id              String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id              String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   category        AuditEventCategory
-  eventType       String              @map("event_type")
-  userId          String?             @map("user_id")
-  user            User?               @relation(fields: [userId], references: [id], onDelete: SetNull)
-  workspaceId     String?             @map("workspace_id") @db.Uuid
-  workspace       Workspace?          @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
-  success         Boolean             @default(true)
-  metadata        Json                @default("{}")
-  ipHash          String?             @map("ip_hash")
-  userAgentFamily String?             @map("user_agent_family")
-  createdAt       DateTime            @default(now()) @map("created_at") @db.Timestamptz
+  eventType       String             @map("event_type")
+  userId          String?            @map("user_id")
+  user            User?              @relation(fields: [userId], references: [id], onDelete: SetNull)
+  workspaceId     String?            @map("workspace_id") @db.Uuid
+  workspace       Workspace?         @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
+  success         Boolean            @default(true)
+  metadata        Json               @default("{}")
+  ipHash          String?            @map("ip_hash")
+  userAgentFamily String?            @map("user_agent_family")
+  createdAt       DateTime           @default(now()) @map("created_at") @db.Timestamptz
 
   @@index([userId, createdAt(sort: Desc)])
   @@index([workspaceId, createdAt(sort: Desc)])
@@ -1136,32 +1196,31 @@ model ProcessedWebhook {
 }
 
 model DailyBrief {
-  id                  String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId              String     @map("user_id")
-  user                User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  workspaceId         String     @map("workspace_id") @db.Uuid
-  workspace           Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId      String    @map("user_id")
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspaceId String    @map("workspace_id") @db.Uuid
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
-  briefDate           DateTime   @map("brief_date") @db.Date
-  sourceBrandScanId   String?    @map("source_brand_scan_id") @db.Uuid
+  briefDate         DateTime @map("brief_date") @db.Date
+  sourceBrandScanId String?  @map("source_brand_scan_id") @db.Uuid
 
-  archetype           String
-  scoreAtGeneration   Int        @map("score_at_generation")
-  weakestPhase        String     @map("weakest_phase")
-  weakestPhaseScore   Int        @map("weakest_phase_score")
+  archetype         String
+  scoreAtGeneration Int    @map("score_at_generation")
+  weakestPhase      String @map("weakest_phase")
+  weakestPhaseScore Int    @map("weakest_phase_score")
 
-  idea                String
-  action              String
+  idea   String
+  action String
 
-  completedAt         DateTime?  @map("completed_at") @db.Timestamptz
-  createdAt           DateTime   @default(now()) @map("created_at") @db.Timestamptz
+  completedAt DateTime? @map("completed_at") @db.Timestamptz
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz
 
   @@unique([userId, briefDate])
   @@index([userId, briefDate(sort: Desc)])
   @@index([workspaceId])
   @@map("DailyBrief")
 }
-
 
 // ===== ARCHETYPE PROFILE CACHE (anon scan funnel) =====
 
@@ -1172,7 +1231,7 @@ model DailyBrief {
 model UserProfile {
   username         String   @id // normalized lowercase, no @
   displayName      String   @map("display_name")
-  archetype        String   // JSON: ArchetypeData
+  archetype        String // JSON: ArchetypeData
   archetypeHistory String   @default("[]") @map("archetype_history") // JSON: ArchetypeHistoryEntry[]
   scores           String   @default("[]") // JSON: ScoreRecord[] (last 20)
   highestScore     Int      @default(0) @map("highest_score")
@@ -1186,4 +1245,127 @@ model UserProfile {
   @@index([currentScore(sort: Desc)])
   @@index([lastScannedAt(sort: Desc)])
   @@map("user_profiles")
+}
+
+// XP ledger: one row per award, idempotent per user via dedupeKey (migration 029)
+model XPEvent {
+  id        String   @id @default(dbgenerated("(gen_random_uuid())::text"))
+  userId    String
+  kind      String // dailyVisit | streakDay | scorePoint | rescan | floorBuilt | task | onBrandPost | scoredPost
+  xp        Int
+  dedupeKey String // e.g. visit:2026-10-11, scan:<id>
+  label     String?
+  createdAt DateTime @default(now()) @db.Timestamptz
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, dedupeKey])
+  @@index([userId, createdAt(sort: Desc)])
+}
+
+// Running XP total, daily visit streak, weekly goal streak, last visit (migration 029)
+model UserProgress {
+  userId            String    @id
+  xpTotal           Int       @default(0)
+  currentStreakDays Int       @default(0)
+  longestStreakDays Int       @default(0)
+  lastActiveDate    DateTime? @db.Date
+  lastVisitAt       DateTime? @db.Timestamptz
+  prevVisitAt       DateTime? @db.Timestamptz
+  lastSeenScore     Int?
+  weeklyGoal        Int       @default(3)
+  streakWeeks       Int       @default(0)
+  lastGoalWeek      DateTime? @db.Date
+  createdAt         DateTime  @default(now()) @db.Timestamptz
+  updatedAt         DateTime  @default(now()) @updatedAt @db.Timestamptz
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// Per-post brand-fit breakdown for "Recent posts analyzed" (migration 033)
+model PostScore {
+  id         String   @id @default(dbgenerated("(gen_random_uuid())::text"))
+  userId     String
+  tweetId    String
+  excerpt    String
+  postedAt   DateTime @db.Timestamptz
+  likes      Int      @default(0)
+  replies    Int      @default(0)
+  reposts    Int      @default(0)
+  views      Int      @default(0)
+  multiple   Float?
+  fit        Int
+  breakdown  Json
+  analyzedAt DateTime @default(now()) @db.Timestamptz
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, tweetId])
+  @@index([userId, postedAt(sort: Desc)])
+}
+
+// Metered BrandOS MCP uses (migration 034): free plan = 10 per calendar week.
+model McpUsage {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tool      String
+  createdAt DateTime @default(now()) @db.Timestamptz
+
+  @@index([userId, createdAt(sort: Desc)])
+}
+
+// "Your brand was looked up" (migration 039): one row per handle/kind/viewer/day.
+model BrandLookup {
+  id        String   @id @default(dbgenerated("(gen_random_uuid())::text"))
+  handle    String
+  kind      String // page | mcp | compare
+  viewerKey String
+  day       DateTime @default(dbgenerated("((now() AT TIME ZONE 'utc'::text))::date")) @db.Date
+  createdAt DateTime @default(now()) @db.Timestamptz
+
+  @@unique([handle, kind, viewerKey, day])
+  @@index([handle, createdAt(sort: Desc)])
+}
+
+// Weekly lookup digest send claim (migration 039).
+model LookupDigest {
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  week      DateTime @db.Date
+  createdAt DateTime @default(now()) @db.Timestamptz
+
+  @@id([userId, week])
+}
+
+// Founding 100 (migration 038): numbered 1–100 on the first real paid invoice.
+model FoundingMember {
+  number    Int      @id
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now()) @db.Timestamptz
+}
+
+// Per-account display settings (migration 036): the dashboard colorway.
+model UserPreference {
+  userId            String   @id
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dashboardColorway String   @default("bone")
+  updatedAt         DateTime @default(now()) @updatedAt @db.Timestamptz
+}
+
+// Studio idea board (migration 035): post ideas built on a "Next time" suggestion.
+model Idea {
+  id          String    @id @default(uuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  postScoreId String?
+  postExcerpt String?
+  suggestion  String
+  title       String
+  hook        String
+  format      String
+  why         String
+  status      String    @default("saved")
+  createdAt   DateTime  @default(now()) @db.Timestamptz
+  postedAt    DateTime? @db.Timestamptz
+
+  @@index([userId, createdAt(sort: Desc)])
 }

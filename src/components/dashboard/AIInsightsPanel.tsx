@@ -47,8 +47,8 @@ export default function AIInsightsPanel({ insights, isLoading }: AIInsightsPanel
           <span
             style={{
               fontSize: 11,
-              color: '#0A84FF',
-              background: 'rgba(10,132,255,0.1)',
+              color: '#0047FF',
+              background: 'rgba(0,71,255,0.1)',
               padding: '2px 8px',
               borderRadius: 4,
               fontWeight: 500,
@@ -88,7 +88,7 @@ export default function AIInsightsPanel({ insights, isLoading }: AIInsightsPanel
                 border: '1px solid var(--border)',
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = 'rgba(10,132,255,0.3)';
+                e.currentTarget.style.borderColor = 'rgba(0,71,255,0.3)';
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.borderColor = 'var(--border)';
@@ -146,7 +146,7 @@ export default function AIInsightsPanel({ insights, isLoading }: AIInsightsPanel
                       style={{
                         fontSize: 18,
                         fontWeight: 700,
-                        color: '#0A84FF',
+                        color: '#0047FF',
                         marginTop: 8,
                         letterSpacing: '-0.02em',
                       }}

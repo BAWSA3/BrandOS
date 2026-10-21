@@ -34,7 +34,10 @@ export type FunnelEvent =
   | 'x_connected'
   | 'scan_completed'
   | 'checkout_started'
-  | 'purchase_completed';
+  | 'purchase_completed'
+  | 'trial_started'
+  | 'trial_converted'
+  | 'subscription_canceled';
 
 /**
  * Fire a funnel event. Awaits delivery (captureImmediate) so the event isn't

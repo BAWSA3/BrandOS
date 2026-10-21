@@ -152,7 +152,7 @@ export default function NewInterview({ draft, setDraft, onSave, onCancel }: Prop
               placeholder="username"
               style={{
                 width: '100%',
-                background: '#F2F0EF',
+                background: '#F2EFE8',
                 border: '1px solid rgba(0,0,0,0.15)',
                 borderRadius: 4,
                 padding: '12px 14px',
@@ -225,7 +225,7 @@ export default function NewInterview({ draft, setDraft, onSave, onCancel }: Prop
                 <div
                   key={q.id}
                   style={{
-                    background: '#F2F0EF',
+                    background: '#F2EFE8',
                     border: '1px solid rgba(0,0,0,0.08)',
                     borderRadius: 4,
                     padding: '16px 20px',
@@ -306,7 +306,7 @@ export default function NewInterview({ draft, setDraft, onSave, onCancel }: Prop
 
           <div
             style={{
-              background: '#F2F0EF',
+              background: '#F2EFE8',
               border: '1px solid rgba(0,0,0,0.08)',
               borderRadius: 4,
               padding: '24px 28px',

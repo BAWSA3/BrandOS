@@ -29,8 +29,19 @@ initBotId({
     { path: '/api/import/analyze-social', method: 'POST' },
     // Reserve your brand station — email capture after the scan (spam surface)
     { path: '/api/reserve-station', method: 'POST' },
+    // Full breakdown by email — email capture after the scan (spam surface)
+    { path: '/api/breakdown', method: 'POST' },
+    // Dashboard rescan — signed-in AI cost surface
+    { path: '/api/dashboard/rescan', method: 'POST' },
+    // Dashboard post breakdowns — signed-in AI cost surface
+    { path: '/api/dashboard/post-scores', method: 'POST' },
+    { path: '/api/dashboard/brainstorm', method: 'POST' },
     // Early-access signup form — email capture (spam surface)
     { path: '/api/early-access', method: 'POST' },
+    // public brand page (/@handle) + its compare funnel: scans / model calls
+    { path: '/api/public-brand', method: 'POST' },
+    { path: '/api/brand-lookup', method: 'POST' },
+    { path: '/api/brand-compare', method: 'POST' },
     // Checkout — payment abuse surface
     { path: '/api/stripe/checkout', method: 'POST' },
   ],

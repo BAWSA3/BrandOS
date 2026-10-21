@@ -17,6 +17,7 @@ const allowedPages = [
   '/privacy', // Legal: privacy policy
   '/terms', // Legal: terms of service
   '/station', // Public reserved-station pages (flex sign + X link preview)
+  '/breakdown', // Email capture for the full scan breakdown
   '/archetype', // Archetype scanner
   '/archetypes', // Archetype showcase
   '/intelligence', // Intelligence Report
@@ -25,9 +26,12 @@ const allowedPages = [
   '/audit', // Score Boost Audit — post-purchase results page (/audit/[sessionId])
   '/migrate-account', // Phase 1: legacy user credential migration
   '/dashboard', // Phase 1: authenticated user dashboard
+  '/home', // title screen / main menu after sign-in
   '/signup', // Phase 1: new account creation (email/Google/Apple)
   '/today', // Daily creator brief — 1 idea, 1 metric, 1 action
   '/world-preview', // V2 worlds: unauthenticated theme preview (dev)
+  '/oauth', // "Sign in with BrandOS" consent for the MCP (Claude / ChatGPT)
+  '/b', // public brand page; the public address is /@handle (rewritten below)
 ];
 
 export function middleware(request: NextRequest) {
@@ -41,6 +45,14 @@ export function middleware(request: NextRequest) {
     pathname.includes('.') // .ico, .svg, .png, etc.
   ) {
     return NextResponse.next();
+  }
+
+  // mybrandos.app/@handle -> the public brand page (/b/handle)
+  const at = pathname.match(/^\/(?:@|%40)([A-Za-z0-9_]{1,15})\/?$/);
+  if (at) {
+    const url = request.nextUrl.clone();
+    url.pathname = `/b/${at[1]}`;
+    return NextResponse.rewrite(url);
   }
 
   // Check if page is in the allowed list
