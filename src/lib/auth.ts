@@ -46,7 +46,9 @@ export async function getSession() {
     const accessToken = (await cookies()).get('sb-access-token')?.value;
     if (accessToken) {
       const { supabaseUrl, supabaseAnonKey } = supabaseEnv();
-      const legacy = createClient(supabaseUrl, supabaseAnonKey, { auth: { persistSession: false } });
+      const legacy = createClient(supabaseUrl, supabaseAnonKey, {
+        auth: { persistSession: false },
+      });
       const { data: legacyData } = await legacy.auth.getUser(accessToken);
       if (legacyData.user) return { user: legacyData.user };
     }
