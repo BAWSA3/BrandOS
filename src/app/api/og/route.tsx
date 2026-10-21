@@ -3,19 +3,53 @@ import { NextRequest } from 'next/server';
 
 export const runtime = 'edge';
 
+interface PublicReport {
+  archetype?: { name?: string } | null;
+  score?: { current?: number } | null;
+  phases?: { scores?: { define: number; check: number; generate: number; scale: number } } | null;
+}
+
+// Look up the handle's latest scan so previews show the real score. Shared links
+// (e.g. /card/<handle>) only pass `u`, and scores are never taken from the URL.
+async function getPublicReport(origin: string, username: string): Promise<PublicReport | null> {
+  try {
+    const res = await fetch(
+      `${origin}/api/intelligence/report?username=${encodeURIComponent(username)}&include=public`
+    );
+    if (!res.ok) return null;
+    const json = await res.json();
+    return (json?.report as PublicReport) ?? null;
+  } catch {
+    return null;
+  }
+}
+
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
-  const username = searchParams.get('u') || 'unknown';
-  const score = parseInt(searchParams.get('s') || '0');
-  const archetype = searchParams.get('a') || 'Unknown';
-  const define = parseInt(searchParams.get('d') || '0');
-  const check = parseInt(searchParams.get('c') || '0');
-  const generate = parseInt(searchParams.get('g') || '0');
-  const scale = parseInt(searchParams.get('sc') || '0');
-  const displayName = searchParams.get('n') || username;
+  const username = (searchParams.get('u') || 'unknown').replace(/^@/, '').toLowerCase();
+  const valid = /^[a-z0-9_]{1,30}$/.test(username);
+  // Look up against our own configured origin, never the request's Host header.
+  const appUrl = (process.env.NEXT_PUBLIC_APP_URL || 'https://mybrandos.app').replace(/\/$/, '');
+  const report = valid ? await getPublicReport(appUrl, username) : null;
+  const scanned = typeof report?.score?.current === 'number';
+  const score = Math.round(report?.score?.current ?? 0);
+  const archetype = scanned ? report?.archetype?.name || 'Unknown' : 'Not scanned yet';
+  const phaseScores = report?.phases?.scores ?? null;
+  const define = phaseScores?.define ?? 0;
+  const check = phaseScores?.check ?? 0;
+  const generate = phaseScores?.generate ?? 0;
+  const scale = phaseScores?.scale ?? 0;
+  const displayName = `@${username}`;
 
-  const scoreColor =
-    score >= 80 ? '#10B981' : score >= 60 ? '#0047FF' : score >= 40 ? '#F59E0B' : '#EF4444';
+  const scoreColor = !scanned
+    ? '#0047FF'
+    : score >= 80
+      ? '#10B981'
+      : score >= 60
+        ? '#0047FF'
+        : score >= 40
+          ? '#F59E0B'
+          : '#EF4444';
 
   function renderBar(value: number, max: number = 100) {
     const filled = Math.round((value / max) * 20);
@@ -72,17 +106,15 @@ export async function GET(request: NextRequest) {
         </div>
       </div>
 
-      {/* Separator */}
+      {/* Separator (a rule: the default font has no box-drawing glyphs) */}
       <div
         style={{
-          color: 'rgba(255,255,255,0.15)',
-          fontSize: '12px',
+          height: '1px',
+          background: 'rgba(255,255,255,0.15)',
           marginBottom: '32px',
           display: 'flex',
         }}
-      >
-        {'/* ════════════════════════════════════════════════════════════════════ */'}
-      </div>
+      />
 
       {/* Main content */}
       <div style={{ display: 'flex', gap: '48px', flex: 1 }}>
@@ -137,7 +169,7 @@ export async function GET(request: NextRequest) {
               <div
                 style={{ color: scoreColor, fontSize: '42px', fontWeight: 700, display: 'flex' }}
               >
-                {score}
+                {scanned ? score : '?'}
               </div>
               <div
                 style={{
@@ -183,81 +215,91 @@ export async function GET(request: NextRequest) {
               background: `${scoreColor}20`,
               border: `1px solid ${scoreColor}40`,
               borderRadius: '4px',
-              width: 'fit-content',
+              alignSelf: 'flex-start',
             }}
           >
             <span style={{ color: scoreColor, fontSize: '12px', letterSpacing: '0.12em' }}>
-              {score >= 80
-                ? 'ELITE'
-                : score >= 70
-                  ? 'STRONG'
-                  : score >= 60
-                    ? 'SOLID'
-                    : score >= 50
-                      ? 'BUILDING'
-                      : 'EMERGING'}
+              {!scanned
+                ? 'SCAN YOURS FREE'
+                : score >= 80
+                  ? 'ELITE'
+                  : score >= 70
+                    ? 'STRONG'
+                    : score >= 60
+                      ? 'SOLID'
+                      : score >= 50
+                        ? 'BUILDING'
+                        : 'EMERGING'}
             </span>
           </div>
         </div>
 
         {/* Right: Phase breakdown */}
         <div style={{ display: 'flex', flexDirection: 'column', flex: 1, gap: '16px' }}>
-          <div
-            style={{
-              color: 'rgba(255,255,255,0.4)',
-              fontSize: '12px',
-              letterSpacing: '0.12em',
-              marginBottom: '8px',
-              display: 'flex',
-            }}
-          >
-            PHASE BREAKDOWN
-          </div>
-
-          {[
-            { label: 'DEFINE', score: define, color: '#E8A838' },
-            { label: 'CHECK', score: check, color: '#10B981' },
-            { label: 'GENERATE', score: generate, color: '#9D4EDD' },
-            { label: 'SCALE', score: scale, color: '#0047FF' },
-          ].map((phase) => (
-            <div key={phase.label} style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          {/* Phase bars only when this scan recorded phase scores. */}
+          {phaseScores ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div
                 style={{
-                  color: phase.color,
+                  color: 'rgba(255,255,255,0.4)',
                   fontSize: '12px',
-                  letterSpacing: '0.1em',
-                  width: '90px',
+                  letterSpacing: '0.12em',
+                  marginBottom: '8px',
                   display: 'flex',
                 }}
               >
-                {phase.label}
+                PHASE BREAKDOWN
               </div>
-              <div
-                style={{
-                  color: 'rgba(255,255,255,0.3)',
-                  fontSize: '14px',
-                  flex: 1,
-                  display: 'flex',
-                  letterSpacing: '0.05em',
-                }}
-              >
-                {renderBar(phase.score)}
-              </div>
-              <div
-                style={{
-                  color: '#fff',
-                  fontSize: '16px',
-                  fontWeight: 600,
-                  width: '40px',
-                  textAlign: 'right',
-                  display: 'flex',
-                  justifyContent: 'flex-end',
-                }}
-              >
-                {phase.score}
-              </div>
+
+              {[
+                { label: 'DEFINE', score: define, color: '#E8A838' },
+                { label: 'CHECK', score: check, color: '#10B981' },
+                { label: 'GENERATE', score: generate, color: '#9D4EDD' },
+                { label: 'SCALE', score: scale, color: '#0047FF' },
+              ].map((phase) => (
+                <div
+                  key={phase.label}
+                  style={{ display: 'flex', alignItems: 'center', gap: '16px' }}
+                >
+                  <div
+                    style={{
+                      color: phase.color,
+                      fontSize: '12px',
+                      letterSpacing: '0.1em',
+                      width: '90px',
+                      display: 'flex',
+                    }}
+                  >
+                    {phase.label}
+                  </div>
+                  <div
+                    style={{
+                      color: 'rgba(255,255,255,0.3)',
+                      fontSize: '14px',
+                      flex: 1,
+                      display: 'flex',
+                      letterSpacing: '0.05em',
+                    }}
+                  >
+                    {renderBar(phase.score)}
+                  </div>
+                  <div
+                    style={{
+                      color: '#fff',
+                      fontSize: '16px',
+                      fontWeight: 600,
+                      width: '40px',
+                      textAlign: 'right',
+                      display: 'flex',
+                      justifyContent: 'flex-end',
+                    }}
+                  >
+                    {phase.score}
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
+          ) : null}
 
           {/* CTA */}
           <div
@@ -267,7 +309,7 @@ export async function GET(request: NextRequest) {
               padding: '12px 20px',
               background: '#0047FF',
               borderRadius: '4px',
-              width: 'fit-content',
+              alignSelf: 'flex-start',
             }}
           >
             <span style={{ color: '#fff', fontSize: '13px', letterSpacing: '0.12em' }}>
@@ -313,6 +355,10 @@ export async function GET(request: NextRequest) {
     {
       width: 1200,
       height: 630,
+      // Unfurls are cached at the edge so link previews don't hit the report API each time.
+      headers: {
+        'Cache-Control': 'public, max-age=300, s-maxage=3600, stale-while-revalidate=86400',
+      },
     }
   );
 }

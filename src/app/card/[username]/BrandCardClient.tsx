@@ -43,8 +43,11 @@ interface CardData {
       scores: PhaseScores;
     } | null;
     strengths: string[] | null;
-    scannedAt: string;
-    totalScans: number;
+    // The report API nests scan bookkeeping under `meta`.
+    meta?: {
+      scannedAt: string | null;
+      totalScans: number | null;
+    };
   };
 }
 
@@ -150,6 +153,12 @@ export default function BrandCardClient({ username }: { username: string }) {
 
   const r = data.report;
   const phases = r.phases?.scores;
+  const totalScans = r.meta?.totalScans ?? null;
+  const scannedAt = r.meta?.scannedAt ? new Date(r.meta.scannedAt) : null;
+  const verifiedLabel =
+    scannedAt && !Number.isNaN(scannedAt.getTime())
+      ? scannedAt.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }).toUpperCase()
+      : null;
 
   return (
     <div
@@ -479,7 +488,7 @@ export default function BrandCardClient({ username }: { username: string }) {
                   marginTop: '2px',
                 }}
               >
-                {r.totalScans}
+                {totalScans ?? '—'}
               </div>
             </div>
           </div>
@@ -506,19 +515,18 @@ export default function BrandCardClient({ username }: { username: string }) {
           >
             BRANDOS.APP
           </span>
-          <span
-            style={{
-              fontFamily: MONO,
-              fontSize: '9px',
-              letterSpacing: '0.1em',
-              color: 'rgba(255,255,255,0.15)',
-            }}
-          >
-            VERIFIED{' '}
-            {new Date(r.scannedAt)
-              .toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
-              .toUpperCase()}
-          </span>
+          {verifiedLabel && (
+            <span
+              style={{
+                fontFamily: MONO,
+                fontSize: '9px',
+                letterSpacing: '0.1em',
+                color: 'rgba(255,255,255,0.15)',
+              }}
+            >
+              VERIFIED {verifiedLabel}
+            </span>
+          )}
         </div>
       </motion.div>
 
