@@ -1,23 +1,25 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { getCurrentUser } from '@/lib/auth';
-import { hasPro, trialEndsAt } from '@/lib/billing';
+import { isOpenAccess, isSubscribed, trialEndsAt } from '@/lib/billing';
 import { foundingNumber, foundingSpotsLeft } from '@/lib/founding';
-import { FOUNDING_SPOTS, TRIAL_DAYS } from '@/lib/plans';
+import { FOUNDING_SPOTS, OPEN_ACCESS_UNTIL, TRIAL_DAYS } from '@/lib/plans';
 import Wordmark from '@/components/Wordmark';
 import StartTrialButton from '@/components/billing/StartTrialButton';
 import ManageBillingButton from './ManageBillingButton';
 
-// Launch pricing (docs/LAUNCH-PLAN.md): free scan + public page; Pro is the
-// Brand Dashboard at $29/mo after a card-required 7-day trial. Founding 100
-// keep $29 forever. Annual plans, coupons and Agency/Enterprise are out of
-// scope for the launch.
+// Launch pricing (docs/LAUNCH-PLAN.md, offer decided 2026-10-22): full access
+// free for everyone until Dec 3; Founding 100 add a card before then to keep
+// $29/mo for life (first charge Dec 3); Pro is $39/mo after. Once the window
+// closes this page falls back to the card-required 7-day trial. Annual plans,
+// coupons and Agency/Enterprise are out of scope for the launch.
 
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'Pricing · BrandOS',
-  description: `Know your reputation score before brands check it. Free scan, or BrandOS Pro at $29/month with a ${TRIAL_DAYS}-day free trial.`,
+  description:
+    'Know your reputation score before brands check it. BrandOS Studio is free for everyone until Dec 3; the first 100 keep $29/month for life.',
 };
 
 const MONO = "'VCR OSD Mono', 'JetBrains Mono', monospace";
@@ -53,7 +55,10 @@ export default async function PricingPage({
     foundingSpotsLeft(),
     searchParams,
   ]);
-  const pro = user ? hasPro(user) : false;
+  // "has Pro" here means paid / card on file: open access makes hasPro() true for all
+  const pro = user ? isSubscribed(user) : false;
+  const open = isOpenAccess();
+  const until = day(OPEN_ACCESS_UNTIL);
   const trialEnd = user ? trialEndsAt(user) : null;
   const founding = user && pro ? await foundingNumber(user.id) : null;
 
@@ -78,8 +83,9 @@ export default async function PricingPage({
           Know your reputation score before brands check it.
         </h1>
         <p className="mt-5 max-w-[560px] text-[16px] leading-[1.55]" style={{ color: '#333' }}>
-          Scan your brand for free. Go Pro for the full dashboard: what&apos;s working, what&apos;s
-          drifting, and what to post next.
+          {open
+            ? `Full access is free for everyone until ${until}: the full dashboard, what's working, what's drifting, and what to post next. The first ${FOUNDING_SPOTS} to add a card keep $29/month for life.`
+            : "Scan your brand for free. Go Pro for the full dashboard: what's working, what's drifting, and what to post next."}
         </p>
 
         {sp.canceled && (
@@ -137,7 +143,7 @@ export default async function PricingPage({
             >
               <span>Pro</span>
               <span className="border border-white/60 px-2 py-[3px]">
-                {TRIAL_DAYS}-day free trial
+                {open ? `Free until ${until}` : `${TRIAL_DAYS}-day free trial`}
               </span>
             </div>
             <div className="mt-4 flex items-baseline gap-2">
@@ -154,6 +160,14 @@ export default async function PricingPage({
                 / month
               </span>
             </div>
+            {open && (
+              <p
+                className="mt-2 text-[11px] uppercase tracking-[0.14em] opacity-80"
+                style={{ fontFamily: MONO }}
+              >
+                {left > 0 ? `for life, founding 100 · $39/month after` : '$39/month'}
+              </p>
+            )}
             <ul className="mt-6 space-y-2.5 text-[15px] leading-[1.45]">
               {PRO.map((f) => (
                 <li key={f} className="flex gap-2">
@@ -169,7 +183,11 @@ export default async function PricingPage({
                     className="text-[11px] uppercase tracking-[0.14em]"
                     style={{ fontFamily: MONO, color: BLUE }}
                   >
-                    {trialEnd ? `Trial · ends ${day(trialEnd)}` : 'You have Pro'}
+                    {trialEnd
+                      ? founding
+                        ? `First charge ${day(trialEnd)}`
+                        : `Trial · ends ${day(trialEnd)}`
+                      : 'You have Pro'}
                     {founding ? ` · Founding #${String(founding).padStart(3, '0')}` : ''}
                   </div>
                   {trialEnd && (
@@ -182,13 +200,24 @@ export default async function PricingPage({
                 </div>
               ) : (
                 <div className="bg-white p-4">
-                  <StartTrialButton signedIn={!!user} next="/pricing" />
+                  <StartTrialButton
+                    signedIn={!!user}
+                    next="/pricing"
+                    label={
+                      open
+                        ? left > 0
+                          ? 'Lock in $29 for life'
+                          : 'Keep Pro after Dec 3'
+                        : undefined
+                    }
+                  />
                   <p
                     className="mt-3 text-center text-[12px] leading-[1.5]"
                     style={{ color: MUTED }}
                   >
-                    Card required · $29/month after {TRIAL_DAYS} days · cancel before day{' '}
-                    {TRIAL_DAYS} and pay nothing
+                    {open
+                      ? `Card required · nothing charged until ${until} · cancel before then and pay nothing`
+                      : `Card required · $29/month after ${TRIAL_DAYS} days · cancel before day ${TRIAL_DAYS} and pay nothing`}
                   </p>
                 </div>
               )}
@@ -223,8 +252,9 @@ export default async function PricingPage({
               Founding 100
             </div>
             <p className="mt-2 text-[15px] leading-[1.55]" style={{ color: '#333' }}>
-              The first {FOUNDING_SPOTS} paying members keep $29/month forever, even when prices go
-              up, and get a short recorded brand teardown from Bawsa.
+              {open
+                ? `Add a card before ${until} and keep $29/month for life (your first charge is ${until}), plus a short recorded brand teardown from Bawsa. After the first ${FOUNDING_SPOTS}, Pro is $39/month.`
+                : `The first ${FOUNDING_SPOTS} paying members keep $29/month forever, even when prices go up, and get a short recorded brand teardown from Bawsa.`}
             </p>
           </div>
         </section>
