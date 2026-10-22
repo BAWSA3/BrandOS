@@ -45,6 +45,13 @@ export function cleanHandle(raw: string | null): string | null {
 async function main() {
   const host = (process.env.DATABASE_URL ?? '').replace(/^.*@/, '').replace(/[:/].*$/, '');
   console.log(`DB host: ${host}  |  mode: ${SEND ? 'SEND' : 'dry run'}`);
+  if (!process.env.EMAIL_REPLY_TO) {
+    console.warn(
+      '⚠ EMAIL_REPLY_TO is not set: replies go to the From address, which has no inbox.'
+    );
+    if (SEND && !to)
+      throw new Error('Set EMAIL_REPLY_TO before a list send (the email asks for replies).');
+  }
 
   const already = await prisma.emailSend.findMany({
     where: { campaign: CAMPAIGNS.studioTease },

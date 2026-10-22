@@ -24,6 +24,8 @@ export const CAMPAIGNS = {
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://mybrandos.app';
 const FROM = process.env.EMAIL_FROM || 'BrandOS <onboarding@resend.dev>';
+// mybrandos.app has no inbox (no MX), so replies need a real mailbox
+const REPLY_TO = process.env.EMAIL_REPLY_TO || undefined;
 
 // ---------------------------------------------------------------------------
 // Content
@@ -271,6 +273,7 @@ export async function sendOnce(
   const { data, error } = await client().emails.send({
     from: FROM,
     to: signup.email,
+    ...(REPLY_TO ? { replyTo: REPLY_TO } : {}),
     subject: content.subject,
     html,
     text,
