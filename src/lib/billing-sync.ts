@@ -1,7 +1,7 @@
 import type Stripe from 'stripe';
 import prisma from '@/lib/db';
 import type { SubscriptionTier } from '@prisma/client';
-import { mapStripeStatus } from '@/lib/billing';
+import { mapStripeStatus, periodEndOf } from '@/lib/billing';
 import { legacyTierToPlanTier } from '@/lib/plans';
 import { captureFunnelEvent } from '@/lib/funnel-events';
 
@@ -16,14 +16,18 @@ export async function syncSubscription(subscription: Stripe.Subscription): Promi
 
   const tier = (subscription.metadata?.tier || 'PRO') as SubscriptionTier;
   const status = mapStripeStatus(subscription.status);
-  const firstItem = subscription.items.data[0];
-  const interval = firstItem?.plan?.interval;
-  // during a trial this is the trial end (the first charge date)
-  const periodEnd = subscription.trial_end ?? firstItem?.current_period_end;
+  const interval = subscription.items.data[0]?.plan?.interval;
+  const customerId =
+    typeof subscription.customer === 'string' ? subscription.customer : subscription.customer.id;
 
   const before = await prisma.user.findUnique({
     where: { id: userId },
-    select: { subscriptionStatus: true, stripeSubscriptionId: true, supabaseId: true },
+    select: {
+      subscriptionStatus: true,
+      stripeSubscriptionId: true,
+      supabaseId: true,
+      stripeCustomerId: true,
+    },
   });
   if (!before) return;
 
@@ -31,15 +35,12 @@ export async function syncSubscription(subscription: Stripe.Subscription): Promi
     where: { id: userId },
     data: {
       stripeSubscriptionId: subscription.id,
+      // checkout sets this first; backfill so invoice.paid can always find the user
+      ...(before.stripeCustomerId ? {} : { stripeCustomerId: customerId }),
       subscriptionTier: tier,
       subscriptionStatus: status,
       billingInterval: interval === 'year' ? 'annual' : 'monthly',
-      currentPeriodEnd:
-        status === 'TRIALING' && subscription.trial_end
-          ? new Date(subscription.trial_end * 1000)
-          : periodEnd
-            ? new Date(periodEnd * 1000)
-            : null,
+      currentPeriodEnd: periodEndOf(subscription),
     },
   });
 

@@ -1,6 +1,7 @@
 import { Resend } from 'resend';
 import prisma from '@/lib/db';
 import { getArchetypeInfo } from '@/lib/archetype-descriptions';
+import { normalizeArchetypeName } from '@/lib/archetype-names';
 import { renderNewsletter, type NewsletterContent } from '@/lib/newsletter-template';
 
 /**
@@ -19,10 +20,13 @@ export const CAMPAIGNS = {
   reserveConfirm: 'reserve-confirm',
   release: 'release-v1',
   reengage: 'reengage-oct26',
+  studioTease: 'studio-tease-oct22',
 } as const;
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://mybrandos.app';
 const FROM = process.env.EMAIL_FROM || 'BrandOS <onboarding@resend.dev>';
+// mybrandos.app has no inbox (no MX), so replies need a real mailbox
+const REPLY_TO = process.env.EMAIL_REPLY_TO || undefined;
 
 // ---------------------------------------------------------------------------
 // Content
@@ -118,6 +122,210 @@ export function reengageContent(r: {
   };
 }
 
+/** Current display name for a stored archetype ("SIGNAL_SAGE" → "SOURCE"), or null. */
+function archetypeLabel(raw: string | null): string | null {
+  if (!raw) return null;
+  const name = normalizeArchetypeName(normalizeArchetypeName(raw).replace(/^The /, ''));
+  const info = getArchetypeInfo(name);
+  // "62 · NULL" reads like missing data, so the anon archetype stays off the label
+  return info && info.name !== 'NULL' ? info.name : null;
+}
+
+/**
+ * Pre-launch tease (Oct 22 2026) for the whole list: "BrandOS Studio opens
+ * Nov 2". One job: get a fresh scan. Hook (their last score + archetype) →
+ * button straight away (`/?scan=<handle>` runs their scan) → the why, the
+ * Studio, a reply offer, Founding 100 in the P.S.
+ *
+ * Subject A/B on people with a score: A = "you scored 62 in march",
+ * B = "did your brand score go up?". The variant rides utm_content, and
+ * conversion is read back from BrandScans (did that handle scan after the send).
+ */
+type TeaseRecipient = {
+  handle: string | null;
+  score: number | null;
+  archetype?: string | null;
+  since: Date;
+  variant?: 'a' | 'b';
+};
+
+/** Everything the tease says, shared by the plain-text and branded HTML versions. */
+function teaseModel(r: TeaseRecipient) {
+  const month = r.since.toLocaleString('en-US', { month: 'long', timeZone: 'UTC' }).toLowerCase();
+  const days = (Date.now() - r.since.getTime()) / 86_400_000;
+  // scanned in the last ~6 weeks: "7 months of posts ago" would read wrong
+  const recent = days < 45;
+  const months = Math.max(2, Math.round(days / 30));
+  const variant = r.variant ?? 'a';
+  const utm = `utm_source=email&utm_medium=email&utm_campaign=studio-tease&utm_content=${variant}`;
+  const hasScore = r.score != null;
+
+  const subject =
+    hasScore && r.handle
+      ? variant === 'b'
+        ? `@${r.handle}, did your brand score go up?`
+        : recent
+          ? `@${r.handle}, your last brand score was ${r.score}`
+          : `@${r.handle}, you scored ${r.score} in ${month}`
+      : r.handle
+        ? `@${r.handle}, what's your brand score now?`
+        : "what's your brand score now?";
+
+  return {
+    subject,
+    preheader: hasScore
+      ? 'did it go up or down? takes a minute to find out.'
+      : 'free, about a minute. BrandOS Studio opens Nov 2.',
+    who: r.handle ? `@${esc(r.handle)}` : 'there',
+    handle: r.handle ? esc(r.handle) : null,
+    score: r.score,
+    arch: archetypeLabel(r.archetype ?? null),
+    then: recent ? 'last scan' : month,
+    url: r.handle
+      ? `${APP_URL}/?scan=${encodeURIComponent(r.handle)}&${utm}`
+      : `${APP_URL}/?${utm}`,
+    hook: hasScore
+      ? recent
+        ? 'your score moves every time you post. up or down since your last scan? i&#39;d bet you can&#39;t guess which.'
+        : `that was ${months} months of posts ago. your score has moved since, up or down, and i&#39;d bet you can&#39;t guess which.`
+      : recent
+        ? 'you signed up for BrandOS recently. before it opens, see where your brand stands. it&#39;s free and takes about a minute.'
+        : `you signed up for BrandOS back in ${month}. i&#39;ve been building since. before it opens, see where your brand stands. it&#39;s free and takes about a minute.`,
+    cta: hasScore ? 'See my score now →' : 'Scan my brand →',
+    why: '4,000+ creators have scanned their brand on BrandOS. brands are starting to ask AI who to work with instead of reading bios, so knowing where you stand matters more every month.',
+    studio:
+      'on <b>nov 2</b> i&#39;m opening <b>BrandOS Studio</b>: one dashboard that tracks your brand score over time, keeps you on-brand, and tells you what to fix after every post.',
+    reply: 'hit reply with your new score and i&#39;ll tell you the one thing i&#39;d fix first.',
+    ps: 'on nov 2 everyone gets full access to BrandOS Studio, free until dec 3. no card needed. the first 100 people who add a card before dec 3 lock in $29/mo for life (nothing is charged until dec 3), plus a recorded teardown of their brand from me. after that, Pro is $39/mo.',
+  };
+}
+
+/** Plain content (subject, preheader, text part); the HTML comes from renderStudioTease. */
+export function studioTeaseContent(r: TeaseRecipient): NonNullable<NewsletterContent> {
+  const m = teaseModel(r);
+  return {
+    subject: m.subject,
+    preheader: m.preheader,
+    sections: [
+      { type: 'text', content: `hey ${m.who},` },
+      ...(m.score != null
+        ? [
+            {
+              type: 'stat' as const,
+              label: m.arch ? `${m.score} · ${esc(m.arch)}` : String(m.score),
+              content: `your brand, ${m.then}`,
+            },
+          ]
+        : []),
+      { type: 'text', content: m.hook },
+      { type: 'cta', content: m.cta, url: m.url },
+      { type: 'text', content: m.why },
+      { type: 'text', content: m.studio },
+      { type: 'text', content: `${m.reply}<br/><br/>— Bawsa` },
+      { type: 'text', content: `<b>p.s.</b> ${m.ps}` },
+    ],
+  };
+}
+
+/**
+ * Branded HTML for the tease, in the locked design system: bone canvas, one
+ * Klein tile (their score then → "??" now, the whole hook in one glance),
+ * ink button, mono micro-labels, hairline rules. Table layout + inline styles
+ * for email clients; light-only so Gmail's dark mode doesn't invert the tile.
+ */
+export function renderStudioTease(
+  r: TeaseRecipient,
+  email: string
+): { html: string; text: string } {
+  const m = teaseModel(r);
+  const { text } = renderNewsletter(studioTeaseContent(r), email);
+  const unsub = `${APP_URL}/api/newsletter/unsubscribe?email=${encodeURIComponent(email)}`;
+  const asset = process.env.EMAIL_ASSET_BASE || APP_URL;
+
+  const SANS = "'Helvetica Neue', Helvetica, Arial, sans-serif";
+  const MONO = "'JetBrains Mono', 'SFMono-Regular', Menlo, Consolas, monospace";
+  const label = (t: string, color = '#6B6862') =>
+    `<div style="font-family:${MONO};font-size:10px;letter-spacing:1.6px;text-transform:uppercase;color:${color};margin:0 0 10px 0;">${t}</div>`;
+  const p = (t: string, extra = '') =>
+    `<p style="font-family:${SANS};font-size:16px;line-height:1.6;color:#0E0E0E;margin:0 0 18px 0;${extra}">${t}</p>`;
+  const rule = `<tr><td style="padding:8px 0 26px 0;"><div style="border-top:1px solid #DCD8CF;font-size:0;line-height:0;">&nbsp;</div></td></tr>`;
+  const big = (v: string, color: string) =>
+    `<div style="font-family:${SANS};font-size:76px;line-height:1;font-weight:700;letter-spacing:-3px;color:${color};">${v}</div>`;
+
+  const tile =
+    m.score != null
+      ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#0047FF;border-radius:10px;">
+          <tr><td colspan="3" style="padding:22px 24px 0 24px;">${label(`Brand score · ${m.handle ? '@' + m.handle : 'you'}`, '#B8CBFF')}</td></tr>
+          <tr>
+            <td valign="top" style="padding:6px 0 24px 24px;width:46%;">
+              ${label(m.then, '#B8CBFF')}${big(String(m.score), '#FFFFFF')}
+              ${m.arch ? `<div style="font-family:${MONO};font-size:11px;letter-spacing:1.6px;color:#FFFFFF;margin-top:10px;">${esc(m.arch)}</div>` : ''}
+            </td>
+            <td valign="top" align="center" style="padding:52px 0 0 0;font-family:${MONO};font-size:22px;color:#8FADFF;">&rarr;</td>
+            <td valign="top" style="padding:6px 24px 24px 0;width:42%;">
+              ${label('now', '#B8CBFF')}${big('??', '#7FA1FF')}
+              <div style="font-family:${MONO};font-size:11px;letter-spacing:1.6px;color:#B8CBFF;margin-top:10px;">1 MIN SCAN</div>
+            </td>
+          </tr>
+        </table>`
+      : `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#0047FF;border-radius:10px;">
+          <tr><td style="padding:22px 24px 24px 24px;">
+            ${label(`Brand score · ${m.handle ? '@' + m.handle : 'you'}`, '#B8CBFF')}
+            ${big('??', '#FFFFFF')}
+            <div style="font-family:${MONO};font-size:11px;letter-spacing:1.6px;color:#B8CBFF;margin-top:10px;">1 MIN SCAN</div>
+          </td></tr>
+        </table>`;
+
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light only">
+  <meta name="supported-color-schemes" content="light only">
+  <title>${esc(m.subject)}</title>
+</head>
+<body style="margin:0;padding:0;background:#F2EFE8;-webkit-font-smoothing:antialiased;">
+  <div style="display:none;max-height:0;overflow:hidden;opacity:0;">${m.preheader}${'&nbsp;&zwnj;'.repeat(60)}</div>
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F2EFE8;">
+    <tr><td align="center" style="padding:28px 16px 40px 16px;">
+      <table role="presentation" width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;">
+        <tr><td style="padding:0 0 22px 0;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+            <td><a href="${APP_URL}" style="text-decoration:none;"><img src="${asset}/brand/wordmark-day-480.png" width="150" alt="BrandOS" style="display:block;width:150px;height:auto;border:0;"></a></td>
+            <td align="right" style="font-family:${MONO};font-size:10px;letter-spacing:1.6px;text-transform:uppercase;color:#6B6862;">Brand report</td>
+          </tr></table>
+        </td></tr>
+        ${rule}
+        <tr><td>${p(`hey ${m.who},`)}</td></tr>
+        <tr><td style="padding:4px 0 22px 0;">${tile}</td></tr>
+        <tr><td>${p(m.hook)}</td></tr>
+        <tr><td style="padding:6px 0 30px 0;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+            <td align="center" style="background:#0E0E0E;border-radius:6px;">
+              <a href="${m.url}" style="display:block;padding:17px 20px;font-family:${MONO};font-size:13px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:#FFFFFF;text-decoration:none;">${m.cta}</a>
+            </td>
+          </tr></table>
+        </td></tr>
+        ${rule}
+        <tr><td>${label('Why now')}${p(m.why)}</td></tr>
+        <tr><td style="padding-top:6px;">${label('Nov 2 · BrandOS Studio')}${p(m.studio)}</td></tr>
+        <tr><td style="padding-top:6px;">${p(m.reply)}${p('— Bawsa', 'margin-bottom:28px;')}</td></tr>
+        <tr><td style="background:#FAF8F3;border:1px solid #DCD8CF;border-radius:10px;padding:20px 22px;">
+          ${label('Founding 100', '#0047FF')}${p(`<b>p.s.</b> ${m.ps}`, 'font-size:15px;margin:0;')}
+        </td></tr>
+        <tr><td align="center" style="padding:30px 0 0 0;font-family:${SANS};font-size:12px;line-height:1.6;color:#9A968E;">
+          You're getting this because you signed up at <a href="${APP_URL}" style="color:#9A968E;">mybrandos.app</a>.<br>
+          <a href="${unsub}" style="color:#9A968E;text-decoration:underline;">Unsubscribe</a>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+  return { html, text };
+}
+
 // DRAFT copy for release day: Jeffrey approves the wording before any send.
 export function releaseEmailContent(): NewsletterContent {
   return {
@@ -165,7 +373,15 @@ export type SendResult = 'sent' | 'already-sent' | 'skipped-unsubscribed' | 'fai
 export async function sendOnce(
   signupId: string,
   campaign: string,
-  build: (signup: { id: string; email: string }) => NewsletterContent
+  build: (signup: { id: string; email: string }) => NewsletterContent,
+  // optional campaign-specific HTML (defaults to the shared newsletter template)
+  render: (
+    content: NonNullable<NewsletterContent>,
+    email: string
+  ) => {
+    html: string;
+    text: string;
+  } = renderNewsletter
 ): Promise<SendResult> {
   const signup = await prisma.emailSignup.findUnique({
     where: { id: signupId },
@@ -181,15 +397,18 @@ export async function sendOnce(
   }
 
   const content = build(signup);
-  const { html, text } = renderNewsletter(content, signup.email);
+  const { html, text } = render(content, signup.email);
   const { data, error } = await client().emails.send({
     from: FROM,
     to: signup.email,
+    ...(REPLY_TO ? { replyTo: REPLY_TO } : {}),
     subject: content.subject,
     html,
     text,
     headers: {
       'List-Unsubscribe': `<${APP_URL}/api/newsletter/unsubscribe?email=${encodeURIComponent(signup.email)}>`,
+      // RFC 8058 one-click: Gmail/Yahoo POST to the URL above (the route reads ?email=)
+      'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
     },
   });
   if (error || !data) {

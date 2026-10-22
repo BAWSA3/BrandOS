@@ -1535,6 +1535,14 @@ export default function XBrandScoreHero({
               >
                 Get The Full Breakdown <span aria-hidden>→</span>
               </a>
+              {/* Sets up launch day for today's scanners (offer decided 2026-10-22) */}
+              <p
+                className="capture-hide mt-4 text-center text-[11px] tracking-[0.14em] text-black/70 uppercase"
+                style={{ fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace" }}
+              >
+                BrandOS Studio opens Nov 2 ·{' '}
+                <span className="text-[#0047FF]">free until Dec 3</span>
+              </p>
               {/* Sign in keeps this scan: it becomes the account's first dashboard scan */}
               <a
                 href="/signup?next=/dashboard"

@@ -4,34 +4,54 @@ import { useEffect, useState } from 'react';
 
 const MONO = "var(--dash-mono, 'VCR OSD Mono', monospace)";
 
+/** What the dashboard top bar says about the account's plan. */
+export type PlanBadge =
+  /** Launch window, no card yet: "Free until Dec 3 · Lock $29 →" (opens checkout). */
+  | { kind: 'open'; until: string; spotsLeft: number }
+  /** Card on file during the launch window: "Founding #12 · first charge Dec 3". */
+  | { kind: 'founding'; number: number | null; chargesAt: string }
+  /** Card trial after the launch window: "Trial · 5 days left". */
+  | { kind: 'trial'; endsAt: string };
+
+const shortDate = (iso: string) =>
+  new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
 /**
- * Trial badge in the dashboard top bar: "Trial · 5 days left". Click opens
- * Stripe's billing portal (cancel / card / invoices).
+ * Plan badge in the dashboard top bar. The open-access badge starts the
+ * Founding checkout; the others open Stripe's billing portal (cancel / card /
+ * invoices).
  */
 export default function PlanChip({
-  trialEndsAt,
+  plan,
   onCanvas = false,
 }: {
-  trialEndsAt: string;
+  plan: PlanBadge;
   onCanvas?: boolean;
 }) {
   const [busy, setBusy] = useState(false);
-  // days left, computed after mount (the clock isn't read during render)
+  // trial days left, computed after mount (the clock isn't read during render)
   const [days, setDays] = useState<number | null>(null);
+  const endsAt = plan.kind === 'trial' ? plan.endsAt : null;
   useEffect(() => {
+    if (!endsAt) return;
     const t = window.setTimeout(
-      () =>
-        setDays(
-          Math.max(0, Math.ceil((new Date(trialEndsAt).getTime() - Date.now()) / 86_400_000))
-        ),
+      () => setDays(Math.max(0, Math.ceil((new Date(endsAt).getTime() - Date.now()) / 86_400_000))),
       0
     );
     return () => window.clearTimeout(t);
-  }, [trialEndsAt]);
-  const open = async () => {
+  }, [endsAt]);
+
+  const go = async () => {
     setBusy(true);
     try {
-      const res = await fetch('/api/stripe/portal', { method: 'POST' });
+      const res = await fetch(
+        plan.kind === 'open' ? '/api/stripe/checkout' : '/api/stripe/portal',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: plan.kind === 'open' ? JSON.stringify({ tier: 'PRO' }) : undefined,
+        }
+      );
       const body = (await res.json().catch(() => ({}))) as { url?: string };
       if (body.url) window.location.href = body.url;
       else setBusy(false);
@@ -39,25 +59,40 @@ export default function PlanChip({
       setBusy(false);
     }
   };
+
+  const label =
+    plan.kind === 'open'
+      ? plan.spotsLeft > 0
+        ? `Free until ${shortDate(plan.until)} · Lock $29 for life →`
+        : `Free until ${shortDate(plan.until)} · Keep Pro →`
+      : plan.kind === 'founding'
+        ? `${plan.number ? `Founding #${plan.number}` : 'Pro'} · first charge ${shortDate(plan.chargesAt)}`
+        : `Trial${days === null ? '' : days === 0 ? ' · ends today' : ` · ${days} day${days === 1 ? '' : 's'} left`}`;
+  const title =
+    plan.kind === 'open'
+      ? plan.spotsLeft > 0
+        ? `${plan.spotsLeft} of 100 founding spots left: add a card to keep $29/mo for life. Nothing is charged until ${shortDate(plan.until)}.`
+        : `Add a card to keep Pro after ${shortDate(plan.until)}.`
+      : plan.kind === 'founding'
+        ? `Nothing is charged until ${shortDate(plan.chargesAt)}. Manage billing`
+        : `Your trial ends ${shortDate(plan.endsAt)}. Manage billing`;
+  const accent = plan.kind === 'open';
+
   return (
     <button
       type="button"
-      onClick={open}
+      onClick={go}
       disabled={busy}
-      title={`Your trial ends ${new Date(trialEndsAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}. Manage billing`}
+      title={title}
       className="mr-1 border px-2 py-1 text-[10px] uppercase tracking-[0.14em] disabled:opacity-60"
       style={{
         fontFamily: MONO,
-        borderColor: onCanvas ? 'var(--d-head-muted)' : 'var(--d-rule)',
-        color: onCanvas ? 'var(--d-head)' : 'var(--d-muted)',
+        borderColor: accent ? '#0047FF' : onCanvas ? 'var(--d-head-muted)' : 'var(--d-rule)',
+        background: accent ? '#0047FF' : 'transparent',
+        color: accent ? '#FFFFFF' : onCanvas ? 'var(--d-head)' : 'var(--d-muted)',
       }}
     >
-      Trial
-      {days === null
-        ? ''
-        : days === 0
-          ? ' · ends today'
-          : ` · ${days} day${days === 1 ? '' : 's'} left`}
+      {busy ? (plan.kind === 'open' ? 'Opening checkout…' : 'Opening…') : label}
     </button>
   );
 }

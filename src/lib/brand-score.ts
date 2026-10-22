@@ -4,7 +4,8 @@ import { xBrandScorePrompt, enhancedBrandScorePrompt, XProfileData } from '@/lib
 import { resolveArchetype, getEvolutionInfo } from '@/lib/archetype-engine';
 import { recordScan, extractIntelligence } from '@/lib/scan-tracking';
 import { brandScoreCache } from '@/lib/cache';
-import { getUserProfile } from '@/lib/user-profiles';
+import { getUserProfileAsync } from '@/lib/user-profiles';
+import { smoothScore } from '@/lib/score-smoothing';
 import {
   parseBrandScore,
   heuristicBrandScore,
@@ -45,6 +46,8 @@ async function scoreWithClaude(prompt: string): Promise<string> {
   const message = await anthropic.beta.messages.create({
     model: 'claude-haiku-4-5-20251001',
     max_tokens: 4096,
+    // same feed → same read: the default (1.0) let rescans swing ±5–10 points
+    temperature: 0,
     system: SCORE_SYSTEM,
     messages: [{ role: 'user', content: prompt }],
     betas: ['structured-outputs-2025-11-13'],
@@ -139,8 +142,9 @@ export async function computeBrandScore(
     cachedAt: string;
   }>(cacheKey);
 
-  // Build score context from user history
-  const userProfile = getUserProfile(cleanUsername);
+  // Build score context from user history. Async (DB): the sync getUserProfile
+  // only sees this instance's memory, so smoothing silently never ran.
+  const userProfile = await getUserProfileAsync(cleanUsername);
   const scoreHistory = userProfile?.scores || [];
   const scoreValues = scoreHistory.map((s) => s.value);
   const scoreRange =
@@ -214,18 +218,18 @@ export async function computeBrandScore(
   }
 
   // === SCORE SMOOTHING: prevent jarring score swings for returning users ===
-  // LLMs are non-deterministic — same profile can produce ±10 point variance.
-  // For returning users, clamp the new score within ±5 of their stored score
-  // so the number feels stable while still allowing real growth/decline over time.
-  const MAX_SCORE_DRIFT = 5;
+  // The model is non-deterministic; clamp a returning handle's new score near
+  // its stored one (±3 within a week, ±5 within a month, ±12 after), so the
+  // number feels stable while real change over time still shows.
   if (userProfile && !forceReevaluate) {
-    const storedScore = userProfile.currentScore;
     const rawScore = brandScore.overallScore;
-    if (Math.abs(rawScore - storedScore) > MAX_SCORE_DRIFT) {
-      brandScore.overallScore =
-        rawScore > storedScore ? storedScore + MAX_SCORE_DRIFT : storedScore - MAX_SCORE_DRIFT;
+    brandScore.overallScore = smoothScore(rawScore, {
+      score: userProfile.currentScore,
+      scannedAt: new Date(userProfile.lastScannedAt),
+    });
+    if (brandScore.overallScore !== rawScore) {
       console.log(
-        `[BrandScore] Smoothed score for @${cleanUsername}: ${rawScore} → ${brandScore.overallScore} (stored: ${storedScore})`
+        `[BrandScore] Smoothed score for @${cleanUsername}: ${rawScore} → ${brandScore.overallScore} (stored: ${userProfile.currentScore})`
       );
     }
   }

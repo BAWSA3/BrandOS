@@ -1,6 +1,7 @@
 import { Resend } from 'resend';
 import prisma from '@/lib/db';
 import { renderNewsletter, type NewsletterContent } from '@/lib/newsletter-template';
+import { foundingNumber } from '@/lib/founding';
 
 /**
  * "Here's what your dashboard says" — sent when Stripe fires
@@ -48,9 +49,13 @@ export async function sendTrialEndingEmail(
     month: 'short',
     day: 'numeric',
   });
+  // Founding 100 (launch offer): card added during free access, first charge Dec 3
+  const founding = await foundingNumber(userId);
 
   const content: NewsletterContent = {
-    subject: `Your BrandOS trial ends ${day}`,
+    subject: founding
+      ? `Founding #${founding}: your $29 rate starts ${day}`
+      : `Your BrandOS trial ends ${day}`,
     preheader: scan
       ? `Your brand score is ${scan.score}. Here's what your dashboard says.`
       : undefined,
@@ -74,7 +79,9 @@ export async function sendTrialEndingEmail(
         : []),
       {
         type: 'text',
-        content: `Your free trial ends <strong>${day}</strong>. After that it's $29/month and you keep everything: score history, every post analyzed, your Brand Pass, and BrandOS inside Claude and ChatGPT. If you're one of the first 100, $29 is locked in for good.`,
+        content: founding
+          ? `Free access ends <strong>${day}</strong>. As founding member #${founding}, you keep everything for $29/month, locked in for life: score history, every post analyzed, your Brand Pass, and BrandOS inside Claude and ChatGPT. Your recorded brand teardown is coming from me.`
+          : `Your free trial ends <strong>${day}</strong>. After that it's $29/month and you keep everything: score history, every post analyzed, your Brand Pass, and BrandOS inside Claude and ChatGPT. If you're one of the first 100, $29 is locked in for good.`,
       },
       {
         type: 'cta',

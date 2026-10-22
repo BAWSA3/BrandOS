@@ -38,6 +38,13 @@ video tease) has to multiply scan volume; current traffic alone won't do it.
 
 ## Offer and funnel
 
+> **Updated Oct 22 (supersedes the card-required trial for launch):** Nov 2 → **Dec 3, full
+> access is free for everyone, no card.** The **Founding 100** add a card before Dec 3 to keep
+> **$29/mo for life** (first charge Dec 3) plus a recorded teardown. After the first 100, Pro is
+> **$39/mo**. After Dec 3 the site falls back to the card-required 7-day trial. Goal: feedback
+> volume plus a real payment signal (cards added). Built in #173. The original Oct 18 funnel is
+> kept below for reference.
+
 1. **Free X Brand Score scan.** Live on prod (homepage). Every piece of content ends
    with "scan yours."
 2. **Card-required free trial** of the Brand Dashboard (X data only). _Not built yet._
@@ -84,7 +91,8 @@ Legend: ✅ done · 🟡 on staging, not prod · 🔨 to build · 👤 Bawsa (no
 | Trial-ending note (email)                       | ✅ built   | `trial_will_end` → score + weakest phase + charge date + cancel link                         |
 | Weekly review numbers                           | 🔨         | `scripts/weekly-review.mjs` (scans, trials, paid, cancels)                                   |
 | Teardown kit                                    | 🔨         | Handle → scan + `/@handle` + score card PNG (reuse the video capture pipeline)               |
-| "What I built" email to the list                | 🟡         | Launch-email infra exists (#41); rewrite copy; the held 981-recipient send becomes this      |
+| "What I built" email to the list                | ✅ sent    | Oct 22 "BrandOS Studio" tease, 1,009 sent. Results in "Email and follow-up plan" below       |
+| Launch offer: open access + Founding card lock  | 🟡 #173    | Free until Dec 3, founding checkout charges Dec 3, $39 price needed before spot #100         |
 | Find Your Opp + tier list in rotation           | ❓         | Verify they're reachable on prod (#40 hid legacy pages; tier list had the Sept egress issue) |
 | CUSTOMER-VOICE.md / KILLED-IDEAS.md             | ✅         | Created alongside this file                                                                  |
 
@@ -120,7 +128,7 @@ otherwise push one week.
 **Oct 26–Nov 1: warm up (no selling yet)**
 
 - [ ] 👤 DM the 213+ "ACCESS" commenters: first claim on Founding 100 spots
-- [ ] 👤 Email the 1k list once: "Here's what I built since you signed up" + dashboard screenshot + founding spots open next week
+- [x] Email the 1k list once: sent Oct 22 as the "BrandOS Studio" tease (see the email plan below)
 - [ ] 👤 3–4 build-in-public posts from your own dashboard (the Oct 16 skins video counts as one)
 - [ ] 🔨 Pre-run the first 7 teardown targets through the teardown kit
 - [ ] 👤 Save every reply and DM to `CUSTOMER-VOICE.md`
@@ -139,6 +147,67 @@ otherwise push one week.
 - [ ] Before each trial ends: "here's what your dashboard says" note (automated email + your DM)
 - [ ] 👤 DM every trial user; talk to every canceller; log in `CUSTOMER-VOICE.md`
 - [ ] If trials don't convert, fix what cancellers say. No new features
+
+---
+
+## Email and follow-up plan (Oct 22)
+
+### What the Oct 22 email did
+
+"BrandOS Studio opens Nov 2" tease, personal (their last score + archetype), one button that
+runs their scan (`/?scan=<handle>`). Branded template, replies to Bawsa's Gmail, DMARC added.
+`scripts/send-studio-tease.ts` (`--report` gives scans per subject).
+
+| As of Oct 22, noon PT                   | Result                                           |
+| --------------------------------------- | ------------------------------------------------ |
+| Sent / delivered                        | 1,009 / 974 (96.5%)                              |
+| Bounced / spam complaints               | 17 (1.7%) / **0**                                |
+| Unsubscribes                            | 1                                                |
+| Homepage scans since send               | **74** vs 12 the same hours the day before (~6×) |
+| Breakdown emails requested              | 21 (36% of scanners): the reveal capture works   |
+| **Subject A** "you scored 62 in march"  | **9.4% scanned** (33/352)                        |
+| Subject B "did your brand score go up?" | 4.8% scanned (17/351)                            |
+
+**Learning:** showing someone their real number beats asking a question. Use A's style for
+every list email ("@handle, your score is 71. studio is open.").
+
+### Rules
+
+1. **Max one email a week to the whole list.**
+2. Everything else is **triggered by behavior** and only goes to that segment.
+3. **One job per email.** One button.
+4. Replies get a **1:1 answer within 24h** (the Oct 22 email promised "the one thing i'd fix
+   first"). These are the warmest Founding 100 leads; log them in `CUSTOMER-VOICE.md`.
+
+### Cadence
+
+| When      | Who                                  | The one job                                                                                                                                                                  |
+| --------- | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ✅ Oct 22 | Everyone                             | Fresh scan (done)                                                                                                                                                            |
+| Oct 26    | **Substack only** (no BrandOS email) | Data story: "what 4,000 scans taught me," linked from an X thread                                                                                                            |
+| **Nov 2** | Everyone                             | Launch: "Studio is open, free until Dec 3." Score in the subject; Oct 22 scanners get "you scored 71 on Oct 22, your dashboard is ready"; cite the week's teardowns as proof |
+| Nov 6     | Didn't sign up after Nov 2           | One nudge with proof: "N creators are in, here's what they found"                                                                                                            |
+| Nov 30    | Signed up, no card                   | "3 days left to lock $29 for life" + founding spots left                                                                                                                     |
+| Dec 2     | Signed up, no card                   | "Free access ends tomorrow"                                                                                                                                                  |
+
+Two list-wide emails between now and Dec 3; everything else is targeted. Substack and the
+BrandOS list overlap: export Substack subscribers before Nov 2 and keep the overlap out of one
+of the two launch-day sends.
+
+### X teardowns (the awareness engine, runs alongside)
+
+- **Oct 23–30: one teardown per weekday** (6 total). Pick creators/founders with roughly
+  **20k–300k followers** who actually reply. Mega accounts rarely do.
+- Format: score card (Klein skin) + score and archetype + **2 things they do right, 1 fixable
+  gap** + `mybrandos.app/@them`. "What @X does that you should steal" gets quote-tweets;
+  takedowns don't.
+- End every one with **"drop your handle and i'll send you yours."** Pre-scan the handles that
+  come in; reply with their `/@handle` link. Their page shows "Compare your brand to @X", so
+  their followers scan too. `/@handle` page views are counted per handle (`BrandLookup`), so
+  each teardown's reach is measurable.
+- Oct 31–Nov 1: tease ("studio opens monday, free for 30 days"). Nov 2: launch post + reply
+  wave to every collected handle. Teardowns continue Nov 3+ ending with "your dashboard is
+  open."
 
 ---
 

@@ -2,8 +2,15 @@
  * Billing rules for the launch (docs/LAUNCH-PLAN.md). Pure, no network/DB:
  *   npm run test:billing
  */
-import { hasPro, mapStripeStatus, trialEndsAt } from '../src/lib/billing';
-import { TRIAL_DAYS, FOUNDING_SPOTS, PLAN_CONFIGS } from '../src/lib/plans';
+import {
+  hasPro,
+  isOpenAccess,
+  isSubscribed,
+  mapStripeStatus,
+  periodEndOf,
+  trialEndsAt,
+} from '../src/lib/billing';
+import { TRIAL_DAYS, FOUNDING_SPOTS, OPEN_ACCESS_UNTIL, PLAN_CONFIGS } from '../src/lib/plans';
 import { viewerKey } from '../src/lib/lookups';
 import { digestContent } from '../src/lib/lookup-digest';
 
@@ -19,20 +26,41 @@ function test(name: string, ok: boolean) {
   }
 }
 
-console.log('A. Who gets Pro');
+console.log('A. Who gets Pro (after the launch window)');
 const u = (subscriptionTier: string, subscriptionStatus: string, role = 'user') => ({
   subscriptionTier,
   subscriptionStatus,
   role,
 });
-test('Pro + trialing → Pro', hasPro(u('PRO', 'TRIALING')));
-test('Pro + active → Pro', hasPro(u('PRO', 'ACTIVE')));
-test('Pro + past_due (failed charge at trial end) → Free', !hasPro(u('PRO', 'PAST_DUE')));
-test('Pro + canceled → Free', !hasPro(u('PRO', 'CANCELED')));
-test('Pro + incomplete → Free', !hasPro(u('PRO', 'INCOMPLETE')));
-test('Free + active (the default for every account) → Free', !hasPro(u('FREE', 'ACTIVE')));
-test('legacy CREATOR + active → Free', !hasPro(u('CREATOR', 'ACTIVE')));
-test('admin on Free → Pro (founder is never paywalled)', hasPro(u('FREE', 'ACTIVE', 'admin')));
+// rules once open access is over (Dec 3)
+const AFTER = new Date(OPEN_ACCESS_UNTIL.getTime() + 1000);
+test('Pro + trialing → Pro', hasPro(u('PRO', 'TRIALING'), AFTER));
+test('Pro + active → Pro', hasPro(u('PRO', 'ACTIVE'), AFTER));
+test('Pro + past_due (failed charge at trial end) → Free', !hasPro(u('PRO', 'PAST_DUE'), AFTER));
+test('Pro + canceled → Free', !hasPro(u('PRO', 'CANCELED'), AFTER));
+test('Pro + incomplete → Free', !hasPro(u('PRO', 'INCOMPLETE'), AFTER));
+test('Free + active (the default for every account) → Free', !hasPro(u('FREE', 'ACTIVE'), AFTER));
+test('legacy CREATOR + active → Free', !hasPro(u('CREATOR', 'ACTIVE'), AFTER));
+test(
+  'admin on Free → Pro (founder is never paywalled)',
+  hasPro(u('FREE', 'ACTIVE', 'admin'), AFTER)
+);
+
+console.log('A2. Launch window: free full access until Dec 3');
+const DURING = new Date(OPEN_ACCESS_UNTIL.getTime() - 86_400_000);
+test(
+  'window ends Dec 3 2026, 9am PT',
+  OPEN_ACCESS_UNTIL.toISOString() === '2026-12-03T17:00:00.000Z'
+);
+test('open the day before', isOpenAccess(DURING));
+test('closed after', !isOpenAccess(AFTER));
+test('free account → Pro during the window', hasPro(u('FREE', 'ACTIVE'), DURING));
+test('canceled account → Pro during the window', hasPro(u('PRO', 'CANCELED'), DURING));
+test(
+  'free account is NOT subscribed (checkout + return sync still work)',
+  !isSubscribed(u('FREE', 'ACTIVE'))
+);
+test('founding card (trialing) is subscribed', isSubscribed(u('PRO', 'TRIALING')));
 
 console.log('B. Stripe status mapping (bug: unknown statuses used to map to ACTIVE)');
 test('active → ACTIVE', mapStripeStatus('active') === 'ACTIVE');
@@ -42,7 +70,7 @@ test('unpaid → PAST_DUE (not ACTIVE)', mapStripeStatus('unpaid') === 'PAST_DUE
 test('paused → INCOMPLETE (not ACTIVE)', mapStripeStatus('paused') === 'INCOMPLETE');
 test('canceled → CANCELED', mapStripeStatus('canceled') === 'CANCELED');
 test('incomplete_expired → INCOMPLETE', mapStripeStatus('incomplete_expired') === 'INCOMPLETE');
-test('unknown → not entitled', !hasPro(u('PRO', mapStripeStatus('something_new'))));
+test('unknown → not entitled', !hasPro(u('PRO', mapStripeStatus('something_new')), AFTER));
 
 console.log('C. Trial end');
 const end = new Date('2026-11-09T12:00:00Z');
@@ -85,6 +113,31 @@ test(
 test(
   'digest never names viewers (counts + type only)',
   !JSON.stringify(many).match(/@(?!jbawsa)[a-z0-9_]+/i)
+);
+
+console.log('F. Stored period end (bug: an ended trial kept showing as the renewal date)');
+const sub = (status: string, trial_end: number | null, current_period_end: number) => ({
+  status,
+  trial_end,
+  items: { data: [{ current_period_end }] },
+});
+const TRIAL_END = 1_793_274_798; // Oct 29
+const RENEWS = 1_795_348_421; // Nov 22
+test(
+  'trialing → trial end (first charge date)',
+  periodEndOf(sub('trialing', TRIAL_END, RENEWS))?.getTime() === TRIAL_END * 1000
+);
+test(
+  'active after a trial → renewal date, not the old trial end',
+  periodEndOf(sub('active', TRIAL_END, RENEWS))?.getTime() === RENEWS * 1000
+);
+test(
+  'active, never trialed → renewal date',
+  periodEndOf(sub('active', null, RENEWS))?.getTime() === RENEWS * 1000
+);
+test(
+  'no items → null',
+  periodEndOf({ status: 'active', trial_end: null, items: { data: [] } }) === null
 );
 
 console.log(`\n${pass} passed, ${fail} failed`);
