@@ -15,7 +15,8 @@
     "test:deletion": "npx tsx --env-file=.env.local scripts/test-account-deletion.ts",
     "test:webhooks": "npx tsx --env-file=.env.local scripts/test-webhook-idempotency.ts",
     "prepare": "husky",
-    "test:billing": "npx tsx scripts/test-billing.ts"
+    "test:billing": "npx tsx scripts/test-billing.ts",
+    "test:scores": "npx tsx scripts/test-score-smoothing.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.71.2",
