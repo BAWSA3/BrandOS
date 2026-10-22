@@ -59,12 +59,17 @@ export interface SocialDataTweet {
     like_count: number;
     quote_count: number;
     impression_count: number;
+    bookmark_count?: number;
   };
   entities?: {
     hashtags?: { tag: string }[];
     mentions?: { username: string }[];
     urls?: { expanded_url: string }[];
   };
+  /** Attached media types ('photo' | 'video' | 'animated_gif'); empty when none. */
+  media?: string[];
+  /** Quote post (kept: it's the author's own words on top of someone else's). */
+  is_quote?: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -139,6 +144,13 @@ function mapTweet(raw: Record<string, unknown>): SocialDataTweet {
   // SocialData may include bookmark/view counts on some endpoints
   const viewsObj = raw.ext_views as Record<string, unknown> | undefined;
   const impressionCount = (raw.views_count as number) || Number(viewsObj?.count) || 0;
+  const bookmarkCount = (raw.bookmark_count as number) || 0;
+  // Media lives in extended_entities / entities.media (never in entities.urls),
+  // which is why every scan used to read "zero media"
+  const mediaEnts = (
+    (raw.extended_entities || raw.entities) as { media?: { type?: string }[] } | undefined
+  )?.media;
+  const media = (mediaEnts || []).map((m) => m.type || 'photo');
 
   // Entities mapping
   const rawEntities = raw.entities as Record<string, Record<string, unknown>[]> | undefined;
@@ -167,53 +179,77 @@ function mapTweet(raw: Record<string, unknown>): SocialDataTweet {
       reply_count: replyCount,
       quote_count: quoteCount,
       impression_count: impressionCount,
+      bookmark_count: bookmarkCount,
     },
     entities,
+    media,
+    is_quote: !!raw.is_quote_status,
   };
 }
 
+/** Timeline pages read per scan: ~21 posts a page, so 3 pages ≈ 40–60 original posts. */
+const MAX_TIMELINE_PAGES = 3;
+
+/** Retweets, replies and pinned posts aren't the author's recent original posting. */
+function isRecentOriginal(t: Record<string, unknown>): boolean {
+  const isRetweet = !!(t.retweeted_status || ((t.full_text as string) || '').startsWith('RT @'));
+  const isReply = !!(t.in_reply_to_status_id_str || t.in_reply_to_status_id);
+  // a pinned post is usually old; it skewed posting frequency for every account with one
+  return !isRetweet && !isReply && !t.is_pinned;
+}
+
 /**
- * Fetch a user's recent tweets via SocialData.
- * Uses the user timeline endpoint.
+ * Fetch a user's recent original tweets via SocialData (user timeline).
+ * The endpoint ignores `count` and returns ~21 posts per page, so we follow
+ * next_cursor for up to MAX_TIMELINE_PAGES pages (one request each) until we
+ * have maxResults originals.
  */
 export async function fetchUserTweets(
   userId: string,
   maxResults: number = 20
 ): Promise<{ tweets: SocialDataTweet[]; error?: string }> {
+  const want = Math.min(maxResults, 60);
+  const seen = new Set<string>();
+  const originals: Record<string, unknown>[] = [];
+  let cursor: string | undefined;
   try {
-    const response = await socialDataFetch(
-      `/twitter/user/${encodeURIComponent(userId)}/tweets?count=${Math.min(maxResults, 200)}`
-    );
-    console.log(`[SOCIALDATA] tweets for user ${userId} -> ${response.status}`);
+    for (let page = 0; page < MAX_TIMELINE_PAGES; page++) {
+      const response = await socialDataFetch(
+        `/twitter/user/${encodeURIComponent(userId)}/tweets` +
+          (cursor ? `?cursor=${encodeURIComponent(cursor)}` : '')
+      );
+      console.log(`[SOCIALDATA] tweets for user ${userId} p${page + 1} -> ${response.status}`);
 
-    if (!response.ok) {
-      const err = await response.json().catch(() => ({}));
-      console.error(`[SOCIALDATA ERROR] tweets ${response.status}:`, JSON.stringify(err));
-      return { tweets: [], error: `SocialData error (${response.status})` };
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        console.error(`[SOCIALDATA ERROR] tweets ${response.status}:`, JSON.stringify(err));
+        // keep what earlier pages returned
+        if (originals.length > 0) break;
+        return { tweets: [], error: `SocialData error (${response.status})` };
+      }
+
+      const data = await response.json();
+      const rawTweets: Record<string, unknown>[] = data.tweets || data || [];
+      if (!Array.isArray(rawTweets)) {
+        if (originals.length > 0) break;
+        return { tweets: [], error: 'Unexpected response format' };
+      }
+
+      for (const t of rawTweets) {
+        const id = String(t.id_str || t.id || '');
+        if (!id || seen.has(id)) continue;
+        seen.add(id);
+        if (isRecentOriginal(t)) originals.push(t);
+      }
+
+      cursor = typeof data.next_cursor === 'string' ? data.next_cursor : undefined;
+      if (originals.length >= want || !cursor || rawTweets.length === 0) break;
     }
 
-    const data = await response.json();
-    const rawTweets: Record<string, unknown>[] = data.tweets || data || [];
-
-    if (!Array.isArray(rawTweets)) {
-      return { tweets: [], error: 'Unexpected response format' };
-    }
-
-    // Filter out retweets and replies, map to our format
-    const tweets = rawTweets
-      .filter((t) => {
-        const isRetweet = !!(
-          t.retweeted_status || ((t.full_text as string) || '').startsWith('RT @')
-        );
-        const isReply = !!(t.in_reply_to_status_id_str || t.in_reply_to_status_id);
-        return !isRetweet && !isReply;
-      })
-      .slice(0, maxResults)
-      .map(mapTweet);
-
-    return { tweets };
+    return { tweets: originals.slice(0, want).map(mapTweet) };
   } catch (error) {
     console.error('[SOCIALDATA] Tweet fetch error:', error);
+    if (originals.length > 0) return { tweets: originals.slice(0, want).map(mapTweet) };
     return { tweets: [], error: 'SocialData request failed' };
   }
 }
