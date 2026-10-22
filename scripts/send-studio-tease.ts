@@ -25,8 +25,7 @@ import { writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import prisma from '@/lib/db';
-import { CAMPAIGNS, sendOnce, studioTeaseContent } from '@/lib/launch-emails';
-import { renderNewsletter } from '@/lib/newsletter-template';
+import { CAMPAIGNS, renderStudioTease, sendOnce, studioTeaseContent } from '@/lib/launch-emails';
 
 const args = process.argv.slice(2);
 const SEND = args.includes('--send');
@@ -139,8 +138,11 @@ async function main() {
     const stamp = Date.now();
     for (const v of ['a', 'b'] as const) {
       const r = { ...audience[0], variant: v };
-      const res = await sendOnce(r.id, `${CAMPAIGNS.studioTease}:test-${stamp}-${v}`, () =>
-        studioTeaseContent(r)
+      const res = await sendOnce(
+        r.id,
+        `${CAMPAIGNS.studioTease}:test-${stamp}-${v}`,
+        () => studioTeaseContent(r),
+        (_, email) => renderStudioTease(r, email)
       );
       console.log(`test [${v}] "${studioTeaseContent(r).subject}" → ${res}`);
       await new Promise((ok) => setTimeout(ok, 600));
@@ -165,7 +167,7 @@ async function main() {
     if (!sample) continue;
     const content = studioTeaseContent(sample);
     const file = join(PREVIEW_DIR, `studio-tease-${name}.html`);
-    writeFileSync(file, renderNewsletter(content, sample.email).html);
+    writeFileSync(file, renderStudioTease(sample, sample.email).html);
     console.log(`sample [${name}] "${content.subject}" → ${file}`);
   }
 
@@ -176,7 +178,12 @@ async function main() {
 
   const tally: Record<string, number> = {};
   for (const [i, r] of pending.entries()) {
-    const res = await sendOnce(r.id, CAMPAIGNS.studioTease, () => studioTeaseContent(r));
+    const res = await sendOnce(
+      r.id,
+      CAMPAIGNS.studioTease,
+      () => studioTeaseContent(r),
+      (_, email) => renderStudioTease(r, email)
+    );
     tally[res] = (tally[res] ?? 0) + 1;
     if ((i + 1) % 50 === 0) console.log(`  ${i + 1}/${pending.length}`, tally);
     await new Promise((ok) => setTimeout(ok, 600));
