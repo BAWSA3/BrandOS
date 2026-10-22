@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { createBrowserClient } from '@supabase/ssr';
 import { TOS_VERSION } from '@/lib/tos';
@@ -30,12 +30,35 @@ function friendly(message: string): string {
   return 'Something went wrong. Try again.';
 }
 
+/** "Last used" tag on the sign-in method that worked last time on this device. */
+function LastUsed({ onBlue = false }: { onBlue?: boolean }) {
+  return (
+    <span
+      className="ml-2 rounded-[3px] px-1.5 py-[2px] text-[9px] tracking-[0.12em]"
+      style={{
+        fontFamily: LABEL,
+        background: onBlue ? '#FFFFFF' : BLUE,
+        color: onBlue ? BLUE : '#FFFFFF',
+      }}
+    >
+      Last used
+    </span>
+  );
+}
+
 export default function ContinuePage() {
   const [emailOpen, setEmailOpen] = useState(false);
   const [email, setEmail] = useState('');
   const [busy, setBusy] = useState<null | 'x' | 'google' | 'email'>(null);
   const [error, setError] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
+  // the method that last worked on this device (cookie set by the callback)
+  const [lastUsed, setLastUsed] = useState<null | 'x' | 'google' | 'email'>(null);
+  useEffect(() => {
+    const v = document.cookie.match(/(?:^|; )bos_last_signin=(x|google|email)/)?.[1];
+    const t = window.setTimeout(() => setLastUsed((v as 'x' | 'google' | 'email') ?? null), 0);
+    return () => window.clearTimeout(t);
+  }, []);
 
   const params = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
   const ref = params?.get('ref');
@@ -43,9 +66,9 @@ export default function ContinuePage() {
   // same-origin relative paths only (no open redirect)
   const next =
     rawNext && rawNext.startsWith('/') && !rawNext.startsWith('//') ? rawNext : '/dashboard';
-  const callbackUrl =
+  const callbackUrl = (via: 'x' | 'google' | 'email') =>
     typeof window !== 'undefined'
-      ? `${window.location.origin}/api/auth/callback?next=${encodeURIComponent(next)}&tos=${encodeURIComponent(TOS_VERSION)}`
+      ? `${window.location.origin}/api/auth/callback?next=${encodeURIComponent(next)}&tos=${encodeURIComponent(TOS_VERSION)}&via=${via}`
       : '';
 
   async function oauth(provider: 'twitter' | 'google') {
@@ -53,7 +76,7 @@ export default function ContinuePage() {
     setBusy(provider === 'twitter' ? 'x' : 'google');
     const { error: e } = await supabase.auth.signInWithOAuth({
       provider,
-      options: { redirectTo: callbackUrl },
+      options: { redirectTo: callbackUrl(provider === 'twitter' ? 'x' : 'google') },
     });
     if (e) {
       setError(friendly(e.message));
@@ -68,7 +91,7 @@ export default function ContinuePage() {
     // One-tap link: creates the account if new, signs in if returning.
     const { error: err } = await supabase.auth.signInWithOtp({
       email: email.trim(),
-      options: { emailRedirectTo: callbackUrl, shouldCreateUser: true },
+      options: { emailRedirectTo: callbackUrl('email'), shouldCreateUser: true },
     });
     setBusy(null);
     if (err) {
@@ -159,6 +182,7 @@ export default function ContinuePage() {
               <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
             </svg>
             {busy === 'x' ? 'Opening X…' : 'Continue with X'}
+            {lastUsed === 'x' && <LastUsed onBlue />}
           </button>
           <p className="text-center text-[11px] text-[#6B6862]">
             Recommended: BrandOS reads your brand from X.
@@ -190,6 +214,7 @@ export default function ContinuePage() {
               />
             </svg>
             {busy === 'google' ? 'Opening Google…' : 'Continue with Google'}
+            {lastUsed === 'google' && <LastUsed />}
           </button>
 
           {emailOpen ? (
@@ -223,6 +248,7 @@ export default function ContinuePage() {
               style={{ fontFamily: LABEL }}
             >
               Continue with email
+              {lastUsed === 'email' && <LastUsed />}
             </button>
           )}
         </div>

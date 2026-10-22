@@ -295,6 +295,18 @@ export async function GET(request: NextRequest) {
       maxAge: 60 * 60 * 24 * 30,
     });
 
+    // "Last used" on the sign-in screen: the method that just worked (the
+    // signup page tags its callback with ?via=). Not sensitive, so readable.
+    const via = requestUrl.searchParams.get('via');
+    if (via === 'x' || via === 'google' || via === 'email') {
+      response.cookies.set('bos_last_signin', via, {
+        path: '/',
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 60 * 60 * 24 * 365,
+      });
+    }
+
     return response;
   } catch (error) {
     console.error('[Auth Callback] Error:', error);
