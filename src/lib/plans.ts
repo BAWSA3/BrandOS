@@ -202,6 +202,16 @@ export const PAID_TIERS: SubscriptionTier[] = ['PRO', 'AGENCY', 'ENTERPRISE'];
 export const TRIAL_DAYS = 7;
 /** Founding 100: the first paying members keep $29/mo forever. */
 export const FOUNDING_SPOTS = 100;
+/**
+ * Launch offer (decided 2026-10-22): full access free for everyone until this
+ * moment (Dec 3, 9am PT). Founding 100 add a card before it to lock $29/mo for
+ * life; their first charge is this moment. After it, Pro is $39/mo.
+ * NEXT_PUBLIC_OPEN_ACCESS_UNTIL overrides it (e.g. a past date on staging to
+ * test the paid flow).
+ */
+export const OPEN_ACCESS_UNTIL = new Date(
+  process.env.NEXT_PUBLIC_OPEN_ACCESS_UNTIL || '2026-12-03T17:00:00Z'
+);
 export const SELF_SERVE_TIERS: SubscriptionTier[] = ['PRO', 'AGENCY'];
 
 // Normalize legacy CREATOR tier to FREE for feature access checks

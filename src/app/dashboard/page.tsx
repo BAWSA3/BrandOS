@@ -6,9 +6,11 @@ import { getHomeData, toDashboardData } from '@/lib/home-data';
 import { cookies } from 'next/headers';
 import { recordVisit, safeTz } from '@/lib/progress';
 import { getColorway } from '@/lib/user-preferences';
-import { hasPro, trialEndsAt } from '@/lib/billing';
+import { hasPro, isOpenAccess, isSubscribed, trialEndsAt } from '@/lib/billing';
+import { OPEN_ACCESS_UNTIL } from '@/lib/plans';
+import type { PlanBadge } from '@/components/billing/PlanChip';
 import { syncSubscription } from '@/lib/billing-sync';
-import { foundingSpotsLeft } from '@/lib/founding';
+import { foundingNumber, foundingSpotsLeft } from '@/lib/founding';
 import { stripe } from '@/lib/stripe';
 import Paywall from '@/components/billing/Paywall';
 import { lookupStats } from '@/lib/lookups';
@@ -33,7 +35,8 @@ export default async function DashboardPage({
   // Back from Stripe Checkout: sync the new subscription now so the trial
   // unlocks immediately (the webhook may land a few seconds later; both are
   // idempotent). Only the signed-in buyer's own session is honoured.
-  if (user && sp.checkout && !hasPro(user) && process.env.STRIPE_SECRET_KEY) {
+  // (isSubscribed, not hasPro: open access makes everyone Pro until Dec 3)
+  if (user && sp.checkout && !isSubscribed(user) && process.env.STRIPE_SECRET_KEY) {
     try {
       const session = await stripe.checkout.sessions.retrieve(sp.checkout.slice(0, 200), {
         expand: ['subscription'],
@@ -81,8 +84,20 @@ export default async function DashboardPage({
   // Pro (trial included) gets the dashboard; free accounts see it locked.
   const pro = hasPro(user);
   const autoRescan = (sp.rescan === '1' && pro) || firstScan;
-  const foundingLeft = !pro && bento ? await foundingSpotsLeft() : 0;
+  const subscribed = isSubscribed(user);
+  const foundingLeft = !subscribed && bento ? await foundingSpotsLeft() : 0;
   const trialEnd = trialEndsAt(user);
+  // Top-bar plan badge: the launch offer (lock $29), a founding card, or a trial
+  let plan: PlanBadge | null = null;
+  if (!subscribed && isOpenAccess()) {
+    plan = { kind: 'open', until: OPEN_ACCESS_UNTIL.toISOString(), spotsLeft: foundingLeft };
+  } else if (trialEnd) {
+    const number = await foundingNumber(user.id);
+    plan =
+      number !== null
+        ? { kind: 'founding', number, chargesAt: trialEnd.toISOString() }
+        : { kind: 'trial', endsAt: trialEnd.toISOString() };
+  }
   // "your brand was looked up": last 7 days + last 24h (counts only)
   const now = Date.now();
   const [lookWeek, lookDay] = bento
@@ -101,7 +116,7 @@ export default async function DashboardPage({
           colorway={colorway}
           // v2 is the launch default (decided 2026-10-18); ?design=v1 for the old layout
           design={sp.design === 'v1' ? 'v1' : 'v2'}
-          trialEndsAt={trialEnd ? trialEnd.toISOString() : null}
+          plan={plan}
           lookups={lookWeek && lookDay ? { week: lookWeek, today: lookDay.total } : null}
           xp={
             progress

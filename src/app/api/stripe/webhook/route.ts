@@ -10,7 +10,7 @@ import {
 import { logSecurityEvent } from '@/lib/audit-log';
 import { captureFunnelEvent } from '@/lib/funnel-events';
 import { syncSubscription, endSubscription } from '@/lib/billing-sync';
-import { claimFoundingSpot } from '@/lib/founding';
+import { claimFoundingSpot, foundingNumber } from '@/lib/founding';
 import { sendTrialEndingEmail } from '@/lib/trial-email';
 
 export async function POST(request: NextRequest) {
@@ -142,6 +142,12 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     }
   }
 
+  // Founding 100: the spot is claimed when the card goes on (launch offer:
+  // free until Dec 3, first charge then), not at the first payment
+  if (session.mode === 'subscription' && session.metadata?.founding === '1') {
+    await claimFoundingSpot(userId);
+  }
+
   const buyer = await prisma.user.findUnique({
     where: { id: userId },
     select: { supabaseId: true },
@@ -202,8 +208,8 @@ async function handleInvoicePaid(invoice: Stripe.Invoice) {
     },
   });
 
-  // First real payment: a founding spot while they last
-  const founding = await claimFoundingSpot(user.id);
+  // founding spots are claimed at checkout (card added); this just reports it
+  const founding = await foundingNumber(user.id);
   if (user.subscriptionStatus === 'TRIALING') {
     await captureFunnelEvent(user.supabaseId, 'trial_converted', {
       amount_cents: invoice.amount_paid,

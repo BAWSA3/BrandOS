@@ -2,8 +2,15 @@ import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
 import { getUser } from '@/lib/auth';
 import prisma from '@/lib/db';
-import { PLAN_CONFIGS, ONE_TIME_PRODUCTS, TRIAL_DAYS, type SubscriptionTier } from '@/lib/plans';
-import { hasPro } from '@/lib/billing';
+import {
+  PLAN_CONFIGS,
+  ONE_TIME_PRODUCTS,
+  OPEN_ACCESS_UNTIL,
+  TRIAL_DAYS,
+  type SubscriptionTier,
+} from '@/lib/plans';
+import { isOpenAccess, isSubscribed } from '@/lib/billing';
+import { foundingSpotsLeft } from '@/lib/founding';
 import { botGuard } from '@/lib/botid-guard';
 import { captureFunnelEvent } from '@/lib/funnel-events';
 
@@ -75,18 +82,25 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ url: session.url });
     }
 
-    // Subscription checkout (launch): Pro, monthly, card-required trial.
+    // Subscription checkout: Pro, monthly, card required. During the launch
+    // window (open access until Dec 3) this is the Founding 100 card lock: no
+    // charge until OPEN_ACCESS_UNTIL. After it: the 7-day card trial.
     // Annual plans, coupons and Agency/Enterprise are out of scope.
     if ((tier ?? 'PRO') !== 'PRO') {
       return NextResponse.json({ error: 'Invalid plan tier' }, { status: 400 });
     }
-    if (hasPro(user)) {
+    // open access makes hasPro() true for everyone, so ask "did they pay"
+    if (isSubscribed(user)) {
       return NextResponse.json(
         { error: 'You already have Pro', url: '/dashboard' },
         { status: 409 }
       );
     }
-    const priceId = PLAN_CONFIGS.PRO.stripePriceIdMonthly;
+    // $29 while founding spots last; $39 (STRIPE_PRICE_PRO_STANDARD) after
+    const founding = (await foundingSpotsLeft()) > 0;
+    const priceId = founding
+      ? PLAN_CONFIGS.PRO.stripePriceIdMonthly
+      : process.env.STRIPE_PRICE_PRO_STANDARD || PLAN_CONFIGS.PRO.stripePriceIdMonthly;
     if (!priceId) {
       return NextResponse.json({ error: 'Price not configured' }, { status: 400 });
     }
@@ -97,8 +111,17 @@ export async function POST(request: NextRequest) {
       status: 'all',
       limit: 1,
     });
-    const trial = prior.data.length === 0;
+    const open = isOpenAccess();
+    const trial = open || prior.data.length === 0;
+    // Stripe wants trial_end >= 48h out; in the last two days, a 2-day trial
+    // (charged at most ~2 days after Dec 3) instead
+    const lockUntil = Math.floor(OPEN_ACCESS_UNTIL.getTime() / 1000);
+    const trialTiming =
+      open && lockUntil - Date.now() / 1000 > 49 * 3600
+        ? { trial_end: lockUntil }
+        : { trial_period_days: open ? 2 : TRIAL_DAYS };
     const app = process.env.NEXT_PUBLIC_APP_URL;
+    const meta = { userId: user.id, tier: 'PRO', founding: founding ? '1' : '0' };
 
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
@@ -106,12 +129,12 @@ export async function POST(request: NextRequest) {
       line_items: [{ price: priceId, quantity: 1 }],
       // the trial won't start without a card
       payment_method_collection: 'always',
-      metadata: { userId: user.id, tier: 'PRO', billingInterval: 'monthly' },
+      metadata: { ...meta, billingInterval: 'monthly' },
       subscription_data: {
-        metadata: { userId: user.id, tier: 'PRO' },
+        metadata: meta,
         ...(trial
           ? {
-              trial_period_days: TRIAL_DAYS,
+              ...trialTiming,
               // no card on file at trial end → cancel, never a free ride
               trial_settings: { end_behavior: { missing_payment_method: 'cancel' } },
             }
@@ -125,6 +148,8 @@ export async function POST(request: NextRequest) {
       mode: 'subscription',
       tier: 'PRO',
       trial,
+      founding,
+      open_access: open,
     });
 
     return NextResponse.json({ url: session.url });

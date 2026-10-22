@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import { PAID_TIERS } from '@/lib/plans';
+import { isOpenAccess } from '@/lib/billing';
 import { scoreLatestPosts } from '@/lib/post-scores';
 
 /**
@@ -23,16 +24,21 @@ export async function GET(request: NextRequest) {
   }
   const started = Date.now();
 
+  // launch window (until Dec 3): everyone has full access, so everyone is scored
   const users = await prisma.user.findMany({
     where: {
       platformConnections: { some: { platform: 'x', status: 'active' } },
-      OR: [
-        { role: 'admin' },
-        {
-          subscriptionTier: { in: PAID_TIERS },
-          subscriptionStatus: { in: ['ACTIVE', 'TRIALING'] },
-        },
-      ],
+      ...(isOpenAccess()
+        ? {}
+        : {
+            OR: [
+              { role: 'admin' },
+              {
+                subscriptionTier: { in: PAID_TIERS },
+                subscriptionStatus: { in: ['ACTIVE', 'TRIALING'] },
+              },
+            ],
+          }),
     },
     select: { id: true },
     orderBy: { updatedAt: 'desc' },

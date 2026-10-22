@@ -42,7 +42,7 @@ import type { PostBreakdownData } from '@/lib/post-scores';
 import { STUDIO_STEPS, type StageNumber } from '@/lib/studio-stages';
 import { COLORWAY_TOKENS, isDarkColorway, type Colorway } from '@/lib/colorways';
 import DashSettings from '@/components/dashboard/DashSettings';
-import PlanChip from '@/components/billing/PlanChip';
+import PlanChip, { type PlanBadge } from '@/components/billing/PlanChip';
 import LookupStrip, { type LookupSummary } from '@/components/dashboard/LookupStrip';
 
 /** The workstation (studio brainstorm, #144) is parked for the launch (docs/LAUNCH-PLAN.md). */
@@ -431,12 +431,15 @@ export default function BentoDashboard({
   design = 'v1',
   handleSize,
   trialEndsAt,
+  plan,
   lookups,
 }: {
   /** "Your brand was looked up" counts (dashboard strip + check-in). */
   lookups?: LookupSummary | null;
   /** Pro trial end (ISO): shows the trial badge in the top bar. */
   trialEndsAt?: string | null;
+  /** Plan badge (launch offer / founding / trial); wins over trialEndsAt. */
+  plan?: PlanBadge | null;
   /** v2 masthead @handle max size in px (design preview). */
   handleSize?: number;
   /** v2 (2026-10-15 preview): @handle masthead, wide score, roomier grid, one blue. */
@@ -467,6 +470,8 @@ export default function BentoDashboard({
     streakDays?: number;
   } | null;
 }) {
+  const badge: PlanBadge | null =
+    plan ?? (trialEndsAt ? { kind: 'trial', endsAt: trialEndsAt } : null);
   // Settings (top bar) switches it live; the prop is the saved choice.
   const [colorwayPick, setColorwayPick] = useState<Colorway | null>(null);
   // Switching skins is a moment: a Klein pixel wipe covers the page, the new
@@ -763,7 +768,7 @@ export default function BentoDashboard({
                       ↻ Rescan
                     </button>
                   )}
-                  {trialEndsAt && <PlanChip trialEndsAt={trialEndsAt} onCanvas />}
+                  {badge && <PlanChip plan={badge} onCanvas />}
                   <DashSettings
                     colorway={colorway}
                     onColorway={switchColorway}
@@ -819,7 +824,7 @@ export default function BentoDashboard({
                       ↻ Rescan
                     </button>
                   )}
-                  {trialEndsAt && <PlanChip trialEndsAt={trialEndsAt} />}
+                  {badge && <PlanChip plan={badge} />}
                   <DashSettings
                     colorway={colorway}
                     onColorway={switchColorway}
