@@ -1,6 +1,7 @@
 import { Resend } from 'resend';
 import prisma from '@/lib/db';
 import { getArchetypeInfo } from '@/lib/archetype-descriptions';
+import { normalizeArchetypeName } from '@/lib/archetype-names';
 import { renderNewsletter, type NewsletterContent } from '@/lib/newsletter-template';
 
 /**
@@ -121,86 +122,108 @@ export function reengageContent(r: {
   };
 }
 
+/** Current display name for a stored archetype ("SIGNAL_SAGE" → "SOURCE"), or null. */
+function archetypeLabel(raw: string | null): string | null {
+  if (!raw) return null;
+  const name = normalizeArchetypeName(normalizeArchetypeName(raw).replace(/^The /, ''));
+  const info = getArchetypeInfo(name);
+  // "62 · NULL" reads like missing data, so the anon archetype stays off the label
+  return info && info.name !== 'NULL' ? info.name : null;
+}
+
 /**
  * Pre-launch tease (Oct 22 2026) for the whole list: "BrandOS Studio opens
- * Nov 2". One job: get a fresh scan. Leads with their own past score when we
- * have one (661 of ~1k), and the button runs their scan in one tap
- * (`/?scan=<handle>`). Founding 100 is the reason to come back on Nov 2.
+ * Nov 2". One job: get a fresh scan. Hook (their last score + archetype) →
+ * button straight away (`/?scan=<handle>` runs their scan) → the why, the
+ * Studio, a reply offer, Founding 100 in the P.S.
+ *
+ * Subject A/B on people with a score: A = "you scored 62 in march",
+ * B = "did your brand score go up?". The variant rides utm_content, and
+ * conversion is read back from BrandScans (did that handle scan after the send).
  */
 export function studioTeaseContent(r: {
   handle: string | null;
   score: number | null;
+  archetype?: string | null;
   since: Date;
+  variant?: 'a' | 'b';
 }): NonNullable<NewsletterContent> {
   const who = r.handle ? `@${esc(r.handle)}` : 'there';
   const month = r.since.toLocaleString('en-US', { month: 'long', timeZone: 'UTC' }).toLowerCase();
-  // scanned in the last ~6 weeks: "back in october, a lot of posts ago" would read wrong
-  const recent = Date.now() - r.since.getTime() < 45 * 86_400_000;
-  const utm = 'utm_source=email&utm_medium=email&utm_campaign=studio-tease';
+  const days = (Date.now() - r.since.getTime()) / 86_400_000;
+  // scanned in the last ~6 weeks: "7 months of posts ago" would read wrong
+  const recent = days < 45;
+  const months = Math.max(2, Math.round(days / 30));
+  const variant = r.variant ?? 'a';
+  const utm = `utm_source=email&utm_medium=email&utm_campaign=studio-tease&utm_content=${variant}`;
   const url = r.handle
     ? `${APP_URL}/?scan=${encodeURIComponent(r.handle)}&${utm}`
     : `${APP_URL}/?${utm}`;
+  const arch = archetypeLabel(r.archetype ?? null);
+  const hasScore = r.score != null;
 
-  const opener: NewsletterContent['sections'] =
-    r.score != null
-      ? [
-          {
-            type: 'stat',
-            label: String(r.score),
-            content: recent ? 'your last brand score' : `your brand score in ${month}`,
-          },
-          {
-            type: 'text',
-            content: recent
-              ? 'you scanned your X on BrandOS recently. your score moves every time you post, so let&#39;s see where it is now.'
-              : `back in ${month} you scanned your X on BrandOS. that was a lot of posts ago, and your brand has moved since. i want you to see where.`,
-          },
-        ]
-      : [
-          {
-            type: 'text',
-            content: recent
-              ? 'you signed up for BrandOS recently. it&#39;s almost ready.'
-              : `back in ${month} you signed up for BrandOS. since then i&#39;ve been building, and it&#39;s almost ready.`,
-          },
-        ];
+  const hook: NewsletterContent['sections'] = hasScore
+    ? [
+        {
+          type: 'stat',
+          label: arch ? `${r.score} · ${esc(arch)}` : String(r.score),
+          content: recent ? 'your brand, last scan' : `your brand in ${month}`,
+        },
+        {
+          type: 'text',
+          content: recent
+            ? 'your score moves every time you post. up or down since your last scan? i&#39;d bet you can&#39;t guess which.'
+            : `that was ${months} months of posts ago. your score has moved since, up or down, and i&#39;d bet you can&#39;t guess which.`,
+        },
+      ]
+    : [
+        {
+          type: 'text',
+          content: recent
+            ? 'you signed up for BrandOS recently. before it opens, see where your brand stands. it&#39;s free and takes about a minute.'
+            : `you signed up for BrandOS back in ${month}. i&#39;ve been building since. before it opens, see where your brand stands. it&#39;s free and takes about a minute.`,
+        },
+      ];
 
-  return {
-    subject:
-      r.score != null && r.handle
-        ? recent
+  const subject =
+    hasScore && r.handle
+      ? variant === 'b'
+        ? `@${r.handle}, did your brand score go up?`
+        : recent
           ? `@${r.handle}, your last brand score was ${r.score}`
           : `@${r.handle}, you scored ${r.score} in ${month}`
-        : r.handle
-          ? `@${r.handle}, what's your brand score now?`
-          : "what's your brand score now?",
-    preheader: 'BrandOS Studio opens Nov 2. See where you stand before it does.',
+      : r.handle
+        ? `@${r.handle}, what's your brand score now?`
+        : "what's your brand score now?";
+
+  return {
+    subject,
+    preheader: hasScore
+      ? 'did it go up or down? takes a minute to find out.'
+      : 'free, about a minute. BrandOS Studio opens Nov 2.',
     sections: [
       { type: 'text', content: `hey ${who},` },
-      ...opener,
+      ...hook,
+      { type: 'cta', content: hasScore ? 'See my score now →' : 'Scan my brand →', url },
       {
         type: 'text',
         content:
-          "brands aren't reading bios anymore. they ask AI who you are, and they act on the answer.",
+          '4,000+ creators have scanned their brand on BrandOS. brands are starting to ask AI who to work with instead of reading bios, so knowing where you stand matters more every month.',
       },
       {
         type: 'text',
         content:
-          'on <b>nov 2</b> i&#39;m opening <b>BrandOS Studio</b>: your brand dashboard. it tracks your score over time, reads every post you make, and tells you exactly what to fix next.',
+          'on <b>nov 2</b> i&#39;m opening <b>BrandOS Studio</b>: it tracks your score over time and tells you what to fix after every post.',
       },
-      {
-        type: 'text',
-        content: 'before it opens, run a fresh scan. it&#39;s free and takes about a minute.',
-      },
-      { type: 'cta', content: r.score != null ? 'See my score now →' : 'Scan my brand →', url },
       {
         type: 'text',
         content:
-          '<b>founding 100:</b> the first 100 people to go Pro keep $29/mo forever, plus a recorded brand teardown from me. spots open nov 2.',
+          'hit reply with your new score and i&#39;ll tell you the one thing i&#39;d fix first.<br/><br/>— Bawsa',
       },
       {
         type: 'text',
-        content: 'reply with your new score. i read every one.<br/><br/>— Bawsa',
+        content:
+          '<b>p.s.</b> the first 100 people to go Pro on nov 2 lock in $29/mo forever, plus a recorded teardown of their brand from me.',
       },
     ],
   };
