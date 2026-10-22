@@ -29,10 +29,15 @@ const allowedPages = [
   '/home', // title screen / main menu after sign-in
   '/signup', // Phase 1: new account creation (email/Google/Apple)
   '/today', // Daily creator brief — 1 idea, 1 metric, 1 action
-  '/world-preview', // V2 worlds: unauthenticated theme preview (dev)
+  '/world-preview', // design previews with sample data (not on the production domain, below)
   '/oauth', // "Sign in with BrandOS" consent for the MCP (Claude / ChatGPT)
   '/b', // public brand page; the public address is /@handle (rewritten below)
 ];
+
+// Design-review pages (sample data) stay on staging and local, never on the
+// live site.
+const PRODUCTION_HOSTS = new Set(['mybrandos.app', 'www.mybrandos.app']);
+const PREVIEW_ONLY = ['/world-preview'];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -55,12 +60,16 @@ export function middleware(request: NextRequest) {
     return NextResponse.rewrite(url);
   }
 
+  const previewOnLive =
+    PRODUCTION_HOSTS.has((request.headers.get('host') ?? '').split(':')[0].toLowerCase()) &&
+    PREVIEW_ONLY.some((route) => pathname === route || pathname.startsWith(`${route}/`));
+
   // Check if page is in the allowed list
   const isAllowed = allowedPages.some(
     (route) => pathname === route || pathname.startsWith(`${route}/`)
   );
 
-  if (!isAllowed) {
+  if (!isAllowed || previewOnLive) {
     // Return 404 for all non-allowed pages
     const url = request.nextUrl.clone();
     url.pathname = '/';

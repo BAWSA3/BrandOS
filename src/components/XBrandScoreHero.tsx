@@ -1535,6 +1535,14 @@ export default function XBrandScoreHero({
               >
                 Get The Full Breakdown <span aria-hidden>→</span>
               </a>
+              {/* Sign in keeps this scan: it becomes the account's first dashboard scan */}
+              <a
+                href="/signup?next=/dashboard"
+                className="capture-hide mt-3 block text-center text-[11px] tracking-[0.14em] text-black/60 uppercase hover:text-[#0047FF]"
+                style={{ fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace" }}
+              >
+                Save it to your dashboard · continue with X →
+              </a>
             </div>
           </motion.div>
         )}

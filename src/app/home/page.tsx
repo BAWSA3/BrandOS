@@ -12,7 +12,6 @@ export const dynamic = 'force-dynamic';
 export default async function HomePage() {
   const user = await getCurrentUser();
   if (!user) redirect('/signup?next=/home');
-  if (user.accountMigrationStatus === 'legacy') redirect('/migrate-account');
 
   const [h, level, colorway] = await Promise.all([
     getHomeData(user),
