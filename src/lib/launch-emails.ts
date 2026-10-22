@@ -213,7 +213,7 @@ export function studioTeaseContent(r: {
       {
         type: 'text',
         content:
-          'on <b>nov 2</b> i&#39;m opening <b>BrandOS Studio</b>: it tracks your score over time and tells you what to fix after every post.',
+          'on <b>nov 2</b> i&#39;m opening <b>BrandOS Studio</b>: one dashboard that tracks your brand score over time, keeps you on-brand, and tells you what to fix after every post.',
       },
       {
         type: 'text',
