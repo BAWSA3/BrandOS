@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { AnimateNumber } from 'motion-plus/react';
 import { useReducedMotion } from 'motion/react';
 import Wordmark from '@/components/Wordmark';
@@ -100,6 +100,14 @@ const IDEAS: Idea[] = [
   },
   { id: 4, col: 'drafting', text: 'Why I stopped posting "gm"' },
   { id: 5, col: 'posted', text: 'The 3 income streams nobody tells you about' },
+];
+
+// prompts for a blank page: things only this person can say
+const SPARKS = [
+  'Something I changed my mind about',
+  'A question my audience keeps asking',
+  'A win (or a miss) from this week',
+  'What everyone in my niche gets wrong',
 ];
 
 function Label({ children, color = T.muted }: { children: React.ReactNode; color?: string }) {
@@ -219,6 +227,19 @@ export default function GrowthDashboard() {
   const [score, setScore] = useState(0);
   const [ideas, setIdeas] = useState<Idea[]>(IDEAS);
   const [draft, setDraft] = useState('');
+  const pageRef = useRef<HTMLTextAreaElement>(null);
+  // the page grows with the idea instead of scrolling inside a box
+  useEffect(() => {
+    const el = pageRef.current;
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = `${Math.max(120, el.scrollHeight)}px`;
+  }, [draft]);
+  const pin = () => {
+    if (!draft.trim()) return;
+    setIdeas((all) => [{ id: Date.now(), text: draft.trim(), col: 'ideas' }, ...all]);
+    setDraft('');
+  };
 
   // AnimateNumber only rolls when the value changes after mount
   useEffect(() => {
@@ -602,33 +623,95 @@ export default function GrowthDashboard() {
 
           {/* Idea board */}
           <Tile className="md:col-span-12">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <Label>Idea board</Label>
+            <Label>Idea board</Label>
+            {/* The blank page: a place to think, not a search box */}
+            <div
+              className="mt-4 grid grid-cols-1 gap-6 border p-5 md:grid-cols-[1fr_260px] md:gap-10 md:p-8"
+              style={{
+                borderColor: T.rule,
+                background: '#FFFFFF',
+              }}
+            >
               <form
-                className="flex w-full gap-2 md:w-auto"
                 onSubmit={(e) => {
                   e.preventDefault();
-                  if (!draft.trim()) return;
-                  setIdeas((all) => [...all, { id: Date.now(), text: draft.trim(), col: 'ideas' }]);
-                  setDraft('');
+                  pin();
                 }}
               >
-                <input
+                <div className="text-[13px] leading-[1.5]" style={{ color: T.muted }}>
+                  Half-formed is fine. Get it out of your head.
+                </div>
+                <textarea
+                  ref={pageRef}
                   value={draft}
                   onChange={(e) => setDraft(e.target.value)}
-                  placeholder="Add your own idea…"
-                  aria-label="Add an idea"
-                  className="w-full border bg-white px-3 py-2 text-[14px] md:w-[320px]"
-                  style={{ borderColor: T.rule }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+                      e.preventDefault();
+                      pin();
+                    }
+                  }}
+                  rows={3}
+                  placeholder={`What should @${brand.handle} say next?`}
+                  aria-label="Write an idea"
+                  className="mt-3 w-full resize-none bg-transparent text-[26px] leading-[40px] outline-none placeholder:text-black/25 md:text-[32px]"
+                  style={{
+                    fontFamily: BIG,
+                    fontWeight: 500,
+                    letterSpacing: '-0.02em',
+                    // site-wide form styles give textareas a grey box; this is a page
+                    // notebook rules that sit under each 40px line and scroll with the text
+                    background:
+                      'repeating-linear-gradient(transparent 0 39px, rgba(14,14,14,0.07) 39px 40px)',
+                    backgroundAttachment: 'local',
+                    border: 'none',
+                    borderRadius: 0,
+                    boxShadow: 'none',
+                    padding: 0,
+                    overflow: 'hidden',
+                    width: '100%',
+                    maxWidth: 'none',
+                    fontSize: 'clamp(24px, 2.6vw, 32px)',
+                    lineHeight: '40px',
+                    color: T.ink,
+                  }}
                 />
-                <button
-                  type="submit"
-                  className="px-4 text-[11px] uppercase tracking-[0.14em] text-white"
-                  style={{ fontFamily: MONO, background: T.ink }}
-                >
-                  Add
-                </button>
+                <div className="mt-3 flex items-center justify-between gap-3">
+                  <span
+                    className="hidden text-[10px] uppercase tracking-[0.14em] md:inline"
+                    style={{ fontFamily: MONO, color: T.muted }}
+                  >
+                    ⌘ + Enter to pin it
+                  </span>
+                  <button
+                    type="submit"
+                    disabled={!draft.trim()}
+                    className="ml-auto px-5 py-3 text-[11px] uppercase tracking-[0.14em] text-white transition-opacity disabled:opacity-30"
+                    style={{ fontFamily: MONO, background: T.ink }}
+                  >
+                    Pin to the board →
+                  </button>
+                </div>
               </form>
+              <aside className="md:border-l md:pl-8" style={{ borderColor: T.rule }}>
+                <Label>Stuck? Start from</Label>
+                <div className="mt-3 flex flex-wrap gap-2 md:flex-col md:items-start">
+                  {SPARKS.map((sp) => (
+                    <button
+                      key={sp}
+                      type="button"
+                      onClick={() => {
+                        setDraft(`${sp}: `);
+                        pageRef.current?.focus();
+                      }}
+                      className="border bg-white px-3 py-2 text-left text-[13px] leading-[1.35] transition-colors hover:border-[#0047FF]"
+                      style={{ borderColor: T.rule }}
+                    >
+                      {sp}
+                    </button>
+                  ))}
+                </div>
+              </aside>
             </div>
             <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-3">
               {(
