@@ -25,7 +25,10 @@ export async function GET(request: NextRequest) {
   const code = requestUrl.searchParams.get('code');
   const rawNext = requestUrl.searchParams.get('next');
   // Only allow same-origin relative paths to prevent open-redirect.
-  const next = rawNext && rawNext.startsWith('/') && !rawNext.startsWith('//') ? rawNext : '/home';
+  // Default landing: the dashboard (decided 2026-10-22; the title screen stays
+  // one tap away from the dashboard's menu icon).
+  const next =
+    rawNext && rawNext.startsWith('/') && !rawNext.startsWith('//') ? rawNext : '/dashboard';
   // TOS acknowledgment version from the signup page (strict-format validated —
   // the param round-trips through OAuth providers / email links).
   const rawTos = requestUrl.searchParams.get('tos');
@@ -73,17 +76,15 @@ export async function GET(request: NextRequest) {
     const name = session.user.user_metadata?.full_name || session.user.user_metadata?.name;
     const avatar = session.user.user_metadata?.avatar_url || session.user.user_metadata?.picture;
 
-    // Extract X-specific data (only present for twitter provider)
+    // X data: from an X sign-in, or from an X identity linked onto a Google /
+    // email account ("Connect your X" on the dashboard).
+    const xIdentity = (session.user.identities ?? []).find((i) => i.provider === 'twitter');
+    const xData = (
+      provider === 'twitter' ? session.user.user_metadata : xIdentity?.identity_data
+    ) as Record<string, string | undefined> | undefined;
     const xUsername =
-      provider === 'twitter'
-        ? session.user.user_metadata?.user_name ||
-          session.user.user_metadata?.preferred_username ||
-          session.user.user_metadata?.screen_name
-        : null;
-    const xId =
-      provider === 'twitter'
-        ? session.user.user_metadata?.provider_id || session.user.user_metadata?.sub
-        : null;
+      (xData && (xData.user_name || xData.preferred_username || xData.screen_name)) || null;
+    const xId = (xData && (xData.provider_id || xData.sub)) || null;
 
     // Invite code redemption
     const pendingInviteCode = cookieStore.get('pendingInviteCode')?.value;
@@ -147,7 +148,8 @@ export async function GET(request: NextRequest) {
         name,
         avatar,
         email,
-        ...(xUsername && !existingUser?.xUsername ? { xUsername } : {}),
+        // keep the handle current (people rename on X)
+        ...(xUsername ? { xUsername } : {}),
         ...(xId && !existingUser?.xId ? { xId } : {}),
         ...(isInnerCircle ? { isInnerCircle: true, invitedBy } : {}),
         ...tosFields,
@@ -172,8 +174,8 @@ export async function GET(request: NextRequest) {
       name || xUsername || email?.split('@')[0]
     );
 
-    // Auto-connect X account if this is an X OAuth login
-    if (provider === 'twitter' && xUsername && xId) {
+    // Auto-connect X: an X sign-in, or X just linked onto this account
+    if (xUsername && xId) {
       const providerToken = session.provider_token;
       const providerRefreshToken = session.provider_refresh_token;
 
@@ -249,11 +251,29 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Determine redirect: legacy users go to migration page
-    let redirectTo = next;
-    if (existingUser?.accountMigrationStatus === 'legacy' && provider === 'twitter') {
-      redirectTo = '/migrate-account';
+    // Legacy (X-only) accounts must add a primary login. Once one is attached
+    // (Google / Apple via linkIdentity, or a confirmed email), the migration
+    // is done, whichever provider this sign-in came through. Without this,
+    // linking Google sent the user straight back to /migrate-account.
+    if (existingUser?.accountMigrationStatus === 'legacy') {
+      const providers = (session.user.identities ?? []).map((i) => i.provider);
+      if (providers.some((p) => p !== 'twitter')) {
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { accountMigrationStatus: 'completed' },
+        });
+        await logSecurityEvent({
+          category: 'auth',
+          eventType: 'account_migration_completed',
+          userId: user.id,
+          metadata: { from_status: 'legacy', via: providers.join(',') },
+        });
+      }
     }
+
+    // Legacy accounts are no longer walled off: the dashboard shows an
+    // optional "add a backup login" nudge instead (decided 2026-10-22).
+    const redirectTo = next;
 
     const response = NextResponse.redirect(new URL(redirectTo, request.url));
 
