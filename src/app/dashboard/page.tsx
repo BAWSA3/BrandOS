@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { after } from 'next/server';
 import { refreshAvatar } from '@/lib/avatar-refresh';
-import { getCurrentUser, getCurrentWorkspace } from '@/lib/auth';
+import { getCurrentUser } from '@/lib/auth';
 import { getHomeData, toDashboardData } from '@/lib/home-data';
 import { cookies } from 'next/headers';
 import { recordVisit, safeTz } from '@/lib/progress';
@@ -14,7 +14,9 @@ import Paywall from '@/components/billing/Paywall';
 import { lookupStats } from '@/lib/lookups';
 import BentoDashboard from '@/components/dashboard/BentoDashboard';
 import RescanOnLoad from '@/components/dashboard/RescanOnLoad';
-import DashboardClient from './DashboardClient';
+import ConnectX from './ConnectX';
+import BackupLoginNudge from '@/components/dashboard/BackupLoginNudge';
+import { adoptPublicScan } from '@/lib/adopt-scan';
 import FirstScan from './FirstScan';
 
 // Auth-gated page: render per-request, never statically prerender at build.
@@ -50,15 +52,16 @@ export default async function DashboardPage({
     redirect('/signup');
   }
 
-  if (user.accountMigrationStatus === 'legacy') {
-    redirect('/migrate-account');
-  }
+  // Old X-only accounts get an optional nudge (below), never a wall.
+  const legacy = user.accountMigrationStatus === 'legacy';
 
-  const workspace = await getCurrentWorkspace(user);
   const xConnections = user.platformConnections.filter((pc) => pc.platform === 'x');
   // Real-data bento once the user has a scan (the legacy tools page only shows
   // for accounts without X connected, which can't scan yet).
   // The visit awards XP / advances the streak (null if migration 029 isn't applied).
+  // "Your scan comes with you": a homepage scan of their own handle becomes
+  // the account's first scan (no second scan, no wait).
+  if (xConnections[0]) await adoptPublicScan(user, xConnections[0]);
   const home = await getHomeData(user);
   // first visit of the day: check X for a new profile photo (background)
   after(() => refreshAvatar(user.id).catch(() => null));
@@ -122,34 +125,10 @@ export default async function DashboardPage({
       {firstScan ? (
         <FirstScan handle={home.handle} />
       ) : bento ? null : (
-        <DashboardClient
-          user={{
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            xUsername: user.xUsername,
-            avatar: user.avatar,
-            role: user.role,
-          }}
-          workspace={
-            workspace
-              ? {
-                  id: workspace.id,
-                  name: workspace.name,
-                  type: workspace.type,
-                  plan: workspace.plan,
-                  activeWorldId: workspace.activeWorldId,
-                }
-              : null
-          }
-          xConnections={xConnections.map((pc) => ({
-            id: pc.id,
-            username: pc.platformUsername,
-            status: pc.status,
-            connectedAt: pc.connectedAt.toISOString(),
-          }))}
-        />
+        // Signed up with Google / email: one step left
+        <ConnectX name={user.name} />
       )}
+      {legacy && bento && <BackupLoginNudge />}
     </>
   );
 }

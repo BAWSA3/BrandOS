@@ -20,7 +20,7 @@ export default async function MigrateAccountPage() {
   const user = await getCurrentUser();
 
   if (!user) {
-    redirect('/');
+    redirect('/signup?next=/dashboard');
   }
 
   if (user.accountMigrationStatus === 'completed') {
