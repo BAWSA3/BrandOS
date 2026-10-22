@@ -2,7 +2,7 @@
  * Billing rules for the launch (docs/LAUNCH-PLAN.md). Pure, no network/DB:
  *   npm run test:billing
  */
-import { hasPro, mapStripeStatus, trialEndsAt } from '../src/lib/billing';
+import { hasPro, mapStripeStatus, periodEndOf, trialEndsAt } from '../src/lib/billing';
 import { TRIAL_DAYS, FOUNDING_SPOTS, PLAN_CONFIGS } from '../src/lib/plans';
 import { viewerKey } from '../src/lib/lookups';
 import { digestContent } from '../src/lib/lookup-digest';
@@ -85,6 +85,31 @@ test(
 test(
   'digest never names viewers (counts + type only)',
   !JSON.stringify(many).match(/@(?!jbawsa)[a-z0-9_]+/i)
+);
+
+console.log('F. Stored period end (bug: an ended trial kept showing as the renewal date)');
+const sub = (status: string, trial_end: number | null, current_period_end: number) => ({
+  status,
+  trial_end,
+  items: { data: [{ current_period_end }] },
+});
+const TRIAL_END = 1_793_274_798; // Oct 29
+const RENEWS = 1_795_348_421; // Nov 22
+test(
+  'trialing → trial end (first charge date)',
+  periodEndOf(sub('trialing', TRIAL_END, RENEWS))?.getTime() === TRIAL_END * 1000
+);
+test(
+  'active after a trial → renewal date, not the old trial end',
+  periodEndOf(sub('active', TRIAL_END, RENEWS))?.getTime() === RENEWS * 1000
+);
+test(
+  'active, never trialed → renewal date',
+  periodEndOf(sub('active', null, RENEWS))?.getTime() === RENEWS * 1000
+);
+test(
+  'no items → null',
+  periodEndOf({ status: 'active', trial_end: null, items: { data: [] } }) === null
 );
 
 console.log(`\n${pass} passed, ${fail} failed`);
