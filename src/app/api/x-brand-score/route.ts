@@ -11,16 +11,15 @@ async function handlePost(request: NextRequest) {
     const botBlock = await botGuard(request);
     if (botBlock) return botBlock;
 
-    const { username, forceReevaluate = false } = (await request.json()) as {
-      username: string;
-      forceReevaluate?: boolean;
-    };
+    // forceReevaluate is NOT read from the body: it skips the cache, score
+    // smoothing and the archetype lock, so it's admin-only (/api/archetype).
+    const { username } = (await request.json()) as { username: string };
 
     if (!username) {
       return NextResponse.json({ error: 'Username is required' }, { status: 400 });
     }
 
-    const result = await computeBrandScore(username, request.nextUrl.origin, forceReevaluate);
+    const result = await computeBrandScore(username, request.nextUrl.origin);
     return NextResponse.json(result.body, { status: result.status });
   } catch (error) {
     console.error('Brand Score API error:', error);

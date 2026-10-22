@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getCurrentUser } from '@/lib/auth';
+import { computeBrandScore } from '@/lib/brand-score';
 import {
   getUserProfile,
   getArchetypeHistory,
@@ -70,26 +72,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid action. Supported: reevaluate' }, { status: 400 });
     }
 
-    // Reevaluate by calling brand score API with forceReevaluate
-    const origin = request.nextUrl.origin;
-    const response = await fetch(`${origin}/api/x-brand-score`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        username,
-        forceReevaluate: true,
-      }),
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      return NextResponse.json(
-        { error: error.error || 'Reevaluation failed' },
-        { status: response.status }
-      );
+    // Re-scoring from scratch skips the cache, smoothing and the archetype
+    // lock, and costs a paid scan: admins only (it used to be open to anyone).
+    const user = await getCurrentUser();
+    if (user?.role !== 'admin') {
+      return NextResponse.json({ error: 'Not allowed' }, { status: 403 });
     }
 
-    const result = await response.json();
+    const scored = await computeBrandScore(username, request.nextUrl.origin, true);
+    if (scored.status !== 200) {
+      return NextResponse.json(
+        { error: (scored.body.error as string) || 'Reevaluation failed' },
+        { status: scored.status }
+      );
+    }
+    const result = scored.body as { brandScore: { archetype: unknown }; meta: unknown };
 
     return NextResponse.json({
       success: true,
