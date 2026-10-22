@@ -196,7 +196,7 @@ function teaseModel(r: TeaseRecipient) {
     studio:
       'on <b>nov 2</b> i&#39;m opening <b>BrandOS Studio</b>: one dashboard that tracks your brand score over time, keeps you on-brand, and tells you what to fix after every post.',
     reply: 'hit reply with your new score and i&#39;ll tell you the one thing i&#39;d fix first.',
-    ps: 'Pro is $29/mo at launch. after the first 100 members it goes to $39. founding members keep $29 for life, plus a recorded teardown of their brand from me.',
+    ps: 'on nov 2 everyone gets full access to BrandOS Studio, free until dec 3. no card needed. the first 100 people who add a card before dec 3 lock in $29/mo for life (nothing is charged until dec 3), plus a recorded teardown of their brand from me. after that, Pro is $39/mo.',
   };
 }
 
