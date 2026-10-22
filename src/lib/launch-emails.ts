@@ -223,7 +223,7 @@ export function studioTeaseContent(r: {
       {
         type: 'text',
         content:
-          '<b>p.s.</b> the first 100 people to go Pro on nov 2 lock in $29/mo forever, plus a recorded teardown of their brand from me.',
+          '<b>p.s.</b> Pro is $29/mo at launch. after the first 100 members it goes to $39. founding members keep $29 for life, plus a recorded teardown of their brand from me.',
       },
     ],
   };
