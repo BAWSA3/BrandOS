@@ -19,10 +19,13 @@ export const CAMPAIGNS = {
   reserveConfirm: 'reserve-confirm',
   release: 'release-v1',
   reengage: 'reengage-oct26',
+  studioTease: 'studio-tease-oct22',
 } as const;
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://mybrandos.app';
 const FROM = process.env.EMAIL_FROM || 'BrandOS <onboarding@resend.dev>';
+// mybrandos.app has no inbox (no MX), so replies need a real mailbox
+const REPLY_TO = process.env.EMAIL_REPLY_TO || undefined;
 
 // ---------------------------------------------------------------------------
 // Content
@@ -118,6 +121,91 @@ export function reengageContent(r: {
   };
 }
 
+/**
+ * Pre-launch tease (Oct 22 2026) for the whole list: "BrandOS Studio opens
+ * Nov 2". One job: get a fresh scan. Leads with their own past score when we
+ * have one (661 of ~1k), and the button runs their scan in one tap
+ * (`/?scan=<handle>`). Founding 100 is the reason to come back on Nov 2.
+ */
+export function studioTeaseContent(r: {
+  handle: string | null;
+  score: number | null;
+  since: Date;
+}): NonNullable<NewsletterContent> {
+  const who = r.handle ? `@${esc(r.handle)}` : 'there';
+  const month = r.since.toLocaleString('en-US', { month: 'long', timeZone: 'UTC' }).toLowerCase();
+  // scanned in the last ~6 weeks: "back in october, a lot of posts ago" would read wrong
+  const recent = Date.now() - r.since.getTime() < 45 * 86_400_000;
+  const utm = 'utm_source=email&utm_medium=email&utm_campaign=studio-tease';
+  const url = r.handle
+    ? `${APP_URL}/?scan=${encodeURIComponent(r.handle)}&${utm}`
+    : `${APP_URL}/?${utm}`;
+
+  const opener: NewsletterContent['sections'] =
+    r.score != null
+      ? [
+          {
+            type: 'stat',
+            label: String(r.score),
+            content: recent ? 'your last brand score' : `your brand score in ${month}`,
+          },
+          {
+            type: 'text',
+            content: recent
+              ? 'you scanned your X on BrandOS recently. your score moves every time you post, so let&#39;s see where it is now.'
+              : `back in ${month} you scanned your X on BrandOS. that was a lot of posts ago, and your brand has moved since. i want you to see where.`,
+          },
+        ]
+      : [
+          {
+            type: 'text',
+            content: recent
+              ? 'you signed up for BrandOS recently. it&#39;s almost ready.'
+              : `back in ${month} you signed up for BrandOS. since then i&#39;ve been building, and it&#39;s almost ready.`,
+          },
+        ];
+
+  return {
+    subject:
+      r.score != null && r.handle
+        ? recent
+          ? `@${r.handle}, your last brand score was ${r.score}`
+          : `@${r.handle}, you scored ${r.score} in ${month}`
+        : r.handle
+          ? `@${r.handle}, what's your brand score now?`
+          : "what's your brand score now?",
+    preheader: 'BrandOS Studio opens Nov 2. See where you stand before it does.',
+    sections: [
+      { type: 'text', content: `hey ${who},` },
+      ...opener,
+      {
+        type: 'text',
+        content:
+          "brands aren't reading bios anymore. they ask AI who you are, and they act on the answer.",
+      },
+      {
+        type: 'text',
+        content:
+          'on <b>nov 2</b> i&#39;m opening <b>BrandOS Studio</b>: your brand dashboard. it tracks your score over time, reads every post you make, and tells you exactly what to fix next.',
+      },
+      {
+        type: 'text',
+        content: 'before it opens, run a fresh scan. it&#39;s free and takes about a minute.',
+      },
+      { type: 'cta', content: r.score != null ? 'See my score now →' : 'Scan my brand →', url },
+      {
+        type: 'text',
+        content:
+          '<b>founding 100:</b> the first 100 people to go Pro keep $29/mo forever, plus a recorded brand teardown from me. spots open nov 2.',
+      },
+      {
+        type: 'text',
+        content: 'reply with your new score. i read every one.<br/><br/>— Bawsa',
+      },
+    ],
+  };
+}
+
 // DRAFT copy for release day: Jeffrey approves the wording before any send.
 export function releaseEmailContent(): NewsletterContent {
   return {
@@ -185,11 +273,14 @@ export async function sendOnce(
   const { data, error } = await client().emails.send({
     from: FROM,
     to: signup.email,
+    ...(REPLY_TO ? { replyTo: REPLY_TO } : {}),
     subject: content.subject,
     html,
     text,
     headers: {
       'List-Unsubscribe': `<${APP_URL}/api/newsletter/unsubscribe?email=${encodeURIComponent(signup.email)}>`,
+      // RFC 8058 one-click: Gmail/Yahoo POST to the URL above (the route reads ?email=)
+      'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
     },
   });
   if (error || !data) {
