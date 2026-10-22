@@ -160,6 +160,7 @@ model User {
   preference           UserPreference? // display settings (migration 036)
   foundingMember       FoundingMember? // Founding 100 spot (migration 038)
   lookupDigests        LookupDigest[] // weekly lookup email claims (migration 039)
+  trackedAccountsAdded TrackedAccount[] // accounts this user added (migration 040)
   ideas                Idea[] // studio idea board (migration 035)
   postScores           PostScore[] // per-post brand fit (migration 033)
   noteReports          NoteReport[]       @relation("NoteReporter")
@@ -1059,6 +1060,7 @@ model Workspace {
   securityAuditEvents SecurityAuditLog[]
   dailyBriefs         DailyBrief[]
   brands              Brand[]
+  trackedAccounts     TrackedAccount[] // growth dashboard (migration 040)
 
   @@index([ownerUserId])
   @@map("Workspace")
@@ -1368,4 +1370,70 @@ model Idea {
   postedAt    DateTime? @db.Timestamptz
 
   @@index([userId, createdAt(sort: Desc)])
+}
+
+// Growth dashboard (migration 040, pivot 2026-10-22): X accounts a workspace
+// tracks by public handle — its brands and their competitors.
+model TrackedAccount {
+  id             String            @id @default(dbgenerated("(gen_random_uuid())::text"))
+  workspaceId    String            @db.Uuid
+  workspace      Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  handle         String // lowercase
+  displayHandle  String
+  xUserId        String?
+  kind           String            @default("creator") // creator | brand
+  competitorOfId String?
+  competitorOf   TrackedAccount?   @relation("Competitors", fields: [competitorOfId], references: [id], onDelete: Cascade)
+  competitors    TrackedAccount[]  @relation("Competitors")
+  addedByUserId  String?
+  addedBy        User?             @relation(fields: [addedByUserId], references: [id], onDelete: SetNull)
+  lastSyncedAt   DateTime?         @db.Timestamptz
+  createdAt      DateTime          @default(now()) @db.Timestamptz
+  snapshots      AccountSnapshot[]
+  posts          AccountPost[]
+
+  @@index([workspaceId])
+  @@index([lastSyncedAt])
+}
+
+model AccountSnapshot {
+  accountId      String
+  account        TrackedAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  day            DateTime       @default(dbgenerated("((now() AT TIME ZONE 'utc'::text))::date")) @db.Date
+  followers      Int
+  following      Int
+  postsTotal     Int
+  listed         Int            @default(0)
+  samplePosts    Int            @default(0)
+  sampleDays     Float          @default(0) @db.Real
+  postsPerDay    Float          @default(0) @db.Real
+  engagementRate Float?         @db.Real
+  mediaShare     Float          @default(0) @db.Real
+  avgLikes       Float          @default(0) @db.Real
+  avgReplies     Float          @default(0) @db.Real
+  avgReposts     Float          @default(0) @db.Real
+  avgViews       Float          @default(0) @db.Real
+  createdAt      DateTime       @default(now()) @db.Timestamptz
+
+  @@id([accountId, day])
+}
+
+model AccountPost {
+  accountId String
+  account   TrackedAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  tweetId   String
+  text      String
+  postedAt  DateTime       @db.Timestamptz
+  likes     Int            @default(0)
+  replies   Int            @default(0)
+  reposts   Int            @default(0)
+  quotes    Int            @default(0)
+  bookmarks Int            @default(0)
+  views     Int            @default(0)
+  media     String[]       @default([])
+  isQuote   Boolean        @default(false)
+  updatedAt DateTime       @default(now()) @db.Timestamptz
+
+  @@id([accountId, tweetId])
+  @@index([accountId, postedAt(sort: Desc)])
 }
