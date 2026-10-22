@@ -133,6 +133,16 @@ export async function publicRead(handle: string): Promise<ProfileRead | null> {
     : null;
 }
 
+/**
+ * The first `n` sentences of a summary. A sentence ends at . ! or ? followed by
+ * whitespace and a new sentence: the old split broke at any period, so
+ * "52.3K followers" or "4.14% engagement" cut the summary mid-number.
+ */
+export function firstSentences(text: string, n: number): string {
+  const parts = text.trim().split(/(?<=[.!?])\s+(?=[A-Z0-9"'“(@])/);
+  return parts.slice(0, n).join(' ').trim();
+}
+
 /** Build a read from a fresh computeBrandScore() result. */
 export function freshRead(handle: string, brandScore: Record<string, unknown>): ProfileRead {
   const archetype = (brandScore.archetype as { primary?: string } | undefined)?.primary ?? null;
@@ -205,13 +215,7 @@ export function profileCard(r: ProfileRead) {
     score: r.score,
     archetype: info ? { name: info.name, tagline: info.tagline } : null,
     // the card keeps the read scannable: the first two sentences of the summary
-    summary: i.summary
-      ? (i.summary
-          .match(/[^.!?]+[.!?]+/g)
-          ?.slice(0, 2)
-          .join('')
-          .trim() ?? i.summary)
-      : null,
+    summary: i.summary ? firstSentences(i.summary, 2) : null,
     phases: i.phaseScores ?? null,
     pillars: i.contentPillars?.slice(0, 4) ?? [],
     influence: i.influenceTier ? i.influenceTier.split(/[\s(]/)[0] : null,

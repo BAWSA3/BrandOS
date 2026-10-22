@@ -3,6 +3,7 @@
  *   npm run test:scan
  */
 import { analyzeTweets, type Tweet } from '../src/lib/tweet-analysis';
+import { firstSentences } from '../src/lib/mcp/profile-read';
 
 let pass = 0;
 let fail = 0;
@@ -93,6 +94,21 @@ const mixed = analyzeTweets([post(1, { views: 1000 }), post(2, { views: 0 })]);
 test(
   'posts without views do not deflate the rate',
   Math.abs(mixed.stats.avgEngagementRate - 1.6) < 1e-9
+);
+
+console.log('E. Read summary on the card (bug: cut at a decimal point, "With 52.")');
+test(
+  'decimals stay intact',
+  firstSentences(
+    'Hades teaches branding. With 52.3K followers he hits 2.05% engagement. Third.',
+    2
+  ) === 'Hades teaches branding. With 52.3K followers he hits 2.05% engagement.'
+);
+test('first sentence only', firstSentences('One. Two. Three.', 1) === 'One.');
+test('no period → whole text', firstSentences('Just one line', 2) === 'Just one line');
+test(
+  'question and exclamation marks end sentences',
+  firstSentences('Is it good? Yes! More.', 2) === 'Is it good? Yes!'
 );
 
 console.log(`\n${pass} passed, ${fail} failed`);
