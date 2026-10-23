@@ -17,12 +17,13 @@ const card = (
   archetype: string,
   niches: string[],
   blurb: string,
-  featured = false
+  featured = false,
+  avatar: string | null = null
 ): IndexCard => ({
   handle,
   number,
   name: null,
-  avatar: null,
+  avatar,
   score,
   archetype,
   niches,
@@ -38,7 +39,9 @@ const FEATURED = [
     'BUILD.EXE',
     ['Founder', 'Infra & dev'],
     'Shipping a wallet in public. Weekly build logs, no hype.',
-    true
+    true,
+    // a solid-colour picture (used to render as a flat grey square)
+    "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Crect width='40' height='40' fill='%230047FF'/%3E%3C/svg%3E"
   ),
   card(
     7,
@@ -57,7 +60,10 @@ const REST = [
     68,
     'SIGNAL',
     ['Trading'],
-    'Daily market reads for 20k traders. Charts, not calls.'
+    'Daily market reads for 20k traders. Charts, not calls.',
+    false,
+    // a stale X URL: falls back to the initial
+    'https://pbs.twimg.com/profile_images/0/brandos-preview-missing_normal.jpg'
   ),
   card(
     41,

@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useReducedMotion } from 'motion/react';
 import { AnimateNumber } from 'motion-plus/react';
 import { DASH_FONTS } from '@/components/dashboard/dashFonts';
@@ -44,24 +44,7 @@ function Card({ c, pinned = false }: { c: IndexCard; pinned?: boolean }) {
         {c.featured && <Micro color={C.blue}>Featured</Micro>}
       </div>
       <div className="mt-4 flex items-center gap-3">
-        {c.avatar ? (
-          // eslint-disable-next-line @next/next/no-img-element -- X avatars (pbs.twimg.com)
-          <img
-            src={c.avatar.replace('_normal', '_200x200')}
-            alt=""
-            width={44}
-            height={44}
-            className="h-11 w-11 shrink-0 object-cover"
-            style={{ filter: 'grayscale(100%) contrast(1.1)' }}
-          />
-        ) : (
-          <div
-            className="flex h-11 w-11 shrink-0 items-center justify-center text-[18px]"
-            style={{ background: '#E4E0D6', fontFamily: BIG, color: C.muted }}
-          >
-            {c.handle[0]?.toUpperCase()}
-          </div>
-        )}
+        <Avatar src={c.avatar} handle={c.handle} />
         <div className="min-w-0">
           <div
             className="truncate text-[17px] leading-tight"
@@ -99,6 +82,52 @@ function Card({ c, pinned = false }: { c: IndexCard; pinned?: boolean }) {
         </div>
       )}
     </Link>
+  );
+}
+
+/**
+ * The member's X picture in full colour: in a directory, recognising someone
+ * is the point (a grayscale filter turned solid-colour pictures into flat grey
+ * squares). Falls back to their initial in Klein on Bone when there's no
+ * picture or the saved URL has gone stale (X URLs 404 once a picture changes).
+ */
+function Avatar({ src, handle }: { src: string | null; handle: string }) {
+  const [failed, setFailed] = useState(false);
+  const img = useRef<HTMLImageElement>(null);
+  // an image that failed before hydration never fires onError: check on mount
+  useEffect(() => {
+    const el = img.current;
+    if (el && el.complete && el.naturalWidth === 0) setFailed(true);
+  }, []);
+  if (src && !failed) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element -- X avatars (pbs.twimg.com)
+      <img
+        ref={img}
+        src={src.replace('_normal', '_200x200')}
+        alt=""
+        width={44}
+        height={44}
+        onError={() => setFailed(true)}
+        className="h-11 w-11 shrink-0 object-cover"
+        style={{ boxShadow: `inset 0 0 0 1px ${C.rule}` }}
+      />
+    );
+  }
+  return (
+    <div
+      aria-hidden
+      className="flex h-11 w-11 shrink-0 items-center justify-center text-[20px] leading-none"
+      style={{
+        background: C.bg,
+        border: `1px solid ${C.blue}`,
+        fontFamily: BIG,
+        fontWeight: 500,
+        color: C.blue,
+      }}
+    >
+      {handle[0]?.toUpperCase()}
+    </div>
   );
 }
 

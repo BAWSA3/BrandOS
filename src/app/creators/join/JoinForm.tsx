@@ -32,6 +32,16 @@ function Micro({ children, color = C.muted }: { children: React.ReactNode; color
 
 type Entry = { number: number; niches: string[]; blurb: string; listed: boolean };
 
+// Shown while a first-ever brand read runs (it reads their posts and scores
+// them, ~30-60s), so the wait reads as the reveal it is, not a stuck button.
+const SCAN_STEPS = [
+  'Reading your latest posts…',
+  'Finding what you post about…',
+  'Scoring your brand…',
+  'Naming your archetype…',
+  'Getting your number ready…',
+];
+
 export default function JoinForm({
   handle,
   read,
@@ -50,6 +60,19 @@ export default function JoinForm({
   const [joined, setJoined] = useState<number | null>(null);
   const [listed, setListed] = useState(entry?.listed ?? false);
   const [shown, setShown] = useState(0);
+  const [step, setStep] = useState(0);
+  const [refreshing, setRefreshing] = useState(false);
+
+  // walk through the scan steps while a first brand read runs
+  useEffect(() => {
+    if (busy !== 'scan') return;
+    setStep(0);
+    const t = window.setInterval(
+      () => setStep((s) => Math.min(s + 1, SCAN_STEPS.length - 1)),
+      9000
+    );
+    return () => window.clearInterval(t);
+  }, [busy]);
 
   // the number rolls up from 0 once it's assigned
   useEffect(() => {
@@ -87,11 +110,11 @@ export default function JoinForm({
       cur.includes(n) ? cur.filter((x) => x !== n) : cur.length >= MAX_NICHES ? cur : [...cur, n]
     );
 
-  const post = (allowStale: boolean) =>
+  const post = () =>
     fetch('/api/index/join', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ niches, blurb, allowStale }),
+      body: JSON.stringify({ niches, blurb }),
     });
 
   const submit = async (e: React.FormEvent) => {
@@ -111,18 +134,19 @@ export default function JoinForm({
     setError(null);
     setBusy('join');
     try {
-      let res = await post(false);
+      // An old read joins right away and is refreshed in the background.
+      // Only a first-ever read has to run before the number is assigned.
+      let res = await post();
       let body = await res.json().catch(() => ({}));
       if (res.status === 409 && body.needsScan) {
-        // no fresh brand read: refresh it once, then join (an old read is used if the refresh isn't allowed)
         setBusy('scan');
         const scan = await fetch('/api/dashboard/rescan', { method: 'POST' });
         setBusy('join');
-        if (!scan.ok && !read) {
+        if (!scan.ok) {
           setError("We couldn't read your brand right now. Try again in a minute.");
           return;
         }
-        res = await post(!scan.ok);
+        res = await post();
         body = await res.json().catch(() => ({}));
       }
       if (!res.ok || typeof body.number !== 'number') {
@@ -130,6 +154,7 @@ export default function JoinForm({
         return;
       }
       setListed(true);
+      setRefreshing(body.refreshing === true);
       setJoined(body.number);
     } catch {
       setError('Check your connection and try again.');
@@ -176,6 +201,11 @@ export default function JoinForm({
         <p className="mt-4 text-[17px]">
           @{handle} is {formatNumber(joined)} in the BrandOS Creator Index.
         </p>
+        {refreshing && (
+          <p className="mt-2 text-[14px]" style={{ color: C.muted }}>
+            We&apos;re refreshing your brand read in the background. Your card updates in a minute.
+          </p>
+        )}
         <div className="mt-8 flex flex-wrap gap-3">
           <a
             href={intent}
@@ -222,7 +252,7 @@ export default function JoinForm({
           : ' and your brand read'}
         , plus what you tell them below.
         {read && !read.fresh
-          ? ' Your read is over a week old, so we refresh it when you join.'
+          ? ' Your read is over a week old, so we refresh it right after you join.'
           : ''}
       </p>
 
@@ -300,7 +330,7 @@ export default function JoinForm({
             style={{ fontFamily: MONO, background: C.blue }}
           >
             {busy === 'scan'
-              ? 'Refreshing your brand read…'
+              ? SCAN_STEPS[step]
               : busy === 'join'
                 ? 'Saving…'
                 : entry
