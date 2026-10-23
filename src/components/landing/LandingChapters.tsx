@@ -8,6 +8,8 @@ import {
   useMotionValueEvent,
   useReducedMotion,
   useScroll,
+  useTransform,
+  type MotionValue,
 } from 'motion/react';
 import { AnimateNumber, Carousel, Ticker, useCarousel, useCurtains } from 'motion-plus/react';
 import { pixels } from 'motion-plus/curtains';
@@ -288,6 +290,47 @@ function DotBar({
   );
 }
 
+/**
+ * The same dot bar, filled by scrolling: `progress` (0..1) lights the dots one
+ * by one as the reader scrolls, and empties them on the way back up. Each bar
+ * starts a little after the one above it (`index`). Only this bar re-renders.
+ */
+function ScrollDotBar({
+  value,
+  progress,
+  index = 0,
+  dots = 28,
+  color = KLEIN,
+}: {
+  value: number;
+  progress: MotionValue<number>;
+  index?: number;
+  dots?: number;
+  color?: string;
+}) {
+  const max = Math.round((Math.max(0, Math.min(100, value)) / 100) * dots);
+  const local = (p: number) => Math.max(0, Math.min(1, (p - index * 0.12) / 0.64));
+  const [lit, setLit] = useState(() => Math.round(local(progress.get()) * max));
+  useMotionValueEvent(progress, 'change', (p) => setLit(Math.round(local(p) * max)));
+  return (
+    <div
+      aria-hidden
+      style={{ display: 'grid', gridTemplateColumns: `repeat(${dots}, 1fr)`, gap: 3 }}
+    >
+      {Array.from({ length: dots }, (_, i) => (
+        <span
+          key={i}
+          style={{
+            aspectRatio: '1',
+            background: i < lit ? color : 'transparent',
+            boxShadow: `inset 0 0 0 1px ${i < lit ? color : 'rgba(14,14,14,.18)'}`,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
 /** A line chart drawn as columns of dots (the follower line in the record). */
 function DotChart({ series, on }: { series: number[]; on: boolean }) {
   const rows = 10;
@@ -453,7 +496,16 @@ function SameFollowers() {
 
 type Ex = LandingData['example'];
 
-function Specimen({ step, ex }: { step: number; ex: Ex }) {
+function Specimen({
+  step,
+  ex,
+  fill,
+}: {
+  step: number;
+  ex: Ex;
+  /** Scroll-linked fill for the phase bars (0..1); without it they fill once on arrival. */
+  fill?: MotionValue<number>;
+}) {
   const H = LANDING.how;
   const cls = classify(ex.archetype);
   const phases: [string, number][] = [
@@ -498,7 +550,17 @@ function Specimen({ step, ex }: { step: number; ex: Ex }) {
             }}
           >
             <Count value={ex.score} on={on} />
-            <span style={{ fontSize: '0.24em', color: MUTED, letterSpacing: 0 }}>/100</span>
+            <span
+              style={{
+                fontSize: '0.24em',
+                color: MUTED,
+                letterSpacing: 0,
+                marginLeft: '0.35em',
+                fontVariantNumeric: 'tabular-nums',
+              }}
+            >
+              /100
+            </span>
           </div>
           <div style={{ display: 'grid', gap: 14, marginTop: 26 }}>
             {phases.map(([k, v], i) => (
@@ -508,7 +570,11 @@ function Specimen({ step, ex }: { step: number; ex: Ex }) {
                   <span style={{ color: INK }}>{v}</span>
                 </div>
                 <div style={{ marginTop: 7 }}>
-                  <DotBar value={v} on={on} delay={i * 90} dots={28} />
+                  {fill ? (
+                    <ScrollDotBar value={v} progress={fill} index={i} dots={28} />
+                  ) : (
+                    <DotBar value={v} on={on} delay={i * 90} dots={28} />
+                  )}
                 </div>
               </div>
             ))}
@@ -694,6 +760,8 @@ function PinnedHow({ ex }: { ex: Ex }) {
   const track = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: track, offset: ['start start', 'end end'] });
   const [step, setStep] = useState(0);
+  // The phase bars fill across the first step's scroll (and empty going back).
+  const fill = useTransform(scrollYProgress, [0.01, 0.23], [0, 1], { clamp: true });
   useMotionValueEvent(scrollYProgress, 'change', (p) =>
     setStep(Math.min(3, Math.max(0, Math.floor(p * 4 - 0.0001))))
   );
@@ -742,7 +810,7 @@ function PinnedHow({ ex }: { ex: Ex }) {
               label={`${H.stepOf} ${String(step + 1).padStart(2, '0')} / 04 · ${H.specimen[step]}`}
               padding={28}
             >
-              <Specimen key={step} step={step} ex={ex} />
+              <Specimen key={step} step={step} ex={ex} fill={fill} />
             </Panel>
           </div>
         </div>
@@ -754,17 +822,26 @@ function PinnedHow({ ex }: { ex: Ex }) {
 /** Phones and reduced motion: the same four states, stacked. */
 function StackedHow({ ex, on }: { ex: Ex; on: boolean }) {
   const H = LANDING.how;
+  const reduce = useReducedMotion();
+  const reading = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({ target: reading, offset: ['start 0.9', 'end 0.55'] });
   return (
     <div style={{ display: 'grid', gap: 12 }}>
       {H.steps.map((s, i) => (
-        <Panel key={s.n} padding={14}>
-          <StepText s={s} active />
-          {on && (
-            <div style={{ padding: '4px 4px 8px' }}>
-              <Specimen step={i} ex={ex} />
-            </div>
-          )}
-        </Panel>
+        <div key={s.n} ref={i === 0 ? reading : undefined}>
+          <Panel padding={14}>
+            <StepText s={s} active />
+            {on && (
+              <div style={{ padding: '4px 4px 8px' }}>
+                <Specimen
+                  step={i}
+                  ex={ex}
+                  fill={i === 0 && !reduce ? scrollYProgress : undefined}
+                />
+              </div>
+            )}
+          </Panel>
+        </div>
       ))}
     </div>
   );
