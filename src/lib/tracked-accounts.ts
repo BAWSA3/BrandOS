@@ -212,21 +212,67 @@ export async function syncAudience(accountId: string): Promise<number> {
   return saved;
 }
 
+/** A brand-kind tracked row and who added it (for `trackedKind`). */
+export interface BrandVouch {
+  xUserId: string | null;
+  addedBy: { role: string; xUserIds: string[] } | null;
+}
+
 /**
- * 'brand' when any workspace tracks this handle as a brand / company account
- * (not as a competitor), else 'creator'. Only changes how a brand read is
- * worded, never the score. Never throws.
+ * Whether a row marking a handle as a brand / company account comes from
+ * someone allowed to decide that for everyone: an admin, or the handle's owner
+ * (signed in with that X account, matched by X user id, not by handle text).
+ * Anyone else's choice stays in their own workspace. Pure (test:accounts).
+ */
+export function vouchesForCompany(row: BrandVouch): boolean {
+  if (!row.addedBy) return false;
+  if (row.addedBy.role === 'admin') return true;
+  return !!row.xUserId && row.addedBy.xUserIds.includes(row.xUserId);
+}
+
+/**
+ * 'brand' when the handle is tracked as a brand / company account (not as a
+ * competitor) by its owner or an admin, else 'creator'. The brand read is
+ * shared by everyone who looks the handle up (/@handle, scans, MCP, every
+ * dashboard), so one workspace marking a creator as a "brand" must not reword
+ * that creator's read for everyone else. Only changes wording, never the
+ * score. Never throws.
  */
 export async function trackedKind(rawHandle: string): Promise<'creator' | 'brand'> {
   const handle = cleanHandle(rawHandle);
   if (!handle) return 'creator';
-  const row = await prisma.trackedAccount
-    .findFirst({
-      where: { handle: handle.toLowerCase(), kind: 'brand', competitorOfId: null },
-      select: { id: true },
+  const rows = await prisma.trackedAccount
+    .findMany({
+      where: {
+        handle: handle.toLowerCase(),
+        kind: 'brand',
+        competitorOfId: null,
+        addedByUserId: { not: null },
+      },
+      select: {
+        xUserId: true,
+        addedBy: {
+          select: {
+            role: true,
+            platformConnections: { where: { platform: 'x' }, select: { platformUserId: true } },
+          },
+        },
+      },
+      take: 50,
     })
-    .catch(() => null);
-  return row ? 'brand' : 'creator';
+    .catch(() => []);
+  const vouched = rows.some((r) =>
+    vouchesForCompany({
+      xUserId: r.xUserId,
+      addedBy: r.addedBy
+        ? {
+            role: String(r.addedBy.role),
+            xUserIds: r.addedBy.platformConnections.map((c) => c.platformUserId),
+          }
+        : null,
+    })
+  );
+  return vouched ? 'brand' : 'creator';
 }
 
 /**

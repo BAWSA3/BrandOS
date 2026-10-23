@@ -106,9 +106,9 @@ const respond = (body: Record<string, unknown>, init?: { status: number }): Bran
 
 /**
  * Score an X handle. `origin` is this app's origin (profile + tweets are
- * fetched through its own routes). A handle tracked as a brand / company
- * account on any growth dashboard gets its read worded for the team running it
- * (same score); see score-framing.ts.
+ * fetched through its own routes). A handle its owner (or an admin) tracks as
+ * a brand / company account gets its read worded for the team running it
+ * (same score); see trackedKind and score-framing.ts.
  */
 export async function computeBrandScore(
   username: string,
