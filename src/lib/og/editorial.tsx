@@ -18,9 +18,10 @@ const MUTED = '#6B6B6B';
 export const OG_SIZE = { width: 1200, height: 630 };
 
 /** The hero wordmark (brand tokens: the logo is never typed). */
-const wordmark = () => readFile(join(process.cwd(), 'public', 'brand', 'wordmark-day-480.png'));
+export const wordmark = () =>
+  readFile(join(process.cwd(), 'public', 'brand', 'wordmark-day-480.png'));
 
-async function fonts() {
+export async function fonts() {
   const [grotesk, vcr] = await Promise.all([
     readFile(join(process.cwd(), 'public', 'fonts', 'Helvetica.ttf')),
     readFile(join(process.cwd(), 'public', 'fonts', 'VCR_OSD_MONO_1.001.ttf')),

@@ -1462,3 +1462,15 @@ model AudienceInteraction {
   @@id([accountId, tweetId, handle, kind])
   @@index([accountId, at(sort: Desc)])
 }
+
+// "How many bots follow you?" (/bots, migration 043): one cached check per
+// handle, refreshed after 7 days. `record` holds the counts and, for the
+// owner only, the flagged accounts (never shown to anyone else).
+model BotCheck {
+  handle    String   @id
+  xUserId   String
+  record    Json
+  checkedAt DateTime @default(now()) @db.Timestamptz
+
+  @@index([checkedAt])
+}

@@ -47,5 +47,7 @@ initBotId({
     { path: '/api/accounts/*/sync', method: 'POST' },
     // AI ideas from a brand's analytics (model cost)
     { path: '/api/ideas/generate', method: 'POST' },
+    // "How many bots follow you?" — public, paid X data (~20 requests per check)
+    { path: '/api/bot-check', method: 'POST' },
   ],
 });
