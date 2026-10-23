@@ -728,6 +728,15 @@ export default function BentoDashboard({
               handleSize={handleSize}
               controls={
                 <>
+                  {rescan === 'live' && (
+                    <Link
+                      href="/dashboard/write"
+                      className="border px-2 py-1 text-[10px] uppercase tracking-[0.14em]"
+                      style={{ borderColor: 'var(--d-head)', color: 'var(--d-head)' }}
+                    >
+                      ✎ Write
+                    </Link>
+                  )}
                   {rescan && (
                     <button
                       type="button"
@@ -784,6 +793,15 @@ export default function BentoDashboard({
                   className="ml-auto flex shrink-0 items-center gap-2 pl-4"
                   style={{ fontFamily: MONO }}
                 >
+                  {rescan === 'live' && (
+                    <Link
+                      href="/dashboard/write"
+                      className="border px-2 py-1 text-[10px] uppercase tracking-[0.14em]"
+                      style={{ borderColor: C.rule, color: C.ink }}
+                    >
+                      ✎ Write
+                    </Link>
+                  )}
                   {rescan && (
                     <button
                       type="button"
