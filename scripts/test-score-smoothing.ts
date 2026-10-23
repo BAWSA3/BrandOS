@@ -1,8 +1,10 @@
 /**
- * Score consistency rules (src/lib/score-smoothing.ts). Pure, no network/DB:
+ * Score consistency rules (src/lib/score-smoothing.ts) and company-aware
+ * framing (src/lib/score-framing.ts). Pure, no network/DB:
  *   npm run test:scores
  */
 import { maxDrift, smoothScore } from '../src/lib/score-smoothing';
+import { scoreSystem } from '../src/lib/score-framing';
 
 let pass = 0;
 let fail = 0;
@@ -45,6 +47,18 @@ test(
 test(
   'March scanner 62 → 70 moves freely',
   smoothScore(70, { score: 62, scannedAt: ago(215) }, NOW) === 70
+);
+
+console.log('C. Brand / company accounts: same rubric, team wording');
+test('creator read has no company note', !scoreSystem('creator').includes('COMPANY'));
+test('default is the creator read', scoreSystem() === scoreSystem('creator'));
+test(
+  'brand read keeps the creator instructions',
+  scoreSystem('brand').startsWith(scoreSystem('creator'))
+);
+test(
+  'brand read speaks to the team and keeps the numbers',
+  /your team/.test(scoreSystem('brand')) && /same numbers/.test(scoreSystem('brand'))
 );
 
 console.log(`\n${pass} passed, ${fail} failed`);
