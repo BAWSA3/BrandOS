@@ -15,6 +15,8 @@ export default async function ClaimIndexNumberPage({ searchParams }: Props) {
     const v = sp[k];
     if (typeof v === 'string' && /^[\w.-]{1,64}$/.test(v)) keep.set(k, v);
   }
+  // keep the Direction 03 preview switch (src/lib/field/switch.ts) through the redirect
+  if (sp.field === '1' || sp.field === '0') keep.set('field', sp.field);
   const q = keep.toString();
   redirect(`/index/join${q ? `?${q}` : ''}`);
 }

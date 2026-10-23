@@ -5,6 +5,7 @@ import { formatNumber, indexEnabled, indexOpenFor, parseFilters } from '@/lib/in
 import { cardFor, getEntry, indexAggregates, listIndex, ownReservation } from '@/lib/creator-index';
 import prisma from '@/lib/db';
 import IndexBook from './IndexBook';
+import { fieldSystemOn } from '@/lib/field/switch-server';
 
 // The BrandOS Creator Index, served at mybrandos.app/index (middleware
 // rewrite; the pages live in /creators, /index is the public address).
@@ -59,6 +60,7 @@ export default async function CreatorIndexPage({ searchParams }: Props) {
     indexAggregates(),
   ]);
   const reserved = user && !entry ? await ownReservation(user) : null;
+  const field = await fieldSystemOn(sp, user);
   return (
     <IndexBook
       page={page}
@@ -77,6 +79,7 @@ export default async function CreatorIndexPage({ searchParams }: Props) {
       }
       aggregates={aggregates}
       preview={!indexEnabled()}
+      field={field}
     />
   );
 }

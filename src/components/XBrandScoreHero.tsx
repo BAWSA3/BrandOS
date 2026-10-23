@@ -10,6 +10,19 @@ import DNAWalkthrough from './DNAWalkthrough';
 import BrandBreakdown from './BrandBreakdown';
 import BrandOSDashboard, { BrandOSDashboardData } from './BrandOSDashboard';
 import RevealScoreCard from './RevealScoreCard';
+import {
+  Button,
+  FieldBackground,
+  FieldText,
+  Input,
+  Panel,
+  SystemStyles,
+  SYSTEM_FONTS,
+  useCanDrift,
+} from '@/components/system';
+import MetaStrip from '@/components/field/MetaStrip';
+import Wordmark from '@/components/Wordmark';
+import { classLabel } from '@/lib/classifications';
 import BrandIssuesSection from './BrandIssuesSection';
 import { SaveResultsPrompt } from './SaveResultsPrompt';
 import { useAuth } from '@/hooks/useAuth';
@@ -41,7 +54,7 @@ const DNAJourneyScene = dynamic(() => import('./DNAJourneyScene'), {
 // ============================================================================
 // Types
 // ============================================================================
-interface XProfileData {
+export interface XProfileData {
   name: string;
   username: string;
   description: string;
@@ -54,7 +67,7 @@ interface XProfileData {
   url?: string;
 }
 
-interface BrandScoreResult {
+export interface BrandScoreResult {
   overallScore: number;
   phases: {
     define: { score: number; insights: string[] };
@@ -75,11 +88,33 @@ interface XBrandScoreHeroProps {
   theme: string;
   initialUsername?: string;
   autoStart?: boolean;
+  /** Direction 03 (docs/BRAND-WORLD.md): the hero on the field. Off = today's hero. */
+  field?: boolean;
+  /** Design previews only (/world-preview/*): open straight on the reveal with sample data. */
+  previewReveal?: { profile: XProfileData; brandScore: BrandScoreResult };
 }
 
 // ============================================================================
 // Helper Functions for BrandOS Dashboard
 // ============================================================================
+
+/** The reveal's links on the field, styled like the system's Button (bone panel). */
+function revealLink(kind: 'primary' | 'secondary'): React.CSSProperties {
+  return {
+    display: 'block',
+    textAlign: 'center',
+    textDecoration: 'none',
+    fontFamily: SYSTEM_FONTS.plex,
+    fontSize: 13,
+    fontWeight: 500,
+    letterSpacing: '0.06em',
+    textTransform: 'uppercase',
+    padding: '12px 18px',
+    border: '1px solid #0E0E0E',
+    background: kind === 'primary' ? '#0E0E0E' : 'transparent',
+    color: kind === 'primary' ? '#F2EFE8' : '#0E0E0E',
+  };
+}
 
 function formatFollowersDisplay(count: number): string {
   if (count >= 1000000) {
@@ -591,7 +626,10 @@ export default function XBrandScoreHero({
   theme,
   initialUsername,
   autoStart,
+  field = false,
+  previewReveal,
 }: XBrandScoreHeroProps) {
+  const canDrift = useCanDrift();
   // Auth state
   const { user, isLoading: isAuthLoading } = useAuth();
   const indexStatus = useIndexStatus();
@@ -599,11 +637,13 @@ export default function XBrandScoreHero({
   const pendingInviteCode = searchParams.get('invite') || undefined;
   const [showSavePrompt, setShowSavePrompt] = useState(true);
 
-  const [flowState, setFlowState] = useState<FlowState>('input');
+  const [flowState, setFlowState] = useState<FlowState>(previewReveal ? 'reveal' : 'input');
   const [username, setUsername] = useState(initialUsername || '');
   const [error, setError] = useState('');
-  const [profile, setProfile] = useState<XProfileData | null>(null);
-  const [brandScore, setBrandScore] = useState<BrandScoreResult | null>(null);
+  const [profile, setProfile] = useState<XProfileData | null>(previewReveal?.profile ?? null);
+  const [brandScore, setBrandScore] = useState<BrandScoreResult | null>(
+    previewReveal?.brandScore ?? null
+  );
   const [scoreMeta, setScoreMeta] = useState<{
     cached?: boolean;
     analyzedAt?: string;
@@ -1002,10 +1042,11 @@ export default function XBrandScoreHero({
 
   return (
     <div
-      className={flowState === 'input' ? 'crt-scanlines' : ''}
+      className={flowState === 'input' && !field ? 'crt-scanlines' : ''}
       style={{
-        height: flowState === 'input' ? '100vh' : undefined,
-        minHeight: flowState === 'input' ? undefined : '100vh',
+        // On the field the input state can grow past one screen (small phones)
+        height: flowState === 'input' && !field ? '100vh' : undefined,
+        minHeight: flowState === 'input' && !field ? undefined : '100vh',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
@@ -1014,7 +1055,9 @@ export default function XBrandScoreHero({
         position: 'relative',
         overflow:
           flowState === 'input'
-            ? 'hidden'
+            ? field
+              ? 'visible'
+              : 'hidden'
             : flowState === 'walkthrough' || flowState === 'journey'
               ? 'visible'
               : 'hidden',
@@ -1032,15 +1075,21 @@ export default function XBrandScoreHero({
           position: 'absolute',
           inset: 0,
           zIndex: 0,
-          background: '#ffffff',
+          background: field ? '#0047FF' : '#ffffff',
         }}
       >
-        {ACTIVE_BG === 'ascii-dna' && (
+        {field && (
+          <FieldBackground
+            signalCell={flowState === 'input' ? 'auto' : 'none'}
+            drift={canDrift && flowState === 'input'}
+          />
+        )}
+        {!field && ACTIVE_BG === 'ascii-dna' && (
           <AsciiDNAHero backgroundColor="#ffffff" textColor="#000000" />
         )}
-        {ACTIVE_BG === 'typescript' && <TypeScriptInterfaceBg />}
-        {ACTIVE_BG === 'system-logs' && <SystemLogsBg />}
-        {ACTIVE_BG === 'hybrid' && <HybridCodeBg />}
+        {!field && ACTIVE_BG === 'typescript' && <TypeScriptInterfaceBg />}
+        {!field && ACTIVE_BG === 'system-logs' && <SystemLogsBg />}
+        {!field && ACTIVE_BG === 'hybrid' && <HybridCodeBg />}
       </motion.div>
 
       {/* DNA Background - Hidden during all states (replaced by code aesthetic) */}
@@ -1076,7 +1125,7 @@ export default function XBrandScoreHero({
 
       {/* System UI Decorations — corner brackets, status labels */}
       <AnimatePresence>
-        {flowState === 'input' && (
+        {flowState === 'input' && !field && (
           <>
             {/* Corner brackets — all 4 viewport corners */}
             {/* Top-left */}
@@ -1200,8 +1249,114 @@ export default function XBrandScoreHero({
       </AnimatePresence>
 
       <AnimatePresence mode="wait">
+        {/* INPUT STATE ON THE FIELD (Direction 03). Same form, same handleSubmit. */}
+        {flowState === 'input' && field && (
+          <div
+            key="input-field"
+            style={{
+              position: 'relative',
+              zIndex: 10,
+              width: '100%',
+              minHeight: '100vh',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              gap: 32,
+              padding: 'clamp(16px, 3.5vw, 40px) clamp(16px, 3.5vw, 40px) 76px',
+              boxSizing: 'border-box',
+            }}
+          >
+            <SystemStyles />
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
+              <FieldText size="mono" as="span">
+                brandos / the index
+              </FieldText>
+              <FieldText size="mono" as="span">
+                doc — 01
+              </FieldText>
+            </div>
+
+            <div style={{ maxWidth: 1180, width: '100%' }}>
+              {/* The hero wordmark is an image, never typed */}
+              <Wordmark mode="white" height={34} />
+              <FieldText size="label" style={{ marginTop: 'clamp(24px, 5vh, 48px)' }}>
+                The record of creator reputation
+              </FieldText>
+              <FieldText size="display" style={{ marginTop: 12 }}>
+                Reputation
+                <br />
+                on the record.
+              </FieldText>
+
+              <Panel
+                label="Read your brand"
+                meta="any public X account"
+                style={{ marginTop: 'clamp(24px, 5vh, 44px)', maxWidth: 460 }}
+                padding={22}
+              >
+                <form onSubmit={handleSubmit} style={{ display: 'grid', gap: 12 }} noValidate>
+                  <Input
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value.replace(/^@/, ''))}
+                    placeholder="@yourhandle"
+                    maxLength={15}
+                    aria-label="Your X handle"
+                    invalid={!!error}
+                    autoCapitalize="none"
+                    autoCorrect="off"
+                    spellCheck={false}
+                  />
+                  <Button type="submit" disabled={isValidating} style={{ width: '100%' }}>
+                    {isValidating ? 'Reading…' : 'Read my brand →'}
+                  </Button>
+                  {error && (
+                    <p
+                      role="alert"
+                      style={{
+                        margin: 0,
+                        fontFamily: SYSTEM_FONTS.plex,
+                        fontSize: 13,
+                        color: '#0E0E0E',
+                      }}
+                    >
+                      {error}
+                    </p>
+                  )}
+                </form>
+              </Panel>
+            </div>
+
+            <FieldText size="mono" as="div">
+              free.{' '}
+              <a href="/privacy" style={{ color: 'inherit' }}>
+                privacy
+              </a>
+              {' / '}
+              <a href="/terms" style={{ color: 'inherit' }}>
+                terms
+              </a>
+            </FieldText>
+
+            <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}>
+              <MetaStrip
+                items={[
+                  'DOC — 01',
+                  '//',
+                  'THE INDEX',
+                  'THE RECORD OF CREATOR REPUTATION',
+                  'CLASS 01–08',
+                  'READ FROM REAL POSTS',
+                  'FOUNDING 100',
+                  'MYBRANDOS.APP',
+                  '//',
+                ]}
+              />
+            </div>
+          </div>
+        )}
+
         {/* INPUT STATE */}
-        {flowState === 'input' && (
+        {flowState === 'input' && !field && (
           <motion.div
             key="input"
             initial={{ opacity: 0 }}
@@ -1432,7 +1587,7 @@ export default function XBrandScoreHero({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.5 }}
             className="flex w-full h-screen relative z-[1] items-center justify-center"
-            style={{ background: '#ffffff', overflow: 'hidden' }}
+            style={{ background: field ? 'transparent' : '#ffffff', overflow: 'hidden' }}
           >
             {/* Analysis panel - Centered with terminal styling, extra top padding for fixed progress bar */}
             <motion.div
@@ -1440,6 +1595,15 @@ export default function XBrandScoreHero({
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
               className="w-full max-w-[640px] flex flex-col justify-center items-center px-4 pb-12 md:px-8"
+              style={
+                field
+                  ? {
+                      background: '#F2EFE8',
+                      border: '1px solid rgba(14,14,14,.18)',
+                      paddingTop: 24,
+                    }
+                  : undefined
+              }
             >
               <AnimatePresence mode="wait">
                 <TerminalPhaseCard
@@ -1481,7 +1645,8 @@ export default function XBrandScoreHero({
         {flowState === 'reveal' && brandScore && profile && (
           <motion.div
             key="reveal-dashboard"
-            initial={{ opacity: 0, scale: 0.95 }}
+            // On the field: a cut, not a fade
+            initial={field ? false : { opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.6 }}
@@ -1501,69 +1666,146 @@ export default function XBrandScoreHero({
               paddingBottom: '48px',
             }}
           >
-            <div
-              id="brandos-dashboard-capture"
-              style={{
-                // Explicit width: this sits in a centered flex column, so
-                // without it the score card shrinks to its content and loses
-                // its 16:10 desktop shape (card = 1064 - 2x24 padding = 1016).
-                width: '100%',
-                maxWidth: '1064px',
-                background: 'transparent',
-                padding: '24px',
-                borderRadius: '8px',
-                position: 'relative',
-              }}
-            >
-              {/* The shareable square score card (the dashboard's card): score rolls
-                  up, the archetype fills the space a history chart takes later */}
-              <RevealScoreCard
-                handle={profile.username}
-                avatarUrl={profile.profile_image_url || null}
-                score={brandScore.overallScore}
-                archetype={normalizeArchetypeName(brandScore.archetype?.primary || '')}
-                phases={{
-                  define: brandScore.phases.define.score,
-                  check: brandScore.phases.check.score,
-                  generate: brandScore.phases.generate.score,
-                  scale: brandScore.phases.scale.score,
+            {field ? (
+              <div
+                id="brandos-dashboard-capture"
+                style={{ width: '100%', maxWidth: 560, padding: '16px 8px', position: 'relative' }}
+              >
+                <SystemStyles />
+                {/* On the field the read sits on a bone panel; the score card is the one moment */}
+                <Panel label="Your read" meta={`@${profile.username}`} padding={16}>
+                  <RevealScoreCard
+                    handle={profile.username}
+                    avatarUrl={profile.profile_image_url || null}
+                    score={brandScore.overallScore}
+                    archetype={normalizeArchetypeName(brandScore.archetype?.primary || '')}
+                    phases={{
+                      define: brandScore.phases.define.score,
+                      check: brandScore.phases.check.score,
+                      generate: brandScore.phases.generate.score,
+                      scale: brandScore.phases.scale.score,
+                    }}
+                  />
+                  {/* The classification, stamped in (press, no fade) */}
+                  <div
+                    className="sys-anim capture-hide"
+                    style={{
+                      marginTop: 18,
+                      display: 'inline-block',
+                      fontFamily: SYSTEM_FONTS.vcr,
+                      fontSize: 13,
+                      letterSpacing: '0.16em',
+                      color: '#0E0E0E',
+                      border: '1px solid #0E0E0E',
+                      padding: '8px 12px',
+                      animation: 'sys-press 420ms cubic-bezier(.16,1,.3,1) 900ms both',
+                    }}
+                  >
+                    {classLabel(brandScore.archetype?.primary, '/')}
+                  </div>
+                  <div className="capture-hide" style={{ display: 'grid', gap: 10, marginTop: 22 }}>
+                    <a
+                      href={`/breakdown?handle=${encodeURIComponent(profile.username)}`}
+                      className="sys-press sys-focus"
+                      style={revealLink('primary')}
+                    >
+                      Get the full breakdown →
+                    </a>
+                    <a
+                      href="/signup?next=/dashboard"
+                      className="sys-press sys-focus"
+                      style={revealLink('secondary')}
+                    >
+                      Save it to your dashboard · continue with X →
+                    </a>
+                    {indexStatus?.open && !indexStatus.member?.listed && (
+                      <a
+                        href={indexStatus.signedIn ? '/index/join' : '/signup?next=/index/join'}
+                        className="sys-press sys-focus"
+                        style={revealLink('secondary')}
+                      >
+                        Get listed in the Creator Index · get your number →
+                      </a>
+                    )}
+                  </div>
+                  <p
+                    className="capture-hide"
+                    style={{
+                      margin: '16px 0 0',
+                      fontFamily: SYSTEM_FONTS.plex,
+                      fontSize: 13,
+                      color: 'rgba(14,14,14,.7)',
+                    }}
+                  >
+                    BrandOS Studio opens Nov 2 · free until Dec 3
+                  </p>
+                </Panel>
+              </div>
+            ) : (
+              <div
+                id="brandos-dashboard-capture"
+                style={{
+                  // Explicit width: this sits in a centered flex column, so
+                  // without it the score card shrinks to its content and loses
+                  // its 16:10 desktop shape (card = 1064 - 2x24 padding = 1016).
+                  width: '100%',
+                  maxWidth: '1064px',
+                  background: 'transparent',
+                  padding: '24px',
+                  borderRadius: '8px',
+                  position: 'relative',
                 }}
-              />
-              {/* One next step: keep attention on the score, then email the full breakdown */}
-              <a
-                href={`/breakdown?handle=${encodeURIComponent(profile.username)}`}
-                className="capture-hide mt-8 inline-flex items-center justify-center gap-2 rounded-[4px] bg-[#0047FF] px-7 py-4 text-[13px] font-semibold tracking-[0.12em] text-white uppercase transition-colors duration-200 hover:bg-[#0036C4]"
-                style={{ fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace" }}
               >
-                Get The Full Breakdown <span aria-hidden>→</span>
-              </a>
-              {/* Sets up launch day for today's scanners (offer decided 2026-10-22) */}
-              <p
-                className="capture-hide mt-4 text-center text-[11px] tracking-[0.14em] text-black/70 uppercase"
-                style={{ fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace" }}
-              >
-                BrandOS Studio opens Nov 2 ·{' '}
-                <span className="text-[#0047FF]">free until Dec 3</span>
-              </p>
-              {/* Sign in keeps this scan: it becomes the account's first dashboard scan */}
-              <a
-                href="/signup?next=/dashboard"
-                className="capture-hide mt-3 block text-center text-[11px] tracking-[0.14em] text-black/60 uppercase hover:text-[#0047FF]"
-                style={{ fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace" }}
-              >
-                Save it to your dashboard · continue with X →
-              </a>
-              {/* The Creator Index (shown only while it's open) */}
-              {indexStatus?.open && !indexStatus.member?.listed && (
+                {/* The shareable square score card (the dashboard's card): score rolls
+                    up, the archetype fills the space a history chart takes later */}
+                <RevealScoreCard
+                  handle={profile.username}
+                  avatarUrl={profile.profile_image_url || null}
+                  score={brandScore.overallScore}
+                  archetype={normalizeArchetypeName(brandScore.archetype?.primary || '')}
+                  phases={{
+                    define: brandScore.phases.define.score,
+                    check: brandScore.phases.check.score,
+                    generate: brandScore.phases.generate.score,
+                    scale: brandScore.phases.scale.score,
+                  }}
+                />
+                {/* One next step: keep attention on the score, then email the full breakdown */}
                 <a
-                  href={indexStatus.signedIn ? '/index/join' : '/signup?next=/index/join'}
-                  className="capture-hide mt-3 block text-center text-[11px] tracking-[0.14em] text-[#0047FF] uppercase hover:underline"
+                  href={`/breakdown?handle=${encodeURIComponent(profile.username)}`}
+                  className="capture-hide mt-8 inline-flex items-center justify-center gap-2 rounded-[4px] bg-[#0047FF] px-7 py-4 text-[13px] font-semibold tracking-[0.12em] text-white uppercase transition-colors duration-200 hover:bg-[#0036C4]"
                   style={{ fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace" }}
                 >
-                  Get listed in the Creator Index · get your number →
+                  Get The Full Breakdown <span aria-hidden>→</span>
                 </a>
-              )}
-            </div>
+                {/* Sets up launch day for today's scanners (offer decided 2026-10-22) */}
+                <p
+                  className="capture-hide mt-4 text-center text-[11px] tracking-[0.14em] text-black/70 uppercase"
+                  style={{ fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace" }}
+                >
+                  BrandOS Studio opens Nov 2 ·{' '}
+                  <span className="text-[#0047FF]">free until Dec 3</span>
+                </p>
+                {/* Sign in keeps this scan: it becomes the account's first dashboard scan */}
+                <a
+                  href="/signup?next=/dashboard"
+                  className="capture-hide mt-3 block text-center text-[11px] tracking-[0.14em] text-black/60 uppercase hover:text-[#0047FF]"
+                  style={{ fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace" }}
+                >
+                  Save it to your dashboard · continue with X →
+                </a>
+                {/* The Creator Index (shown only while it's open) */}
+                {indexStatus?.open && !indexStatus.member?.listed && (
+                  <a
+                    href={indexStatus.signedIn ? '/index/join' : '/signup?next=/index/join'}
+                    className="capture-hide mt-3 block text-center text-[11px] tracking-[0.14em] text-[#0047FF] uppercase hover:underline"
+                    style={{ fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace" }}
+                  >
+                    Get listed in the Creator Index · get your number →
+                  </a>
+                )}
+              </div>
+            )}
           </motion.div>
         )}
 

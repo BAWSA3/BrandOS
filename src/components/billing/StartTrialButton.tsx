@@ -14,12 +14,15 @@ export default function StartTrialButton({
   label = `Start my ${TRIAL_DAYS}-day free trial`,
   next = '/pricing',
   className = '',
+  signal = false,
 }: {
   signedIn: boolean;
   label?: string;
   /** Where sign-up returns to. */
   next?: string;
   className?: string;
+  /** Direction 03: the coral "this one" look (visual only; checkout is unchanged). */
+  signal?: boolean;
 }) {
   const [state, setState] = useState<{ busy: boolean; note?: string }>({ busy: false });
 
@@ -58,7 +61,11 @@ export default function StartTrialButton({
         type="button"
         onClick={start}
         disabled={state.busy}
-        className="w-full bg-[#0047FF] px-5 py-4 text-[12px] uppercase tracking-[0.16em] text-white transition-colors hover:bg-[#0035CC] disabled:opacity-60"
+        className={
+          signal
+            ? 'w-full bg-[#FF4B2B] px-5 py-4 text-[12px] uppercase tracking-[0.16em] text-[#0E0E0E] transition-transform active:scale-[.97] disabled:opacity-60'
+            : 'w-full bg-[#0047FF] px-5 py-4 text-[12px] uppercase tracking-[0.16em] text-white transition-colors hover:bg-[#0035CC] disabled:opacity-60'
+        }
         style={{ fontFamily: MONO }}
       >
         {state.busy ? 'Opening checkout…' : `${label} →`}
