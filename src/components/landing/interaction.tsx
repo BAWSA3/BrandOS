@@ -122,15 +122,21 @@ export function LandingCursor() {
   if (!rich) return null;
   return (
     <>
-      <style>{`.lc-cursor-on, .lc-cursor-on a, .lc-cursor-on button { cursor: none; }
-        .lc-cursor-on input, .lc-cursor-on textarea { cursor: text; }`}</style>
+      {/* The effects belong to the field. Over a bone surface (panel, card, form)
+          the reading head steps aside and the system cursor comes back. */}
+      <style>{`.lc-cursor-on:not(.lc-calm), .lc-cursor-on:not(.lc-calm) a, .lc-cursor-on:not(.lc-calm) button { cursor: none; }
+        .lc-cursor-on input, .lc-cursor-on textarea { cursor: text; }
+        .lc-calm .lc-cursor { visibility: hidden; }`}</style>
       <CursorMount />
       <Cursor
+        className="lc-cursor"
         magnetic={{ morph: true, padding: 6, snap: 0.8 }}
-        matchTextSize
         style={{
-          background: '#fff',
-          border: `1.5px solid ${KLEIN}`,
+          // A hollow frame, never a filled box: on a button it hugs the edge and
+          // the label stays readable.
+          background: 'transparent',
+          border: '2px solid #fff',
+          boxShadow: `0 0 0 1px ${KLEIN}`,
           borderRadius: 0,
           mixBlendMode: 'normal',
           zIndex: 2147483000,
@@ -140,10 +146,50 @@ export function LandingCursor() {
   );
 }
 
+/** True when the element sits on an opaque surface (a bone panel, card, form). */
+const surfaceCache = new WeakMap<Element, boolean>();
+export function onSurface(target: EventTarget | null): boolean {
+  let el = target instanceof Element ? target : null;
+  const start = el;
+  if (start && surfaceCache.has(start)) return surfaceCache.get(start)!;
+  let hit = false;
+  while (el && el !== document.body) {
+    // Full-width wrappers are the page behind the field, never a panel.
+    if (el.getBoundingClientRect().width >= document.documentElement.clientWidth - 8) break;
+    const bg = getComputedStyle(el).backgroundColor;
+    const m = bg.match(/rgba?\(([^)]+)\)/);
+    if (m) {
+      const [r, g, b, a = '1'] = m[1].split(',').map((s) => s.trim());
+      // Opaque and not the Klein field itself → a surface.
+      if (
+        Number(a) > 0.5 &&
+        !(Number(r) < 20 && Number(g) > 50 && Number(g) < 90 && Number(b) > 230)
+      ) {
+        hit = true;
+        break;
+      }
+    }
+    el = el.parentElement;
+  }
+  if (start) surfaceCache.set(start, hit);
+  return hit;
+}
+
 function CursorMount() {
   useEffect(() => {
-    document.documentElement.classList.add('lc-cursor-on');
-    return () => document.documentElement.classList.remove('lc-cursor-on');
+    const root = document.documentElement;
+    root.classList.add('lc-cursor-on');
+    let raf = 0;
+    const move = (e: PointerEvent) => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => root.classList.toggle('lc-calm', onSurface(e.target)));
+    };
+    document.addEventListener('pointermove', move, { passive: true });
+    return () => {
+      cancelAnimationFrame(raf);
+      document.removeEventListener('pointermove', move);
+      root.classList.remove('lc-cursor-on', 'lc-calm');
+    };
   }, []);
   return null;
 }
@@ -337,6 +383,13 @@ export function CellReader({ host }: { host: React.RefObject<HTMLElement | null>
     const move = (e: PointerEvent) => {
       cancelAnimationFrame(raf);
       raf = requestAnimationFrame(() => {
+        // Bare field only: never over a panel, a form or a button.
+        const t = e.target instanceof Element ? e.target : null;
+        if (onSurface(t) || t?.closest('a, button, input, textarea, select, [role="button"]')) {
+          b.style.display = 'none';
+          last = '';
+          return;
+        }
         const m = fieldMetrics(window.innerWidth, window.innerHeight);
         const c = Math.floor(e.clientX / m.grid);
         const r = Math.floor(e.clientY / m.grid);
