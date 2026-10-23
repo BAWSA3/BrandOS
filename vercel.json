@@ -27,6 +27,10 @@
     {
       "path": "/api/cron/lookup-digest",
       "schedule": "0 16 * * 1"
+    },
+    {
+      "path": "/api/cron/sync-accounts",
+      "schedule": "0 4 * * *"
     }
   ]
 }
