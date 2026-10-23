@@ -18,6 +18,7 @@ import { FIELD_DENSITY, driftOffset, fieldMetrics, signalCellFor } from '@/lib/f
  *   <FieldBackground />                      // static, coral cell auto-placed
  *   <FieldBackground signalCell="none" />
  *   <FieldBackground signalCell={[5, 1]} drift />
+ *   <FieldBackground focus />                // dashboards: softly blurred
  */
 type Props = {
   signalCell?: 'none' | 'auto' | [number, number];
@@ -26,8 +27,15 @@ type Props = {
   /** Hero only: a very slow drift (period in seconds, default 60). */
   drift?: boolean;
   driftPeriod?: number;
+  /**
+   * Dashboards: soften the field so the eye goes to the data. `true` = 6px blur,
+   * or a px value. Eases in on arrival (instant for reduced motion).
+   */
+  focus?: boolean | number;
   className?: string;
 };
+
+const FOCUS_BLUR = 6;
 
 const DRIFT_FPS = 6;
 
@@ -37,10 +45,19 @@ export default function FieldBackground({
   density = FIELD_DENSITY,
   drift = false,
   driftPeriod = 60,
+  focus = false,
   className,
 }: Props) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const [drawn, setDrawn] = useState(false);
+  const blur = focus === true ? FOCUS_BLUR : focus || 0;
+  // Start sharp, then ease to the blur once drawn, so arriving reads as a focus pull.
+  const [settled, setSettled] = useState(false);
+  useEffect(() => {
+    if (!drawn) return;
+    const id = requestAnimationFrame(() => setSettled(true));
+    return () => cancelAnimationFrame(id);
+  }, [drawn]);
   const sig = Array.isArray(signalCell) ? signalCell.join(',') : signalCell;
 
   useEffect(() => {
@@ -122,7 +139,12 @@ export default function FieldBackground({
           display: 'block',
           // flat 1-bit dots like the loop video: no glow (Direction 03)
           visibility: drawn ? 'visible' : 'hidden',
+          // Focus blur (dashboards). Scaled up a touch so the soft edge stays off-screen.
+          filter: blur && settled ? `blur(${blur}px)` : 'none',
+          transform: blur ? 'scale(1.03)' : undefined,
+          transition: 'filter 600ms cubic-bezier(.16,1,.3,1)',
         }}
+        className="field-canvas"
       />
     </div>
   );

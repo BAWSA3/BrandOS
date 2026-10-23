@@ -44,6 +44,7 @@ export function SystemStyles() {
       @media (prefers-reduced-motion: reduce) {
         .sys-anim { animation: none !important; }
         .sys-press:active { transform: none; }
+        .field-canvas { transition: none !important; }
       }
     `}</style>
   );
