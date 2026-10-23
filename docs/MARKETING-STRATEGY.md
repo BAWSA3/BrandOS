@@ -1,5 +1,8 @@
 # BrandOS marketing strategy: Nov 2 → Dec 3 (convert the Founding 100)
 
+> **Oct 22:** `docs/LAUNCH-PLAYBOOK.md` is now the launch strategy (brief, PR/FAQ, gates,
+> metrics, risks). This file stays as the detail for segments, objections, levers and emails.
+
 Written Oct 22, 2026 with Bawsa. One goal: **creators add a card to lock Pro at $29/mo for
 life before Dec 3.** `docs/GTM-OPERATING-PLAN.md` is the day-by-day schedule; this file is
 the strategy behind it: who we sell to, what we say, which levers turn free members into
