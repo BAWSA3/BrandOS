@@ -2,7 +2,12 @@
  * Growth dashboard accounts (src/lib/tracked-accounts.ts). Pure, no network/DB:
  *   npm run test:accounts
  */
-import { brandLimit, cleanHandle, snapshotFields } from '../src/lib/tracked-accounts';
+import {
+  brandLimit,
+  cleanHandle,
+  snapshotFields,
+  vouchesForCompany,
+} from '../src/lib/tracked-accounts';
 import { analyzeTweets } from '../src/lib/tweet-analysis';
 import { OPEN_ACCESS_UNTIL } from '../src/lib/plans';
 
@@ -73,6 +78,15 @@ const noViews = snapshotFields(
   analyzeTweets([t(1, [], 0), t(2, [], 0)])
 );
 test('no views → engagement null (unknown, not 0)', noViews.engagementRate === null);
+
+// Company framing: only the handle's owner or an admin rewords the shared read
+const vouch = (xUserId: string | null, role: string, xUserIds: string[]) =>
+  vouchesForCompany({ xUserId, addedBy: { role, xUserIds } });
+test('owner (same X id) marks own account as a company', vouch('42', 'user', ['42']));
+test('another user marking it changes nothing for others', !vouch('42', 'user', ['7']));
+test('admin can mark any account', vouch('42', 'admin', []));
+test('unknown X id never matches', !vouch(null, 'user', ['42']));
+test('deleted adder never vouches', !vouchesForCompany({ xUserId: '42', addedBy: null }));
 
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);
