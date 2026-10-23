@@ -39,7 +39,8 @@ care of an archive: dated, numbered, exact, and beautiful enough to want to be i
 
 > **Reputation should be a record, not a rumour.**
 
-Line for the world: **"Reputation, on the record."**
+Line for the world: **"Reputation on the record."** Official form, no comma (decided Oct 23).
+Two-line lockup for big type: **Reputation** / **on the record.**
 
 ## Three pillars (every decision should serve at least one)
 
@@ -302,7 +303,7 @@ Nov 2 launch.
 | **3. Founding Day**                | Dec 3        | Founding mark on entries and cards; member card finishes; thank-you issue                                                                                                                                             | Founding Day post + email   |
 | **4. The Desk + the Reading Room** | Dec–Jan      | Dashboard as "your record"; Reading Room archive pages                                                                                                                                                                | Weekly sessions as content  |
 | **5. Volume I**                    | Q1 2027      | The printed Index; physical member cards                                                                                                                                                                              | Index Release event         |
-| **6. Receipts**                    | Q1 2027      | Filing and confirming receipts; Standing from delivery                                                                                                                                                                | "reputation, on the record" |
+| **6. Receipts**                    | Q1 2027      | Filing and confirming receipts; Standing from delivery                                                                                                                                                                | "reputation on the record"  |
 
 **Before Nov 2, only Chapter 0.** It's copy and two small motion changes in surfaces that
 already exist, so it doesn't risk the launch or the Oct 28 payment check.
