@@ -21,7 +21,8 @@
     "test:accounts": "npx tsx scripts/test-accounts.ts",
     "test:growth": "npx tsx scripts/test-growth.ts",
     "test:bots": "npx tsx scripts/test-bots.ts",
-    "test:index": "npx tsx scripts/test-index.ts"
+    "test:index": "npx tsx scripts/test-index.ts",
+    "test:field": "npx tsx scripts/test-field.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.71.2",
