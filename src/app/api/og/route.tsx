@@ -1,7 +1,6 @@
 import { NextRequest } from 'next/server';
 import { getPublicScan } from '@/lib/public-scan';
 import { editorialImage } from '@/lib/og/editorial';
-import { getReservationByHandle } from '@/lib/reservations';
 
 // Link-preview image for /scan/<handle> and /card/<handle>, in the shared
 // Editorial design (src/lib/og/editorial.tsx). Scores come from our own record
@@ -16,9 +15,7 @@ const CACHE = {
 export async function GET(request: NextRequest) {
   const raw = (request.nextUrl.searchParams.get('u') || '').replace(/^@/, '').toLowerCase();
   const valid = /^[a-z0-9_]{1,30}$/.test(raw);
-  const [scan, reservation] = valid
-    ? await Promise.all([getPublicScan(raw), getReservationByHandle(raw).catch(() => null)])
-    : [null, null];
+  const scan = valid ? await getPublicScan(raw) : null;
   if (!scan) return editorialImage({ kind: 'invite', handle: valid ? raw : null }, CACHE);
   return editorialImage(
     {
@@ -29,7 +26,6 @@ export async function GET(request: NextRequest) {
       phases: scan.phases,
       avatarUrl: scan.avatarUrl,
       taste: scan.taste,
-      stationNumber: reservation ? String(reservation.number).padStart(4, '0') : null,
     },
     CACHE
   );

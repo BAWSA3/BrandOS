@@ -627,7 +627,11 @@ export function WeekTile({
         style={{ borderColor: 'var(--d-rule)' }}
       >
         <span style={{ color: INK }}>
-          <Micro>{left ? `${left} more post lights your station` : 'Goal hit · station lit'}</Micro>
+          <Micro>
+            {left
+              ? `${left} more post${left === 1 ? '' : 's'} to hit your weekly goal`
+              : 'Weekly goal hit'}
+          </Micro>
         </span>
         {streakWeeks ? (
           <span style={{ color: MUTED }}>

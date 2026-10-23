@@ -17,9 +17,6 @@ import { renderNewsletter, type NewsletterContent } from '@/lib/newsletter-templ
  */
 
 export const CAMPAIGNS = {
-  reserveConfirm: 'reserve-confirm',
-  release: 'release-v1',
-  reengage: 'reengage-oct26',
   studioTease: 'studio-tease-oct22',
 } as const;
 
@@ -39,88 +36,6 @@ const esc = (v: string) =>
     /[&<>"']/g,
     (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch]!
   );
-
-export function reserveConfirmContent(r: {
-  number: number;
-  handle: string | null;
-  archetype: string | null;
-}): NewsletterContent {
-  const no = String(r.number).padStart(4, '0');
-  const name = r.archetype ? getArchetypeInfo(r.archetype)?.name : null;
-  const sections: NewsletterContent['sections'] = [
-    { type: 'stat', label: `#${no}`, content: 'your reserved brand station' },
-    {
-      type: 'text',
-      content: `Your plot is claimed${r.handle ? ` for <b>@${esc(r.handle)}</b>` : ''}${
-        name ? `, a <b>${esc(name)}</b> station` : ''
-      }. It's locked: whatever station you reserved is the one you build when BrandOS Studio opens.`,
-    },
-  ];
-  if (r.handle) {
-    sections.push({
-      type: 'cta',
-      content: 'See your station',
-      url: `${APP_URL}/station/${encodeURIComponent(r.handle)}`,
-    });
-  }
-  sections.push({
-    type: 'text',
-    content: "We'll email you when the studio opens. Until then, keep building.",
-  });
-  return {
-    subject: `Station #${no} is yours`,
-    preheader: 'Your BrandOS brand station is reserved. The studio is opening soon.',
-    sections,
-  };
-}
-
-/**
- * Re-engagement (Oct 2026): for people who scanned before stations existed and
- * never reserved one. Personal ("you scanned in march"), one action (rescan +
- * reserve), honest scarcity (live count of claimed stations), and owns the
- * unsubscribe bug fixed 2026-10-12.
- */
-export function reengageContent(r: {
-  handle: string | null;
-  claimed: number;
-}): NonNullable<NewsletterContent> {
-  const who = r.handle ? `@${esc(r.handle)}` : 'there';
-  return {
-    subject: r.handle
-      ? `@${r.handle}, your brand station is waiting`
-      : 'your brand station is waiting',
-    preheader: 'You scanned your brand in March. Since then we built something for it.',
-    sections: [
-      {
-        type: 'text',
-        content: `hey ${who},<br/><br/>back in march you scanned your X on BrandOS and got your brand score. thanks for being early.`,
-      },
-      {
-        type: 'text',
-        content:
-          'since then we&#39;ve been building. every creator on BrandOS now gets a <b>brand station</b>: a 3D building that&#39;s yours, shaped by your archetype, and it grows as your brand does.',
-      },
-      { type: 'heading', content: "what's live now" },
-      {
-        type: 'text',
-        content: `• <b>a fresh scan</b>: your score, your archetype, and what to fix next<br/>• <b>your station</b>: reserve your number before the good ones go (${r.claimed} claimed so far)<br/>• <b>your brand pass</b>: your identity card with archetype, taste, pillars and score`,
-      },
-      {
-        type: 'text',
-        content:
-          'and coming next: <b>BrandOS dashboards</b>. track your score over time, see exactly which part of your brand to work on, and level up as you post. people with a reserved station get in first.',
-      },
-      { type: 'cta', content: 'Rescan + reserve your station →', url: APP_URL },
-      { type: 'text', content: 'takes about a minute.<br/><br/>— Bawsa' },
-      { type: 'divider', content: '' },
-      {
-        type: 'text',
-        content:
-          '<span style="color:#888;font-size:13px">p.s. if you ever tried to unsubscribe from our emails and it didn&#39;t work, that&#39;s on us. it&#39;s fixed now, and the link below works.</span>',
-      },
-    ],
-  };
-}
 
 /** Current display name for a stored archetype ("SIGNAL_SAGE" → "SOURCE"), or null. */
 function archetypeLabel(raw: string | null): string | null {
@@ -326,32 +241,6 @@ export function renderStudioTease(
   return { html, text };
 }
 
-// DRAFT copy for release day: Jeffrey approves the wording before any send.
-export function releaseEmailContent(): NewsletterContent {
-  return {
-    subject: 'BrandOS is open. Your first 30 days are free.',
-    preheader: 'Build your brand station, free for 30 days.',
-    sections: [
-      {
-        type: 'text',
-        content:
-          "Building brands shouldn't be difficult. So I built BrandOS Studio: find your taste, shape your brand, and stay on brand while you build in public.",
-      },
-      {
-        type: 'text',
-        content:
-          "It's open now, and your first <b>30 days are free</b>. Start on an empty plot and build your brand station as you go.",
-      },
-      { type: 'cta', content: 'Open BrandOS', url: APP_URL },
-      {
-        type: 'text',
-        content:
-          "I'm building this in public, so reply and tell me what you'd change. Every reply gets read. Jeffrey",
-      },
-    ],
-  };
-}
-
 // ---------------------------------------------------------------------------
 // Sending
 // ---------------------------------------------------------------------------
@@ -423,20 +312,4 @@ export async function sendOnce(
     data: { resendId: data.id },
   });
   return 'sent';
-}
-
-/** Instant confirmation after a reservation; once per address, ever. */
-export async function sendReserveConfirmation(signupId: string): Promise<SendResult> {
-  const row = await prisma.emailSignup.findUnique({
-    where: { id: signupId },
-    select: { reservationNumber: true, xUsername: true, reservedArchetype: true },
-  });
-  if (row?.reservationNumber == null) return 'failed';
-  return sendOnce(signupId, CAMPAIGNS.reserveConfirm, () =>
-    reserveConfirmContent({
-      number: row.reservationNumber!,
-      handle: row.xUsername,
-      archetype: row.reservedArchetype,
-    })
-  );
 }

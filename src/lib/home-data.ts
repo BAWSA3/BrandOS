@@ -275,7 +275,6 @@ export function toPass(h: HomeData): BrandPassData | null {
     archetype: h.archetype,
     taste,
     pillars: h.pillars,
-    stationNumber: h.stationNumber ?? 0,
     score: h.score,
     issued: `${String(issued.getMonth() + 1).padStart(2, '0')}.${issued.getFullYear()}`,
   };

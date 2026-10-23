@@ -283,7 +283,6 @@ const SAMPLE: DashboardData = {
     archetype: 'BUILD.EXE',
     taste: 'Scrappy builder-in-public energy',
     pillars: ['building in public', 'creator economy', 'web3'],
-    stationNumber: 2,
     score: 72,
     issued: '10.2026',
   },

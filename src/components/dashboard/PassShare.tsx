@@ -7,7 +7,7 @@ import { getArchetypeInfo } from '@/lib/archetype-descriptions';
 import type { BrandPassData } from '@/components/dashboard/BrandPass';
 
 // "Share ↗" on the Brand Pass tile: download the pass as a PNG, post it to X,
-// copy the station link, or (phones) the native share sheet with the image.
+// copy the brand page link, or (phones) the native share sheet with the image.
 // The pass is found in the tile by [data-pass-card]. Remote avatars are
 // swapped for same-origin copies (/api/image-proxy) while capturing, or the
 // export would come out with a blank portrait.
@@ -31,7 +31,7 @@ export default function PassShare({ pass }: { pass: BrandPassData }) {
   const link =
     typeof window === 'undefined'
       ? ''
-      : `${window.location.origin}/station/${encodeURIComponent(pass.handle)}`;
+      : `${window.location.origin}/@${encodeURIComponent(pass.handle)}`;
   const name = getArchetypeInfo(pass.archetype)?.name ?? pass.archetype;
   const file = `brandos-pass-${pass.handle}.png`;
 
@@ -82,7 +82,7 @@ export default function PassShare({ pass }: { pass: BrandPassData }) {
   };
 
   const postToX = () => {
-    const text = `my brand pass on BrandOS\n\n${name} · ${pass.score}/100\n\nclaim your station →`;
+    const text = `my brand pass on BrandOS\n\n${name} · ${pass.score}/100\n\nsee the full read →`;
     window.open(
       `https://x.com/intent/post?text=${encodeURIComponent(text)}&url=${encodeURIComponent(link)}`,
       '_blank',
