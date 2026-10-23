@@ -50,22 +50,22 @@ export const isFresh = (scannedAt: Date, now = Date.now()) =>
   now - scannedAt.getTime() < FRESH_READ_DAYS * DAY_MS;
 
 export type JoinResult =
-  | { ok: true; number: number; created: boolean }
+  | { ok: true; number: number; created: boolean; stale: boolean }
   | { ok: false; status: number; error: string; needsScan?: boolean };
 
 /**
  * Join (or update) the Index with the account's own X handle and latest brand
  * read. No handle is taken from the request: it's always the signed-in user's
- * own active X connection. A read older than 7 days asks the client to
- * rescan first unless `allowStale` (the account can't rescan right now).
+ * own active X connection. With no read at all the client scans first
+ * (`needsScan`). A read older than 7 days still joins right away and comes
+ * back `stale: true`, so the caller can refresh it after responding.
  */
 export async function joinIndex(
   user: {
     id: string;
     platformConnections: { platform: string; platformUsername: string; platformUserId: string }[];
   },
-  input: JoinInput,
-  opts: { allowStale?: boolean } = {}
+  input: JoinInput
 ): Promise<JoinResult> {
   const x = user.platformConnections.find((pc) => pc.platform === 'x');
   if (!x) return { ok: false, status: 400, error: 'Connect your X account to join the Index.' };
@@ -81,13 +81,6 @@ export async function joinIndex(
   const read = await latestRead(user.id);
   if (!read)
     return { ok: false, status: 409, error: 'Get your brand read first.', needsScan: true };
-  if (!isFresh(read.scannedAt) && !opts.allowStale)
-    return {
-      ok: false,
-      status: 409,
-      error: 'Your brand read is over a week old.',
-      needsScan: true,
-    };
 
   const data = {
     handle,
@@ -106,7 +99,7 @@ export async function joinIndex(
     const entry = existing
       ? await prisma.indexEntry.update({ where: { userId: user.id }, data })
       : await prisma.indexEntry.create({ data: { ...data, userId: user.id } });
-    return { ok: true, number: entry.number, created: !existing };
+    return { ok: true, number: entry.number, created: !existing, stale: !isFresh(read.scannedAt) };
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002')
       return {
