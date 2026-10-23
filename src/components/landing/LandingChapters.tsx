@@ -1089,7 +1089,8 @@ function PhaseList({ on }: { on: boolean }) {
                   </span>
                 </span>
                 <span style={{ gridColumn: '1 / -1' }}>
-                  <DotBar value={ph.weight} max={30} dots={30} on={on} delay={i * 80} />
+                  {/* Weight as a share of the whole score: 20 squares, 5% each. */}
+                  <DotBar value={ph.weight} max={100} dots={20} on={on} delay={i * 80} />
                 </span>
               </button>
               <AnimatePresence initial={false}>

@@ -545,6 +545,8 @@ export function ChapterRail({ chapters }: { chapters: { id: string; label: strin
     >
       <style>{`
         .lc-rail .lc-rail-label { display: none; }
+        /* Only where it fits beside the 1180px content column; never over a panel. */
+        @media (max-width: 1299px) { .lc-rail { display: none !important; } }
         .lc-rail:hover .lc-rail-label, .lc-rail:focus-within .lc-rail-label { display: inline; }
       `}</style>
       {chapters.map((c) => {
