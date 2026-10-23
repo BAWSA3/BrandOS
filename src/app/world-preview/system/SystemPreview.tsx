@@ -122,21 +122,11 @@ function Demos() {
 }
 
 export default function SystemPreview() {
-  const [focus, setFocus] = useState(false);
   return (
     <ToastProvider>
       <DitherWipeProvider>
         <SystemStyles />
-        <div style={{ position: 'fixed', right: 16, bottom: 56, zIndex: 20 }}>
-          <Button
-            tone="field"
-            variant={focus ? 'signal' : 'secondary'}
-            onClick={() => setFocus((f) => !f)}
-          >
-            {focus ? 'Dashboard focus: on' : 'Dashboard focus: off'}
-          </Button>
-        </div>
-        <FieldScreen signalCell="auto" drift={!focus} focus={focus}>
+        <FieldScreen signalCell="auto" drift>
           <div className={FIELD_FONTS.plexVariable} style={{ paddingBottom: 80 }}>
             <div
               style={{
