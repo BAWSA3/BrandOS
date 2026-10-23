@@ -84,7 +84,7 @@ export default function FieldPreview() {
                 maxWidth: '11ch',
               }}
             >
-              Reputation, on the record.
+              Reputation on the record.
             </h1>
           </div>
           <p
