@@ -1076,24 +1076,6 @@ export default function XBrandScoreHero({
       <AnimatePresence>
         {flowState === 'input' && (
           <>
-            {/* The free bot check (/bots) */}
-            <a
-              href="/bots"
-              style={{
-                position: 'fixed',
-                top: 20,
-                left: '50%',
-                transform: 'translateX(-50%)',
-                zIndex: 30,
-                fontFamily: "'VCR OSD Mono', monospace",
-                fontSize: 11,
-                letterSpacing: '0.24em',
-                color: '#0047FF',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              HOW MANY BOTS FOLLOW YOU? →
-            </a>
             {/* Corner brackets — all 4 viewport corners */}
             {/* Top-left */}
             <motion.div

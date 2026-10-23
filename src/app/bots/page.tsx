@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
-import { cleanBotHandle } from '@/lib/bot-rules';
+import { notFound } from 'next/navigation';
+import { botCheckEnabled, cleanBotHandle } from '@/lib/bot-rules';
 import BotCheck from './BotCheck';
 
 // "How many bots follow you?" — the public bot check. Same experience as the
@@ -12,6 +13,7 @@ type Props = { searchParams: Promise<{ h?: string }> };
 const APP = process.env.NEXT_PUBLIC_APP_URL || 'https://mybrandos.app';
 
 export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
+  if (!botCheckEnabled()) return { title: 'BrandOS', robots: { index: false, follow: false } };
   const handle = cleanBotHandle((await searchParams).h);
   const title = handle
     ? `How many bots follow @${handle}? · BrandOS`
@@ -23,12 +25,14 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
   return {
     title,
     description,
+    robots: { index: false, follow: false },
     openGraph: { title, description, images: [image], url },
     twitter: { card: 'summary_large_image', title, description, images: [image] },
   };
 }
 
 export default async function BotsPage({ searchParams }: Props) {
+  if (!botCheckEnabled()) notFound();
   const handle = cleanBotHandle((await searchParams).h);
   return <BotCheck initialHandle={handle} />;
 }
