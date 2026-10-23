@@ -1,6 +1,11 @@
 # BrandOS Brand Kit
 
-> Last updated: 2026-02-20
+> Last updated: 2026-02-20 (logo section updated 2026-10-23)
+
+> **Heads up:** most of this file predates the brand lock of 2026-10-13. For the logo, use the
+> current wordmark below. For colors, type and voice, `docs/BRAND-WORLD.md` and the locked
+> tokens win where this file disagrees (Klein `#0047FF` is the only blue). The old pixel-"OS"
+> logos and the "AI-powered" tagline art are in `brand-kit/archive/pre-2026-10-13-logos/`.
 
 ---
 
@@ -119,8 +124,7 @@ font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
 ### Font Usage Rules
 
 - **Headlines / Hero:** Blauer Nue Extrabold or system stack at large sizes
-- **Logo wordmark (hero):** "Brand" in Coolvetica Italic + "OS" in LEDLIGHT (white→blue gradient)
-- **Logo wordmark (alt):** "Brand" in Blauer Nue + "OS" in PP Mondwest (colored `--accent`)
+- **Logo:** never typeset. Use the wordmark art (see [Logo](#logo)).
 - **Tagline / Subheading:** Moderniz
 - **Section labels / Badges:** VCR OSD Mono or PP Mondwest
 - **Body text:** System font stack (SF Pro / Inter / Segoe UI)
@@ -154,25 +158,24 @@ Moderniz.otf
 
 ### Files
 
-| File | Variant | Location |
+The wordmark is "Brand" in heavy italic grotesk + a halftone "OS" (ink → Klein blue).
+Copies live in `brand-kit/logos/`; the product serves them from `public/`.
+
+| File (`brand-kit/logos/`) | Use on | Served in the product as |
 |------|---------|----------|
-| `brandos-logo.png` | Light background | `brand-kit/logos/` |
-| `brandos-logo-dark.png` | Dark background | `brand-kit/logos/` |
-
-### Logo Construction
-
-The BrandOS logo is typographic, composed of two parts:
-
-- **"Brand"** — Helvetica Custom (weight 400) or Blauer Nue Extrabold for display
-- **"OS"** — PP Mondwest, colored `#0A84FF` (accent blue)
-- Optional shimmer effect on "OS" via animated gradient
+| `brandos-wordmark-day.png` (1600×319) | Light surfaces (bone, paper, white) | `/brandos-wordmark-day.png` |
+| `brandos-wordmark-night.png` (1600×319) | Dark surfaces (night) | `/brandos-wordmark-night.png` |
+| `brandos-wordmark-white-480.png` | Klein-blue surfaces | `/brand/wordmark-white-480.png` |
+| `brandos-wordmark.svg` | Light surfaces, any size | `/brandos-hero-logo.svg` |
+| `brandos-wordmark-white.svg` | Dark or Klein surfaces, any size | `/brandos-hero-logo-white.svg` |
 
 ### Logo Rules
 
-- Always keep "Brand" and "OS" as a single unit
-- "OS" must always use the accent blue (`#0A84FF`)
-- Minimum clear space: equal to the height of the "O" character on all sides
-- The code-rendered version lives in `src/components/BrandOSLogo.tsx`
+- Never type "BrandOS" as a logo. Use the art above.
+- In the app, use `src/components/Wordmark.tsx` (`mode`: `day` / `night` / `white`).
+- Keep "Brand" and "OS" together; don't recolor, re-letter or add a tagline under it.
+- Minimum clear space: the height of the "O" on all sides.
+- `src/components/BrandOSLogo.tsx` is the old typeset logo; don't use it for new work.
 
 ---
 
@@ -378,8 +381,13 @@ Located in `brand-kit/screenshots/`:
 brand-kit/
 ├── BRAND-KIT.md                          # This file
 ├── logos/
-│   ├── brandos-logo.png                  # Light variant
-│   └── brandos-logo-dark.png             # Dark variant
+│   ├── brandos-wordmark-day.png          # Light surfaces
+│   ├── brandos-wordmark-night.png        # Dark surfaces
+│   ├── brandos-wordmark-white-480.png    # Klein-blue surfaces
+│   ├── brandos-wordmark.svg              # Light, vector
+│   └── brandos-wordmark-white.svg        # Dark / Klein, vector
+├── archive/
+│   └── pre-2026-10-13-logos/             # Old pixel-"OS" logos + old tagline art (don't use)
 ├── fonts/
 │   ├── Blauer-Nue-Bold-Italic.otf
 │   ├── Blauer-Nue-Extrabold.otf
