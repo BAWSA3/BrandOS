@@ -16,6 +16,7 @@ import {
 import { encodePng, ditherPng } from '../src/lib/og/dither';
 import { allowedAvatarUrl } from '../src/lib/field/avatar';
 import { driftOffset, fieldMetrics, signalCellFor, wipeCovered } from '../src/lib/field/system';
+import { asksForField, fieldSwitch } from '../src/lib/field/switch';
 
 let pass = 0;
 let fail = 0;
@@ -204,6 +205,31 @@ for (let y = 0; y < 8; y++)
 test('wipe: nothing covered at 0, everything at 1', allOff && allOn);
 test('wipe: once a cell is covered it stays covered', monotonic);
 test('wipe sweeps left to right', wipeCovered(0, 0, 24, 0.35) && !wipeCovered(23, 0, 24, 0.35));
+
+// The launch-surfaces switch (src/lib/field/switch.ts)
+console.log('\nH. The launch-surfaces switch');
+test('off by default', !fieldSwitch({}));
+test('env flag turns it on for everyone', fieldSwitch({ envFlag: 'true', appEnv: 'production' }));
+test('?field=1 works on staging / previews', fieldSwitch({ param: '1', appEnv: 'staging' }));
+test('?field=1 works locally', fieldSwitch({ param: '1' }));
+test('?field=1 on production needs an admin', !fieldSwitch({ param: '1', appEnv: 'production' }));
+test(
+  '?field=1 on production for an admin',
+  fieldSwitch({ param: '1', appEnv: 'production', isAdmin: true })
+);
+test(
+  '?field=0 forces it off, even with the env flag',
+  !fieldSwitch({ param: '0', envFlag: 'true' })
+);
+test(
+  "admins without ?field=1 see today's page",
+  !fieldSwitch({ appEnv: 'production', isAdmin: true })
+);
+test('array params use the first value', fieldSwitch({ param: ['1', '0'], appEnv: 'staging' }));
+test(
+  'asksForField only for "1"',
+  asksForField('1') && !asksForField('true') && !asksForField(undefined)
+);
 
 console.log(`\n${pass} passed, ${fail} failed`);
 if (fail) process.exit(1);

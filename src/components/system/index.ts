@@ -14,3 +14,4 @@ export {
 } from './primitives';
 export type { Tone } from './primitives';
 export { DitherWipeProvider, Modal, ToastProvider, useDitherWipe, useToast } from './overlays';
+export { useCanDrift } from './useCanDrift';

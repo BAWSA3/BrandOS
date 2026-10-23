@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
+import { FieldScreen } from '@/components/system';
 import { motion, useReducedMotion } from 'motion/react';
 import { DASH_FONTS } from '@/components/dashboard/dashFonts';
 import { BLURB_MAX, formatNumber, MAX_NICHES, NICHES } from '@/lib/index-rules';
@@ -44,7 +45,7 @@ const SCAN_STEPS = [
   'Preparing your entry…',
 ];
 
-export default function JoinForm({
+function JoinFormInner({
   handle,
   read,
   entry,
@@ -467,10 +468,30 @@ function TypeLine({
   );
 }
 
+// Direction 03 (src/lib/field/switch.ts): the join form and the claim moment on
+// a bone panel placed on the field. Off = today's page.
+const FieldOn = createContext(false);
+
 function Shell({ children }: { children: React.ReactNode }) {
-  return (
-    <main className="min-h-screen" style={{ background: C.bg, color: C.ink }}>
-      <div className="mx-auto max-w-[880px] px-4 pb-20 pt-6 md:px-10 md:pt-10">
+  const field = useContext(FieldOn);
+  const page = (
+    <main
+      className="min-h-screen"
+      style={{ background: field ? 'transparent' : C.bg, color: C.ink }}
+    >
+      <div
+        className="mx-auto max-w-[880px] px-4 pb-20 pt-6 md:px-10 md:pt-10"
+        style={
+          field
+            ? {
+                background: C.bg,
+                border: `1px solid ${C.rule}`,
+                marginTop: 'clamp(16px, 6vh, 64px)',
+                marginBottom: 48,
+              }
+            : undefined
+        }
+      >
         <div
           className="flex items-center justify-between border-b pb-3"
           style={{ borderColor: C.rule }}
@@ -483,5 +504,17 @@ function Shell({ children }: { children: React.ReactNode }) {
         <div className="pt-12 md:pt-16">{children}</div>
       </div>
     </main>
+  );
+  return field ? <FieldScreen signalCell="none">{page}</FieldScreen> : page;
+}
+
+export default function JoinForm({
+  field = false,
+  ...props
+}: Parameters<typeof JoinFormInner>[0] & { field?: boolean }) {
+  return (
+    <FieldOn.Provider value={field}>
+      <JoinFormInner {...props} />
+    </FieldOn.Provider>
   );
 }

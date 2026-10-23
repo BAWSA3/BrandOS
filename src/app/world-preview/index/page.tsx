@@ -117,12 +117,15 @@ const REST = [
 export default async function IndexPreviewPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tile?: string; joined?: string }>;
+  searchParams: Promise<{ tile?: string; joined?: string; field?: string }>;
 }) {
   const sp = await searchParams;
+  // ?field=1: the Direction 03 versions (on the field)
+  const field = sp.field === '1';
   if (sp.joined === '1') {
     return (
       <JoinForm
+        field={field}
         handle="sample_founder"
         read={{ score: 81, archetype: 'BUILD.EXE', fresh: true }}
         entry={null}
@@ -161,6 +164,7 @@ export default async function IndexPreviewPage({
   }
   return (
     <IndexBook
+      field={field}
       page={{
         members: 42,
         matching: 42,
@@ -172,7 +176,11 @@ export default async function IndexPreviewPage({
       }}
       filters={parseFilters({})}
       pinned={null}
-      viewer={{ signedIn: true, member: null }}
+      viewer={
+        field
+          ? { signedIn: true, member: { number: 7, listed: true, handle: 'sample_research' } }
+          : { signedIn: true, member: null }
+      }
       aggregates={{ reserved: 1004, scanned: '4,700+' }}
       preview
     />
