@@ -391,14 +391,21 @@ async function main() {
           }
           await tx.$executeRaw`rollback to savepoint dup`;
           test('two reservations can never share a number', blocked);
-          await tx.$executeRaw`savepoint zero`;
-          let zeroOk = true;
-          try {
-            await tx.indexEntry.update({ where: { id: entry.id }, data: { number: 0 } });
-          } catch {
-            zeroOk = false;
+          // Once the founder holds No. 0000 (after the import), 0 is taken, so the
+          // existing row is the proof; otherwise move the test entry onto it.
+          const zeroTaken = await tx.$queryRaw<{ ok: boolean }[]>`
+            select exists(select 1 from "IndexEntry" where "number" = 0) as ok`;
+          let zeroOk = !!zeroTaken[0]?.ok;
+          if (!zeroOk) {
+            await tx.$executeRaw`savepoint zero`;
+            try {
+              await tx.indexEntry.update({ where: { id: entry.id }, data: { number: 0 } });
+              zeroOk = true;
+            } catch {
+              zeroOk = false;
+            }
+            await tx.$executeRaw`rollback to savepoint zero`;
           }
-          await tx.$executeRaw`rollback to savepoint zero`;
           test('No. 0000 is a valid Index number', zeroOk);
         }
         throw ROLLBACK;
