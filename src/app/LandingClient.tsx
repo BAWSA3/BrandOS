@@ -8,6 +8,7 @@ import { useInnerCircle } from '@/components/InnerCircleBadge';
 import { useAuth } from '@/hooks/useAuth';
 import { fieldSwitch } from '@/lib/field/switch';
 import { getAppEnv } from '@/lib/app-env';
+import type { LandingData } from '@/lib/landing-data';
 
 // =============================================================================
 // Landing Page. With the Direction 03 switch on (src/lib/field/switch.ts) the
@@ -16,9 +17,12 @@ import { getAppEnv } from '@/lib/app-env';
 
 export default function LandingClient({
   fieldEnv,
+  landing,
 }: {
   /** FIELD_SYSTEM === "true" on the server. */
   fieldEnv: boolean;
+  /** Live numbers for the landing scroll (only shown on the field). */
+  landing?: LandingData;
 }) {
   const { theme } = useBrandStore();
 
@@ -30,12 +34,20 @@ export default function LandingClient({
 
   return (
     <Suspense fallback={<div style={{ minHeight: '100vh', background: '#F2EFE8' }} />}>
-      <Landing theme={theme} fieldEnv={fieldEnv} />
+      <Landing theme={theme} fieldEnv={fieldEnv} landing={landing} />
     </Suspense>
   );
 }
 
-function Landing({ theme, fieldEnv }: { theme: string; fieldEnv: boolean }) {
+function Landing({
+  theme,
+  fieldEnv,
+  landing,
+}: {
+  theme: string;
+  fieldEnv: boolean;
+  landing?: LandingData;
+}) {
   const sp = useSearchParams();
   // No admin check here: the homepage stays static, so on production only the
   // env flag turns it on (?field=1 works on staging and previews).
@@ -70,7 +82,7 @@ function Landing({ theme, fieldEnv }: { theme: string; fieldEnv: boolean }) {
       />
 
       {/* Main Content - X Brand Score Lead Magnet */}
-      <LandingScan theme={theme} field={field} />
+      <LandingScan theme={theme} field={field} landing={landing} />
     </div>
   );
 }
@@ -80,10 +92,24 @@ const HANDLE_RE = /^@?[A-Za-z0-9_]{1,15}$/;
 // `/?scan=<handle>` opens the site and runs that handle's scan straight away.
 // It's the landing link from the BrandOS MCP (Claude / ChatGPT breakdowns), so
 // people arrive at their full brand read without retyping their handle.
-function LandingScan({ theme, field }: { theme: string; field: boolean }) {
+function LandingScan({
+  theme,
+  field,
+  landing,
+}: {
+  theme: string;
+  field: boolean;
+  landing?: LandingData;
+}) {
   const raw = useSearchParams().get('scan')?.trim() ?? '';
   const handle = HANDLE_RE.test(raw) ? raw.replace(/^@/, '') : undefined;
   return (
-    <XBrandScoreHero theme={theme} initialUsername={handle} autoStart={!!handle} field={field} />
+    <XBrandScoreHero
+      theme={theme}
+      initialUsername={handle}
+      autoStart={!!handle}
+      field={field}
+      landing={field ? landing : undefined}
+    />
   );
 }

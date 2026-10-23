@@ -2,6 +2,7 @@
  * The field (Direction 02): dither core, server PNG, avatar URL allowlist.
  * Pure: no database, no network.  npm run test:field
  */
+import { indexOpen, parsePhases } from '../src/lib/landing-rules';
 import { inflateSync } from 'node:zlib';
 import {
   BAYER8,
@@ -229,6 +230,29 @@ test('array params use the first value', fieldSwitch({ param: ['1', '0'], appEnv
 test(
   'asksForField only for "1"',
   asksForField('1') && !asksForField('true') && !asksForField(undefined)
+);
+
+// The landing scroll (src/lib/landing-rules.ts)
+console.log('\nI. The landing scroll');
+test(
+  'phases parse from the scan JSON',
+  JSON.stringify(parsePhases('{"define":78,"check":71,"generate":68,"scale":69}')) ===
+    JSON.stringify({ define: 78, check: 71, generate: 68, scale: 69 })
+);
+test(
+  'phases: junk, missing keys and out-of-range values are rejected',
+  parsePhases('nope') === null &&
+    parsePhases('{"define":78}') === null &&
+    parsePhases('{"define":178,"check":1,"generate":1,"scale":1}') === null &&
+    parsePhases(null) === null
+);
+test(
+  'the Index is closed before 2 Nov (Los Angeles)',
+  !indexOpen(Date.parse('2026-11-01T23:59:00-07:00'))
+);
+test(
+  'the Index opens at midnight 2 Nov (Los Angeles)',
+  indexOpen(Date.parse('2026-11-02T00:00:00-07:00'))
 );
 
 console.log(`\n${pass} passed, ${fail} failed`);

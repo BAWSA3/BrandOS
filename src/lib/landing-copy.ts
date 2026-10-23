@@ -1,0 +1,116 @@
+/**
+ * Every line of the homepage landing scroll (Direction 03, the field) lives
+ * here so the copy can be edited without touching layout code.
+ *
+ * Voice (docs/BRAND-WORLD.md): the institution speaks formally (sentence case,
+ * no exclamation marks, never "I"); Bawsa speaks lowercase, signed, as the
+ * editor. Numbers shown on the page are live (see src/lib/landing-data.ts);
+ * never write a figure into this file.
+ */
+
+export const EDITOR = 'bawsa, editor';
+
+export const LANDING = {
+  problem: {
+    id: 'problem',
+    label: '01 / The problem',
+    headline: 'Good creators are invisible to brands.',
+    body: 'Brands are moving their budgets to creators, and they still choose by follower count, because it is the only number they can see. It says nothing about what a creator stands for, whether they show up, or who actually listens.',
+    cantTellLabel: 'What a follower count cannot tell a brand',
+    cantTell: ['What you stand for.', 'Whether you show up.', 'Who actually listens.'],
+    quote: "brands aren't ignoring you. they can't see you.",
+  },
+
+  how: {
+    id: 'how',
+    label: '02 / How it works',
+    headline: 'BrandOS reads your brand and puts it on the record.',
+    steps: [
+      {
+        n: '01',
+        title: 'The reading',
+        body: 'BrandOS reads your recent posts: what you say, how you say it, how often, and how people respond. Not your bio. Not your follower count.',
+      },
+      {
+        n: '02',
+        title: 'The classification',
+        body: 'Your brand is classified into one of eight classes. The same method is applied to everyone.',
+      },
+      {
+        n: '03',
+        title: 'The entry',
+        body: 'You enter the Index with a permanent number. Brands browse it free.',
+      },
+      {
+        n: '04',
+        title: 'Certification',
+        body: 'Members who pass the checks are Verified: the account is theirs, the audience is real, the reading is current.',
+        when: 'From 9 Nov',
+      },
+    ],
+    exampleLabel: 'An example reading',
+    proofLabel: 'Brands read so far',
+  },
+
+  record: {
+    id: 'record',
+    label: '03 / What you get',
+    headline: 'Your record, kept up to date.',
+    body: 'Members keep a private record of their brand. It is re-read as you post, and it tells you what to do next.',
+    items: [
+      'Your score and its four phases, re-read as you post.',
+      'Growth, tracked every day.',
+      "What's working: formats, your best hour, your best and worst posts.",
+      'Next moves and ideas drawn from your own data.',
+      'Your audience: who engages, and who comes back.',
+      'Competitors, side by side.',
+    ],
+    sampleLabel: 'Sample record',
+  },
+
+  index: {
+    id: 'index',
+    label: '04 / The Index',
+    headlineBefore: 'The Index opens 2 Nov.',
+    headlineOpen: 'The Index is open.',
+    body: 'A public book of creators, each with a reading behind them. Free to be listed. Pro to be picked.',
+    brands: 'Brands browse the Index free.',
+    membersLabel: 'Members',
+    sampleEntry: 'Sample entry',
+    seeIndex: 'See the Index',
+    opensNote: 'opens 2 Nov',
+    founding: {
+      label: 'Founding 100',
+      title: '$29/mo for life.',
+      body: 'Everything is free for everyone until 3 Dec. The first 100 members who add a card keep Pro at $29/mo for life: featured in the Index, a full profile, and which brands viewed them. Nothing is charged until 3 Dec. After the first 100, Pro is $39/mo.',
+      seatsLabel: 'Seats left',
+      cta: 'Become a Founding Member',
+    },
+    faqLabel: 'Questions',
+    faq: [
+      {
+        q: 'Is it free?',
+        a: 'Reading your brand and joining the Index are free. Everything is free until 3 Dec. After that, listing stays free and Pro is paid.',
+      },
+      { q: 'Which accounts can be read?', a: 'Any public X account.' },
+      {
+        q: 'Do I have to be listed?',
+        a: 'No. The Index is opt-in, and you can leave at any time.',
+      },
+      {
+        q: 'What does BrandOS read?',
+        a: 'Your recent public posts and how people respond to them. Nothing private.',
+      },
+    ],
+  },
+
+  close: {
+    id: 'read',
+    label: '05 / Your turn',
+    headline: 'Read your brand.',
+    body: 'It takes about a minute. Any public X account.',
+    quote: 'good creators lose deals they never hear about. this is the fix.',
+  },
+
+  cta: 'Read my brand →',
+} as const;
