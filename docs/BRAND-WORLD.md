@@ -313,3 +313,49 @@ already exist, so it doesn't risk the launch or the Oct 28 payment check.
 - Volume I: print run, who receives it, and whether it's sold.
 - Member cards: material (heavy paper vs metal) and cost per card.
 - Whether brands get a named status ("Readers") and their own page in the Index.
+
+---
+
+# Direction 02: the field (decided Oct 23)
+
+From Bawsa's references (dithered photographs, a grid with one hot cell, metadata strips, CRT
+glow). Prototype: the "BrandOS World" artifact, Direction 02 section.
+
+| Decision             |                                                                                                                             |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| **World surfaces**   | Klein field + 1-bit dither: homepage hero, the Index, member cards, the claim moment, share images, film                    |
+| **Reading surfaces** | Stay on bone: your record (dashboard), pricing, settings, long text, email bodies                                           |
+| **Signal colour**    | **Coral `#FF4B2B`**, used only for "this one": your entry, the selected cell, the live state                                |
+| **Dithered imagery** | Members' own photos · nature (clouds, sky, water; procedural, no image rights) · product moments (scores, numbers, screens) |
+| **Type**             | Helvetica/Inter Tight + VCR stay; **IBM Plex Mono** added for metadata strips and lowercase lines                           |
+
+**Rules of the field**
+
+1. The dither is 1-bit: white dots on Klein (8×8 Bayer), with a faint glow. No greys, no gradients.
+2. The grid is white, 1px, over the image. **One coral cell per screen, maximum.**
+3. Coral is a fill, never text on Klein (contrast). White text on the field; ink text on bone.
+4. Motion on the field follows the vocabulary: press, type, rule, count, cut. The field itself is still
+   (no drifting clouds behind reading text); the metadata strip may run slowly.
+5. Every field has a static poster first (no blank flash, no layout shift), then the canvas.
+
+## Product plan
+
+| Phase                           | When         | What                                                                                                                                                                                                                                                                                                                                                                                                    | Where in the code                                       | Ships                                                                                      |
+| ------------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| **A. Foundations**              | Oct 24–27    | Tokens (`--field`, `--signal` coral), IBM Plex Mono via `next/font`; `<DitherField>` (clouds / photo / number samplers, grid, signal cell, poster fallback, reduced-motion); `<MetaStrip>`; a server-side dither for share images (`src/lib/og/dither.ts`, PNG from the same algorithm); an avatar proxy route so X photos can be dithered without CORS trouble; preview harness `/world-preview/field` | new `src/components/field/*`, `src/lib/og/*`            | Staging                                                                                    |
+| **B. The Index + the claim**    | Oct 27–29    | Index header becomes a field; every member card shows a dithered avatar; **your own entry is the coral cell**; the claim moment presses your number onto the field and lights your cell; Index share card (`/api/og/index`) in the field style                                                                                                                                                          | `src/app/creators/*`, `/api/og/index`                   | Oct 29 promote (Index stays behind its flag until the beta)                                |
+| **C. The homepage**             | Oct 29–Nov 1 | Hero becomes the field (clouds, grid, coral cell, metadata strip) replacing `HybridCodeBg` in `XBrandScoreHero`; the scan stays a bone input card on the field; the score reveal ends by pressing the classification code                                                                                                                                                                               | `src/components/XBrandScoreHero.tsx`, `ScoreReveal.tsx` | Behind a `HOME_FIELD` flag: on for Nov 2 only if staging passes on Oct 31; otherwise Nov 3 |
+| **D. Member card + entry page** | Nov 2–8      | Brand Pass Klein finish with dithered portrait, perforated edge, `CLASS` code; `/@handle` gets a field header band (body stays bone); main share image (`/api/og`) in the field style                                                                                                                                                                                                                   | `BrandPass.tsx`, `src/app/b/[handle]/*`, `/api/og`      | Staging → prod                                                                             |
+| **E. Certification**            | Nov 9        | Verified certificate page on the field; ✓ stamp; coral cell = "verified" state                                                                                                                                                                                                                                                                                                                          | new                                                     | Verified campaign                                                                          |
+| **F. Campaign + film**          | Nov 3 →      | The Check re-cut in the field look (a dither shader in Tesseract); posts and the Nov 2 email header from the same engine                                                                                                                                                                                                                                                                                | `marketing/`, `launch-emails.ts`                        | With each campaign                                                                         |
+
+**Risks and how they're handled**
+
+- _Launch risk:_ homepage behind a flag; the Index isn't public until the beta; nothing in phase A–C
+  touches checkout, auth or scans.
+- _Performance on phones:_ dither renders once per size (not per frame), cell size grows on small
+  screens, static poster first.
+- _X avatar images:_ fetched through our own proxy (cached), dithered client-side; initial-letter
+  fallback stays.
+- _Vercel deploy limit:_ the Hobby plan capped deploys on Oct 23; launch week will need many
+  deploys. Recommend Vercel Pro before Oct 29.
