@@ -360,3 +360,28 @@ glow). Prototype: the "BrandOS World" artifact, Direction 02 section.
   fallback stays.
 - _Vercel deploy limit:_ the Hobby plan capped deploys on Oct 23; launch week will need many
   deploys. Recommend Vercel Pro before Oct 29.
+
+---
+
+# Direction 03: the system (decided Oct 23)
+
+"ascii2": the ascii-sky clouds together with the field references, applied across all of
+BrandOS, small things to big.
+
+| Decision           |                                                                                                                                                              |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Default ground** | **Bone + a faint square grid** on every screen. Dithered clouds as illustration                                                                              |
+| **Big moments**    | Full **Klein dither fields** (homepage hero, the claim, Verified, share images)                                                                              |
+| **Atmosphere**     | Soft glows behind the dither, as in ascii-sky: **Klein and coral only** (no orange)                                                                          |
+| **Palette**        | Bone, Ink, Klein, Coral. Coral solid only for "this one"; soft coral only in glows                                                                           |
+| **Clouds**         | **Pixel-art clouds** (outlined, dithered; the ascii-sky style) as UI illustrations and icons; **photographic dither clouds** for heroes, film and posts      |
+| **How deep**       | Components (buttons, inputs, cards, tags, toasts, modals) · charts and data in dots · icons, cursor and transitions (dither wipes)                           |
+| **Timing**         | Before Nov 2: tokens, components, homepage, scan, the Index and claim, pricing. After: charts, icons, cursor, transitions and the dashboard, in weekly drops |
+
+**The pixel-cloud library** (Higgsfield `gpt_image_2_5`, styled on `public/assets/cloud-bg.png`;
+jobs `288e2238`, `0991807f`): 12 clouds cut by outline into three colourways by
+`marketing/pixel-clouds/make.mjs`:
+
+- `ink/`: for bone. Outline and dither dots in ink, highlights left open as paper (glows show through).
+- `white/`: for the Klein field.
+- `klein/`: ink version in Klein, for accents on bone.
