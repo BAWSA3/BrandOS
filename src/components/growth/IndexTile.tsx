@@ -5,9 +5,9 @@ import { formatNumber } from '@/lib/index-rules';
 import { BIG, Label, MONO, T, Tile } from './parts';
 
 /**
- * The Creator Index on the growth dashboard: "Join the Index" for
- * non-members; for members, their number and who viewed their page this
- * week. The count is free; which brand/agency teams looked is the Pro
+ * The Creator Index on the growth dashboard (institution voice,
+ * docs/BRAND-WORLD.md): "Join the Index" for non-members; for members, their
+ * entry number and who viewed their entry this week. The count is free; which brand/agency teams looked is the Pro
  * (founding card) perk, shown locked otherwise.
  */
 export interface IndexTileData {
@@ -31,8 +31,8 @@ export default function IndexTile({ data }: { data: IndexTileData }) {
               Get found by brands. Get your number.
             </div>
             <p className="mt-2 max-w-[560px] text-[14px]" style={{ color: T.muted }}>
-              A public book of creators with a real brand read behind them. Brands browse it free.
-              Early members get the low numbers.
+              The record of creator reputation: every entry is a BrandOS reading of real posts.
+              Brands browse it free. Early entries hold the low numbers.
             </p>
           </div>
           <Link
@@ -62,11 +62,11 @@ export default function IndexTile({ data }: { data: IndexTileData }) {
           </div>
         </div>
         <div>
-          <Label>Viewed you · last 7 days</Label>
+          <Label>Viewed your entry / last 7 days</Label>
           <div className="mt-2 text-[15px]">
             {people === 0
-              ? 'No signed-in visitors yet. Share your number to get seen.'
-              : `${people} ${people === 1 ? 'person' : 'people'} opened your page.`}
+              ? 'No signed-in visitors yet. Share your entry to be seen.'
+              : `${people} ${people === 1 ? 'person' : 'people'} opened your entry.`}
           </div>
           {standsOut ? (
             views?.teams && views.teams.length > 0 ? (
@@ -83,16 +83,16 @@ export default function IndexTile({ data }: { data: IndexTileData }) {
               </ul>
             ) : (
               <p className="mt-1 text-[13px]" style={{ color: T.muted }}>
-                Brand and agency teams that view you show up here.
+                Brand and agency teams that view your entry are listed here.
               </p>
             )
           ) : (
             <p className="mt-1 text-[13px]" style={{ color: T.muted }}>
               {people > 0
-                ? 'See which brands and agencies they were with'
-                : 'See which brands view you'}{' '}
+                ? 'Founding Members see which brand and agency teams they were with.'
+                : 'Founding Members see which brand teams view their entry.'}{' '}
               <Link href="/pricing" style={{ color: T.blue }}>
-                with Pro →
+                Become a Founding Member →
               </Link>
             </p>
           )}
@@ -103,7 +103,7 @@ export default function IndexTile({ data }: { data: IndexTileData }) {
             className="border px-4 py-2.5 text-[11px] uppercase tracking-[0.14em]"
             style={{ fontFamily: MONO, borderColor: T.ink }}
           >
-            Your card in the Index
+            Your entry in the Index
           </Link>
           <Link
             href="/index/join"

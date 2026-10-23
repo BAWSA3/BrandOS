@@ -51,7 +51,15 @@ export const isFresh = (scannedAt: Date, now = Date.now()) =>
   now - scannedAt.getTime() < FRESH_READ_DAYS * DAY_MS;
 
 export type JoinResult =
-  | { ok: true; number: number; created: boolean; stale: boolean; reserved?: boolean }
+  | {
+      ok: true;
+      number: number;
+      created: boolean;
+      stale: boolean;
+      reserved?: boolean;
+      joinedAt: Date;
+      archetype: string | null;
+    }
   | { ok: false; status: number; error: string; needsScan?: boolean };
 
 /**
@@ -100,7 +108,14 @@ export async function joinIndex(
     const stale = !isFresh(read.scannedAt);
     if (existing) {
       const entry = await prisma.indexEntry.update({ where: { userId: user.id }, data });
-      return { ok: true, number: entry.number, created: false, stale };
+      return {
+        ok: true,
+        number: entry.number,
+        created: false,
+        stale,
+        joinedAt: entry.joinedAt,
+        archetype: entry.archetype,
+      };
     }
     // A reserved number (migration 045) is claimed by joining as that handle:
     // the handle is always the signed-in account's own X connection.
@@ -117,13 +132,28 @@ export async function joinIndex(
         });
         return created;
       });
-      return { ok: true, number: entry.number, created: true, stale, reserved: true };
+      return {
+        ok: true,
+        number: entry.number,
+        created: true,
+        stale,
+        reserved: true,
+        joinedAt: entry.joinedAt,
+        archetype: entry.archetype,
+      };
     }
     const number = reservation === undefined ? undefined : await nextFreeNumber();
     const entry = await prisma.indexEntry.create({
       data: { ...data, userId: user.id, ...(number != null ? { number } : {}) },
     });
-    return { ok: true, number: entry.number, created: true, stale };
+    return {
+      ok: true,
+      number: entry.number,
+      created: true,
+      stale,
+      joinedAt: entry.joinedAt,
+      archetype: entry.archetype,
+    };
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002')
       return {
@@ -237,11 +267,13 @@ export interface IndexCard {
   niches: string[];
   blurb: string;
   featured: boolean;
+  joinedAt: string; // ISO, for "Entered 23 Oct 2026"
 }
 
 const CARD_SELECT = {
   displayHandle: true,
   number: true,
+  joinedAt: true,
   score: true,
   archetype: true,
   niches: true,
@@ -268,6 +300,7 @@ const toCard = (r: CardRow): IndexCard => ({
   archetype: r.archetype,
   niches: r.niches,
   blurb: r.blurb,
+  joinedAt: r.joinedAt.toISOString(),
   featured: standsOut({
     role: String(r.user.role),
     subscriptionTier: String(r.user.subscriptionTier),

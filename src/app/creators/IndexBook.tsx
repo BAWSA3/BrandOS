@@ -6,10 +6,12 @@ import { useReducedMotion } from 'motion/react';
 import { AnimateNumber } from 'motion-plus/react';
 import { DASH_FONTS } from '@/components/dashboard/dashFonts';
 import { formatNumber, NICHES, type IndexFilters } from '@/lib/index-rules';
+import { classify, classLabel, recordDate } from '@/lib/classifications';
 import type { IndexCard, IndexPage } from '@/lib/creator-index';
 
 // The Creator Index page: an editorial "book" (hairline frame, micro labels,
-// big grotesk) of members' cards. One headline motion: the member count rolls
+// big grotesk) of members' entries, in the institution's voice
+// (docs/BRAND-WORLD.md: entry, classification, "/" not "·" in VCR text). One headline motion: the member count rolls
 // up in Klein (Motion+ AnimateNumber); everything else stays still.
 
 const MONO = DASH_FONTS.mono;
@@ -52,11 +54,11 @@ function Card({ c, pinned = false }: { c: IndexCard; pinned?: boolean }) {
           >
             @{c.handle}
           </div>
-          {c.archetype && (
-            <div className="mt-1 truncate">
-              <Micro color={C.blue}>{c.archetype}</Micro>
-            </div>
-          )}
+          <div className="mt-1 truncate">
+            <Micro color={classify(c.archetype) ? C.blue : C.muted}>
+              {classLabel(c.archetype, '/')}
+            </Micro>
+          </div>
         </div>
         {c.score !== null && (
           <div
@@ -69,7 +71,7 @@ function Card({ c, pinned = false }: { c: IndexCard; pinned?: boolean }) {
       </div>
       {c.blurb && <p className="mt-4 text-[14px] leading-snug">{c.blurb}</p>}
       {c.niches.length > 0 && (
-        <div className="mt-auto flex flex-wrap gap-1.5 pt-4">
+        <div className="mt-4 flex flex-wrap gap-1.5">
           {c.niches.map((n) => (
             <span
               key={n}
@@ -79,6 +81,13 @@ function Card({ c, pinned = false }: { c: IndexCard; pinned?: boolean }) {
               {n}
             </span>
           ))}
+        </div>
+      )}
+      {c.joinedAt && (
+        <div className="mt-auto pt-4">
+          <div className="border-t pt-3" style={{ borderColor: C.rule }}>
+            <Micro>Entered {recordDate(c.joinedAt)}</Micro>
+          </div>
         </div>
       )}
     </Link>
@@ -207,13 +216,14 @@ export default function IndexBook({
               className="mt-5 max-w-[520px] text-[15px] leading-relaxed md:text-[17px]"
               style={{ color: C.muted }}
             >
-              Creators with a real brand read behind them, not a follower count. Every member chose
-              to be listed. Brands browse free.
+              The record of creator reputation. Every entry is a BrandOS reading of real posts, not
+              a follower count. Every member chose to be listed. Brands browse free.
             </p>
           </div>
           <div className="md:text-right">
+            {/* overflow-hidden: rolling digits mustn't slide in from past the page edge on phones */}
             <div
-              className="text-[64px] leading-none md:text-[96px]"
+              className="overflow-hidden text-[64px] leading-none md:text-[96px]"
               style={{ fontFamily: BIG, fontWeight: 500, letterSpacing: '-0.04em', color: C.blue }}
             >
               <AnimateNumber>{count}</AnimateNumber>
@@ -229,7 +239,7 @@ export default function IndexBook({
                     aggregates.scanned ? `${aggregates.scanned} creators scanned` : null,
                   ]
                     .filter(Boolean)
-                    .join(' · ')}
+                    .join(' / ')}
                 </Micro>
               </div>
             ) : null}
@@ -241,8 +251,8 @@ export default function IndexBook({
                   style={{ fontFamily: MONO, borderColor: C.blue, color: C.blue }}
                 >
                   {viewer.member.listed
-                    ? `You're ${formatNumber(viewer.member.number)} · edit`
-                    : `${formatNumber(viewer.member.number)} · hidden · come back`}
+                    ? `Entry ${formatNumber(viewer.member.number)} / Edit`
+                    : `Entry ${formatNumber(viewer.member.number)} / Hidden / List again`}
                 </Link>
               ) : (
                 <Link
@@ -252,7 +262,7 @@ export default function IndexBook({
                 >
                   {viewer.reserved != null
                     ? `Claim ${formatNumber(viewer.reserved)} →`
-                    : 'Join the Index · get your number →'}
+                    : 'Join the Index →'}
                 </Link>
               )}
             </div>
@@ -283,7 +293,7 @@ export default function IndexBook({
             </select>
           </label>
           <label className="flex flex-col gap-1.5">
-            <Micro>Archetype</Micro>
+            <Micro>Classification</Micro>
             <select
               name="archetype"
               defaultValue={filters.archetype ?? ''}
@@ -291,11 +301,13 @@ export default function IndexBook({
               style={{ borderColor: C.rule, background: C.panel, color: C.ink }}
             >
               <option value="">All</option>
-              {page.archetypes.map((a) => (
-                <option key={a} value={a}>
-                  {a}
-                </option>
-              ))}
+              {[...page.archetypes]
+                .sort((a, b) => (classify(a)?.number ?? 99) - (classify(b)?.number ?? 99))
+                .map((a) => (
+                  <option key={a} value={a}>
+                    {classLabel(a)}
+                  </option>
+                ))}
             </select>
           </label>
           <label className="flex flex-col gap-1.5">
@@ -341,7 +353,11 @@ export default function IndexBook({
             </Link>
           )}
           <div className="ml-auto">
-            <Micro>{filtered ? `${page.matching} matching` : `${page.members} listed`}</Micro>
+            <Micro>
+              {filtered
+                ? `${page.matching} matching`
+                : `${page.members} ${page.members === 1 ? 'entry' : 'entries'}`}
+            </Micro>
           </div>
         </form>
 
@@ -356,7 +372,7 @@ export default function IndexBook({
 
         {page.featured.length > 0 && (
           <section className="mt-10">
-            <Micro color={C.blue}>Featured</Micro>
+            <Micro color={C.blue}>Featured / Founding Members</Micro>
             <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {page.featured.map((c) => (
                 <Card key={c.number} c={c} />
@@ -367,7 +383,9 @@ export default function IndexBook({
 
         {page.cards.length > 0 && (
           <section className="mt-10">
-            <Micro>{page.featured.length > 0 ? 'Everyone · newest first' : 'Newest first'}</Micro>
+            <Micro>
+              {page.featured.length > 0 ? 'All entries / newest first' : 'Entries / newest first'}
+            </Micro>
             <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {page.cards.map((c) => (
                 <Card key={c.number} c={c} />
@@ -390,7 +408,7 @@ export default function IndexBook({
             <p className="mx-auto mt-3 max-w-[420px] text-[15px]" style={{ color: C.muted }}>
               {filtered
                 ? 'Try a wider score range or another niche.'
-                : 'Early members get the low numbers. Join and claim yours.'}
+                : 'Early entries hold the low numbers. Join the Index to claim yours.'}
             </p>
             {!viewer.member && (
               <Link
@@ -441,9 +459,9 @@ export default function IndexBook({
           className="mt-16 flex flex-wrap items-center justify-between gap-3 border-t pt-4"
           style={{ borderColor: C.rule }}
         >
-          <Micro>Every member opted in · leave any time</Micro>
-          <Micro>Scores are BrandOS brand reads of public X posts</Micro>
-          <Micro>Signed in? Pro members see which brand teams viewed them</Micro>
+          <Micro>Every member chose to be listed / leave any time</Micro>
+          <Micro>One reading method for every entry / public X posts</Micro>
+          <Micro>Founding Members see which brand teams viewed their entry</Micro>
         </footer>
       </div>
     </main>

@@ -21,6 +21,7 @@ import {
 } from '../src/lib/index-rules';
 import { decodeUtm, encodeUtm, utmFromSearch } from '../src/lib/utm';
 import { readFileSync } from 'fs';
+import { CLASSES, classify, classLabel, recordDate } from '../src/lib/classifications';
 import {
   cleanSignupHandle,
   planReservations,
@@ -190,6 +191,28 @@ async function main() {
     'next UTC day differs',
     viewDay(new Date('2026-11-02T23:59:59Z')) !== viewDay(new Date('2026-11-03T00:00:00Z'))
   );
+
+  console.log("\nK. Classifications (the institution's codes)");
+  test(
+    'eight classes, numbered 1-8',
+    CLASSES.length === 8 && CLASSES.every((c, i) => c.number === i + 1)
+  );
+  test('BUILD.EXE is Class 03', classLabel('BUILD.EXE') === 'CLASS 03 · BUILD.EXE');
+  test('VCR text uses "/" (no "·" glyph)', classLabel('ARC', '/') === 'CLASS 04 / ARC');
+  test('any casing works', classify('build.exe')?.number === 3);
+  test('legacy SIGNAL_SAGE reads as Class 01 SOURCE', classify('SIGNAL_SAGE')?.code === 'SOURCE');
+  test('legacy "The Builder" reads as BUILD.EXE', classify('The Builder')?.code === 'BUILD.EXE');
+  test('emoji prefixes are ignored', classify('🐕 ARC')?.code === 'ARC');
+  test('unknown names are Unclassified', classLabel('The Prophet') === 'UNCLASSIFIED');
+  test(
+    'null/empty are Unclassified',
+    classLabel(null) === 'UNCLASSIFIED' && classLabel('') === 'UNCLASSIFIED'
+  );
+  test(
+    'record dates read "23 OCT 2026" (UTC)',
+    recordDate('2026-10-23T23:30:00Z') === '23 OCT 2026'
+  );
+  test('a bad date is empty, not "NaN"', recordDate('nope') === '');
 
   console.log('\nR. Reserved numbers (migration 045)');
   {

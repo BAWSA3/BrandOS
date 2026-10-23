@@ -1,12 +1,14 @@
 import type { Metadata } from 'next';
 import IndexBook from '@/app/creators/IndexBook';
 import IndexTile from '@/components/growth/IndexTile';
+import JoinForm from '@/app/creators/join/JoinForm';
 import { parseFilters } from '@/lib/index-rules';
 import type { IndexCard } from '@/lib/creator-index';
 
 // Layout preview for the Creator Index (/index) and its dashboard tile, with
 // sample members (not real accounts). /world-preview/* is hidden on
-// mybrandos.app (middleware). ?tile=1 shows the dashboard tile states.
+// mybrandos.app (middleware). ?tile=1 shows the dashboard tile states;
+// ?joined=1 shows the entry-confirmed screen (the Press).
 
 export const metadata: Metadata = { title: 'Creator Index preview · BrandOS' };
 
@@ -18,7 +20,8 @@ const card = (
   niches: string[],
   blurb: string,
   featured = false,
-  avatar: string | null = null
+  avatar: string | null = null,
+  joinedAt = '2026-10-23T12:00:00Z'
 ): IndexCard => ({
   handle,
   number,
@@ -29,6 +32,7 @@ const card = (
   niches,
   blurb,
   featured,
+  joinedAt,
 });
 
 const FEATURED = [
@@ -47,7 +51,7 @@ const FEATURED = [
     7,
     'sample_research',
     77,
-    'ORACLE',
+    'SOURCE',
     ['Research', 'DeFi'],
     'Long-form breakdowns of DeFi protocols before they trend.',
     true
@@ -58,7 +62,7 @@ const REST = [
     42,
     'sample_trader',
     68,
-    'SIGNAL',
+    'FORESIGHT',
     ['Trading'],
     'Daily market reads for 20k traders. Charts, not calls.',
     false,
@@ -69,7 +73,7 @@ const REST = [
     41,
     'sample_artist',
     72,
-    'CURATOR',
+    'NULL',
     ['NFTs & art', 'Culture & memes'],
     'Generative art and the people behind it.'
   ),
@@ -77,7 +81,7 @@ const REST = [
     40,
     'sample_teacher',
     64,
-    'TEACHER',
+    'SIGNAL_SAGE', // a legacy name: still reads as Class 01 SOURCE
     ['Education', 'AI'],
     'Explaining crypto + AI to people who just got here.'
   ),
@@ -85,7 +89,7 @@ const REST = [
     39,
     'sample_community',
     59,
-    'HOST',
+    'RELAY',
     ['Community'],
     'I run the Tuesday spaces 4k builders show up for.'
   ),
@@ -93,19 +97,40 @@ const REST = [
     38,
     'sample_memes',
     55,
-    'JESTER',
+    'FREQ',
     ['Memecoins', 'Culture & memes'],
     'Memes first, alpha second.'
   ),
-  card(37, 'sample_gamer', 61, 'PLAYER', ['Gaming'], 'Onchain games, honestly reviewed.'),
+  card(
+    37,
+    'sample_gamer',
+    61,
+    'ENTROPY',
+    ['Gaming'],
+    'Onchain games, honestly reviewed.',
+    false,
+    null,
+    '2026-10-22T09:00:00Z'
+  ),
 ];
 
 export default async function IndexPreviewPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tile?: string }>;
+  searchParams: Promise<{ tile?: string; joined?: string }>;
 }) {
-  if ((await searchParams).tile === '1') {
+  const sp = await searchParams;
+  if (sp.joined === '1') {
+    return (
+      <JoinForm
+        handle="sample_founder"
+        read={{ score: 81, archetype: 'BUILD.EXE', fresh: true }}
+        entry={null}
+        preview={{ number: 1, joinedAt: '2026-10-23T12:00:00Z', archetype: 'BUILD.EXE' }}
+      />
+    );
+  }
+  if (sp.tile === '1') {
     return (
       <main className="min-h-screen space-y-6 p-6 md:p-10" style={{ background: '#F2EFE8' }}>
         <div className="grid gap-4 md:grid-cols-12">
@@ -143,11 +168,12 @@ export default async function IndexPreviewPage({
         cards: REST,
         page: 1,
         pages: 2,
-        archetypes: ['BUILD.EXE', 'CURATOR', 'ORACLE', 'SIGNAL'],
+        archetypes: ['BUILD.EXE', 'FORESIGHT', 'SOURCE', 'NULL', 'RELAY', 'FREQ', 'ENTROPY'],
       }}
       filters={parseFilters({})}
       pinned={null}
       viewer={{ signedIn: true, member: null }}
+      aggregates={{ reserved: 1004, scanned: '4,700+' }}
       preview
     />
   );

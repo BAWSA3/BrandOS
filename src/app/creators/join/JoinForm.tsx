@@ -2,13 +2,15 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { useReducedMotion } from 'motion/react';
-import { AnimateNumber } from 'motion-plus/react';
+import { motion, useReducedMotion } from 'motion/react';
 import { DASH_FONTS } from '@/components/dashboard/dashFonts';
 import { BLURB_MAX, formatNumber, MAX_NICHES, NICHES } from '@/lib/index-rules';
+import { classLabel, recordDate } from '@/lib/classifications';
 
-// Join (or edit) your Creator Index entry. The headline motion is the number
-// arriving: it rolls up in Klein when you join (Motion+ AnimateNumber).
+// Join (or edit) your Creator Index entry, in the institution's voice
+// (docs/BRAND-WORLD.md). The headline motion is the Press: the entry number is
+// stamped in Klein (112% → 100%, a soft ring outward, no overshoot), then the
+// record lines type in. Nothing fades in.
 
 const MONO = DASH_FONTS.mono;
 const BIG = DASH_FONTS.big;
@@ -38,8 +40,8 @@ const SCAN_STEPS = [
   'Reading your latest posts…',
   'Finding what you post about…',
   'Scoring your brand…',
-  'Naming your archetype…',
-  'Getting your number ready…',
+  'Classifying your brand…',
+  'Preparing your entry…',
 ];
 
 export default function JoinForm({
@@ -47,12 +49,15 @@ export default function JoinForm({
   read,
   entry,
   reserved = null,
+  preview = null,
 }: {
   handle: string | null;
   read: { score: number; archetype: string; fresh: boolean } | null;
   entry: Entry | null;
   /** The account's own reserved number (migration 045), shown until they claim it. */
   reserved?: number | null;
+  /** /world-preview only: open on the entry-confirmed screen. */
+  preview?: { number: number; joinedAt: string; archetype: string | null } | null;
 }) {
   const claim = !entry && reserved != null;
   const reduce = useReducedMotion();
@@ -61,9 +66,11 @@ export default function JoinForm({
   const [listMe, setListMe] = useState(true);
   const [busy, setBusy] = useState<null | 'scan' | 'join' | 'leave'>(null);
   const [error, setError] = useState<string | null>(null);
-  const [joined, setJoined] = useState<number | null>(null);
+  const [joined, setJoined] = useState<number | null>(preview?.number ?? null);
+  const [entered, setEntered] = useState<{ at: string; archetype: string | null } | null>(
+    preview ? { at: preview.joinedAt, archetype: preview.archetype } : null
+  );
   const [listed, setListed] = useState(entry?.listed ?? false);
-  const [shown, setShown] = useState(0);
   const [step, setStep] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -78,13 +85,6 @@ export default function JoinForm({
     return () => window.clearInterval(t);
   }, [busy]);
 
-  // the number rolls up from 0 once it's assigned
-  useEffect(() => {
-    if (joined === null) return;
-    const t = window.setTimeout(() => setShown(joined), reduce ? 0 : 150);
-    return () => window.clearTimeout(t);
-  }, [joined, reduce]);
-
   if (!handle) {
     return (
       <Shell>
@@ -95,7 +95,7 @@ export default function JoinForm({
           Connect X to join.
         </h1>
         <p className="mt-4 text-[16px]" style={{ color: C.muted }}>
-          Every Index entry is a real X account with a BrandOS brand read. Connect yours from your
+          Every Index entry is a real X account with a BrandOS reading. Connect yours from your
           dashboard, then come back.
         </p>
         <Link
@@ -159,6 +159,10 @@ export default function JoinForm({
       }
       setListed(true);
       setRefreshing(body.refreshing === true);
+      setEntered({
+        at: typeof body.joinedAt === 'string' ? body.joinedAt : new Date().toISOString(),
+        archetype: typeof body.archetype === 'string' ? body.archetype : (read?.archetype ?? null),
+      });
       setJoined(body.number);
     } catch {
       setError('Check your connection and try again.');
@@ -186,28 +190,42 @@ export default function JoinForm({
 
   if (joined !== null) {
     const shareUrl = `${APP}/index?m=${handle}`;
-    const text = `i'm ${formatNumber(joined)} in the BrandOS Creator Index.\n\nbrands browse it free. creators, get your number ↓`;
+    const text = `i'm entry ${formatNumber(joined)} in the BrandOS Creator Index.\n\nbrands browse it free. creators, claim your number ↓`;
     const intent = `https://x.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`;
     return (
       <Shell>
-        <Micro color={C.blue}>You&apos;re in</Micro>
-        <div
-          className="mt-4 flex items-baseline gap-3"
-          style={{ fontFamily: BIG, fontWeight: 500, letterSpacing: '-0.045em' }}
-        >
-          <span className="text-[40px] md:text-[56px]">No.</span>
-          <span className="text-[96px] leading-none md:text-[160px]" style={{ color: C.blue }}>
-            <AnimateNumber format={{ minimumIntegerDigits: 4, useGrouping: false }}>
-              {shown}
-            </AnimateNumber>
-          </span>
+        <Micro color={C.blue}>Entry confirmed</Micro>
+        <Press reduce={!!reduce}>
+          <div
+            className="flex items-baseline gap-3"
+            style={{ fontFamily: BIG, fontWeight: 500, letterSpacing: '-0.045em' }}
+          >
+            <span className="text-[40px] md:text-[56px]">No.</span>
+            <span className="text-[96px] leading-none md:text-[160px]" style={{ color: C.blue }}>
+              {String(joined).padStart(4, '0')}
+            </span>
+          </div>
+        </Press>
+        <div className="mt-5 space-y-1.5">
+          <TypeLine
+            text={`ENTERED ${recordDate(entered?.at ?? new Date())}`}
+            start={480}
+            reduce={!!reduce}
+            color={C.ink}
+          />
+          <TypeLine
+            text={classLabel(entered?.archetype, '/')}
+            start={480 + 22 * 30}
+            reduce={!!reduce}
+            color={C.blue}
+          />
         </div>
-        <p className="mt-4 text-[17px]">
-          @{handle} is {formatNumber(joined)} in the BrandOS Creator Index.
+        <p className="mt-6 text-[17px]">
+          @{handle} is entered in the BrandOS Creator Index as {formatNumber(joined)}.
         </p>
         {refreshing && (
           <p className="mt-2 text-[14px]" style={{ color: C.muted }}>
-            We&apos;re refreshing your brand read in the background. Your card updates in a minute.
+            Your reading is being refreshed. The entry updates when it completes.
           </p>
         )}
         <div className="mt-8 flex flex-wrap gap-3">
@@ -218,7 +236,7 @@ export default function JoinForm({
             className="px-6 py-3.5 text-[12px] uppercase tracking-[0.14em] text-white"
             style={{ fontFamily: MONO, background: C.blue }}
           >
-            Share your number on X →
+            Share your entry on X →
           </a>
           <Link
             href={`/index?m=${handle}`}
@@ -229,10 +247,10 @@ export default function JoinForm({
           </Link>
         </div>
         <p className="mt-8 max-w-[520px] text-[14px] leading-relaxed" style={{ color: C.muted }}>
-          Founding members (Pro, $29 for life) are Featured at the top of the Index and see which
-          brands viewed them.{' '}
+          Founding Members (Pro, $29/mo for life) are Featured at the top of the Index and see which
+          brand teams viewed their entry.{' '}
           <Link href="/pricing" style={{ color: C.blue }}>
-            Lock in founding →
+            Become a Founding Member →
           </Link>
         </p>
       </Shell>
@@ -243,9 +261,9 @@ export default function JoinForm({
     <Shell>
       <Micro color={claim ? C.blue : C.muted}>
         {entry
-          ? `${formatNumber(entry.number)} · edit your entry`
+          ? `Entry ${formatNumber(entry.number)} / Edit`
           : claim
-            ? 'Your number is reserved'
+            ? 'Number reserved'
             : 'Join the Index'}
       </Micro>
       <h1
@@ -256,26 +274,26 @@ export default function JoinForm({
       </h1>
       {claim && (
         <p className="mt-4 max-w-[560px] text-[16px] leading-relaxed" style={{ color: C.ink }}>
-          You signed up early, so we held a number for you. Claim it below. Unclaimed numbers are
-          released on Dec 3.
+          Held for you since you joined the list. Claim it below. Unclaimed numbers are released on
+          3 Dec 2026.
         </p>
       )}
       <p className="mt-4 max-w-[560px] text-[16px] leading-relaxed" style={{ color: C.muted }}>
-        Brands browse the Index to find creators with a real brand read behind them. Your card shows
-        @{handle}
+        Brands browse the Index to find creators by their reading, not their follower count. Your
+        entry shows @{handle}
         {read
-          ? `, your score (${read.score}) and archetype (${read.archetype})`
-          : ' and your brand read'}
-        , plus what you tell them below.
+          ? `, your score (${read.score}) and classification (${classLabel(read.archetype)})`
+          : ' and your reading'}
+        , plus what you write below.
         {read && !read.fresh
-          ? ' Your read is over a week old, so we refresh it right after you join.'
+          ? ' Your reading is over a week old; it is refreshed right after you join.'
           : ''}
       </p>
 
       <form onSubmit={submit} className="mt-10 space-y-8">
         <fieldset>
           <legend>
-            <Micro>Your niches · pick up to {MAX_NICHES}</Micro>
+            <Micro>Your niches / pick up to {MAX_NICHES}</Micro>
           </legend>
           <div className="mt-3 flex flex-wrap gap-2">
             {NICHES.map((n) => {
@@ -327,7 +345,7 @@ export default function JoinForm({
             className="mt-1"
           />
           <span>
-            List me in the public BrandOS Creator Index. Anyone can see my card (and, on Pro, my
+            List me in the public BrandOS Creator Index. Anyone can see my entry (and, on Pro, my
             score history and best posts on my page). I can leave any time.
           </span>
         </label>
@@ -361,12 +379,91 @@ export default function JoinForm({
               className="text-[11px] uppercase tracking-[0.14em] underline-offset-4 hover:underline"
               style={{ fontFamily: MONO, color: C.muted }}
             >
-              {listed ? 'Leave the Index (hide my card)' : 'Hidden · list me again'}
+              {listed ? 'Leave the Index (hide my entry)' : 'Hidden / list me again'}
             </button>
           )}
         </div>
       </form>
     </Shell>
+  );
+}
+
+/**
+ * The Press: the stamp that confirms an entry. Arrives at 112% and settles to
+ * 100% (ease-out, no overshoot) while a thin Klein ring presses outward and
+ * thins away. Reduced motion: the final state, no ring.
+ */
+function Press({ children, reduce }: { children: React.ReactNode; reduce: boolean }) {
+  if (reduce) return <div className="mt-4">{children}</div>;
+  return (
+    <div className="relative mt-4 inline-block">
+      <motion.span
+        aria-hidden
+        className="pointer-events-none absolute inset-[-6px]"
+        style={{ border: `2px solid ${C.blue}` }}
+        initial={{ scale: 1, opacity: 0.5 }}
+        animate={{ scale: 1.08, opacity: 0 }}
+        transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: 0.12 }}
+      />
+      <motion.div
+        style={{ transformOrigin: 'left center' }}
+        initial={{ scale: 1.12 }}
+        animate={{ scale: 1 }}
+        transition={{ duration: 0.42, ease: [0.16, 1, 0.3, 1] }}
+      >
+        {children}
+      </motion.div>
+    </div>
+  );
+}
+
+/**
+ * A record line typed in VCR, ~30ms a character. The line's width is held
+ * (no-break spaces) so nothing shifts while it types.
+ */
+function TypeLine({
+  text,
+  start,
+  reduce,
+  color,
+}: {
+  text: string;
+  start: number;
+  reduce: boolean;
+  color: string;
+}) {
+  const [n, setN] = useState(reduce ? text.length : 0);
+  useEffect(() => {
+    if (reduce) {
+      setN(text.length);
+      return;
+    }
+    setN(0);
+    let i = 0;
+    let tick: number | undefined;
+    const begin = window.setTimeout(() => {
+      tick = window.setInterval(() => {
+        i += 1;
+        setN(i);
+        if (i >= text.length) window.clearInterval(tick);
+      }, 30);
+    }, start);
+    return () => {
+      window.clearTimeout(begin);
+      if (tick) window.clearInterval(tick);
+    };
+  }, [text, start, reduce]);
+  return (
+    <div
+      className="text-[12px] tracking-[0.18em]"
+      style={{ fontFamily: MONO, color, whiteSpace: 'pre' }}
+      aria-label={text}
+    >
+      <span aria-hidden>
+        {text.slice(0, n)}
+        {'\u00a0'.repeat(text.length - n)}
+      </span>
+    </div>
   );
 }
 
