@@ -46,6 +46,91 @@ export const LANDING = {
     },
   },
 
+  /** Chapter 02, before the stepper: what a reading actually does (src/lib/brand-score.ts). */
+  scan: {
+    label: '02 / The scan',
+    headline: 'What happens when you read your brand.',
+    body: 'A reading takes about a minute. This is what BrandOS does in that minute.',
+    logLabel: 'Scan log',
+    log: {
+      start: 'reading',
+      profile: 'profile: bio, followers vs following, lists, verified',
+      posts: '50 recent original posts: no reposts, no replies, no pinned post',
+      measured: 'engagement per view / posts per day / best hour',
+      formats: 'formats: threads, media, questions, length',
+      voice: 'voice: tone breakdown',
+      phases: 'four phases scored',
+      classified: 'classified',
+      back: 'strengths / gaps / next moves',
+    },
+    phasesLabel: 'The four phases',
+    phasesHint: 'Weighted into one score out of 100.',
+    phases: [
+      {
+        name: 'Define',
+        weight: 30,
+        question: 'What are you known for?',
+        details: [
+          'Your content pillars: the topics you return to.',
+          'A one-line identity signature, read from your posts alone.',
+          'How focused your topics are.',
+          'Who your posts naturally speak to.',
+        ],
+      },
+      {
+        name: 'Check',
+        weight: 25,
+        question: 'Does your voice hold?',
+        details: [
+          'Whether your voice drifts from post to post.',
+          'On topic, or scattered across unrelated subjects.',
+          'Contradictory messages or a split identity.',
+          'Whether people would recognize your post without the handle.',
+        ],
+      },
+      {
+        name: 'Generate',
+        weight: 25,
+        question: 'Does your content perform?',
+        details: [
+          'Engagement for your size.',
+          'Which formats work: threads, media, questions.',
+          'How strong your hooks are.',
+          'Original posts versus reposting and reacting.',
+          'How often, and how steadily, you post.',
+        ],
+      },
+      {
+        name: 'Scale',
+        weight: 20,
+        question: 'What signals your reputation?',
+        details: [
+          'Followers versus following: do people follow for the content.',
+          'Lists: whether others curate you.',
+          'Growth trajectory.',
+          'Verification.',
+          'Reach potential, from your formats and engagement.',
+        ],
+      },
+    ],
+    backLabel: 'What you get back',
+    back: [
+      'A score out of 100, and the four phase scores behind it.',
+      'Your classification: one of eight classes.',
+      'Your voice: a tone breakdown.',
+      'Strengths and gaps, from your own posts.',
+      'Next moves: what to do first.',
+    ],
+    fairLabel: 'The same method for everyone',
+    fair: [
+      'One method, applied to every account.',
+      'Read from your posts. Not your bio. Not your follower count.',
+      'Re-reads are smoothed: within 3 points in a week, 5 in a month, so the number does not jump around.',
+      'Your classification stays consistent from read to read.',
+      'A reading is kept for 6 hours before it can be re-read.',
+    ],
+  },
+
   how: {
     id: 'how',
     label: '02 / How it works',

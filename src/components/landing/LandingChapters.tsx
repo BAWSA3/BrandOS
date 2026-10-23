@@ -67,7 +67,12 @@ const micro: CSSProperties = {
 };
 
 function useWide(min = 900) {
-  const [wide, setWide] = useState(false);
+  return useWideKnown(min) ?? false;
+}
+
+/** Like useWide, but null until measured (so a layout isn't mounted and then swapped). */
+function useWideKnown(min = 900) {
+  const [wide, setWide] = useState<boolean | null>(null);
   useEffect(() => {
     const mq = window.matchMedia(`(min-width: ${min}px)`);
     const set = () => setWide(mq.matches);
@@ -929,15 +934,282 @@ function ClassIndex() {
   );
 }
 
-function HowChapter({ data }: { data: LandingData }) {
-  const H = LANDING.how;
+// ── 02 · The scan: what a reading actually does ──────────────────────────────
+
+/**
+ * The scan log types itself as the reader scrolls (and un-types going back),
+ * so the machine's steps read in order. Facts only: src/lib/brand-score.ts.
+ */
+function ScanLog({ ex }: { ex: Ex }) {
+  const S = LANDING.scan;
+  const reduce = useReducedMotion();
+  const box = useRef<HTMLDivElement>(null);
+  // The log is short, so it types across most of a screen of scrolling: from its
+  // top entering the bottom of the screen to its top reaching the upper quarter.
+  const { scrollYProgress } = useScroll({ target: box, offset: ['start 0.85', 'start 0.25'] });
+  const lines: { mark: string; text: string }[] = [
+    { mark: '›', text: `${S.log.start} @${ex.handle}` },
+    { mark: '✓', text: S.log.profile },
+    { mark: '✓', text: S.log.posts },
+    { mark: '✓', text: S.log.measured },
+    { mark: '✓', text: S.log.formats },
+    { mark: '✓', text: S.log.voice },
+    { mark: '✓', text: S.log.phases },
+    { mark: '✓', text: `${S.log.classified}: ${classLabel(ex.archetype, '/')}` },
+    { mark: '✓', text: S.log.back },
+  ];
+  const total = lines.reduce((n, l) => n + l.text.length, 0);
+  const at = (p: number) => Math.round(Math.max(0, Math.min(1, p)) * total);
+  const [typed, setTyped] = useState(() => (reduce ? total : at(scrollYProgress.get())));
+  useMotionValueEvent(scrollYProgress, 'change', (p) => {
+    if (!reduce) setTyped(at(p));
+  });
+  const shown = reduce ? total : typed;
+  let left = shown;
+  return (
+    <div ref={box}>
+      <Panel label={S.logLabel} meta={`@${ex.handle}`} padding={24}>
+        <div
+          role="log"
+          aria-label={S.logLabel}
+          style={{
+            fontFamily: SYSTEM_FONTS.plex,
+            fontSize: 14,
+            lineHeight: 1.75,
+            color: INK,
+            display: 'grid',
+            gap: 2,
+          }}
+        >
+          {lines.map((l, i) => {
+            const n = Math.max(0, Math.min(l.text.length, left));
+            left -= l.text.length;
+            const done = n === l.text.length;
+            const typing = n > 0 && !done;
+            return (
+              <div
+                key={i}
+                data-scan-line={n > 0 ? 'on' : 'off'}
+                style={{ display: 'flex', gap: 10, minHeight: '1.75em' }}
+              >
+                <span style={{ color: KLEIN, width: '1ch', flexShrink: 0 }}>
+                  {i === 0 ? (n > 0 ? l.mark : '') : done ? l.mark : ''}
+                </span>
+                <span style={{ minWidth: 0 }}>
+                  {l.text.slice(0, n)}
+                  {typing && (
+                    <span
+                      aria-hidden
+                      style={{
+                        display: 'inline-block',
+                        width: '0.6em',
+                        height: '1em',
+                        background: KLEIN,
+                        verticalAlign: '-0.15em',
+                        marginLeft: 1,
+                      }}
+                    />
+                  )}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+        {/* Screen readers get the whole log at once. */}
+        <p style={srOnly}>{lines.map((l) => l.text).join('. ')}</p>
+      </Panel>
+    </div>
+  );
+}
+
+const srOnly: CSSProperties = {
+  position: 'absolute',
+  width: 1,
+  height: 1,
+  overflow: 'hidden',
+  clip: 'rect(0 0 0 0)',
+  whiteSpace: 'nowrap',
+};
+
+/** The four phases: weight in dots, the question, and the detail on tap. */
+function PhaseList({ on }: { on: boolean }) {
+  const S = LANDING.scan;
   const wide = useWide(900);
   const reduce = useReducedMotion();
+  const [open, setOpen] = useState<number>(-1);
+  const [touched, setTouched] = useState(false);
+  const current = touched ? open : wide ? 0 : -1;
+  return (
+    <Panel label={S.phasesLabel} meta={S.phasesHint} padding={24}>
+      <div style={{ display: 'grid' }}>
+        {S.phases.map((ph, i) => {
+          const isOpen = current === i;
+          return (
+            <div key={ph.name} style={{ borderTop: i ? `1px solid ${RULE}` : 'none' }}>
+              <button
+                type="button"
+                aria-expanded={isOpen}
+                aria-controls={`phase-${i}`}
+                onClick={() => {
+                  setTouched(true);
+                  setOpen(isOpen ? -1 : i);
+                }}
+                className="sys-focus"
+                style={{
+                  all: 'unset',
+                  boxSizing: 'border-box',
+                  width: '100%',
+                  cursor: 'pointer',
+                  display: 'grid',
+                  gridTemplateColumns: 'minmax(0, 1fr) auto',
+                  gap: '8px 16px',
+                  padding: '14px 0',
+                }}
+              >
+                <span style={{ minWidth: 0 }}>
+                  <span
+                    style={{
+                      fontFamily: SYSTEM_FONTS.display,
+                      fontWeight: 700,
+                      fontSize: 20,
+                      letterSpacing: '-0.02em',
+                      color: INK,
+                    }}
+                  >
+                    {ph.name}
+                  </span>
+                  <span style={{ display: 'block', fontSize: 15, color: MUTED, marginTop: 2 }}>
+                    {ph.question}
+                  </span>
+                </span>
+                <span style={{ textAlign: 'right' }}>
+                  <span style={{ ...micro, color: INK }}>{ph.weight}%</span>
+                  <span style={{ display: 'block', ...micro, marginTop: 4 }} aria-hidden>
+                    {isOpen ? '−' : '+'}
+                  </span>
+                </span>
+                <span style={{ gridColumn: '1 / -1' }}>
+                  <DotBar value={ph.weight} max={30} dots={30} on={on} delay={i * 80} />
+                </span>
+              </button>
+              <AnimatePresence initial={false}>
+                {isOpen && (
+                  <motion.ul
+                    id={`phase-${i}`}
+                    key="d"
+                    initial={reduce ? false : { height: 0 }}
+                    animate={{ height: 'auto' }}
+                    exit={reduce ? undefined : { height: 0 }}
+                    transition={{ duration: 0.32, ease: EASE }}
+                    style={{ overflow: 'hidden', margin: 0, padding: 0, listStyle: 'none' }}
+                  >
+                    {ph.details.map((d) => (
+                      <li
+                        key={d}
+                        style={{
+                          display: 'flex',
+                          gap: 10,
+                          fontSize: 15,
+                          lineHeight: 1.5,
+                          color: INK,
+                          padding: '0 0 8px',
+                        }}
+                      >
+                        <span style={{ color: KLEIN, fontFamily: SYSTEM_FONTS.plex }}>·</span>
+                        {d}
+                      </li>
+                    ))}
+                    <li aria-hidden style={{ height: 8 }} />
+                  </motion.ul>
+                )}
+              </AnimatePresence>
+            </div>
+          );
+        })}
+      </div>
+    </Panel>
+  );
+}
+
+function ListBlock({ label, items }: { label: string; items: readonly string[] }) {
+  return (
+    <div style={{ minWidth: 0 }}>
+      <div style={micro}>{label}</div>
+      <ul style={{ margin: '12px 0 0', padding: 0, listStyle: 'none', display: 'grid', gap: 10 }}>
+        {items.map((t, i) => (
+          <li
+            key={t}
+            style={{ display: 'flex', gap: 12, fontSize: 15, lineHeight: 1.5, color: INK }}
+          >
+            <span style={{ fontFamily: SYSTEM_FONTS.plex, color: KLEIN, fontSize: 13 }}>
+              {String(i + 1).padStart(2, '0')}
+            </span>
+            {t}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function ScanSection({ ex }: { ex: Ex }) {
+  const S = LANDING.scan;
   const { ref, arrived } = useArrived<HTMLDivElement>(0.1);
-  const pinned = wide && !reduce;
+  return (
+    <div ref={ref} style={{ padding: 'clamp(64px, 12vh, 140px) clamp(16px, 3.5vw, 40px) 24px' }}>
+      <div style={{ maxWidth: 1180, margin: '0 auto' }}>
+        <ChapterLabel text={S.label} on={arrived} />
+        <FieldText size="title" as="h2" style={{ marginTop: 20, maxWidth: 900 }}>
+          {S.headline}
+        </FieldText>
+        <div style={{ marginTop: 14 }}>
+          <FieldText size="mono">{S.body}</FieldText>
+        </div>
+        <div
+          style={{
+            marginTop: 28,
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 420px), 1fr))',
+            gap: 16,
+            alignItems: 'start',
+          }}
+        >
+          <ScanLog ex={ex} />
+          <PhaseList on={arrived} />
+        </div>
+        <div style={{ marginTop: 16 }}>
+          <Panel padding={24}>
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))',
+                gap: 28,
+              }}
+            >
+              <ListBlock label={S.backLabel} items={S.back} />
+              <ListBlock label={S.fairLabel} items={S.fair} />
+            </div>
+          </Panel>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function HowChapter({ data }: { data: LandingData }) {
+  const H = LANDING.how;
+  // Wait until the width is known: mounting the phone layout first and swapping
+  // it out made its scroll tracker throw (Motion: "Target ref is defined but not hydrated").
+  const wide = useWideKnown(900);
+  const reduce = useReducedMotion();
+  const { ref, arrived } = useArrived<HTMLDivElement>(0.1);
+  const pinned = !!wide && !reduce;
   return (
     <section id={H.id} aria-label={H.label}>
-      {pinned ? (
+      <ScanSection ex={data.example} />
+      {wide === null ? (
+        <div ref={ref} style={{ minHeight: '100vh' }} />
+      ) : pinned ? (
         <PinnedHow ex={data.example} />
       ) : (
         <div
