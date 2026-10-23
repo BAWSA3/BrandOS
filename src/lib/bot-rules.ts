@@ -5,6 +5,12 @@
  */
 
 // ── The rules (one place; tune here) ─────────────────────────────────────────
+/**
+ * The bot check is parked until it's activated: /bots, its OG image and
+ * POST /api/bot-check all 404 unless BOT_CHECK_ENABLED is exactly "true".
+ */
+export const botCheckEnabled = () => process.env.BOT_CHECK_ENABLED === 'true';
+
 export const BOT_RULES = {
   /** Weight of each signal. */
   weights: {

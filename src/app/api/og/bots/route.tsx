@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { ImageResponse } from 'next/og';
-import { cachedBotCheck, cleanBotHandle } from '@/lib/bot-check';
+import { botCheckEnabled, cachedBotCheck, cleanBotHandle } from '@/lib/bot-check';
 import { fonts, wordmark } from '@/lib/og/editorial';
 
 // Link preview for /bots and /bots?h=handle, in the Editorial system (bone,
@@ -17,6 +17,7 @@ const CACHE = {
 };
 
 export async function GET(request: NextRequest) {
+  if (!botCheckEnabled()) return new Response('Not found', { status: 404 });
   const handle = cleanBotHandle(request.nextUrl.searchParams.get('h'));
   const [f, wm, rec] = await Promise.all([
     fonts(),

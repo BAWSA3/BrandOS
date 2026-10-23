@@ -4,6 +4,7 @@ import { botGuard } from '@/lib/botid-guard';
 import { checkRateLimit, getClientIdentifier } from '@/lib/rate-limit';
 import {
   BotCheckError,
+  botCheckEnabled,
   cachedBotCheck,
   cleanBotHandle,
   dailyLimit,
@@ -31,6 +32,7 @@ const inflight = new Map<string, Promise<BotCheckRecord>>();
 const HOUR = 60 * 60 * 1000;
 
 export async function POST(request: NextRequest) {
+  if (!botCheckEnabled()) return NextResponse.json({ error: 'Not found' }, { status: 404 });
   const botBlock = await botGuard(request);
   if (botBlock) return botBlock;
 
