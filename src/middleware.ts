@@ -84,7 +84,7 @@ function route(request: NextRequest): NextResponse {
   // /creators (an app/index folder would sit next to Next's internal name for
   // the root page); /index is the public address. They 404 themselves while
   // the Index is closed (INDEX_ENABLED).
-  const idx = pathname.match(/^\/index(\/join)?\/?$/);
+  const idx = pathname.match(/^\/index(\/join|\/claim)?\/?$/);
   if (idx) {
     const url = request.nextUrl.clone();
     url.pathname = `/creators${idx[1] ?? ''}`;

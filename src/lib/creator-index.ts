@@ -1,6 +1,7 @@
 import { Prisma } from '@prisma/client';
 import prisma from '@/lib/db';
 import { normalizeArchetypeName } from '@/lib/archetype-names';
+import { reservedNumberFor, scannedLabel } from '@/lib/index-reservations';
 import {
   FEATURED_MAX,
   FRESH_READ_DAYS,
@@ -50,7 +51,7 @@ export const isFresh = (scannedAt: Date, now = Date.now()) =>
   now - scannedAt.getTime() < FRESH_READ_DAYS * DAY_MS;
 
 export type JoinResult =
-  | { ok: true; number: number; created: boolean; stale: boolean }
+  | { ok: true; number: number; created: boolean; stale: boolean; reserved?: boolean }
   | { ok: false; status: number; error: string; needsScan?: boolean };
 
 /**
@@ -96,10 +97,33 @@ export async function joinIndex(
   };
   try {
     const existing = await prisma.indexEntry.findUnique({ where: { userId: user.id } });
-    const entry = existing
-      ? await prisma.indexEntry.update({ where: { userId: user.id }, data })
-      : await prisma.indexEntry.create({ data: { ...data, userId: user.id } });
-    return { ok: true, number: entry.number, created: !existing, stale: !isFresh(read.scannedAt) };
+    const stale = !isFresh(read.scannedAt);
+    if (existing) {
+      const entry = await prisma.indexEntry.update({ where: { userId: user.id }, data });
+      return { ok: true, number: entry.number, created: false, stale };
+    }
+    // A reserved number (migration 045) is claimed by joining as that handle:
+    // the handle is always the signed-in account's own X connection.
+    const reservation = await findReservation(handle);
+    const reserved = reservedNumberFor(reservation ?? null, user.id);
+    if (reserved != null) {
+      const entry = await prisma.$transaction(async (tx) => {
+        const created = await tx.indexEntry.create({
+          data: { ...data, userId: user.id, number: reserved },
+        });
+        await tx.indexReservation.update({
+          where: { handle },
+          data: { claimedAt: new Date(), claimedByUserId: user.id },
+        });
+        return created;
+      });
+      return { ok: true, number: entry.number, created: true, stale, reserved: true };
+    }
+    const number = reservation === undefined ? undefined : await nextFreeNumber();
+    const entry = await prisma.indexEntry.create({
+      data: { ...data, userId: user.id, ...(number != null ? { number } : {}) },
+    });
+    return { ok: true, number: entry.number, created: true, stale };
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002')
       return {
@@ -110,6 +134,75 @@ export async function joinIndex(
     console.error('[creator-index] join failed', e);
     return { ok: false, status: 503, error: "The Index isn't open yet. Try again soon." };
   }
+}
+
+/**
+ * The reservation for a handle (migration 045), null if it has none, or
+ * undefined if the reservations table isn't there yet (joins then use the
+ * plain sequence). Never throws.
+ */
+export async function findReservation(
+  handle: string
+): Promise<{ number: number; claimedByUserId: string | null } | null | undefined> {
+  try {
+    return await prisma.indexReservation.findUnique({
+      where: { handle },
+      select: { number: true, claimedByUserId: true },
+    });
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * The next Index number for a join without a reservation: the sequence's next
+ * value, skipping any number reserved for someone else or already used (the
+ * import script moves the sequence above every reservation, so this is a
+ * safety net). Undefined lets the column default decide.
+ */
+async function nextFreeNumber(): Promise<number | undefined> {
+  for (let i = 0; i < 20; i++) {
+    const rows = await prisma.$queryRaw<
+      { n: bigint }[]
+    >`select nextval('"IndexEntry_number_seq"') as n`;
+    const n = Number(rows[0]?.n);
+    if (!Number.isFinite(n)) return undefined;
+    const [held, used] = await Promise.all([
+      prisma.indexReservation.findUnique({ where: { number: n }, select: { handle: true } }),
+      prisma.indexEntry.findUnique({ where: { number: n }, select: { id: true } }),
+    ]);
+    if (!held && !used) return n;
+  }
+  return undefined;
+}
+
+/**
+ * The signed-in account's own reserved number, if it has one and hasn't
+ * joined yet. Only ever looked up for the account's own X handle, so nobody
+ * can learn whether someone else is on the list.
+ */
+export async function ownReservation(user: {
+  id: string;
+  platformConnections: { platform: string; platformUsername: string }[];
+}): Promise<number | null> {
+  const x = user.platformConnections.find((pc) => pc.platform === 'x');
+  const handle = x?.platformUsername.replace(/^@/, '').toLowerCase();
+  if (!handle || !/^[a-z0-9_]{1,15}$/.test(handle)) return null;
+  return reservedNumberFor((await findReservation(handle)) ?? null, user.id);
+}
+
+/** Header numbers: unclaimed reserved numbers and creators ever scanned (aggregates only). */
+let scannedCache: { at: number; label: string | null } | null = null;
+export async function indexAggregates(): Promise<{ reserved: number; scanned: string | null }> {
+  const reserved = await prisma.indexReservation
+    .count({ where: { claimedAt: null } })
+    .catch(() => 0);
+  if (!scannedCache || Date.now() - scannedCache.at > 3_600_000) {
+    const rows = await prisma.$queryRaw<{ n: bigint }[]>`
+      select count(distinct lower(username)) as n from "BrandScans"`.catch(() => []);
+    scannedCache = { at: Date.now(), label: scannedLabel(Number(rows[0]?.n ?? 0)) };
+  }
+  return { reserved, scanned: scannedCache.label };
 }
 
 /** Leave (hide) or come back. Keeps the number. */

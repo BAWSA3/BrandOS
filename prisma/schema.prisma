@@ -166,6 +166,7 @@ model User {
   noteReports          NoteReport[]       @relation("NoteReporter")
   indexEntry           IndexEntry? // Creator Index membership (migration 044)
   indexViews           IndexView[] // Index members' pages this user viewed (migration 044)
+  indexReservations    IndexReservation[] // reserved Index numbers this user claimed (migration 045)
 
   @@index([xUsername])
   @@index([stripeCustomerId])
@@ -1514,4 +1515,20 @@ model IndexView {
 
   @@id([entryId, viewerUserId, day])
   @@index([entryId, viewedAt(sort: Desc)])
+}
+
+// Reserved Creator Index numbers (migration 045): private until the handle's
+// owner signs in with X and joins, which keeps the number.
+model IndexReservation {
+  handle          String    @id // lowercase
+  number          Int       @unique
+  source          String // founder | station | email | account
+  emailSignupId   String?
+  reservedAt      DateTime  @default(now()) @db.Timestamptz
+  releaseAt       DateTime? @db.Timestamptz
+  claimedAt       DateTime? @db.Timestamptz
+  claimedByUserId String?
+  claimedBy       User?     @relation(fields: [claimedByUserId], references: [id], onDelete: SetNull)
+
+  @@index([claimedAt])
 }
