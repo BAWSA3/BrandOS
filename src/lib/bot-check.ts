@@ -125,6 +125,9 @@ export async function runBotCheck(
     fetchUserTweets(profile.id, 20),
   ]);
   requests += followersRes.requests + 1;
+  // A partial read is not a result: never show or cache it.
+  if (followersRes.failed || tweetsRes.error)
+    throw new BotCheckError('X data is unavailable right now. Try again in a little while.', 503);
 
   const recent = tweetsRes.tweets
     .filter((t) => now - Date.parse(t.created_at) < R.engagerDays * 86_400_000)
@@ -142,9 +145,11 @@ export async function runBotCheck(
     recent.map((t) => fetchEngagerAccounts(t.id, profile.username))
   );
   requests += recent.length * 3;
+  if (engagerLists.some((l) => l.failed))
+    throw new BotCheckError('X data is unavailable right now. Try again in a little while.', 503);
   const seen = new Set<string>();
   const engagers: XAccount[] = [];
-  for (const a of engagerLists.flat()) {
+  for (const a of engagerLists.flatMap((l) => l.accounts)) {
     if (seen.has(a.id) || engagers.length >= R.maxEngagers) continue;
     seen.add(a.id);
     engagers.push(a);
