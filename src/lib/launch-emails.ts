@@ -280,14 +280,14 @@ function reservedModel(r: ReservedRecipient) {
     subject: variant === 'b' ? `you're ${no}` : `your creator index number is reserved: ${no}`,
     preheader: 'you signed up early, so we held a number for you. claim it before dec 3.',
     problem:
-      'most good creators never get found by brands. not because they&#39;re bad, because nobody can see them. so i built the <b>BrandOS Creator Index</b>: a book of creators brands can browse, each with a real brand read behind them instead of a follower count.',
+      'most good creators never get found by brands. not because they&#39;re bad, because nobody can see them. so i built the <b>BrandOS Creator Index</b>: the record of creator reputation. a book of creators brands can browse, every entry backed by a real brand read instead of a follower count.',
     readLine: read
-      ? `your read: <b>${read.archetype}, ${read.score}/100</b>. that&#39;s what brands will see next to your number.`
+      ? `your read: <b>${read.archetype}, ${read.score}/100</b>. that&#39;s what brands will see on your entry.`
       : null,
     held: 'you signed up early, so your number is already held. claiming takes a minute: sign in with X, pick your niches, write one line for brands.',
     cta: `Claim ${no} →`,
     release: 'numbers under 1,000 won&#39;t exist again. unclaimed ones are released dec 3.',
-    ps: 'the first 100 to add a card keep Pro at $29/mo for life. featured in the Index, and you see which brands viewed you. nothing&#39;s charged until dec 3.',
+    ps: 'the first 100 to add a card become Founding Members and keep Pro at $29/mo for life. featured in the Index, and you see which brands viewed your entry. nothing&#39;s charged until dec 3.',
   };
 }
 

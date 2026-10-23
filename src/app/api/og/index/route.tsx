@@ -3,6 +3,7 @@ import { ImageResponse } from 'next/og';
 import prisma from '@/lib/db';
 import { indexEnabled } from '@/lib/index-rules';
 import { fonts, wordmark } from '@/lib/og/editorial';
+import { classLabel } from '@/lib/classifications';
 
 // Link preview for /index and a member's share link (/index?m=handle), in the
 // Editorial system (bone, hairline header, huge grotesk figure, Klein): "No.
@@ -133,7 +134,7 @@ export async function GET(request: NextRequest) {
                     padding: '6px 12px',
                   }}
                 >
-                  {entry.archetype.toUpperCase()}
+                  {classLabel(entry.archetype, '/')}
                 </span>
               )}
             </div>

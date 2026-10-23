@@ -64,6 +64,8 @@ async function handlePost(request: NextRequest) {
     number: result.number,
     created: result.created,
     refreshing: result.stale,
+    joinedAt: result.joinedAt.toISOString(),
+    archetype: result.archetype,
   });
 }
 
