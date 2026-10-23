@@ -86,14 +86,18 @@ const smooth = (e0: number, e1: number, x: number) => {
   return t * t * (3 - 2 * t);
 };
 
-/** Dithered clouds: brighter towards the top, density 0.3 (heavy) … 0.6 (sparse). */
-export function clouds(seed = 11, density = 0.42): Luma {
+/**
+ * Dithered clouds: brighter towards the top, density 0.3 (heavy) … 0.6 (sparse).
+ * `offset` shifts the sky in noise units (used for the hero's slow drift).
+ */
+export function clouds(seed = 11, density = 0.42, offset: [number, number] = [0, 0]): Luma {
   const f = makeNoise(seed);
   const warp = makeNoise(seed + 7);
+  const [ox, oy] = offset;
   return (u, v) => {
-    const wx = warp(u * 2, v * 2) * 1.2;
-    const wy = warp(u * 2 + 5, v * 2 + 3) * 1.2;
-    const n = f(u * 3.2 + wx, v * 2.2 + wy);
+    const wx = warp(u * 2 + ox * 0.5, v * 2 + oy * 0.5) * 1.2;
+    const wy = warp(u * 2 + 5 - ox * 0.5, v * 2 + 3 - oy * 0.5) * 1.2;
+    const n = f(u * 3.2 + wx + ox, v * 2.2 + wy + oy);
     return Math.min(
       1,
       smooth(density, density + 0.32, n) * (0.55 + 0.45 * (1 - v)) + 0.06 * (1 - v)

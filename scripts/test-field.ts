@@ -15,6 +15,7 @@ import {
 } from '../src/lib/field/dither';
 import { encodePng, ditherPng } from '../src/lib/og/dither';
 import { allowedAvatarUrl } from '../src/lib/field/avatar';
+import { driftOffset, fieldMetrics, signalCellFor, wipeCovered } from '../src/lib/field/system';
 
 let pass = 0;
 let fail = 0;
@@ -150,6 +151,59 @@ test(
   'rejects non-strings and junk',
   !ok('javascript:alert(1)') && allowedAvatarUrl(null) === null && !ok('not a url')
 );
+
+console.log('\nG. The system (Direction 03)');
+const desk = fieldMetrics(1920, 1080);
+test(
+  'desktop matches the loop video: 7px dots, 7 columns',
+  desk.cell === 7 && desk.cols === 7,
+  JSON.stringify(desk)
+);
+const phone = fieldMetrics(390, 844);
+test(
+  'phone: dots never under 4px, 4 columns',
+  phone.cell === 4 && phone.cols === 4,
+  JSON.stringify(phone)
+);
+test('tablet: 5 columns', fieldMetrics(820, 1180).cols === 5);
+test('rows cover the viewport', desk.rows * desk.grid >= 1080 && phone.rows * phone.grid >= 844);
+test('dots cap at 8px on huge screens', fieldMetrics(5120, 2880).cell === 8);
+test("signal 'none' means no coral cell", signalCellFor('none', desk) === undefined);
+test(
+  "signal 'auto' sits second from the right, second row",
+  signalCellFor('auto', desk)?.join(',') === '5,1'
+);
+test(
+  'signal cells are clamped to the visible grid',
+  signalCellFor([99, -3], phone)?.join(',') === '3,0'
+);
+const d0 = driftOffset(0, 60);
+const d1 = driftOffset(60, 60);
+test(
+  'drift starts at rest and loops with no seam',
+  Math.abs(d0[0]) < 1e-9 &&
+    Math.abs(d0[1]) < 1e-9 &&
+    Math.abs(d1[0] - d0[0]) < 1e-9 &&
+    Math.abs(d1[1] - d0[1]) < 1e-9
+);
+test('drift actually moves mid-loop', Math.hypot(...driftOffset(30, 60)) > 0.5);
+let allOff = true;
+let allOn = true;
+let monotonic = true;
+for (let y = 0; y < 8; y++)
+  for (let x = 0; x < 24; x++) {
+    if (wipeCovered(x, y, 24, 0)) allOff = false;
+    if (!wipeCovered(x, y, 24, 1)) allOn = false;
+    let was = false;
+    for (let p = 0; p <= 1.0001; p += 0.05) {
+      const now = wipeCovered(x, y, 24, p);
+      if (was && !now) monotonic = false;
+      was = now;
+    }
+  }
+test('wipe: nothing covered at 0, everything at 1', allOff && allOn);
+test('wipe: once a cell is covered it stays covered', monotonic);
+test('wipe sweeps left to right', wipeCovered(0, 0, 24, 0.35) && !wipeCovered(23, 0, 24, 0.35));
 
 console.log(`\n${pass} passed, ${fail} failed`);
 if (fail) process.exit(1);
