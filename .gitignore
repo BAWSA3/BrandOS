@@ -40,7 +40,11 @@ yarn-error.log*
 .vercel*
 
 # IDE and tool configs
-.claude/
+.claude/*
+!.claude/agents/
+!.claude/skills/
+.claude/skills/*
+!.claude/skills/market-research/
 .cursor/*
 !.cursor/rules/
 .playwright-mcp/
