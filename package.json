@@ -18,7 +18,8 @@
     "test:billing": "npx tsx scripts/test-billing.ts",
     "test:scores": "npx tsx scripts/test-score-smoothing.ts",
     "test:scan": "npx tsx scripts/test-scan-data.ts",
-    "test:accounts": "npx tsx scripts/test-accounts.ts"
+    "test:accounts": "npx tsx scripts/test-accounts.ts",
+    "test:growth": "npx tsx scripts/test-growth.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.71.2",
