@@ -73,7 +73,6 @@ export interface BrandPassData {
   archetype: string;
   taste: string; // short tagline
   pillars: string[];
-  stationNumber: number;
   score: number;
   issued: string; // e.g. "10.2026"
 }
@@ -180,7 +179,6 @@ export default function BrandPass({
       setPhoto(null);
     }
   };
-  const no = String(data.stationNumber).padStart(4, '0');
   // The card tilts a few degrees toward the cursor, like holding a real pass.
   const fine = useFinePointer();
   const tiltOn = fine && !reduce;
@@ -228,7 +226,6 @@ export default function BrandPass({
             className="right-0 top-[46%] flex-row-reverse"
             line="16px"
           />
-          <Callout id="d" label="Station" className="left-0 bottom-[16%]" line="16px" />
         </>
       )}
 
@@ -257,7 +254,7 @@ export default function BrandPass({
               className="mt-1 text-[9px] uppercase tracking-[0.12em] opacity-70"
               style={{ fontFamily: TYPE }}
             >
-              Card code: BOS-{no}-{data.handle.toUpperCase().slice(0, 8)}
+              Card code: BOS-{data.handle.toUpperCase().slice(0, 12)}
             </div>
           </div>
           {/* stamp */}
@@ -307,14 +304,7 @@ export default function BrandPass({
               className="mt-2 flex items-center justify-center gap-1 py-[3px]"
               style={{ background: k.accent, color: k.onAccent, fontFamily: TYPE }}
             >
-              <span className="text-[10px]">✱ STATION</span>
-              <span
-                className="rounded-full border px-[5px] text-[10px] leading-[14px]"
-                style={{ borderColor: k.onAccent }}
-              >
-                {no}
-              </span>
-              <span className="text-[10px]">✱</span>
+              <span className="text-[10px]">✱ BRANDOS ✱</span>
             </div>
             <div className="mt-2 flex h-[26px] items-end gap-[1px]" aria-hidden>
               {bars(data.handle).map((w, i) => (

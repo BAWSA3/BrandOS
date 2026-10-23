@@ -303,7 +303,6 @@ function Masthead({
     dayLabel(day),
     level ? `LV ${String(level).padStart(2, '0')}` : null,
     streakDays > 1 ? `${streakDays}-day streak` : null,
-    data.pass.stationNumber ? `Station #${String(data.pass.stationNumber).padStart(4, '0')}` : null,
   ].filter(Boolean);
   return (
     <header style={{ color: 'var(--d-head)' }}>
@@ -634,7 +633,6 @@ export default function BentoDashboard({
       <StationTile
         archetype={data.pass.archetype}
         handle={data.handle}
-        stationNumber={data.pass.stationNumber}
         mode={theme === 'dark' ? 'night' : 'day'}
         large={large}
       />

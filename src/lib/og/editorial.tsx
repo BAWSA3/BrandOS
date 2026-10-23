@@ -87,7 +87,6 @@ export type EditorialCard =
       /** Brand Pass on the right (approved P1): X avatar, taste line, station number. */
       avatarUrl?: string | null;
       taste?: string | null;
-      stationNumber?: string | null;
     }
   | { kind: 'invite'; handle: string | null }
   | { kind: 'home' };
@@ -127,7 +126,6 @@ function Pass({
   archetype,
   taste,
   score,
-  stationNumber,
   portrait,
   portraitIsArt,
 }: {
@@ -135,12 +133,11 @@ function Pass({
   archetype: string | null;
   taste: string | null;
   score: number;
-  stationNumber: string | null;
   portrait: string;
   portraitIsArt: boolean;
 }) {
   const s = 430 / 420;
-  const code = `BOS-${stationNumber ?? '0000'}-${handle.toUpperCase().slice(0, 8)}`;
+  const code = `BOS-${handle.toUpperCase().slice(0, 12)}`;
   const rows: [string, string][] = [
     ['BRAND', `@${handle}`],
     ['ARCHETYPE', archetype ?? '—'],
@@ -237,7 +234,7 @@ function Pass({
               marginTop: 8 * s,
             }}
           >
-            {stationNumber ? `* STATION ${stationNumber} *` : '* BRANDOS *'}
+            {'* BRANDOS *'}
           </div>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', marginLeft: 18 * s, flex: 1 }}>
@@ -504,7 +501,6 @@ export async function editorialImage(card: EditorialCard, headers?: Record<strin
             archetype={card.archetype}
             taste={card.taste ?? null}
             score={card.score}
-            stationNumber={card.stationNumber ?? null}
             portrait={avatar ?? artSrc}
             portraitIsArt={!avatar}
           />
