@@ -360,6 +360,7 @@ function InputScene({
           placeholder="@yourhandle"
           className="h-16 flex-1 border-2 bg-transparent px-5 text-[24px] outline-none md:text-[28px]"
           style={{
+            background: 'transparent',
             borderColor: C.ink,
             caretColor: C.blue,
             fontFamily: BIG,
