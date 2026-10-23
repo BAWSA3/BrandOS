@@ -107,7 +107,7 @@ export default function GrowthDashboard({
   field = false,
 }: {
   view: GrowthView;
-  /** Direction 03: the dashboard on the softly blurred field (preview: ?field=1). */
+  /** Direction 03: the dashboard on the field (preview: ?field=1). */
   field?: boolean;
   sample?: boolean;
   ideas?: Idea[];
@@ -762,11 +762,5 @@ export default function GrowthDashboard({
       </div>
     </main>
   );
-  return field ? (
-    <FieldScreen signalCell="none" focus>
-      {page}
-    </FieldScreen>
-  ) : (
-    page
-  );
+  return field ? <FieldScreen signalCell="none">{page}</FieldScreen> : page;
 }
