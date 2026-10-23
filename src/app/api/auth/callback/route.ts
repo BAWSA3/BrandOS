@@ -7,6 +7,7 @@ import { encryptOauthToken, getCurrentKeyId } from '@/lib/crypto';
 import { logSecurityEvent } from '@/lib/audit-log';
 import { captureFunnelEvent } from '@/lib/funnel-events';
 import { isValidTosVersion } from '@/lib/tos';
+import { decodeUtm, UTM_COOKIE } from '@/lib/utm';
 
 const EARLY_ACCESS_MODE = process.env.NEXT_PUBLIC_EARLY_ACCESS_MODE === 'true';
 
@@ -238,6 +239,8 @@ export async function GET(request: NextRequest) {
       await captureFunnelEvent(session.user.id, 'signup_completed', {
         method: provider,
         inner_circle: isInnerCircle,
+        // first-touch UTMs (middleware cookie), e.g. utm_source=x&utm_campaign=index
+        ...decodeUtm(request.cookies.get(UTM_COOKIE)?.value),
       });
     }
 

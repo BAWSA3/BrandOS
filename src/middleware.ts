@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { encodeUtm, UTM_COOKIE, UTM_MAX_AGE, utmFromSearch } from '@/lib/utm';
 
 // ============================================================================
 // ALLOWED PAGES — only these pages are publicly accessible.
@@ -32,6 +33,7 @@ const allowedPages = [
   '/oauth', // "Sign in with BrandOS" consent for the MCP (Claude / ChatGPT)
   '/b', // public brand page; the public address is /@handle (rewritten below)
   '/bots', // "How many bots follow you?" — public bot check
+  '/creators', // the Creator Index; the public address is /index (rewritten below)
 ];
 
 // Design-review pages (sample data) stay on staging and local, never on the
@@ -39,7 +41,25 @@ const allowedPages = [
 const PRODUCTION_HOSTS = new Set(['mybrandos.app', 'www.mybrandos.app']);
 const PREVIEW_ONLY = ['/world-preview'];
 
+// First-touch attribution: the first utm_* a visitor arrives with is kept in
+// a cookie for 30 days and attached to signup_completed (auth callback).
 export function middleware(request: NextRequest) {
+  const response = route(request);
+  if (!request.cookies.has(UTM_COOKIE)) {
+    const utm = utmFromSearch(request.nextUrl.searchParams);
+    if (utm)
+      response.cookies.set(UTM_COOKIE, encodeUtm(utm), {
+        maxAge: UTM_MAX_AGE,
+        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production',
+        httpOnly: true,
+        path: '/',
+      });
+  }
+  return response;
+}
+
+function route(request: NextRequest): NextResponse {
   const { pathname } = request.nextUrl;
 
   // Always allow: static files, Next.js internals, API routes
@@ -57,6 +77,17 @@ export function middleware(request: NextRequest) {
   if (at) {
     const url = request.nextUrl.clone();
     url.pathname = `/b/${at[1]}`;
+    return NextResponse.rewrite(url);
+  }
+
+  // mybrandos.app/index -> the Creator Index (/creators). The pages live in
+  // /creators (an app/index folder would sit next to Next's internal name for
+  // the root page); /index is the public address. They 404 themselves while
+  // the Index is closed (INDEX_ENABLED).
+  const idx = pathname.match(/^\/index(\/join)?\/?$/);
+  if (idx) {
+    const url = request.nextUrl.clone();
+    url.pathname = `/creators${idx[1] ?? ''}`;
     return NextResponse.rewrite(url);
   }
 

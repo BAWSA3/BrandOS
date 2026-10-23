@@ -24,6 +24,9 @@ import prisma from '@/lib/db';
 import { addAccount, brandLimit, COMPETITORS_PER_BRAND } from '@/lib/tracked-accounts';
 import { getGrowthView, type GrowthView } from '@/lib/growth-data';
 import GrowthDashboard from '@/components/growth/GrowthDashboard';
+import type { IndexTileData } from '@/components/growth/IndexTile';
+import { indexOpenFor, standsOut } from '@/lib/index-rules';
+import { getEntry, viewSummary } from '@/lib/creator-index';
 
 // Auth-gated page: render per-request, never statically prerender at build.
 export const dynamic = 'force-dynamic';
@@ -68,8 +71,11 @@ export default async function DashboardPage({
   // until Dec 3). ?design=v2 keeps the old dashboard reachable while the new
   // one beds in; before migration 040 is applied this falls through to it.
   if (sp.design !== 'v2' && hasPro(user)) {
-    const view = await loadGrowth(user, xConnections[0]?.platformUsername, sp.brand);
-    if (view) return <GrowthDashboard view={view} />;
+    const [view, index] = await Promise.all([
+      loadGrowth(user, xConnections[0]?.platformUsername, sp.brand),
+      loadIndexTile(user),
+    ]);
+    if (view) return <GrowthDashboard view={view} index={index} />;
   }
   // Real-data bento once the user has a scan (the legacy tools page only shows
   // for accounts without X connected, which can't scan yet).
@@ -158,6 +164,30 @@ export default async function DashboardPage({
       {legacy && bento && <BackupLoginNudge />}
     </>
   );
+}
+
+/**
+ * The Creator Index tile: null while the Index is closed (admins see it).
+ * Members get their number and this week's views; which teams viewed them
+ * is shown only to members who stand out (a paid card).
+ */
+async function loadIndexTile(
+  user: NonNullable<Awaited<ReturnType<typeof getCurrentUser>>>
+): Promise<IndexTileData | null> {
+  if (!indexOpenFor(user)) return null;
+  const entry = await getEntry(user.id);
+  const pro = standsOut({
+    role: String(user.role),
+    subscriptionTier: String(user.subscriptionTier),
+    subscriptionStatus: String(user.subscriptionStatus),
+  });
+  if (!entry) return { member: null, views: null, standsOut: pro };
+  const v = await viewSummary(entry.id, 7);
+  return {
+    member: { number: entry.number, listed: entry.listed, handle: entry.displayHandle },
+    views: { people: v.people, teams: pro ? v.teams : null },
+    standsOut: pro,
+  };
 }
 
 /**

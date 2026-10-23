@@ -2,6 +2,7 @@ import prisma from '@/lib/db';
 import { publicRead } from '@/lib/mcp/profile-read';
 import { normalizeArchetypeName } from '@/lib/archetype-names';
 import { getCurrentWorkspace } from '@/lib/auth';
+import { refreshEntryFromRead } from '@/lib/creator-index';
 
 /**
  * "Your scan comes with you": a new account's first dashboard visit reuses the
@@ -21,6 +22,7 @@ export async function adoptPublicScan(
     const workspace = await getCurrentWorkspace(user);
     if (!workspace) return false;
     const i = read.intel;
+    const archetype = normalizeArchetypeName(read.archetype || '') || 'unknown';
     await prisma.brandScan.create({
       data: {
         userId: user.id,
@@ -28,7 +30,7 @@ export async function adoptPublicScan(
         platformConnectionId: x.id,
         xUsername: handle.toLowerCase(),
         score: read.score,
-        archetype: normalizeArchetypeName(read.archetype || '') || 'unknown',
+        archetype,
         phaseScores: i.phaseScores ?? {},
         strengths: i.strengths ?? [],
         improvements: i.improvements ?? [],
@@ -40,6 +42,7 @@ export async function adoptPublicScan(
         scannedAt: read.scannedAt ?? new Date(),
       },
     });
+    await refreshEntryFromRead(user.id, read.score, archetype);
     return true;
   } catch (e) {
     console.error('[adopt-scan] failed', e);

@@ -1,5 +1,6 @@
 'use client';
 
+import { useIndexStatus } from '@/hooks/useIndexStatus';
 import { useState, useEffect, useRef, useCallback, MouseEvent as ReactMouseEvent } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence, useMotionValue, useSpring, animate } from 'motion/react';
@@ -593,6 +594,7 @@ export default function XBrandScoreHero({
 }: XBrandScoreHeroProps) {
   // Auth state
   const { user, isLoading: isAuthLoading } = useAuth();
+  const indexStatus = useIndexStatus();
   const searchParams = useSearchParams();
   const pendingInviteCode = searchParams.get('invite') || undefined;
   const [showSavePrompt, setShowSavePrompt] = useState(true);
@@ -1551,6 +1553,16 @@ export default function XBrandScoreHero({
               >
                 Save it to your dashboard · continue with X →
               </a>
+              {/* The Creator Index (shown only while it's open) */}
+              {indexStatus?.open && !indexStatus.member?.listed && (
+                <a
+                  href={indexStatus.signedIn ? '/index/join' : '/signup?next=/index/join'}
+                  className="capture-hide mt-3 block text-center text-[11px] tracking-[0.14em] text-[#0047FF] uppercase hover:underline"
+                  style={{ fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace" }}
+                >
+                  Get listed in the Creator Index · get your number →
+                </a>
+              )}
             </div>
           </motion.div>
         )}
