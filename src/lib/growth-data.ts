@@ -10,6 +10,7 @@ import {
   type PostRow,
   type SnapshotRow,
 } from '@/lib/growth-metrics';
+import { audienceSummary, type AudienceSummary } from '@/lib/audience-metrics';
 
 /**
  * Everything the growth dashboard shows for one brand, as plain JSON (safe to
@@ -48,6 +49,8 @@ export interface GrowthView {
   peakHour: number | null;
   best: { text: string; rate: number; why: string; tweetId: string }[];
   worst: { text: string; rate: number; why: string; tweetId: string } | null;
+  /** Null until the audience tables exist (migration 041) or anything was read. */
+  audience: AudienceSummary | null;
   competitors: {
     id: string;
     handle: string;
@@ -152,6 +155,19 @@ export async function getGrowthView(
   const last = snaps[snaps.length - 1] ?? null;
   const rows: PostRow[] = posts;
   const bw = bestAndWorst(rows);
+  const audienceRows = await prisma.audienceInteraction
+    .findMany({
+      where: { accountId: brand.id, at: { gte: new Date(Date.now() - 30 * 86_400_000) } },
+      select: {
+        tweetId: true,
+        handle: true,
+        displayHandle: true,
+        name: true,
+        followers: true,
+        kind: true,
+      },
+    })
+    .catch(() => null);
   const [score, ...compScores] = await Promise.all([
     latestRead(brand.handle),
     ...competitors.map((c) => latestRead(c.handle)),
@@ -185,6 +201,7 @@ export async function getGrowthView(
       series: followerSeries(snaps, 30),
       trackedDays: snaps.length,
     },
+    audience: audienceRows?.length ? audienceSummary(audienceRows) : null,
     formats: formatPerformance(rows),
     peakHour: peakHour(rows),
     best: bw.best.map((b) => ({

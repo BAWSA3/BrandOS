@@ -632,13 +632,80 @@ export default function GrowthDashboard({
               )}
           </Tile>
 
-          {/* Audience */}
+          {/* Audience: who replies to and reposts this brand (public data, last 30 days) */}
           <Tile className="md:col-span-5">
-            <Label>Audience</Label>
-            <p className="mt-4 text-[14px] leading-[1.5]" style={{ color: T.muted }}>
-              Who replies to and reposts @{brand.handle}, and who keeps coming back. Arriving this
-              week.
-            </p>
+            <Label>Audience · last 30 days</Label>
+            {!view.audience ? (
+              <p className="mt-4 text-[14px] leading-[1.5]" style={{ color: T.muted }}>
+                Who replies to and reposts @{brand.handle}, and who keeps coming back. BrandOS reads
+                it from {brand.handle}&apos;s best recent posts; it appears after the next refresh.
+              </p>
+            ) : (
+              <>
+                <div className="mt-4 grid grid-cols-2 gap-4">
+                  <div>
+                    <div
+                      className="text-[30px] leading-none"
+                      style={{ fontFamily: BIG, fontWeight: 500, letterSpacing: '-0.03em' }}
+                    >
+                      {fmt.int(view.audience.people)}
+                    </div>
+                    <div className="mt-1 text-[12px]" style={{ color: T.muted }}>
+                      people replied, reposted or quoted
+                    </div>
+                  </div>
+                  <div>
+                    <div
+                      className="text-[30px] leading-none"
+                      style={{ fontFamily: BIG, fontWeight: 500, letterSpacing: '-0.03em' }}
+                    >
+                      {view.audience.returningShare === null
+                        ? '—'
+                        : `${Math.round(view.audience.returningShare * 100)}%`}
+                    </div>
+                    <div className="mt-1 text-[12px]" style={{ color: T.muted }}>
+                      came back on more than one post
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-5 text-[13px]" style={{ color: T.muted }}>
+                  Who engages most
+                </div>
+                <ul className="mt-2">
+                  {view.audience.topEngagers.map((e) => (
+                    <li
+                      key={e.handle}
+                      className="flex items-center justify-between gap-3 border-t py-2 text-[13px]"
+                      style={{ borderColor: T.rule }}
+                    >
+                      <a
+                        href={`https://x.com/${e.handle}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="truncate hover:underline"
+                      >
+                        @{e.handle}
+                        {e.followers >= 10_000 && (
+                          <span className="ml-1.5" style={{ color: T.muted }}>
+                            · {fmt.compact(e.followers)}
+                          </span>
+                        )}
+                      </a>
+                      <span className="shrink-0" style={{ fontFamily: MONO, color: T.muted }}>
+                        {e.replies} repl{e.replies === 1 ? 'y' : 'ies'} · {e.reposts} repost
+                        {e.reposts === 1 ? '' : 's'}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+                {view.audience.topAmplifiers[0] && (
+                  <p className="mt-3 text-[13px] leading-[1.5]" style={{ color: T.muted }}>
+                    @{view.audience.topAmplifiers[0].handle} amplifies @{brand.handle} most. A reply
+                    back keeps them coming.
+                  </p>
+                )}
+              </>
+            )}
           </Tile>
 
           <IdeaBoard handle={brand.handle} initial={ideas} />

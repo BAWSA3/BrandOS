@@ -69,6 +69,40 @@ export const SAMPLE_VIEW: GrowthView = {
     rate: 0.4,
     why: '85% below your average · very short, no idea to engage with',
   },
+  audience: {
+    people: 214,
+    returning: 81,
+    returningShare: 0.38,
+    posts: 6,
+    topEngagers: [
+      {
+        handle: 'galileowilson',
+        name: 'Galileo',
+        followers: 33_000,
+        replies: 9,
+        reposts: 2,
+        posts: 4,
+      },
+      { handle: 'kreatorsdao', name: null, followers: 12_400, replies: 7, reposts: 4, posts: 5 },
+      { handle: 'notthreadguy', name: null, followers: 8_100, replies: 5, reposts: 0, posts: 3 },
+      { handle: 'mintlabs', name: null, followers: 2_300, replies: 3, reposts: 5, posts: 4 },
+    ],
+    topAmplifiers: [
+      { handle: 'mintlabs', name: null, followers: 2_300, replies: 3, reposts: 5, posts: 4 },
+      { handle: 'kreatorsdao', name: null, followers: 12_400, replies: 7, reposts: 4, posts: 5 },
+    ],
+    notable: [
+      {
+        handle: 'galileowilson',
+        name: 'Galileo',
+        followers: 33_000,
+        replies: 9,
+        reposts: 2,
+        posts: 4,
+      },
+      { handle: 'kreatorsdao', name: null, followers: 12_400, replies: 7, reposts: 4, posts: 5 },
+    ],
+  },
   competitors: [
     {
       id: 'b1',

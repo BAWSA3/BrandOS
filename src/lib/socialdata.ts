@@ -410,3 +410,84 @@ export async function searchTweets(
 export function isSocialDataConfigured(): boolean {
   return !!process.env.SOCIALDATA_API_KEY;
 }
+
+// ---------------------------------------------------------------------------
+// Post audience (growth dashboard, migration 041)
+// ---------------------------------------------------------------------------
+
+export interface AudiencePerson {
+  handle: string;
+  name: string;
+  followers: number;
+  at: string; // ISO time of the interaction (reposts: when we saw it)
+}
+
+const HANDLE_OK = /^[A-Za-z0-9_]{1,15}$/;
+
+function person(u: Record<string, unknown> | undefined, at: string): AudiencePerson | null {
+  const handle = String(u?.screen_name ?? '');
+  if (!HANDLE_OK.test(handle)) return null;
+  return {
+    handle,
+    name: String(u?.name ?? '').slice(0, 80),
+    followers: Number(u?.followers_count) || 0,
+    at,
+  };
+}
+
+async function listOf(path: string, key: 'tweets' | 'users'): Promise<Record<string, unknown>[]> {
+  try {
+    const res = await socialDataFetch(path);
+    if (!res.ok) {
+      console.error(`[SOCIALDATA ERROR] ${path.split('?')[0]} ${res.status}`);
+      return [];
+    }
+    const data = await res.json();
+    const list = data[key];
+    return Array.isArray(list) ? list : [];
+  } catch (e) {
+    console.error('[SOCIALDATA] audience fetch failed', e);
+    return [];
+  }
+}
+
+/** People who replied to a post (one page, ~10–20), excluding the author's own replies. */
+export async function fetchRepliers(
+  tweetId: string,
+  authorHandle: string
+): Promise<AudiencePerson[]> {
+  const q = new URLSearchParams({ query: `conversation_id:${tweetId}`, type: 'Latest' });
+  const tweets = await listOf(`/twitter/search?${q}`, 'tweets');
+  const self = authorHandle.toLowerCase();
+  return tweets
+    .map((t) =>
+      person(
+        t.user as Record<string, unknown> | undefined,
+        String(t.tweet_created_at || t.created_at || new Date().toISOString())
+      )
+    )
+    .filter((p): p is AudiencePerson => !!p && p.handle.toLowerCase() !== self);
+}
+
+/** People who reposted a post (one page). */
+export async function fetchReposters(tweetId: string): Promise<AudiencePerson[]> {
+  const now = new Date().toISOString();
+  const users = await listOf(
+    `/twitter/tweets/${encodeURIComponent(tweetId)}/retweeted_by`,
+    'users'
+  );
+  return users.map((u) => person(u, now)).filter((p): p is AudiencePerson => !!p);
+}
+
+/** People who quoted a post (one page). */
+export async function fetchQuoters(tweetId: string): Promise<AudiencePerson[]> {
+  const tweets = await listOf(`/twitter/tweets/${encodeURIComponent(tweetId)}/quotes`, 'tweets');
+  return tweets
+    .map((t) =>
+      person(
+        t.user as Record<string, unknown> | undefined,
+        String(t.tweet_created_at || t.created_at || new Date().toISOString())
+      )
+    )
+    .filter((p): p is AudiencePerson => !!p);
+}
