@@ -213,6 +213,23 @@ export async function syncAudience(accountId: string): Promise<number> {
 }
 
 /**
+ * 'brand' when any workspace tracks this handle as a brand / company account
+ * (not as a competitor), else 'creator'. Only changes how a brand read is
+ * worded, never the score. Never throws.
+ */
+export async function trackedKind(rawHandle: string): Promise<'creator' | 'brand'> {
+  const handle = cleanHandle(rawHandle);
+  if (!handle) return 'creator';
+  const row = await prisma.trackedAccount
+    .findFirst({
+      where: { handle: handle.toLowerCase(), kind: 'brand', competitorOfId: null },
+      select: { id: true },
+    })
+    .catch(() => null);
+  return row ? 'brand' : 'creator';
+}
+
+/**
  * Add a brand (or a competitor of one) to a workspace by public handle.
  * Verifies the handle exists on X, enforces plan limits, then runs the first
  * sync so the dashboard has data immediately.

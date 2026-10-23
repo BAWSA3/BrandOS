@@ -12,6 +12,8 @@ import {
   BRAND_SCORE_OUTPUT_SCHEMA,
 } from '@/lib/score-schemas';
 import { fetchScoringTweets } from '@/lib/score-tweets';
+import { scoreSystem, type AccountKind } from '@/lib/score-framing';
+import { trackedKind } from '@/lib/tracked-accounts';
 
 // The homepage brand score (profile + recent posts -> Claude Haiku -> archetype
 // engine), shared by POST /api/x-brand-score and the BrandOS MCP scan_brand tool.
@@ -27,17 +29,8 @@ const SCORE_CACHE_TTL_MINUTES = 360;
 /** Same size the homepage requests, so /api/x-tweets serves both from cache. */
 const SCORING_TWEET_COUNT = 50;
 
-// Claude sometimes declined a metadata-only prompt in prose ("I can't access
-// their content…"), which failed validation and dropped the scan to the
-// heuristic. The system note sets the expectation; the structured-output
-// schema makes a JSON answer the only possible one.
-const SCORE_SYSTEM =
-  'You score creator brands for BrandOS. Always produce a complete score from the data provided, ' +
-  'even when it is limited (for example, profile details without posts): base every judgment on ' +
-  'what you can see and keep insights specific to it. Never ask for more data or decline to score.';
-
 /** Score profiles via Claude Haiku (fast, cheap, reliable) */
-async function scoreWithClaude(prompt: string): Promise<string> {
+async function scoreWithClaude(prompt: string, kind: AccountKind): Promise<string> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) throw new Error('ANTHROPIC_API_KEY not configured');
 
@@ -48,7 +41,7 @@ async function scoreWithClaude(prompt: string): Promise<string> {
     max_tokens: 4096,
     // same feed → same read: the default (1.0) let rescans swing ±5–10 points
     temperature: 0,
-    system: SCORE_SYSTEM,
+    system: scoreSystem(kind),
     messages: [{ role: 'user', content: prompt }],
     betas: ['structured-outputs-2025-11-13'],
     output_format: { type: 'json_schema', schema: BRAND_SCORE_OUTPUT_SCHEMA },
@@ -111,13 +104,19 @@ const respond = (body: Record<string, unknown>, init?: { status: number }): Bran
   body,
 });
 
-/** Score an X handle. `origin` is this app's origin (profile + tweets are fetched through its own routes). */
+/**
+ * Score an X handle. `origin` is this app's origin (profile + tweets are
+ * fetched through its own routes). A handle tracked as a brand / company
+ * account on any growth dashboard gets its read worded for the team running it
+ * (same score); see score-framing.ts.
+ */
 export async function computeBrandScore(
   username: string,
   origin: string,
   forceReevaluate = false
 ): Promise<BrandScoreResult> {
   const cleanUsername = username.replace(/^@/, '').trim();
+  const kind = await trackedKind(cleanUsername);
 
   // Fetch profile
   const profile = await fetchProfile(cleanUsername, origin);
@@ -130,7 +129,7 @@ export async function computeBrandScore(
   console.log('============================');
 
   // === SCORE CACHING: return consistent score within 6h window ===
-  const cacheKey = `score:${cleanUsername}`;
+  const cacheKey = `score:${kind === 'brand' ? 'brand:' : ''}${cleanUsername}`;
   const cachedResult = brandScoreCache.get<{
     brandScore: Record<string, unknown>;
     archetypeDecision: {
@@ -202,7 +201,7 @@ export async function computeBrandScore(
     console.log(
       `[BrandScore] Mode: ${tweetData ? `tweets (${tweetData.tweets.length})` : 'profile only'}`
     );
-    const responseText = await scoreWithClaude(prompt);
+    const responseText = await scoreWithClaude(prompt, kind);
     const parsed = parseBrandScore(responseText);
     if (parsed) {
       brandScore = parsed;
