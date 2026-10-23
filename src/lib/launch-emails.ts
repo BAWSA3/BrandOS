@@ -5,10 +5,7 @@ import { normalizeArchetypeName } from '@/lib/archetype-names';
 import { renderNewsletter, type NewsletterContent } from '@/lib/newsletter-template';
 
 /**
- * Lifecycle email: the instant "your station is reserved" confirmation and the
- * release-day "BrandOS is open, your first 30 days are free" email. No fixed
- * launch date (plan changed 2026-10-06: build the full product, then 30 days
- * free for every signup, then subscriptions). Server-only.
+ * List email campaigns (the BrandOS Studio tease and what follows). Server-only.
  *
  * Every send goes through sendOnce(): it claims an EmailSend row
  * (unique per signup + campaign) BEFORE calling Resend, so each address gets a

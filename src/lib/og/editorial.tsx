@@ -5,13 +5,10 @@ import { join } from 'node:path';
 /**
  * Server-only. The one link-preview design (Direction A, "Editorial", approved
  * 2026-10-13): bone canvas, hairline header with micro labels, a huge grotesk
- * figure, a Klein-blue archetype tag, and the photoreal 3D station on the
- * right. Every shared link (station, scan, card, homepage) renders through
- * here so they read as one system.
- *
- * Art: public/worlds/stations/og/editorial-<slug>.png (transparent, 520px
- * tall) + editorial-lineup.png. One literal path per file so Next's file
- * tracing bundles them all.
+ * figure, a Klein-blue archetype tag, and the Brand Pass on the right (the
+ * person's X photo; a blank pass for handles not scanned yet). Every shared
+ * link (scan, card, /@handle, homepage) renders through here so they read as
+ * one system. Stations were removed 2026-10-22.
  */
 
 const BLUE = '#0047FF';
@@ -19,33 +16,6 @@ const BONE = '#F2EFE8';
 const INK = '#0E0E0E';
 const MUTED = '#6B6B6B';
 export const OG_SIZE = { width: 1200, height: 630 };
-
-const ART: Record<string, () => Promise<Buffer>> = {
-  arc: () =>
-    readFile(join(process.cwd(), 'public', 'worlds', 'stations', 'og', 'editorial-arc.png')),
-  'build-exe': () =>
-    readFile(join(process.cwd(), 'public', 'worlds', 'stations', 'og', 'editorial-build-exe.png')),
-  entropy: () =>
-    readFile(join(process.cwd(), 'public', 'worlds', 'stations', 'og', 'editorial-entropy.png')),
-  foresight: () =>
-    readFile(join(process.cwd(), 'public', 'worlds', 'stations', 'og', 'editorial-foresight.png')),
-  freq: () =>
-    readFile(join(process.cwd(), 'public', 'worlds', 'stations', 'og', 'editorial-freq.png')),
-  null: () =>
-    readFile(join(process.cwd(), 'public', 'worlds', 'stations', 'og', 'editorial-null.png')),
-  relay: () =>
-    readFile(join(process.cwd(), 'public', 'worlds', 'stations', 'og', 'editorial-relay.png')),
-  source: () =>
-    readFile(join(process.cwd(), 'public', 'worlds', 'stations', 'og', 'editorial-source.png')),
-  lineup: () =>
-    readFile(join(process.cwd(), 'public', 'worlds', 'stations', 'og', 'editorial-lineup.png')),
-};
-
-/** 'BUILD.EXE' -> 'build-exe' when there's 3D art for it. */
-export function artSlug(archetype: string | null | undefined): string | null {
-  const s = (archetype ?? '').trim().toLowerCase().replace(/\./g, '-');
-  return s && s !== 'lineup' && ART[s] ? s : null;
-}
 
 /** The hero wordmark (brand tokens: the logo is never typed). */
 const wordmark = () => readFile(join(process.cwd(), 'public', 'brand', 'wordmark-day-480.png'));
@@ -76,15 +46,13 @@ const Micro = ({
 );
 
 export type EditorialCard =
-  | { kind: 'station'; handle: string; number: string; archetype: string | null }
-  | { kind: 'unclaimed'; handle: string }
   | {
       kind: 'score';
       handle: string;
       score: number;
       archetype: string | null;
       phases: { define: number; check: number; generate: number; scale: number } | null;
-      /** Brand Pass on the right (approved P1): X avatar, taste line, station number. */
+      /** Brand Pass on the right (approved P1): X avatar and taste line. */
       avatarUrl?: string | null;
       taste?: string | null;
     }
@@ -92,8 +60,6 @@ export type EditorialCard =
   | { kind: 'home' };
 
 const LABEL: Record<EditorialCard['kind'], string> = {
-  station: 'STATION RESERVED',
-  unclaimed: 'BRAND STATION',
   score: 'BRAND SCORE',
   invite: 'BRAND SCORE',
   home: 'BRAND INTELLIGENCE',
@@ -102,7 +68,7 @@ const LABEL: Record<EditorialCard['kind'], string> = {
 /**
  * The person's X avatar as a data URL, or null. Fetched here (not by the
  * renderer) so it's host-restricted and time-boxed: only X's image CDN, 3s,
- * <= 2MB. Any failure falls back to the 3D station in the pass portrait.
+ * <= 2MB. Any failure leaves a blank portrait.
  */
 async function loadAvatar(url: string | null | undefined): Promise<string | null> {
   if (!url) return null;
@@ -127,14 +93,12 @@ function Pass({
   taste,
   score,
   portrait,
-  portraitIsArt,
 }: {
   handle: string;
   archetype: string | null;
   taste: string | null;
-  score: number;
-  portrait: string;
-  portraitIsArt: boolean;
+  score: number | null;
+  portrait: string | null;
 }) {
   const s = 430 / 420;
   const code = `BOS-${handle.toUpperCase().slice(0, 12)}`;
@@ -142,7 +106,7 @@ function Pass({
     ['BRAND', `@${handle}`],
     ['ARCHETYPE', archetype ?? '—'],
     ...(taste ? ([['TASTE', taste]] as [string, string][]) : []),
-    ['SCORE', `${score} / 100`],
+    ['SCORE', `${score ?? '?'} / 100`],
   ];
   return (
     <div
@@ -210,15 +174,25 @@ function Pass({
               overflow: 'hidden',
             }}
           >
-            {portraitIsArt ? (
-              <img src={portrait} height={196 * s} style={{ objectFit: 'contain' }} />
-            ) : (
+            {portrait ? (
               <img
                 src={portrait}
                 width={168 * s}
                 height={210 * s}
                 style={{ objectFit: 'cover', filter: 'grayscale(100%) contrast(1.2)' }}
               />
+            ) : (
+              <div
+                style={{
+                  display: 'flex',
+                  fontFamily: 'Grotesk',
+                  fontSize: 96 * s,
+                  color: INK,
+                  opacity: 0.25,
+                }}
+              >
+                {(handle[0] ?? '?').toUpperCase()}
+              </div>
             )}
           </div>
           <div
@@ -291,38 +265,22 @@ function Pass({
 const handleSize = (h: string) => (h.length > 15 ? 26 : h.length > 11 ? 30 : 34);
 
 export async function editorialImage(card: EditorialCard, headers?: Record<string, string>) {
-  const slug = card.kind === 'station' || card.kind === 'score' ? artSlug(card.archetype) : null;
-  const [art, f, avatar, wm] = await Promise.all([
-    (slug ? ART[slug] : ART.lineup)(),
+  const [f, avatar, wm] = await Promise.all([
     fonts(),
     card.kind === 'score' ? loadAvatar(card.avatarUrl) : Promise.resolve(null),
     wordmark(),
   ]);
-  const artSrc = `data:image/png;base64,${art.toString('base64')}`;
-  const lineup = !slug;
 
-  const figure =
-    card.kind === 'station'
-      ? `#${card.number}`
-      : card.kind === 'score'
-        ? String(card.score)
-        : card.kind === 'invite'
-          ? '?'
-          : card.kind === 'unclaimed'
-            ? 'Claim'
-            : null;
+  const figure = card.kind === 'score' ? String(card.score) : card.kind === 'invite' ? '?' : null;
   const handle =
     card.kind === 'home' || (card.kind === 'invite' && !card.handle) ? null : card.handle;
-  const tag =
-    (card.kind === 'station' || card.kind === 'score') && card.archetype ? card.archetype : null;
+  const tag = card.kind === 'score' && card.archetype ? card.archetype : null;
   const note =
-    card.kind === 'unclaimed'
-      ? 'NOT CLAIMED YET'
-      : card.kind === 'invite'
-        ? 'NOT SCANNED YET · SCAN FREE'
-        : card.kind === 'home'
-          ? 'SCAN YOUR X FREE · GET YOUR STATION'
-          : null;
+    card.kind === 'invite'
+      ? 'NOT SCANNED YET · SCAN FREE'
+      : card.kind === 'home'
+        ? 'SCAN YOUR X FREE'
+        : null;
   const phases = card.kind === 'score' ? card.phases : null;
 
   return new ImageResponse(
@@ -394,8 +352,7 @@ export async function editorialImage(card: EditorialCard, headers?: Record<strin
             <span
               style={{
                 fontFamily: 'Grotesk',
-                // '#0000' is wider than a score: sized so any station number clears the art
-                fontSize: card.kind === 'unclaimed' ? 210 : card.kind === 'station' ? 200 : 300,
+                fontSize: 300,
                 lineHeight: 0.8,
                 letterSpacing: -14,
                 color: card.kind === 'invite' ? BLUE : INK,
@@ -492,29 +449,26 @@ export async function editorialImage(card: EditorialCard, headers?: Record<strin
         )}
       </div>
 
-      {/* right: score links show the person's Brand Pass (P1); the rest show
-          the photoreal station (or the three-station lineup) */}
-      {card.kind === 'score' ? (
-        <div style={{ position: 'absolute', right: 64, top: 124, display: 'flex' }}>
+      {/* right: the person's Brand Pass (P1); a blank pass for handles not scanned yet */}
+      <div style={{ position: 'absolute', right: 64, top: 124, display: 'flex' }}>
+        {card.kind === 'score' ? (
           <Pass
             handle={card.handle}
             archetype={card.archetype}
             taste={card.taste ?? null}
             score={card.score}
-            portrait={avatar ?? artSrc}
-            portraitIsArt={!avatar}
+            portrait={avatar}
           />
-        </div>
-      ) : lineup ? (
-        <img
-          src={artSrc}
-          width={480}
-          height={540}
-          style={{ position: 'absolute', right: 30, bottom: 0 }}
-        />
-      ) : (
-        <img src={artSrc} height={500} style={{ position: 'absolute', right: 70, bottom: 18 }} />
-      )}
+        ) : (
+          <Pass
+            handle={handle ?? 'you'}
+            archetype={null}
+            taste={null}
+            score={null}
+            portrait={null}
+          />
+        )}
+      </div>
     </div>,
     { ...OG_SIZE, fonts: f, headers }
   );

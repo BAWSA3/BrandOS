@@ -344,7 +344,6 @@ function Preview() {
         data={data}
         isNew={isNew}
         // &swap=0: the previous layout (Brand Pass big on the left)
-        swapPassStation={q.get('swap') !== '0'}
         // ?colorway=bone|night|klein|paper, else the one picked in the preview title's Settings
         colorway={colorway}
         // &design=v2: the 2026-10-15 redesign preview

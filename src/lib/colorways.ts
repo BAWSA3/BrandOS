@@ -83,8 +83,6 @@ export const COLORWAY_TOKENS: Record<Colorway, Record<string, string>> = {
     '--d-accent-edge': '#0047FF',
     '--d-head': '#0A0A0A', // type on the canvas (v2 masthead)
     '--d-head-muted': '#6B6B6B',
-    // the station renders on #F9F8F3: lift it to white so no box shows
-    '--d-station-filter': 'brightness(1.024)',
   },
 };
 

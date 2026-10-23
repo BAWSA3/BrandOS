@@ -14,7 +14,7 @@ export default function FirstScan({ handle }: { handle: string }) {
       className="flex min-h-screen flex-col items-center justify-center gap-6 px-6 text-center"
       style={{ background: '#F2EFE8', color: '#0E0E0E' }}
     >
-      <Wordmark height={30} href="/home" />
+      <Wordmark height={30} href="/dashboard" />
       <div className="text-[11px] uppercase tracking-[0.14em]" style={{ fontFamily: MONO }}>
         Dashboard · @{handle}
       </div>
@@ -30,13 +30,6 @@ export default function FirstScan({ handle }: { handle: string }) {
         style={{ fontFamily: MONO, background: BLUE }}
       >
         Run my first scan
-      </Link>
-      <Link
-        href="/home"
-        className="text-[11px] uppercase tracking-[0.14em] hover:underline"
-        style={{ fontFamily: MONO, color: '#6B6B6B' }}
-      >
-        ◀ Main menu
       </Link>
     </main>
   );

@@ -16,7 +16,6 @@ const allowedPages = [
   '/early-access', // Email signup / early access
   '/privacy', // Legal: privacy policy
   '/terms', // Legal: terms of service
-  '/station', // Public reserved-station pages (flex sign + X link preview)
   '/breakdown', // Email capture for the full scan breakdown
   '/archetype', // Archetype scanner
   '/archetypes', // Archetype showcase

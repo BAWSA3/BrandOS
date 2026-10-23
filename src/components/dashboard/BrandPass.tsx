@@ -21,7 +21,7 @@ const TYPE = "var(--pass-type, 'JetBrains Mono', ui-monospace, monospace)";
 interface PassSkin {
   bg: string;
   ink: string;
-  /** Stamp, station strip, the no-photo portrait. */
+  /** Stamp, BrandOS strip, the no-photo portrait. */
   accent: string;
   /** Type on the accent strip. */
   onAccent: string;
