@@ -246,23 +246,48 @@ export function renderStudioTease(
  * scripts/reserve-index-numbers.ts). One job: claim it, which means signing in
  * with X as that handle and joining. Founding 100 in the P.S.
  */
-export type ReservedRecipient = { handle: string; number: number };
+/**
+ * `read` is their latest public scan (score + archetype) when there is one.
+ * Subject A/B: A = "your creator index number is reserved: No. 0137",
+ * B = "you're No. 0137". The variant rides utm_content.
+ */
+export type ReservedRecipient = {
+  handle: string;
+  number: number;
+  read?: { score: number; archetype: string } | null;
+  variant?: 'a' | 'b';
+};
+
+/** A scan's archetype as a display name, or null when it's missing or junk. */
+export function readArchetype(raw: string | null | undefined): string | null {
+  const name = normalizeArchetypeName((raw ?? '').replace(/[^\x20-\x7E]/g, '').trim());
+  if (!name || /^(null|unknown)$/i.test(name)) return null;
+  return getArchetypeInfo(name)?.name ?? null;
+}
 
 function reservedModel(r: ReservedRecipient) {
   const no = formatNumber(r.number);
-  const url = `${APP_URL}/index/claim?utm_source=email&utm_medium=email&utm_campaign=${CAMPAIGNS.indexReserved}`;
+  const variant = r.variant ?? 'a';
+  const url = `${APP_URL}/index/claim?utm_source=email&utm_medium=email&utm_campaign=${CAMPAIGNS.indexReserved}&utm_content=${variant}`;
+  const read = r.read
+    ? { score: Math.round(r.read.score), archetype: esc(r.read.archetype) }
+    : null;
   return {
     no,
     url,
+    read,
     handle: esc(r.handle),
-    subject: `your creator index number is reserved: ${no}`,
+    subject: variant === 'b' ? `you're ${no}` : `your creator index number is reserved: ${no}`,
     preheader: 'you signed up early, so we held a number for you. claim it before dec 3.',
     problem:
       'most good creators never get found by brands. not because they&#39;re bad, because nobody can see them. so i built the <b>BrandOS Creator Index</b>: a book of creators brands can browse, each with a real brand read behind them instead of a follower count.',
+    readLine: read
+      ? `your read: <b>${read.archetype}, ${read.score}/100</b>. that&#39;s what brands will see next to your number.`
+      : null,
     held: 'you signed up early, so your number is already held. claiming takes a minute: sign in with X, pick your niches, write one line for brands.',
     cta: `Claim ${no} →`,
-    release: 'unclaimed numbers are released on dec 3.',
-    ps: 'everything is free until dec 3. the first 100 people who add a card before then keep Pro at $29/mo for life (nothing is charged until dec 3): featured placement in the Index, your full profile, and which brands viewed you. after that, Pro is $39/mo.',
+    release: 'numbers under 1,000 won&#39;t exist again. unclaimed ones are released dec 3.',
+    ps: 'the first 100 to add a card keep Pro at $29/mo for life. featured in the Index, and you see which brands viewed you. nothing&#39;s charged until dec 3.',
   };
 }
 
@@ -276,6 +301,7 @@ export function indexReservedContent(r: ReservedRecipient): NonNullable<Newslett
       { type: 'text', content: `hey @${m.handle},` },
       { type: 'stat', label: m.no, content: `reserved for @${m.handle}` },
       { type: 'text', content: m.problem },
+      ...(m.readLine ? [{ type: 'text' as const, content: m.readLine }] : []),
       { type: 'text', content: m.held },
       { type: 'cta', content: m.cta, url: m.url },
       { type: 'text', content: `${m.release}<br/><br/>— Bawsa` },
@@ -327,11 +353,11 @@ export function renderIndexReservedEmail(
             <tr><td style="padding:22px 24px 24px 24px;">
               ${label('Creator Index · reserved', '#B8CBFF')}
               <div style="font-family:${SANS};font-size:76px;line-height:1;font-weight:700;letter-spacing:-3px;color:#FFFFFF;">${m.no}</div>
-              <div style="font-family:${MONO};font-size:11px;letter-spacing:1.6px;color:#FFFFFF;margin-top:12px;">@${m.handle}</div>
+              <div style="font-family:${MONO};font-size:11px;letter-spacing:1.6px;color:#FFFFFF;margin-top:12px;">@${m.handle}${m.read ? ` · ${m.read.archetype} · ${m.read.score}/100` : ''}</div>
             </td></tr>
           </table>
         </td></tr>
-        <tr><td>${p(m.problem)}${p(m.held)}</td></tr>
+        <tr><td>${p(m.problem)}${m.readLine ? p(m.readLine) : ''}${p(m.held)}</td></tr>
         <tr><td style="padding:6px 0 30px 0;">
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
             <td align="center" style="background:#0E0E0E;border-radius:6px;">

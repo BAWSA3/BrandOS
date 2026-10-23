@@ -25,6 +25,7 @@ import prisma from '@/lib/db';
 import {
   CAMPAIGNS,
   indexReservedContent,
+  readArchetype,
   renderIndexReservedEmail,
   sendOnce,
 } from '@/lib/launch-emails';
@@ -72,6 +73,21 @@ async function main() {
     return;
   }
 
+  // Their latest public scan, for the "your read" line (676 of ~1,000 have one).
+  const handles = reservations.map((r) => r.handle);
+  const scans = await prisma.$queryRaw<
+    { handle: string; score: number; archetype: string | null }[]
+  >`
+    select distinct on (lower(username)) lower(username) as handle, score, archetype
+    from "BrandScans" where lower(username) = any(${handles})
+    order by lower(username), created_at desc`;
+  const readOf = new Map(
+    scans.flatMap((s) => {
+      const archetype = readArchetype(s.archetype);
+      return archetype && s.score > 0 ? [[s.handle, { score: s.score, archetype }] as const] : [];
+    })
+  );
+
   const audience = reservations
     .filter((r) => !r.claimedAt && emailOf.has(r.emailSignupId!))
     .map((r) => ({
@@ -79,7 +95,11 @@ async function main() {
       email: emailOf.get(r.emailSignupId!)!,
       handle: r.handle,
       number: r.number,
+      read: readOf.get(r.handle) ?? null,
+      // Subject A/B split by number parity: stable across re-runs.
+      variant: (r.number % 2 === 0 ? 'a' : 'b') as 'a' | 'b',
     }));
+  console.log(`with a brand read: ${audience.filter((a) => a.read).length} of ${audience.length}`);
   if (to && audience.length === 0)
     throw new Error(`${to} has no unclaimed reservation (or isn't on the list)`);
 
@@ -92,14 +112,18 @@ async function main() {
 
   if (TEST) {
     if (!to || !SEND) throw new Error('--test needs --send --to <address on the list>');
-    const r = audience[0];
-    const res = await sendOnce(
-      r.id,
-      `${CAMPAIGNS.indexReserved}:test-${Date.now()}`,
-      () => indexReservedContent(r),
-      (_, email) => renderIndexReservedEmail(r, email)
-    );
-    console.log(`test → ${res}`);
+    // Both subject lines, so the inbox shows A and B side by side.
+    for (const variant of ['a', 'b'] as const) {
+      const r = { ...audience[0], variant };
+      const res = await sendOnce(
+        r.id,
+        `${CAMPAIGNS.indexReserved}:test-${variant}-${Date.now()}`,
+        () => indexReservedContent(r),
+        (_, email) => renderIndexReservedEmail(r, email)
+      );
+      console.log(`test ${variant.toUpperCase()} "${indexReservedContent(r).subject}" → ${res}`);
+      await new Promise((ok) => setTimeout(ok, 600));
+    }
     return;
   }
 
@@ -108,7 +132,10 @@ async function main() {
     select: { emailSignupId: true },
   });
   const sentIds = new Set(already.map((r) => r.emailSignupId));
-  const pending = audience.filter((r) => !sentIds.has(r.id)).slice(0, limit ?? undefined);
+  // No. 0000 is Bawsa: tests only, never the list send.
+  const pending = audience
+    .filter((r) => r.number !== 0 && !sentIds.has(r.id))
+    .slice(0, limit ?? undefined);
   console.log(
     `reservations: ${reservations.length} | unclaimed with a subscribed email: ${audience.length} | already sent: ${sentIds.size} | this run: ${pending.length}`
   );
