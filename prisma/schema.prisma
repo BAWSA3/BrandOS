@@ -1355,9 +1355,9 @@ model UserPreference {
 
 // Studio idea board (migration 035): post ideas built on a "Next time" suggestion.
 model Idea {
-  id          String    @id @default(uuid())
+  id          String          @id @default(uuid())
   userId      String
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   postScoreId String?
   postExcerpt String?
   suggestion  String
@@ -1365,11 +1365,16 @@ model Idea {
   hook        String
   format      String
   why         String
-  status      String    @default("saved")
-  createdAt   DateTime  @default(now()) @db.Timestamptz
-  postedAt    DateTime? @db.Timestamptz
+  status      String          @default("saved") // saved (Ideas) | drafting | posted
+  createdAt   DateTime        @default(now()) @db.Timestamptz
+  postedAt    DateTime?       @db.Timestamptz
+  // growth dashboard board per brand (migration 042)
+  accountId   String?
+  account     TrackedAccount? @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  source      String          @default("mine") // mine | brandos
 
   @@index([userId, createdAt(sort: Desc)])
+  @@index([accountId, createdAt(sort: Desc)])
 }
 
 // Growth dashboard (migration 040, pivot 2026-10-22): X accounts a workspace
@@ -1392,6 +1397,7 @@ model TrackedAccount {
   snapshots      AccountSnapshot[]
   posts          AccountPost[]
   audience       AudienceInteraction[]
+  ideas          Idea[]
 
   @@index([workspaceId])
   @@index([lastSyncedAt])

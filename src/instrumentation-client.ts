@@ -45,5 +45,7 @@ initBotId({
     // Growth dashboard: adding/refreshing tracked accounts reads paid X data
     { path: '/api/accounts', method: 'POST' },
     { path: '/api/accounts/*/sync', method: 'POST' },
+    // AI ideas from a brand's analytics (model cost)
+    { path: '/api/ideas/generate', method: 'POST' },
   ],
 });

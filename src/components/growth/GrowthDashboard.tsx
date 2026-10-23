@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { AnimateNumber } from 'motion-plus/react';
 import { useReducedMotion } from 'motion/react';
@@ -136,6 +136,21 @@ export default function GrowthDashboard({
     }
   };
 
+  // stable between renders, so the board only resets when the server sends new ideas
+  const boardIdeas = useMemo<Idea[]>(
+    () =>
+      sample
+        ? ideas
+        : view.ideas.map((i) => ({
+            id: i.id,
+            text: i.text,
+            hook: i.hook || undefined,
+            format: i.format,
+            why: i.why || undefined,
+            col: i.status === 'posted' ? 'posted' : i.status === 'drafting' ? 'drafting' : 'ideas',
+          })),
+    [sample, ideas, view.ideas]
+  );
   const go = (id: string) => router.push(`/dashboard?brand=${encodeURIComponent(id)}`);
   const maxRate = Math.max(0, ...view.formats.map((f) => f.rate ?? 0));
   const comps = view.competitors;
@@ -708,7 +723,12 @@ export default function GrowthDashboard({
             )}
           </Tile>
 
-          <IdeaBoard handle={brand.handle} initial={ideas} />
+          <IdeaBoard
+            key={brand.id}
+            handle={brand.handle}
+            accountId={sample ? undefined : brand.id}
+            initial={boardIdeas}
+          />
         </div>
 
         {sample && (

@@ -1,16 +1,41 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Label, MONO, BIG, T, Tile } from './parts';
 
 /**
  * Idea board: a blank page to think on (not a search box), BrandOS ideas with
  * their reason, and your own notes moving Ideas → Drafting → Posted.
- * Local state for now; persisted + AI ideas from the brand's analytics land
- * with the idea board build (Oct 29).
+ * With an `accountId` every change is saved to that brand's board
+ * (/api/ideas, migration 042) and "New BrandOS ideas" generates ideas from the
+ * brand's analytics; without one (the preview) it's local only.
  */
 
-export type Idea = { id: number; text: string; why?: string; col: 'ideas' | 'drafting' | 'posted' };
+export type Idea = {
+  id: string | number;
+  text: string;
+  why?: string;
+  hook?: string;
+  format?: string;
+  col: 'ideas' | 'drafting' | 'posted';
+};
+const STATUS: Record<Idea['col'], string> = {
+  ideas: 'saved',
+  drafting: 'drafting',
+  posted: 'posted',
+};
+
+async function call(url: string, method: string, body: unknown) {
+  const res = await fetch(url, {
+    method,
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  const json = (await res.json().catch(() => ({}))) as { error?: string; idea?: { id: string } };
+  if (!res.ok) throw new Error(json.error || 'Something went wrong. Try again.');
+  return json;
+}
 
 // prompts for a blank page: things only this person can say
 const SPARKS = [
@@ -20,8 +45,24 @@ const SPARKS = [
   'What everyone in my niche gets wrong',
 ];
 
-export default function IdeaBoard({ handle, initial }: { handle: string; initial: Idea[] }) {
+export default function IdeaBoard({
+  handle,
+  initial,
+  accountId,
+}: {
+  handle: string;
+  initial: Idea[];
+  accountId?: string;
+}) {
+  const router = useRouter();
   const [ideas, setIdeas] = useState<Idea[]>(initial);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  // the server's board after a refresh (e.g. new BrandOS ideas) replaces the local one
+  useEffect(() => {
+    const t = window.setTimeout(() => setIdeas(initial), 0);
+    return () => window.clearTimeout(t);
+  }, [initial]);
   const [draft, setDraft] = useState('');
   const pageRef = useRef<HTMLTextAreaElement>(null);
   // the page grows with the idea instead of scrolling inside a box
@@ -31,18 +72,72 @@ export default function IdeaBoard({ handle, initial }: { handle: string; initial
     el.style.height = 'auto';
     el.style.height = `${Math.max(120, el.scrollHeight)}px`;
   }, [draft]);
-  const pin = () => {
-    if (!draft.trim()) return;
-    setIdeas((all) => [{ id: Date.now(), text: draft.trim(), col: 'ideas' }, ...all]);
-    setDraft('');
+  const save = async (fn: () => Promise<unknown>) => {
+    setError(null);
+    try {
+      await fn();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Something went wrong.');
+    }
   };
-  const move = (id: number, col: Idea['col']) =>
+  const pin = () => {
+    const text = draft.trim();
+    if (!text) return;
+    const temp = Date.now();
+    setIdeas((all) => [{ id: temp, text, col: 'ideas' }, ...all]);
+    setDraft('');
+    if (accountId)
+      save(async () => {
+        const r = await call('/api/ideas', 'POST', { account: accountId, text });
+        if (r.idea)
+          setIdeas((all) => all.map((i) => (i.id === temp ? { ...i, id: r.idea!.id } : i)));
+      });
+  };
+  const move = (id: Idea['id'], col: Idea['col']) => {
     setIdeas((all) => all.map((i) => (i.id === id ? { ...i, col } : i)));
+    if (accountId && typeof id === 'string')
+      save(() => call('/api/ideas', 'PATCH', { id, status: STATUS[col] }));
+  };
+  const remove = (id: Idea['id']) => {
+    setIdeas((all) => all.filter((i) => i.id !== id));
+    if (accountId && typeof id === 'string') save(() => call('/api/ideas', 'DELETE', { id }));
+  };
+  const generate = async () => {
+    if (!accountId) return;
+    setBusy(true);
+    await save(async () => {
+      await call('/api/ideas/generate', 'POST', { account: accountId });
+      router.refresh();
+    });
+    setBusy(false);
+  };
   const brand = { handle };
 
   return (
     <Tile className="md:col-span-12">
-      <Label>Idea board</Label>
+      <div className="flex items-center justify-between gap-3">
+        <Label>Idea board</Label>
+        {accountId && (
+          <button
+            type="button"
+            onClick={generate}
+            disabled={busy}
+            className="text-[10px] uppercase tracking-[0.14em] disabled:opacity-50"
+            style={{ fontFamily: MONO, color: T.blue }}
+          >
+            {busy ? 'Thinking…' : '✦ New BrandOS ideas'}
+          </button>
+        )}
+      </div>
+      {error && (
+        <div
+          className="mt-3 border px-3 py-2 text-[13px]"
+          style={{ borderColor: '#F3C2C2', background: '#FDF1F1', color: '#9B1C1C' }}
+          role="alert"
+        >
+          {error}
+        </div>
+      )}
       {/* The blank page: a place to think, not a search box */}
       <div
         className="mt-4 grid grid-cols-1 gap-6 border p-5 md:grid-cols-[1fr_260px] md:gap-10 md:p-8"
@@ -162,7 +257,21 @@ export default function IdeaBoard({ handle, initial }: { handle: string; initial
                         ✦ BrandOS idea
                       </div>
                     )}
-                    <div className="text-[14px] leading-[1.4]">{i.text}</div>
+                    <div className="whitespace-pre-wrap text-[14px] leading-[1.4]">{i.text}</div>
+                    {i.hook && (
+                      <div className="mt-1.5 text-[13px] leading-[1.45]">
+                        <span style={{ color: T.muted }}>Open with: </span>
+                        {i.hook}
+                      </div>
+                    )}
+                    {i.format && i.format !== 'note' && (
+                      <div
+                        className="mt-1 text-[10px] uppercase tracking-[0.14em]"
+                        style={{ fontFamily: MONO, color: T.muted }}
+                      >
+                        {i.format}
+                      </div>
+                    )}
                     {i.why && (
                       <div className="mt-1.5 text-[12px] leading-[1.45]" style={{ color: T.muted }}>
                         {i.why}
@@ -189,6 +298,15 @@ export default function IdeaBoard({ handle, initial }: { handle: string; initial
                           Mark posted →
                         </button>
                       )}
+                      <button
+                        type="button"
+                        onClick={() => remove(i.id)}
+                        aria-label="Remove idea"
+                        className="ml-auto text-[13px] leading-none"
+                        style={{ color: T.muted }}
+                      >
+                        ×
+                      </button>
                     </div>
                   </div>
                 ))}

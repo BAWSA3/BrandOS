@@ -69,6 +69,7 @@ export const SAMPLE_VIEW: GrowthView = {
     rate: 0.4,
     why: '85% below your average · very short, no idea to engage with',
   },
+  ideas: [],
   audience: {
     people: 214,
     returning: 81,
