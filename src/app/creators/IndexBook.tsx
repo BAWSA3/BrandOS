@@ -124,7 +124,7 @@ export default function IndexBook({
   filters: IndexFilters;
   pinned: IndexCard | null;
   viewer: { signedIn: boolean; member: { number: number; listed: boolean; handle: string } | null };
-  /** Admin preview while the Index is closed. */
+  /** Not public yet: admins and the private-beta allowlist only. */
   preview: boolean;
 }) {
   const reduce = useReducedMotion();
@@ -153,7 +153,7 @@ export default function IndexBook({
           <div className="hidden sm:block">
             <Micro>The Creator Index</Micro>
           </div>
-          <Micro>{preview ? 'Preview · closed' : 'Brands browse free'}</Micro>
+          <Micro>{preview ? 'Private beta' : 'Brands browse free'}</Micro>
         </div>
 
         <header className="grid gap-8 pt-10 md:grid-cols-[1fr_auto] md:items-end md:pt-16">

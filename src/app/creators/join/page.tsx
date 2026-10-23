@@ -1,4 +1,6 @@
 import { notFound, redirect } from 'next/navigation';
+import { after } from 'next/server';
+import { captureFunnelEvent } from '@/lib/funnel-events';
 import { getCurrentUser } from '@/lib/auth';
 import { indexOpenFor } from '@/lib/index-rules';
 import { getEntry, isFresh, latestRead } from '@/lib/creator-index';
@@ -18,6 +20,11 @@ export default async function JoinIndexPage() {
   // a homepage scan of their own handle becomes the account's first read (no new scan)
   if (x) await adoptPublicScan(user, x);
   const [entry, read] = await Promise.all([getEntry(user.id), latestRead(user.id)]);
+  // the funnel: someone not (or no longer) listed opened the join form
+  if (!entry?.listed) {
+    const supabaseId = user.supabaseId;
+    after(() => captureFunnelEvent(supabaseId, 'index_join_started', { rejoin: !!entry }));
+  }
   return (
     <JoinForm
       handle={x?.platformUsername.replace(/^@/, '') ?? null}

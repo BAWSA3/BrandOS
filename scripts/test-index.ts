@@ -9,6 +9,7 @@ import {
   BLURB_MAX,
   cleanBlurb,
   formatNumber,
+  indexAllowlist,
   indexEnabled,
   indexOpenFor,
   MAX_NICHES,
@@ -18,6 +19,7 @@ import {
   standsOut,
   viewDay,
 } from '../src/lib/index-rules';
+import { decodeUtm, encodeUtm, utmFromSearch } from '../src/lib/utm';
 
 let pass = 0;
 let fail = 0;
@@ -47,6 +49,37 @@ async function main() {
   test('"true" opens it for everyone', indexEnabled() && indexOpenFor(null));
   if (saved === undefined) delete process.env.INDEX_ENABLED;
   else process.env.INDEX_ENABLED = saved;
+
+  console.log('A2. Private beta (INDEX_ALLOWLIST)');
+  const savedAllow = process.env.INDEX_ALLOWLIST;
+  const savedFlag = process.env.INDEX_ENABLED;
+  delete process.env.INDEX_ENABLED;
+  process.env.INDEX_ALLOWLIST = ' @JBawsa, sample_founder ,not a handle,  ';
+  const xs = (h: string) => ({
+    role: 'user',
+    platformConnections: [{ platform: 'x', platformUsername: h }],
+  });
+  test(
+    'list is parsed lowercase, @ and junk dropped',
+    [...indexAllowlist()].join(',') === 'jbawsa,sample_founder'
+  );
+  test('allowlisted X handle gets in (any case)', indexOpenFor(xs('JBAWSA')));
+  test('allowlisted via xUsername', indexOpenFor({ role: 'user', xUsername: 'sample_founder' }));
+  test('a handle not on the list stays out', !indexOpenFor(xs('someone_else')));
+  test(
+    'a non-X connection with the same name stays out',
+    !indexOpenFor({
+      role: 'user',
+      platformConnections: [{ platform: 'linkedin', platformUsername: 'jbawsa' }],
+    })
+  );
+  test('signed-out visitors still get 404 in beta', !indexOpenFor(null));
+  process.env.INDEX_ALLOWLIST = '';
+  test('empty list → closed', !indexOpenFor(xs('jbawsa')));
+  if (savedAllow === undefined) delete process.env.INDEX_ALLOWLIST;
+  else process.env.INDEX_ALLOWLIST = savedAllow;
+  if (savedFlag === undefined) delete process.env.INDEX_ENABLED;
+  else process.env.INDEX_ENABLED = savedFlag;
 
   console.log('B. Join validation');
   const ok = parseJoin({ niches: ['DeFi', 'AI'], blurb: '  I break down DeFi launches.  ' });
@@ -115,6 +148,30 @@ async function main() {
   test('odd archetype dropped', bad.archetype === null);
   test('scores clamped to 0–100', bad.min === 0 && bad.max === 100);
   test('bad page → 1', bad.page === 1);
+
+  console.log('E2. First-touch UTMs');
+  const utm = utmFromSearch(
+    new URLSearchParams('utm_source=X&utm_campaign=index-launch&utm_medium=<b>')
+  );
+  test(
+    'utm_source + campaign kept, bad medium dropped',
+    !!utm && utm.utm_source === 'x' && utm.utm_campaign === 'index-launch' && !utm.utm_medium
+  );
+  test(
+    'no utm_source → nothing stored',
+    utmFromSearch(new URLSearchParams('utm_campaign=x')) === null
+  );
+  test(
+    'cookie round-trips',
+    utm !== null && decodeUtm(encodeUtm(utm)).utm_campaign === 'index-launch'
+  );
+  test(
+    'a tampered cookie is re-validated',
+    JSON.stringify(
+      decodeUtm(encodeURIComponent('{"utm_source":"<script>","utm_campaign":"ok"}'))
+    ) === '{"utm_campaign":"ok"}'
+  );
+  test('garbage cookie → {}', JSON.stringify(decodeUtm('%%%')) === '{}');
 
   console.log('F. View dedupe (one per viewer per member per UTC day)');
   test(

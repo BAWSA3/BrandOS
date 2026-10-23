@@ -4,6 +4,7 @@ import { botGuard } from '@/lib/botid-guard';
 import { withRateLimit, withUserRateLimit, rateLimiters } from '@/lib/rate-limit';
 import { indexOpenFor, parseJoin } from '@/lib/index-rules';
 import { joinIndex } from '@/lib/creator-index';
+import { captureFunnelEvent } from '@/lib/funnel-events';
 
 /**
  * POST /api/index/join { niches, blurb, allowStale? } — join (or update) the
@@ -38,6 +39,11 @@ async function handlePost(request: NextRequest) {
       { error: result.error, needsScan: result.needsScan ?? false },
       { status: result.status }
     );
+  await captureFunnelEvent(user.supabaseId, 'index_joined', {
+    number: result.number,
+    created: result.created,
+    niches: parsed.value.niches.join(','),
+  });
   return NextResponse.json({ number: result.number, created: result.created });
 }
 

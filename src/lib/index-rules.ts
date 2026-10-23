@@ -5,14 +5,46 @@
  *
  * docs/GTM-OPERATING-PLAN.md: opt-in account holders only, free to be
  * listed, Pro to stand out. Off until Nov 2: everything 404s unless
- * INDEX_ENABLED is exactly "true" (admins can always preview it).
+ * INDEX_ENABLED is exactly "true" (public). Private beta (Oct 29–Nov 1,
+ * docs/LAUNCH-PLAYBOOK.md): signed-in users whose X handle is in
+ * INDEX_ALLOWLIST (comma-separated) get the full Index; signed-out visitors
+ * still get 404. Admins can always see it.
  */
 
 export const indexEnabled = () => process.env.INDEX_ENABLED === 'true';
 
-/** Can this viewer see the Index (pages, CTAs, join)? */
-export const indexOpenFor = (viewer: { role?: string | null } | null | undefined) =>
-  indexEnabled() || viewer?.role === 'admin';
+/** The private-beta handles from INDEX_ALLOWLIST (lowercase, no @; invalid entries dropped). */
+export function indexAllowlist(raw = process.env.INDEX_ALLOWLIST ?? ''): Set<string> {
+  return new Set(
+    raw
+      .split(',')
+      .map((h) => h.trim().replace(/^@/, '').toLowerCase())
+      .filter((h) => /^[a-z0-9_]{1,15}$/.test(h))
+  );
+}
+
+/** The signed-in viewer, as far as the Index cares (a CurrentUser fits). */
+export interface IndexViewer {
+  role?: string | null;
+  xUsername?: string | null;
+  platformConnections?: { platform: string; platformUsername: string }[];
+}
+
+/** Can this viewer see the Index (pages, CTAs, join)? Public, admin, or an allowlisted X handle. */
+export function indexOpenFor(viewer: IndexViewer | null | undefined): boolean {
+  if (indexEnabled()) return true;
+  if (!viewer) return false;
+  if (viewer.role === 'admin') return true;
+  const allow = indexAllowlist();
+  if (allow.size === 0) return false;
+  const handles = [
+    viewer.xUsername,
+    ...(viewer.platformConnections ?? [])
+      .filter((pc) => pc.platform === 'x')
+      .map((pc) => pc.platformUsername),
+  ];
+  return handles.some((h) => !!h && allow.has(h.replace(/^@/, '').toLowerCase()));
+}
 
 /** The niches a member can pick (up to MAX_NICHES). Keep in sync with the join form. */
 export const NICHES = [

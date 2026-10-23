@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { encodeUtm, UTM_COOKIE, UTM_MAX_AGE, utmFromSearch } from '@/lib/utm';
 
 // ============================================================================
 // ALLOWED PAGES — only these pages are publicly accessible.
@@ -40,7 +41,25 @@ const allowedPages = [
 const PRODUCTION_HOSTS = new Set(['mybrandos.app', 'www.mybrandos.app']);
 const PREVIEW_ONLY = ['/world-preview'];
 
+// First-touch attribution: the first utm_* a visitor arrives with is kept in
+// a cookie for 30 days and attached to signup_completed (auth callback).
 export function middleware(request: NextRequest) {
+  const response = route(request);
+  if (!request.cookies.has(UTM_COOKIE)) {
+    const utm = utmFromSearch(request.nextUrl.searchParams);
+    if (utm)
+      response.cookies.set(UTM_COOKIE, encodeUtm(utm), {
+        maxAge: UTM_MAX_AGE,
+        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production',
+        httpOnly: true,
+        path: '/',
+      });
+  }
+  return response;
+}
+
+function route(request: NextRequest): NextResponse {
   const { pathname } = request.nextUrl;
 
   // Always allow: static files, Next.js internals, API routes
