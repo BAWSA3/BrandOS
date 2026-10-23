@@ -20,6 +20,30 @@ export const LANDING = {
     cantTell: ['What you stand for.', 'Whether you show up.', 'Who actually listens.'],
     quote:
       "i've watched great creators get passed over for bigger, emptier accounts. that's what i built this for.",
+    demo: {
+      label: 'Same follower count',
+      sampleNote: 'Sample accounts',
+      followersLabel: 'Followers',
+      followers: '48.2K',
+      show: 'Show the reading',
+      hide: 'Hide the reading',
+      scoreLabel: 'Brand score',
+      verdict: 'Same size. Not the same brand.',
+      accounts: [
+        {
+          name: 'Account A',
+          score: 81,
+          archetype: 'SOURCE',
+          note: 'Posts most days. The replies come from people who build.',
+        },
+        {
+          name: 'Account B',
+          score: 38,
+          archetype: 'NULL',
+          note: 'Posts in bursts. Most replies are one word long.',
+        },
+      ],
+    },
   },
 
   how: {
@@ -51,6 +75,12 @@ export const LANDING = {
     ],
     exampleLabel: 'An example reading',
     proofLabel: 'Brands read so far',
+    specimen: ['The reading', 'The classification', 'The entry', 'Certification'],
+    stepOf: 'Step',
+    classOf: '1 of 8 classes',
+    checks: ['The account is theirs', 'The audience is real', 'The reading is current'],
+    classesLabel: 'The eight classes',
+    classesHint: 'Select a class to read its definition.',
   },
 
   record: {
@@ -67,6 +97,16 @@ export const LANDING = {
       'Competitors, side by side.',
     ],
     sampleLabel: 'Sample record',
+    prev: 'Previous',
+    next: 'Next',
+    tiles: {
+      score: 'Brand score',
+      growth: 'Followers, 30 days',
+      working: "What's working",
+      moves: 'Next moves',
+      audience: 'Audience, 30 days',
+      competitors: 'Competitors',
+    },
   },
 
   index: {
@@ -78,6 +118,8 @@ export const LANDING = {
     brands: 'Brands browse the Index free.',
     membersLabel: 'Members',
     sampleEntry: 'Sample entry',
+    tickerLabel: 'Sample entries',
+    sealed: { label: 'Founding 100', range: '№ 001–100' },
     seeIndex: 'See the Index',
     opensNote: 'opens 2 Nov',
     founding: {
@@ -114,4 +156,21 @@ export const LANDING = {
   },
 
   cta: 'Read my brand →',
+  ctaBusy: 'Reading…',
+  /** Example handles typed into the empty scan box. */
+  typedHandles: ['@yourhandle', '@jbawsa', '@anyone_on_x'],
+  /** The live record strip under the hero; numbers are filled in from landing-data. */
+  strip: {
+    brandsRead: 'Brands read',
+    seats: 'Founding seats left',
+    example: 'Example',
+    opens: 'The Index opens 2 Nov',
+    members: 'Index members',
+    house: [
+      'The record of creator reputation',
+      'Read from real posts',
+      'Class 01–08',
+      'mybrandos.app',
+    ],
+  },
 } as const;

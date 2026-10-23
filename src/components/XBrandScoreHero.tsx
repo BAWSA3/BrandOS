@@ -38,6 +38,14 @@ import { PixelConfetti } from '@/components/pixel-world';
 import { TerminalProgressBar, TerminalPhaseCard } from '@/components/terminal';
 import { normalizeArchetypeName } from '@/lib/archetype-names';
 import LandingChapters from '@/components/landing/LandingChapters';
+import {
+  CellReader,
+  HeadlineReveal,
+  LiveStrip,
+  ReadButton,
+  TypedPlaceholder,
+} from '@/components/landing/interaction';
+import { LANDING } from '@/lib/landing-copy';
 import type { LandingData } from '@/lib/landing-data';
 
 // Background style options for easy switching
@@ -623,6 +631,23 @@ function TypewriterPlaceholder({ text }: { text: string }) {
   );
 }
 
+/** The live record strip under the hero: house lines between real numbers. */
+function stripItems(d: LandingData): string[] {
+  const S = LANDING.strip;
+  const ex = d.example;
+  const items: string[] = [];
+  if (d.brandsRead) items.push(`${S.brandsRead.toUpperCase()} ${d.brandsRead}`);
+  items.push(`${S.seats.toUpperCase()} ${d.seatsLeft}/100`);
+  items.push(
+    `${S.example.toUpperCase()} @${ex.handle.toUpperCase()} · ${classLabel(ex.archetype)} · ${ex.score}`
+  );
+  items.push(
+    d.index.open ? `${S.members.toUpperCase()} ${d.index.members}` : S.opens.toUpperCase()
+  );
+  for (const h of S.house) items.push(h.toUpperCase());
+  return items.flatMap((t) => [t, '//']);
+}
+
 // ============================================================================
 // Main Component
 // ============================================================================
@@ -657,6 +682,7 @@ export default function XBrandScoreHero({
     return () => io.disconnect();
   }, [field, landing, flowState]);
   const [username, setUsername] = useState(initialUsername || '');
+  const [scanFocus, setScanFocus] = useState(false);
   const [error, setError] = useState('');
   const [profile, setProfile] = useState<XProfileData | null>(previewReveal?.profile ?? null);
   const [brandScore, setBrandScore] = useState<BrandScoreResult | null>(
@@ -1062,20 +1088,31 @@ export default function XBrandScoreHero({
   // Same state, same handleSubmit (BotID, analytics and the scan flow are unchanged).
   const fieldScanForm = (
     <form onSubmit={handleSubmit} style={{ display: 'grid', gap: 12 }} noValidate>
-      <Input
-        value={username}
-        onChange={(e) => setUsername(e.target.value.replace(/^@/, ''))}
-        placeholder="@yourhandle"
-        maxLength={15}
-        aria-label="Your X handle"
-        invalid={!!error}
-        autoCapitalize="none"
-        autoCorrect="off"
-        spellCheck={false}
-      />
-      <Button type="submit" disabled={isValidating} style={{ width: '100%' }}>
-        {isValidating ? 'Reading…' : 'Read my brand →'}
-      </Button>
+      <div style={{ position: 'relative' }}>
+        <Input
+          value={username}
+          onChange={(e) => setUsername(e.target.value.replace(/^@/, ''))}
+          onFocus={() => setScanFocus(true)}
+          onBlur={() => setScanFocus(false)}
+          placeholder={landing ? '' : '@yourhandle'}
+          maxLength={15}
+          aria-label="Your X handle"
+          invalid={!!error}
+          autoCapitalize="none"
+          autoCorrect="off"
+          spellCheck={false}
+        />
+        {landing && (
+          <TypedPlaceholder handles={LANDING.typedHandles} hidden={scanFocus || !!username} />
+        )}
+      </div>
+      {landing ? (
+        <ReadButton busy={isValidating} label={LANDING.cta} busyLabel={LANDING.ctaBusy} />
+      ) : (
+        <Button type="submit" disabled={isValidating} style={{ width: '100%' }}>
+          {isValidating ? 'Reading…' : 'Read my brand →'}
+        </Button>
+      )}
       {error && (
         <p
           role="alert"
@@ -1336,9 +1373,15 @@ export default function XBrandScoreHero({
                   The record of creator reputation
                 </FieldText>
                 <FieldText size="display" style={{ marginTop: 12 }}>
-                  Reputation
-                  <br />
-                  on the record.
+                  {landing ? (
+                    <HeadlineReveal lines={['Reputation', 'on the record.']} />
+                  ) : (
+                    <>
+                      Reputation
+                      <br />
+                      on the record.
+                    </>
+                  )}
                 </FieldText>
 
                 <Panel
@@ -1362,20 +1405,25 @@ export default function XBrandScoreHero({
                 </a>
               </FieldText>
 
+              {landing && <CellReader host={heroRef} />}
               <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}>
-                <MetaStrip
-                  items={[
-                    'DOC — 01',
-                    '//',
-                    'THE INDEX',
-                    'THE RECORD OF CREATOR REPUTATION',
-                    'CLASS 01–08',
-                    'READ FROM REAL POSTS',
-                    'FOUNDING 100',
-                    'MYBRANDOS.APP',
-                    '//',
-                  ]}
-                />
+                {landing ? (
+                  <LiveStrip items={stripItems(landing)} />
+                ) : (
+                  <MetaStrip
+                    items={[
+                      'DOC — 01',
+                      '//',
+                      'THE INDEX',
+                      'THE RECORD OF CREATOR REPUTATION',
+                      'CLASS 01–08',
+                      'READ FROM REAL POSTS',
+                      'FOUNDING 100',
+                      'MYBRANDOS.APP',
+                      '//',
+                    ]}
+                  />
+                )}
               </div>
             </div>
             {landing && <LandingChapters data={landing} scanForm={fieldScanForm} />}

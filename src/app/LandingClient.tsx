@@ -63,8 +63,10 @@ function Landing({
         minHeight: '100vh',
         background: '#F2EFE8',
         position: 'relative',
-        overflowX: 'hidden',
-        overflowY: 'auto',
+        // On the field: clip (not hidden/auto), so the page isn't a scroll container
+        // and the landing scroll's pinned chapter can stick.
+        overflowX: field ? 'clip' : 'hidden',
+        overflowY: field ? 'visible' : 'auto',
       }}
     >
       {/* Film Grain Texture (not on the field: the loop video has none) */}
