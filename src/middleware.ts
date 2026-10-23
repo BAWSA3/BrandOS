@@ -31,6 +31,7 @@ const allowedPages = [
   '/world-preview', // design previews with sample data (not on the production domain, below)
   '/oauth', // "Sign in with BrandOS" consent for the MCP (Claude / ChatGPT)
   '/b', // public brand page; the public address is /@handle (rewritten below)
+  '/bots', // "How many bots follow you?" — public bot check
 ];
 
 // Design-review pages (sample data) stay on staging and local, never on the
