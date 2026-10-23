@@ -11,6 +11,19 @@ import IdeaBoard, { type Idea } from './IdeaBoard';
 import { BIG, Bar, FollowersChart, Label, MONO, T, Tile, fmt } from './parts';
 import IndexTile, { type IndexTileData } from './IndexTile';
 
+const FIELD_EDGE = [
+  [2, 0],
+  [-2, 0],
+  [0, 2],
+  [0, -2],
+  [2, 2],
+  [-2, -2],
+  [2, -2],
+  [-2, 2],
+]
+  .map(([x, y]) => `${x}px ${y}px ${T.blue}`)
+  .join(', ');
+
 /**
  * The growth dashboard (pivot 2026-10-22): growing and scaling a brand, for
  * creators and the SMMs/agencies running several brands. One brand at a time
@@ -296,21 +309,40 @@ export default function GrowthDashboard({
       <div className="mx-auto w-full max-w-[1240px] px-4 md:px-8">
         {/* Masthead */}
         <div className="pb-8 pt-10 md:pt-14" style={field ? { color: '#fff' } : undefined}>
-          <Label color={field ? 'rgba(255,255,255,0.85)' : undefined}>
-            {[
-              kindLabel,
-              view.score?.archetype,
-              growth.followers !== null ? `${fmt.int(growth.followers)} followers` : null,
-              growth.trackedDays
-                ? `tracked ${growth.trackedDays} day${growth.trackedDays === 1 ? '' : 's'}`
-                : null,
-            ]
-              .filter(Boolean)
-              .join(' · ')}
-          </Label>
+          <span
+            style={
+              field
+                ? {
+                    display: 'inline-block',
+                    background: T.blue,
+                    padding: '4px 8px',
+                    marginLeft: -8,
+                  }
+                : undefined
+            }
+          >
+            <Label color={field ? 'rgba(255,255,255,0.9)' : undefined}>
+              {[
+                kindLabel,
+                view.score?.archetype,
+                growth.followers !== null ? `${fmt.int(growth.followers)} followers` : null,
+                growth.trackedDays
+                  ? `tracked ${growth.trackedDays} day${growth.trackedDays === 1 ? '' : 's'}`
+                  : null,
+              ]
+                .filter(Boolean)
+                .join(' · ')}
+            </Label>
+          </span>
           <h1
             className="mt-3 break-all text-[52px] leading-[0.9] md:text-[104px]"
-            style={{ fontFamily: BIG, fontWeight: 500, letterSpacing: '-0.05em' }}
+            style={{
+              fontFamily: BIG,
+              fontWeight: 500,
+              letterSpacing: '-0.05em',
+              // On the field: a crisp Klein edge so the dots never cut into the handle.
+              ...(field ? { textShadow: FIELD_EDGE } : {}),
+            }}
           >
             @{brand.handle}
           </h1>
