@@ -1149,16 +1149,30 @@ function RecordCarousel({ on }: { on: boolean }) {
 
 // ── 04 · The Index: entries in a ticker, Founding behind a pixel curtain ──────
 
-/** Sample entries before the Index opens: one per class, all labelled "Sample entry". */
+/**
+ * Sample entries before the Index opens: one per class, all labelled "Sample entry".
+ * The handle stays a placeholder on purpose: an invented handle could belong to a
+ * real person, and we'd be showing them a fake score. The lines vary by class.
+ */
+const SAMPLE_LINES: [string[], string][] = [
+  [['Research'], 'Explains new protocols the week they ship.'],
+  [['Trading'], 'Calls the narrative before the chart moves.'],
+  [['Founder', 'Infra & Dev'], 'Ships in public, every week.'],
+  [['Community'], 'Three months in. Growing every week.'],
+  [['Culture & Memes'], 'Introduces the right people to each other.'],
+  [['Culture & Memes'], 'Runs the funniest spaces in the timeline.'],
+  [['Memecoins'], 'Builds cults around coins that last.'],
+  [['AI'], 'Ideas first. No face, no persona.'],
+];
 const SAMPLE_ENTRIES: IndexCard[] = CLASSES.map((c, i) => ({
   handle: 'yourhandle',
-  number: [42, 7, 128, 0, 316, 64, 512, 900][i] ?? 42,
+  number: [1042, 1107, 1128, 1203, 1316, 1364, 1512, 1590][i] ?? 1042,
   name: null,
   avatar: null,
   score: [81, 77, 74, 72, 69, 66, 63, 58][i] ?? null,
   archetype: c.code,
-  niches: [],
-  blurb: 'Your one line for brands.',
+  niches: SAMPLE_LINES[i]?.[0] ?? [],
+  blurb: SAMPLE_LINES[i]?.[1] ?? 'Your one line for brands.',
   featured: false,
   joinedAt: '',
 }));
@@ -1166,7 +1180,7 @@ const SAMPLE_ENTRIES: IndexCard[] = CLASSES.map((c, i) => ({
 function IndexRun({ cards, sample }: { cards: IndexCard[]; sample: boolean }) {
   const reduce = useReducedMotion();
   const items = cards.map((c) => (
-    <div key={`${c.handle}-${c.number}`} style={{ width: 260 }}>
+    <div key={`${c.handle}-${c.number}`} style={{ width: 312 }}>
       <IndexEntryCard c={c} sample={sample} />
     </div>
   ));
