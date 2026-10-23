@@ -44,5 +44,8 @@ initBotId({
     { path: '/api/brand-compare', method: 'POST' },
     // Checkout — payment abuse surface
     { path: '/api/stripe/checkout', method: 'POST' },
+    // Growth dashboard: adding/refreshing tracked accounts reads paid X data
+    { path: '/api/accounts', method: 'POST' },
+    { path: '/api/accounts/*/sync', method: 'POST' },
   ],
 });
