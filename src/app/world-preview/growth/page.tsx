@@ -7,6 +7,11 @@ import { SAMPLE_IDEAS, SAMPLE_VIEW } from './sample';
 
 export const metadata: Metadata = { title: 'Dashboard preview · BrandOS' };
 
-export default function GrowthPreviewPage() {
-  return <GrowthDashboard view={SAMPLE_VIEW} ideas={SAMPLE_IDEAS} sample />;
+export default async function GrowthPreviewPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ field?: string }>;
+}) {
+  const { field } = await searchParams;
+  return <GrowthDashboard view={SAMPLE_VIEW} ideas={SAMPLE_IDEAS} sample field={field === '1'} />;
 }

@@ -5,10 +5,24 @@ import { useRouter } from 'next/navigation';
 import { AnimateNumber } from 'motion-plus/react';
 import { useReducedMotion } from 'motion/react';
 import Wordmark from '@/components/Wordmark';
+import { FieldScreen } from '@/components/system';
 import type { GrowthView } from '@/lib/growth-data';
 import IdeaBoard, { type Idea } from './IdeaBoard';
 import { BIG, Bar, FollowersChart, Label, MONO, T, Tile, fmt } from './parts';
 import IndexTile, { type IndexTileData } from './IndexTile';
+
+const FIELD_EDGE = [
+  [2, 0],
+  [-2, 0],
+  [0, 2],
+  [0, -2],
+  [2, 2],
+  [-2, -2],
+  [2, -2],
+  [-2, 2],
+]
+  .map(([x, y]) => `${x}px ${y}px ${T.blue}`)
+  .join(', ');
 
 /**
  * The growth dashboard (pivot 2026-10-22): growing and scaling a brand, for
@@ -103,8 +117,11 @@ export default function GrowthDashboard({
   sample = false,
   ideas = [],
   index = null,
+  field = false,
 }: {
   view: GrowthView;
+  /** Direction 03: the dashboard on the field (preview: ?field=1). */
+  field?: boolean;
   sample?: boolean;
   ideas?: Idea[];
   /** The Creator Index tile (null while the Index is closed). */
@@ -165,8 +182,11 @@ export default function GrowthDashboard({
   const kindLabel = brand.kind === 'brand' ? 'Brand' : 'Creator';
   const fewDays = growth.series.length < 2;
 
-  return (
-    <main className="min-h-screen pb-24" style={{ background: T.canvas, color: T.ink }}>
+  const page = (
+    <main
+      className="min-h-screen pb-24"
+      style={{ background: field ? 'transparent' : T.canvas, color: T.ink }}
+    >
       {/* Top bar: the brand switcher is the first thing an SMM touches */}
       <header
         className="sticky top-0 z-20 flex items-center justify-between gap-3 border-b px-4 py-3 md:px-8"
@@ -288,22 +308,41 @@ export default function GrowthDashboard({
 
       <div className="mx-auto w-full max-w-[1240px] px-4 md:px-8">
         {/* Masthead */}
-        <div className="pb-8 pt-10 md:pt-14">
-          <Label>
-            {[
-              kindLabel,
-              view.score?.archetype,
-              growth.followers !== null ? `${fmt.int(growth.followers)} followers` : null,
-              growth.trackedDays
-                ? `tracked ${growth.trackedDays} day${growth.trackedDays === 1 ? '' : 's'}`
-                : null,
-            ]
-              .filter(Boolean)
-              .join(' · ')}
-          </Label>
+        <div className="pb-8 pt-10 md:pt-14" style={field ? { color: '#fff' } : undefined}>
+          <span
+            style={
+              field
+                ? {
+                    display: 'inline-block',
+                    background: T.blue,
+                    padding: '4px 8px',
+                    marginLeft: -8,
+                  }
+                : undefined
+            }
+          >
+            <Label color={field ? 'rgba(255,255,255,0.9)' : undefined}>
+              {[
+                kindLabel,
+                view.score?.archetype,
+                growth.followers !== null ? `${fmt.int(growth.followers)} followers` : null,
+                growth.trackedDays
+                  ? `tracked ${growth.trackedDays} day${growth.trackedDays === 1 ? '' : 's'}`
+                  : null,
+              ]
+                .filter(Boolean)
+                .join(' · ')}
+            </Label>
+          </span>
           <h1
             className="mt-3 break-all text-[52px] leading-[0.9] md:text-[104px]"
-            style={{ fontFamily: BIG, fontWeight: 500, letterSpacing: '-0.05em' }}
+            style={{
+              fontFamily: BIG,
+              fontWeight: 500,
+              letterSpacing: '-0.05em',
+              // On the field: a crisp Klein edge so the dots never cut into the handle.
+              ...(field ? { textShadow: FIELD_EDGE } : {}),
+            }}
           >
             @{brand.handle}
           </h1>
@@ -311,7 +350,14 @@ export default function GrowthDashboard({
 
         <div className="grid grid-cols-1 gap-5 md:grid-cols-12">
           {/* Score: the one Klein moment */}
-          <section className="p-6 text-white md:col-span-5 md:p-8" style={{ background: T.blue }}>
+          <section
+            className="p-6 text-white md:col-span-5 md:p-8"
+            style={{
+              background: T.blue,
+              // On the field the Klein tile needs an edge, or it melts into the blue.
+              ...(field ? { outline: '1px solid rgba(255,255,255,0.9)', outlineOffset: -1 } : {}),
+            }}
+          >
             <div className="flex items-center justify-between">
               <Label color="rgba(255,255,255,0.75)">Brand score</Label>
               {view.score && (
@@ -748,4 +794,5 @@ export default function GrowthDashboard({
       </div>
     </main>
   );
+  return field ? <FieldScreen signalCell="none">{page}</FieldScreen> : page;
 }
