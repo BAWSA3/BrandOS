@@ -49,6 +49,16 @@ export interface GrowthView {
   peakHour: number | null;
   best: { text: string; rate: number; why: string; tweetId: string }[];
   worst: { text: string; rate: number; why: string; tweetId: string } | null;
+  /** The brand's idea board (migration 042); empty before it's applied. */
+  ideas: {
+    id: string;
+    text: string;
+    hook: string;
+    format: string;
+    why: string;
+    source: string;
+    status: string;
+  }[];
   /** Null until the audience tables exist (migration 041) or anything was read. */
   audience: AudienceSummary | null;
   competitors: {
@@ -168,6 +178,22 @@ export async function getGrowthView(
       },
     })
     .catch(() => null);
+  const ideaRows = await prisma.idea
+    .findMany({
+      where: { accountId: brand.id },
+      orderBy: { createdAt: 'desc' },
+      take: 100,
+      select: {
+        id: true,
+        suggestion: true,
+        hook: true,
+        format: true,
+        why: true,
+        source: true,
+        status: true,
+      },
+    })
+    .catch(() => []);
   const [score, ...compScores] = await Promise.all([
     latestRead(brand.handle),
     ...competitors.map((c) => latestRead(c.handle)),
@@ -201,6 +227,15 @@ export async function getGrowthView(
       series: followerSeries(snaps, 30),
       trackedDays: snaps.length,
     },
+    ideas: ideaRows.map((i) => ({
+      id: i.id,
+      text: i.suggestion,
+      hook: i.hook,
+      format: i.format,
+      why: i.why,
+      source: i.source,
+      status: i.status,
+    })),
     audience: audienceRows?.length ? audienceSummary(audienceRows) : null,
     formats: formatPerformance(rows),
     peakHour: peakHour(rows),
