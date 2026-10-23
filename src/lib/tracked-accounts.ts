@@ -1,5 +1,13 @@
 import prisma from '@/lib/db';
-import { fetchProfile, fetchUserTweets, type SocialDataTweet } from '@/lib/socialdata';
+import {
+  fetchProfile,
+  fetchQuoters,
+  fetchReposters,
+  fetchRepliers,
+  fetchUserTweets,
+  type AudiencePerson,
+  type SocialDataTweet,
+} from '@/lib/socialdata';
 import { analyzeTweets, type TweetAnalysis } from '@/lib/tweet-analysis';
 import { isOpenAccess, isSubscribed, type BillingFields } from '@/lib/billing';
 
@@ -136,6 +144,74 @@ export async function syncAccount(accountId: string): Promise<void> {
   ]);
 }
 
+/** Posts per audience sync, and how long before a post's audience is re-read. */
+const AUDIENCE_POSTS = 6;
+const AUDIENCE_STALE_MS = 3 * 86_400_000;
+
+/**
+ * Read who replied to / reposted / quoted a brand's best recent posts (last 30
+ * days, by engagement) whose audience wasn't read in the last 3 days. Brands
+ * only (not competitors). ~1–3 SocialData requests per post: reposters and
+ * quoters are only fetched when the post has any.
+ */
+export async function syncAudience(accountId: string): Promise<number> {
+  const account = await prisma.trackedAccount.findUnique({ where: { id: accountId } });
+  if (!account || account.competitorOfId) return 0;
+  const since = new Date(Date.now() - 30 * 86_400_000);
+  const stale = new Date(Date.now() - AUDIENCE_STALE_MS);
+  const posts = await prisma.accountPost.findMany({
+    where: {
+      accountId,
+      postedAt: { gte: since },
+      OR: [{ audienceSyncedAt: null }, { audienceSyncedAt: { lt: stale } }],
+    },
+  });
+  const pick = posts
+    .sort(
+      (a, b) =>
+        b.likes + b.replies + b.reposts + b.quotes - (a.likes + a.replies + a.reposts + a.quotes)
+    )
+    .slice(0, AUDIENCE_POSTS);
+
+  let saved = 0;
+  for (const p of pick) {
+    const [replies, reposts, quotes] = await Promise.all([
+      p.replies > 0 ? fetchRepliers(p.tweetId, account.handle) : Promise.resolve([]),
+      p.reposts > 0 ? fetchReposters(p.tweetId) : Promise.resolve([]),
+      p.quotes > 0 ? fetchQuoters(p.tweetId) : Promise.resolve([]),
+    ]);
+    const rows = (
+      [
+        ['reply', replies],
+        ['repost', reposts],
+        ['quote', quotes],
+      ] as [string, AudiencePerson[]][]
+    ).flatMap(([kind, people]) =>
+      people
+        .filter((x) => x.handle.toLowerCase() !== account.handle)
+        .map((x) => ({
+          accountId,
+          tweetId: p.tweetId,
+          handle: x.handle.toLowerCase(),
+          displayHandle: x.handle,
+          name: x.name || null,
+          followers: x.followers,
+          kind,
+          at: isNaN(Date.parse(x.at)) ? new Date() : new Date(x.at),
+        }))
+    );
+    if (rows.length) {
+      const r = await prisma.audienceInteraction.createMany({ data: rows, skipDuplicates: true });
+      saved += r.count;
+    }
+    await prisma.accountPost.update({
+      where: { accountId_tweetId: { accountId, tweetId: p.tweetId } },
+      data: { audienceSyncedAt: new Date() },
+    });
+  }
+  return saved;
+}
+
 /**
  * Add a brand (or a competitor of one) to a workspace by public handle.
  * Verifies the handle exists on X, enforces plan limits, then runs the first
@@ -202,5 +278,10 @@ export async function addAccount(input: {
     },
   });
   await syncAccount(account.id).catch((e) => console.error('[accounts] first sync failed', e));
+  if (!account.competitorOfId) {
+    await syncAudience(account.id).catch((e) =>
+      console.error('[accounts] first audience failed', e)
+    );
+  }
   return account;
 }

@@ -12,6 +12,7 @@ import {
   type PostRow,
   type SnapshotRow,
 } from '../src/lib/growth-metrics';
+import { audienceSummary, type InteractionRow } from '../src/lib/audience-metrics';
 
 let pass = 0;
 let fail = 0;
@@ -107,6 +108,31 @@ test(
   delta([snap(1, 10, null), snap(8, 12)], (s) => s.engagementRate) === null
 );
 test('series oldest → newest', followerSeries([snap(15, 3), snap(1, 1)])[0].followers === 1);
+
+console.log('E. Audience');
+const ir = (handle: string, tweetId: string, kind: string, followers = 100): InteractionRow => ({
+  tweetId,
+  handle,
+  displayHandle: handle,
+  name: null,
+  followers,
+  kind,
+});
+const aud = audienceSummary([
+  ir('amy', 't1', 'reply'),
+  ir('amy', 't2', 'reply'),
+  ir('amy', 't2', 'repost'),
+  ir('bob', 't1', 'reply', 50_000),
+  ir('cat', 't1', 'quote'),
+  ir('cat', 't3', 'repost'),
+]);
+test('3 people', aud.people === 3);
+test('returning = engaged with 2+ posts (amy, cat)', aud.returning === 2);
+test('top engager is amy (3 interactions)', aud.topEngagers[0]?.handle === 'amy');
+test('top amplifier is cat (quote + repost)', aud.topAmplifiers[0]?.handle === 'cat');
+test('notable = 10K+ followers (bob)', aud.notable.length === 1 && aud.notable[0].handle === 'bob');
+test('read from 3 posts', aud.posts === 3);
+test('empty → no share', audienceSummary([]).returningShare === null);
 
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);
