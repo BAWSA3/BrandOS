@@ -35,8 +35,6 @@ import RescanOverlay from '@/components/dashboard/RescanOverlay';
 import ScanReport from '@/components/dashboard/ScanReport';
 import PostRow from '@/components/dashboard/PostRow';
 import PassShare from '@/components/dashboard/PassShare';
-import StationTile from '@/components/dashboard/StationTile';
-import { stationSlug } from '@/components/StationCard';
 import { levelFor, type XPGain } from '@/lib/xp';
 import type { PostBreakdownData } from '@/lib/post-scores';
 import { STUDIO_STEPS, type StageNumber } from '@/lib/studio-stages';
@@ -44,9 +42,6 @@ import { COLORWAY_TOKENS, isDarkColorway, type Colorway } from '@/lib/colorways'
 import DashSettings from '@/components/dashboard/DashSettings';
 import PlanChip, { type PlanBadge } from '@/components/billing/PlanChip';
 import LookupStrip, { type LookupSummary } from '@/components/dashboard/LookupStrip';
-
-/** The workstation (studio brainstorm, #144) is parked for the launch (docs/LAUNCH-PLAN.md). */
-const SHOW_WORKSTATION = process.env.NEXT_PUBLIC_SHOW_WORKSTATION === 'true';
 
 // The dashboard (docs/specs/TITLE-SCREEN-AND-DASHBOARD.md): dark bento grid,
 // Klein blue as the only accent, mono labels + Inter Tight for big numbers.
@@ -278,7 +273,7 @@ function dayLabel(day: string | null): string | null {
 
 /**
  * Dashboard v2 masthead: menu + controls on a quiet row, the @handle huge (the
- * brand is the person), one micro line (day · level · streak · station), then
+ * brand is the person), one micro line (day · level · streak), then
  * the stat ticker between hairlines. Sits on the canvas, not in a tile.
  */
 function Masthead({
@@ -425,8 +420,7 @@ export default function BentoDashboard({
   scoreAlert,
   xp,
   rescan,
-  homeHref = '/world-preview/title',
-  swapPassStation = true,
+  homeHref = '/dashboard',
   design = 'v1',
   handleSize,
   trialEndsAt,
@@ -456,8 +450,6 @@ export default function BentoDashboard({
   rescan?: 'live' | 'demo';
   /** Where the top-left grid goes: the main menu (/home) on the real dashboard. */
   homeHref?: string;
-  /** Layout (picked 2026-10-13): the station takes the big left tile, the Brand Pass the small right one. */
-  swapPassStation?: boolean;
   /** XP total and what was earned since the last visit (the bar fills it in). */
   xp?: {
     total: number;
@@ -583,16 +575,8 @@ export default function BentoDashboard({
   ) : (
     <span>Fit / 100</span>
   );
-  // Station tile sits beside the score; the week tile then drops to row 2 next to posts.
-  const hasStation = !isNew && !!stationSlug(data.pass.archetype);
-  const listSpan =
-    design === 'v2' && !isNew
-      ? 'md:col-span-12 md:p-7'
-      : hasStation && data.week
-        ? 'md:col-span-4'
-        : 'md:col-span-7';
-  // Brand Pass and station tiles, placed by layout (station big when swapPassStation).
-  const swap = swapPassStation && hasStation;
+  // Stations were removed (2026-10-22): the Brand Pass holds the big tile.
+  const listSpan = design === 'v2' && !isNew ? 'md:col-span-12 md:p-7' : 'md:col-span-7';
   const v2 = design === 'v2' && !isNew;
   const pad = v2 ? ' md:p-7' : '';
   const passTile = (cls: string, compact = false, width?: number) => (
@@ -626,16 +610,6 @@ export default function BentoDashboard({
           </div>
         )}
       </div>
-    </Tile>
-  );
-  const stationTile = (cls: string, large = false) => (
-    <Tile className={cls} open>
-      <StationTile
-        archetype={data.pass.archetype}
-        handle={data.handle}
-        mode={theme === 'dark' ? 'night' : 'day'}
-        large={large}
-      />
     </Tile>
   );
   const openScore = (phase: string | null = null) => {
@@ -867,18 +841,12 @@ export default function BentoDashboard({
           )}
 
           <div className={`grid grid-cols-1 md:grid-cols-12 ${v2 ? 'mt-5 gap-5' : 'mt-3 gap-3'}`}>
-            {swap || (v2 && hasStation)
-              ? stationTile('md:col-span-5 md:row-span-2' + pad, true)
-              : passTile('md:col-span-5 md:row-span-2' + pad)}
+            {passTile('md:col-span-5 md:row-span-2' + pad)}
 
             {/* Brand score: hero number, delta, trend, phase meters */}
             <Tile
               className={
-                v2
-                  ? 'md:col-span-7' + pad
-                  : data.week || isNew || hasStation
-                    ? 'md:col-span-4'
-                    : 'md:col-span-7'
+                v2 ? 'md:col-span-7' + pad : data.week || isNew ? 'md:col-span-4' : 'md:col-span-7'
               }
               accent
               open
@@ -896,13 +864,6 @@ export default function BentoDashboard({
                 onPhase={data.scoreDetail?.length ? (key) => openScore(key) : undefined}
               />
             </Tile>
-
-            {/* Your station (or, swapped, the Brand Pass) on the right */}
-            {v2
-              ? hasStation && passTile('md:col-span-4' + pad, false, 340)
-              : swap
-                ? passTile('md:col-span-3', true)
-                : hasStation && stationTile('md:col-span-3')}
 
             {/* This week: goal meter + day strip (hidden until weekly data exists) */}
             {(isNew || data.week) && (
@@ -1070,15 +1031,6 @@ export default function BentoDashboard({
                         onToggle={() => setOpenPost((o) => (o === p.id ? null : p.id))}
                         bar={<FitBar fit={p.fit} top={top} i={i} />}
                         roomy={v2}
-                        studioHref={
-                          !SHOW_WORKSTATION
-                            ? undefined
-                            : rescan === 'live'
-                              ? (k) => `/dashboard/studio?post=${encodeURIComponent(p.id)}&s=${k}`
-                              : rescan === 'demo'
-                                ? (k) => `/world-preview/studio-brainstorm?s=${k}`
-                                : undefined
-                        }
                         figure={
                           <RollNumber value={p.fit} booted={booted} delay={0.25 + i * 0.12} />
                         }

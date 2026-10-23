@@ -143,7 +143,7 @@ export default async function DashboardPage({
           }
           scoreAlert={progress?.scoreAlert ?? null}
           rescan="live"
-          homeHref="/home"
+          homeHref="/dashboard"
         />
       )}
       {bento && !pro && (

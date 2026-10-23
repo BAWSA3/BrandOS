@@ -611,7 +611,7 @@ export function WeekTile({
         )}
       </div>
 
-      {/* legend (state is never colour alone) + what it means for the station */}
+      {/* legend (state is never colour alone) + the weekly goal */}
       <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1" style={{ color: MUTED }}>
         <span className="flex items-center gap-1">
           <span className="block h-[8px] w-[8px]" style={{ background: onColor }} />
