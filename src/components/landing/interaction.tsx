@@ -113,20 +113,20 @@ export function NearViewport({
 // ── The cursor ────────────────────────────────────────────────────────────────
 
 /**
- * The reading head. A small white square with a Klein edge that follows the
- * pointer, snaps (magnetic) onto buttons and links, and becomes an I-beam over
- * text. Desktop with motion only; everyone else keeps the system cursor.
+ * The reading head. A small hollow square that follows the pointer and snaps
+ * (magnetic) onto buttons and links as a frame. White on the field, Klein on
+ * bone. Desktop with motion only; everyone else keeps the system cursor.
  */
 export function LandingCursor() {
   const rich = useRichMotion();
   if (!rich) return null;
   return (
     <>
-      {/* The effects belong to the field. Over a bone surface (panel, card, form)
-          the reading head steps aside and the system cursor comes back. */}
-      <style>{`.lc-cursor-on:not(.lc-calm), .lc-cursor-on:not(.lc-calm) a, .lc-cursor-on:not(.lc-calm) button { cursor: none; }
-        .lc-cursor-on input, .lc-cursor-on textarea { cursor: text; }
-        .lc-calm .lc-cursor { visibility: hidden; }`}</style>
+      {/* One cursor that never disappears (Motion+ hides the system cursor
+          everywhere). It changes ink with the surface: white on the field, Klein
+          on bone. It's a hollow frame in every state, including over buttons. */}
+      <style>{`.lc-cursor, .lc-cursor[data-motion-cursor] { background-color: transparent !important; }
+        .lc-calm .lc-cursor { border-color: ${KLEIN} !important; box-shadow: 0 0 0 1px ${BONE} !important; }`}</style>
       <CursorMount />
       <Cursor
         className="lc-cursor"
