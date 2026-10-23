@@ -123,6 +123,14 @@ function Count({ value, on, suffix }: { value: number; on: boolean; suffix?: str
   return <AnimateNumber suffix={suffix}>{on ? value : 0}</AnimateNumber>;
 }
 
+/** A number that counts with the scroll: `progress` 0..1 maps to 0..value. */
+function ScrollCount({ value, progress }: { value: number; progress: MotionValue<number> }) {
+  const at = (p: number) => Math.round(Math.max(0, Math.min(1, p)) * value);
+  const [n, setN] = useState(() => at(progress.get()));
+  useMotionValueEvent(progress, 'change', (p) => setN(at(p)));
+  return <span style={{ fontVariantNumeric: 'tabular-nums' }}>{n}</span>;
+}
+
 /** A link styled like the system Button. */
 function LinkButton({
   href,
@@ -549,7 +557,11 @@ function Specimen({
               marginTop: 14,
             }}
           >
-            <Count value={ex.score} on={on} />
+            {fill ? (
+              <ScrollCount value={ex.score} progress={fill} />
+            ) : (
+              <Count value={ex.score} on={on} />
+            )}
             <span
               style={{
                 fontSize: '0.24em',
@@ -761,7 +773,12 @@ function PinnedHow({ ex }: { ex: Ex }) {
   const { scrollYProgress } = useScroll({ target: track, offset: ['start start', 'end end'] });
   const [step, setStep] = useState(0);
   // The phase bars fill across the first step's scroll (and empty going back).
-  const fill = useTransform(scrollYProgress, [0.01, 0.23], [0, 1], { clamp: true });
+  // Fill while the section scrolls in: complete the moment it pins (panel fully on screen).
+  const { scrollYProgress: arrive } = useScroll({
+    target: track,
+    offset: ['start end', 'start start'],
+  });
+  const fill = useTransform(arrive, [0.15, 1], [0, 1], { clamp: true });
   useMotionValueEvent(scrollYProgress, 'change', (p) =>
     setStep(Math.min(3, Math.max(0, Math.floor(p * 4 - 0.0001))))
   );
@@ -824,7 +841,7 @@ function StackedHow({ ex, on }: { ex: Ex; on: boolean }) {
   const H = LANDING.how;
   const reduce = useReducedMotion();
   const reading = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({ target: reading, offset: ['start 0.9', 'end 0.55'] });
+  const { scrollYProgress } = useScroll({ target: reading, offset: ['start 0.7', 'end end'] });
   return (
     <div style={{ display: 'grid', gap: 12 }}>
       {H.steps.map((s, i) => (
