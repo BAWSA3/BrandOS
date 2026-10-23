@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getCurrentUser } from '@/lib/auth';
 import { formatNumber, indexEnabled, indexOpenFor, parseFilters } from '@/lib/index-rules';
-import { cardFor, getEntry, listIndex } from '@/lib/creator-index';
+import { cardFor, getEntry, indexAggregates, listIndex, ownReservation } from '@/lib/creator-index';
 import prisma from '@/lib/db';
 import IndexBook from './IndexBook';
 
@@ -52,11 +52,13 @@ export default async function CreatorIndexPage({ searchParams }: Props) {
   const sp = await searchParams;
   const filters = parseFilters(sp);
   const m = member(sp);
-  const [page, entry, pinned] = await Promise.all([
+  const [page, entry, pinned, aggregates] = await Promise.all([
     listIndex(filters),
     user ? getEntry(user.id) : null,
     m ? cardFor(m) : null,
+    indexAggregates(),
   ]);
+  const reserved = user && !entry ? await ownReservation(user) : null;
   return (
     <IndexBook
       page={page}
@@ -69,9 +71,11 @@ export default async function CreatorIndexPage({ searchParams }: Props) {
               member: entry
                 ? { number: entry.number, listed: entry.listed, handle: entry.displayHandle }
                 : null,
+              reserved,
             }
           : { signedIn: false, member: null }
       }
+      aggregates={aggregates}
       preview={!indexEnabled()}
     />
   );

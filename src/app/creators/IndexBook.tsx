@@ -148,11 +148,19 @@ export default function IndexBook({
   pinned,
   viewer,
   preview,
+  aggregates = null,
 }: {
   page: IndexPage;
   filters: IndexFilters;
   pinned: IndexCard | null;
-  viewer: { signedIn: boolean; member: { number: number; listed: boolean; handle: string } | null };
+  viewer: {
+    signedIn: boolean;
+    member: { number: number; listed: boolean; handle: string } | null;
+    /** The viewer's OWN reserved number (never anyone else's), until claimed. */
+    reserved?: number | null;
+  };
+  /** Unclaimed reserved numbers and creators ever scanned (aggregates only). */
+  aggregates?: { reserved: number; scanned: string | null } | null;
   /** Not public yet: admins and the private-beta allowlist only. */
   preview: boolean;
 }) {
@@ -211,6 +219,20 @@ export default function IndexBook({
               <AnimateNumber>{count}</AnimateNumber>
             </div>
             <Micro>{page.members === 1 ? 'Member' : 'Members'}</Micro>
+            {aggregates && (aggregates.reserved > 0 || aggregates.scanned) ? (
+              <div className="mt-2">
+                <Micro>
+                  {[
+                    aggregates.reserved > 0
+                      ? `${aggregates.reserved.toLocaleString('en-US')} numbers reserved`
+                      : null,
+                    aggregates.scanned ? `${aggregates.scanned} creators scanned` : null,
+                  ]
+                    .filter(Boolean)
+                    .join(' · ')}
+                </Micro>
+              </div>
+            ) : null}
             <div className="mt-5">
               {viewer.member ? (
                 <Link
@@ -228,7 +250,9 @@ export default function IndexBook({
                   className="inline-block px-6 py-3.5 text-[12px] uppercase tracking-[0.14em] text-white"
                   style={{ fontFamily: MONO, background: C.blue }}
                 >
-                  Join the Index · get your number →
+                  {viewer.reserved != null
+                    ? `Claim ${formatNumber(viewer.reserved)} →`
+                    : 'Join the Index · get your number →'}
                 </Link>
               )}
             </div>

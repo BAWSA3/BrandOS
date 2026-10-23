@@ -20,6 +20,14 @@ import {
   viewDay,
 } from '../src/lib/index-rules';
 import { decodeUtm, encodeUtm, utmFromSearch } from '../src/lib/utm';
+import { readFileSync } from 'fs';
+import {
+  cleanSignupHandle,
+  planReservations,
+  reservedNumberFor,
+  scannedLabel,
+  type SignupRow,
+} from '../src/lib/index-reservations';
 
 let pass = 0;
 let fail = 0;
@@ -183,6 +191,143 @@ async function main() {
     viewDay(new Date('2026-11-02T23:59:59Z')) !== viewDay(new Date('2026-11-03T00:00:00Z'))
   );
 
+  console.log('\nR. Reserved numbers (migration 045)');
+  {
+    const d = (n: number) => new Date(Date.UTC(2026, 2, 1) + n * 3_600_000);
+    const su = (
+      id: string,
+      h: string | null,
+      n: number,
+      extra: Partial<SignupRow> = {}
+    ): SignupRow => ({
+      id,
+      xUsername: h,
+      createdAt: d(n),
+      source: 'landing',
+      unsubscribed: false,
+      reservationNumber: null,
+      ...extra,
+    });
+    const stations = Array.from({ length: 28 }, (_, i) =>
+      su(`st${i + 1}`, `station${i + 1}`, 100 + i, { reservationNumber: i + 1 })
+    );
+    const signups = [
+      su('e1', '@Early_One', 1),
+      su('e2', 'https://x.com/second_guy?s=21', 2),
+      su('dup', 'early_one', 3), // same handle later: dropped
+      su('t1', 'tester', 4, { source: 'test' }),
+      su('t2', 'clitester', 5, { source: 'cli-test' }),
+      su('u1', 'gone', 6, { unsubscribed: true }),
+      su('n1', 'not a handle!', 7),
+      su('jb', 'jbawsa', 8),
+      ...stations,
+      su('st5b', 'station5', 300), // a later duplicate of a station holder
+    ];
+    const plan = planReservations({
+      signups,
+      accounts: [
+        { handle: 'acct_only', createdAt: d(500) },
+        { handle: 'early_one', createdAt: d(0) },
+      ],
+      existing: [],
+      entries: [],
+    });
+    const num = (h: string) => plan.reservations.find((r) => r.handle === h)?.number;
+    test('founder @jbawsa is No. 0000', num('jbawsa') === 0);
+    test(
+      'the 28 station numbers are kept exactly',
+      stations.every((s, i) => num(`station${i + 1}`) === i + 1)
+    );
+    test('the first email signup gets No. 0029', num('early_one') === 29);
+    test('signup order continues (URL handle cleaned)', num('second_guy') === 30);
+    test('accounts not on the list come after the list', num('acct_only') === 31);
+    test(
+      'an account already on the list is not reserved twice',
+      plan.reservations.filter((r) => r.handle === 'early_one').length === 1
+    );
+    test(
+      'test sources, unsubscribed and unusable handles are skipped',
+      !num('tester') &&
+        !num('clitester') &&
+        !num('gone') &&
+        plan.skipped.excludedSource === 2 &&
+        plan.skipped.unsubscribed === 1 &&
+        plan.skipped.noHandle === 1
+    );
+    test('duplicates keep one reservation', plan.skipped.duplicate === 2);
+    test('no conflicts on a clean list', plan.conflicts.length === 0);
+
+    const again = planReservations({
+      signups: [...signups, su('late', 'late_comer', 900)],
+      accounts: [],
+      existing: plan.reservations.map((r) => ({ handle: r.handle, number: r.number })),
+      entries: [],
+    });
+    test(
+      're-running never renumbers (only the new signup is added)',
+      again.reservations.length === 1
+    );
+    test('a later signup gets the next free number', again.reservations[0]?.number === 32);
+
+    const withMembers = planReservations({
+      signups,
+      accounts: [],
+      existing: [],
+      entries: [
+        { handle: 'jbawsa', number: 1, userId: 'u-jb' }, // joined before the import
+        { handle: 'stranger', number: 5, userId: 'u-st' }, // sits on station No. 5
+      ],
+    });
+    test(
+      'a member who joined first moves to their reserved number',
+      withMembers.claimMoves.some((m) => m.handle === 'jbawsa' && m.from === 1 && m.to === 0)
+    );
+    const bump = withMembers.bumps.find((b) => b.handle === 'stranger');
+    test(
+      "a member on someone else's reserved number is moved above every reservation",
+      !!bump &&
+        bump.from === 5 &&
+        bump.to > Math.max(...withMembers.reservations.map((r) => r.number))
+    );
+    test('the sequence floor covers every number', withMembers.maxNumber >= (bump?.to ?? 0));
+
+    test(
+      'claim keeps the reserved number',
+      reservedNumberFor({ number: 137, claimedByUserId: null }, 'me') === 137
+    );
+    test(
+      're-claim by the same account keeps it',
+      reservedNumberFor({ number: 137, claimedByUserId: 'me' }, 'me') === 137
+    );
+    test(
+      'a number claimed by another account is not handed out again',
+      reservedNumberFor({ number: 137, claimedByUserId: 'other' }, 'me') === null
+    );
+    test('no reservation → next free number', reservedNumberFor(null, 'me') === null);
+    test('No. 0000 formats', formatNumber(0) === 'No. 0000');
+    test('scanned label rounds down', scannedLabel(4732) === '4,700+' && scannedLabel(40) === null);
+    test(
+      'handles from free text',
+      cleanSignupHandle('@Foo') === 'foo' &&
+        cleanSignupHandle('twitter.com/Bar_1') === 'bar_1' &&
+        cleanSignupHandle('two words') === null
+    );
+
+    // no enumeration: the only reservation lookups the app makes are for the
+    // signed-in account's own X handle (ownReservation), never a request value
+    const src = (f: string) => readFileSync(new URL(`../${f}`, import.meta.url), 'utf8');
+    const routes = [
+      'src/app/api/index/status/route.ts',
+      'src/app/creators/page.tsx',
+      'src/app/creators/join/page.tsx',
+    ];
+    test(
+      'reservations are only looked up for the signed-in account',
+      routes.every((f) => !/findReservation\(/.test(src(f))) &&
+        routes.every((f) => !/ownReservation\((?!user\))/.test(src(f)))
+    );
+  }
+
   if (process.env.DIRECT_URL) {
     const { PrismaClient } = await import('@prisma/client');
     const prisma = new PrismaClient({ datasources: { db: { url: process.env.DIRECT_URL } } });
@@ -221,6 +366,48 @@ async function main() {
         test('first view counts', first.count === 1);
         test('second view the same day is ignored', again.count === 0);
         test('a view the next day counts', nextDay.count === 1);
+
+        const has045 = await tx.$queryRaw<
+          { ok: boolean }[]
+        >`select to_regclass('public."IndexReservation"') is not null as ok`;
+        if (!has045[0]?.ok)
+          console.log('  · reservation checks skipped: migration 045 not applied here');
+        else {
+          const n = 998_000 + (Date.now() % 900);
+          await tx.indexReservation.create({
+            data: { handle: `${stamp}r`.slice(0, 15), number: n, source: 'email' },
+          });
+          const dupe = await tx.$queryRaw<{ ok: boolean }[]>`
+            select exists(select 1 from "IndexReservation" where "number" = ${n}) as ok`;
+          test('a reserved number is stored', !!dupe[0]?.ok);
+          let blocked = false;
+          await tx.$executeRaw`savepoint dup`;
+          try {
+            await tx.indexReservation.create({
+              data: { handle: `${stamp}s`.slice(0, 15), number: n, source: 'email' },
+            });
+          } catch {
+            blocked = true;
+          }
+          await tx.$executeRaw`rollback to savepoint dup`;
+          test('two reservations can never share a number', blocked);
+          // Once the founder holds No. 0000 (after the import), 0 is taken, so the
+          // existing row is the proof; otherwise move the test entry onto it.
+          const zeroTaken = await tx.$queryRaw<{ ok: boolean }[]>`
+            select exists(select 1 from "IndexEntry" where "number" = 0) as ok`;
+          let zeroOk = !!zeroTaken[0]?.ok;
+          if (!zeroOk) {
+            await tx.$executeRaw`savepoint zero`;
+            try {
+              await tx.indexEntry.update({ where: { id: entry.id }, data: { number: 0 } });
+              zeroOk = true;
+            } catch {
+              zeroOk = false;
+            }
+            await tx.$executeRaw`rollback to savepoint zero`;
+          }
+          test('No. 0000 is a valid Index number', zeroOk);
+        }
         throw ROLLBACK;
       });
     } catch (e) {

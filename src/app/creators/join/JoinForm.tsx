@@ -46,11 +46,15 @@ export default function JoinForm({
   handle,
   read,
   entry,
+  reserved = null,
 }: {
   handle: string | null;
   read: { score: number; archetype: string; fresh: boolean } | null;
   entry: Entry | null;
+  /** The account's own reserved number (migration 045), shown until they claim it. */
+  reserved?: number | null;
 }) {
+  const claim = !entry && reserved != null;
   const reduce = useReducedMotion();
   const [niches, setNiches] = useState<string[]>(entry?.niches ?? []);
   const [blurb, setBlurb] = useState(entry?.blurb ?? '');
@@ -237,13 +241,25 @@ export default function JoinForm({
 
   return (
     <Shell>
-      <Micro>{entry ? `${formatNumber(entry.number)} · edit your entry` : 'Join the Index'}</Micro>
+      <Micro color={claim ? C.blue : C.muted}>
+        {entry
+          ? `${formatNumber(entry.number)} · edit your entry`
+          : claim
+            ? 'Your number is reserved'
+            : 'Join the Index'}
+      </Micro>
       <h1
         className="mt-3 text-[40px] leading-[0.95] md:text-[64px]"
         style={{ fontFamily: BIG, fontWeight: 500, letterSpacing: '-0.04em' }}
       >
-        {entry ? 'Your entry.' : 'Get your number.'}
+        {entry ? 'Your entry.' : claim ? `${formatNumber(reserved)} is yours.` : 'Get your number.'}
       </h1>
+      {claim && (
+        <p className="mt-4 max-w-[560px] text-[16px] leading-relaxed" style={{ color: C.ink }}>
+          You signed up early, so we held a number for you. Claim it below. Unclaimed numbers are
+          released on Dec 3.
+        </p>
+      )}
       <p className="mt-4 max-w-[560px] text-[16px] leading-relaxed" style={{ color: C.muted }}>
         Brands browse the Index to find creators with a real brand read behind them. Your card shows
         @{handle}
