@@ -32,6 +32,7 @@ const allowedPages = [
   '/oauth', // "Sign in with BrandOS" consent for the MCP (Claude / ChatGPT)
   '/b', // public brand page; the public address is /@handle (rewritten below)
   '/bots', // "How many bots follow you?" — public bot check
+  '/creators', // the Creator Index; the public address is /index (rewritten below)
 ];
 
 // Design-review pages (sample data) stay on staging and local, never on the
@@ -57,6 +58,17 @@ export function middleware(request: NextRequest) {
   if (at) {
     const url = request.nextUrl.clone();
     url.pathname = `/b/${at[1]}`;
+    return NextResponse.rewrite(url);
+  }
+
+  // mybrandos.app/index -> the Creator Index (/creators). The pages live in
+  // /creators (an app/index folder would sit next to Next's internal name for
+  // the root page); /index is the public address. They 404 themselves while
+  // the Index is closed (INDEX_ENABLED).
+  const idx = pathname.match(/^\/index(\/join)?\/?$/);
+  if (idx) {
+    const url = request.nextUrl.clone();
+    url.pathname = `/creators${idx[1] ?? ''}`;
     return NextResponse.rewrite(url);
   }
 

@@ -49,5 +49,8 @@ initBotId({
     { path: '/api/ideas/generate', method: 'POST' },
     // "How many bots follow you?" — public, paid X data (~20 requests per check)
     { path: '/api/bot-check', method: 'POST' },
+    // Creator Index: join / leave (writes a public listing)
+    { path: '/api/index/join', method: 'POST' },
+    { path: '/api/index/me', method: 'PATCH' },
   ],
 });

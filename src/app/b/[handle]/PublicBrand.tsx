@@ -8,6 +8,8 @@ import { DASH_FONTS } from '@/components/dashboard/dashFonts';
 import { RollNumber, useBoot } from '@/components/dashboard/dashMotion';
 import type { BrandCard } from '@/lib/public-brand';
 import { PUBLIC_TOKENS, wordmarkFor, type Colorway } from '@/lib/colorways';
+import type { MemberProfile } from '@/lib/creator-index';
+import IndexSection from './IndexSection';
 
 // The public brand page (mybrandos.app/@handle): the BrandOS read of one
 // handle, then "Compare your brand to @handle". Signed out: type your handle
@@ -326,8 +328,11 @@ export default function PublicBrand({
   initial,
   viewer,
   skin = 'bone',
+  index = null,
 }: {
   handle: string;
+  /** The Creator Index side of the page (null while the Index is closed). */
+  index?: { member: MemberProfile | null; ownerCanJoin: boolean } | null;
   valid: boolean;
   /** The creator's dashboard skin (Bone for handles without an account). */
   skin?: Colorway;
@@ -461,6 +466,10 @@ export default function PublicBrand({
             </div>
           )}
         </div>
+
+        {index && (
+          <IndexSection handle={handle} member={index.member} ownerCanJoin={index.ownerCanJoin} />
+        )}
 
         {card && (
           <section

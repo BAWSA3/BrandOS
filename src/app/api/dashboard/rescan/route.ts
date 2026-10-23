@@ -9,6 +9,7 @@ import { saveAvatar } from '@/lib/avatar-refresh';
 import { extractIntelligence } from '@/lib/scan-tracking';
 import { normalizeArchetypeName } from '@/lib/archetype-names';
 import { scoreLatestPosts } from '@/lib/post-scores';
+import { refreshEntryFromRead } from '@/lib/creator-index';
 
 /**
  * POST /api/dashboard/rescan — the signed-in user rescans their own brand from
@@ -119,6 +120,8 @@ async function handlePost(request: NextRequest) {
       },
       select: { id: true, score: true },
     });
+    // a Creator Index member's card shows their latest read
+    await refreshEntryFromRead(user.id, scan.score, archetype);
 
     // Fresh scan, fresh read on recent posts: score any new ones after the
     // response (best-effort; the dashboard shows them on the next load).

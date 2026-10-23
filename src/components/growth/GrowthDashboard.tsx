@@ -8,6 +8,7 @@ import Wordmark from '@/components/Wordmark';
 import type { GrowthView } from '@/lib/growth-data';
 import IdeaBoard, { type Idea } from './IdeaBoard';
 import { BIG, Bar, FollowersChart, Label, MONO, T, Tile, fmt } from './parts';
+import IndexTile, { type IndexTileData } from './IndexTile';
 
 /**
  * The growth dashboard (pivot 2026-10-22): growing and scaling a brand, for
@@ -101,10 +102,13 @@ export default function GrowthDashboard({
   view,
   sample = false,
   ideas = [],
+  index = null,
 }: {
   view: GrowthView;
   sample?: boolean;
   ideas?: Idea[];
+  /** The Creator Index tile (null while the Index is closed). */
+  index?: IndexTileData | null;
 }) {
   const router = useRouter();
   const reduce = useReducedMotion();
@@ -722,6 +726,8 @@ export default function GrowthDashboard({
               </>
             )}
           </Tile>
+
+          {index && <IndexTile data={index} />}
 
           <IdeaBoard
             key={brand.id}

@@ -4,6 +4,8 @@ import { profileCard, publicRead } from '@/lib/mcp/profile-read';
 import { HANDLE_RE } from '@/lib/public-brand';
 import { colorwayForHandle } from '@/lib/user-preferences';
 import { isColorway, type Colorway } from '@/lib/colorways';
+import { indexOpenFor } from '@/lib/index-rules';
+import { getEntry, memberProfile } from '@/lib/creator-index';
 import PublicBrand from './PublicBrand';
 
 // The public brand page, served at mybrandos.app/@handle (middleware rewrite).
@@ -45,12 +47,20 @@ export default async function PublicBrandPage({ params, searchParams }: Props) {
     user?.platformConnections.find((pc) => pc.platform === 'x')?.platformUsername ??
     user?.xUsername ??
     null;
+  // The Creator Index (closed until INDEX_ENABLED; admins preview): the
+  // member strip for listed members, "Join the Index" for the page's owner.
+  const indexOpen = valid && indexOpenFor(user);
+  const owner = !!mine && mine.replace(/^@/, '').toLowerCase() === handle.toLowerCase();
+  const [member, ownEntry] = indexOpen
+    ? await Promise.all([memberProfile(handle), owner && user ? getEntry(user.id) : null])
+    : [null, null];
   return (
     <PublicBrand
       handle={handle}
       valid={valid}
       initial={read ? profileCard(read) : null}
       viewer={user ? { handle: mine } : null}
+      index={indexOpen ? { member, ownerCanJoin: owner && !ownEntry?.listed } : null}
       // local dev only: ?skin= previews another skin
       skin={
         process.env.NODE_ENV !== 'production' && isColorway((await searchParams).skin)

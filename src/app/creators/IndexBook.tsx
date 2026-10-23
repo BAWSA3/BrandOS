@@ -1,0 +1,398 @@
+'use client';
+
+import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import { useReducedMotion } from 'motion/react';
+import { AnimateNumber } from 'motion-plus/react';
+import { DASH_FONTS } from '@/components/dashboard/dashFonts';
+import { formatNumber, NICHES, type IndexFilters } from '@/lib/index-rules';
+import type { IndexCard, IndexPage } from '@/lib/creator-index';
+
+// The Creator Index page: an editorial "book" (hairline frame, micro labels,
+// big grotesk) of members' cards. One headline motion: the member count rolls
+// up in Klein (Motion+ AnimateNumber); everything else stays still.
+
+const MONO = DASH_FONTS.mono;
+const BIG = DASH_FONTS.big;
+const C = {
+  bg: '#F2EFE8',
+  panel: '#FAF8F3',
+  ink: '#0E0E0E',
+  muted: '#6B6862',
+  rule: 'rgba(14,14,14,0.12)',
+  blue: '#0047FF',
+};
+
+function Micro({ children, color = C.muted }: { children: React.ReactNode; color?: string }) {
+  return (
+    <div className="text-[10px] uppercase tracking-[0.18em]" style={{ fontFamily: MONO, color }}>
+      {children}
+    </div>
+  );
+}
+
+function Card({ c, pinned = false }: { c: IndexCard; pinned?: boolean }) {
+  const accent = c.featured || pinned;
+  return (
+    <Link
+      href={`/@${c.handle}`}
+      className="group flex flex-col border p-4 transition-colors md:p-5"
+      style={{ background: C.panel, borderColor: accent ? C.blue : C.rule, color: C.ink }}
+    >
+      <div className="flex items-center justify-between gap-2">
+        <Micro color={accent ? C.blue : C.muted}>{formatNumber(c.number)}</Micro>
+        {c.featured && <Micro color={C.blue}>Featured</Micro>}
+      </div>
+      <div className="mt-4 flex items-center gap-3">
+        {c.avatar ? (
+          // eslint-disable-next-line @next/next/no-img-element -- X avatars (pbs.twimg.com)
+          <img
+            src={c.avatar.replace('_normal', '_200x200')}
+            alt=""
+            width={44}
+            height={44}
+            className="h-11 w-11 shrink-0 object-cover"
+            style={{ filter: 'grayscale(100%) contrast(1.1)' }}
+          />
+        ) : (
+          <div
+            className="flex h-11 w-11 shrink-0 items-center justify-center text-[18px]"
+            style={{ background: '#E4E0D6', fontFamily: BIG, color: C.muted }}
+          >
+            {c.handle[0]?.toUpperCase()}
+          </div>
+        )}
+        <div className="min-w-0">
+          <div
+            className="truncate text-[17px] leading-tight"
+            style={{ fontFamily: BIG, fontWeight: 500 }}
+          >
+            @{c.handle}
+          </div>
+          {c.archetype && (
+            <div className="mt-1 truncate">
+              <Micro color={C.blue}>{c.archetype}</Micro>
+            </div>
+          )}
+        </div>
+        {c.score !== null && (
+          <div
+            className="ml-auto text-[34px] leading-none"
+            style={{ fontFamily: BIG, fontWeight: 500, letterSpacing: '-0.03em', color: C.blue }}
+          >
+            {c.score}
+          </div>
+        )}
+      </div>
+      {c.blurb && <p className="mt-4 text-[14px] leading-snug">{c.blurb}</p>}
+      {c.niches.length > 0 && (
+        <div className="mt-auto flex flex-wrap gap-1.5 pt-4">
+          {c.niches.map((n) => (
+            <span
+              key={n}
+              className="border px-2 py-1 text-[10px] uppercase tracking-[0.12em]"
+              style={{ fontFamily: MONO, borderColor: C.rule, color: C.muted }}
+            >
+              {n}
+            </span>
+          ))}
+        </div>
+      )}
+    </Link>
+  );
+}
+
+function qs(f: IndexFilters, page: number) {
+  const p = new URLSearchParams();
+  if (f.niche) p.set('niche', f.niche);
+  if (f.archetype) p.set('archetype', f.archetype);
+  if (f.min > 0) p.set('min', String(f.min));
+  if (f.max < 100) p.set('max', String(f.max));
+  if (page > 1) p.set('page', String(page));
+  const s = p.toString();
+  return s ? `/index?${s}` : '/index';
+}
+
+export default function IndexBook({
+  page,
+  filters,
+  pinned,
+  viewer,
+  preview,
+}: {
+  page: IndexPage;
+  filters: IndexFilters;
+  pinned: IndexCard | null;
+  viewer: { signedIn: boolean; member: { number: number; listed: boolean; handle: string } | null };
+  /** Admin preview while the Index is closed. */
+  preview: boolean;
+}) {
+  const reduce = useReducedMotion();
+  // AnimateNumber only rolls on a change after mount: start at 0
+  const [count, setCount] = useState(0);
+  useEffect(() => {
+    const t = window.setTimeout(() => setCount(page.members), reduce ? 0 : 200);
+    return () => window.clearTimeout(t);
+  }, [page.members, reduce]);
+
+  const filtered = !!(filters.niche || filters.archetype || filters.min > 0 || filters.max < 100);
+  const joinHref = viewer.signedIn ? '/index/join' : '/signup?next=/index/join';
+  const none = page.featured.length === 0 && page.cards.length === 0;
+
+  return (
+    <main className="min-h-screen" style={{ background: C.bg, color: C.ink }}>
+      <div className="mx-auto max-w-[1200px] px-4 pb-20 pt-6 md:px-10 md:pt-10">
+        {/* the frame: hairline + micro labels */}
+        <div
+          className="flex items-center justify-between border-b pb-3"
+          style={{ borderColor: C.rule }}
+        >
+          <Link href="/">
+            <Micro color={C.ink}>BrandOS</Micro>
+          </Link>
+          <div className="hidden sm:block">
+            <Micro>The Creator Index</Micro>
+          </div>
+          <Micro>{preview ? 'Preview · closed' : 'Brands browse free'}</Micro>
+        </div>
+
+        <header className="grid gap-8 pt-10 md:grid-cols-[1fr_auto] md:items-end md:pt-16">
+          <div>
+            <h1
+              className="text-[44px] leading-[0.92] md:text-[88px]"
+              style={{ fontFamily: BIG, fontWeight: 500, letterSpacing: '-0.045em' }}
+            >
+              The BrandOS
+              <br />
+              Creator Index
+            </h1>
+            <p
+              className="mt-5 max-w-[520px] text-[15px] leading-relaxed md:text-[17px]"
+              style={{ color: C.muted }}
+            >
+              Creators with a real brand read behind them, not a follower count. Every member chose
+              to be listed. Brands browse free.
+            </p>
+          </div>
+          <div className="md:text-right">
+            <div
+              className="text-[64px] leading-none md:text-[96px]"
+              style={{ fontFamily: BIG, fontWeight: 500, letterSpacing: '-0.04em', color: C.blue }}
+            >
+              <AnimateNumber>{count}</AnimateNumber>
+            </div>
+            <Micro>{page.members === 1 ? 'Member' : 'Members'}</Micro>
+            <div className="mt-5">
+              {viewer.member ? (
+                <Link
+                  href="/index/join"
+                  className="inline-block border px-5 py-3 text-[12px] uppercase tracking-[0.14em]"
+                  style={{ fontFamily: MONO, borderColor: C.blue, color: C.blue }}
+                >
+                  {viewer.member.listed
+                    ? `You're ${formatNumber(viewer.member.number)} · edit`
+                    : `${formatNumber(viewer.member.number)} · hidden · come back`}
+                </Link>
+              ) : (
+                <Link
+                  href={joinHref}
+                  className="inline-block px-6 py-3.5 text-[12px] uppercase tracking-[0.14em] text-white"
+                  style={{ fontFamily: MONO, background: C.blue }}
+                >
+                  Join the Index · get your number →
+                </Link>
+              )}
+            </div>
+          </div>
+        </header>
+
+        {/* filters: a plain GET form (works without JS) */}
+        <form
+          method="get"
+          action="/index"
+          className="mt-12 flex flex-wrap items-end gap-3 border-y py-4"
+          style={{ borderColor: C.rule }}
+        >
+          <label className="flex flex-col gap-1.5">
+            <Micro>Niche</Micro>
+            <select
+              name="niche"
+              defaultValue={filters.niche ?? ''}
+              className="border px-2 py-2 text-[13px]"
+              style={{ borderColor: C.rule, background: C.panel, color: C.ink }}
+            >
+              <option value="">All</option>
+              {NICHES.map((n) => (
+                <option key={n} value={n}>
+                  {n}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="flex flex-col gap-1.5">
+            <Micro>Archetype</Micro>
+            <select
+              name="archetype"
+              defaultValue={filters.archetype ?? ''}
+              className="border px-2 py-2 text-[13px]"
+              style={{ borderColor: C.rule, background: C.panel, color: C.ink }}
+            >
+              <option value="">All</option>
+              {page.archetypes.map((a) => (
+                <option key={a} value={a}>
+                  {a}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="flex flex-col gap-1.5">
+            <Micro>Score from</Micro>
+            <input
+              name="min"
+              type="number"
+              min={0}
+              max={100}
+              defaultValue={filters.min || ''}
+              placeholder="0"
+              className="w-20 border px-2 py-2 text-[13px]"
+              style={{ borderColor: C.rule, background: C.panel, color: C.ink }}
+            />
+          </label>
+          <label className="flex flex-col gap-1.5">
+            <Micro>to</Micro>
+            <input
+              name="max"
+              type="number"
+              min={0}
+              max={100}
+              defaultValue={filters.max < 100 ? filters.max : ''}
+              placeholder="100"
+              className="w-20 border px-2 py-2 text-[13px]"
+              style={{ borderColor: C.rule, background: C.panel, color: C.ink }}
+            />
+          </label>
+          <button
+            type="submit"
+            className="border px-4 py-2 text-[11px] uppercase tracking-[0.14em]"
+            style={{ fontFamily: MONO, borderColor: C.ink }}
+          >
+            Filter
+          </button>
+          {filtered && (
+            <Link
+              href="/index"
+              className="px-2 py-2 text-[11px] uppercase tracking-[0.14em]"
+              style={{ fontFamily: MONO, color: C.muted }}
+            >
+              Clear
+            </Link>
+          )}
+          <div className="ml-auto">
+            <Micro>{filtered ? `${page.matching} matching` : `${page.members} listed`}</Micro>
+          </div>
+        </form>
+
+        {pinned && (
+          <section className="mt-10">
+            <Micro color={C.blue}>Shared with you</Micro>
+            <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <Card c={pinned} pinned />
+            </div>
+          </section>
+        )}
+
+        {page.featured.length > 0 && (
+          <section className="mt-10">
+            <Micro color={C.blue}>Featured</Micro>
+            <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {page.featured.map((c) => (
+                <Card key={c.number} c={c} />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {page.cards.length > 0 && (
+          <section className="mt-10">
+            <Micro>{page.featured.length > 0 ? 'Everyone · newest first' : 'Newest first'}</Micro>
+            <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {page.cards.map((c) => (
+                <Card key={c.number} c={c} />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {none && (
+          <section
+            className="mt-16 border p-8 text-center md:p-12"
+            style={{ borderColor: C.rule, background: C.panel }}
+          >
+            <div
+              className="text-[28px] leading-tight md:text-[40px]"
+              style={{ fontFamily: BIG, fontWeight: 500, letterSpacing: '-0.03em' }}
+            >
+              {filtered ? 'No one matches that yet.' : 'The first pages are still blank.'}
+            </div>
+            <p className="mx-auto mt-3 max-w-[420px] text-[15px]" style={{ color: C.muted }}>
+              {filtered
+                ? 'Try a wider score range or another niche.'
+                : 'Early members get the low numbers. Join and claim yours.'}
+            </p>
+            {!viewer.member && (
+              <Link
+                href={joinHref}
+                className="mt-6 inline-block px-6 py-3.5 text-[12px] uppercase tracking-[0.14em] text-white"
+                style={{ fontFamily: MONO, background: C.blue }}
+              >
+                Join the Index →
+              </Link>
+            )}
+          </section>
+        )}
+
+        {page.pages > 1 && (
+          <nav
+            className="mt-10 flex items-center justify-between border-t pt-4"
+            style={{ borderColor: C.rule }}
+          >
+            {page.page > 1 ? (
+              <Link
+                href={qs(filters, page.page - 1)}
+                style={{ fontFamily: MONO }}
+                className="text-[11px] uppercase tracking-[0.14em]"
+              >
+                ← Newer
+              </Link>
+            ) : (
+              <span />
+            )}
+            <Micro>
+              Page {page.page} of {page.pages}
+            </Micro>
+            {page.page < page.pages ? (
+              <Link
+                href={qs(filters, page.page + 1)}
+                style={{ fontFamily: MONO }}
+                className="text-[11px] uppercase tracking-[0.14em]"
+              >
+                Older →
+              </Link>
+            ) : (
+              <span />
+            )}
+          </nav>
+        )}
+
+        <footer
+          className="mt-16 flex flex-wrap items-center justify-between gap-3 border-t pt-4"
+          style={{ borderColor: C.rule }}
+        >
+          <Micro>Every member opted in · leave any time</Micro>
+          <Micro>Scores are BrandOS brand reads of public X posts</Micro>
+          <Micro>Signed in? Pro members see which brand teams viewed them</Micro>
+        </footer>
+      </div>
+    </main>
+  );
+}

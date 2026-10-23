@@ -164,6 +164,8 @@ model User {
   ideas                Idea[] // studio idea board (migration 035)
   postScores           PostScore[] // per-post brand fit (migration 033)
   noteReports          NoteReport[]       @relation("NoteReporter")
+  indexEntry           IndexEntry? // Creator Index membership (migration 044)
+  indexViews           IndexView[] // Index members' pages this user viewed (migration 044)
 
   @@index([xUsername])
   @@index([stripeCustomerId])
@@ -1061,6 +1063,7 @@ model Workspace {
   dailyBriefs         DailyBrief[]
   brands              Brand[]
   trackedAccounts     TrackedAccount[] // growth dashboard (migration 040)
+  indexViews          IndexView[] // Creator Index views by this team (migration 044)
 
   @@index([ownerUserId])
   @@map("Workspace")
@@ -1473,4 +1476,42 @@ model BotCheck {
   checkedAt DateTime @default(now()) @db.Timestamptz
 
   @@index([checkedAt])
+}
+
+// The BrandOS Creator Index (migration 044): creators who chose to be listed,
+// with their Index number and what they told brands.
+model IndexEntry {
+  id            String      @id @default(dbgenerated("(gen_random_uuid())::text"))
+  userId        String      @unique
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  number        Int         @unique @default(autoincrement())
+  handle        String      @unique // lowercase
+  displayHandle String
+  xUserId       String?
+  niches        String[]    @default([])
+  blurb         String      @default("")
+  score         Int?
+  archetype     String?
+  listed        Boolean     @default(true)
+  joinedAt      DateTime    @default(now()) @db.Timestamptz
+  updatedAt     DateTime    @default(now()) @db.Timestamptz
+  views         IndexView[]
+
+  @@index([listed, joinedAt(sort: Desc)])
+}
+
+// A signed-in visitor opened an Index member's /@handle page (one row per
+// viewer per member per day).
+model IndexView {
+  entryId           String
+  entry             IndexEntry @relation(fields: [entryId], references: [id], onDelete: Cascade)
+  viewerUserId      String
+  viewer            User       @relation(fields: [viewerUserId], references: [id], onDelete: Cascade)
+  viewerWorkspaceId String?    @db.Uuid
+  viewerWorkspace   Workspace? @relation(fields: [viewerWorkspaceId], references: [id], onDelete: SetNull)
+  day               DateTime   @default(dbgenerated("((now() AT TIME ZONE 'utc'::text))::date")) @db.Date
+  viewedAt          DateTime   @default(now()) @db.Timestamptz
+
+  @@id([entryId, viewerUserId, day])
+  @@index([entryId, viewedAt(sort: Desc)])
 }
