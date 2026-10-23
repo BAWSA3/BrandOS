@@ -14,11 +14,12 @@ export const LANDING = {
   problem: {
     id: 'problem',
     label: '01 / The problem',
-    headline: 'Good creators are invisible to brands.',
-    body: 'Brands are moving their budgets to creators, and they still choose by follower count, because it is the only number they can see. It says nothing about what a creator stands for, whether they show up, or who actually listens.',
+    headline: "Brands aren't ignoring you. They can't see you.",
+    body: "A follower count says how many. It doesn't say who you are, what you stand for or whether you show up. So brands guess, and good creators lose deals they never hear about.",
     cantTellLabel: 'What a follower count cannot tell a brand',
     cantTell: ['What you stand for.', 'Whether you show up.', 'Who actually listens.'],
-    quote: "brands aren't ignoring you. they can't see you.",
+    quote:
+      "i've watched great creators get passed over for bigger, emptier accounts. that's what i built this for.",
   },
 
   how: {
@@ -29,17 +30,17 @@ export const LANDING = {
       {
         n: '01',
         title: 'The reading',
-        body: 'BrandOS reads your recent posts: what you say, how you say it, how often, and how people respond. Not your bio. Not your follower count.',
+        body: 'BrandOS reads your real posts and scores your brand out of 100 across four phases: Define, Check, Generate and Scale. Not your bio. Not your follower count.',
       },
       {
         n: '02',
         title: 'The classification',
-        body: 'Your brand is classified into one of eight classes. The same method is applied to everyone.',
+        body: 'Your brand is classified into one of eight classes, from Class 01 SOURCE to Class 08 NULL. The same method is applied to everyone.',
       },
       {
         n: '03',
         title: 'The entry',
-        body: 'You enter the Index with a permanent number. Brands browse it free.',
+        body: 'You enter the Creator Index with a permanent number. Brands browse it free.',
       },
       {
         n: '04',
@@ -71,7 +72,7 @@ export const LANDING = {
   index: {
     id: 'index',
     label: '04 / The Index',
-    headlineBefore: 'The Index opens 2 Nov.',
+    headlineBefore: 'The BrandOS Creator Index opens 2 Nov.',
     headlineOpen: 'The Index is open.',
     body: 'A public book of creators, each with a reading behind them. Free to be listed. Pro to be picked.',
     brands: 'Brands browse the Index free.',
@@ -82,7 +83,7 @@ export const LANDING = {
     founding: {
       label: 'Founding 100',
       title: '$29/mo for life.',
-      body: 'Everything is free for everyone until 3 Dec. The first 100 members who add a card keep Pro at $29/mo for life: featured in the Index, a full profile, and which brands viewed them. Nothing is charged until 3 Dec. After the first 100, Pro is $39/mo.',
+      body: 'Everything is free until 3 Dec. The first 100 members to add a card keep Pro at $29/mo for life: featured in the Index, a full profile, and which brands viewed them. Nothing is charged until 3 Dec. After the first 100, Pro is $39/mo.',
       seatsLabel: 'Seats left',
       cta: 'Become a Founding Member',
     },
@@ -109,7 +110,7 @@ export const LANDING = {
     label: '05 / Your turn',
     headline: 'Read your brand.',
     body: 'It takes about a minute. Any public X account.',
-    quote: 'good creators lose deals they never hear about. this is the fix.',
+    quote: "read yours. if it's wrong, tell me.",
   },
 
   cta: 'Read my brand →',
