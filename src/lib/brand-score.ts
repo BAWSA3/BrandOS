@@ -5,13 +5,14 @@ import { resolveArchetype, getEvolutionInfo } from '@/lib/archetype-engine';
 import { recordScan, extractIntelligence } from '@/lib/scan-tracking';
 import { brandScoreCache } from '@/lib/cache';
 import { getUserProfileAsync } from '@/lib/user-profiles';
-import { smoothScore } from '@/lib/score-smoothing';
+import { smoothScore, smoothingAnchor, scoreCacheKey } from '@/lib/score-smoothing';
 import {
   parseBrandScore,
   heuristicBrandScore,
   BRAND_SCORE_OUTPUT_SCHEMA,
 } from '@/lib/score-schemas';
-import { fetchScoringTweets } from '@/lib/score-tweets';
+import { fetchScoringTweets, type ScoringTweets } from '@/lib/score-tweets';
+import { applyMeasuredSignals, SCORER_VERSION } from '@/lib/score-signals';
 import { scoreSystem, type AccountKind } from '@/lib/score-framing';
 import { trackedKind } from '@/lib/tracked-accounts';
 
@@ -129,7 +130,7 @@ export async function computeBrandScore(
   console.log('============================');
 
   // === SCORE CACHING: return consistent score within 6h window ===
-  const cacheKey = `score:${kind === 'brand' ? 'brand:' : ''}${cleanUsername}`;
+  const cacheKey = scoreCacheKey(cleanUsername, kind);
   const cachedResult = brandScoreCache.get<{
     brandScore: Record<string, unknown>;
     archetypeDecision: {
@@ -186,10 +187,11 @@ export async function computeBrandScore(
   // fall back to the deterministic heuristic so the funnel never hard-fails.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- rich, varied model object consumed dynamically downstream
   let brandScore: any;
+  let tweetData: ScoringTweets | null = null;
   try {
     // Score from the creator's actual posts when we can get them; the
     // profile-only prompt is the fallback.
-    const tweetData = await fetchScoringTweets(cleanUsername, origin, SCORING_TWEET_COUNT);
+    tweetData = await fetchScoringTweets(cleanUsername, origin, SCORING_TWEET_COUNT);
     const prompt = tweetData
       ? enhancedBrandScorePrompt({
           profile,
@@ -216,19 +218,24 @@ export async function computeBrandScore(
     brandScore = heuristicBrandScore(profile);
   }
 
+  // Generate + Scale blend in measured signals and the overall is computed
+  // from the phases, so different accounts can't collapse onto the model's
+  // default numbers (score-signals.ts).
+  applyMeasuredSignals(brandScore, profile, tweetData?.stats, tweetData?.contentPatterns);
+
   // === SCORE SMOOTHING: prevent jarring score swings for returning users ===
   // The model is non-deterministic; clamp a returning handle's new score near
   // its stored one (±3 within a week, ±5 within a month, ±12 after), so the
   // number feels stable while real change over time still shows.
-  if (userProfile && !forceReevaluate) {
+  // Anchor only to this handle's own score, and only one made by the current
+  // scoring method: an older method's number isn't a fair "previous read".
+  const anchor = smoothingAnchor(userProfile, SCORER_VERSION);
+  if (anchor && !forceReevaluate) {
     const rawScore = brandScore.overallScore;
-    brandScore.overallScore = smoothScore(rawScore, {
-      score: userProfile.currentScore,
-      scannedAt: new Date(userProfile.lastScannedAt),
-    });
+    brandScore.overallScore = smoothScore(rawScore, anchor);
     if (brandScore.overallScore !== rawScore) {
       console.log(
-        `[BrandScore] Smoothed score for @${cleanUsername}: ${rawScore} → ${brandScore.overallScore} (stored: ${userProfile.currentScore})`
+        `[BrandScore] Smoothed score for @${cleanUsername}: ${rawScore} → ${brandScore.overallScore} (stored: ${anchor.score})`
       );
     }
   }

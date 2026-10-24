@@ -25,6 +25,27 @@ import { extractColorsFromImage, ExtractedColors } from '@/lib/color-extraction'
 import { withRateLimit, rateLimiters } from '@/lib/rate-limit';
 import { internalHeaders } from '@/lib/internal-auth';
 
+// Every step has a budget so a scan finishes (with whatever parts came back)
+// well inside maxDuration. 16 scans hit Vercel's 300s kill in the week to
+// 2026-10-24 waiting on hung Gemini calls. Worst case: 20 + 40 + 40 + 25s.
+export const maxDuration = 150;
+const TWEETS_BUDGET_MS = 20_000;
+const VOICE_BUDGET_MS = 40_000;
+const PARALLEL_BUDGET_MS = 40_000;
+const IMPROVEMENTS_BUDGET_MS = 25_000;
+
+/** Resolve to null (and log) if `work` takes longer than `ms`. */
+function withBudget<T>(work: Promise<T>, ms: number, label: string): Promise<T | null> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<null>((resolve) => {
+    timer = setTimeout(() => {
+      console.warn(`[BrandIdentity] ${label} over ${ms / 1000}s budget — skipped`);
+      resolve(null);
+    }, ms);
+  });
+  return Promise.race([work.catch(() => null), timeout]).finally(() => clearTimeout(timer));
+}
+
 // Minimum tweets required for content-primary analysis
 const MINIMUM_TWEETS_FOR_CONTENT_ANALYSIS = 10;
 
@@ -126,6 +147,7 @@ async function handlePost(request: NextRequest) {
             username: profile.username,
             maxResults: 100,
           }),
+          signal: AbortSignal.timeout(TWEETS_BUDGET_MS),
         });
 
         if (tweetsResponse.ok) {
@@ -138,9 +160,10 @@ async function handlePost(request: NextRequest) {
             // Enough tweets for content-primary analysis
             analysisMode = 'content-primary';
             console.log('=== CONTENT-PRIMARY MODE: Sufficient tweets for reliable analysis ===');
-            tweetVoiceAnalysis = await analyzeTweetVoice(
-              tweetsData.tweets,
-              tweetsData.analysis.stats
+            tweetVoiceAnalysis = await withBudget(
+              analyzeTweetVoice(tweetsData.tweets, tweetsData.analysis.stats),
+              VOICE_BUDGET_MS,
+              'tweet voice'
             );
             console.log('=== TWEET VOICE ANALYSIS RESULT ===');
             console.log('Content Themes:', tweetVoiceAnalysis?.contentThemes?.length || 0);
@@ -155,9 +178,10 @@ async function handlePost(request: NextRequest) {
               `=== LIMITED TWEETS MODE: Only ${tweetCount} tweets (need ${MINIMUM_TWEETS_FOR_CONTENT_ANALYSIS} for content-primary) ===`
             );
             // Still analyze what we have
-            tweetVoiceAnalysis = await analyzeTweetVoice(
-              tweetsData.tweets,
-              tweetsData.analysis.stats
+            tweetVoiceAnalysis = await withBudget(
+              analyzeTweetVoice(tweetsData.tweets, tweetsData.analysis.stats),
+              VOICE_BUDGET_MS,
+              'tweet voice'
             );
           } else {
             console.log('=== NO TWEETS RETURNED - PROFILE-ONLY MODE ===');
@@ -186,21 +210,41 @@ async function handlePost(request: NextRequest) {
     // CONTENT-PRIMARY: Pass tweet voice to brand DNA generation
     const [profileImageAnalysis, extractedColors, brandDNA, postDiagnosis] = await Promise.all([
       profile.profile_image_url
-        ? analyzeProfileImageWithVision(profile.profile_image_url, profileContext)
+        ? withBudget(
+            analyzeProfileImageWithVision(profile.profile_image_url, profileContext),
+            PARALLEL_BUDGET_MS,
+            'profile image'
+          )
         : Promise.resolve(null),
       profile.profile_image_url
-        ? extractColorsFromImage(profile.profile_image_url)
+        ? withBudget(
+            extractColorsFromImage(profile.profile_image_url),
+            PARALLEL_BUDGET_MS,
+            'colors'
+          )
         : Promise.resolve(null),
-      generateBrandDNA(profile, undefined, tweetVoiceAnalysis),
+      withBudget(
+        generateBrandDNA(profile, undefined, tweetVoiceAnalysis),
+        PARALLEL_BUDGET_MS,
+        'brand DNA'
+      ),
       rawTweetsForDiagnosis.length >= 5
-        ? diagnosePostPerformance(rawTweetsForDiagnosis, profile.username)
+        ? withBudget(
+            diagnosePostPerformance(rawTweetsForDiagnosis, profile.username),
+            PARALLEL_BUDGET_MS,
+            'post diagnosis'
+          )
         : Promise.resolve(null),
     ]);
 
     // Step 3: Generate improvements (needs brand DNA first)
     let improvements: BrandImprovements | null = null;
     if (brandDNA) {
-      improvements = await generateBrandImprovements(profile, brandDNA);
+      improvements = await withBudget(
+        generateBrandImprovements(profile, brandDNA),
+        IMPROVEMENTS_BUDGET_MS,
+        'improvements'
+      );
     }
 
     // Step 4: Analyze account authenticity and activity

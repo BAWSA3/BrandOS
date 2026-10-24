@@ -17,6 +17,7 @@
     "prepare": "husky",
     "test:billing": "npx tsx scripts/test-billing.ts",
     "test:scores": "npx tsx scripts/test-score-smoothing.ts",
+    "test:signals": "npx tsx scripts/test-score-signals.ts",
     "test:scan": "npx tsx scripts/test-scan-data.ts",
     "test:accounts": "npx tsx scripts/test-accounts.ts",
     "test:growth": "npx tsx scripts/test-growth.ts",
