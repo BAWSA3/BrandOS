@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import supabase from '@/lib/supabase';
+import {
+  archetypeCreatorCount,
+  archetypeScanCount,
+  cohortPhaseScans,
+} from '@/lib/brand-scans-read';
+import { checkRateLimit, getClientIdentifier } from '@/lib/rate-limit';
 
 // =============================================================================
 // BrandOS Intelligence — Archetype Cohort Aggregation
@@ -22,6 +27,16 @@ interface PhaseScores {
 }
 
 export async function GET(request: NextRequest) {
+  // Public and unauthenticated, with up-to-1,000-row reads: cap per IP.
+  if (
+    checkRateLimit(`intel-cohort:${getClientIdentifier(request)}`, {
+      interval: 60_000,
+      maxRequests: 20,
+    }).limited
+  ) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+  }
+
   const archetype = request.nextUrl.searchParams.get('archetype')?.toUpperCase();
 
   if (!archetype) {
@@ -30,32 +45,12 @@ export async function GET(request: NextRequest) {
 
   try {
     // Fetch all scans for this archetype that have phase data
-    const { data: scans, error } = await supabase
-      .from('BrandScans')
-      .select('score, phase_scores, influence_tier')
-      .eq('archetype', archetype)
-      .not('phase_scores', 'is', null)
-      .order('created_at', { ascending: false })
-      .limit(1000);
-
-    if (error) {
-      console.error('[Intelligence] Cohort query error:', error);
-      return NextResponse.json({ error: 'Failed to query cohort data' }, { status: 500 });
-    }
-
-    // Also get total count for this archetype (including those without phase data)
-    const { count: totalScans } = await supabase
-      .from('BrandScans')
-      .select('*', { count: 'exact', head: true })
-      .eq('archetype', archetype);
-
-    // Get unique creators count
-    const { data: allScans } = await supabase
-      .from('BrandScans')
-      .select('username')
-      .eq('archetype', archetype);
-
-    const uniqueCreators = new Set(allScans?.map((s) => s.username) || []).size;
+    const [scans, totalScans, uniqueCreators] = await Promise.all([
+      cohortPhaseScans(archetype, 1000),
+      // total for this archetype, including scans without phase data
+      archetypeScanCount(archetype),
+      archetypeCreatorCount(archetype),
+    ]);
 
     if (!scans || scans.length === 0) {
       return NextResponse.json({
@@ -75,7 +70,7 @@ export async function GET(request: NextRequest) {
     const parsed: { score: number; phases: PhaseScores }[] = [];
     for (const scan of scans) {
       try {
-        const phases = JSON.parse(scan.phase_scores) as PhaseScores;
+        const phases = JSON.parse(scan.phase_scores ?? '') as PhaseScores;
         if (phases.define != null && phases.check != null) {
           parsed.push({ score: scan.score, phases });
         }

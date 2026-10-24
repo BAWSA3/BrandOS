@@ -63,6 +63,13 @@ async function syncTweets(brandId: string, xUserId: string): Promise<number> {
     let synced = 0;
 
     for (const tweet of rawTweets) {
+      // Skip rows Prisma would reject (the daily cron died on one bad tweet).
+      const postedAt = new Date(tweet.created_at);
+      if (!tweet.id || typeof tweet.text !== 'string' || Number.isNaN(postedAt.getTime())) {
+        console.warn('[performance-tracker] Skipping malformed tweet', tweet.id);
+        continue;
+      }
+
       const metrics = tweet.public_metrics || {
         like_count: 0,
         retweet_count: 0,
@@ -74,8 +81,11 @@ async function syncTweets(brandId: string, xUserId: string): Promise<number> {
       const likes = metrics.like_count || 0;
       const retweets = metrics.retweet_count || 0;
       const replies = metrics.reply_count || 0;
-      const impressions = metrics.impression_count || 1;
-      const engagementRate = ((likes + retweets + replies) / impressions) * 100;
+      // No impressions (SocialData often omits them) means no rate, not
+      // "engagements x 100" (the old divide-by-1 produced rates like 33300).
+      const impressions = metrics.impression_count || 0;
+      const rawRate = impressions > 0 ? ((likes + retweets + replies) / impressions) * 100 : null;
+      const engagementRate = rawRate !== null && Number.isFinite(rawRate) ? rawRate : null;
 
       const metricsJson = JSON.stringify({
         likes,
@@ -97,21 +107,25 @@ async function syncTweets(brandId: string, xUserId: string): Promise<number> {
           })
         : null;
 
-      await prisma.brandTweet.upsert({
-        where: { tweetId: tweet.id },
-        update: { metrics: metricsJson, entities: entitiesJson, engagementRate, syncedAt },
-        create: {
-          tweetId: tweet.id,
-          text: tweet.text,
-          postedAt: new Date(tweet.created_at),
-          metrics: metricsJson,
-          entities: entitiesJson,
-          engagementRate,
-          brandId,
-          syncedAt,
-        },
-      });
-      synced++;
+      try {
+        await prisma.brandTweet.upsert({
+          where: { tweetId: tweet.id },
+          update: { metrics: metricsJson, entities: entitiesJson, engagementRate, syncedAt },
+          create: {
+            tweetId: tweet.id,
+            text: tweet.text,
+            postedAt,
+            metrics: metricsJson,
+            entities: entitiesJson,
+            engagementRate,
+            brandId,
+            syncedAt,
+          },
+        });
+        synced++;
+      } catch (rowError) {
+        console.warn('[performance-tracker] Tweet upsert failed', tweet.id, rowError);
+      }
     }
 
     return synced;

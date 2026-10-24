@@ -8,6 +8,7 @@ import { logSecurityEvent } from '@/lib/audit-log';
 import { captureFunnelEvent } from '@/lib/funnel-events';
 import { isValidTosVersion } from '@/lib/tos';
 import { decodeUtm, UTM_COOKIE } from '@/lib/utm';
+import { safeNextPath } from '@/lib/safe-input';
 
 const EARLY_ACCESS_MODE = process.env.NEXT_PUBLIC_EARLY_ACCESS_MODE === 'true';
 
@@ -28,8 +29,7 @@ export async function GET(request: NextRequest) {
   // Only allow same-origin relative paths to prevent open-redirect.
   // Default landing: the dashboard (decided 2026-10-22; the title screen stays
   // one tap away from the dashboard's menu icon).
-  const next =
-    rawNext && rawNext.startsWith('/') && !rawNext.startsWith('//') ? rawNext : '/dashboard';
+  const next = safeNextPath(rawNext, '/dashboard');
   // TOS acknowledgment version from the signup page (strict-format validated —
   // the param round-trips through OAuth providers / email links).
   const rawTos = requestUrl.searchParams.get('tos');

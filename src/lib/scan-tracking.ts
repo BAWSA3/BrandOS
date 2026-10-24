@@ -1,13 +1,14 @@
-import supabase from './supabase';
+import { revalidatePath } from 'next/cache';
 import prisma from '@/lib/db';
 
 /**
  * Trigger on-demand revalidation of the tier list pages
  */
+// In-process: this only runs inside our own route handlers. (It used to call a
+// public /api/revalidate that anyone could hit to force re-renders.)
 async function revalidateTierList() {
   try {
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://mybrandos.app';
-    await fetch(`${appUrl}/api/revalidate?path=/tier-list`, { method: 'GET' });
+    revalidatePath('/tier-list');
   } catch (e) {
     console.error('[ScanTracking] Revalidation failed:', e);
   }
@@ -143,63 +144,8 @@ export async function recordScan(scan: {
   }
 }
 
-/**
- * Get total scan count
- */
-export async function getScanCount(): Promise<number> {
-  try {
-    const { count, error } = await supabase
-      .from('BrandScans')
-      .select('*', { count: 'exact', head: true });
-
-    if (error) {
-      console.error('[ScanTracking] Error getting count:', error);
-      return 0;
-    }
-
-    return count || 0;
-  } catch {
-    return 0;
-  }
-}
-
-/**
- * Get unique users scanned
- */
-export async function getUniqueScanCount(): Promise<number> {
-  try {
-    const { data, error } = await supabase.from('BrandScans').select('username');
-
-    if (error) {
-      console.error('[ScanTracking] Error getting unique count:', error);
-      return 0;
-    }
-
-    const unique = new Set(data?.map((d) => d.username) || []);
-    return unique.size;
-  } catch {
-    return 0;
-  }
-}
-
-/**
- * Get recent scans
- */
-export async function getRecentScans(limit = 50): Promise<BrandScanRecord[]> {
-  try {
-    const { data, error } = await supabase
-      .from('BrandScans')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(limit);
-
-    if (error) {
-      console.error('[ScanTracking] Error getting recent scans:', error);
-      return [];
-    }
-
-    return data || [];
-  } catch {
-    return [];
-  }
-}
+// Read helpers now live in brand-scans-read (Prisma); these names stay for
+// existing callers.
+export { totalScanCount as getScanCount } from './brand-scans-read';
+export { uniqueScannedCount as getUniqueScanCount } from './brand-scans-read';
+export { recentScans as getRecentScans } from './brand-scans-read';

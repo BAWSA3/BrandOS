@@ -11,7 +11,7 @@
     "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,json,css}\"",
     "send-email": "npx tsx scripts/send-email.ts",
     "test:rls": "node --env-file=.env.local scripts/rls-acceptance.mjs",
-    "test:safety": "npx tsx scripts/test-prompt-safety.ts",
+    "test:safety": "npx tsx scripts/test-prompt-safety.ts && npx tsx scripts/test-input-guards.ts",
     "test:deletion": "npx tsx --env-file=.env.local scripts/test-account-deletion.ts",
     "test:webhooks": "npx tsx --env-file=.env.local scripts/test-webhook-idempotency.ts",
     "prepare": "husky",

@@ -46,35 +46,21 @@ export default function BetaBadge({
   // Banner variant
   if (isDismissed) return null;
 
+  // In the page flow (not fixed) so it pushes headers down instead of sitting
+  // on top of them; Klein with white text for contrast (was white on lavender).
   return (
-    <div
-      className="fixed top-0 left-0 right-0 z-[60] py-2 px-4"
-      style={{
-        background:
-          'linear-gradient(90deg, rgba(99, 102, 241, 0.15) 0%, rgba(139, 92, 246, 0.15) 50%, rgba(99, 102, 241, 0.15) 100%)',
-        borderBottom: '1px solid rgba(139, 92, 246, 0.2)',
-        backdropFilter: 'blur(12px)',
-      }}
-    >
-      <div className="relative max-w-6xl mx-auto flex items-center justify-center gap-3 text-sm">
+    <div className="relative z-[60] py-2 px-4" style={{ background: '#0047FF' }}>
+      <div className="relative max-w-6xl mx-auto flex flex-wrap items-center justify-center gap-x-3 gap-y-1 pr-8 text-sm text-white">
         <span
-          className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider rounded-full"
-          style={{
-            background:
-              'linear-gradient(135deg, rgba(99, 102, 241, 0.3) 0%, rgba(139, 92, 246, 0.3) 100%)',
-            color: '#a78bfa',
-            border: '1px solid rgba(139, 92, 246, 0.4)',
-          }}
+          className="inline-flex items-center px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider"
+          style={{ border: '1px solid rgba(255,255,255,0.9)' }}
         >
-          <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse" />
           Beta
         </span>
-        <span className="text-white/80">
-          Welcome to the BrandOS beta! You&apos;re among the first to try it.
-        </span>
+        <span>Welcome to the BrandOS beta! You&apos;re among the first to try it.</span>
         <a
           href="mailto:feedback@mybrandos.app"
-          className="text-purple-400 hover:text-purple-300 underline underline-offset-2 transition-colors"
+          className="text-white underline underline-offset-2 hover:opacity-80"
         >
           Share feedback
         </a>
@@ -82,7 +68,7 @@ export default function BetaBadge({
         {dismissible && (
           <button
             onClick={handleDismiss}
-            className="absolute right-0 top-1/2 -translate-y-1/2 p-1 rounded-lg hover:bg-white/10 transition-colors"
+            className="absolute right-0 top-1/2 -translate-y-1/2 p-1 hover:bg-white/15"
             aria-label="Dismiss"
           >
             <svg
@@ -92,7 +78,6 @@ export default function BetaBadge({
               fill="none"
               stroke="white"
               strokeWidth="2"
-              strokeOpacity="0.5"
             >
               <line x1="18" y1="6" x2="6" y2="18" />
               <line x1="6" y1="6" x2="18" y2="18" />

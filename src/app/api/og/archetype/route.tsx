@@ -1,7 +1,8 @@
 import { ImageResponse } from 'next/og';
 import { NextRequest } from 'next/server';
 
-export const runtime = 'edge';
+// Node runtime: the three edge-runtime OG routes were the only ones 500ing on
+// prod (the Node /api/og was fine), and Vercel has deprecated edge functions.
 
 const ARCHETYPE_COLORS: Record<string, string> = {
   ARC: '#10B981',
