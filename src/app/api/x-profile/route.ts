@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { profileCache, notFoundCache } from '@/lib/cache';
 import { checkRateLimit, getClientIdentifier, rateLimiters } from '@/lib/rate-limit';
 import prisma from '@/lib/db';
+import { normalizeXHandle } from '@/lib/safe-input';
 
 // X API v2 User fields we want to fetch
 const USER_FIELDS = [
@@ -50,7 +51,7 @@ async function fetchFromXApi(
     return { status: 500, error: 'X_BEARER_TOKEN not configured' };
   }
 
-  const url = `https://api.twitter.com/2/users/by/username/${username}?user.fields=${USER_FIELDS}`;
+  const url = `https://api.twitter.com/2/users/by/username/${encodeURIComponent(username)}?user.fields=${USER_FIELDS}`;
   const response = await fetch(url, {
     method: 'GET',
     headers: { Authorization: `Bearer ${bearerToken}` },
@@ -117,7 +118,7 @@ async function fetchFromSocialData(
     return { status: 500, error: 'SOCIALDATA_API_KEY not configured' };
   }
 
-  const url = `https://api.socialdata.tools/twitter/user/${username}`;
+  const url = `https://api.socialdata.tools/twitter/user/${encodeURIComponent(username)}`;
   const response = await fetch(url, {
     method: 'GET',
     headers: {
@@ -212,7 +213,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Username is required' }, { status: 400 });
     }
 
-    const cleanUsername = username.replace(/^@/, '').trim();
+    // Strict handle check before it goes anywhere near an upstream URL
+    // (`../search?query=…` used to reach other SocialData / X endpoints).
+    const cleanUsername = normalizeXHandle(username);
     if (!cleanUsername) {
       return NextResponse.json({ error: 'Invalid username format' }, { status: 400 });
     }

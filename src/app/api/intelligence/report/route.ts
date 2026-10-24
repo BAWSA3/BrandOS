@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import supabase from '@/lib/supabase';
+import { archetypeCreatorCount, cohortPhaseScans, scansForUsername } from '@/lib/brand-scans-read';
 import { getArchetypeInfo } from '@/lib/archetype-descriptions';
 import { getUserProfileAsync, getUserStats } from '@/lib/user-profiles';
+import { checkRateLimit, getClientIdentifier } from '@/lib/rate-limit';
 
 // =============================================================================
 // BrandOS Intelligence Report — Per-User
@@ -44,6 +45,16 @@ function safeJsonParse<T>(value: string | null | undefined): T | null {
 }
 
 export async function GET(request: NextRequest) {
+  // Public and unauthenticated, with up-to-1,000-row reads: cap per IP.
+  if (
+    checkRateLimit(`intel-report:${getClientIdentifier(request)}`, {
+      interval: 60_000,
+      maxRequests: 20,
+    }).limited
+  ) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+  }
+
   const username = request.nextUrl.searchParams.get('username')?.toLowerCase().replace(/^@/, '');
 
   if (!username) {
@@ -58,17 +69,7 @@ export async function GET(request: NextRequest) {
 
   try {
     // Get user's scan history (latest first)
-    const { data: userScans, error: userError } = await supabase
-      .from('BrandScans')
-      .select('*')
-      .eq('username', username)
-      .order('created_at', { ascending: false })
-      .limit(20);
-
-    if (userError) {
-      console.error('[Intelligence] User scan query error:', userError);
-      return NextResponse.json({ error: 'Failed to fetch user data' }, { status: 500 });
-    }
+    const userScans = await scansForUsername(username, 20);
 
     if (!userScans || userScans.length === 0) {
       return NextResponse.json(
@@ -104,19 +105,14 @@ export async function GET(request: NextRequest) {
       .reverse();
 
     // Get cohort data for comparison
-    const { data: cohortScans } = await supabase
-      .from('BrandScans')
-      .select('score, phase_scores')
-      .eq('archetype', archetype)
-      .not('phase_scores', 'is', null)
-      .limit(1000);
+    const cohortScans = await cohortPhaseScans(archetype, 1000);
 
     // Parse cohort phase data
     const cohortParsed: { score: number; phases: PhaseScores }[] = [];
     if (cohortScans) {
       for (const scan of cohortScans) {
         try {
-          const phases = JSON.parse(scan.phase_scores) as PhaseScores;
+          const phases = JSON.parse(scan.phase_scores ?? '') as PhaseScores;
           if (phases.define != null) {
             cohortParsed.push({ score: scan.score, phases });
           }
@@ -225,11 +221,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Cohort size
-    const { data: cohortUsernames } = await supabase
-      .from('BrandScans')
-      .select('username')
-      .eq('archetype', archetype);
-    const cohortSize = new Set(cohortUsernames?.map((s) => s.username) || []).size;
+    const cohortSize = await archetypeCreatorCount(archetype);
 
     // Meta: staleness + stats
     const daysSinceLastScan = latestScan.created_at

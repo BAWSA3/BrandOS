@@ -36,6 +36,10 @@ initBotId({
     { path: '/api/dashboard/brainstorm', method: 'POST' },
     // Early-access signup form — email capture (spam surface)
     { path: '/api/early-access', method: 'POST' },
+    // Post-scan email capture + enterprise contact form — both send mail to
+    // a caller-chosen address (spam surface)
+    { path: '/api/signup', method: 'POST' },
+    { path: '/api/enterprise/inquiry', method: 'POST' },
     // public brand page (/@handle) + its compare funnel: scans / model calls
     { path: '/api/public-brand', method: 'POST' },
     { path: '/api/brand-lookup', method: 'POST' },

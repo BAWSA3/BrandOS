@@ -201,6 +201,13 @@ async function main() {
       .insert({ username: SENTINEL, score: 80, archetype: 'Test' });
     assert(!!error, 'expected rejection but anon insert succeeded — migration 031 not applied?');
   });
+  await test('anon cannot read scan history (BrandScans)', async () => {
+    const { data, error } = await anon.from('BrandScans').select('id').limit(1);
+    assert(
+      !!error || (data ?? []).length === 0,
+      `expected no rows, got ${data?.length} — migration 047 not applied?`
+    );
+  });
   await test('anon cannot read the email list (EmailSignup)', async () => {
     const { data, error } = await anon.from('EmailSignup').select('id').limit(1);
     assert(!!error || (data ?? []).length === 0, `expected no rows, got ${data?.length}`);

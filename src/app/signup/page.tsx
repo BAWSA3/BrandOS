@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { createBrowserClient } from '@supabase/ssr';
 import { TOS_VERSION } from '@/lib/tos';
 import Wordmark from '@/components/Wordmark';
+import { safeNextPath } from '@/lib/safe-input';
 
 // One screen for new AND returning users (decided 2026-10-22): Continue with X
 // first (BrandOS reads your X), then Google, then a one-tap email link (no
@@ -64,8 +65,7 @@ export default function ContinuePage() {
   const ref = params?.get('ref');
   const rawNext = params?.get('next');
   // same-origin relative paths only (no open redirect)
-  const next =
-    rawNext && rawNext.startsWith('/') && !rawNext.startsWith('//') ? rawNext : '/dashboard';
+  const next = safeNextPath(rawNext, '/dashboard');
   const callbackUrl = (via: 'x' | 'google' | 'email') =>
     typeof window !== 'undefined'
       ? `${window.location.origin}/api/auth/callback?next=${encodeURIComponent(next)}&tos=${encodeURIComponent(TOS_VERSION)}&via=${via}`

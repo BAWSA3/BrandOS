@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { checkRateLimit, getClientIdentifier, rateLimiters } from '@/lib/rate-limit';
 import supabase from '@/lib/supabase';
+import { scansInScoreBand } from '@/lib/brand-scans-read';
 import { findInteractionBasedOpp, type MutualInteractionResult } from '@/lib/interaction-scanner';
 
 const SCORE_CHANGE_THRESHOLD = 5;
@@ -137,15 +138,12 @@ async function fallbackMatch(
 
   // Try same archetype first
   if (archetype) {
-    const { data: sameArchetype } = await supabase
-      .from('BrandScans')
-      .select('username, score, archetype')
-      .gte('score', score - tolerance)
-      .lte('score', score + tolerance)
-      .neq('username', cleanUsername)
-      .eq('archetype', archetype)
-      .order('created_at', { ascending: false })
-      .limit(50);
+    const sameArchetype = await scansInScoreBand({
+      min: score - tolerance,
+      max: score + tolerance,
+      excludeUsername: cleanUsername,
+      archetype,
+    });
 
     if (sameArchetype && sameArchetype.length > 0) {
       const unique = deduplicateByUsername(sameArchetype);
@@ -155,14 +153,11 @@ async function fallbackMatch(
   }
 
   // Any archetype within ±10
-  const { data: anyArchetype } = await supabase
-    .from('BrandScans')
-    .select('username, score, archetype')
-    .gte('score', score - tolerance)
-    .lte('score', score + tolerance)
-    .neq('username', cleanUsername)
-    .order('created_at', { ascending: false })
-    .limit(50);
+  const anyArchetype = await scansInScoreBand({
+    min: score - tolerance,
+    max: score + tolerance,
+    excludeUsername: cleanUsername,
+  });
 
   if (anyArchetype && anyArchetype.length > 0) {
     const unique = deduplicateByUsername(anyArchetype);
@@ -171,14 +166,11 @@ async function fallbackMatch(
   }
 
   // Wider: ±20
-  const { data: wider } = await supabase
-    .from('BrandScans')
-    .select('username, score, archetype')
-    .gte('score', score - 20)
-    .lte('score', score + 20)
-    .neq('username', cleanUsername)
-    .order('created_at', { ascending: false })
-    .limit(50);
+  const wider = await scansInScoreBand({
+    min: score - 20,
+    max: score + 20,
+    excludeUsername: cleanUsername,
+  });
 
   if (wider && wider.length > 0) {
     const unique = deduplicateByUsername(wider);

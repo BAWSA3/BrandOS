@@ -66,8 +66,9 @@ function route(request: NextRequest): NextResponse {
   if (
     pathname.startsWith('/_next') ||
     pathname.startsWith('/static') ||
-    pathname.startsWith('/api') ||
-    pathname.includes('.') // .ico, .svg, .png, etc.
+    pathname === '/api' ||
+    pathname.startsWith('/api/') || // not '/api': that let /api-docs skip the allowlist
+    /\.[A-Za-z0-9]{1,8}$/.test(pathname) // files (.ico, .svg, .png…), not any path with a dot
   ) {
     return NextResponse.next();
   }

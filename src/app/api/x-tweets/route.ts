@@ -4,6 +4,7 @@ import { getClientIdentifier, checkRateLimit, rateLimiters } from '@/lib/rate-li
 import { isInternalRequest } from '@/lib/internal-auth';
 import { tweetsCache } from '@/lib/cache';
 import { analyzeTweets, type Tweet, type TweetAnalysis } from '@/lib/tweet-analysis';
+import { normalizeXHandle } from '@/lib/safe-input';
 
 // Tweet fields we want to fetch (X API v2 fallback)
 const TWEET_FIELDS = [
@@ -42,16 +43,26 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const {
-      userId,
-      username,
-      maxResults = 100,
-    } = (await request.json()) as {
-      userId?: string;
-      username?: string;
-      maxResults?: number;
+    const body = (await request.json()) as {
+      userId?: unknown;
+      username?: unknown;
+      maxResults?: unknown;
     };
+    // Both end up in upstream URL paths: numeric ids and real handles only.
+    const userId =
+      typeof body.userId === 'string' && /^\d{1,20}$/.test(body.userId) ? body.userId : undefined;
+    const username = body.username == null ? undefined : normalizeXHandle(body.username);
+    const maxResults =
+      typeof body.maxResults === 'number' && Number.isFinite(body.maxResults)
+        ? Math.min(100, Math.max(1, Math.floor(body.maxResults)))
+        : 100;
 
+    if (body.userId != null && !userId) {
+      return NextResponse.json({ error: 'Invalid userId' }, { status: 400 });
+    }
+    if (body.username != null && !username) {
+      return NextResponse.json({ error: 'Invalid username format' }, { status: 400 });
+    }
     if (!userId && !username) {
       return NextResponse.json({ error: 'Either userId or username is required' }, { status: 400 });
     }

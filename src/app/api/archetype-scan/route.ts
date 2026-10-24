@@ -78,14 +78,8 @@ async function handlePost(request: NextRequest) {
     // If no user_profiles row, check BrandScans for a previous archetype (week 1 users)
     if (!existingProfile) {
       try {
-        const { data: prevScan } = await (await import('@/lib/supabase')).default
-          .from('BrandScans')
-          .select('archetype, score')
-          .eq('username', cleanUsername)
-          .not('archetype', 'is', null)
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .single();
+        const { latestArchetypeScan } = await import('@/lib/brand-scans-read');
+        const prevScan = await latestArchetypeScan(cleanUsername);
 
         if (prevScan?.archetype) {
           const prevArchetype = normalizeArchetypeName(prevScan.archetype);
