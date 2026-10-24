@@ -9,6 +9,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { fieldSwitch } from '@/lib/field/switch';
 import { getAppEnv } from '@/lib/app-env';
 import type { LandingData } from '@/lib/landing-data';
+import { FieldPredraw } from '@/components/system/FieldBackground';
 
 // =============================================================================
 // Landing Page. With the Direction 03 switch on (src/lib/field/switch.ts) the
@@ -33,7 +34,16 @@ export default function LandingClient({
   useAuth();
 
   return (
-    <Suspense fallback={<div style={{ minHeight: '100vh', background: '#F2EFE8' }} />}>
+    <Suspense
+      fallback={
+        <div style={{ minHeight: '100vh', background: '#F2EFE8' }}>
+          {/* Paints the field before hydration when the switch is on (it checks ?field=1). */}
+          {(fieldEnv || getAppEnv() !== 'production') && (
+            <FieldPredraw env={fieldEnv} appEnv={getAppEnv()} />
+          )}
+        </div>
+      }
+    >
       <Landing theme={theme} fieldEnv={fieldEnv} landing={landing} />
     </Suspense>
   );

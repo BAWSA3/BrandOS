@@ -1,6 +1,6 @@
 // The BrandOS system (docs/BRAND-WORLD.md, Direction 03): the field everywhere,
 // bone panels for reading. Opt-in; see /world-preview/system.
-export { default as FieldBackground, FieldScreen } from './FieldBackground';
+export { default as FieldBackground, FieldPredraw, FieldScreen } from './FieldBackground';
 export {
   Button,
   Card,
