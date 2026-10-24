@@ -1,4 +1,5 @@
 import prisma from './db';
+import { SCORER_VERSION } from './score-signals';
 
 /**
  * User Profile Storage System
@@ -25,6 +26,8 @@ export interface ArchetypeData {
 export interface ScoreRecord {
   value: number;
   scannedAt: number;
+  /** Scoring method that produced it (score-signals.ts); absent = before v2. */
+  v?: number;
 }
 
 export interface ArchetypeHistoryEntry {
@@ -229,7 +232,7 @@ export function createUserProfile(
         timestamp: now,
       },
     ],
-    scores: [{ value: score, scannedAt: now }],
+    scores: [{ value: score, scannedAt: now, v: SCORER_VERSION }],
     highestScore: score,
     currentScore: score,
     firstScannedAt: now,
@@ -273,7 +276,7 @@ export function updateUserScan(
     profile.highestScore = score;
   }
 
-  profile.scores.push({ value: score, scannedAt: now });
+  profile.scores.push({ value: score, scannedAt: now, v: SCORER_VERSION });
   if (profile.scores.length > MAX_SCORE_HISTORY) {
     profile.scores = profile.scores.slice(-MAX_SCORE_HISTORY);
   }

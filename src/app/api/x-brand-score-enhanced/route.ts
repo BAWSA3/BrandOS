@@ -17,6 +17,7 @@ import { logSecurityEvent, getClientIp } from '@/lib/audit-log';
 import { captureFunnelEvent } from '@/lib/funnel-events';
 import { fetchScoringTweets } from '@/lib/score-tweets';
 import { parseBrandScore, heuristicBrandScore } from '@/lib/score-schemas';
+import { applyMeasuredSignals } from '@/lib/score-signals';
 
 /**
  * Enhanced Brand Score API
@@ -202,6 +203,10 @@ export async function POST(request: NextRequest) {
       console.log(`Voice consistency blended into CHECK: ${originalCheck} -> ${blended}`);
       console.log(`Recalculated overall: ${brandScore.overallScore}`);
     }
+
+    // Measured Generate/Scale signals + overall from phases (score-signals.ts),
+    // same as the homepage score, so different accounts don't collapse.
+    applyMeasuredSignals(brandScore, profile, tweetData?.stats, tweetData?.contentPatterns);
 
     // === SCORE SMOOTHING: clamp within ±5 of stored score for returning users ===
     const MAX_SCORE_DRIFT = 5;
