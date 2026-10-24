@@ -152,14 +152,20 @@ export function resetGeminiPause() {
  * - a spent quota pauses Gemini for this instance (until its retryDelay, capped)
  *   and every call in the pause goes straight to Claude Haiku;
  * - anything Gemini can't answer is answered by Claude Haiku; only when Claude
- *   also fails does the original Gemini error throw.
+ *   also fails does the original Gemini error throw;
+ * - GEMINI_DISABLED=true skips Gemini entirely and Claude carries every call.
  * Callers keep the Gemini result shape (`(await result.response).text()`).
  */
 export function resilientFlash(
   client: GoogleGenerativeAI = genAI,
-  opts: { claude?: (blocks: ClaudeBlock[]) => Promise<string>; now?: () => number } = {}
+  opts: {
+    claude?: (blocks: ClaudeBlock[]) => Promise<string>;
+    now?: () => number;
+    disabled?: () => boolean;
+  } = {}
 ) {
   const claude = opts.claude ?? claudeText;
+  const disabled = opts.disabled ?? (() => process.env.GEMINI_DISABLED === 'true');
   const now = opts.now ?? Date.now;
   const requestOptions = { timeout: GEMINI_TIMEOUT_MS };
   const primary = client.getGenerativeModel({ model: GEMINI_FLASH_MODEL }, requestOptions);
@@ -186,7 +192,7 @@ export function resilientFlash(
 
   return {
     async generateContent(...args: FlashArgs): Promise<FlashResult> {
-      if (now() < geminiPausedUntil) return viaClaude(args, undefined);
+      if (disabled() || now() < geminiPausedUntil) return viaClaude(args, undefined);
 
       let lastError: unknown;
       for (let attempt = 1; attempt <= 2; attempt++) {
