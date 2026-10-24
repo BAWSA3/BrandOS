@@ -17,6 +17,7 @@ const allowedPages = [
   '/early-access', // Email signup / early access
   '/privacy', // Legal: privacy policy
   '/terms', // Legal: terms of service
+  '/unsubscribe', // where every email's unsubscribe link lands (confirmation)
   '/breakdown', // Email capture for the full scan breakdown
   '/archetype', // Archetype scanner
   '/archetypes', // Archetype showcase

@@ -7,7 +7,7 @@
  * input and a URL: the post-sign-in redirect (open redirect via `/\evil`) and
  * X handles that get spliced into SocialData / X API paths.
  */
-import { safeNextPath, normalizeXHandle } from '../src/lib/safe-input';
+import { safeNextPath, normalizeXHandle, handleInputValue } from '../src/lib/safe-input';
 import { escapeHtml, isValidEmail, sanitizeDeep } from '../src/lib/email-safety';
 
 let passed = 0;
@@ -86,6 +86,21 @@ const handles: [unknown, string | null][] = [
 for (const [input, want] of handles) {
   const got = normalizeXHandle(input);
   check(`handle ${JSON.stringify(input)} → ${want}`, got === want, `got ${got}`);
+}
+
+console.log('\nB2. handleInputValue (what a handle input holds after a paste)');
+const typed: [string, string][] = [
+  ['https://x.com/naval', 'naval'],
+  ['https://twitter.com/naval?s=20', 'naval'],
+  ['x.com/naval/', 'naval'],
+  ['@naval', 'naval'],
+  ['nav', 'nav'], // mid-typing stays as typed
+  ['https://x.com/', 'https://x.com/'], // partial URL: untouched until it has a handle
+  ['bad name!', 'bad name!'], // invalid input is left for the form's error, not rewritten
+];
+for (const [input, want] of typed) {
+  const got = handleInputValue(input);
+  check(`input ${JSON.stringify(input)} → ${JSON.stringify(want)}`, got === want, `got ${got}`);
 }
 
 console.log('\nC. email-safety (public forms that send mail)');
