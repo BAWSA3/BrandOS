@@ -5,10 +5,15 @@ import { hasPro, PRO_REQUIRED } from '@/lib/billing';
 import { botGuard } from '@/lib/botid-guard';
 import { checkRateLimit, rateLimiters, withRateLimit } from '@/lib/rate-limit';
 import { sanitizeUntrusted } from '@/lib/prompt-safety';
-import { buildCopywriterPrompt, copyBrandForUser, isCopyFormat } from '@/lib/copywriter';
+import {
+  buildCopywriterPrompt,
+  copyBrandForUser,
+  isCopyFormat,
+  isEmailKind,
+} from '@/lib/copywriter';
 
 /**
- * POST /api/dashboard/copywriter { format, messages: [{role, content}] }
+ * POST /api/dashboard/copywriter { format, emailKind?, messages: [{role, content}] }
  * The copywriter chat (/dashboard/write). Streams plain text back.
  * AI cost surface: BotID + the per-IP AI limit + 60 messages per hour per
  * user, bounded history and input. The brand context comes from the user's
@@ -55,6 +60,7 @@ async function handlePost(request: NextRequest) {
   }
 
   const format = isCopyFormat(body.format) ? body.format : 'other';
+  const emailKind = isEmailKind(body.emailKind) ? body.emailKind : null;
   const all = Array.isArray(body.messages) ? body.messages.filter(isChatMessage) : [];
   const last = all[all.length - 1];
   if (!last || last.role !== 'user' || !last.content.trim())
@@ -86,7 +92,7 @@ async function handlePost(request: NextRequest) {
     user.name ??
     'you';
   const brand = await copyBrandForUser(user.id, handle.replace(/^@/, ''));
-  const system = buildCopywriterPrompt(brand, format);
+  const system = buildCopywriterPrompt(brand, format, emailKind);
 
   const stream = new Anthropic({ apiKey }).messages.stream({
     model: MODEL,
