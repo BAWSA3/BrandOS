@@ -34,6 +34,8 @@ changes are written into the calendar, rules and build table below:
    the receipts post moves from Nov 20 to Nov 12
 6. 👤 Check X's paid-partnership rule for crypto by Oct 28
 7. Weekly competitor check every Sunday (`/market-research competitors`)
+8. **Design-partner track** (Oct 24): 3–5 brands/agencies running KOL campaigns get a free,
+   hands-on campaign through Dec 3 in exchange for a case study. See the section below
 
 ## The framework: Problem → Proof → Product → People → Price
 
@@ -90,20 +92,64 @@ blurb, joinedAt, listed), join flow, `/index` page, OG share card, "Join the Ind
 profile-view counts. Uses existing scan data, so the only SocialData cost is a join scan
 (~$0.015, skipped if a fresh one exists).
 
+## Design-partner track: brands and agencies running KOL campaigns
+
+Added Oct 24 with Bawsa. **Creators fill the Index and pay first; design partners prove brands
+use it; case studies connect the two.** This runs alongside the creator launch and replaces the
+"Brand and agency track" in `LAUNCH-PLAN.md` (same spirit: a paid commitment or we park it).
+
+|                          |                                                                                                                                                                                                                                                                                |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Who**                  | 3–5 crypto brands, projects or KOL agencies with a KOL campaign planned for November. Source: the brand DMs from Oct 26 (KOL leads at companies hiring for the role), then agencies that sell shortlists (KolHQ / Growgami types)                                              |
+| **The offer**            | Free through Dec 3. Bawsa hand-builds a shortlist from the Index with each creator's brand read, flags bot-heavy accounts, and tracks what each creator delivers. In return: permission to publish a case study with real numbers, and a straight answer on paying after Dec 3 |
+| **Not the offer**        | We don't run their campaign, negotiate rates, handle payments or post for them. A shortlist and a record, nothing more (the services trap)                                                                                                                                     |
+| **Cap**                  | 5 partners, 1 campaign each, until Dec 3. A 6th goes on a waitlist                                                                                                                                                                                                             |
+| **Time**                 | ~10% until Nov 1 (DMs only), **~30% from Nov 2** (the 16:00 brand block becomes 15:00–17:30, plus partner calls at 18:00)                                                                                                                                                      |
+| **Every deal is logged** | Each partner campaign is logged in `IndexDeal` (migration 046), so the Nov 12 "brand confirms a deal" step has real deals on day one                                                                                                                                           |
+| **Gate**                 | 👤 X's crypto paid-partnership rule (Oct 28). If crypto brands can't pay creators on X, partners come from non-crypto brands on X instead; the track doesn't stop                                                                                                              |
+
+**What each campaign measures** (filled into `docs/case-studies/TEMPLATE.md`):
+
+1. Time to a usable shortlist: theirs before vs. with the Index
+2. Accounts flagged as bot-heavy or a poor fit, and whether the partner agreed
+3. What each creator delivered (posts, reach, clicks or sign-ups the partner can share) vs. the
+   partner's past KOL picks
+4. "Would you pay for this after Dec 3? How much a month?" Their words, verbatim
+
+**The first DM to a brand or agency** (personalize the first line; from Oct 26 it opens with the
+"browse or shortlist?" question, and this is the follow-up to anyone who answers):
+
+> thanks, that helps. here's what i'm testing: you tell me the campaign, i send you a shortlist
+> from the brandos creator index with a brand read on every creator, bot-heavy accounts flagged.
+> then we track what each one delivers. free through dec 3; all i ask is a case study if it
+> works, and an honest "would you pay for this". got a campaign in november?
+
+**Decision rules**
+
+| By         | Line                                                                | If it's below the line                                                                                                  |
+| ---------- | ------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| Sun Nov 8  | 3 partners said yes in principle                                    | Ask every "no" why; rewrite the offer from their words, not ours                                                        |
+| Sun Nov 15 | 2 partners have agreed to run a campaign with Index creators        | The problem is the pitch or the timing: interview 5 more KOL leads before pitching again                                |
+| Sun Nov 22 | 1 campaign live                                                     | Offer the shortlist on a smaller ask: one post, one creator, tracked                                                    |
+| Thu Dec 3  | 1 published case study (both sides' permission) + 1 paid commitment | No paid commitment: park brand pricing in `KILLED-IDEAS.md` with what we learned; keep the case study for creator posts |
+
+If partners commit to paying, brand pricing becomes the main revenue plan after Dec 3 (Favikon
+charges brands from €159/mo, Modash $199/mo; `docs/research/COMPETITORS.md`).
+
 ## Daily operating rhythm (full-time)
 
-| Time        | Block                        | What exactly                                                                                                    |
-| ----------- | ---------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| 8:00        | **Numbers** (15 min)         | Yesterday's scans, signups, Index joins, cards added. Write them in the scorecard below                         |
-| 8:30        | **Write**                    | Finish today's two posts from the calendar                                                                      |
-| 9:30        | **Post 1 (anchor)**          | The calendar post. Link in the first reply                                                                      |
-| 9:30–11:30  | **Reply wave**               | Answer every reply. Every handle dropped → scan → reply with their `/@handle`                                   |
-| 12:00–13:30 | **Outreach**                 | 30 personal DMs to target creators (list below). Use their real score                                           |
-| 14:00       | **Post 2 (light)**           | Teardown, member spotlight, build-in-public, or a poll                                                          |
-| 14:00–16:00 | **Reply wave 2**             | Same as the morning                                                                                             |
-| 16:00–17:30 | **Brand side** (from Oct 26) | 5 brand/agency DMs a day. Until Nov 5: "browse or shortlist?" From Nov 5: "browse the Index free, early access" |
-| 18:00       | **Calls**                    | Founding member onboarding calls / recorded teardowns (the Founding promise)                                    |
-| 21:00       | **Log** (20 min)             | `CUSTOMER-VOICE.md`, tomorrow's posts drafted, DM list for tomorrow                                             |
+| Time        | Block                        | What exactly                                                                                                                                                                           |
+| ----------- | ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 8:00        | **Numbers** (15 min)         | Yesterday's scans, signups, Index joins, cards added. Write them in the scorecard below                                                                                                |
+| 8:30        | **Write**                    | Finish today's two posts from the calendar                                                                                                                                             |
+| 9:30        | **Post 1 (anchor)**          | The calendar post. Link in the first reply                                                                                                                                             |
+| 9:30–11:30  | **Reply wave**               | Answer every reply. Every handle dropped → scan → reply with their `/@handle`                                                                                                          |
+| 12:00–13:30 | **Outreach**                 | 30 personal DMs to target creators (list below). Use their real score                                                                                                                  |
+| 14:00       | **Post 2 (light)**           | Teardown, member spotlight, build-in-public, or a poll                                                                                                                                 |
+| 14:00–16:00 | **Reply wave 2**             | Same as the morning                                                                                                                                                                    |
+| 16:00–17:30 | **Brand side** (from Oct 26) | 5 brand/agency DMs a day. Until Nov 5: "browse or shortlist?" From Nov 5: "browse the Index free, early access". From Nov 2 it starts at 15:00: design-partner shortlists and tracking |
+| 18:00       | **Calls**                    | Founding member onboarding calls / recorded teardowns (the Founding promise) / design-partner calls                                                                                    |
+| 21:00       | **Log** (20 min)             | `CUSTOMER-VOICE.md`, tomorrow's posts drafted, DM list for tomorrow                                                                                                                    |
 
 **Who to DM** (in order): people who replied "ACCESS" (213+) → anyone who dropped a handle on
 past posts → the 1,010 email list who scanned but have no account → crypto creators with
@@ -145,6 +191,8 @@ past posts → the 1,010 email list who scanned but have no account → crypto c
   read-only access; with "request a shortlist" if the Nov 1 rule says so.
 - **Fri Nov 6:** nudge email to everyone who hasn't joined (LAUNCH-PLAN email #2).
 - **Sun Nov 8:** week-1 recap post + update the funnel rates in LAUNCH-PLAN with real ones.
+- **Design partners:** send the offer to everyone who answered a brand DM; aim for 3 yeses by
+  Sun Nov 8.
 
 ### Phase 3: Stand out (Mon Nov 9 → Sun Nov 22)
 
@@ -157,11 +205,15 @@ past posts → the 1,010 email list who scanned but have no account → crypto c
 - **Thu Nov 12:** data post: "what {n} creators in the Index have in common" (real numbers).
   Post 2, receipts (moved from Nov 20): "{n} members have logged {m} past brand deals. next:
   brands confirm them." Real counts from `IndexDeal` only.
+- **Design partners:** shortlists delivered, campaigns starting; 2 agreed by Sun Nov 15, 1 live
+  by Sun Nov 22. Log every partner campaign's deals in `IndexDeal`.
 
 ### Phase 4: Deadline (Mon Nov 23 → Thu Dec 3)
 
 - Price posts at 40%: spots left, "ends Dec 3", one member story a day (why they locked in).
 - First brand intro made through the Index → a case study post, with both sides' permission.
+  The first design-partner case study (`docs/case-studies/`) is that post. Ask every partner
+  the pay question before Dec 3.
 - **Mon Nov 30, Wed Dec 2:** founding deadline emails (LAUNCH-PLAN).
 - **Thu Dec 3:** first charges. Thank-you post naming the Founding members who agree to it.
 
@@ -178,6 +230,8 @@ The targets are estimates to replace with real rates after week 1.
 | Thu Dec 3  | 500                                              | **40** (goal 30–50)    | Extend nothing. Talk to every member who didn't add a card; log why                                                        |
 
 **The one number:** cards added. Joins, scans and impressions only matter if they move it.
+The design-partner track has its own lines (above, in its section); its one number is **paid
+commitments from brands by Dec 3**.
 
 ## Daily scorecard (copy this block each day)
 

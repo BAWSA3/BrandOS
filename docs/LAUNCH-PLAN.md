@@ -240,6 +240,10 @@ Watch in the Sunday review: do trial users with lookups or overnight scores conv
 
 ## Brand and agency track (≈10% of time, no code)
 
+> **Superseded Oct 24** by the design-partner track in `docs/GTM-OPERATING-PLAN.md`
+> (3–5 brands/agencies, free hands-on campaign through Dec 3 for a case study + a paid
+> commitment). Kept below for history.
+
 - [ ] Reach out to 5 crypto projects or agencies you know that pay creators
 - [ ] Optional: one message to Kreatorsverse (below). No follow-up; doesn't count toward the 5.
       Note: memory had Kreatorsverse marked "dropped" since Apr 13; this is a single re-touch
