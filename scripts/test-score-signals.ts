@@ -279,6 +279,18 @@ async function asyncTests() {
   }
   test('Claude also down → the original Gemini error surfaces', thrown === quotaError);
   resetGeminiPause();
+
+  const offCalls = { n: 0 };
+  const flashOff = resilientFlash(fakeClient(quotaError, offCalls), {
+    claude: async () => 'claude',
+    disabled: () => true,
+  });
+  const r3 = await flashOff.generateContent('prompt');
+  test(
+    'GEMINI_DISABLED → Claude only, Gemini never called',
+    offCalls.n === 0 && (await r3.response).text() === 'claude',
+    offCalls
+  );
 }
 
 asyncTests().then(() => {
