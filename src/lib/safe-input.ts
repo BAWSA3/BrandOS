@@ -43,3 +43,13 @@ export function normalizeXHandle(raw: unknown): string | null {
   h = h.replace(/^@/, '');
   return X_HANDLE_RE.test(h) ? h : null;
 }
+
+/**
+ * What a handle input should hold after a keystroke or paste: a pasted profile
+ * URL (x.com/naval, https://twitter.com/naval?s=20) becomes the handle, and a
+ * leading @ is dropped. Inputs using this need room for a URL (maxLength ~64):
+ * a 15-char maxLength cut a pasted URL to "https://x.com/n" before onChange ran.
+ */
+export function handleInputValue(raw: string): string {
+  return normalizeXHandle(raw) ?? raw.replace(/^@/, '');
+}

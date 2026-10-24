@@ -47,6 +47,7 @@ import {
 } from '@/components/landing/interaction';
 import { LANDING } from '@/lib/landing-copy';
 import type { LandingData } from '@/lib/landing-data';
+import { handleInputValue } from '@/lib/safe-input';
 
 // Background style options for easy switching
 type BgStyle = 'ascii-dna' | 'typescript' | 'system-logs' | 'hybrid';
@@ -1091,11 +1092,11 @@ export default function XBrandScoreHero({
       <div style={{ position: 'relative' }}>
         <Input
           value={username}
-          onChange={(e) => setUsername(e.target.value.replace(/^@/, ''))}
+          onChange={(e) => setUsername(handleInputValue(e.target.value))}
           onFocus={() => setScanFocus(true)}
           onBlur={() => setScanFocus(false)}
           placeholder={landing ? '' : '@yourhandle'}
-          maxLength={15}
+          maxLength={64}
           aria-label="Your X handle"
           invalid={!!error}
           autoCapitalize="none"
@@ -1539,9 +1540,9 @@ export default function XBrandScoreHero({
                   <input
                     type="text"
                     value={username}
-                    onChange={(e) => setUsername(e.target.value.replace(/^@/, ''))}
+                    onChange={(e) => setUsername(handleInputValue(e.target.value))}
                     placeholder=""
-                    maxLength={15}
+                    maxLength={64}
                     className="terminal-input"
                     style={{
                       width: '100%',

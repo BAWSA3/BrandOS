@@ -10,6 +10,7 @@ import type { BrandCard } from '@/lib/public-brand';
 import { PUBLIC_TOKENS, wordmarkFor, type Colorway } from '@/lib/colorways';
 import type { MemberProfile } from '@/lib/creator-index';
 import IndexSection from './IndexSection';
+import { handleInputValue } from '@/lib/safe-input';
 
 // The public brand page (mybrandos.app/@handle): the BrandOS read of one
 // handle, then "Compare your brand to @handle". Signed out: type your handle
@@ -494,9 +495,9 @@ export default function PublicBrand({
                 </span>
                 <input
                   value={mine}
-                  onChange={(e) => setMine(e.target.value.replace(/^@/, ''))}
+                  onChange={(e) => setMine(handleInputValue(e.target.value))}
                   placeholder="yourhandle"
-                  maxLength={16}
+                  maxLength={64}
                   autoCapitalize="none"
                   autoCorrect="off"
                   spellCheck={false}
