@@ -52,5 +52,8 @@ initBotId({
     // Creator Index: join / leave (writes a public listing)
     { path: '/api/index/join', method: 'POST' },
     { path: '/api/index/me', method: 'PATCH' },
+    // Creator Index: log / remove a past brand deal (writes to the track record)
+    { path: '/api/index/deals', method: 'POST' },
+    { path: '/api/index/deals', method: 'DELETE' },
   ],
 });

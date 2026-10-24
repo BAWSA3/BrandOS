@@ -1497,8 +1497,25 @@ model IndexEntry {
   joinedAt      DateTime    @default(now()) @db.Timestamptz
   updatedAt     DateTime    @default(now()) @db.Timestamptz
   views         IndexView[]
+  deals         IndexDeal[]
 
   @@index([listed, joinedAt(sort: Desc)])
+}
+
+// A past brand deal a member logged (migration 046). Private to the member
+// until the brand confirms it (confirmedAt).
+model IndexDeal {
+  id          String     @id @default(dbgenerated("(gen_random_uuid())::text"))
+  entryId     String
+  entry       IndexEntry @relation(fields: [entryId], references: [id], onDelete: Cascade)
+  brand       String
+  brandHandle String? // lowercase, no @
+  dealMonth   DateTime?  @db.Date
+  postUrl     String? // https://x.com/<user>/status/<id>
+  confirmedAt DateTime?  @db.Timestamptz
+  createdAt   DateTime   @default(now()) @db.Timestamptz
+
+  @@index([entryId, createdAt(sort: Desc)])
 }
 
 // A signed-in visitor opened an Index member's /@handle page (one row per
