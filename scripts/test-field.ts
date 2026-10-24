@@ -18,6 +18,14 @@ import { encodePng, ditherPng } from '../src/lib/og/dither';
 import { allowedAvatarUrl } from '../src/lib/field/avatar';
 import { driftOffset, fieldMetrics, signalCellFor, wipeCovered } from '../src/lib/field/system';
 import { asksForField, fieldSwitch } from '../src/lib/field/switch';
+import {
+  BOOT_JS,
+  PAINT_JS,
+  predrawKey,
+  predrawScript,
+  type PredrawConfig,
+  type PredrawSignal,
+} from '../src/lib/field/predraw';
 
 let pass = 0;
 let fail = 0;
@@ -254,6 +262,140 @@ test(
   'the Index opens at midnight 2 Nov (Los Angeles)',
   indexOpen(Date.parse('2026-11-02T00:00:00-07:00'))
 );
+
+// The pre-drawn field (src/lib/field/predraw.ts): the inline script must draw
+// exactly what FieldBackground draws, and must stand alone once serialised.
+console.log('\nJ. The pre-drawn field');
+type Op = string;
+const recorder = () => {
+  const ops: Op[] = [];
+  const g = {
+    fillStyle: '' as unknown,
+    fillRect(x: number, y: number, w: number, h: number) {
+      ops.push(`${String(g.fillStyle)} ${x} ${y} ${w} ${h}`);
+    },
+  };
+  return { g, ops };
+};
+// The script's own text, evaluated on its own (no outer scope to lean on).
+type Paint = (
+  g: unknown,
+  w: number,
+  h: number,
+  seed: number,
+  density: number,
+  signal: PredrawSignal
+) => void;
+const standalonePaint = new Function(`return (${PAINT_JS})`)() as Paint;
+const predrawBoot = new Function(`return (${BOOT_JS})`)() as (c: PredrawConfig, p: Paint) => void;
+const sizes: [number, number][] = [
+  [375, 812],
+  [768, 1024],
+  [1440, 900],
+  [1920, 1080],
+];
+const specs: PredrawSignal[] = ['auto', 'none', [5, 1], [9, 40]];
+for (const [w, h] of sizes)
+  for (const spec of specs) {
+    const a = recorder();
+    const m = fieldMetrics(w, h);
+    paintField(a.g, clouds(11, 0.4), {
+      width: w,
+      height: h,
+      cell: m.cell,
+      grid: m.grid,
+      signalCell: signalCellFor(spec, m),
+    });
+    const b = recorder();
+    standalonePaint(b.g, w, h, 11, 0.4, spec);
+    const same = a.ops.length === b.ops.length && a.ops.every((op, i) => op === b.ops[i]);
+    test(
+      `same drawing at ${w}×${h}, signal ${String(spec)}`,
+      same,
+      `${a.ops.length} vs ${b.ops.length} ops`
+    );
+  }
+{
+  const a = recorder();
+  const m = fieldMetrics(1440, 900);
+  paintField(a.g, clouds(29, 0.5), {
+    width: 1440,
+    height: 900,
+    cell: m.cell,
+    grid: m.grid,
+    signalCell: signalCellFor('auto', m),
+  });
+  const b = recorder();
+  standalonePaint(b.g, 1440, 900, 29, 0.5, 'auto');
+  test('same drawing with another seed and density', a.ops.join('|') === b.ops.join('|'));
+}
+const script = predrawScript({ id: 'f', seed: 11, density: 0.4, signal: 'auto' });
+test('the script is under 6 KB', script.length < 6144, `${script.length} bytes`);
+test(
+  'the script parses',
+  (() => {
+    try {
+      new Function(script);
+      return true;
+    } catch {
+      return false;
+    }
+  })()
+);
+test(
+  'config is escaped for HTML',
+  !predrawScript({ id: '</script>', seed: 1, density: 0.4, signal: 'none' }).includes('</script>')
+);
+
+// Boot in a fake page: draws, marks the key FieldBackground looks for, honours the gate.
+const fakePage = (search: string) => {
+  const canvas = {
+    width: 0,
+    height: 0,
+    style: { visibility: 'hidden' },
+    attrs: {} as Record<string, string>,
+    parentNode: { style: { display: 'none' } },
+    setAttribute(k: string, v: string) {
+      this.attrs[k] = v;
+    },
+    getContext() {
+      return { ...recorder().g, setTransform() {} };
+    },
+  };
+  const g = globalThis as Record<string, unknown>;
+  g.window = { innerWidth: 1440, innerHeight: 900, devicePixelRatio: 2 };
+  g.document = { getElementById: () => canvas };
+  g.location = { search };
+  return canvas;
+};
+{
+  const c = fakePage('');
+  predrawBoot({ id: 'f', seed: 11, density: 0.4, signal: 'auto' }, standalonePaint);
+  test(
+    'boot draws at the pixel ratio and marks the key',
+    c.width === 2880 &&
+      c.height === 1800 &&
+      c.style.visibility === 'visible' &&
+      c.attrs['data-field-key'] === predrawKey(1440, 900, 2, 11, 0.4, 'auto')
+  );
+  const gated = (search: string, env: boolean, appEnv: string) => {
+    const p = fakePage(search);
+    predrawBoot(
+      { id: 'f', seed: 11, density: 0.4, signal: 'auto', gate: { env, appEnv } },
+      standalonePaint
+    );
+    return p.style.visibility === 'visible' && p.parentNode.style.display === 'block';
+  };
+  test('gate: ?field=1 off production draws', gated('?field=1', false, 'staging'));
+  test('gate: no param, flag off, does nothing', !gated('', false, 'staging'));
+  test('gate: ?field=1 on production does nothing', !gated('?field=1', false, 'production'));
+  test('gate: flag on draws everywhere', gated('', true, 'production'));
+  test('gate: ?field=0 always does nothing', !gated('?field=0', true, 'staging'));
+  const g = globalThis as Record<string, unknown>;
+  delete g.window;
+  delete g.document;
+  delete g.location;
+}
 
 console.log(`\n${pass} passed, ${fail} failed`);
 if (fail) process.exit(1);
