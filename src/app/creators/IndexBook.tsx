@@ -64,19 +64,23 @@ function SectionLabel({
   );
 }
 
-function Card({
+export function Card({
   c,
   pinned = false,
   own = false,
+  sample = false,
 }: {
   c: IndexCard;
   pinned?: boolean;
   /** On the field: the viewer's own entry, the one coral item on the page. */
   own?: boolean;
+  /** Illustrative entry (the landing page before the Index opens): labelled, not a link. */
+  sample?: boolean;
 }) {
   const accent = c.featured || pinned;
+  const Frame = sample ? SampleFrame : Link;
   return (
-    <Link
+    <Frame
       href={`/@${c.handle}`}
       className="group flex flex-col border p-4 transition-colors md:p-5"
       style={{
@@ -95,6 +99,8 @@ function Card({
           >
             Your entry
           </span>
+        ) : sample ? (
+          <Micro>Sample entry</Micro>
         ) : (
           c.featured && <Micro color={C.blue}>Featured</Micro>
         )}
@@ -144,7 +150,25 @@ function Card({
           </div>
         </div>
       )}
-    </Link>
+    </Frame>
+  );
+}
+
+/** A sample card is not a link (there is no page to open). */
+function SampleFrame({
+  className,
+  style,
+  children,
+}: {
+  href: string;
+  className?: string;
+  style?: React.CSSProperties;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className={className} style={style}>
+      {children}
+    </div>
   );
 }
 

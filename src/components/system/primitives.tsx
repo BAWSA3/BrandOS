@@ -40,6 +40,7 @@ export function SystemStyles() {
       .sys-press:active { transform: scale(.97); }
       .sys-focus:focus-visible { outline: 2px solid ${FIELD}; outline-offset: 2px; }
       .sys-focus-field:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+      .sys-input.sys-focus:focus-visible { outline-offset: -2px; } /* one ring, on the edge */
       .sys-input::placeholder { font-family: ${FIELD_FONTS.plex}; color: rgba(14,14,14,.45); }
       @media (prefers-reduced-motion: reduce) {
         .sys-anim { animation: none !important; }

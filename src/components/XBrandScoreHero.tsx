@@ -37,6 +37,16 @@ import HybridCodeBg from '@/components/backgrounds/HybridCodeBg';
 import { PixelConfetti } from '@/components/pixel-world';
 import { TerminalProgressBar, TerminalPhaseCard } from '@/components/terminal';
 import { normalizeArchetypeName } from '@/lib/archetype-names';
+import LandingChapters from '@/components/landing/LandingChapters';
+import {
+  CellReader,
+  HeadlineReveal,
+  LiveStrip,
+  ReadButton,
+  TypedPlaceholder,
+} from '@/components/landing/interaction';
+import { LANDING } from '@/lib/landing-copy';
+import type { LandingData } from '@/lib/landing-data';
 
 // Background style options for easy switching
 type BgStyle = 'ascii-dna' | 'typescript' | 'system-logs' | 'hybrid';
@@ -92,6 +102,8 @@ interface XBrandScoreHeroProps {
   field?: boolean;
   /** Design previews only (/world-preview/*): open straight on the reveal with sample data. */
   previewReveal?: { profile: XProfileData; brandScore: BrandScoreResult };
+  /** Field only: live numbers for the landing scroll under the hero (src/lib/landing-data.ts). */
+  landing?: LandingData;
 }
 
 // ============================================================================
@@ -619,6 +631,23 @@ function TypewriterPlaceholder({ text }: { text: string }) {
   );
 }
 
+/** The live record strip under the hero: house lines between real numbers. */
+function stripItems(d: LandingData): string[] {
+  const S = LANDING.strip;
+  const ex = d.example;
+  const items: string[] = [];
+  if (d.brandsRead) items.push(`${S.brandsRead.toUpperCase()} ${d.brandsRead}`);
+  items.push(`${S.seats.toUpperCase()} ${d.seatsLeft}/100`);
+  items.push(
+    `${S.example.toUpperCase()} @${ex.handle.toUpperCase()} · ${classLabel(ex.archetype)} · ${ex.score}`
+  );
+  items.push(
+    d.index.open ? `${S.members.toUpperCase()} ${d.index.members}` : S.opens.toUpperCase()
+  );
+  for (const h of S.house) items.push(h.toUpperCase());
+  return items.flatMap((t) => [t, '//']);
+}
+
 // ============================================================================
 // Main Component
 // ============================================================================
@@ -628,6 +657,7 @@ export default function XBrandScoreHero({
   autoStart,
   field = false,
   previewReveal,
+  landing,
 }: XBrandScoreHeroProps) {
   const canDrift = useCanDrift();
   // Auth state
@@ -638,7 +668,21 @@ export default function XBrandScoreHero({
   const [showSavePrompt, setShowSavePrompt] = useState(true);
 
   const [flowState, setFlowState] = useState<FlowState>(previewReveal ? 'reveal' : 'input');
+  // Landing scroll: the field's coral cell (and the drift) belong to the hero only,
+  // so the chapters below keep one coral item per screen (e.g. Founding).
+  const heroRef = useRef<HTMLDivElement>(null);
+  const [pastHero, setPastHero] = useState(false);
+  useEffect(() => {
+    const el = heroRef.current;
+    if (!field || !landing || !el) return;
+    const io = new IntersectionObserver(([e]) => setPastHero(!e.isIntersecting), {
+      threshold: 0.15,
+    });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [field, landing, flowState]);
   const [username, setUsername] = useState(initialUsername || '');
+  const [scanFocus, setScanFocus] = useState(false);
   const [error, setError] = useState('');
   const [profile, setProfile] = useState<XProfileData | null>(previewReveal?.profile ?? null);
   const [brandScore, setBrandScore] = useState<BrandScoreResult | null>(
@@ -1040,6 +1084,51 @@ export default function XBrandScoreHero({
     alert("Profile comparison coming soon! We'll notify you when it's ready.");
   };
 
+  // The scan form on the field: in the hero, and again at the end of the landing scroll.
+  // Same state, same handleSubmit (BotID, analytics and the scan flow are unchanged).
+  const fieldScanForm = (
+    <form onSubmit={handleSubmit} style={{ display: 'grid', gap: 12 }} noValidate>
+      <div style={{ position: 'relative' }}>
+        <Input
+          value={username}
+          onChange={(e) => setUsername(e.target.value.replace(/^@/, ''))}
+          onFocus={() => setScanFocus(true)}
+          onBlur={() => setScanFocus(false)}
+          placeholder={landing ? '' : '@yourhandle'}
+          maxLength={15}
+          aria-label="Your X handle"
+          invalid={!!error}
+          autoCapitalize="none"
+          autoCorrect="off"
+          spellCheck={false}
+        />
+        {landing && (
+          <TypedPlaceholder handles={LANDING.typedHandles} hidden={scanFocus || !!username} />
+        )}
+      </div>
+      {landing ? (
+        <ReadButton busy={isValidating} label={LANDING.cta} busyLabel={LANDING.ctaBusy} />
+      ) : (
+        <Button type="submit" disabled={isValidating} style={{ width: '100%' }}>
+          {isValidating ? 'Reading…' : 'Read my brand →'}
+        </Button>
+      )}
+      {error && (
+        <p
+          role="alert"
+          style={{
+            margin: 0,
+            fontFamily: SYSTEM_FONTS.plex,
+            fontSize: 13,
+            color: '#0E0E0E',
+          }}
+        >
+          {error}
+        </p>
+      )}
+    </form>
+  );
+
   return (
     <div
       className={flowState === 'input' && !field ? 'crt-scanlines' : ''}
@@ -1080,8 +1169,8 @@ export default function XBrandScoreHero({
       >
         {field && (
           <FieldBackground
-            signalCell={flowState === 'input' ? 'auto' : 'none'}
-            drift={canDrift && flowState === 'input'}
+            signalCell={flowState === 'input' && !pastHero ? 'auto' : 'none'}
+            drift={canDrift && flowState === 'input' && !pastHero}
           />
         )}
         {!field && ACTIVE_BG === 'ascii-dna' && (
@@ -1251,107 +1340,93 @@ export default function XBrandScoreHero({
       <AnimatePresence mode="wait">
         {/* INPUT STATE ON THE FIELD (Direction 03). Same form, same handleSubmit. */}
         {flowState === 'input' && field && (
-          <div
-            key="input-field"
-            style={{
-              position: 'relative',
-              zIndex: 10,
-              width: '100%',
-              minHeight: '100vh',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between',
-              gap: 32,
-              padding: 'clamp(16px, 3.5vw, 40px) clamp(16px, 3.5vw, 40px) 76px',
-              boxSizing: 'border-box',
-            }}
-          >
-            <SystemStyles />
-            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
-              <FieldText size="mono" as="span">
-                brandos / the index
-              </FieldText>
-              <FieldText size="mono" as="span">
-                doc — 01
-              </FieldText>
-            </div>
+          <div key="input-field" style={{ position: 'relative', zIndex: 10, width: '100%' }}>
+            <div
+              ref={heroRef}
+              style={{
+                position: 'relative',
+                zIndex: 10,
+                width: '100%',
+                minHeight: '100vh',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                gap: 32,
+                padding: 'clamp(16px, 3.5vw, 40px) clamp(16px, 3.5vw, 40px) 76px',
+                boxSizing: 'border-box',
+              }}
+            >
+              <SystemStyles />
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
+                <FieldText size="mono" as="span">
+                  brandos / the index
+                </FieldText>
+                <FieldText size="mono" as="span">
+                  doc — 01
+                </FieldText>
+              </div>
 
-            <div style={{ maxWidth: 1180, width: '100%' }}>
-              {/* The hero wordmark is an image, never typed */}
-              <Wordmark mode="white" height={34} />
-              <FieldText size="label" style={{ marginTop: 'clamp(24px, 5vh, 48px)' }}>
-                The record of creator reputation
-              </FieldText>
-              <FieldText size="display" style={{ marginTop: 12 }}>
-                Reputation
-                <br />
-                on the record.
-              </FieldText>
-
-              <Panel
-                label="Read your brand"
-                meta="any public X account"
-                style={{ marginTop: 'clamp(24px, 5vh, 44px)', maxWidth: 460 }}
-                padding={22}
-              >
-                <form onSubmit={handleSubmit} style={{ display: 'grid', gap: 12 }} noValidate>
-                  <Input
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value.replace(/^@/, ''))}
-                    placeholder="@yourhandle"
-                    maxLength={15}
-                    aria-label="Your X handle"
-                    invalid={!!error}
-                    autoCapitalize="none"
-                    autoCorrect="off"
-                    spellCheck={false}
-                  />
-                  <Button type="submit" disabled={isValidating} style={{ width: '100%' }}>
-                    {isValidating ? 'Reading…' : 'Read my brand →'}
-                  </Button>
-                  {error && (
-                    <p
-                      role="alert"
-                      style={{
-                        margin: 0,
-                        fontFamily: SYSTEM_FONTS.plex,
-                        fontSize: 13,
-                        color: '#0E0E0E',
-                      }}
-                    >
-                      {error}
-                    </p>
+              <div style={{ maxWidth: 1180, width: '100%' }}>
+                {/* The hero wordmark is an image, never typed */}
+                <Wordmark mode="white" height={34} />
+                <FieldText size="label" style={{ marginTop: 'clamp(24px, 5vh, 48px)' }}>
+                  The record of creator reputation
+                </FieldText>
+                <FieldText size="display" style={{ marginTop: 12 }}>
+                  {landing ? (
+                    <HeadlineReveal lines={['Reputation', 'on the record.']} />
+                  ) : (
+                    <>
+                      Reputation
+                      <br />
+                      on the record.
+                    </>
                   )}
-                </form>
-              </Panel>
-            </div>
+                </FieldText>
 
-            <FieldText size="mono" as="div">
-              free.{' '}
-              <a href="/privacy" style={{ color: 'inherit' }}>
-                privacy
-              </a>
-              {' / '}
-              <a href="/terms" style={{ color: 'inherit' }}>
-                terms
-              </a>
-            </FieldText>
+                <Panel
+                  label="Read your brand"
+                  meta="any public X account"
+                  style={{ marginTop: 'clamp(24px, 5vh, 44px)', maxWidth: 460 }}
+                  padding={22}
+                >
+                  {fieldScanForm}
+                </Panel>
+              </div>
 
-            <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}>
-              <MetaStrip
-                items={[
-                  'DOC — 01',
-                  '//',
-                  'THE INDEX',
-                  'THE RECORD OF CREATOR REPUTATION',
-                  'CLASS 01–08',
-                  'READ FROM REAL POSTS',
-                  'FOUNDING 100',
-                  'MYBRANDOS.APP',
-                  '//',
-                ]}
-              />
+              <FieldText size="mono" as="div">
+                free.{' '}
+                <a href="/privacy" style={{ color: 'inherit' }}>
+                  privacy
+                </a>
+                {' / '}
+                <a href="/terms" style={{ color: 'inherit' }}>
+                  terms
+                </a>
+              </FieldText>
+
+              {landing && <CellReader host={heroRef} />}
+              <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}>
+                {landing ? (
+                  <LiveStrip items={stripItems(landing)} />
+                ) : (
+                  <MetaStrip
+                    items={[
+                      'DOC — 01',
+                      '//',
+                      'THE INDEX',
+                      'THE RECORD OF CREATOR REPUTATION',
+                      'CLASS 01–08',
+                      'READ FROM REAL POSTS',
+                      'FOUNDING 100',
+                      'MYBRANDOS.APP',
+                      '//',
+                    ]}
+                  />
+                )}
+              </div>
             </div>
+            {landing && <LandingChapters data={landing} scanForm={fieldScanForm} />}
           </div>
         )}
 
