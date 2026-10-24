@@ -31,6 +31,27 @@ const FORMAT_RULES: Record<CopyFormat, string> = {
     'Whatever they ask for (bios, captions, landing page lines, DMs, scripts). Match the length the format needs.',
 };
 
+/** Email sub-types (format 'email' only). Each adds rules on top of the email format. */
+export const EMAIL_KINDS = ['pitch', 'newsletter', 'follow-up', 'collab', 'announce'] as const;
+export type EmailKind = (typeof EMAIL_KINDS)[number];
+
+export function isEmailKind(v: unknown): v is EmailKind {
+  return typeof v === 'string' && (EMAIL_KINDS as readonly string[]).includes(v);
+}
+
+const EMAIL_KIND_RULES: Record<EmailKind, string> = {
+  pitch:
+    'BRAND PITCH (cold, to a brand they want to work with). Under 150 words. Open with why THIS brand (something specific about it; if they did not give you one, use a [what you noticed about the brand] placeholder). Then what they would make for the brand, tied to their content pillars. Then proof from what already works for them; audience size, rates and past results are [placeholders] unless they gave you the numbers. One ask: a reply or a short call. Subject lines name the brand or the idea, never "Partnership opportunity" or "Collaboration".',
+  newsletter:
+    'NEWSLETTER ISSUE (to their own subscribers). A subject that makes one promise, then the issue: a short opener in their voice, 2-4 sections with plain headings, one call to action at the end. Use their content pillars for the sections unless they named a topic.',
+  'follow-up':
+    'FOLLOW-UP (to someone who did not reply, or after a call or a finished deal). Under 80 words. Reference the earlier email or call in one line, add ONE new thing (an idea, a result, a date), and make the ask again, smaller. Never guilt-trip ("just bumping this", "circling back").',
+  collab:
+    'COLLAB ASK (to another creator). Under 120 words. Peer to peer, not a pitch deck. Why them specifically, the one idea, what each side gets, an easy yes or no.',
+  announce:
+    'ANNOUNCEMENT (a launch, product, drop or news to their own list). Lead with the thing and the date. One reason it matters to the reader, one call to action, a P.S. for the detail people will ask about.',
+};
+
 export interface CopyBrand {
   handle: string;
   archetype: string | null;
@@ -88,7 +109,11 @@ export async function copyBrandForUser(userId: string, handle: string): Promise<
   };
 }
 
-export function buildCopywriterPrompt(brand: CopyBrand, format: CopyFormat): string {
+export function buildCopywriterPrompt(
+  brand: CopyBrand,
+  format: CopyFormat,
+  emailKind?: EmailKind | null
+): string {
   const lines = [
     brand.archetype ? `Archetype: ${brand.archetype}` : null,
     brand.pillars.length ? `Content pillars: ${brand.pillars.join(', ')}` : null,
@@ -110,7 +135,7 @@ THEIR VOICE (posts that scored on-brand; match rhythm, vocabulary, casing, punct
 ${samples}
 
 CURRENT FORMAT:
-${FORMAT_RULES[format]}
+${FORMAT_RULES[format]}${format === 'email' && emailKind ? `\n${EMAIL_KIND_RULES[emailKind]}` : ''}
 
 HOW TO WRITE:
 - Sound like their posts above. If they write lowercase, write lowercase. If they never use emoji, don't.

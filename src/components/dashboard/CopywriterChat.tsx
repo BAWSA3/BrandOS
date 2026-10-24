@@ -10,6 +10,7 @@ import { DASH_FONTS } from '@/components/dashboard/dashFonts';
 // by "---" lines and render as cards, each with its own Copy button.
 
 type Format = 'x-post' | 'thread' | 'email' | 'ad' | 'other';
+type EmailKind = 'pitch' | 'newsletter' | 'follow-up' | 'collab' | 'announce';
 type Msg = { role: 'user' | 'assistant'; content: string };
 
 const MONO = DASH_FONTS.mono;
@@ -30,11 +31,8 @@ const FORMATS: { id: Format; label: string; starters: string[] }[] = [
     label: 'Thread',
     starters: ['A thread teaching my best lesson', 'Break down how I got my last result'],
   },
-  {
-    id: 'email',
-    label: 'Email',
-    starters: ['A newsletter intro for this week', 'A pitch email to a brand I want to work with'],
-  },
+  // Email starters come from EMAIL_KINDS
+  { id: 'email', label: 'Email', starters: [] },
   {
     id: 'ad',
     label: 'Ad',
@@ -42,6 +40,63 @@ const FORMATS: { id: Format; label: string; starters: string[] }[] = [
   },
   { id: 'other', label: 'Other', starters: ['Rewrite my X bio', 'A cold DM to a collaborator'] },
 ];
+
+// Mirrors EMAIL_KINDS in src/lib/copywriter.ts (server-only, so not imported)
+const EMAIL_KINDS: { id: EmailKind; label: string; placeholder: string; starters: string[] }[] = [
+  {
+    id: 'pitch',
+    label: 'Brand pitch',
+    placeholder: 'Which brand, and what would you make for them?',
+    starters: [
+      'Pitch a brand I already use and love',
+      'Pitch a sponsored thread to a tool in my niche',
+    ],
+  },
+  {
+    id: 'newsletter',
+    label: 'Newsletter',
+    placeholder: 'What is this issue about?',
+    starters: ['This week’s issue from my best post', 'A first issue introducing my newsletter'],
+  },
+  {
+    id: 'follow-up',
+    label: 'Follow-up',
+    placeholder: 'Who are you following up with, and what happened last?',
+    starters: [
+      'Follow up on a pitch with no reply',
+      'Thank a brand after a campaign and ask for the next one',
+    ],
+  },
+  {
+    id: 'collab',
+    label: 'Collab',
+    placeholder: 'Which creator, and what is the idea?',
+    starters: ['Ask a bigger creator in my niche to do a Space together'],
+  },
+  {
+    id: 'announce',
+    label: 'Announcement',
+    placeholder: 'What are you announcing, and when?',
+    starters: ['Announce a launch to my list', 'Tell my list about a new offer'],
+  },
+];
+
+/** "Subject:" / "Preview:" lines at the top of an email draft, split from the body. */
+function splitEmail(text: string): { subjects: string[]; preview: string | null; body: string } {
+  const subjects: string[] = [];
+  let preview: string | null = null;
+  const lines = text.split('\n');
+  let i = 0;
+  for (; i < lines.length; i++) {
+    const line = lines[i].trim();
+    const m = line.match(/^(Subject|Preview)(?:\s*\d+)?:\s*(.+)$/i);
+    if (m) {
+      if (m[1].toLowerCase() === 'subject') subjects.push(m[2].trim());
+      else preview = m[2].trim();
+    } else if (line) break;
+  }
+  return { subjects, preview, body: lines.slice(i).join('\n').trim() };
+}
 
 function splitOptions(text: string): { label: string | null; body: string }[] {
   return text
@@ -76,6 +131,68 @@ function CopyButton({ text }: { text: string }) {
   );
 }
 
+const microLabel: React.CSSProperties = {
+  fontFamily: MONO,
+  color: 'var(--d-muted)',
+};
+
+/**
+ * One option card's content. Email drafts get their subject lines pulled out
+ * (each with its own Copy, since subject and body are pasted into separate
+ * fields); everything else renders as-is.
+ */
+function OptionBody({ body, done }: { body: string; done: boolean }) {
+  const email = splitEmail(body);
+  if (!email.subjects.length)
+    return (
+      <>
+        <div className="text-[14px] leading-relaxed" style={{ whiteSpace: 'pre-wrap' }}>
+          {body}
+        </div>
+        {done && (
+          <div className="mt-3 flex justify-end">
+            <CopyButton text={body} />
+          </div>
+        )}
+      </>
+    );
+  return (
+    <>
+      <div className="mb-1 text-[10px] uppercase tracking-[0.16em]" style={microLabel}>
+        Subject lines
+      </div>
+      <ul className="mb-3 flex flex-col divide-y border-y" style={{ borderColor: 'var(--d-rule)' }}>
+        {email.subjects.map((sub, k) => (
+          <li
+            key={k}
+            className="flex items-center justify-between gap-3 py-2 text-[14px]"
+            style={{ borderColor: 'var(--d-rule)' }}
+          >
+            <span>{sub}</span>
+            {done && <CopyButton text={sub} />}
+          </li>
+        ))}
+      </ul>
+      {email.preview && (
+        <div className="mb-3 text-[13px]" style={{ color: 'var(--d-muted)' }}>
+          <span className="mr-2 text-[10px] uppercase tracking-[0.16em]" style={microLabel}>
+            Preview
+          </span>
+          {email.preview}
+        </div>
+      )}
+      <div className="text-[14px] leading-relaxed" style={{ whiteSpace: 'pre-wrap' }}>
+        {email.body}
+      </div>
+      {done && email.body && (
+        <div className="mt-3 flex justify-end">
+          <CopyButton text={email.body} />
+        </div>
+      )}
+    </>
+  );
+}
+
 /** Stand-in for the API in preview mode: streams `text` in small chunks. */
 function demoStream(text: string): ReadableStream<Uint8Array> {
   const enc = new TextEncoder();
@@ -94,13 +211,16 @@ export default function CopywriterChat({
   handle,
   colorway,
   demoReply,
+  initialFormat = 'x-post',
 }: {
   handle: string | null;
   colorway: Colorway;
   /** Preview only (/world-preview/write): reply with this instead of calling the API. */
   demoReply?: string;
+  initialFormat?: Format;
 }) {
-  const [format, setFormat] = useState<Format>('x-post');
+  const [format, setFormat] = useState<Format>(initialFormat);
+  const [emailKind, setEmailKind] = useState<EmailKind>('pitch');
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState('');
   const [busy, setBusy] = useState(false);
@@ -130,7 +250,11 @@ export default function CopywriterChat({
         : await fetch('/api/dashboard/copywriter', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ format, messages: next }),
+            body: JSON.stringify({
+              format,
+              ...(format === 'email' ? { emailKind } : {}),
+              messages: next,
+            }),
             signal: ac.signal,
           });
       if (!res.ok || !res.body) {
@@ -163,6 +287,12 @@ export default function CopywriterChat({
   }
 
   const current = FORMATS.find((f) => f.id === format)!;
+  const kind = EMAIL_KINDS.find((k) => k.id === emailKind)!;
+  const starters = format === 'email' ? kind.starters : current.starters;
+  const placeholder =
+    format === 'email'
+      ? `${kind.label}: ${kind.placeholder}`
+      : `${current.label}: what should it say?`;
 
   return (
     <main
@@ -245,6 +375,36 @@ export default function CopywriterChat({
             );
           })}
         </div>
+        {format === 'email' && (
+          <div
+            className="flex flex-wrap items-center gap-2 border-b py-3"
+            role="tablist"
+            aria-label="Email type"
+            style={{ borderColor: 'var(--d-rule)' }}
+          >
+            {EMAIL_KINDS.map((k) => {
+              const on = k.id === emailKind;
+              return (
+                <button
+                  key={k.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={on}
+                  onClick={() => setEmailKind(k.id)}
+                  className="border px-2.5 py-1 text-[10px] uppercase tracking-[0.14em]"
+                  style={{
+                    fontFamily: MONO,
+                    background: on ? 'var(--d-ink)' : 'transparent',
+                    borderColor: on ? 'var(--d-ink)' : 'var(--d-rule)',
+                    color: on ? 'var(--d-canvas)' : 'var(--d-muted)',
+                  }}
+                >
+                  {k.label}
+                </button>
+              );
+            })}
+          </div>
+        )}
 
         <section className="mt-6 flex flex-1 flex-col gap-4" aria-live="polite">
           {messages.length === 0 && (
@@ -256,7 +416,7 @@ export default function CopywriterChat({
                 Try
               </span>
               <div className="flex flex-wrap gap-2">
-                {current.starters.map((s) => (
+                {starters.map((s) => (
                   <button
                     key={s}
                     type="button"
@@ -304,17 +464,7 @@ export default function CopywriterChat({
                           {opt.label}
                         </div>
                       )}
-                      <div
-                        className="text-[14px] leading-relaxed"
-                        style={{ whiteSpace: 'pre-wrap' }}
-                      >
-                        {opt.body}
-                      </div>
-                      {!(busy && i === messages.length - 1) && (
-                        <div className="mt-3 flex justify-end">
-                          <CopyButton text={opt.body} />
-                        </div>
-                      )}
+                      <OptionBody body={opt.body} done={!(busy && i === messages.length - 1)} />
                     </div>
                   ))
                 )}
@@ -348,7 +498,7 @@ export default function CopywriterChat({
             }}
             rows={2}
             maxLength={4000}
-            placeholder={`${current.label}: what should it say?`}
+            placeholder={placeholder}
             aria-label="Message"
             className="min-h-[44px] flex-1 resize-none bg-transparent px-2 py-2 text-[14px] outline-none"
             style={{ color: 'var(--d-ink)', background: 'transparent' }}
