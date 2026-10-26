@@ -98,8 +98,8 @@ export const PLAN_CONFIGS: Record<SubscriptionTier, PlanConfig> = {
     description: 'Everything you need to build a standout brand',
     monthlyPrice: 29,
     annualPrice: 23,
-    stripePriceIdMonthly: process.env.STRIPE_PRICE_PRO_MONTHLY || '',
-    stripePriceIdAnnual: process.env.STRIPE_PRICE_PRO_ANNUAL || '',
+    stripePriceIdMonthly: stripeEnv('STRIPE_PRICE_PRO_MONTHLY'),
+    stripePriceIdAnnual: stripeEnv('STRIPE_PRICE_PRO_ANNUAL'),
     popular: true,
     limits: {
       brands: 3,
@@ -126,8 +126,8 @@ export const PLAN_CONFIGS: Record<SubscriptionTier, PlanConfig> = {
     description: 'For agencies and multi-brand companies',
     monthlyPrice: 99,
     annualPrice: 79,
-    stripePriceIdMonthly: process.env.STRIPE_PRICE_AGENCY_MONTHLY || '',
-    stripePriceIdAnnual: process.env.STRIPE_PRICE_AGENCY_ANNUAL || '',
+    stripePriceIdMonthly: stripeEnv('STRIPE_PRICE_AGENCY_MONTHLY'),
+    stripePriceIdAnnual: stripeEnv('STRIPE_PRICE_AGENCY_ANNUAL'),
     limits: {
       brands: 15,
       checksPerMonth: 1000,
@@ -223,6 +223,7 @@ export function normalizeTier(tier: SubscriptionTier): SubscriptionTier {
 
 import prisma from '@/lib/db';
 import type { PlanTier, PlanLimit } from '@prisma/client';
+import { stripeEnv } from './stripe-env';
 
 export type { PlanTier };
 
@@ -321,27 +322,27 @@ export const ONE_TIME_PRODUCTS = {
     description:
       'Your complete brand breakdown — archetype profile, phase analysis, cohort comparison, pattern intelligence, and actionable insights. See how you rank against creators like you and what top scorers did to break through.',
     price: 4.99,
-    stripePriceId: process.env.STRIPE_PRICE_INTELLIGENCE_REPORT || '',
+    stripePriceId: stripeEnv('STRIPE_PRICE_INTELLIGENCE_REPORT'),
   },
   BRAND_DNA_REPORT: {
     name: 'Brand DNA Deep-Dive Report',
     description:
       'A comprehensive AI-generated analysis of your brand identity, voice, and strategy — delivered as a premium PDF.',
     price: 39,
-    stripePriceId: process.env.STRIPE_PRICE_DNA_REPORT || '',
+    stripePriceId: stripeEnv('STRIPE_PRICE_DNA_REPORT'),
   },
   SCORE_BOOST_AUDIT: {
     name: 'Score Boost Audit',
     description:
       'Analyze your last 50 tweets with AI-powered rewrite suggestions to boost your brand score.',
     price: 19,
-    stripePriceId: process.env.STRIPE_PRICE_SCORE_BOOST || '',
+    stripePriceId: stripeEnv('STRIPE_PRICE_SCORE_BOOST'),
   },
   ARCHETYPE_DEEP_DIVE: {
     name: 'Archetype Deep-Dive',
     description:
       'Extended archetype analysis with collaboration compatibility, content templates, and growth playbook.',
     price: 9,
-    stripePriceId: process.env.STRIPE_PRICE_ARCHETYPE_DEEP_DIVE || '',
+    stripePriceId: stripeEnv('STRIPE_PRICE_ARCHETYPE_DEEP_DIVE'),
   },
 };
