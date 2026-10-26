@@ -11,7 +11,14 @@ export const SAMPLE_VIEW: GrowthView = {
     { id: 'b2', handle: 'mybrandos', kind: 'brand' },
     { id: 'b3', handle: 'acmelabs', kind: 'brand' },
   ],
-  brand: { id: 'b1', handle: 'jbawsa', kind: 'creator', lastSyncedAt: null },
+  brand: {
+    id: 'b1',
+    handle: 'jbawsa',
+    kind: 'creator',
+    lastSyncedAt: null,
+    name: 'Bawsa',
+    avatarUrl: null,
+  },
   limits: { brands: 5, competitors: 5 },
   score: {
     value: 72,
@@ -148,25 +155,37 @@ export const SAMPLE_VIEW: GrowthView = {
   ],
 };
 
+const H = 3_600_000;
+const D = 24 * H;
+const ago = (ms: number) => new Date(Date.now() - ms).toISOString();
+
 export const SAMPLE_IDEAS: Idea[] = [
   {
     id: 1,
+    createdAt: ago(2 * H),
     col: 'ideas',
     text: 'Thread: "how I priced my first brand deal" (5 posts)',
     why: 'Threads earn 2.4× your average and you posted 1 this month.',
   },
   {
     id: 2,
+    createdAt: ago(5 * H),
     col: 'ideas',
     text: 'Screenshot your BrandOS score jump and explain the one change',
     why: 'Posts with media earn 2.1× text-only.',
   },
   {
     id: 3,
+    createdAt: ago(26 * H),
     col: 'ideas',
     text: 'Reply-guy audit: 3 replies that grew my account',
     why: '@0xhvdes gets 38 replies a post; you get 21.',
   },
-  { id: 4, col: 'drafting', text: 'Why I stopped posting "gm"' },
-  { id: 5, col: 'posted', text: 'The 3 income streams nobody tells you about' },
+  { id: 4, col: 'drafting', text: 'Why I stopped posting "gm"', createdAt: ago(3 * D) },
+  {
+    id: 5,
+    col: 'posted',
+    text: 'The 3 income streams nobody tells you about',
+    createdAt: ago(9 * D),
+  },
 ];

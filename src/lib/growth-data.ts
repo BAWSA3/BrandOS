@@ -23,7 +23,15 @@ export type Phase = (typeof PHASES)[number];
 
 export interface GrowthView {
   brands: { id: string; handle: string; kind: string }[];
-  brand: { id: string; handle: string; kind: string; lastSyncedAt: string | null };
+  brand: {
+    id: string;
+    handle: string;
+    kind: string;
+    lastSyncedAt: string | null;
+    /** From the X profile cache, for the idea board's post composer. */
+    name?: string | null;
+    avatarUrl?: string | null;
+  };
   limits: { brands: number; competitors: number };
   score: {
     value: number;
@@ -58,6 +66,7 @@ export interface GrowthView {
     why: string;
     source: string;
     status: string;
+    createdAt: string;
   }[];
   /** Null until the audience tables exist (migration 041) or anything was read. */
   audience: AudienceSummary | null;
@@ -117,6 +126,21 @@ async function latestRead(handle: string) {
     scannedAt: (row.createdAt ?? new Date()).toISOString(),
     nextMoves: [...list(moves), ...list(fixes)].slice(0, 3),
   };
+}
+
+/** Display name and avatar from the X profile cache (pbs.twimg.com only). */
+async function brandProfile(handle: string) {
+  const row = await prisma.xProfileCache
+    .findUnique({ where: { username: handle.toLowerCase() }, select: { profileData: true } })
+    .catch(() => null);
+  const pd = parseJson<{ name?: unknown; profile_image_url?: unknown }>(row?.profileData);
+  const name = typeof pd?.name === 'string' && pd.name.trim() ? pd.name.trim().slice(0, 50) : null;
+  const img = pd?.profile_image_url;
+  const avatarUrl =
+    typeof img === 'string' && img.startsWith('https://pbs.twimg.com/')
+      ? img.replace('_normal', '_400x400')
+      : null;
+  return { name, avatarUrl };
 }
 
 const toSnap = (s: {
@@ -191,9 +215,11 @@ export async function getGrowthView(
         why: true,
         source: true,
         status: true,
+        createdAt: true,
       },
     })
     .catch(() => []);
+  const profile = await brandProfile(brand.displayHandle);
   const [score, ...compScores] = await Promise.all([
     latestRead(brand.handle),
     ...competitors.map((c) => latestRead(c.handle)),
@@ -209,6 +235,8 @@ export async function getGrowthView(
       handle: brand.displayHandle,
       kind: brand.kind,
       lastSyncedAt: brand.lastSyncedAt?.toISOString() ?? null,
+      name: profile.name,
+      avatarUrl: profile.avatarUrl,
     },
     limits,
     score,
@@ -235,6 +263,7 @@ export async function getGrowthView(
       why: i.why,
       source: i.source,
       status: i.status,
+      createdAt: i.createdAt.toISOString(),
     })),
     audience: audienceRows?.length ? audienceSummary(audienceRows) : null,
     formats: formatPerformance(rows),
