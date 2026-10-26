@@ -4,8 +4,14 @@
    line); paragraphs avoid a lone last word. In the base layer, so a utility
    class can still override it. */
 @layer base {
-  h1, h2, h3 { text-wrap: balance; }
-  p { text-wrap: pretty; }
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+  p {
+    text-wrap: pretty;
+  }
 }
 
 /* ============================================
