@@ -18,6 +18,7 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import pg from 'pg';
 import { normalizeArchetypeName } from '../src/lib/archetype-names';
+import { isLikelyCompany } from '../src/lib/account-kind';
 import { CLASSES } from '../src/lib/classifications';
 import { NICHES, BLURB_MAX, MAX_NICHES } from '../src/lib/index-rules';
 
@@ -64,11 +65,7 @@ function arg(name: string): string | undefined {
 }
 
 // Brands, protocols and media accounts aren't creators; the Index is for people.
-const NOT_A_PERSON =
-  /(\b(the|we|our)\b.*\b(network|platform|protocol|layer|stablecoin)|labs?\b|protocol|network|\bdao\b|foundation|official|finance|exchange|token|wallet|capital|ventures|\bapp\b|\bhq\b|\binc\b|studios?|\bnews\b|markets?\b|\bfund\b|\bchain\b)/i;
-
-// Company bios speak as "we" / "the <product>": "We connect…", "The stablecoin network…".
-const ORG_BIO = /^\s*(we|the|our)\b|\b(we (help|connect|build|are))\b|web apps|\bplatform for\b/i;
+// Shared with the homepage recent reads (src/lib/account-kind.ts).
 
 const NICHE_WORDS: Record<string, RegExp> = {
   DeFi: /\b(defi|yield|lending|liquidity|dex|stablecoin|amm|restaking)\b/i,
@@ -172,7 +169,8 @@ async function pick(out: string) {
       if (!r.phase_scores) continue;
       const name = typeof pd.name === 'string' ? pd.name.trim() : null;
       const bio = typeof pd.description === 'string' ? pd.description : null;
-      if (NOT_A_PERSON.test(`${r.h} ${name ?? ''}`) || ORG_BIO.test(bio ?? '')) continue;
+      if (isLikelyCompany({ handle: r.h, name: name ?? null, bio, summary: r.summary ?? null }))
+        continue;
       if (!/^[a-z0-9_]{1,15}$/.test(r.h)) continue;
       const avatar =
         typeof pd.profile_image_url === 'string' &&

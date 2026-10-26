@@ -40,6 +40,8 @@ export interface ReadCandidate {
   avatar: string | null;
   name: string | null;
   readAt: string; // ISO
+  /** A company / product account (`isLikelyCompany`): never shown as a person. */
+  company?: boolean;
 }
 
 /** A homepage card for a recent read: a public read, never an Index entry. */
@@ -71,6 +73,7 @@ export function readLine(summary: string | null | undefined, max = 96): string {
  * scores among accounts read lately, one per class first so the run shows the
  * range, then the next highest. Only complete reads with a real picture: a
  * read with no phases, no summary or no class is a broken or fallback scan.
+ * Companies and products are skipped: the run shows people.
  * Input is one candidate per handle (their latest read). Pure (tested).
  */
 export function pickRecentReads(
@@ -85,6 +88,7 @@ export function pickRecentReads(
       if (seen.has(h)) return false;
       seen.add(h);
       return (
+        !c.company &&
         c.phases !== null &&
         !!c.summary?.trim() &&
         !!c.avatar &&

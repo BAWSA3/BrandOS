@@ -10,6 +10,7 @@ import {
   type ReadCandidate,
 } from '../src/lib/landing-rules';
 import { classify } from '../src/lib/classifications';
+import { isLikelyCompany } from '../src/lib/account-kind';
 import { inflateSync } from 'node:zlib';
 import {
   BAYER8,
@@ -320,6 +321,90 @@ test(
   'recent reads: a handle appears once (case-insensitive)',
   pickRecentReads([cand('Naval', 84, 'FORESIGHT'), cand('naval', 80, 'FORESIGHT')], classOf)
     .length === 1
+);
+test(
+  'recent reads: company accounts are skipped',
+  pickRecentReads(
+    [cand('vercel', 95, 'SOURCE', { company: true }), cand('naval', 84, 'FORESIGHT')],
+    classOf
+  )
+    .map((r) => r.handle)
+    .join(',') === 'naval'
+);
+const person = (extra: Partial<Parameters<typeof isLikelyCompany>[0]> = {}) => ({
+  handle: 'someone',
+  name: 'Some One',
+  bio: null,
+  summary: null,
+  ...extra,
+});
+test(
+  'company: a product bio ("infrastructure for …") is a company',
+  isLikelyCompany(
+    person({
+      handle: 'vercel',
+      name: 'Vercel',
+      bio: 'Agentic Infrastructure for apps and agents.',
+      summary: 'Vercel has built a highly focused, technically authoritative brand.',
+    })
+  )
+);
+test(
+  'company: tracked as a brand by its owner or an admin wins',
+  isLikelyCompany(person({ tracked: 'brand', bio: 'i post about markets' }))
+);
+test(
+  'company: org names and "we" bios are companies',
+  isLikelyCompany(person({ handle: 'uniswap', name: 'Uniswap Labs' })) &&
+    isLikelyCompany(person({ bio: 'We help creators get paid.' })) &&
+    isLikelyCompany(person({ summary: 'Acme is a payments platform for small teams.' })) &&
+    isLikelyCompany(person({ summary: 'Swoobz operates as a focused product brand.' })) &&
+    isLikelyCompany(person({ bio: 'The stablecoin network that makes money programmable.' }))
+);
+test(
+  'company: individual creators are kept',
+  [
+    person({
+      handle: 'naval',
+      name: 'Naval',
+      bio: 'Incompressible',
+      summary: 'Naval is a top-tier intellectual brand built on first-principles thinking.',
+    }),
+    person({ handle: 'levelsio', name: '@levelsio', bio: '💸 $86K/m 📸 $44K/m' }),
+    person({
+      handle: 'jbawsa',
+      name: 'BAWSA',
+      bio: 'building creative ai systems to scale your brand',
+    }),
+    person({
+      handle: 'galileowilson',
+      name: 'Galileo Wilson',
+      bio: 'wizard behind your favorite projects | work: @whop @avax',
+    }),
+    person({ handle: 'collabking', name: 'Collab King', bio: 'collabs and threads' }),
+    person({
+      handle: 'ruthybuilds',
+      name: 'Julian | Surgence Labs (a.k.a RuthyBuilds)',
+      bio: 'Co-Founder @Surgence_io: Making FinTech, Crypto, AI companies go viral.',
+    }),
+    person({ handle: 'satwikofficial', name: 'Satwik', bio: 'creator of immaculate vibes' }),
+    person({
+      handle: 'solquicks',
+      name: 'quicks',
+      bio: 'The Fox @SatRush | Creator @domaprotocol',
+    }),
+    person({
+      handle: 'jerrygmii',
+      name: 'Jerry',
+      summary: 'Jerry is a specialized trend-spotter and platform advocate in Web3.',
+    }),
+  ].every((a) => !isLikelyCompany(a))
+);
+test(
+  'company: ambiguous product wording in a first-person bio stays a person',
+  !isLikelyCompany(
+    person({ bio: "I build infrastructure for onchain apps. my takes, not my employer's." })
+  )
 );
 test('read line: first sentence', readLine('One thing. Two things.') === 'One thing.');
 test(
