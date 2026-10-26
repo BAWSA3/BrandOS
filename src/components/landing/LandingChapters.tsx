@@ -26,6 +26,7 @@ import { CLASSES, classLabel, classify } from '@/lib/classifications';
 import { EDITOR, LANDING } from '@/lib/landing-copy';
 import type { LandingData } from '@/lib/landing-data';
 import type { IndexCard } from '@/lib/creator-index';
+import type { RecentRead } from '@/lib/landing-rules';
 import {
   BONE,
   CORAL,
@@ -1544,11 +1545,43 @@ const SAMPLE_ENTRIES: IndexCard[] = CLASSES.map((c, i) => ({
   joinedAt: '',
 }));
 
-function IndexRun({ cards, sample }: { cards: IndexCard[]; sample: boolean }) {
+/** A recent read as a card: a public read, never an Index entry (no number). */
+const readCard = (r: RecentRead): IndexCard => ({
+  handle: r.handle,
+  number: 0,
+  name: r.name,
+  avatar: r.avatar,
+  score: r.score,
+  archetype: r.archetype,
+  niches: r.niches,
+  blurb: r.blurb,
+  featured: false,
+  joinedAt: '',
+});
+
+function IndexRun({
+  cards,
+  sample,
+  reads,
+}: {
+  cards: IndexCard[];
+  sample: boolean;
+  /** Read dates by handle: these cards are recent reads, not entries. */
+  reads?: Map<string, string>;
+}) {
   const reduce = useReducedMotion();
+  const I = LANDING.index;
   const items = cards.map((c) => (
     <div key={`${c.handle}-${c.number}`} style={{ width: 312 }}>
-      <IndexEntryCard c={c} sample={sample} />
+      <IndexEntryCard
+        c={c}
+        sample={sample}
+        read={
+          reads?.has(c.handle)
+            ? { date: reads.get(c.handle)!, label: I.recentRead, on: I.readOn }
+            : undefined
+        }
+      />
     </div>
   ));
   if (reduce) {
@@ -1760,6 +1793,8 @@ export default function LandingChapters({
   const C = LANDING.close;
   const chapters = [P, LANDING.how, R, I, C].map((c) => ({ id: c.id, label: c.label }));
   const live = data.index.open && data.index.recent.length > 0;
+  // before the Index opens: real recent reads (3+), else the labelled samples
+  const showReads = !live && data.index.reads.length >= 3;
 
   return (
     <DitherWipeProvider ms={360}>
@@ -1879,16 +1914,35 @@ export default function LandingChapters({
                     padding: '4px 8px',
                   }}
                 >
-                  {live ? `${I.membersLabel}: ${data.index.members}` : I.tickerLabel}
+                  {live
+                    ? `${I.membersLabel}: ${data.index.members}`
+                    : showReads
+                      ? I.readsLabel
+                      : I.tickerLabel}
                 </span>
               </div>
               <div
                 style={{ margin: '24px calc(-1 * clamp(16px, 3.5vw, 40px)) 0', overflow: 'hidden' }}
               >
                 <NearViewport minHeight={220}>
-                  <IndexRun cards={live ? data.index.recent : SAMPLE_ENTRIES} sample={!live} />
+                  {live ? (
+                    <IndexRun cards={data.index.recent} sample={false} />
+                  ) : showReads ? (
+                    <IndexRun
+                      cards={data.index.reads.map(readCard)}
+                      sample={false}
+                      reads={new Map(data.index.reads.map((r) => [r.handle, r.readAt]))}
+                    />
+                  ) : (
+                    <IndexRun cards={SAMPLE_ENTRIES} sample />
+                  )}
                 </NearViewport>
               </div>
+              {showReads && (
+                <FieldText size="mono" style={{ marginTop: 12, fontSize: 12 }}>
+                  {I.readsNote}
+                </FieldText>
+              )}
               <div className="lc-index-grid">
                 <div style={{ gridArea: 'info', minWidth: 0 }}>
                   <Panel padding={24}>

@@ -1,5 +1,13 @@
 @import "tailwindcss";
 
+/* Headlines break into even lines (no single word left alone on the last
+   line); paragraphs avoid a lone last word. In the base layer, so a utility
+   class can still override it. */
+@layer base {
+  h1, h2, h3 { text-wrap: balance; }
+  p { text-wrap: pretty; }
+}
+
 /* ============================================
    CUSTOM FONT FACES (kept for landing page)
    ============================================ */

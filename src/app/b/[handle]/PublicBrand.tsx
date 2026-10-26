@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import Wordmark from '@/components/Wordmark';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { DASH_FONTS } from '@/components/dashboard/dashFonts';
 import { RollNumber, useBoot } from '@/components/dashboard/dashMotion';
@@ -206,6 +206,15 @@ function BrandRead({ card }: { card: BrandCard }) {
   );
 }
 
+/**
+ * Sign in (or create an account: /signup is one screen for both) and come
+ * straight back here; `compare=1` runs the comparison with the viewer's own
+ * handle on return, so nobody types it twice.
+ */
+function signInToCompare(handle: string): string {
+  return `/signup?next=${encodeURIComponent(`/@${handle}?compare=1`)}`;
+}
+
 function CompareView({ data, signedIn }: { data: Compare; signedIn: boolean }) {
   const { me, them } = data;
   const lead = me.score === them.score ? null : me.score > them.score ? 'me' : 'them';
@@ -309,13 +318,21 @@ function CompareView({ data, signedIn }: { data: Compare; signedIn: boolean }) {
               Create your BrandOS account to open your dashboard (score history, every post
               analyzed, your next moves) and use BrandOS inside Claude and ChatGPT.
             </p>
-            <Link
-              href="/signup?next=/dashboard"
-              className="mt-4 inline-block bg-white px-4 py-3 text-[11px] uppercase tracking-[0.14em]"
-              style={{ fontFamily: MONO, color: BLUE }}
-            >
-              Create your account →
-            </Link>
+            <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-3">
+              <Link
+                href="/signup?next=/dashboard"
+                className="inline-block bg-white px-4 py-3 text-[11px] uppercase tracking-[0.14em]"
+                style={{ fontFamily: MONO, color: BLUE }}
+              >
+                Create your account →
+              </Link>
+              <Link
+                href="/signup?next=/dashboard"
+                className="text-[12px] underline underline-offset-2 hover:opacity-80"
+              >
+                Already have an account? Sign in
+              </Link>
+            </div>
           </>
         )}
       </div>
@@ -395,7 +412,10 @@ export default function PublicBrand({
 
   const compare = async (e: React.FormEvent) => {
     e.preventDefault();
-    const me = mine.trim().replace(/^@/, '');
+    await runCompare(mine.trim().replace(/^@/, ''));
+  };
+
+  const runCompare = async (me: string) => {
     if (!/^[A-Za-z0-9_]{1,15}$/.test(me)) {
       setCmpError('Enter your X handle, like @yourname.');
       return;
@@ -426,6 +446,34 @@ export default function PublicBrand({
     }
   };
 
+  // back from sign-in with ?compare=1: compare with the viewer's own handle
+  // (or the one they typed before signing up), once, then tidy the URL
+  const auto = useRef(false);
+  const compareBox = useRef<HTMLElement>(null);
+  useEffect(() => {
+    if (auto.current || !card || !viewer) return;
+    const url = new URL(window.location.href);
+    if (url.searchParams.get('compare') !== '1') return;
+    auto.current = true;
+    url.searchParams.delete('compare');
+    window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`);
+    let me = viewer.handle ?? '';
+    if (!me) {
+      try {
+        me = window.localStorage.getItem('brandos:pending-handle') ?? '';
+      } catch {
+        me = '';
+      }
+    }
+    compareBox.current?.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+    if (me && me.toLowerCase() !== handle.toLowerCase()) {
+      setMine(me);
+      void runCompare(me);
+    }
+    // runCompare reads only stable values for this page
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [card, viewer, handle, reduce]);
+
   return (
     <main
       className="min-h-screen px-4 pb-16 pt-6 md:px-8"
@@ -435,7 +483,7 @@ export default function PublicBrand({
         <header className="flex items-center justify-between">
           <Wordmark height={26} mode={wordmarkFor(skin)} />
           <Link
-            href={viewer ? '/dashboard' : '/signup?next=/dashboard'}
+            href={viewer ? '/dashboard' : `/signup?next=${encodeURIComponent(`/@${handle}`)}`}
             className="text-[11px] uppercase tracking-[0.14em] hover:underline"
             style={{ fontFamily: MONO }}
           >
@@ -474,7 +522,8 @@ export default function PublicBrand({
 
         {card && (
           <section
-            className="mt-8 rounded-[12px] p-5 text-white md:p-8"
+            ref={compareBox}
+            className="mt-8 scroll-mt-6 rounded-[12px] p-5 text-white md:p-8"
             style={{ background: BLUE, border: '1px solid var(--p-cta-edge)' }}
           >
             <div
@@ -514,6 +563,14 @@ export default function PublicBrand({
                 {busy ? 'Scanning…' : 'Compare →'}
               </button>
             </form>
+            {!viewer && (
+              <Link
+                href={signInToCompare(card.handle)}
+                className="mt-4 inline-block text-[13px] underline underline-offset-2 hover:opacity-80"
+              >
+                Already have an account? Sign in to compare →
+              </Link>
+            )}
             {cmpError && (
               <div className="mt-3 text-[13px]" role="alert">
                 {cmpError}
