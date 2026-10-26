@@ -1,36 +1,79 @@
 import { ImageResponse } from 'next/og';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
+import { cloudsDataUrl } from '@/lib/og/dither';
+import { FIELD_DENSITY, fieldMetrics } from '@/lib/field/system';
 
 /**
  * Server-only. The one link-preview design (Direction A, "Editorial", approved
- * 2026-10-13): bone canvas, hairline header with micro labels, a huge grotesk
- * figure, a Klein-blue archetype tag, and the Brand Pass on the right (the
- * person's X photo; a blank pass for handles not scanned yet). Every shared
- * link (scan, card, /@handle, homepage) renders through here so they read as
- * one system. Stations were removed 2026-10-22.
+ * 2026-10-13): hairline header with micro labels, a huge grotesk figure, the
+ * archetype tag, and the Brand Pass on the right (the person's X photo; a blank
+ * pass for handles not scanned yet). Every shared link (scan, card, /@handle,
+ * homepage) renders through here so they read as one system. Stations were
+ * removed 2026-10-22.
+ *
+ * Score and invite cards sit on the field (approved 2026-10-26): the homepage's
+ * Direction 03 dither (seed 11, no signal cell) with a bold Helvetica-style figure (TeX Gyre Heros)
+ * and labels on Klein chips. The homepage card stays on bone.
  */
 
 const BLUE = '#0047FF';
 const BONE = '#F2EFE8';
 const INK = '#0E0E0E';
 const MUTED = '#6B6B6B';
+const ON_FIELD_MUTED = 'rgba(255,255,255,0.75)';
 export const OG_SIZE = { width: 1200, height: 630 };
 
 /** The hero wordmark (brand tokens: the logo is never typed). */
-export const wordmark = () =>
-  readFile(join(process.cwd(), 'public', 'brand', 'wordmark-day-480.png'));
+export const wordmark = (mode: 'day' | 'white' = 'day') =>
+  readFile(join(process.cwd(), 'public', 'brand', `wordmark-${mode}-480.png`));
+
+/** The homepage field at card size, painted once per instance (it never changes). */
+let fieldUrl: string | null = null;
+function field(): string {
+  if (!fieldUrl) {
+    const m = fieldMetrics(OG_SIZE.width, OG_SIZE.height);
+    fieldUrl = cloudsDataUrl({
+      ...OG_SIZE,
+      seed: 11,
+      density: FIELD_DENSITY,
+      cell: m.cell,
+      grid: m.grid,
+    });
+  }
+  return fieldUrl;
+}
 
 export async function fonts() {
-  const [grotesk, vcr] = await Promise.all([
+  const [grotesk, display, vcr] = await Promise.all([
     readFile(join(process.cwd(), 'public', 'fonts', 'Helvetica.ttf')),
+    readFile(join(process.cwd(), 'public', 'fonts', 'TeXGyreHeros-Bold.otf')),
     readFile(join(process.cwd(), 'public', 'fonts', 'VCR_OSD_MONO_1.001.ttf')),
   ]);
   return [
     { name: 'Grotesk', data: grotesk, style: 'normal' as const, weight: 400 as const },
+    // TeX Gyre Heros Bold (GUST Font License): a free Helvetica clone, for the bold figure and handle on field cards.
+    { name: 'Display', data: display, style: 'normal' as const, weight: 700 as const },
     { name: 'VCR', data: vcr, style: 'normal' as const, weight: 400 as const },
   ];
 }
+
+/** A label on the field: a Klein chip so it reads over the dots (homepage style). */
+const Chip = ({ children, size = 18 }: { children: string; size?: number }) => (
+  <div
+    style={{
+      display: 'flex',
+      background: BLUE,
+      color: '#FFFFFF',
+      fontFamily: 'VCR',
+      fontSize: size,
+      letterSpacing: 3,
+      padding: '4px 9px',
+    }}
+  >
+    {children}
+  </div>
+);
 
 const Micro = ({
   children,
@@ -94,12 +137,14 @@ function Pass({
   taste,
   score,
   portrait,
+  onField = false,
 }: {
   handle: string;
   archetype: string | null;
   taste: string | null;
   score: number | null;
   portrait: string | null;
+  onField?: boolean;
 }) {
   const s = 430 / 420;
   const code = `BOS-${handle.toUpperCase().slice(0, 12)}`;
@@ -118,7 +163,7 @@ function Pass({
         background: '#ECE9E1',
         borderRadius: 16 * s,
         padding: `${26 * s}px ${26 * s}px ${22 * s}px`,
-        boxShadow: '0 22px 50px rgba(0,0,0,0.28)',
+        boxShadow: `0 22px 50px rgba(0,0,0,${onField ? 0.38 : 0.28})`,
         transform: 'rotate(4deg)',
         color: INK,
       }}
@@ -261,10 +306,12 @@ function Pass({
 const handleSize = (h: string) => (h.length > 15 ? 26 : h.length > 11 ? 30 : 34);
 
 export async function editorialImage(card: EditorialCard, headers?: Record<string, string>) {
+  // Score + invite cards sit on the field; the homepage card keeps the bone canvas.
+  const onField = card.kind !== 'home';
   const [f, avatar, wm] = await Promise.all([
     fonts(),
     card.kind === 'score' ? loadAvatar(card.avatarUrl) : Promise.resolve(null),
-    wordmark(),
+    wordmark(onField ? 'white' : 'day'),
   ]);
 
   const figure = card.kind === 'score' ? String(card.score) : card.kind === 'invite' ? '?' : null;
@@ -278,44 +325,66 @@ export async function editorialImage(card: EditorialCard, headers?: Record<strin
         ? 'SCAN YOUR X FREE'
         : null;
   const phases = card.kind === 'score' ? card.phases : null;
+  const logo = `data:image/png;base64,${wm.toString('base64')}`;
 
   return new ImageResponse(
     <div
-      style={{ width: 1200, height: 630, display: 'flex', background: BONE, position: 'relative' }}
+      style={{
+        width: 1200,
+        height: 630,
+        display: 'flex',
+        background: onField ? BLUE : BONE,
+        position: 'relative',
+      }}
     >
-      {/* header: micro labels on a hairline */}
+      {onField && (
+        // eslint-disable-next-line @next/next/no-img-element -- satori
+        <img
+          src={field()}
+          width={1200}
+          height={630}
+          alt=""
+          style={{ position: 'absolute', left: 0, top: 0 }}
+        />
+      )}
+
+      {/* header: micro labels (on Klein chips over the field, on a hairline on bone) */}
       <div
         style={{
           position: 'absolute',
-          left: 56,
-          right: 56,
-          top: 52,
+          left: onField ? 44 : 56,
+          right: onField ? 44 : 56,
+          top: onField ? 36 : 52,
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
         }}
       >
-        {/* eslint-disable-next-line @next/next/no-img-element -- satori */}
-        <img
-          src={`data:image/png;base64,${wm.toString('base64')}`}
-          width={120}
-          height={24}
-          alt="BrandOS"
-        />
-        <Micro>{LABEL[card.kind]}</Micro>
-        <Micro>MYBRANDOS.APP</Micro>
+        {onField ? (
+          <div style={{ display: 'flex', background: BLUE, padding: '6px 8px' }}>
+            {/* eslint-disable-next-line @next/next/no-img-element -- satori */}
+            <img src={logo} width={120} height={24} alt="BrandOS" />
+          </div>
+        ) : (
+          // eslint-disable-next-line @next/next/no-img-element -- satori
+          <img src={logo} width={120} height={24} alt="BrandOS" />
+        )}
+        {onField ? <Chip>{LABEL[card.kind]}</Chip> : <Micro>{LABEL[card.kind]}</Micro>}
+        {onField ? <Chip>MYBRANDOS.APP</Chip> : <Micro>MYBRANDOS.APP</Micro>}
       </div>
-      <div
-        style={{
-          position: 'absolute',
-          left: 56,
-          right: 56,
-          top: 88,
-          height: 1,
-          background: 'rgba(14,14,14,0.18)',
-          display: 'flex',
-        }}
-      />
+      {!onField && (
+        <div
+          style={{
+            position: 'absolute',
+            left: 56,
+            right: 56,
+            top: 88,
+            height: 1,
+            background: 'rgba(14,14,14,0.18)',
+            display: 'flex',
+          }}
+        />
+      )}
 
       {/* left column */}
       <div
@@ -323,8 +392,8 @@ export async function editorialImage(card: EditorialCard, headers?: Record<strin
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'flex-end',
-          paddingLeft: 52,
-          paddingBottom: 46,
+          paddingLeft: onField ? 44 : 52,
+          paddingBottom: onField ? 40 : 46,
           width: 700,
         }}
       >
@@ -347,39 +416,35 @@ export async function editorialImage(card: EditorialCard, headers?: Record<strin
           <div style={{ display: 'flex', alignItems: 'flex-end' }}>
             <span
               style={{
-                fontFamily: 'Grotesk',
-                fontSize: 300,
-                lineHeight: 0.8,
-                letterSpacing: -14,
-                color: card.kind === 'invite' ? BLUE : INK,
+                fontFamily: 'Display',
+                fontWeight: 700,
+                fontSize: 330,
+                lineHeight: 0.76,
+                letterSpacing: -21,
+                color: '#FFFFFF',
               }}
             >
               {figure}
             </span>
-            {(card.kind === 'score' || card.kind === 'invite') && (
-              <span
-                style={{
-                  fontFamily: 'VCR',
-                  fontSize: 26,
-                  color: MUTED,
-                  marginLeft: 12,
-                  marginBottom: 18,
-                }}
-              >
-                /100
-              </span>
-            )}
+            <div style={{ display: 'flex', marginLeft: 14, marginBottom: 14 }}>
+              <Chip size={22}>/100</Chip>
+            </div>
           </div>
         )}
 
-        <div style={{ display: 'flex', alignItems: 'center', marginTop: 30 }}>
+        <div style={{ display: 'flex', alignItems: 'center', marginTop: onField ? 28 : 30 }}>
           {handle && (
             <span
               style={{
-                fontFamily: 'Grotesk',
+                display: 'flex',
+                fontFamily: onField ? 'Display' : 'Grotesk',
+                fontWeight: onField ? 700 : 400,
                 fontSize: handleSize(handle),
-                color: INK,
-                marginRight: 18,
+                letterSpacing: onField ? -1 : 0,
+                color: onField ? '#FFFFFF' : INK,
+                background: onField ? BLUE : 'transparent',
+                padding: onField ? '0 8px 2px' : 0,
+                marginRight: onField ? 12 : 18,
               }}
             >
               @{handle}
@@ -389,8 +454,8 @@ export async function editorialImage(card: EditorialCard, headers?: Record<strin
             <span
               style={{
                 display: 'flex',
-                background: BLUE,
-                color: '#FFFFFF',
+                background: onField ? '#FFFFFF' : BLUE,
+                color: onField ? BLUE : '#FFFFFF',
                 fontFamily: 'VCR',
                 fontSize: 20,
                 letterSpacing: 3,
@@ -400,11 +465,18 @@ export async function editorialImage(card: EditorialCard, headers?: Record<strin
               {tag}
             </span>
           )}
-          {note && <Micro>{note}</Micro>}
+          {note && (onField ? <Chip>{note}</Chip> : <Micro>{note}</Micro>)}
         </div>
 
         {phases && (
-          <div style={{ display: 'flex', marginTop: 26 }}>
+          <div
+            style={{
+              display: 'flex',
+              marginTop: 22,
+              background: BLUE,
+              padding: '10px 8px 12px',
+            }}
+          >
             {(
               [
                 ['DEFINE', phases.define],
@@ -412,14 +484,21 @@ export async function editorialImage(card: EditorialCard, headers?: Record<strin
                 ['GENERATE', phases.generate],
                 ['SCALE', phases.scale],
               ] as [string, number][]
-            ).map(([k, v]) => (
+            ).map(([k, v], i) => (
               <div
                 key={k}
-                style={{ display: 'flex', flexDirection: 'column', width: 130, marginRight: 22 }}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  width: 124,
+                  marginRight: i < 3 ? 22 : 0,
+                }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <Micro size={14}>{k}</Micro>
-                  <Micro color={INK} size={14}>
+                  <Micro size={14} color={ON_FIELD_MUTED}>
+                    {k}
+                  </Micro>
+                  <Micro color="#FFFFFF" size={14}>
                     {String(v)}
                   </Micro>
                 </div>
@@ -427,7 +506,7 @@ export async function editorialImage(card: EditorialCard, headers?: Record<strin
                   style={{
                     display: 'flex',
                     height: 4,
-                    background: 'rgba(14,14,14,0.1)',
+                    background: 'rgba(255,255,255,0.25)',
                     marginTop: 8,
                   }}
                 >
@@ -435,7 +514,7 @@ export async function editorialImage(card: EditorialCard, headers?: Record<strin
                     style={{
                       display: 'flex',
                       width: `${Math.max(0, Math.min(100, v))}%`,
-                      background: INK,
+                      background: '#FFFFFF',
                     }}
                   />
                 </div>
@@ -454,6 +533,7 @@ export async function editorialImage(card: EditorialCard, headers?: Record<strin
             taste={card.taste ?? null}
             score={card.score}
             portrait={avatar}
+            onField
           />
         ) : (
           <Pass
@@ -462,6 +542,7 @@ export async function editorialImage(card: EditorialCard, headers?: Record<strin
             taste={null}
             score={null}
             portrait={null}
+            onField={onField}
           />
         )}
       </div>
