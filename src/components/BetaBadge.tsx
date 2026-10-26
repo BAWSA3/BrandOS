@@ -50,14 +50,18 @@ export default function BetaBadge({
   // on top of them; Klein with white text for contrast (was white on lavender).
   return (
     <div className="relative z-[60] py-2 px-4" style={{ background: '#0047FF' }}>
-      <div className="relative max-w-6xl mx-auto flex flex-wrap items-center justify-center gap-x-3 gap-y-1 pr-8 text-sm text-white">
+      <div className="relative max-w-6xl mx-auto flex items-center justify-center gap-x-3 pr-8 text-xs sm:text-sm text-white whitespace-nowrap">
         <span
           className="inline-flex items-center px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider"
           style={{ border: '1px solid rgba(255,255,255,0.9)' }}
         >
           Beta
         </span>
-        <span>Welcome to the BrandOS beta! You&apos;re among the first to try it.</span>
+        {/* One line on phones so the hero keeps the first screen */}
+        <span className="sm:hidden">You&apos;re early.</span>
+        <span className="hidden sm:inline">
+          Welcome to the BrandOS beta! You&apos;re among the first to try it.
+        </span>
         <a
           href="mailto:feedback@mybrandos.app"
           className="text-white underline underline-offset-2 hover:opacity-80"

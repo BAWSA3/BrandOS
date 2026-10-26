@@ -176,12 +176,7 @@ function Pass({
             }}
           >
             {portrait ? (
-              <img
-                src={portrait}
-                width={168 * s}
-                height={210 * s}
-                style={{ objectFit: 'cover', filter: 'grayscale(100%) contrast(1.2)' }}
-              />
+              <img src={portrait} width={168 * s} height={210 * s} style={{ objectFit: 'cover' }} />
             ) : (
               <div
                 style={{
