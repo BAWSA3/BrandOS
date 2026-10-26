@@ -1,5 +1,13 @@
 import prisma from '@/lib/db';
-import { fetchProfile, fetchUserTweets, type SocialDataTweet } from '@/lib/socialdata';
+import {
+  fetchProfile,
+  fetchQuoters,
+  fetchReposters,
+  fetchRepliers,
+  fetchUserTweets,
+  type AudiencePerson,
+  type SocialDataTweet,
+} from '@/lib/socialdata';
 import { analyzeTweets, type TweetAnalysis } from '@/lib/tweet-analysis';
 import { isOpenAccess, isSubscribed, type BillingFields } from '@/lib/billing';
 
@@ -136,6 +144,183 @@ export async function syncAccount(accountId: string): Promise<void> {
   ]);
 }
 
+/** Posts per audience sync, and how long before a post's audience is re-read. */
+const AUDIENCE_POSTS = 6;
+const AUDIENCE_STALE_MS = 3 * 86_400_000;
+
+/**
+ * Read who replied to / reposted / quoted a brand's best recent posts (last 30
+ * days, by engagement) whose audience wasn't read in the last 3 days. Brands
+ * only (not competitors). ~1–3 SocialData requests per post: reposters and
+ * quoters are only fetched when the post has any.
+ */
+export async function syncAudience(accountId: string): Promise<number> {
+  const account = await prisma.trackedAccount.findUnique({ where: { id: accountId } });
+  if (!account || account.competitorOfId) return 0;
+  const since = new Date(Date.now() - 30 * 86_400_000);
+  const stale = new Date(Date.now() - AUDIENCE_STALE_MS);
+  const posts = await prisma.accountPost.findMany({
+    where: {
+      accountId,
+      postedAt: { gte: since },
+      OR: [{ audienceSyncedAt: null }, { audienceSyncedAt: { lt: stale } }],
+    },
+  });
+  const pick = posts
+    .sort(
+      (a, b) =>
+        b.likes + b.replies + b.reposts + b.quotes - (a.likes + a.replies + a.reposts + a.quotes)
+    )
+    .slice(0, AUDIENCE_POSTS);
+
+  let saved = 0;
+  for (const p of pick) {
+    const [replies, reposts, quotes] = await Promise.all([
+      p.replies > 0 ? fetchRepliers(p.tweetId, account.handle) : Promise.resolve([]),
+      p.reposts > 0 ? fetchReposters(p.tweetId) : Promise.resolve([]),
+      p.quotes > 0 ? fetchQuoters(p.tweetId) : Promise.resolve([]),
+    ]);
+    const rows = (
+      [
+        ['reply', replies],
+        ['repost', reposts],
+        ['quote', quotes],
+      ] as [string, AudiencePerson[]][]
+    ).flatMap(([kind, people]) =>
+      people
+        .filter((x) => x.handle.toLowerCase() !== account.handle)
+        .map((x) => ({
+          accountId,
+          tweetId: p.tweetId,
+          handle: x.handle.toLowerCase(),
+          displayHandle: x.handle,
+          name: x.name || null,
+          followers: x.followers,
+          kind,
+          at: isNaN(Date.parse(x.at)) ? new Date() : new Date(x.at),
+        }))
+    );
+    if (rows.length) {
+      const r = await prisma.audienceInteraction.createMany({ data: rows, skipDuplicates: true });
+      saved += r.count;
+    }
+    await prisma.accountPost.update({
+      where: { accountId_tweetId: { accountId, tweetId: p.tweetId } },
+      data: { audienceSyncedAt: new Date() },
+    });
+  }
+  return saved;
+}
+
+/** A brand-kind tracked row and who added it (for `trackedKind`). */
+export interface BrandVouch {
+  xUserId: string | null;
+  addedBy: { role: string; xUserIds: string[] } | null;
+}
+
+/**
+ * Whether a row marking a handle as a brand / company account comes from
+ * someone allowed to decide that for everyone: an admin, or the handle's owner
+ * (signed in with that X account, matched by X user id, not by handle text).
+ * Anyone else's choice stays in their own workspace. Pure (test:accounts).
+ */
+export function vouchesForCompany(row: BrandVouch): boolean {
+  if (!row.addedBy) return false;
+  if (row.addedBy.role === 'admin') return true;
+  return !!row.xUserId && row.addedBy.xUserIds.includes(row.xUserId);
+}
+
+/**
+ * 'brand' when the handle is tracked as a brand / company account (not as a
+ * competitor) by its owner or an admin, else 'creator'. The brand read is
+ * shared by everyone who looks the handle up (/@handle, scans, MCP, every
+ * dashboard), so one workspace marking a creator as a "brand" must not reword
+ * that creator's read for everyone else. Only changes wording, never the
+ * score. Never throws.
+ */
+export async function trackedKind(rawHandle: string): Promise<'creator' | 'brand'> {
+  const handle = cleanHandle(rawHandle);
+  if (!handle) return 'creator';
+  const rows = await prisma.trackedAccount
+    .findMany({
+      where: {
+        handle: handle.toLowerCase(),
+        kind: 'brand',
+        competitorOfId: null,
+        addedByUserId: { not: null },
+      },
+      select: {
+        xUserId: true,
+        addedBy: {
+          select: {
+            role: true,
+            platformConnections: { where: { platform: 'x' }, select: { platformUserId: true } },
+          },
+        },
+      },
+      take: 50,
+    })
+    .catch(() => []);
+  const vouched = rows.some((r) =>
+    vouchesForCompany({
+      xUserId: r.xUserId,
+      addedBy: r.addedBy
+        ? {
+            role: String(r.addedBy.role),
+            xUserIds: r.addedBy.platformConnections.map((c) => c.platformUserId),
+          }
+        : null,
+    })
+  );
+  return vouched ? 'brand' : 'creator';
+}
+
+/**
+ * The handles among `handles` that are tracked as a brand / company account by
+ * their owner or an admin (the same rule as `trackedKind`), in one query.
+ * Never throws.
+ */
+export async function trackedBrandHandles(handles: string[]): Promise<Set<string>> {
+  const wanted = [...new Set(handles.map((h) => h.toLowerCase()))];
+  if (wanted.length === 0) return new Set();
+  const rows = await prisma.trackedAccount
+    .findMany({
+      where: {
+        handle: { in: wanted },
+        kind: 'brand',
+        competitorOfId: null,
+        addedByUserId: { not: null },
+      },
+      select: {
+        handle: true,
+        xUserId: true,
+        addedBy: {
+          select: {
+            role: true,
+            platformConnections: { where: { platform: 'x' }, select: { platformUserId: true } },
+          },
+        },
+      },
+      take: 500,
+    })
+    .catch(() => []);
+  return new Set(
+    rows
+      .filter((r) =>
+        vouchesForCompany({
+          xUserId: r.xUserId,
+          addedBy: r.addedBy
+            ? {
+                role: String(r.addedBy.role),
+                xUserIds: r.addedBy.platformConnections.map((c) => c.platformUserId),
+              }
+            : null,
+        })
+      )
+      .map((r) => r.handle.toLowerCase())
+  );
+}
+
 /**
  * Add a brand (or a competitor of one) to a workspace by public handle.
  * Verifies the handle exists on X, enforces plan limits, then runs the first
@@ -202,5 +387,10 @@ export async function addAccount(input: {
     },
   });
   await syncAccount(account.id).catch((e) => console.error('[accounts] first sync failed', e));
+  if (!account.competitorOfId) {
+    await syncAudience(account.id).catch((e) =>
+      console.error('[accounts] first audience failed', e)
+    );
+  }
   return account;
 }

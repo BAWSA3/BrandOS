@@ -5,7 +5,7 @@ import { COLORWAYS, COLORWAY_SWATCH, type Colorway } from '@/lib/colorways';
 const BLUE = '#0047FF';
 
 /**
- * Settings → Dashboard: one mini dashboard (the station layout) per colorway.
+ * Settings → Dashboard: one mini dashboard (the dashboard layout) per colorway.
  * Used on the title screen's Settings and the dashboard's own Settings panel.
  */
 export default function ColorwayPicker({

@@ -7,6 +7,8 @@ import { FOUNDING_SPOTS, OPEN_ACCESS_UNTIL, TRIAL_DAYS } from '@/lib/plans';
 import Wordmark from '@/components/Wordmark';
 import StartTrialButton from '@/components/billing/StartTrialButton';
 import ManageBillingButton from './ManageBillingButton';
+import { FieldScreen } from '@/components/system';
+import { fieldSystemOn } from '@/lib/field/switch-server';
 
 // Launch pricing (docs/LAUNCH-PLAN.md, offer decided 2026-10-22): full access
 // free for everyone until Dec 3; Founding 100 add a card before then to keep
@@ -48,7 +50,7 @@ const day = (d: Date) =>
 export default async function PricingPage({
   searchParams,
 }: {
-  searchParams: Promise<{ canceled?: string }>;
+  searchParams: Promise<{ canceled?: string; field?: string }>;
 }) {
   const [user, left, sp] = await Promise.all([
     getCurrentUser().catch(() => null),
@@ -61,42 +63,56 @@ export default async function PricingPage({
   const until = day(OPEN_ACCESS_UNTIL);
   const trialEnd = user ? trialEndsAt(user) : null;
   const founding = user && pro ? await foundingNumber(user.id) : null;
+  // Direction 03 (src/lib/field/switch.ts): the page on the field, reading on bone panels
+  const field = await fieldSystemOn(sp, user);
+  const intro = field
+    ? {
+        background: '#F2EFE8',
+        border: '1px solid rgba(14,14,14,0.1)',
+        padding: 'clamp(20px, 3vw, 32px)',
+      }
+    : undefined;
 
-  return (
-    <main className="min-h-screen bg-[#F2EFE8] px-4 pb-20 pt-6 md:px-8" style={{ color: INK }}>
+  const page = (
+    <main
+      className={`min-h-screen px-4 pb-20 pt-6 md:px-8 ${field ? '' : 'bg-[#F2EFE8]'}`}
+      style={{ color: INK }}
+    >
       <div className="mx-auto w-full max-w-[1040px]">
-        <header className="flex items-center justify-between">
-          <Wordmark height={24} />
-          <Link
-            href={user ? '/dashboard' : '/signup?next=/pricing'}
-            className="text-[11px] uppercase tracking-[0.14em] hover:underline"
-            style={{ fontFamily: MONO }}
-          >
-            {user ? 'My dashboard →' : 'Sign in'}
-          </Link>
-        </header>
+        <div style={intro}>
+          <header className="flex items-center justify-between">
+            <Wordmark height={24} />
+            <Link
+              href={user ? '/dashboard' : '/signup?next=/pricing'}
+              className="text-[11px] uppercase tracking-[0.14em] hover:underline"
+              style={{ fontFamily: MONO }}
+            >
+              {user ? 'My dashboard →' : 'Sign in'}
+            </Link>
+          </header>
 
-        <h1
-          className="mt-14 max-w-[820px] text-[44px] leading-[0.95] md:text-[76px]"
-          style={{ fontFamily: BIG, fontWeight: 500, letterSpacing: '-0.04em' }}
-        >
-          Know your reputation score before brands check it.
-        </h1>
-        <p className="mt-5 max-w-[560px] text-[16px] leading-[1.55]" style={{ color: '#333' }}>
-          {open
-            ? `Full access is free for everyone until ${until}: the full dashboard, what's working, what's drifting, and what to post next. The first ${FOUNDING_SPOTS} to add a card keep $29/month for life.`
-            : "Scan your brand for free. Go Pro for the full dashboard: what's working, what's drifting, and what to post next."}
-        </p>
-
-        {sp.canceled && (
-          <p
-            className="mt-6 inline-block border px-3 py-2 text-[11px] uppercase tracking-[0.14em]"
-            style={{ fontFamily: MONO, borderColor: 'rgba(14,14,14,0.15)', color: MUTED }}
-            role="status"
+          <h1
+            className="mt-14 max-w-[820px] text-[44px] leading-[0.95] md:text-[76px]"
+            style={{ fontFamily: BIG, fontWeight: 500, letterSpacing: '-0.04em' }}
           >
-            Checkout canceled. Nothing was charged.
+            Know your reputation score before brands check it.
+          </h1>
+          <p className="mt-5 max-w-[560px] text-[16px] leading-[1.55]" style={{ color: '#333' }}>
+            {open
+              ? `Full access is free for everyone until ${until}: the full dashboard, what's working, what's drifting, and what to post next. The first ${FOUNDING_SPOTS} to add a card keep $29/month for life.`
+              : "Scan your brand for free. Go Pro for the full dashboard: what's working, what's drifting, and what to post next."}
           </p>
-        )}
+
+          {sp.canceled && (
+            <p
+              className="mt-6 inline-block border px-3 py-2 text-[11px] uppercase tracking-[0.14em]"
+              style={{ fontFamily: MONO, borderColor: 'rgba(14,14,14,0.15)', color: MUTED }}
+              role="status"
+            >
+              Checkout canceled. Nothing was charged.
+            </p>
+          )}
+        </div>
 
         <div className="mt-12 grid grid-cols-1 gap-5 md:grid-cols-2">
           {/* Free */}
@@ -136,7 +152,14 @@ export default async function PricingPage({
           </section>
 
           {/* Pro */}
-          <section className="flex flex-col p-6 text-white md:p-8" style={{ background: BLUE }}>
+          <section
+            className="flex flex-col p-6 text-white md:p-8"
+            style={{
+              background: BLUE,
+              // On the field the Klein plan needs an edge, or it melts into the blue
+              ...(field ? { outline: '1px solid rgba(255,255,255,0.9)', outlineOffset: -1 } : {}),
+            }}
+          >
             <div
               className="flex items-center justify-between text-[11px] uppercase tracking-[0.16em]"
               style={{ fontFamily: MONO }}
@@ -201,6 +224,7 @@ export default async function PricingPage({
               ) : (
                 <div className="bg-white p-4">
                   <StartTrialButton
+                    signal={field}
                     signedIn={!!user}
                     next="/pricing"
                     label={
@@ -261,4 +285,5 @@ export default async function PricingPage({
       </div>
     </main>
   );
+  return field ? <FieldScreen signalCell="none">{page}</FieldScreen> : page;
 }

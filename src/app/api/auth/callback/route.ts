@@ -7,6 +7,8 @@ import { encryptOauthToken, getCurrentKeyId } from '@/lib/crypto';
 import { logSecurityEvent } from '@/lib/audit-log';
 import { captureFunnelEvent } from '@/lib/funnel-events';
 import { isValidTosVersion } from '@/lib/tos';
+import { decodeUtm, UTM_COOKIE } from '@/lib/utm';
+import { safeNextPath } from '@/lib/safe-input';
 
 const EARLY_ACCESS_MODE = process.env.NEXT_PUBLIC_EARLY_ACCESS_MODE === 'true';
 
@@ -27,8 +29,7 @@ export async function GET(request: NextRequest) {
   // Only allow same-origin relative paths to prevent open-redirect.
   // Default landing: the dashboard (decided 2026-10-22; the title screen stays
   // one tap away from the dashboard's menu icon).
-  const next =
-    rawNext && rawNext.startsWith('/') && !rawNext.startsWith('//') ? rawNext : '/dashboard';
+  const next = safeNextPath(rawNext, '/dashboard');
   // TOS acknowledgment version from the signup page (strict-format validated —
   // the param round-trips through OAuth providers / email links).
   const rawTos = requestUrl.searchParams.get('tos');
@@ -238,6 +239,8 @@ export async function GET(request: NextRequest) {
       await captureFunnelEvent(session.user.id, 'signup_completed', {
         method: provider,
         inner_circle: isInnerCircle,
+        // first-touch UTMs (middleware cookie), e.g. utm_source=x&utm_campaign=index
+        ...decodeUtm(request.cookies.get(UTM_COOKIE)?.value),
       });
     }
 
@@ -294,6 +297,18 @@ export async function GET(request: NextRequest) {
       sameSite: 'lax',
       maxAge: 60 * 60 * 24 * 30,
     });
+
+    // "Last used" on the sign-in screen: the method that just worked (the
+    // signup page tags its callback with ?via=). Not sensitive, so readable.
+    const via = requestUrl.searchParams.get('via');
+    if (via === 'x' || via === 'google' || via === 'email') {
+      response.cookies.set('bos_last_signin', via, {
+        path: '/',
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 60 * 60 * 24 * 365,
+      });
+    }
 
     return response;
   } catch (error) {

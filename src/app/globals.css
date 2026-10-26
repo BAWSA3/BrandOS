@@ -1,5 +1,19 @@
 @import "tailwindcss";
 
+/* Headlines break into even lines (no single word left alone on the last
+   line); paragraphs avoid a lone last word. In the base layer, so a utility
+   class can still override it. */
+@layer base {
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+  p {
+    text-wrap: pretty;
+  }
+}
+
 /* ============================================
    CUSTOM FONT FACES (kept for landing page)
    ============================================ */
@@ -182,6 +196,10 @@
 
   /* Accent Colors — Apple System Palette */
   --accent: #0047ff;
+  /* The field (Direction 02): world surfaces. Fixed in every theme. */
+  --field: #0047ff;
+  /* The one signal colour: "this one" only (your entry, the selected cell). A fill, never text on the field. */
+  --signal: #ff4b2b;
   --accent-hover: #0035cc;
   --success: #34c759;
   --warning: #ff9f0a;
@@ -433,6 +451,8 @@
   --color-input: var(--border);
   --color-ring: var(--accent);
   --color-surface: var(--surface);
+  --color-field: var(--field);
+  --color-signal: var(--signal);
   --color-chart-1: #0047ff;
   --color-chart-2: #34c759;
   --color-chart-3: #ff9f0a;
@@ -456,6 +476,7 @@
   /* Typography */
   --font-sans: var(--font-inter), "Helvetica Neue", sans-serif;
   --font-mono: var(--font-jetbrains), "Courier New", monospace;
+  --font-plex: var(--font-plex-mono), "IBM Plex Mono", ui-monospace, monospace;
 
   /* Background Images */
   --background-image-noise-pattern: url("/assets/noise.png");

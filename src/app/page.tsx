@@ -1,64 +1,13 @@
-'use client';
+import LandingClient from './LandingClient';
+import { getLandingData } from '@/lib/landing-data';
 
-import { useBrandStore } from '@/lib/store';
-import XBrandScoreHero from '@/components/XBrandScoreHero';
-import { Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
-import { useInnerCircle } from '@/components/InnerCircleBadge';
-import { useAuth } from '@/hooks/useAuth';
+// The landing page. A server wrapper so the Direction 03 switch can read
+// FIELD_SYSTEM and the landing scroll gets its live numbers (brands read,
+// Founding seats left, the example read, the Index). No request data, so the
+// page stays static and refreshes hourly.
+export const revalidate = 3600;
 
-// =============================================================================
-// Landing Page — Klein blue ASCII DNA background
-// =============================================================================
-
-export default function LandingPage() {
-  const { theme } = useBrandStore();
-
-  // Handle invite code validation on landing page
-  useInnerCircle();
-
-  // Handle OAuth callback tokens (if redirected here with tokens in URL hash)
-  useAuth();
-
-  return (
-    <div
-      className="aura-background"
-      style={{
-        minHeight: '100vh',
-        background: '#F2EFE8',
-        position: 'relative',
-        overflowX: 'hidden',
-        overflowY: 'auto',
-      }}
-    >
-      {/* Film Grain Texture */}
-      <div
-        style={{
-          position: 'fixed',
-          inset: 0,
-          opacity: 0.04,
-          pointerEvents: 'none',
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
-          backgroundSize: '150px 150px',
-          zIndex: 10,
-        }}
-      />
-
-      {/* Main Content - X Brand Score Lead Magnet */}
-      <Suspense fallback={null}>
-        <LandingScan theme={theme} />
-      </Suspense>
-    </div>
-  );
-}
-
-const HANDLE_RE = /^@?[A-Za-z0-9_]{1,15}$/;
-
-// `/?scan=<handle>` opens the site and runs that handle's scan straight away.
-// It's the landing link from the BrandOS MCP (Claude / ChatGPT breakdowns), so
-// people arrive at their full brand read without retyping their handle.
-function LandingScan({ theme }: { theme: string }) {
-  const raw = useSearchParams().get('scan')?.trim() ?? '';
-  const handle = HANDLE_RE.test(raw) ? raw.replace(/^@/, '') : undefined;
-  return <XBrandScoreHero theme={theme} initialUsername={handle} autoStart={!!handle} />;
+export default async function LandingPage() {
+  const landing = await getLandingData().catch(() => undefined);
+  return <LandingClient fieldEnv={process.env.FIELD_SYSTEM === 'true'} landing={landing} />;
 }

@@ -7,6 +7,7 @@ import { normalizeArchetypeName } from '@/lib/archetype-names';
 import { ARCHETYPE_DATA, getArchetypeInfo } from '@/lib/archetype-descriptions';
 import ArchetypeCard from '@/components/ArchetypeCard';
 import { domToPng } from 'modern-screenshot';
+import { handleInputValue } from '@/lib/safe-input';
 
 // ============================================================================
 // Types
@@ -1274,9 +1275,9 @@ export default function ArchetypeScanHero({ initialUsername, autoStart }: Archet
                   <input
                     type="text"
                     value={username}
-                    onChange={(e) => setUsername(e.target.value.replace(/^@/, ''))}
+                    onChange={(e) => setUsername(handleInputValue(e.target.value))}
                     placeholder=""
-                    maxLength={15}
+                    maxLength={64}
                     className="terminal-input"
                     style={{
                       width: '100%',

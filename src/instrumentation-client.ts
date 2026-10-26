@@ -27,8 +27,6 @@ initBotId({
     { path: '/api/import/analyze-images', method: 'POST' },
     { path: '/api/import/analyze-url', method: 'POST' },
     { path: '/api/import/analyze-social', method: 'POST' },
-    // Reserve your brand station — email capture after the scan (spam surface)
-    { path: '/api/reserve-station', method: 'POST' },
     // Full breakdown by email — email capture after the scan (spam surface)
     { path: '/api/breakdown', method: 'POST' },
     // Dashboard rescan — signed-in AI cost surface
@@ -36,8 +34,13 @@ initBotId({
     // Dashboard post breakdowns — signed-in AI cost surface
     { path: '/api/dashboard/post-scores', method: 'POST' },
     { path: '/api/dashboard/brainstorm', method: 'POST' },
+    { path: '/api/dashboard/copywriter', method: 'POST' },
     // Early-access signup form — email capture (spam surface)
     { path: '/api/early-access', method: 'POST' },
+    // Post-scan email capture + enterprise contact form — both send mail to
+    // a caller-chosen address (spam surface)
+    { path: '/api/signup', method: 'POST' },
+    { path: '/api/enterprise/inquiry', method: 'POST' },
     // public brand page (/@handle) + its compare funnel: scans / model calls
     { path: '/api/public-brand', method: 'POST' },
     { path: '/api/brand-lookup', method: 'POST' },
@@ -47,5 +50,12 @@ initBotId({
     // Growth dashboard: adding/refreshing tracked accounts reads paid X data
     { path: '/api/accounts', method: 'POST' },
     { path: '/api/accounts/*/sync', method: 'POST' },
+    // AI ideas from a brand's analytics (model cost)
+    { path: '/api/ideas/generate', method: 'POST' },
+    // "How many bots follow you?" — public, paid X data (~20 requests per check)
+    { path: '/api/bot-check', method: 'POST' },
+    // Creator Index: join / leave (writes a public listing)
+    { path: '/api/index/join', method: 'POST' },
+    { path: '/api/index/me', method: 'PATCH' },
   ],
 });

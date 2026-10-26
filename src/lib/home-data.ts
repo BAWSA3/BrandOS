@@ -1,6 +1,5 @@
 import { prisma } from '@/lib/db';
 import type { CurrentUser } from '@/lib/auth';
-import { getReservationByHandle } from '@/lib/reservations';
 import { normalizeArchetypeName } from '@/lib/archetype-names';
 import { getArchetypeInfo } from '@/lib/archetype-descriptions';
 import type { BrandPassData } from '@/components/dashboard/BrandPass';
@@ -11,8 +10,8 @@ import type { PostBreakdownData } from '@/lib/post-scores';
 import type { StageNumber } from '@/lib/studio-stages';
 
 // Server-only (Prisma). Real, per-user data for the title screen (/home) and the dashboard bento.
-// Everything is read for the signed-in user only (BrandScan by userId, Station
-// by ownerUserId, the reservation by their own X handle). Fields with no real
+// Everything is read for the signed-in user only (BrandScan and PostScore by
+// userId). Fields with no real
 // source yet (post fit scores, weekly streak, follower change, XP, "since last
 // visit") are left out, and the UI hides those tiles until they exist.
 
@@ -49,11 +48,10 @@ export interface HomeData {
   handle: string;
   name: string;
   avatarUrl: string | null;
-  /** Current archetype name, e.g. 'BUILD.EXE' (null until the first scan / reservation). */
+  /** Current archetype name, e.g. 'BUILD.EXE' (null until the first scan). */
   archetype: string | null;
   /** Interim until the studio build stage is stored: 3 once scanned, 0 before. */
   stage: StageNumber;
-  stationNumber: number | null;
   score: number | null;
   /** Oldest first, for the trend line. */
   scans: ScanSummary[];
@@ -143,7 +141,7 @@ function toPillars(raw: unknown): string[] {
 
 export async function getHomeData(user: CurrentUser): Promise<HomeData> {
   const handle = (user.xUsername ?? '').replace(/^@/, '');
-  const [scans, station, reservation, posts] = await Promise.all([
+  const [scans, posts] = await Promise.all([
     prisma.brandScan.findMany({
       where: { userId: user.id, status: 'active' },
       orderBy: { scannedAt: 'desc' },
@@ -162,11 +160,6 @@ export async function getHomeData(user: CurrentUser): Promise<HomeData> {
         scannedAt: true,
       },
     }),
-    prisma.station.findUnique({
-      where: { ownerUserId: user.id },
-      select: { reservationNumber: true, archetype: true },
-    }),
-    handle ? getReservationByHandle(handle).catch(() => null) : Promise.resolve(null),
     // PostScore (migration 033) may not exist yet: no posts, not an error
     prisma.postScore
       .findMany({
@@ -187,18 +180,13 @@ export async function getHomeData(user: CurrentUser): Promise<HomeData> {
       .catch(() => []),
   ]);
   const latest = scans[0] ?? null;
-  const rawArchetype =
-    (latest && latest.archetype !== 'unknown' ? latest.archetype : null) ??
-    station?.archetype ??
-    reservation?.archetype ??
-    null;
+  const rawArchetype = latest && latest.archetype !== 'unknown' ? latest.archetype : null;
   return {
     handle: handle || user.name || 'you',
     name: user.name || handle,
     avatarUrl: user.avatar ?? null,
     archetype: rawArchetype ? normalizeArchetypeName(rawArchetype) : null,
     stage: latest ? 3 : 0,
-    stationNumber: station?.reservationNumber ?? reservation?.number ?? null,
     score: latest?.score ?? null,
     scans: scans
       .map((s) => ({
@@ -275,7 +263,6 @@ export function toPass(h: HomeData): BrandPassData | null {
     archetype: h.archetype,
     taste,
     pillars: h.pillars,
-    stationNumber: h.stationNumber ?? 0,
     score: h.score,
     issued: `${String(issued.getMonth() + 1).padStart(2, '0')}.${issued.getFullYear()}`,
   };

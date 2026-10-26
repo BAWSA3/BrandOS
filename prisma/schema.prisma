@@ -164,6 +164,9 @@ model User {
   ideas                Idea[] // studio idea board (migration 035)
   postScores           PostScore[] // per-post brand fit (migration 033)
   noteReports          NoteReport[]       @relation("NoteReporter")
+  indexEntry           IndexEntry? // Creator Index membership (migration 044)
+  indexViews           IndexView[] // Index members' pages this user viewed (migration 044)
+  indexReservations    IndexReservation[] // reserved Index numbers this user claimed (migration 045)
 
   @@index([xUsername])
   @@index([stripeCustomerId])
@@ -1061,6 +1064,7 @@ model Workspace {
   dailyBriefs         DailyBrief[]
   brands              Brand[]
   trackedAccounts     TrackedAccount[] // growth dashboard (migration 040)
+  indexViews          IndexView[] // Creator Index views by this team (migration 044)
 
   @@index([ownerUserId])
   @@map("Workspace")
@@ -1355,9 +1359,9 @@ model UserPreference {
 
 // Studio idea board (migration 035): post ideas built on a "Next time" suggestion.
 model Idea {
-  id          String    @id @default(uuid())
+  id          String          @id @default(uuid())
   userId      String
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   postScoreId String?
   postExcerpt String?
   suggestion  String
@@ -1365,32 +1369,39 @@ model Idea {
   hook        String
   format      String
   why         String
-  status      String    @default("saved")
-  createdAt   DateTime  @default(now()) @db.Timestamptz
-  postedAt    DateTime? @db.Timestamptz
+  status      String          @default("saved") // saved (Ideas) | drafting | posted
+  createdAt   DateTime        @default(now()) @db.Timestamptz
+  postedAt    DateTime?       @db.Timestamptz
+  // growth dashboard board per brand (migration 042)
+  accountId   String?
+  account     TrackedAccount? @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  source      String          @default("mine") // mine | brandos
 
   @@index([userId, createdAt(sort: Desc)])
+  @@index([accountId, createdAt(sort: Desc)])
 }
 
 // Growth dashboard (migration 040, pivot 2026-10-22): X accounts a workspace
 // tracks by public handle — its brands and their competitors.
 model TrackedAccount {
-  id             String            @id @default(dbgenerated("(gen_random_uuid())::text"))
-  workspaceId    String            @db.Uuid
-  workspace      Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  id             String                @id @default(dbgenerated("(gen_random_uuid())::text"))
+  workspaceId    String                @db.Uuid
+  workspace      Workspace             @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   handle         String // lowercase
   displayHandle  String
   xUserId        String?
-  kind           String            @default("creator") // creator | brand
+  kind           String                @default("creator") // creator | brand
   competitorOfId String?
-  competitorOf   TrackedAccount?   @relation("Competitors", fields: [competitorOfId], references: [id], onDelete: Cascade)
-  competitors    TrackedAccount[]  @relation("Competitors")
+  competitorOf   TrackedAccount?       @relation("Competitors", fields: [competitorOfId], references: [id], onDelete: Cascade)
+  competitors    TrackedAccount[]      @relation("Competitors")
   addedByUserId  String?
-  addedBy        User?             @relation(fields: [addedByUserId], references: [id], onDelete: SetNull)
-  lastSyncedAt   DateTime?         @db.Timestamptz
-  createdAt      DateTime          @default(now()) @db.Timestamptz
+  addedBy        User?                 @relation(fields: [addedByUserId], references: [id], onDelete: SetNull)
+  lastSyncedAt   DateTime?             @db.Timestamptz
+  createdAt      DateTime              @default(now()) @db.Timestamptz
   snapshots      AccountSnapshot[]
   posts          AccountPost[]
+  audience       AudienceInteraction[]
+  ideas          Idea[]
 
   @@index([workspaceId])
   @@index([lastSyncedAt])
@@ -1419,21 +1430,105 @@ model AccountSnapshot {
 }
 
 model AccountPost {
-  accountId String
-  account   TrackedAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
-  tweetId   String
-  text      String
-  postedAt  DateTime       @db.Timestamptz
-  likes     Int            @default(0)
-  replies   Int            @default(0)
-  reposts   Int            @default(0)
-  quotes    Int            @default(0)
-  bookmarks Int            @default(0)
-  views     Int            @default(0)
-  media     String[]       @default([])
-  isQuote   Boolean        @default(false)
-  updatedAt DateTime       @default(now()) @db.Timestamptz
+  accountId        String
+  account          TrackedAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  tweetId          String
+  text             String
+  postedAt         DateTime       @db.Timestamptz
+  likes            Int            @default(0)
+  replies          Int            @default(0)
+  reposts          Int            @default(0)
+  quotes           Int            @default(0)
+  bookmarks        Int            @default(0)
+  views            Int            @default(0)
+  media            String[]       @default([])
+  isQuote          Boolean        @default(false)
+  updatedAt        DateTime       @default(now()) @db.Timestamptz
+  audienceSyncedAt DateTime?      @db.Timestamptz
 
   @@id([accountId, tweetId])
   @@index([accountId, postedAt(sort: Desc)])
+}
+
+// Growth dashboard audience (migration 041): who replied to / reposted /
+// quoted a tracked brand's post. Public data only.
+model AudienceInteraction {
+  accountId     String
+  account       TrackedAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  tweetId       String
+  handle        String // lowercase
+  displayHandle String
+  name          String?
+  followers     Int            @default(0)
+  kind          String // reply | repost | quote
+  at            DateTime       @default(now()) @db.Timestamptz
+
+  @@id([accountId, tweetId, handle, kind])
+  @@index([accountId, at(sort: Desc)])
+}
+
+// "How many bots follow you?" (/bots, migration 043): one cached check per
+// handle, refreshed after 7 days. `record` holds the counts and, for the
+// owner only, the flagged accounts (never shown to anyone else).
+model BotCheck {
+  handle    String   @id
+  xUserId   String
+  record    Json
+  checkedAt DateTime @default(now()) @db.Timestamptz
+
+  @@index([checkedAt])
+}
+
+// The BrandOS Creator Index (migration 044): creators who chose to be listed,
+// with their Index number and what they told brands.
+model IndexEntry {
+  id            String      @id @default(dbgenerated("(gen_random_uuid())::text"))
+  userId        String      @unique
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  number        Int         @unique @default(autoincrement())
+  handle        String      @unique // lowercase
+  displayHandle String
+  xUserId       String?
+  niches        String[]    @default([])
+  blurb         String      @default("")
+  score         Int?
+  archetype     String?
+  listed        Boolean     @default(true)
+  joinedAt      DateTime    @default(now()) @db.Timestamptz
+  updatedAt     DateTime    @default(now()) @db.Timestamptz
+  views         IndexView[]
+
+  @@index([listed, joinedAt(sort: Desc)])
+}
+
+// A signed-in visitor opened an Index member's /@handle page (one row per
+// viewer per member per day).
+model IndexView {
+  entryId           String
+  entry             IndexEntry @relation(fields: [entryId], references: [id], onDelete: Cascade)
+  viewerUserId      String
+  viewer            User       @relation(fields: [viewerUserId], references: [id], onDelete: Cascade)
+  viewerWorkspaceId String?    @db.Uuid
+  viewerWorkspace   Workspace? @relation(fields: [viewerWorkspaceId], references: [id], onDelete: SetNull)
+  day               DateTime   @default(dbgenerated("((now() AT TIME ZONE 'utc'::text))::date")) @db.Date
+  viewedAt          DateTime   @default(now()) @db.Timestamptz
+
+  @@id([entryId, viewerUserId, day])
+  @@index([entryId, viewedAt(sort: Desc)])
+}
+
+// Reserved Creator Index numbers (migration 045): private until the handle's
+// owner signs in with X and joins, which keeps the number.
+model IndexReservation {
+  handle          String    @id // lowercase
+  number          Int       @unique
+  source          String // founder | station | email | account
+  emailSignupId   String?
+  reservedAt      DateTime  @default(now()) @db.Timestamptz
+  releaseAt       DateTime? @db.Timestamptz
+  claimedAt       DateTime? @db.Timestamptz
+  claimedByUserId String?
+  claimedBy       User?     @relation(fields: [claimedByUserId], references: [id], onDelete: SetNull)
+
+  @@index([claimedAt])
 }

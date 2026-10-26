@@ -3,12 +3,10 @@ import prisma from '@/lib/db';
 import { getArchetypeInfo } from '@/lib/archetype-descriptions';
 import { normalizeArchetypeName } from '@/lib/archetype-names';
 import { renderNewsletter, type NewsletterContent } from '@/lib/newsletter-template';
+import { formatNumber } from '@/lib/index-rules';
 
 /**
- * Lifecycle email: the instant "your station is reserved" confirmation and the
- * release-day "BrandOS is open, your first 30 days are free" email. No fixed
- * launch date (plan changed 2026-10-06: build the full product, then 30 days
- * free for every signup, then subscriptions). Server-only.
+ * List email campaigns (the BrandOS Studio tease and what follows). Server-only.
  *
  * Every send goes through sendOnce(): it claims an EmailSend row
  * (unique per signup + campaign) BEFORE calling Resend, so each address gets a
@@ -17,10 +15,8 @@ import { renderNewsletter, type NewsletterContent } from '@/lib/newsletter-templ
  */
 
 export const CAMPAIGNS = {
-  reserveConfirm: 'reserve-confirm',
-  release: 'release-v1',
-  reengage: 'reengage-oct26',
   studioTease: 'studio-tease-oct22',
+  indexReserved: 'index-reserved-nov2',
 } as const;
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://mybrandos.app';
@@ -39,88 +35,6 @@ const esc = (v: string) =>
     /[&<>"']/g,
     (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch]!
   );
-
-export function reserveConfirmContent(r: {
-  number: number;
-  handle: string | null;
-  archetype: string | null;
-}): NewsletterContent {
-  const no = String(r.number).padStart(4, '0');
-  const name = r.archetype ? getArchetypeInfo(r.archetype)?.name : null;
-  const sections: NewsletterContent['sections'] = [
-    { type: 'stat', label: `#${no}`, content: 'your reserved brand station' },
-    {
-      type: 'text',
-      content: `Your plot is claimed${r.handle ? ` for <b>@${esc(r.handle)}</b>` : ''}${
-        name ? `, a <b>${esc(name)}</b> station` : ''
-      }. It's locked: whatever station you reserved is the one you build when BrandOS Studio opens.`,
-    },
-  ];
-  if (r.handle) {
-    sections.push({
-      type: 'cta',
-      content: 'See your station',
-      url: `${APP_URL}/station/${encodeURIComponent(r.handle)}`,
-    });
-  }
-  sections.push({
-    type: 'text',
-    content: "We'll email you when the studio opens. Until then, keep building.",
-  });
-  return {
-    subject: `Station #${no} is yours`,
-    preheader: 'Your BrandOS brand station is reserved. The studio is opening soon.',
-    sections,
-  };
-}
-
-/**
- * Re-engagement (Oct 2026): for people who scanned before stations existed and
- * never reserved one. Personal ("you scanned in march"), one action (rescan +
- * reserve), honest scarcity (live count of claimed stations), and owns the
- * unsubscribe bug fixed 2026-10-12.
- */
-export function reengageContent(r: {
-  handle: string | null;
-  claimed: number;
-}): NonNullable<NewsletterContent> {
-  const who = r.handle ? `@${esc(r.handle)}` : 'there';
-  return {
-    subject: r.handle
-      ? `@${r.handle}, your brand station is waiting`
-      : 'your brand station is waiting',
-    preheader: 'You scanned your brand in March. Since then we built something for it.',
-    sections: [
-      {
-        type: 'text',
-        content: `hey ${who},<br/><br/>back in march you scanned your X on BrandOS and got your brand score. thanks for being early.`,
-      },
-      {
-        type: 'text',
-        content:
-          'since then we&#39;ve been building. every creator on BrandOS now gets a <b>brand station</b>: a 3D building that&#39;s yours, shaped by your archetype, and it grows as your brand does.',
-      },
-      { type: 'heading', content: "what's live now" },
-      {
-        type: 'text',
-        content: `• <b>a fresh scan</b>: your score, your archetype, and what to fix next<br/>• <b>your station</b>: reserve your number before the good ones go (${r.claimed} claimed so far)<br/>• <b>your brand pass</b>: your identity card with archetype, taste, pillars and score`,
-      },
-      {
-        type: 'text',
-        content:
-          'and coming next: <b>BrandOS dashboards</b>. track your score over time, see exactly which part of your brand to work on, and level up as you post. people with a reserved station get in first.',
-      },
-      { type: 'cta', content: 'Rescan + reserve your station →', url: APP_URL },
-      { type: 'text', content: 'takes about a minute.<br/><br/>— Bawsa' },
-      { type: 'divider', content: '' },
-      {
-        type: 'text',
-        content:
-          '<span style="color:#888;font-size:13px">p.s. if you ever tried to unsubscribe from our emails and it didn&#39;t work, that&#39;s on us. it&#39;s fixed now, and the link below works.</span>',
-      },
-    ],
-  };
-}
 
 /** Current display name for a stored archetype ("SIGNAL_SAGE" → "SOURCE"), or null. */
 function archetypeLabel(raw: string | null): string | null {
@@ -326,30 +240,145 @@ export function renderStudioTease(
   return { html, text };
 }
 
-// DRAFT copy for release day: Jeffrey approves the wording before any send.
-export function releaseEmailContent(): NewsletterContent {
+/**
+ * "Your Creator Index number is reserved" (launch, Nov 2): everyone on the list
+ * with an X handle had a number reserved for them (migration 045,
+ * scripts/reserve-index-numbers.ts). One job: claim it, which means signing in
+ * with X as that handle and joining. Founding 100 in the P.S.
+ */
+/**
+ * `read` is their latest public scan (score + archetype) when there is one.
+ * Subject A/B: A = "your creator index number is reserved: No. 0137",
+ * B = "you're No. 0137". The variant rides utm_content.
+ */
+export type ReservedRecipient = {
+  handle: string;
+  number: number;
+  read?: { score: number; archetype: string } | null;
+  variant?: 'a' | 'b';
+};
+
+/** A scan's archetype as a display name, or null when it's missing or junk. */
+export function readArchetype(raw: string | null | undefined): string | null {
+  const name = normalizeArchetypeName((raw ?? '').replace(/[^\x20-\x7E]/g, '').trim());
+  if (!name || /^(null|unknown)$/i.test(name)) return null;
+  return getArchetypeInfo(name)?.name ?? null;
+}
+
+function reservedModel(r: ReservedRecipient) {
+  const no = formatNumber(r.number);
+  const variant = r.variant ?? 'a';
+  const url = `${APP_URL}/index/claim?utm_source=email&utm_medium=email&utm_campaign=${CAMPAIGNS.indexReserved}&utm_content=${variant}`;
+  const read = r.read
+    ? { score: Math.round(r.read.score), archetype: esc(r.read.archetype) }
+    : null;
   return {
-    subject: 'BrandOS is open. Your first 30 days are free.',
-    preheader: 'Build your brand station, free for 30 days.',
+    no,
+    url,
+    read,
+    handle: esc(r.handle),
+    subject: variant === 'b' ? `you're ${no}` : `your creator index number is reserved: ${no}`,
+    preheader: 'you signed up early, so we held a number for you. claim it before dec 3.',
+    problem:
+      'most good creators never get found by brands. not because they&#39;re bad, because nobody can see them. so i built the <b>BrandOS Creator Index</b>: the record of creator reputation. a book of creators brands can browse, every entry backed by a real brand read instead of a follower count.',
+    readLine: read
+      ? `your read: <b>${read.archetype}, ${read.score}/100</b>. that&#39;s what brands will see on your entry.`
+      : null,
+    held: 'you signed up early, so your number is already held. claiming takes a minute: sign in with X, pick your niches, write one line for brands.',
+    cta: `Claim ${no} →`,
+    release: 'numbers under 1,000 won&#39;t exist again. unclaimed ones are released dec 3.',
+    ps: 'the first 100 to add a card become Founding Members and keep Pro at $29/mo for life. featured in the Index, and you see which brands viewed your entry. nothing&#39;s charged until dec 3.',
+  };
+}
+
+/** Plain content (subject, preheader, text part); the HTML comes from renderIndexReservedEmail. */
+export function indexReservedContent(r: ReservedRecipient): NonNullable<NewsletterContent> {
+  const m = reservedModel(r);
+  return {
+    subject: m.subject,
+    preheader: m.preheader,
     sections: [
-      {
-        type: 'text',
-        content:
-          "Building brands shouldn't be difficult. So I built BrandOS Studio: find your taste, shape your brand, and stay on brand while you build in public.",
-      },
-      {
-        type: 'text',
-        content:
-          "It's open now, and your first <b>30 days are free</b>. Start on an empty plot and build your brand station as you go.",
-      },
-      { type: 'cta', content: 'Open BrandOS', url: APP_URL },
-      {
-        type: 'text',
-        content:
-          "I'm building this in public, so reply and tell me what you'd change. Every reply gets read. Jeffrey",
-      },
+      { type: 'text', content: `hey @${m.handle},` },
+      { type: 'stat', label: m.no, content: `reserved for @${m.handle}` },
+      { type: 'text', content: m.problem },
+      ...(m.readLine ? [{ type: 'text' as const, content: m.readLine }] : []),
+      { type: 'text', content: m.held },
+      { type: 'cta', content: m.cta, url: m.url },
+      { type: 'text', content: `${m.release}<br/><br/>— Bawsa` },
+      { type: 'text', content: `<b>p.s.</b> ${m.ps}` },
     ],
   };
+}
+
+/** Branded HTML in the locked design system (bone canvas, one Klein tile with the number). */
+export function renderIndexReservedEmail(
+  r: ReservedRecipient,
+  email: string
+): { html: string; text: string } {
+  const m = reservedModel(r);
+  const { text } = renderNewsletter(indexReservedContent(r), email);
+  const unsub = `${APP_URL}/api/newsletter/unsubscribe?email=${encodeURIComponent(email)}`;
+  const asset = process.env.EMAIL_ASSET_BASE || APP_URL;
+  const SANS = "'Helvetica Neue', Helvetica, Arial, sans-serif";
+  const MONO = "'JetBrains Mono', 'SFMono-Regular', Menlo, Consolas, monospace";
+  const label = (t: string, color = '#6B6862') =>
+    `<div style="font-family:${MONO};font-size:10px;letter-spacing:1.6px;text-transform:uppercase;color:${color};margin:0 0 10px 0;">${t}</div>`;
+  const p = (t: string, extra = '') =>
+    `<p style="font-family:${SANS};font-size:16px;line-height:1.6;color:#0E0E0E;margin:0 0 18px 0;${extra}">${t}</p>`;
+  const rule = `<tr><td style="padding:8px 0 26px 0;"><div style="border-top:1px solid #DCD8CF;font-size:0;line-height:0;">&nbsp;</div></td></tr>`;
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light only">
+  <meta name="supported-color-schemes" content="light only">
+  <title>${esc(m.subject)}</title>
+</head>
+<body style="margin:0;padding:0;background:#F2EFE8;-webkit-font-smoothing:antialiased;">
+  <div style="display:none;max-height:0;overflow:hidden;opacity:0;">${m.preheader}${'&nbsp;&zwnj;'.repeat(60)}</div>
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F2EFE8;">
+    <tr><td align="center" style="padding:28px 16px 40px 16px;">
+      <table role="presentation" width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;">
+        <tr><td style="padding:0 0 22px 0;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+            <td><a href="${APP_URL}" style="text-decoration:none;"><img src="${asset}/brand/wordmark-day-480.png" width="150" alt="BrandOS" style="display:block;width:150px;height:auto;border:0;"></a></td>
+            <td align="right" style="font-family:${MONO};font-size:10px;letter-spacing:1.6px;text-transform:uppercase;color:#6B6862;">The Creator Index</td>
+          </tr></table>
+        </td></tr>
+        ${rule}
+        <tr><td>${p(`hey @${m.handle},`)}</td></tr>
+        <tr><td style="padding:4px 0 22px 0;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#0047FF;border-radius:10px;">
+            <tr><td style="padding:22px 24px 24px 24px;">
+              ${label('Creator Index · reserved', '#B8CBFF')}
+              <div style="font-family:${SANS};font-size:76px;line-height:1;font-weight:700;letter-spacing:-3px;color:#FFFFFF;">${m.no}</div>
+              <div style="font-family:${MONO};font-size:11px;letter-spacing:1.6px;color:#FFFFFF;margin-top:12px;">@${m.handle}${m.read ? ` · ${m.read.archetype} · ${m.read.score}/100` : ''}</div>
+            </td></tr>
+          </table>
+        </td></tr>
+        <tr><td>${p(m.problem)}${m.readLine ? p(m.readLine) : ''}${p(m.held)}</td></tr>
+        <tr><td style="padding:6px 0 30px 0;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+            <td align="center" style="background:#0E0E0E;border-radius:6px;">
+              <a href="${m.url}" style="display:block;padding:17px 20px;font-family:${MONO};font-size:13px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:#FFFFFF;text-decoration:none;">${m.cta}</a>
+            </td>
+          </tr></table>
+        </td></tr>
+        <tr><td>${p(m.release)}${p('— Bawsa', 'margin-bottom:28px;')}</td></tr>
+        <tr><td style="background:#FAF8F3;border:1px solid #DCD8CF;border-radius:10px;padding:20px 22px;">
+          ${label('Founding 100', '#0047FF')}${p(`<b>p.s.</b> ${m.ps}`, 'font-size:15px;margin:0;')}
+        </td></tr>
+        <tr><td align="center" style="padding:30px 0 0 0;font-family:${SANS};font-size:12px;line-height:1.6;color:#9A968E;">
+          You're getting this because you signed up at <a href="${APP_URL}" style="color:#9A968E;">mybrandos.app</a>.<br>
+          <a href="${unsub}" style="color:#9A968E;text-decoration:underline;">Unsubscribe</a>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+  return { html, text };
 }
 
 // ---------------------------------------------------------------------------
@@ -423,20 +452,4 @@ export async function sendOnce(
     data: { resendId: data.id },
   });
   return 'sent';
-}
-
-/** Instant confirmation after a reservation; once per address, ever. */
-export async function sendReserveConfirmation(signupId: string): Promise<SendResult> {
-  const row = await prisma.emailSignup.findUnique({
-    where: { id: signupId },
-    select: { reservationNumber: true, xUsername: true, reservedArchetype: true },
-  });
-  if (row?.reservationNumber == null) return 'failed';
-  return sendOnce(signupId, CAMPAIGNS.reserveConfirm, () =>
-    reserveConfirmContent({
-      number: row.reservationNumber!,
-      handle: row.xUsername,
-      archetype: row.reservedArchetype,
-    })
-  );
 }

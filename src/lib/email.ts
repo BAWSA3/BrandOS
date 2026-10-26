@@ -53,16 +53,17 @@ export interface PendingEmail {
 // Pending Emails Storage
 // =============================================================================
 
-async function ensureDataDir() {
-  try {
-    await fs.access(DATA_DIR);
-  } catch {
-    await fs.mkdir(DATA_DIR, { recursive: true });
-  }
+// NOTE: this queue is a local JSON file. Vercel's filesystem is read-only, so
+// on deployments nothing is ever queued and the follow-up emails (24h/48h/72h)
+// are skipped; the cron reads an empty queue instead of crashing on EROFS.
+// Moving the follow-ups to Resend's `scheduledAt` would turn them on, which is
+// a product call (it starts a 3-email drip for every signup).
+function isReadOnlyFsError(error: unknown): boolean {
+  const code = (error as NodeJS.ErrnoException | undefined)?.code;
+  return code === 'EROFS' || code === 'EACCES' || code === 'EPERM';
 }
 
 async function readPendingEmails(): Promise<PendingEmail[]> {
-  await ensureDataDir();
   try {
     const data = await fs.readFile(PENDING_EMAILS_FILE, 'utf-8');
     return JSON.parse(data);
@@ -71,9 +72,19 @@ async function readPendingEmails(): Promise<PendingEmail[]> {
   }
 }
 
-async function writePendingEmails(emails: PendingEmail[]) {
-  await ensureDataDir();
-  await fs.writeFile(PENDING_EMAILS_FILE, JSON.stringify(emails, null, 2));
+/** Returns false when the queue can't be written (read-only filesystem). */
+async function writePendingEmails(emails: PendingEmail[]): Promise<boolean> {
+  try {
+    await fs.mkdir(DATA_DIR, { recursive: true });
+    await fs.writeFile(PENDING_EMAILS_FILE, JSON.stringify(emails, null, 2));
+    return true;
+  } catch (error) {
+    if (isReadOnlyFsError(error)) {
+      console.warn('[Email] Pending-email queue is not writable here; skipping.');
+      return false;
+    }
+    throw error;
+  }
 }
 
 // =============================================================================
@@ -215,7 +226,9 @@ export async function schedulePendingEmail(
   };
 
   pending.push(newEmail);
-  await writePendingEmails(pending);
+  if (!(await writePendingEmails(pending))) {
+    return { success: false };
+  }
 
   console.log(`[Email] Scheduled ${templateId} at ${newEmail.scheduledFor}`);
   return { success: true, id: newEmail.id };
@@ -303,8 +316,8 @@ export async function sendWelcomeSequence(
       } else {
         // Schedule for later (may fail on read-only filesystems like Vercel)
         const delayMs = parseDelay(template.sendDelay);
-        await schedulePendingEmail(email, template.id, templateData, delayMs);
-        emailsScheduled++;
+        const scheduled = await schedulePendingEmail(email, template.id, templateData, delayMs);
+        if (scheduled.success) emailsScheduled++;
       }
     } catch (templateErr) {
       console.warn(`[Email] Failed to process template ${template.id}:`, templateErr);
@@ -392,7 +405,7 @@ export async function processPendingEmails(): Promise<{
   }
 
   // Save updated statuses
-  await writePendingEmails(pending);
+  if (processed > 0) await writePendingEmails(pending);
 
   return { processed, sent, failed };
 }

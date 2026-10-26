@@ -36,49 +36,188 @@ function isUrlSafe(urlString: string): boolean {
 // 2.5-* is closed to this account; 3.8-flash is Google's named replacement.
 // One constant so the next retirement is a one-line change.
 export const GEMINI_FLASH_MODEL = 'gemini-3.8-flash';
-// 3.8-flash regularly returns 503 "high demand". On a transient failure we
-// retry it once, then fall back to the previous flash model.
 export const GEMINI_FALLBACK_MODEL = 'gemini-3.7-flash';
+/** Used when Gemini is down or out of quota (same model as the brand score). */
+export const CLAUDE_FALLBACK_MODEL = 'claude-haiku-4-5-20251001';
 
 const RETRY_DELAY_MS = 600;
+/** Per Gemini request. A hung call used to hold a scan until Vercel's 300s kill. */
+const GEMINI_TIMEOUT_MS = 20_000;
+const CLAUDE_TIMEOUT_MS = 40_000;
+/** How long to skip Gemini after a quota error when it doesn't say (and the cap). */
+const QUOTA_PAUSE_DEFAULT_MS = 30 * 60_000;
+const QUOTA_PAUSE_MAX_MS = 6 * 60 * 60_000;
 
-// Read the HTTP status off the SDK's fetch error by shape, not instanceof —
-// instanceof fails when two copies of the SDK are loaded (CJS + ESM).
 function geminiStatus(error: unknown): number | undefined {
   const status = (error as { status?: unknown } | null)?.status;
   return typeof status === 'number' ? status : undefined;
 }
 
 /**
- * A flash model whose generateContent survives Gemini overload: transient
- * errors (429/5xx, no status = network) retry the primary once, then go to the
- * fallback model; a 404 (model retired) goes straight to the fallback. Other
- * errors (bad request, auth, safety) throw unchanged.
+ * A 429 that is a spent quota (e.g. the free tier's 20 requests a day), not a
+ * momentary rate spike: retrying is pointless until the quota resets.
  */
-export function resilientFlash(client: GoogleGenerativeAI = genAI) {
-  const primary = client.getGenerativeModel({ model: GEMINI_FLASH_MODEL });
-  const fallback = client.getGenerativeModel({ model: GEMINI_FALLBACK_MODEL });
+export function isQuotaExhausted(error: unknown): boolean {
+  if (geminiStatus(error) !== 429) return false;
+  const msg = String((error as { message?: unknown } | null)?.message ?? '');
+  return /quota/i.test(msg);
+}
+
+/** Gemini's "retryDelay":"76738s", capped; a default when absent. */
+export function quotaPauseMs(error: unknown): number {
+  const msg = String((error as { message?: unknown } | null)?.message ?? '');
+  const m = msg.match(/retryDelay"?\s*:\s*"(\d+(?:\.\d+)?)s"/) ?? msg.match(/retry in (\d+)h/);
+  if (!m) return QUOTA_PAUSE_DEFAULT_MS;
+  const ms = m[0].includes('retry in') ? Number(m[1]) * 3_600_000 : Number(m[1]) * 1000;
+  return Math.min(QUOTA_PAUSE_MAX_MS, Math.max(60_000, ms));
+}
+
+type FlashArgs = Parameters<GenerativeModel['generateContent']>;
+type FlashResult = Awaited<ReturnType<GenerativeModel['generateContent']>>;
+
+export type ClaudeBlock =
+  | { type: 'text'; text: string }
+  | {
+      type: 'image';
+      source: {
+        type: 'base64';
+        media_type: 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp';
+        data: string;
+      };
+    };
+
+const CLAUDE_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/gif', 'image/webp']);
+
+/** Gemini request (string, parts, or { contents }) → Claude content blocks. */
+export function toClaudeBlocks(request: FlashArgs[0]): ClaudeBlock[] {
+  type AnyPart = string | { text?: string; inlineData?: { mimeType: string; data: string } };
+  let parts: AnyPart[];
+  if (typeof request === 'string') parts = [request];
+  else if (Array.isArray(request)) parts = request as AnyPart[];
+  else
+    parts = ((request as { contents?: { parts?: AnyPart[] }[] }).contents ?? []).flatMap(
+      (c) => c.parts ?? []
+    );
+
+  const blocks: ClaudeBlock[] = [];
+  for (const part of parts) {
+    if (typeof part === 'string') blocks.push({ type: 'text', text: part });
+    else if (part?.text) blocks.push({ type: 'text', text: part.text });
+    else if (part?.inlineData && CLAUDE_IMAGE_TYPES.has(part.inlineData.mimeType))
+      blocks.push({
+        type: 'image',
+        source: {
+          type: 'base64',
+          media_type: part.inlineData.mimeType as 'image/jpeg',
+          data: part.inlineData.data,
+        },
+      });
+  }
+  // Claude wants images before the text that refers to them.
+  return [...blocks.filter((b) => b.type === 'image'), ...blocks.filter((b) => b.type === 'text')];
+}
+
+/** Default Claude fallback: one Haiku call, text out. */
+async function claudeText(blocks: ClaudeBlock[]): Promise<string> {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) throw new Error('ANTHROPIC_API_KEY not configured');
+  const { default: Anthropic } = await import('@anthropic-ai/sdk');
+  const anthropic = new Anthropic({ apiKey, timeout: CLAUDE_TIMEOUT_MS, maxRetries: 0 });
+  const message = await anthropic.messages.create({
+    model: CLAUDE_FALLBACK_MODEL,
+    max_tokens: 4096,
+    messages: [{ role: 'user', content: blocks }],
+  });
+  return message.content.map((b) => (b.type === 'text' ? b.text : '')).join('');
+}
+
+/** A Gemini-shaped result around fallback text, so callers don't change. */
+function textResult(text: string): FlashResult {
+  return { response: { text: () => text } } as unknown as FlashResult;
+}
+
+/** Per-instance: skip Gemini until this time after a spent quota. */
+let geminiPausedUntil = 0;
+
+/** Test hook: clear the quota pause. */
+export function resetGeminiPause() {
+  geminiPausedUntil = 0;
+}
+
+/**
+ * A flash model whose generateContent survives Gemini trouble:
+ * - every Gemini request times out after GEMINI_TIMEOUT_MS;
+ * - transient errors (429 spike/5xx/network/timeout) retry the primary once,
+ *   then try the fallback model; a 404 (model retired) goes straight there;
+ * - a spent quota pauses Gemini for this instance (until its retryDelay, capped)
+ *   and every call in the pause goes straight to Claude Haiku;
+ * - anything Gemini can't answer is answered by Claude Haiku; only when Claude
+ *   also fails does the original Gemini error throw;
+ * - GEMINI_DISABLED=true skips Gemini entirely and Claude carries every call.
+ * Callers keep the Gemini result shape (`(await result.response).text()`).
+ */
+export function resilientFlash(
+  client: GoogleGenerativeAI = genAI,
+  opts: {
+    claude?: (blocks: ClaudeBlock[]) => Promise<string>;
+    now?: () => number;
+    disabled?: () => boolean;
+  } = {}
+) {
+  const claude = opts.claude ?? claudeText;
+  const disabled = opts.disabled ?? (() => process.env.GEMINI_DISABLED === 'true');
+  const now = opts.now ?? Date.now;
+  const requestOptions = { timeout: GEMINI_TIMEOUT_MS };
+  const primary = client.getGenerativeModel({ model: GEMINI_FLASH_MODEL }, requestOptions);
+  const fallback = client.getGenerativeModel({ model: GEMINI_FALLBACK_MODEL }, requestOptions);
+
+  async function viaClaude(args: FlashArgs, cause: unknown): Promise<FlashResult> {
+    try {
+      return textResult(await claude(toClaudeBlocks(args[0])));
+    } catch (claudeError) {
+      console.error('[Gemini] Claude fallback failed too:', claudeError);
+      throw cause ?? claudeError;
+    }
+  }
+
+  function pauseIfQuota(error: unknown): boolean {
+    if (!isQuotaExhausted(error)) return false;
+    const ms = quotaPauseMs(error);
+    geminiPausedUntil = now() + ms;
+    console.warn(
+      `[Gemini] quota spent — using Claude for the next ${Math.round(ms / 60_000)} min on this instance`
+    );
+    return true;
+  }
 
   return {
-    async generateContent(
-      ...args: Parameters<GenerativeModel['generateContent']>
-    ): ReturnType<GenerativeModel['generateContent']> {
+    async generateContent(...args: FlashArgs): Promise<FlashResult> {
+      if (disabled() || now() < geminiPausedUntil) return viaClaude(args, undefined);
+
+      let lastError: unknown;
       for (let attempt = 1; attempt <= 2; attempt++) {
         try {
           return await primary.generateContent(...args);
         } catch (error) {
+          lastError = error;
+          if (pauseIfQuota(error)) return viaClaude(args, error);
           const status = geminiStatus(error);
-          const transient = status === undefined || status === 429 || status >= 500;
           if (status === 404) break;
-          if (!transient) throw error;
+          const transient = status === undefined || status === 429 || status >= 500;
+          if (!transient) return viaClaude(args, error);
           console.warn(
-            `[Gemini] ${GEMINI_FLASH_MODEL} failed (${status ?? 'network'}), attempt ${attempt}`
+            `[Gemini] ${GEMINI_FLASH_MODEL} failed (${status ?? 'network/timeout'}), attempt ${attempt}`
           );
           if (attempt === 1) await new Promise((r) => setTimeout(r, RETRY_DELAY_MS));
         }
       }
       console.warn(`[Gemini] falling back to ${GEMINI_FALLBACK_MODEL}`);
-      return fallback.generateContent(...args);
+      try {
+        return await fallback.generateContent(...args);
+      } catch (error) {
+        pauseIfQuota(error);
+        return viaClaude(args, error ?? lastError);
+      }
     },
   };
 }
@@ -1932,13 +2071,7 @@ export function analyzeNameHandle(name: string, handle: string): NameAnalysis {
 // BRAND DNA GENERATION (AI-powered)
 // =============================================================================
 
-export const brandDNAPrompt = (
-  profile: XProfileData,
-  bioLinguistics: BioLinguistics,
-  nameAnalysis: NameAnalysis,
-  imageAnalysis?: ProfileImageAnalysis,
-  tweetVoice?: TweetVoiceAnalysis | null
-) => {
+export const brandDNAPrompt = (profile: XProfileData, tweetVoice?: TweetVoiceAnalysis | null) => {
   const influenceAnalysis = analyzeInfluence(profile);
   // Support both flat and nested follower count properties
   const followersCount =
@@ -2091,7 +2224,7 @@ export async function analyzeProfileImageWithVision(
     }
 
     // Fetch the image and convert to base64
-    const imageResponse = await fetch(finalUrl);
+    const imageResponse = await fetch(finalUrl, { signal: AbortSignal.timeout(8_000) });
     if (!imageResponse.ok) return null;
 
     const arrayBuffer = await imageResponse.arrayBuffer();
@@ -2135,11 +2268,11 @@ export async function generateBrandDNA(
   tweetVoice?: TweetVoiceAnalysis | null
 ): Promise<BrandDNA | null> {
   try {
-    const bioLinguistics = analyzeBioLinguistics(profile.description || '', profile.name);
-    const nameAnalysis = analyzeNameHandle(profile.name, profile.username);
-
-    // CONTENT-PRIMARY: Pass tweet voice to prompt if available
-    const prompt = brandDNAPrompt(profile, bioLinguistics, nameAnalysis, imageAnalysis, tweetVoice);
+    // CONTENT-PRIMARY: the prompt reads content + reputation only. It used to
+    // also take bio/name analyses it never used; the minifier inlined those
+    // dead calls with a variable assigned before its `let`, so every prod call
+    // threw "Cannot access 't' before initialization" (139× in 7 days).
+    const prompt = brandDNAPrompt(profile, tweetVoice);
 
     const result = await geminiFlash.generateContent(prompt);
     const response = await result.response;

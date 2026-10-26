@@ -7,6 +7,7 @@ import { ScrollTrigger } from '@/lib/gsap/ScrollTrigger';
 import PhaseSection from './PhaseSection';
 import ScoreReveal from './ScoreReveal';
 import JourneyProgress from './JourneyProgress';
+import { handleInputValue } from '@/lib/safe-input';
 
 // Register GSAP plugins
 if (typeof window !== 'undefined') {
@@ -376,9 +377,9 @@ export default function BrandScoreJourney({ theme, onComplete }: BrandScoreJourn
                     <input
                       type="text"
                       value={username}
-                      onChange={(e) => setUsername(e.target.value.replace(/^@/, ''))}
+                      onChange={(e) => setUsername(handleInputValue(e.target.value))}
                       placeholder="your_handle"
-                      maxLength={15}
+                      maxLength={64}
                       disabled={journeyState === 'loading'}
                       style={{
                         width: '100%',

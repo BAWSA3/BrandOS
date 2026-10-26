@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { after } from 'next/server';
 import { refreshAvatar } from '@/lib/avatar-refresh';
-import { getCurrentUser } from '@/lib/auth';
+import { getCurrentUser, getCurrentWorkspace } from '@/lib/auth';
 import { getHomeData, toDashboardData } from '@/lib/home-data';
 import { cookies } from 'next/headers';
 import { recordVisit, safeTz } from '@/lib/progress';
@@ -20,6 +20,13 @@ import ConnectX from './ConnectX';
 import BackupLoginNudge from '@/components/dashboard/BackupLoginNudge';
 import { adoptPublicScan } from '@/lib/adopt-scan';
 import FirstScan from './FirstScan';
+import prisma from '@/lib/db';
+import { addAccount, brandLimit, COMPETITORS_PER_BRAND } from '@/lib/tracked-accounts';
+import { getGrowthView, type GrowthView } from '@/lib/growth-data';
+import GrowthDashboard from '@/components/growth/GrowthDashboard';
+import type { IndexTileData } from '@/components/growth/IndexTile';
+import { indexOpenFor, standsOut } from '@/lib/index-rules';
+import { getEntry, viewSummary } from '@/lib/creator-index';
 
 // Auth-gated page: render per-request, never statically prerender at build.
 export const dynamic = 'force-dynamic';
@@ -27,7 +34,7 @@ export const dynamic = 'force-dynamic';
 export default async function DashboardPage({
   searchParams,
 }: {
-  searchParams: Promise<{ rescan?: string; design?: string; checkout?: string }>;
+  searchParams: Promise<{ rescan?: string; design?: string; checkout?: string; brand?: string }>;
 }) {
   const sp = await searchParams;
   let user = await getCurrentUser();
@@ -59,6 +66,17 @@ export default async function DashboardPage({
   const legacy = user.accountMigrationStatus === 'legacy';
 
   const xConnections = user.platformConnections.filter((pc) => pc.platform === 'x');
+
+  // Growth dashboard (pivot 2026-10-22) for anyone with Pro access (everyone
+  // until Dec 3). ?design=v2 keeps the old dashboard reachable while the new
+  // one beds in; before migration 040 is applied this falls through to it.
+  if (sp.design !== 'v2' && hasPro(user)) {
+    const [view, index] = await Promise.all([
+      loadGrowth(user, xConnections[0]?.platformUsername, sp.brand),
+      loadIndexTile(user),
+    ]);
+    if (view) return <GrowthDashboard view={view} index={index} />;
+  }
   // Real-data bento once the user has a scan (the legacy tools page only shows
   // for accounts without X connected, which can't scan yet).
   // The visit awards XP / advances the streak (null if migration 029 isn't applied).
@@ -131,7 +149,7 @@ export default async function DashboardPage({
           }
           scoreAlert={progress?.scoreAlert ?? null}
           rescan="live"
-          homeHref="/home"
+          homeHref="/dashboard"
         />
       )}
       {bento && !pro && (
@@ -146,4 +164,61 @@ export default async function DashboardPage({
       {legacy && bento && <BackupLoginNudge />}
     </>
   );
+}
+
+/**
+ * The Creator Index tile: null while the Index is closed (admins see it).
+ * Members get their number and this week's views; which teams viewed them
+ * is shown only to members who stand out (a paid card).
+ */
+async function loadIndexTile(
+  user: NonNullable<Awaited<ReturnType<typeof getCurrentUser>>>
+): Promise<IndexTileData | null> {
+  if (!indexOpenFor(user)) return null;
+  const entry = await getEntry(user.id);
+  const pro = standsOut({
+    role: String(user.role),
+    subscriptionTier: String(user.subscriptionTier),
+    subscriptionStatus: String(user.subscriptionStatus),
+  });
+  if (!entry) return { member: null, views: null, standsOut: pro };
+  const v = await viewSummary(entry.id, 7);
+  return {
+    member: { number: entry.number, listed: entry.listed, handle: entry.displayHandle },
+    views: { people: v.people, teams: pro ? v.teams : null },
+    standsOut: pro,
+  };
+}
+
+/**
+ * The growth view for the user's workspace. First visit: the user's own X
+ * account becomes their first brand (one sync, a few seconds). Null when the
+ * tables aren't there yet (migration 040) or there's nothing to show.
+ */
+async function loadGrowth(
+  user: NonNullable<Awaited<ReturnType<typeof getCurrentUser>>>,
+  ownHandle: string | undefined,
+  brandId: string | undefined
+): Promise<GrowthView | null> {
+  try {
+    const workspace = await getCurrentWorkspace(user);
+    if (!workspace) return null;
+    const limits = { brands: brandLimit(user), competitors: COMPETITORS_PER_BRAND };
+    const count = await prisma.trackedAccount.count({
+      where: { workspaceId: workspace.id, competitorOfId: null },
+    });
+    if (count === 0 && ownHandle) {
+      await addAccount({
+        workspaceId: workspace.id,
+        userId: user.id,
+        limit: limits.brands,
+        rawHandle: ownHandle,
+        kind: 'creator',
+      });
+    }
+    return await getGrowthView(workspace.id, brandId, limits);
+  } catch (e) {
+    console.error('[dashboard] growth view unavailable, using the classic dashboard', e);
+    return null;
+  }
 }

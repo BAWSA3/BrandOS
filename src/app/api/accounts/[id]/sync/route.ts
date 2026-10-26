@@ -3,7 +3,7 @@ import prisma from '@/lib/db';
 import { getCurrentUser, getCurrentWorkspace } from '@/lib/auth';
 import { botGuard } from '@/lib/botid-guard';
 import { checkRateLimit } from '@/lib/rate-limit';
-import { AccountError, syncAccount } from '@/lib/tracked-accounts';
+import { AccountError, syncAccount, syncAudience } from '@/lib/tracked-accounts';
 
 /**
  * POST /api/accounts/[id]/sync — refresh one tracked account now (the nightly
@@ -37,6 +37,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
   try {
     await syncAccount(account.id);
+    if (!account.competitorOfId) await syncAudience(account.id);
     return NextResponse.json({ ok: true });
   } catch (e) {
     if (e instanceof AccountError)

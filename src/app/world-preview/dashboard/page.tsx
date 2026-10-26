@@ -283,7 +283,6 @@ const SAMPLE: DashboardData = {
     archetype: 'BUILD.EXE',
     taste: 'Scrappy builder-in-public energy',
     pillars: ['building in public', 'creator economy', 'web3'],
-    stationNumber: 2,
     score: 72,
     issued: '10.2026',
   },
@@ -345,7 +344,6 @@ function Preview() {
         data={data}
         isNew={isNew}
         // &swap=0: the previous layout (Brand Pass big on the left)
-        swapPassStation={q.get('swap') !== '0'}
         // ?colorway=bone|night|klein|paper, else the one picked in the preview title's Settings
         colorway={colorway}
         // &design=v2: the 2026-10-15 redesign preview

@@ -1,6 +1,8 @@
 /**
  * Server-side PostHog capture for the gated funnel:
  *   signup_completed → x_connected → scan_completed → checkout_started → purchase_completed
+ * and the launch funnel (docs/LAUNCH-PLAYBOOK.md):
+ *   signup_completed → index_join_started → index_joined → checkout_started → trial_started (card added)
  *
  * Why server-side: every funnel step's source of truth is a DB write in an API
  * route (see MINIMUM-LAUNCH-BAR.md Week 4). Client-side capture would undercount
@@ -37,7 +39,12 @@ export type FunnelEvent =
   | 'purchase_completed'
   | 'trial_started'
   | 'trial_converted'
-  | 'subscription_canceled';
+  | 'subscription_canceled'
+  // Creator Index (migration 044). checkout_started = a Pro/founding checkout
+  // began; trial_started = a card was added (founding cards trial until Dec 3).
+  | 'index_join_started'
+  | 'index_joined'
+  | 'index_left';
 
 /**
  * Fire a funnel event. Awaits delivery (captureImmediate) so the event isn't

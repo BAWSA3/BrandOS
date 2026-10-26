@@ -410,3 +410,208 @@ export async function searchTweets(
 export function isSocialDataConfigured(): boolean {
   return !!process.env.SOCIALDATA_API_KEY;
 }
+
+// ---------------------------------------------------------------------------
+// Post audience (growth dashboard, migration 041)
+// ---------------------------------------------------------------------------
+
+export interface AudiencePerson {
+  handle: string;
+  name: string;
+  followers: number;
+  at: string; // ISO time of the interaction (reposts: when we saw it)
+}
+
+const HANDLE_OK = /^[A-Za-z0-9_]{1,15}$/;
+
+function person(u: Record<string, unknown> | undefined, at: string): AudiencePerson | null {
+  const handle = String(u?.screen_name ?? '');
+  if (!HANDLE_OK.test(handle)) return null;
+  return {
+    handle,
+    name: String(u?.name ?? '').slice(0, 80),
+    followers: Number(u?.followers_count) || 0,
+    at,
+  };
+}
+
+async function listOf(path: string, key: 'tweets' | 'users'): Promise<Record<string, unknown>[]> {
+  try {
+    const res = await socialDataFetch(path);
+    if (!res.ok) {
+      console.error(`[SOCIALDATA ERROR] ${path.split('?')[0]} ${res.status}`);
+      return [];
+    }
+    const data = await res.json();
+    const list = data[key];
+    return Array.isArray(list) ? list : [];
+  } catch (e) {
+    console.error('[SOCIALDATA] audience fetch failed', e);
+    return [];
+  }
+}
+
+/** People who replied to a post (one page, ~10–20), excluding the author's own replies. */
+export async function fetchRepliers(
+  tweetId: string,
+  authorHandle: string
+): Promise<AudiencePerson[]> {
+  const q = new URLSearchParams({ query: `conversation_id:${tweetId}`, type: 'Latest' });
+  const tweets = await listOf(`/twitter/search?${q}`, 'tweets');
+  const self = authorHandle.toLowerCase();
+  return tweets
+    .map((t) =>
+      person(
+        t.user as Record<string, unknown> | undefined,
+        String(t.tweet_created_at || t.created_at || new Date().toISOString())
+      )
+    )
+    .filter((p): p is AudiencePerson => !!p && p.handle.toLowerCase() !== self);
+}
+
+/** People who reposted a post (one page). */
+export async function fetchReposters(tweetId: string): Promise<AudiencePerson[]> {
+  const now = new Date().toISOString();
+  const users = await listOf(
+    `/twitter/tweets/${encodeURIComponent(tweetId)}/retweeted_by`,
+    'users'
+  );
+  return users.map((u) => person(u, now)).filter((p): p is AudiencePerson => !!p);
+}
+
+/** People who quoted a post (one page). */
+export async function fetchQuoters(tweetId: string): Promise<AudiencePerson[]> {
+  const tweets = await listOf(`/twitter/tweets/${encodeURIComponent(tweetId)}/quotes`, 'tweets');
+  return tweets
+    .map((t) =>
+      person(
+        t.user as Record<string, unknown> | undefined,
+        String(t.tweet_created_at || t.created_at || new Date().toISOString())
+      )
+    )
+    .filter((p): p is AudiencePerson => !!p);
+}
+
+// ---------------------------------------------------------------------------
+// Account details for the bot check (/bots)
+// ---------------------------------------------------------------------------
+
+/** The public account fields the bot check reads (followers, engagers). */
+export interface XAccount {
+  id: string;
+  handle: string;
+  name: string;
+  bio: string;
+  followers: number;
+  following: number;
+  posts: number;
+  likes: number;
+  createdAt: string;
+  defaultAvatar: boolean;
+}
+
+function xAccount(u: Record<string, unknown> | undefined): XAccount | null {
+  const handle = String(u?.screen_name ?? '');
+  const id = String(u?.id_str ?? '');
+  if (!HANDLE_OK.test(handle) || !/^\d{1,25}$/.test(id)) return null;
+  const avatar = String(u?.profile_image_url_https ?? u?.profile_image_url ?? '');
+  return {
+    id,
+    handle,
+    name: String(u?.name ?? '').slice(0, 80),
+    bio: String(u?.description ?? '').slice(0, 300),
+    followers: Number(u?.followers_count) || 0,
+    following: Number(u?.friends_count) || 0,
+    posts: Number(u?.statuses_count) || 0,
+    likes: Number(u?.favourites_count) || 0,
+    createdAt: String(u?.created_at ?? ''),
+    defaultAvatar: !avatar || avatar.includes('default_profile'),
+  };
+}
+
+/**
+ * An account's newest followers, newest first: up to `maxAccounts`, reading
+ * at most `maxPages` pages. Returns what it got if a later page fails.
+ */
+export async function fetchFollowerAccounts(
+  userId: string,
+  maxAccounts = 200,
+  maxPages = 10
+): Promise<{ accounts: XAccount[]; requests: number; failed: boolean }> {
+  const out: XAccount[] = [];
+  const seen = new Set<string>();
+  let cursor = '';
+  let requests = 0;
+  let failed = false;
+  for (let page = 0; page < maxPages && out.length < maxAccounts; page++) {
+    const q = new URLSearchParams({ user_id: userId });
+    if (cursor) q.set('cursor', cursor);
+    requests++;
+    let data: { users?: unknown; next_cursor?: unknown };
+    try {
+      const res = await socialDataFetch(`/twitter/followers/list?${q}`);
+      if (!res.ok) {
+        console.error(`[SOCIALDATA ERROR] followers ${res.status}`);
+        failed = true;
+        break;
+      }
+      data = await res.json();
+    } catch (e) {
+      console.error('[SOCIALDATA] followers fetch failed', e);
+      failed = true;
+      break;
+    }
+    const users = Array.isArray(data.users) ? (data.users as Record<string, unknown>[]) : [];
+    for (const u of users) {
+      const a = xAccount(u);
+      if (a && !seen.has(a.id)) {
+        seen.add(a.id);
+        out.push(a);
+      }
+    }
+    cursor = typeof data.next_cursor === 'string' ? data.next_cursor : '';
+    if (!cursor || cursor === '0' || users.length === 0) break;
+  }
+  return { accounts: out.slice(0, maxAccounts), requests, failed };
+}
+
+/**
+ * Everyone who replied to, reposted or quoted a post (one page each),
+ * excluding the author. Three requests. `failed` when any of them errored
+ * (so callers can tell "nobody engaged" from "couldn't read it").
+ */
+export async function fetchEngagerAccounts(
+  tweetId: string,
+  authorHandle: string
+): Promise<{ accounts: XAccount[]; failed: boolean }> {
+  let failed = false;
+  const get = async (path: string, key: 'tweets' | 'users') => {
+    try {
+      const res = await socialDataFetch(path);
+      if (!res.ok) {
+        console.error(`[SOCIALDATA ERROR] ${path.split('?')[0]} ${res.status}`);
+        failed = true;
+        return [];
+      }
+      const list = (await res.json())[key];
+      return Array.isArray(list) ? (list as Record<string, unknown>[]) : [];
+    } catch (e) {
+      console.error('[SOCIALDATA] engager fetch failed', e);
+      failed = true;
+      return [];
+    }
+  };
+  const q = new URLSearchParams({ query: `conversation_id:${tweetId}`, type: 'Latest' });
+  const [replies, reposts, quotes] = await Promise.all([
+    get(`/twitter/search?${q}`, 'tweets'),
+    get(`/twitter/tweets/${encodeURIComponent(tweetId)}/retweeted_by`, 'users'),
+    get(`/twitter/tweets/${encodeURIComponent(tweetId)}/quotes`, 'tweets'),
+  ]);
+  const self = authorHandle.toLowerCase();
+  const accounts = [
+    ...replies.map((t) => xAccount(t.user as Record<string, unknown> | undefined)),
+    ...reposts.map((u) => xAccount(u)),
+    ...quotes.map((t) => xAccount(t.user as Record<string, unknown> | undefined)),
+  ].filter((a): a is XAccount => !!a && a.handle.toLowerCase() !== self);
+  return { accounts, failed };
+}

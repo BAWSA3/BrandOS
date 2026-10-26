@@ -5,7 +5,7 @@ export type StageNumber = 0 | 1 | 2 | 3;
 
 export interface StudioStep {
   stage: 1 | 2 | 3;
-  name: string; // the floor it builds
+  name: string; // the step's name
   verb: string; // the brand step that unlocks it
   line: string;
 }
@@ -13,30 +13,23 @@ export interface StudioStep {
 export const STUDIO_STEPS: StudioStep[] = [
   {
     stage: 1,
-    name: 'Foundation',
+    name: 'Taste',
     verb: 'Find your taste',
     line: 'React to brand cards and add what inspires you.',
   },
   {
     stage: 2,
-    name: 'Workstation',
+    name: 'Brand Kit',
     verb: 'Shape your brand',
     line: 'Turn your taste into your first Brand Kit.',
   },
   {
     stage: 3,
-    name: 'Billboard',
+    name: 'Consistency',
     verb: 'Stay on brand',
     line: 'Connect X and set your first posting streak.',
   },
 ];
-
-export const STAGE_HEADLINES: Record<StageNumber, string> = {
-  0: 'Your station starts here.',
-  1: 'The foundation is poured.',
-  2: 'Your workstation is up.',
-  3: 'Blueprint complete.',
-};
 
 /**
  * How much of the finished station art is built at each stage, as the top
