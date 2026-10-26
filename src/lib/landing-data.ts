@@ -4,6 +4,8 @@ import { foundingSpotsLeft } from '@/lib/founding';
 import { scannedLabel } from '@/lib/index-reservations';
 import { listIndex, type IndexCard } from '@/lib/creator-index';
 import { classify } from '@/lib/classifications';
+import { isLikelyCompany } from '@/lib/account-kind';
+import { trackedBrandHandles } from '@/lib/tracked-accounts';
 import {
   indexOpen,
   parsePhases,
@@ -98,14 +100,18 @@ async function recentReads(): Promise<RecentRead[]> {
     })
     .catch(() => []);
   const byHandle = new Map(profiles.map((p) => [p.username.toLowerCase(), p.profileData]));
+  const brands = await trackedBrandHandles(rows.map((r) => r.handle));
   const candidates: ReadCandidate[] = rows.map((r) => {
     let avatar: string | null = null;
     let name: string | null = null;
+    let bio: string | null = null;
     try {
       const pd = JSON.parse(byHandle.get(r.handle) ?? 'null') as {
         name?: unknown;
+        description?: unknown;
         profile_image_url?: unknown;
       } | null;
+      if (typeof pd?.description === 'string') bio = pd.description;
       if (
         typeof pd?.profile_image_url === 'string' &&
         pd.profile_image_url.startsWith('https://pbs.twimg.com/')
@@ -132,6 +138,13 @@ async function recentReads(): Promise<RecentRead[]> {
       avatar,
       name,
       readAt: (r.created_at ?? new Date()).toISOString(),
+      company: isLikelyCompany({
+        handle: r.handle,
+        name,
+        bio,
+        summary: r.summary,
+        tracked: brands.has(r.handle) ? 'brand' : null,
+      }),
     };
   });
   return pickRecentReads(candidates, (a) => classify(a)?.code ?? null);

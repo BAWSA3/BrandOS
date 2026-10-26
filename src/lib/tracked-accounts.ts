@@ -276,6 +276,52 @@ export async function trackedKind(rawHandle: string): Promise<'creator' | 'brand
 }
 
 /**
+ * The handles among `handles` that are tracked as a brand / company account by
+ * their owner or an admin (the same rule as `trackedKind`), in one query.
+ * Never throws.
+ */
+export async function trackedBrandHandles(handles: string[]): Promise<Set<string>> {
+  const wanted = [...new Set(handles.map((h) => h.toLowerCase()))];
+  if (wanted.length === 0) return new Set();
+  const rows = await prisma.trackedAccount
+    .findMany({
+      where: {
+        handle: { in: wanted },
+        kind: 'brand',
+        competitorOfId: null,
+        addedByUserId: { not: null },
+      },
+      select: {
+        handle: true,
+        xUserId: true,
+        addedBy: {
+          select: {
+            role: true,
+            platformConnections: { where: { platform: 'x' }, select: { platformUserId: true } },
+          },
+        },
+      },
+      take: 500,
+    })
+    .catch(() => []);
+  return new Set(
+    rows
+      .filter((r) =>
+        vouchesForCompany({
+          xUserId: r.xUserId,
+          addedBy: r.addedBy
+            ? {
+                role: String(r.addedBy.role),
+                xUserIds: r.addedBy.platformConnections.map((c) => c.platformUserId),
+              }
+            : null,
+        })
+      )
+      .map((r) => r.handle.toLowerCase())
+  );
+}
+
+/**
  * Add a brand (or a competitor of one) to a workspace by public handle.
  * Verifies the handle exists on X, enforces plan limits, then runs the first
  * sync so the dashboard has data immediately.
