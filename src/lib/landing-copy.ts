@@ -204,6 +204,11 @@ export const LANDING = {
     membersLabel: 'Members',
     sampleEntry: 'Sample entry',
     tickerLabel: 'Sample entries',
+    readsLabel: 'Recent reads',
+    recentRead: 'Recent read',
+    readOn: 'Read',
+    readsNote:
+      'Public accounts BrandOS read lately. The Index lists only members who chose to join.',
     sealed: { label: 'Founding 100', range: '№ 001–100' },
     seeIndex: 'See the Index',
     opensNote: 'opens 2 Nov',
@@ -235,7 +240,7 @@ export const LANDING = {
   close: {
     id: 'read',
     label: '05 / Your turn',
-    headline: 'Read your brand.',
+    headline: 'Read your\u00a0brand.', // no-break: never "brand." alone on a line
     body: 'It takes about a minute. Any public X account.',
     quote: "read yours. if it's wrong, tell me.",
   },

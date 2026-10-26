@@ -2,7 +2,14 @@
  * The field (Direction 02): dither core, server PNG, avatar URL allowlist.
  * Pure: no database, no network.  npm run test:field
  */
-import { indexOpen, parsePhases } from '../src/lib/landing-rules';
+import {
+  indexOpen,
+  parsePhases,
+  pickRecentReads,
+  readLine,
+  type ReadCandidate,
+} from '../src/lib/landing-rules';
+import { classify } from '../src/lib/classifications';
 import { inflateSync } from 'node:zlib';
 import {
   BAYER8,
@@ -261,6 +268,66 @@ test(
 test(
   'the Index opens at midnight 2 Nov (Los Angeles)',
   indexOpen(Date.parse('2026-11-02T00:00:00-07:00'))
+);
+
+// Recent reads (the homepage before the Index opens)
+const ph = { define: 70, check: 70, generate: 70, scale: 70 };
+const cand = (
+  handle: string,
+  score: number,
+  archetype: string | null,
+  extra: Partial<ReadCandidate> = {}
+): ReadCandidate => ({
+  handle,
+  score,
+  archetype,
+  phases: ph,
+  summary: `${handle} is a creator. Second sentence.`,
+  pillars: ['AI', 'Trading'],
+  avatar: 'https://pbs.twimg.com/a.jpg',
+  name: handle,
+  readAt: '2026-10-25T00:00:00Z',
+  ...extra,
+});
+const classOf = (a: string | null) => classify(a)?.code ?? null;
+const reads = pickRecentReads(
+  [
+    cand('a', 90, 'SOURCE'),
+    cand('b', 88, 'SOURCE'),
+    cand('c', 80, 'FORESIGHT'),
+    cand('d', 70, 'ARC'),
+    cand('broken', 95, 'SOURCE', { phases: null }),
+    cand('nopic', 94, 'ARC', { avatar: null }),
+    cand('nosummary', 93, 'ARC', { summary: ' ' }),
+    cand('noclass', 92, 'MYSTERY'),
+    cand('A', 60, 'NULL'),
+  ],
+  classOf,
+  3
+);
+test(
+  'recent reads: one per class first, highest scores, complete reads only',
+  reads.map((r) => r.handle).join(',') === 'a,c,d',
+  reads.map((r) => r.handle).join(',')
+);
+test(
+  'recent reads: fills with the next highest once classes run out',
+  pickRecentReads([cand('a', 90, 'SOURCE'), cand('b', 88, 'SOURCE')], classOf, 3)
+    .map((r) => r.handle)
+    .join(',') === 'a,b'
+);
+test(
+  'recent reads: a handle appears once (case-insensitive)',
+  pickRecentReads([cand('Naval', 84, 'FORESIGHT'), cand('naval', 80, 'FORESIGHT')], classOf)
+    .length === 1
+);
+test('read line: first sentence', readLine('One thing. Two things.') === 'One thing.');
+test(
+  'read line: long sentences are cut at a word',
+  (() => {
+    const l = readLine(`${'word '.repeat(40)}end.`);
+    return l.length <= 96 && l.endsWith('…') && !l.includes('wor…');
+  })()
 );
 
 // The pre-drawn field (src/lib/field/predraw.ts): the inline script must draw

@@ -139,6 +139,7 @@ export function FieldText({
       fontSize: 'clamp(48px, 9vw, 168px)',
       lineHeight: 0.92,
       letterSpacing: '-0.045em',
+      textWrap: 'balance',
     },
     title: {
       fontFamily: SYSTEM_FONTS.display,
@@ -146,6 +147,7 @@ export function FieldText({
       fontSize: 'clamp(28px, 4vw, 52px)',
       lineHeight: 1,
       letterSpacing: '-0.03em',
+      textWrap: 'balance',
     },
     body: { fontFamily: SYSTEM_FONTS.display, fontSize: 17, lineHeight: 1.55 },
     mono: { fontFamily: SYSTEM_FONTS.plex, fontSize: 14, lineHeight: 1.6 },

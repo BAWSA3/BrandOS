@@ -66,6 +66,15 @@ export default function ContinuePage() {
   const rawNext = params?.get('next');
   // same-origin relative paths only (no open redirect)
   const next = safeNextPath(rawNext, '/dashboard');
+  // signing in from someone's public page to compare: say where they're going
+  // back to (read after mount; the page is prerendered without the URL)
+  const [compareWith, setCompareWith] = useState<string | null>(null);
+  useEffect(() => {
+    const target = safeNextPath(new URLSearchParams(window.location.search).get('next'), '');
+    const handle = /^\/@([A-Za-z0-9_]{1,15})\?compare=1$/.exec(target)?.[1] ?? null;
+    const t = window.setTimeout(() => setCompareWith(handle), 0);
+    return () => window.clearTimeout(t);
+  }, []);
   const callbackUrl = (via: 'x' | 'google' | 'email') =>
     typeof window !== 'undefined'
       ? `${window.location.origin}/api/auth/callback?next=${encodeURIComponent(next)}&tos=${encodeURIComponent(TOS_VERSION)}&via=${via}`
@@ -152,6 +161,14 @@ export default function ContinuePage() {
         <p className="mt-3 text-center text-[14px] leading-[1.5] text-[#6B6862]">
           New here? This creates your account. Back again? It signs you in.
         </p>
+        {compareWith && (
+          <p
+            className="mt-2 text-center text-[11px] uppercase tracking-[0.14em]"
+            style={{ fontFamily: LABEL, color: BLUE }}
+          >
+            Then we compare you to @{compareWith}
+          </p>
+        )}
         {ref && (
           <p
             className="mt-2 text-center text-[11px] uppercase tracking-[0.14em]"

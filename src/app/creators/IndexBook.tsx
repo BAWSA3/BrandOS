@@ -69,6 +69,7 @@ export function Card({
   pinned = false,
   own = false,
   sample = false,
+  read,
 }: {
   c: IndexCard;
   pinned?: boolean;
@@ -76,6 +77,12 @@ export function Card({
   own?: boolean;
   /** Illustrative entry (the landing page before the Index opens): labelled, not a link. */
   sample?: boolean;
+  /**
+   * A real account's recent read (the landing page before the Index opens), not
+   * an entry: no number, labelled "Recent read" with the read's date; links to
+   * their public read.
+   */
+  read?: { date: string; label: string; on: string };
 }) {
   const accent = c.featured || pinned;
   const Frame = sample ? SampleFrame : Link;
@@ -91,8 +98,12 @@ export function Card({
       }}
     >
       <div className="flex items-center justify-between gap-2">
-        <Micro color={accent ? C.blue : C.muted}>{formatNumber(c.number)}</Micro>
-        {own ? (
+        <Micro color={accent ? C.blue : C.muted}>
+          {read ? `${read.on} ${recordDate(read.date)}` : formatNumber(c.number)}
+        </Micro>
+        {read ? (
+          <Micro>{read.label}</Micro>
+        ) : own ? (
           <span
             className="px-1.5 py-0.5 text-[10px] uppercase tracking-[0.18em]"
             style={{ fontFamily: MONO, background: SIGNAL, color: C.ink }}
