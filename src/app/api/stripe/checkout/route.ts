@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { stripe } from '@/lib/stripe';
+import { stripe, stripeEnv } from '@/lib/stripe';
 import { getUser } from '@/lib/auth';
 import prisma from '@/lib/db';
 import {
@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    if (!process.env.STRIPE_SECRET_KEY) {
+    if (!stripeEnv('STRIPE_SECRET_KEY')) {
       return NextResponse.json({ error: 'Billing is not open yet' }, { status: 503 });
     }
 
@@ -100,7 +100,7 @@ export async function POST(request: NextRequest) {
     const founding = (await foundingSpotsLeft()) > 0;
     const priceId = founding
       ? PLAN_CONFIGS.PRO.stripePriceIdMonthly
-      : process.env.STRIPE_PRICE_PRO_STANDARD || PLAN_CONFIGS.PRO.stripePriceIdMonthly;
+      : stripeEnv('STRIPE_PRICE_PRO_STANDARD') || PLAN_CONFIGS.PRO.stripePriceIdMonthly;
     if (!priceId) {
       return NextResponse.json({ error: 'Price not configured' }, { status: 400 });
     }
