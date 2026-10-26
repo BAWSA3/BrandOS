@@ -169,6 +169,7 @@ export default function GrowthDashboard({
             format: i.format,
             why: i.why || undefined,
             col: i.status === 'posted' ? 'posted' : i.status === 'drafting' ? 'drafting' : 'ideas',
+            createdAt: i.createdAt,
           })),
     [sample, ideas, view.ideas]
   );
@@ -778,6 +779,8 @@ export default function GrowthDashboard({
           <IdeaBoard
             key={brand.id}
             handle={brand.handle}
+            name={brand.name}
+            avatarUrl={brand.avatarUrl}
             accountId={sample ? undefined : brand.id}
             initial={boardIdeas}
           />

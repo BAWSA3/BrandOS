@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Label, MONO, BIG, T, Tile } from './parts';
+import { Label, MONO, T, Tile } from './parts';
+import XComposer, { Avatar, X } from './XComposer';
 
 /**
  * Idea board: a blank page to think on (not a search box), BrandOS ideas with
@@ -10,6 +11,8 @@ import { Label, MONO, BIG, T, Tile } from './parts';
  * With an `accountId` every change is saved to that brand's board
  * (/api/ideas, migration 042) and "New BrandOS ideas" generates ideas from the
  * brand's analytics; without one (the preview) it's local only.
+ * Ideas are written and read like X posts (XComposer); editing an idea reopens
+ * it in the composer.
  */
 
 export type Idea = {
@@ -19,6 +22,7 @@ export type Idea = {
   hook?: string;
   format?: string;
   col: 'ideas' | 'drafting' | 'posted';
+  createdAt?: string;
 };
 const STATUS: Record<Idea['col'], string> = {
   ideas: 'saved',
@@ -37,6 +41,22 @@ async function call(url: string, method: string, body: unknown) {
   return json;
 }
 
+/** X's timestamp: 4m / 3h / Oct 24 (and the year once it isn't this year). */
+function ago(iso?: string) {
+  if (!iso) return 'now';
+  const t = new Date(iso);
+  const s = (Date.now() - t.getTime()) / 1000;
+  if (!Number.isFinite(s) || s < 60) return 'now';
+  if (s < 3600) return `${Math.floor(s / 60)}m`;
+  if (s < 86_400) return `${Math.floor(s / 3600)}h`;
+  const sameYear = t.getFullYear() === new Date().getFullYear();
+  return t.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    ...(sameYear ? {} : { year: 'numeric' }),
+  });
+}
+
 // prompts for a blank page: things only this person can say
 const SPARKS = [
   'Something I changed my mind about',
@@ -47,10 +67,14 @@ const SPARKS = [
 
 export default function IdeaBoard({
   handle,
+  name,
+  avatarUrl,
   initial,
   accountId,
 }: {
   handle: string;
+  name?: string | null;
+  avatarUrl?: string | null;
   initial: Idea[];
   accountId?: string;
 }) {
@@ -65,13 +89,7 @@ export default function IdeaBoard({
   }, [initial]);
   const [draft, setDraft] = useState('');
   const pageRef = useRef<HTMLTextAreaElement>(null);
-  // the page grows with the idea instead of scrolling inside a box
-  useEffect(() => {
-    const el = pageRef.current;
-    if (!el) return;
-    el.style.height = 'auto';
-    el.style.height = `${Math.max(120, el.scrollHeight)}px`;
-  }, [draft]);
+  const [editing, setEditing] = useState<{ id: Idea['id']; text: string } | null>(null);
   const save = async (fn: () => Promise<unknown>) => {
     setError(null);
     try {
@@ -84,7 +102,10 @@ export default function IdeaBoard({
     const text = draft.trim();
     if (!text) return;
     const temp = Date.now();
-    setIdeas((all) => [{ id: temp, text, col: 'ideas' }, ...all]);
+    setIdeas((all) => [
+      { id: temp, text, col: 'ideas', createdAt: new Date().toISOString() },
+      ...all,
+    ]);
     setDraft('');
     if (accountId)
       save(async () => {
@@ -97,6 +118,15 @@ export default function IdeaBoard({
     setIdeas((all) => all.map((i) => (i.id === id ? { ...i, col } : i)));
     if (accountId && typeof id === 'string')
       save(() => call('/api/ideas', 'PATCH', { id, status: STATUS[col] }));
+  };
+  const edit = () => {
+    if (!editing) return;
+    const { id } = editing;
+    const text = editing.text.trim();
+    if (!text) return;
+    setIdeas((all) => all.map((i) => (i.id === id ? { ...i, text } : i)));
+    setEditing(null);
+    if (accountId && typeof id === 'string') save(() => call('/api/ideas', 'PATCH', { id, text }));
   };
   const remove = (id: Idea['id']) => {
     setIdeas((all) => all.filter((i) => i.id !== id));
@@ -111,7 +141,7 @@ export default function IdeaBoard({
     });
     setBusy(false);
   };
-  const brand = { handle };
+  const brand = { handle, name, avatarUrl };
 
   return (
     <Tile className="md:col-span-12">
@@ -146,67 +176,21 @@ export default function IdeaBoard({
           background: '#FFFFFF',
         }}
       >
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            pin();
-          }}
-        >
-          <div className="text-[13px] leading-[1.5]" style={{ color: T.muted }}>
-            Half-formed is fine. Get it out of your head.
+        <div>
+          <div className="mb-4 text-[13px] leading-[1.5]" style={{ color: T.muted }}>
+            Half-formed is fine. Write it the way you&apos;d post it.
           </div>
-          <textarea
-            ref={pageRef}
+          <XComposer
             value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
-                e.preventDefault();
-                pin();
-              }
-            }}
-            rows={3}
+            onChange={setDraft}
+            onSubmit={pin}
+            handle={brand.handle}
+            name={brand.name}
+            avatarUrl={brand.avatarUrl}
             placeholder={`What should @${brand.handle} say next?`}
-            aria-label="Write an idea"
-            className="mt-3 w-full resize-none bg-transparent text-[26px] leading-[40px] outline-none placeholder:text-black/25 md:text-[32px]"
-            style={{
-              fontFamily: BIG,
-              fontWeight: 500,
-              letterSpacing: '-0.02em',
-              // site-wide form styles give textareas a grey box; this is a page
-              // notebook rules that sit under each 40px line and scroll with the text
-              background:
-                'repeating-linear-gradient(transparent 0 39px, rgba(14,14,14,0.07) 39px 40px)',
-              backgroundAttachment: 'local',
-              border: 'none',
-              borderRadius: 0,
-              boxShadow: 'none',
-              padding: 0,
-              overflow: 'hidden',
-              width: '100%',
-              maxWidth: 'none',
-              fontSize: 'clamp(24px, 2.6vw, 32px)',
-              lineHeight: '40px',
-              color: T.ink,
-            }}
+            textareaRef={pageRef}
           />
-          <div className="mt-3 flex items-center justify-between gap-3">
-            <span
-              className="hidden text-[10px] uppercase tracking-[0.14em] md:inline"
-              style={{ fontFamily: MONO, color: T.muted }}
-            >
-              ⌘ + Enter to pin it
-            </span>
-            <button
-              type="submit"
-              disabled={!draft.trim()}
-              className="ml-auto px-5 py-3 text-[11px] uppercase tracking-[0.14em] text-white transition-opacity disabled:opacity-30"
-              style={{ fontFamily: MONO, background: T.ink }}
-            >
-              Pin to the board →
-            </button>
-          </div>
-        </form>
+        </div>
         <aside className="md:border-l md:pl-8" style={{ borderColor: T.rule }}>
           <Label>Stuck? Start from</Label>
           <div className="mt-3 flex flex-wrap gap-2 md:flex-col md:items-start">
@@ -248,67 +232,122 @@ export default function IdeaBoard({
               {ideas
                 .filter((i) => i.col === col)
                 .map((i) => (
-                  <div key={i.id} className="border bg-white p-3" style={{ borderColor: T.rule }}>
-                    {i.why && (
-                      <div
-                        className="mb-1.5 text-[9px] uppercase tracking-[0.14em]"
-                        style={{ fontFamily: MONO, color: T.blue }}
-                      >
-                        ✦ BrandOS idea
+                  <article
+                    key={i.id}
+                    className="border bg-white px-3 py-3"
+                    style={{ borderColor: X.rule, fontFamily: X.font, color: X.ink }}
+                  >
+                    {editing?.id === i.id ? (
+                      <XComposer
+                        value={editing.text}
+                        onChange={(text) => setEditing({ id: i.id, text })}
+                        onSubmit={edit}
+                        onCancel={() => setEditing(null)}
+                        handle={brand.handle}
+                        name={brand.name}
+                        avatarUrl={brand.avatarUrl}
+                        submitLabel="Save"
+                        toolbar={false}
+                        autoFocus
+                      />
+                    ) : (
+                      <div className="flex gap-3">
+                        <Avatar
+                          name={brand.name}
+                          handle={brand.handle}
+                          avatarUrl={brand.avatarUrl}
+                        />
+                        <div className="min-w-0 flex-1">
+                          <div className="flex min-w-0 items-baseline gap-1 text-[15px] leading-5">
+                            <span className="truncate font-bold">{brand.name || brand.handle}</span>
+                            <span
+                              className="truncate"
+                              style={{ color: X.muted }}
+                              suppressHydrationWarning
+                            >
+                              @{brand.handle} · {ago(i.createdAt)}
+                            </span>
+                          </div>
+                          {i.why && (
+                            <div
+                              className="mt-1 text-[9px] uppercase tracking-[0.14em]"
+                              style={{ fontFamily: MONO, color: T.blue }}
+                            >
+                              ✦ BrandOS idea
+                            </div>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => setEditing({ id: i.id, text: i.text })}
+                            className="mt-0.5 block w-full whitespace-pre-wrap break-words text-left text-[15px] leading-5"
+                            aria-label={`Edit idea: ${i.text.slice(0, 80)}`}
+                          >
+                            {i.text}
+                          </button>
+                          {i.hook && (
+                            <div className="mt-1.5 text-[14px] leading-5">
+                              <span style={{ color: X.muted }}>Open with: </span>
+                              {i.hook}
+                            </div>
+                          )}
+                          {i.format && i.format !== 'note' && (
+                            <div
+                              className="mt-1 text-[10px] uppercase tracking-[0.14em]"
+                              style={{ fontFamily: MONO, color: X.muted }}
+                            >
+                              {i.format}
+                            </div>
+                          )}
+                          {i.why && (
+                            <div
+                              className="mt-1.5 text-[13px] leading-[18px]"
+                              style={{ color: X.muted }}
+                            >
+                              {i.why}
+                            </div>
+                          )}
+                          <div
+                            className="mt-2.5 flex items-center gap-4 text-[13px]"
+                            style={{ color: X.muted }}
+                          >
+                            {col !== 'drafting' && col !== 'posted' && (
+                              <button
+                                type="button"
+                                onClick={() => move(i.id, 'drafting')}
+                                className="hover:text-[#0047FF]"
+                              >
+                                Draft it →
+                              </button>
+                            )}
+                            {col === 'drafting' && (
+                              <button
+                                type="button"
+                                onClick={() => move(i.id, 'posted')}
+                                className="hover:text-[#0047FF]"
+                              >
+                                Mark posted →
+                              </button>
+                            )}
+                            <button
+                              type="button"
+                              onClick={() => setEditing({ id: i.id, text: i.text })}
+                              className="hover:text-[#0047FF]"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => remove(i.id)}
+                              aria-label="Remove idea"
+                              className="ml-auto text-[15px] leading-none hover:text-[#F4212E]"
+                            >
+                              ×
+                            </button>
+                          </div>
+                        </div>
                       </div>
                     )}
-                    <div className="whitespace-pre-wrap text-[14px] leading-[1.4]">{i.text}</div>
-                    {i.hook && (
-                      <div className="mt-1.5 text-[13px] leading-[1.45]">
-                        <span style={{ color: T.muted }}>Open with: </span>
-                        {i.hook}
-                      </div>
-                    )}
-                    {i.format && i.format !== 'note' && (
-                      <div
-                        className="mt-1 text-[10px] uppercase tracking-[0.14em]"
-                        style={{ fontFamily: MONO, color: T.muted }}
-                      >
-                        {i.format}
-                      </div>
-                    )}
-                    {i.why && (
-                      <div className="mt-1.5 text-[12px] leading-[1.45]" style={{ color: T.muted }}>
-                        {i.why}
-                      </div>
-                    )}
-                    <div className="mt-2.5 flex gap-3">
-                      {col !== 'drafting' && col !== 'posted' && (
-                        <button
-                          type="button"
-                          onClick={() => move(i.id, 'drafting')}
-                          className="text-[10px] uppercase tracking-[0.14em] hover:underline"
-                          style={{ fontFamily: MONO }}
-                        >
-                          Draft it →
-                        </button>
-                      )}
-                      {col === 'drafting' && (
-                        <button
-                          type="button"
-                          onClick={() => move(i.id, 'posted')}
-                          className="text-[10px] uppercase tracking-[0.14em] hover:underline"
-                          style={{ fontFamily: MONO }}
-                        >
-                          Mark posted →
-                        </button>
-                      )}
-                      <button
-                        type="button"
-                        onClick={() => remove(i.id)}
-                        aria-label="Remove idea"
-                        className="ml-auto text-[13px] leading-none"
-                        style={{ color: T.muted }}
-                      >
-                        ×
-                      </button>
-                    </div>
-                  </div>
+                  </article>
                 ))}
             </div>
           </div>

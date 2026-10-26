@@ -7,7 +7,7 @@ import { withRateLimit, rateLimiters } from '@/lib/rate-limit';
  * The growth dashboard's idea board, per brand (migration 042).
  *   GET    ?account=<brandId>                 the brand's ideas (newest first)
  *   POST   { account, text }                  an idea written on the blank page
- *   PATCH  { id, status: saved|drafting|posted }
+ *   PATCH  { id, status?: saved|drafting|posted, text? }   (at least one)
  *   DELETE { id }
  * Security: auth; the brand must belong to the caller's own workspace; text is
  * capped; 500 ideas per brand.
@@ -107,15 +107,29 @@ async function handlePost(request: NextRequest) {
 }
 
 async function handlePatch(request: NextRequest) {
-  const body = (await request.json().catch(() => ({}))) as { id?: unknown; status?: unknown };
-  if (!STATUSES.includes(body.status as (typeof STATUSES)[number]))
+  const body = (await request.json().catch(() => ({}))) as {
+    id?: unknown;
+    status?: unknown;
+    text?: unknown;
+  };
+  const hasStatus = body.status !== undefined;
+  const hasText = body.text !== undefined;
+  if (!hasStatus && !hasText)
+    return NextResponse.json({ error: 'Nothing to change' }, { status: 400 });
+  if (hasStatus && !STATUSES.includes(body.status as (typeof STATUSES)[number]))
     return NextResponse.json({ error: 'Bad status' }, { status: 400 });
+  const text = typeof body.text === 'string' ? body.text.trim().slice(0, 2000) : '';
+  if (hasText && !text)
+    return NextResponse.json({ error: 'Write the idea first.' }, { status: 400 });
   const ctx = await ownIdea(body.id);
   if (!ctx.ok) return ctx.error;
-  const status = body.status as (typeof STATUSES)[number];
+  const status = hasStatus ? (body.status as (typeof STATUSES)[number]) : undefined;
   await prisma.idea.update({
     where: { id: ctx.idea.id },
-    data: { status, postedAt: status === 'posted' ? new Date() : null },
+    data: {
+      ...(status ? { status, postedAt: status === 'posted' ? new Date() : null } : {}),
+      ...(hasText ? { suggestion: text, title: text.slice(0, 160) } : {}),
+    },
   });
   return NextResponse.json({ ok: true });
 }
