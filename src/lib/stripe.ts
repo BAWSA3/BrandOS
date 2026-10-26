@@ -1,7 +1,10 @@
 import Stripe from 'stripe';
+import { stripeEnv } from './stripe-env';
 
-export const stripe = process.env.STRIPE_SECRET_KEY
-  ? new Stripe(process.env.STRIPE_SECRET_KEY)
-  : (null as unknown as Stripe);
+export { stripeEnv };
 
-export const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET || '';
+const SECRET_KEY = stripeEnv('STRIPE_SECRET_KEY');
+
+export const stripe = SECRET_KEY ? new Stripe(SECRET_KEY) : (null as unknown as Stripe);
+
+export const STRIPE_WEBHOOK_SECRET = stripeEnv('STRIPE_WEBHOOK_SECRET');
