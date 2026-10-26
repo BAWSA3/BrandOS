@@ -34,6 +34,7 @@ initBotId({
     // Dashboard post breakdowns — signed-in AI cost surface
     { path: '/api/dashboard/post-scores', method: 'POST' },
     { path: '/api/dashboard/brainstorm', method: 'POST' },
+    { path: '/api/dashboard/copywriter', method: 'POST' },
     // Early-access signup form — email capture (spam surface)
     { path: '/api/early-access', method: 'POST' },
     // Post-scan email capture + enterprise contact form — both send mail to
