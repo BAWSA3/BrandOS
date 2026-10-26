@@ -13,7 +13,7 @@ import { FIELD_DENSITY, fieldMetrics } from '@/lib/field/system';
  * removed 2026-10-22.
  *
  * Score and invite cards sit on the field (approved 2026-10-26): the homepage's
- * Direction 03 dither (seed 11, no signal cell) with a bold Inter Tight figure
+ * Direction 03 dither (seed 11, no signal cell) with a bold Helvetica-style figure (TeX Gyre Heros)
  * and labels on Klein chips. The homepage card stays on bone.
  */
 
@@ -47,13 +47,13 @@ function field(): string {
 export async function fonts() {
   const [grotesk, display, vcr] = await Promise.all([
     readFile(join(process.cwd(), 'public', 'fonts', 'Helvetica.ttf')),
-    readFile(join(process.cwd(), 'public', 'fonts', 'InterTight-ExtraBold.ttf')),
+    readFile(join(process.cwd(), 'public', 'fonts', 'TeXGyreHeros-Bold.otf')),
     readFile(join(process.cwd(), 'public', 'fonts', 'VCR_OSD_MONO_1.001.ttf')),
   ]);
   return [
     { name: 'Grotesk', data: grotesk, style: 'normal' as const, weight: 400 as const },
-    // Inter Tight 800 (SIL OFL): the bold figure and handle on field cards.
-    { name: 'Display', data: display, style: 'normal' as const, weight: 800 as const },
+    // TeX Gyre Heros Bold (GUST Font License): a free Helvetica clone, for the bold figure and handle on field cards.
+    { name: 'Display', data: display, style: 'normal' as const, weight: 700 as const },
     { name: 'VCR', data: vcr, style: 'normal' as const, weight: 400 as const },
   ];
 }
@@ -417,7 +417,7 @@ export async function editorialImage(card: EditorialCard, headers?: Record<strin
             <span
               style={{
                 fontFamily: 'Display',
-                fontWeight: 800,
+                fontWeight: 700,
                 fontSize: 330,
                 lineHeight: 0.76,
                 letterSpacing: -21,
@@ -438,7 +438,7 @@ export async function editorialImage(card: EditorialCard, headers?: Record<strin
               style={{
                 display: 'flex',
                 fontFamily: onField ? 'Display' : 'Grotesk',
-                fontWeight: onField ? 800 : 400,
+                fontWeight: onField ? 700 : 400,
                 fontSize: handleSize(handle),
                 letterSpacing: onField ? -1 : 0,
                 color: onField ? '#FFFFFF' : INK,
