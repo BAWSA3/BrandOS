@@ -109,7 +109,11 @@ function nichesFor(text: string, cls: string): string[] {
   return out.length ? out : [CLASS_NICHE[cls] ?? 'Community'];
 }
 
-/** The member's one line: their X bio (what they'd write themselves), else the read's first sentence. */
+/**
+ * The member's one line: the first sentence of our own read, which is always
+ * English and says what the account is about. X bios made poor lines (all
+ * emoji, other languages, "new chapter"), so the bio is only a last resort.
+ */
 function blurbFor(bio: string | null, summary: string | null): string {
   const clean = (s: string) =>
     s
@@ -121,10 +125,16 @@ function blurbFor(bio: string | null, summary: string | null): string {
     const cut = s.slice(0, BLURB_MAX - 1);
     return cut.slice(0, cut.lastIndexOf(' ')).replace(/[,;:\-–—]$/, '') + '…';
   };
-  const b = bio ? clean(bio) : '';
-  if (b.length >= 12) return fit(b);
-  const first = summary ? clean(summary).split(/(?<=[.!?])\s/)[0] : '';
-  return fit(first);
+  // The read's first sentence, kept to the positive description: no metric
+  // asides ("(82% concentration…)"), no "but lacks…" critique, no "demonstrated
+  // by 21% engagement" evidence clauses. Those belong in the member's read.
+  const first = (summary ? clean(summary).split(/(?<=[.!?])\s/)[0] : '')
+    .replace(/\s*\([^)]*\)/g, '')
+    .split(/,?\s+but\s+/i)[0]
+    .split(/,\s+(?:demonstrated|evidenced|shown|proven|as shown)\b/i)[0]
+    .replace(/[\s,;:.]+$/, '');
+  if (first.length >= 12) return fit(first + '.');
+  return fit(bio ? clean(bio) : '');
 }
 
 async function pick(out: string) {

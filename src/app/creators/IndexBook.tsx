@@ -6,7 +6,7 @@ import { useReducedMotion } from 'motion/react';
 import { AnimateNumber } from 'motion-plus/react';
 import { DASH_FONTS } from '@/components/dashboard/dashFonts';
 import { formatNumber, NICHES, type IndexFilters } from '@/lib/index-rules';
-import { classify, classLabel, recordDate } from '@/lib/classifications';
+import { CLASSES, classify, classLabel, recordDate } from '@/lib/classifications';
 import type { IndexCard, IndexPage } from '@/lib/creator-index';
 import { FieldScreen } from '@/components/system';
 
@@ -129,7 +129,11 @@ export function Card({
           </div>
         )}
       </div>
-      {c.blurb && <p className="mt-4 text-[14px] leading-snug">{c.blurb}</p>}
+      {/* Two lines, always: long lines are clipped and short ones keep the space,
+          so cards in a row share their rhythm. */}
+      <p className="mt-4 line-clamp-2 min-h-[2.75em] text-[14px] leading-snug" title={c.blurb}>
+        {c.blurb}
+      </p>
       {c.niches.length > 0 && (
         <div className="mt-4 flex flex-wrap gap-1.5">
           {c.niches.map((n) => (
@@ -229,6 +233,24 @@ function qs(f: IndexFilters, page: number) {
   return s ? `/index?${s}` : '/index';
 }
 
+const plural = (n: number, one: string, many: string) =>
+  `${n.toLocaleString('en-US')} ${n === 1 ? one : many}`;
+
+/**
+ * Featured shows whole rows only (3, or 6 when there are six): any extra
+ * featured members lead the main list instead, so nobody is dropped and no
+ * card sits alone on a row.
+ */
+export function splitFeatured<T>(featured: T[]): { row: T[]; extra: T[] } {
+  const take = featured.length >= 6 ? 6 : featured.length >= 3 ? 3 : featured.length;
+  return { row: featured.slice(0, take), extra: featured.slice(take) };
+}
+
+/** Three across on desktop, two on tablet: an odd last card spans the tablet row. */
+const GRID = 'mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3';
+const ODD_LAST =
+  'sm:[&>*:last-child:nth-child(odd)]:col-span-2 lg:[&>*:last-child:nth-child(odd)]:col-span-1';
+
 export default function IndexBook({
   page,
   filters,
@@ -265,6 +287,15 @@ export default function IndexBook({
   const filtered = !!(filters.niche || filters.archetype || filters.min > 0 || filters.max < 100);
   const joinHref = viewer.signedIn ? '/index/join' : '/signup?next=/index/join';
   const none = page.featured.length === 0 && page.cards.length === 0;
+  const { row: featuredRow, extra: featuredExtra } = splitFeatured(page.featured);
+  const entries = [...featuredExtra, ...page.cards];
+  // Every class is offered, even before it has members; the value is the stored
+  // name when one exists (the filter matches it exactly), else the class code.
+  const classOptions = CLASSES.map((c) => ({
+    c,
+    value: page.archetypes.find((a) => classify(a)?.code === c.code) ?? c.code,
+    empty: !page.archetypes.some((a) => classify(a)?.code === c.code),
+  }));
 
   const ownHandle = viewer.member?.listed ? viewer.member.handle.toLowerCase() : null;
   const isOwn = (c: IndexCard) => field && !!ownHandle && c.handle.toLowerCase() === ownHandle;
@@ -331,7 +362,7 @@ export default function IndexBook({
                   <Micro>
                     {[
                       aggregates.reserved > 0
-                        ? `${aggregates.reserved.toLocaleString('en-US')} numbers reserved`
+                        ? `${plural(aggregates.reserved, 'number', 'numbers')} reserved`
                         : null,
                       aggregates.scanned ? `${aggregates.scanned} creators scanned` : null,
                     ]
@@ -398,13 +429,12 @@ export default function IndexBook({
                 style={{ borderColor: C.rule, background: C.panel, color: C.ink }}
               >
                 <option value="">All</option>
-                {[...page.archetypes]
-                  .sort((a, b) => (classify(a)?.number ?? 99) - (classify(b)?.number ?? 99))
-                  .map((a) => (
-                    <option key={a} value={a}>
-                      {classLabel(a)}
-                    </option>
-                  ))}
+                {classOptions.map(({ c, value, empty }) => (
+                  <option key={c.code} value={value}>
+                    {classLabel(c.code)}
+                    {empty ? ' (none yet)' : ''}
+                  </option>
+                ))}
               </select>
             </label>
             <label className="flex flex-col gap-1.5">
@@ -451,9 +481,7 @@ export default function IndexBook({
             )}
             <div className="ml-auto">
               <Micro>
-                {filtered
-                  ? `${page.matching} matching`
-                  : `${page.members} ${page.members === 1 ? 'entry' : 'entries'}`}
+                {filtered ? `${page.matching} matching` : plural(page.members, 'entry', 'entries')}
               </Micro>
             </div>
           </form>
@@ -470,26 +498,26 @@ export default function IndexBook({
           </section>
         )}
 
-        {page.featured.length > 0 && (
+        {featuredRow.length > 0 && (
           <section className="mt-10">
             <SectionLabel field={field} blue>
               Featured / Founding Members
             </SectionLabel>
-            <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {page.featured.map((c) => (
+            <div className={`${GRID} ${ODD_LAST}`}>
+              {featuredRow.map((c) => (
                 <Card key={c.number} c={c} own={isOwn(c)} />
               ))}
             </div>
           </section>
         )}
 
-        {page.cards.length > 0 && (
+        {entries.length > 0 && (
           <section className="mt-10">
             <SectionLabel field={field}>
-              {page.featured.length > 0 ? 'All entries / newest first' : 'Entries / newest first'}
+              {featuredRow.length > 0 ? 'All entries / newest first' : 'Entries / newest first'}
             </SectionLabel>
-            <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {page.cards.map((c) => (
+            <div className={GRID}>
+              {entries.map((c) => (
                 <Card key={c.number} c={c} own={isOwn(c)} />
               ))}
             </div>
