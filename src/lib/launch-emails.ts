@@ -384,10 +384,12 @@ export function renderIndexReservedEmail(
 
 /**
  * Early access invite (Oct 27 2026), the whole list: "reply with BrandOS and
- * i'll send you an early access code". One job: a reply. No button on
- * purpose: it reads like a personal note, and replies help deliverability
- * before the Nov 2 send. No price (GTM phase 1). Codes are sent by hand from
- * /admin (Inner Circle invite codes) to everyone who replies.
+ * i'll send you your own link". One job: a reply. No button on purpose: it
+ * reads like a personal note, and replies help deliverability before the
+ * Nov 2 send. Everyone who replies gets a personal single-use code as a
+ * link (mybrandos.app/i/<CODE>, scripts/invite-codes.ts): the Index before
+ * Nov 2, the Founding price locked for life, a direct line to Bawsa. No
+ * price figure (GTM phase 1). Send only once the codes are live on prod.
  *
  * Subject A/B: A = "@handle, you're on the early access list",
  * B = "early access to BrandOS. reply to claim it."
@@ -410,17 +412,22 @@ function earlyAccessModel(r: EarlyAccessRecipient) {
         : r.handle
           ? `@${r.handle}, you're on the early access list`
           : "you're on the BrandOS early access list",
-    preheader: 'reply with one word and i&#39;ll send your code. free, no card.',
+    preheader: 'reply with one word and i&#39;ll send you your own link.',
     who: r.handle ? `@${esc(r.handle)}` : 'there',
     intro: recent
       ? 'you signed up for BrandOS recently, so you get in before everyone else. i&#39;m opening early access to this list first, before the public launch on nov 2.'
       : `you signed up for BrandOS back in ${month}, so you get in before everyone else. i&#39;m opening early access to this list first, before the public launch on nov 2.`,
     scoreLine:
       r.score != null
-        ? `your last brand score was <b>${r.score}</b>. early access is where you see what moves it: your score over time, every post read for fit, and the one thing to fix next.`
-        : 'early access gets you the full dashboard: your brand score over time, every post read for fit, and the one thing to fix next.',
-    ask: 'want in? reply to this email with the word <b>BrandOS</b> and i&#39;ll send you your early access code. i answer every reply myself.',
-    ps: 'early access is free. no card.',
+        ? `your last brand score was <b>${r.score}</b>. early access gets you three things:`
+        : 'early access gets you three things:',
+    perks: [
+      'your entry in the <b>BrandOS Creator Index</b> before it opens on nov 2, where brands browse creators by their real brand read',
+      'the <b>Founding price, locked for life</b>, even after the founding spots are gone',
+      'a <b>direct line to me</b> from your dashboard',
+    ],
+    ask: 'want in? reply to this email with the word <b>BrandOS</b> and i&#39;ll send you your own link. it&#39;s single-use and just for you. i answer every reply myself.',
+    ps: 'the dashboard itself is free for everyone until dec 3. early access is about getting in the Index first.',
   };
 }
 
@@ -434,6 +441,7 @@ export function earlyAccessContent(r: EarlyAccessRecipient): NonNullable<Newslet
       { type: 'text', content: `hey ${m.who},` },
       { type: 'text', content: m.intro },
       { type: 'text', content: m.scoreLine },
+      { type: 'text', content: m.perks.map((p) => `- ${p}`).join('<br/>') },
       { type: 'text', content: `${m.ask}<br/><br/>— Bawsa` },
       { type: 'text', content: `<b>p.s.</b> ${m.ps}` },
     ],
@@ -474,7 +482,9 @@ export function renderEarlyAccessEmail(
           <a href="${APP_URL}" style="text-decoration:none;"><img src="${asset}/brand/wordmark-day-480.png" width="120" alt="BrandOS" style="display:block;width:120px;height:auto;border:0;"></a>
         </td></tr>
         <tr><td>
-          ${p(`hey ${m.who},`)}${p(m.intro)}${p(m.scoreLine)}${p(m.ask)}
+          ${p(`hey ${m.who},`)}${p(m.intro)}${p(m.scoreLine, 'margin-bottom:10px;')}
+          <ul style="font-family:${SANS};font-size:16px;line-height:1.6;color:#0E0E0E;margin:0 0 18px 0;padding-left:22px;">${m.perks.map((t) => `<li style="margin:0 0 6px 0;">${t}</li>`).join('')}</ul>
+          ${p(m.ask)}
           ${p('— Bawsa', 'margin-bottom:24px;')}${p(`<b>p.s.</b> ${m.ps}`, 'font-size:15px;')}
         </td></tr>
         <tr><td align="center" style="padding:30px 0 0 0;font-family:${SANS};font-size:12px;line-height:1.6;color:#9A968E;">
