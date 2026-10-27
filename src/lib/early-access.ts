@@ -1,6 +1,7 @@
+import type { Prisma } from '@prisma/client';
 import prisma from '@/lib/db';
 import { indexOpenFor, type IndexViewer } from '@/lib/index-rules';
-import { normalizeCode } from '@/lib/early-access-rules';
+import { inviteOnlyFrom, normalizeCode, type CodeState } from '@/lib/early-access-rules';
 
 /**
  * Early-access codes, data side (migration 049). Rules and format live in
@@ -55,17 +56,77 @@ export async function indexOpenForUser(
 
 /** Can this code still be redeemed? (For the signed-out invite link; false before 049.) */
 export async function codeIsRedeemable(raw: unknown): Promise<boolean> {
+  return (await codeState(raw)) === 'redeemable';
+}
+
+let warnedUnavailable = false;
+
+/**
+ * A carried code's state, without using it. `unavailable` means the codes
+ * table can't be read (049 not applied yet): the gate fails closed on it.
+ */
+export async function codeState(raw: unknown): Promise<CodeState> {
+  if (raw === undefined || raw === null || raw === '') return 'none';
   const code = normalizeCode(raw);
-  if (!code) return false;
+  if (!code) return 'bad';
   try {
     const c = await prisma.earlyAccessCode.findUnique({
       where: { code },
       select: { redeemedAt: true, revokedAt: true },
     });
-    return !!c && !c.redeemedAt && !c.revokedAt;
-  } catch {
-    return false;
+    return c && !c.redeemedAt && !c.revokedAt ? 'redeemable' : 'bad';
+  } catch (e) {
+    if (!warnedUnavailable) {
+      warnedUnavailable = true;
+      console.error('[early-access] codes table unavailable (is 049 applied?)', e);
+    }
+    return 'unavailable';
   }
+}
+
+/** The closed-beta flag (env INVITE_ONLY=true). */
+export function inviteOnly(): boolean {
+  return inviteOnlyFrom(process.env.INVITE_ONLY);
+}
+
+/**
+ * INVITE_ONLY: may this Supabase identity use BrandOS? Only if it already has a
+ * BrandOS account (accounts are created by the auth callback, which is gated).
+ * Used by sign-in paths that don't go through the callback (the extension).
+ */
+export async function hasAccount(supabaseId: string): Promise<boolean> {
+  const u = await prisma.user
+    .findUnique({ where: { supabaseId }, select: { id: true } })
+    .catch(() => null);
+  return !!u;
+}
+
+export class CodeTakenError extends Error {
+  constructor() {
+    super('early-access code taken');
+  }
+}
+
+/**
+ * Create a new account and redeem its code in ONE transaction: if the code
+ * was taken in the meantime (or the table is missing), nothing is created, so
+ * there's never an account with access but no code.
+ */
+export async function createAccountWithCode<T extends { id: string }>(
+  raw: string,
+  create: (tx: Prisma.TransactionClient) => Promise<T>
+): Promise<T> {
+  const code = normalizeCode(raw);
+  if (!code) throw new CodeTakenError();
+  return prisma.$transaction(async (tx) => {
+    const user = await create(tx);
+    const { count } = await tx.earlyAccessCode.updateMany({
+      where: { code, redeemedAt: null, revokedAt: null },
+      data: { redeemedAt: new Date(), redeemedByUserId: user.id },
+    });
+    if (count !== 1) throw new CodeTakenError();
+    return user;
+  });
 }
 
 export type RedeemResult = { ok: true; already: boolean } | { ok: false };

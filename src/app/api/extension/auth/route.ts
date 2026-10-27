@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { hasAccount, inviteOnly } from '@/lib/early-access';
+import { INVITE_ONLY_HOW, INVITE_ONLY_MESSAGE } from '@/lib/early-access-rules';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey =
@@ -56,6 +58,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { valid: false, error: 'Invalid or expired token' },
         { status: 401, headers }
+      );
+    }
+
+    // Closed beta: the extension is for existing BrandOS accounts only (accounts
+    // are created by the gated auth callback, never here).
+    if (inviteOnly() && !(await hasAccount(user.id))) {
+      return NextResponse.json(
+        { valid: false, error: `${INVITE_ONLY_MESSAGE} ${INVITE_ONLY_HOW}` },
+        { status: 403, headers }
       );
     }
 

@@ -6,7 +6,12 @@ import { createBrowserClient } from '@supabase/ssr';
 import { TOS_VERSION } from '@/lib/tos';
 import Wordmark from '@/components/Wordmark';
 import { safeNextPath } from '@/lib/safe-input';
-import { INVALID_CODE_MESSAGE, normalizeCode } from '@/lib/early-access-rules';
+import {
+  INVALID_CODE_MESSAGE,
+  INVITE_ONLY_HOW,
+  INVITE_ONLY_MESSAGE,
+  typedCodePath,
+} from '@/lib/early-access-rules';
 
 // One screen for new AND returning users (decided 2026-10-22): Continue with X
 // first (BrandOS reads your X), then Google, then a one-tap email link (no
@@ -77,24 +82,30 @@ export default function ContinuePage() {
     return () => window.clearTimeout(t);
   }, []);
   // early-access code: saved by /i/<code> (cookie) or typed here, which goes
-  // through /i/<code> too, so the auth callback redeems it after sign-in
-  const [invite, setInvite] = useState<null | 'saved' | 'invalid'>(null);
+  // through /i/<code> too (checked there, not used), so the auth callback
+  // redeems it after sign-in. `required`: the callback turned a new account
+  // away because BrandOS is invite-only (INVITE_ONLY) and there was no code.
+  const [invite, setInvite] = useState<null | 'saved' | 'invalid' | 'required'>(null);
+  const [codeOpen, setCodeOpen] = useState(false);
   useEffect(() => {
     const v = new URLSearchParams(window.location.search).get('invite');
-    const t = window.setTimeout(() => setInvite(v === 'saved' || v === 'invalid' ? v : null), 0);
+    const t = window.setTimeout(() => {
+      const state = v === 'saved' || v === 'invalid' || v === 'required' ? v : null;
+      setInvite(state);
+      if (state === 'required' || state === 'invalid') setCodeOpen(true);
+    }, 0);
     return () => window.clearTimeout(t);
   }, []);
-  const [codeOpen, setCodeOpen] = useState(false);
   const [code, setCode] = useState('');
   const [codeError, setCodeError] = useState<string | null>(null);
   function applyCode(e: React.FormEvent) {
     e.preventDefault();
-    const c = normalizeCode(code);
-    if (!c) {
+    const path = typedCodePath(code);
+    if (!path) {
       setCodeError(INVALID_CODE_MESSAGE);
       return;
     }
-    window.location.assign(`/i/${c}`);
+    window.location.assign(path);
   }
   const callbackUrl = (via: 'x' | 'google' | 'email') =>
     typeof window !== 'undefined'
@@ -197,6 +208,15 @@ export default function ContinuePage() {
           >
             Your early-access code is saved. Sign in with X to claim it.
           </p>
+        )}
+        {invite === 'required' && (
+          <div
+            className="mt-6 rounded-[6px] border border-[#0047FF]/30 bg-white px-4 py-3.5 text-center"
+            role="alert"
+          >
+            <p className="text-[15px] leading-[1.45] text-[#0E0E0E]">{INVITE_ONLY_MESSAGE}</p>
+            <p className="mt-1.5 text-[13px] text-[#6B6862]">{INVITE_ONLY_HOW}</p>
+          </div>
         )}
         {invite === 'invalid' && (
           <p className="mt-2 text-center text-[13px] text-[#6B6862]" role="alert">

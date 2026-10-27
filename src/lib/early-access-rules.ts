@@ -26,6 +26,45 @@ export const INVALID_CODE_MESSAGE = 'That code isn’t valid or was already used
 
 export const FEEDBACK_MAX = 2000;
 
+/** Shown when a new account tries to sign in without a code (INVITE_ONLY on). */
+export const INVITE_ONLY_MESSAGE =
+  'BrandOS is invite-only for now. Members get in with a personal code.';
+export const INVITE_ONLY_HOW = 'Reply BrandOS to our email, or ask @jbawsa.';
+
+/**
+ * Closed beta (decided with Bawsa on Oct 27): with INVITE_ONLY on, a NEW
+ * account needs a redeemable code to be created; anyone who already has an
+ * account signs in as before. Pure, so the auth callback and tests share it.
+ *  - `allow`: sign in as usual (flag off, or an existing account)
+ *  - `admit`: create the account and redeem the code in one transaction
+ *  - `required`: no code (or the codes table isn't there yet: fail closed)
+ *  - `invalid`: a code was carried in, but it's bad, used or revoked
+ */
+export type GateDecision = 'allow' | 'admit' | 'required' | 'invalid';
+export type CodeState = 'none' | 'redeemable' | 'bad' | 'unavailable';
+
+export function signInGate(opts: {
+  inviteOnly: boolean;
+  existingAccount: boolean;
+  code: CodeState;
+}): GateDecision {
+  if (!opts.inviteOnly || opts.existingAccount) return 'allow';
+  if (opts.code === 'redeemable') return 'admit';
+  if (opts.code === 'bad') return 'invalid';
+  return 'required';
+}
+
+/** The env flag, read the same way everywhere ("true" turns the gate on). */
+export function inviteOnlyFrom(value: string | undefined): boolean {
+  return (value ?? '').trim().toLowerCase() === 'true';
+}
+
+/** Where the /signup code box sends a typed code (validated there, kept in the cookie). */
+export function typedCodePath(raw: unknown): string | null {
+  const code = normalizeCode(raw);
+  return code ? `/i/${formatCode(code)}` : null;
+}
+
 const CODE_RE = new RegExp(`^[${CODE_ALPHABET}]{${CODE_LENGTH}}$`);
 
 /** Canonical form ("AU7K2QX9") of whatever someone typed or pasted, or null. */
