@@ -1,356 +1,216 @@
-// BrandOS Chrome Extension — Content Script (X.com Badge Injection)
+// BrandOS for Chrome — the scoring chip in X's composer.
+// A small chip sits next to X's Post button. As you write (or when you click,
+// if "score as I type" is off), the draft is sent to BrandOS and scored
+// against your brand: score + the top fix on the chip, the rest on click.
+// Only the composer's text (and whether media is attached) is ever sent, and
+// only once it's 12+ characters and you've paused for a moment.
+(function () {
+  'use strict';
+  var core = window.BrandOSCore;
+  if (!core || window.__brandosComposer) return;
+  window.__brandosComposer = true;
 
-const BADGE_ATTR = 'data-brandos-badge';
-const DEFERRED_ATTR = 'data-brandos-deferred';
-const PROCESSED_ATTR = 'data-brandos-processed';
+  var DEBOUNCE_MS = 1500;
+  var KLEIN = '#0047FF';
+  var mounted = new WeakMap(); // composer root -> chip controller
+  var auto = true;
 
-// DOM Selectors (centralized — update here when X changes DOM)
-const SELECTORS = {
-  profileUserName: '[data-testid="UserName"]',
-  tweetUserName: '[data-testid="User-Name"]',
-  tweet: 'article[data-testid="tweet"]',
-};
-
-// Score color tiers
-function getScoreColor(score) {
-  if (score >= 80) return { color: '#22c55e', bg: 'rgba(34,197,94,0.12)' };
-  if (score >= 60) return { color: '#3b82f6', bg: 'rgba(59,130,246,0.12)' };
-  if (score >= 40) return { color: '#f59e0b', bg: 'rgba(245,158,11,0.12)' };
-  return { color: '#ef4444', bg: 'rgba(239,68,68,0.12)' };
-}
-
-// ─── Username Extraction ─────────────────────────────────────────────────────
-
-function extractUsername(element) {
-  // Look for @username span inside the element
-  const spans = element.querySelectorAll('span');
-  for (const span of spans) {
-    const text = span.textContent?.trim();
-    if (text && text.startsWith('@') && text.length > 1) {
-      return text.slice(1);
-    }
-  }
-
-  // Fallback: look for link href
-  const links = element.querySelectorAll('a[href^="/"]');
-  for (const link of links) {
-    const href = link.getAttribute('href');
-    if (href && href.match(/^\/[a-zA-Z0-9_]+$/)) {
-      return href.slice(1);
-    }
-  }
-
-  return null;
-}
-
-// ─── Badge Creation ──────────────────────────────────────────────────────────
-
-function createBadge(username) {
-  const badge = document.createElement('span');
-  badge.setAttribute(BADGE_ATTR, username);
-  badge.className = 'brandos-badge brandos-badge--loading';
-  badge.textContent = '...';
-  badge.title = 'BrandOS Score — Loading...';
-  badge.addEventListener('click', (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    handleBadgeClick(badge, username);
+  chrome.storage.sync.get({ autoScore: true }, function (v) {
+    auto = v.autoScore !== false;
   });
-  return badge;
-}
+  chrome.storage.onChanged.addListener(function (changes, area) {
+    if (area === 'sync' && changes.autoScore) auto = changes.autoScore.newValue !== false;
+  });
 
-function updateBadge(badge, scoreData) {
-  if (scoreData.error) {
-    badge.className = 'brandos-badge brandos-badge--error';
-    badge.textContent = '?';
-    badge.title = scoreData.error === 'not_authenticated'
-      ? 'BrandOS — Sign in to see scores'
-      : 'BrandOS — Score unavailable';
-    return;
+  // ── the panel (one, shared; fixed-position so X's overflow can't clip it) ──
+  var panelHost = document.createElement('div');
+  panelHost.style.cssText = 'position:fixed;z-index:2147483646;top:0;left:0;display:none;';
+  var panelRoot = panelHost.attachShadow({ mode: 'closed' });
+  panelRoot.innerHTML =
+    '<style>' +
+    ':host{all:initial}' +
+    '.p{width:320px;max-width:calc(100vw - 24px);background:#fff;color:#0F1419;border:1px solid #EFF3F4;border-radius:16px;box-shadow:0 8px 28px rgba(15,20,25,.18);padding:14px 16px;font:15px/20px -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}' +
+    '.top{display:flex;align-items:baseline;justify-content:space-between;gap:8px}' +
+    '.n{font-size:36px;line-height:1;font-weight:700;color:' + KLEIN + ';letter-spacing:-.03em}' +
+    '.of{font-size:13px;color:#536471;margin-left:4px}' +
+    '.v{font:10px/14px ui-monospace,"JetBrains Mono",monospace;letter-spacing:.14em;text-transform:uppercase;color:#536471;text-align:right}' +
+    '.r{margin-top:8px;font-size:14px}' +
+    'ol{margin:10px 0 0;padding:0;list-style:none}' +
+    'li{display:flex;gap:8px;margin-top:6px;font-size:14px;line-height:19px}' +
+    'li b{color:' + KLEIN + ';font-weight:600}' +
+    '.m{font:9px ui-monospace,monospace;letter-spacing:.14em;text-transform:uppercase;color:#536471;margin-left:4px}' +
+    '.s{margin-top:10px;font-size:13px;line-height:18px;color:#536471}' +
+    '.f{margin-top:12px;display:flex;justify-content:space-between;font-size:12px;color:#536471}' +
+    '.f a{color:' + KLEIN + ';font-weight:600;text-decoration:none}' +
+    '</style><div class="p" role="dialog" aria-label="BrandOS draft score"></div>';
+  var panel = panelRoot.querySelector('.p');
+  document.documentElement.appendChild(panelHost);
+  var openFor = null;
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
   }
 
-  const { color, bg } = getScoreColor(scoreData.overallScore);
-  badge.className = 'brandos-badge';
-  badge.textContent = scoreData.overallScore;
-  badge.title = `BrandOS Score: ${scoreData.overallScore} — ${scoreData.archetype?.primary || 'Unknown'}`;
-  badge.style.setProperty('--brandos-color', color);
-  badge.style.setProperty('--brandos-bg', bg);
-}
-
-// ─── Badge Injection ─────────────────────────────────────────────────────────
-
-function injectBadges(root = document) {
-  // Profile page
-  const profileNames = root.querySelectorAll(SELECTORS.profileUserName);
-  for (const el of profileNames) {
-    processNameElement(el, true);
+  function showPanel(ctrl) {
+    var r = ctrl.state.result;
+    if (!r) return;
+    var fixes = (r.fixes || [])
+      .map(function (f, i) {
+        return (
+          '<li><b>' + (i + 1) + '.</b><span>' + esc(f.text) +
+          (f.source === 'data' ? '<span class="m">measured</span>' : '') + '</span></li>'
+        );
+      })
+      .join('');
+    panel.innerHTML =
+      '<div class="top"><div><span class="n">' + esc(r.score) + '</span><span class="of">/100</span></div>' +
+      '<div class="v">' + esc(r.verdict) + '<br>' + esc(r.format) +
+      (r.formatLift != null ? ' · ' + esc(r.formatLift) + '× avg' : '') + '</div></div>' +
+      (r.reach ? '<div class="r">' + esc(core.reachLine(r.reach)) + '</div>' : '') +
+      (fixes ? '<ol>' + fixes + '</ol>' : '') +
+      (r.voice ? '<div class="s">Voice: ' + esc(r.voice) + '</div>' : '') +
+      '<div class="f"><span>From your last ' + esc(r.basedOn) + ' posts</span>' +
+      '<a href="https://mybrandos.app/dashboard" target="_blank" rel="noopener">BrandOS →</a></div>';
+    var box = ctrl.host.getBoundingClientRect();
+    panelHost.style.display = 'block';
+    var w = Math.min(320, window.innerWidth - 24);
+    var left = Math.max(12, Math.min(box.right - w, window.innerWidth - w - 12));
+    var h = panel.getBoundingClientRect().height;
+    var top = box.top - h - 8 >= 8 ? box.top - h - 8 : box.bottom + 8;
+    panelHost.style.left = left + 'px';
+    panelHost.style.top = top + 'px';
+    openFor = ctrl;
   }
 
-  // Timeline tweets
-  const tweetNames = root.querySelectorAll(SELECTORS.tweetUserName);
-  for (const el of tweetNames) {
-    processNameElement(el, false);
+  function hidePanel() {
+    panelHost.style.display = 'none';
+    openFor = null;
   }
-}
+  document.addEventListener('mousedown', function (e) {
+    if (openFor && !e.composedPath().includes(panelHost) && !e.composedPath().includes(openFor.host))
+      hidePanel();
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') hidePanel();
+  });
+  window.addEventListener('scroll', hidePanel, true);
 
-function processNameElement(element, isProfile) {
-  if (element.querySelector(`[${BADGE_ATTR}]`)) return; // Already has badge
-  if (element.hasAttribute(PROCESSED_ATTR)) return;
-  element.setAttribute(PROCESSED_ATTR, '');
+  // ── one chip per composer ──
+  function mount(composer) {
+    var host = document.createElement('span');
+    host.setAttribute('data-brandos-chip', '');
+    host.style.cssText = 'display:inline-flex;align-items:center;margin:0 8px;flex:0 0 auto;';
+    var shadow = host.attachShadow({ mode: 'closed' });
+    shadow.innerHTML =
+      '<style>' +
+      ':host{all:initial}' +
+      'button{display:inline-flex;align-items:center;gap:6px;max-width:220px;height:30px;padding:0 10px;border-radius:999px;border:1px solid #CFD9DE;background:#fff;color:#0F1419;cursor:pointer;font:13px/1 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;white-space:nowrap}' +
+      'button:hover{border-color:' + KLEIN + '}' +
+      'button:focus-visible{outline:2px solid ' + KLEIN + ';outline-offset:2px}' +
+      '.l{font-weight:700;color:' + KLEIN + ';font-variant-numeric:tabular-nums}' +
+      '.d{overflow:hidden;text-overflow:ellipsis;color:#536471}' +
+      '.good .l{color:' + KLEIN + '}.mid .l{color:#B7791F}.low .l{color:#C53030}' +
+      '.action{border-color:' + KLEIN + '}.action .d{color:' + KLEIN + '}' +
+      '</style><button type="button" aria-live="polite"><span class="l"></span><span class="d"></span></button>';
+    var button = shadow.querySelector('button');
+    var ctrl = { host: host, composer: composer, state: { kind: 'idle', auto: auto }, lastKey: null, timer: 0, seq: 0 };
 
-  const username = extractUsername(element);
-  if (!username) return;
-
-  // Find the display name container to append badge after
-  const displayNameContainer = element.querySelector('span')?.closest('div') || element;
-  const badge = createBadge(username);
-  displayNameContainer.appendChild(badge);
-
-  if (isProfile) {
-    // Profile badges fetch immediately
-    requestScore(username, badge);
-  } else {
-    // Timeline badges use IntersectionObserver (lazy fetch)
-    badge.setAttribute(DEFERRED_ATTR, '');
-    observeBadge(badge, username);
-  }
-}
-
-// ─── IntersectionObserver for Lazy Loading ───────────────────────────────────
-
-const observer = new IntersectionObserver((entries) => {
-  for (const entry of entries) {
-    if (entry.isIntersecting) {
-      const badge = entry.target;
-      const username = badge.getAttribute(BADGE_ATTR);
-      if (username && badge.hasAttribute(DEFERRED_ATTR)) {
-        badge.removeAttribute(DEFERRED_ATTR);
-        observer.unobserve(badge);
-        requestScore(username, badge);
-      }
+    function render() {
+      var v = core.chipView(Object.assign({ auto: auto }, ctrl.state));
+      button.className = v.tone;
+      button.querySelector('.l').textContent = v.label;
+      button.querySelector('.d').textContent = v.detail;
+      button.title =
+        ctrl.state.kind === 'scored'
+          ? 'BrandOS draft score: ' + ctrl.state.result.score + '/100. Click for the fixes.'
+          : 'BrandOS: score this draft against your brand';
     }
-  }
-}, { rootMargin: '200px' }); // Start fetching slightly before visible
 
-function observeBadge(badge, username) {
-  observer.observe(badge);
-}
+    function score(force) {
+      var text = core.readDraft(ctrl.composer);
+      var media = core.hasMedia(ctrl.composer);
+      if (core.chars(core.normalizeDraft(text)) < core.MIN_CHARS) {
+        ctrl.state = { kind: 'short' };
+        ctrl.lastKey = null;
+        return render();
+      }
+      if (!force && !core.shouldScore(text, media, ctrl.lastKey)) return;
+      var key = core.draftKey(text, media);
+      var seq = ++ctrl.seq;
+      ctrl.state = { kind: 'loading' };
+      render();
+      chrome.runtime.sendMessage(
+        { type: 'SCORE_DRAFT', text: core.normalizeDraft(text), hasMedia: media, tzOffsetMin: -new Date().getTimezoneOffset() },
+        function (res) {
+          if (seq !== ctrl.seq) return; // a newer draft is being scored
+          if (chrome.runtime.lastError || !res) ctrl.state = { kind: 'error' };
+          else if (res.ok) {
+            ctrl.state = { kind: 'scored', result: res.result };
+            ctrl.lastKey = key;
+          } else if (res.status === 401) ctrl.state = { kind: 'signed-out' };
+          else if (res.status === 402) ctrl.state = { kind: 'pro' };
+          else if (res.status === 429) ctrl.state = { kind: 'limited' };
+          else ctrl.state = { kind: 'error' };
+          render();
+          if (openFor === ctrl && ctrl.state.kind === 'scored') showPanel(ctrl);
+        }
+      );
+    }
 
-// ─── Score Requests ──────────────────────────────────────────────────────────
+    button.addEventListener('click', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      var k = ctrl.state.kind;
+      if (k === 'signed-out') return void window.open('https://mybrandos.app/extension-auth', '_blank', 'noopener');
+      if (k === 'pro') return void window.open('https://mybrandos.app/pricing', '_blank', 'noopener');
+      if (k === 'scored') return openFor === ctrl ? hidePanel() : showPanel(ctrl);
+      score(true);
+    });
 
-function requestScore(username, badge) {
-  chrome.runtime.sendMessage(
-    { type: 'GET_SCORE', username },
-    (response) => {
-      if (chrome.runtime.lastError) {
-        updateBadge(badge, { error: 'extension_error' });
+    function onEdit() {
+      if (ctrl.state.kind === 'scored' && openFor === ctrl) hidePanel();
+      clearTimeout(ctrl.timer);
+      if (!auto) {
+        var text = core.readDraft(ctrl.composer);
+        if (core.draftKey(text, core.hasMedia(ctrl.composer)) !== ctrl.lastKey) {
+          ctrl.state = { kind: 'idle' };
+          render();
+        }
         return;
       }
-      if (response?.data) {
-        updateBadge(badge, response.data);
+      ctrl.timer = setTimeout(function () {
+        score(false);
+      }, DEBOUNCE_MS);
+    }
+    composer.root.addEventListener('input', onEdit, true);
+    composer.root.addEventListener('paste', onEdit, true);
+
+    var a = core.chipAnchor(composer);
+    a.parent.insertBefore(host, a.before);
+    render();
+    return ctrl;
+  }
+
+  function scan() {
+    core.findComposers(document).forEach(function (c) {
+      var ctrl = mounted.get(c.root);
+      if (ctrl && ctrl.host.isConnected) {
+        ctrl.composer = c; // X re-renders boxes (threads add boxes)
+        return;
       }
-    }
-  );
-}
-
-// ─── Dropdown Panel ──────────────────────────────────────────────────────────
-
-let activeDropdown = null;
-
-function handleBadgeClick(badge, username) {
-  // Close any existing dropdown
-  closeDropdown();
-
-  const scoreData = badge.textContent;
-  if (scoreData === '...' || scoreData === '?') {
-    // No data yet — request it
-    requestScore(username, badge);
-    return;
-  }
-
-  // Fetch fresh data for dropdown
-  chrome.runtime.sendMessage(
-    { type: 'GET_SCORE', username },
-    (response) => {
-      if (chrome.runtime.lastError || !response?.data || response.data.error) return;
-      showDropdown(badge, response.data);
-    }
-  );
-}
-
-function showDropdown(badge, data) {
-  closeDropdown();
-
-  const dropdown = document.createElement('div');
-  dropdown.className = 'brandos-dropdown';
-  dropdown.innerHTML = buildDropdownHTML(data);
-
-  // Position below badge
-  const rect = badge.getBoundingClientRect();
-  dropdown.style.position = 'fixed';
-  dropdown.style.top = `${rect.bottom + 4}px`;
-  dropdown.style.left = `${Math.max(8, rect.left - 140)}px`;
-  dropdown.style.zIndex = '10001';
-
-  // Detect dark mode
-  const bgColor = getComputedStyle(document.body).backgroundColor;
-  const isDark = isDarkColor(bgColor);
-  dropdown.setAttribute('data-theme', isDark ? 'dark' : 'light');
-
-  document.body.appendChild(dropdown);
-  activeDropdown = dropdown;
-
-  // CTA link
-  const ctaLink = dropdown.querySelector('.brandos-dropdown__cta');
-  if (ctaLink) {
-    ctaLink.addEventListener('click', (e) => {
-      e.preventDefault();
-      chrome.runtime.sendMessage({ type: 'GET_SCORE', username: data.username }, () => {});
-      window.open(data.scoreUrl || `http://localhost:3000/score/${data.username}`, '_blank');
+      mounted.set(c.root, mount(c));
     });
   }
 
-  // Close on click outside
-  setTimeout(() => {
-    document.addEventListener('click', handleClickOutside);
-    document.addEventListener('keydown', handleEscape);
-  }, 10);
-}
-
-function buildDropdownHTML(data) {
-  const { color } = getScoreColor(data.overallScore);
-  const phases = data.phases || {};
-
-  return `
-    <div class="brandos-dropdown__header">
-      <div class="brandos-dropdown__score-circle" style="--score-color: ${color}">
-        <span class="brandos-dropdown__score-value">${data.overallScore}</span>
-      </div>
-      <div class="brandos-dropdown__meta">
-        <div class="brandos-dropdown__archetype">
-          ${data.archetype?.emoji || ''} ${data.archetype?.primary || 'Unknown'}
-        </div>
-        <div class="brandos-dropdown__tagline">${data.archetype?.tagline || ''}</div>
-        <div class="brandos-dropdown__tier">${formatTier(data.influenceTier)}</div>
-      </div>
-    </div>
-
-    <div class="brandos-dropdown__phases">
-      ${phaseBar('Define', phases.define?.score, phases.define?.topInsight)}
-      ${phaseBar('Check', phases.check?.score, phases.check?.topInsight)}
-      ${phaseBar('Generate', phases.generate?.score, phases.generate?.topInsight)}
-      ${phaseBar('Scale', phases.scale?.score, phases.scale?.topInsight)}
-    </div>
-
-    ${data.contentStyle?.topics?.length ? `
-      <div class="brandos-dropdown__topics">
-        ${data.contentStyle.topics.map(t => `<span class="brandos-dropdown__tag">${t}</span>`).join('')}
-      </div>
-    ` : ''}
-
-    <a class="brandos-dropdown__cta" href="#">Full analysis on BrandOS &rarr;</a>
-  `;
-}
-
-function phaseBar(name, score, insight) {
-  score = score || 0;
-  const { color } = getScoreColor(score);
-  return `
-    <div class="brandos-dropdown__phase">
-      <div class="brandos-dropdown__phase-header">
-        <span class="brandos-dropdown__phase-name">${name}</span>
-        <span class="brandos-dropdown__phase-score" style="color: ${color}">${score}</span>
-      </div>
-      <div class="brandos-dropdown__phase-bar">
-        <div class="brandos-dropdown__phase-fill" style="width: ${score}%; background: ${color}"></div>
-      </div>
-      ${insight && !insight.startsWith('Cached') && !insight.startsWith('Quick') ? `<div class="brandos-dropdown__phase-insight">${insight}</div>` : ''}
-    </div>
-  `;
-}
-
-function formatTier(tier) {
-  if (!tier) return '';
-  return tier.charAt(0).toUpperCase() + tier.slice(1);
-}
-
-function isDarkColor(bgColor) {
-  const match = bgColor.match(/\d+/g);
-  if (!match || match.length < 3) return true;
-  const [r, g, b] = match.map(Number);
-  return (r * 299 + g * 587 + b * 114) / 1000 < 128;
-}
-
-function closeDropdown() {
-  if (activeDropdown) {
-    activeDropdown.remove();
-    activeDropdown = null;
-  }
-  document.removeEventListener('click', handleClickOutside);
-  document.removeEventListener('keydown', handleEscape);
-}
-
-function handleClickOutside(e) {
-  if (activeDropdown && !activeDropdown.contains(e.target) && !e.target.hasAttribute(BADGE_ATTR)) {
-    closeDropdown();
-  }
-}
-
-function handleEscape(e) {
-  if (e.key === 'Escape') {
-    closeDropdown();
-  }
-}
-
-// ─── MutationObserver (React SPA — handles virtual scrolling) ────────────────
-
-const mutationObserver = new MutationObserver((mutations) => {
-  let shouldScan = false;
-
-  for (const mutation of mutations) {
-    if (mutation.addedNodes.length > 0) {
-      shouldScan = true;
-      break;
-    }
-  }
-
-  if (shouldScan) {
-    // Debounce scanning to avoid excessive DOM queries
-    clearTimeout(mutationObserver._debounceTimer);
-    mutationObserver._debounceTimer = setTimeout(() => {
-      injectBadges(document);
-    }, 150);
-  }
-});
-
-// ─── Listen for auth from extension-auth page ────────────────────────────────
-
-window.addEventListener('message', (event) => {
-  if (event.data?.type === 'BRANDOS_AUTH_TOKENS') {
-    chrome.runtime.sendMessage({
-      type: 'AUTH_TOKENS',
-      accessToken: event.data.accessToken,
-      refreshToken: event.data.refreshToken,
-    });
-  }
-});
-
-// ─── Initialize ──────────────────────────────────────────────────────────────
-
-function init() {
-  // Initial scan
-  injectBadges(document);
-
-  // Watch for DOM changes (X's React SPA + virtual scrolling)
-  mutationObserver.observe(document.body, {
-    childList: true,
-    subtree: true,
-  });
-}
-
-// Wait for DOM ready
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', init);
-} else {
-  init();
-}
+  var pending = 0;
+  new MutationObserver(function () {
+    if (pending) return;
+    pending = setTimeout(function () {
+      pending = 0;
+      scan();
+    }, 300);
+  }).observe(document.body, { childList: true, subtree: true });
+  scan();
+})();

@@ -1,32 +1,32 @@
 {
   "manifest_version": 3,
-  "name": "BrandOS — X Brand Score",
-  "version": "1.0.0",
-  "description": "See brand scores next to every username on X. Powered by BrandOS.",
-  "permissions": [
-    "storage",
-    "activeTab"
-  ],
-  "host_permissions": [
-    "https://x.com/*",
-    "https://twitter.com/*",
-    "https://brandos.app/*",
-    "http://localhost:3000/*"
-  ],
+  "name": "BrandOS: score your post before you send it",
+  "short_name": "BrandOS",
+  "version": "2.0.0",
+  "description": "Scores your draft in X's composer against your own brand and history, with the fixes that would make it land.",
+  "permissions": ["storage"],
+  "host_permissions": ["https://x.com/*", "https://mybrandos.app/*"],
   "background": {
-    "service_worker": "background/service-worker.js",
-    "type": "module"
+    "service_worker": "background/service-worker.js"
   },
   "content_scripts": [
     {
-      "matches": ["https://x.com/*", "https://twitter.com/*"],
-      "js": ["content/content.js"],
-      "css": ["content/content.css"],
+      "matches": ["https://x.com/*"],
+      "js": ["content/core.js", "content/content.js"],
       "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://mybrandos.app/extension-auth*"],
+      "js": ["content/connector.js"],
+      "run_at": "document_start"
     }
   ],
+  "externally_connectable": {
+    "matches": ["https://mybrandos.app/*"]
+  },
   "action": {
     "default_popup": "popup/popup.html",
+    "default_title": "BrandOS",
     "default_icon": {
       "16": "icons/icon16.png",
       "32": "icons/icon32.png",
@@ -39,11 +39,5 @@
     "32": "icons/icon32.png",
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
-  },
-  "externally_connectable": {
-    "matches": [
-      "https://brandos.app/*",
-      "http://localhost:3000/*"
-    ]
   }
 }
