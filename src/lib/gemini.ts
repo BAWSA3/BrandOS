@@ -668,6 +668,8 @@ export interface ContentPatterns {
   emojiUsage: number;
   questionTweets: number;
   threadStarters: number;
+  /** Posts publishing an X Article; absent on older cached patterns. */
+  articles?: number;
   mediaUsage: number;
 }
 
@@ -1218,7 +1220,7 @@ Score each pillar 0-100, then ADD the tier/authority bonuses to the overall scor
 
 3. GENERATE (Weight: 25%) - Content Quality & Output
    - How strong is their content output volume and posting cadence?
-   - Are they using effective formats (threads, media, questions, polls)?
+   - Are they using effective formats (threads, X Articles, media, questions, polls)?
    - Does their content demonstrate expertise, insight, or entertainment value?
    - Are they creating original content vs just reposting/reacting?
    - Is the content quality appropriate for their influence tier?
@@ -1389,6 +1391,8 @@ CONTENT PATTERNS:
 - Emoji Usage: ${contentPatterns.emojiUsage.toFixed(1)}% of tweets
 - Question Tweets: ${contentPatterns.questionTweets} (engagement bait)
 - Thread Starters: ${contentPatterns.threadStarters}
+- X Articles: ${contentPatterns.articles ?? 0} (X's long-form post format)
+- Long-form on X is threads AND X Articles. Count both when judging depth; never call them light on long-form if they publish Articles. When you advise long-form, offer a thread or an Article (a thread for a quick story or list, an Article for a full breakdown), never threads alone.
 - Media Usage: ${contentPatterns.mediaUsage} of ${stats.totalTweets} posts include a photo, video or GIF
 - Only state facts these numbers support (e.g. do not claim "zero media" or a posting rate other than the one above).
 
@@ -1429,7 +1433,7 @@ Perform a DEEP ANALYSIS — brand = reputation, built entirely through content:
 
 3. GENERATE (25%) - Content Quality & Performance
    - Engagement rate analysis (is it good for their size?)
-   - Content format effectiveness (threads, media, questions)
+   - Content format effectiveness (threads, X Articles, media, questions)
    - Hook quality (do tweets grab attention?)
    - Original content vs reposting/reacting
    - Posting frequency and cadence
@@ -1481,7 +1485,7 @@ Return ONLY valid JSON:
   },
   "contentPerformance": {
     "engagementRate": <number>,
-    "bestPerformingType": "threads|single tweets|questions|media posts",
+    "bestPerformingType": "threads|articles|single tweets|questions|media posts",
     "optimalPostingTime": "Day at HH:MM timezone",
     "hookEffectiveness": <0-100>
   },
@@ -2349,7 +2353,7 @@ export interface TweetVoiceAnalysis {
 
   // High-performing content patterns
   performancePatterns: {
-    bestFormats: ('thread' | 'single' | 'quote' | 'media' | 'question')[];
+    bestFormats: ('thread' | 'article' | 'single' | 'quote' | 'media' | 'question')[];
     optimalLength: { min: number; max: number };
     highEngagementTopics: string[];
     bestPostingTimes: { day: string; hour: number }[];
@@ -2405,7 +2409,7 @@ ANALYZE FOR:
    - Include 1-2 example tweet snippets for each pillar
 
 4. PERFORMANCE PATTERNS
-   - What formats work best? (thread, single, quote, media, question)
+   - What formats work best? (thread, article, single, quote, media, question)
    - Optimal tweet length range
    - Topics that drive highest engagement
    - Any viral content characteristics
@@ -2442,7 +2446,7 @@ Return ONLY valid JSON:
     }
   ],
   "performancePatterns": {
-    "bestFormats": ["thread", "single", "quote", "media", "question"],
+    "bestFormats": ["thread", "article", "single", "quote", "media", "question"],
     "optimalLength": { "min": <number>, "max": <number> },
     "highEngagementTopics": ["topic1", "topic2"],
     "bestPostingTimes": [{ "day": "Monday", "hour": 14 }],
@@ -2848,13 +2852,13 @@ THE 8 ARCHETYPES (choose ONE):
 4. FREQ (Tier 2 — RISING) — Entertainer, community builder, memes, hot takes, shitposts, engagement bait. 16% of creators.
 5. RELAY (Tier 3 — ADVANCED) — Super connector, curator, everyone's mutual, amplifies others. 13% of creators.
 6. BUILD.EXE (Tier 3 — ADVANCED) — Builder, shipper, proof of work, launches, demos, progress updates. Posts about what they're BUILDING. 12% of creators.
-7. SOURCE (Tier 4 — EXPERT) — Knowledge authority, educator, deep dives, threads, how-to guides. 8% of creators.
+7. SOURCE (Tier 4 — EXPERT) — Knowledge authority, educator, deep dives, threads and X Articles, how-to guides. 8% of creators.
 8. FORESIGHT (Tier 5 — PEAK) — Shapes the narrative, visionary, contrarian predictions, big-picture thinker. 4% of creators.
 
 SELECTION GUIDANCE:
 - If their posts show them BUILDING products/projects → BUILD.EXE
 - If their posts are entertaining/memes/engagement-focused → FREQ
-- If their posts are educational/threads/deep knowledge → SOURCE
+- If their posts are educational/threads/X Articles/deep knowledge → SOURCE
 - If their posts amplify others and connect people → RELAY
 - If their posts are bold predictions and market calls → ENTROPY or FORESIGHT
 - If they're pseudonymous with idea-driven content → NULL

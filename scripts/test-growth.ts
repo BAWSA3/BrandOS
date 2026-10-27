@@ -48,6 +48,18 @@ test('1/5 → thread', formatOf(post(1, { text: '1/5 the playbook' })) === 'thre
 test('photo → media', formatOf(post(1, { media: ['photo'] })) === 'media');
 test('quote → quote', formatOf(post(1, { isQuote: true })) === 'quote');
 test('plain → text', formatOf(post(1)) === 'text');
+test(
+  'X Article link → article',
+  formatOf(post(1, { text: 'https://x.com/i/article/2115026387115327488' })) === 'article'
+);
+test(
+  'article beats media',
+  formatOf(post(1, { text: 'new piece x.com/i/article/1', media: ['photo'] })) === 'article'
+);
+test(
+  'a t.co link alone is not an article',
+  formatOf(post(1, { text: 'https://t.co/abc' })) === 'text'
+);
 const perf = formatPerformance([
   post(1, { media: ['photo'], likes: 60 }),
   post(2, { media: ['video'], likes: 60 }),

@@ -13,6 +13,8 @@
  *   posts and skipped matches)
  */
 
+import { isArticlePost } from '@/lib/post-formats';
+
 export interface Tweet {
   id: string;
   text: string;
@@ -60,6 +62,8 @@ export interface TweetAnalysis {
     emojiUsage: number;
     questionTweets: number;
     threadStarters: number;
+    /** Posts that publish an X Article (long-form, like threads). */
+    articles: number;
     /** Posts with at least one photo / video / gif. */
     mediaUsage: number;
   };
@@ -110,6 +114,7 @@ export function analyzeTweets(tweets: Tweet[]): TweetAnalysis {
         emojiUsage: 0,
         questionTweets: 0,
         threadStarters: 0,
+        articles: 0,
         mediaUsage: 0,
       },
     };
@@ -197,6 +202,7 @@ export function analyzeTweets(tweets: Tweet[]): TweetAnalysis {
       threadStarters: tweets.filter(
         (t) => t.text.includes('🧵') || t.text.toLowerCase().includes('thread')
       ).length,
+      articles: tweets.filter((t) => isArticlePost(t.text, t.entities?.urls)).length,
       mediaUsage: tweets.filter(hasMedia).length,
     },
   };

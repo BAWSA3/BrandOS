@@ -4,6 +4,7 @@
  */
 import { analyzeTweets, type Tweet } from '../src/lib/tweet-analysis';
 import { firstSentences } from '../src/lib/mcp/profile-read';
+import { expandArticleLinks, isArticlePost } from '../src/lib/post-formats';
 
 let pass = 0;
 let fail = 0;
@@ -30,6 +31,7 @@ const post = (i: number, o: Partial<Tweet> & { at?: string; views?: number } = {
     impression_count: o.views ?? 1000,
   },
   media: o.media ?? [],
+  entities: o.entities,
 });
 
 console.log('A. Posting frequency (bug: every account with a pinned post read "5+ per day")');
@@ -110,6 +112,34 @@ test(
   'question and exclamation marks end sentences',
   firstSentences('Is it good? Yes! More.', 2) === 'Is it good? Yes!'
 );
+
+console.log('X Articles (long-form alongside threads)');
+{
+  const a = analyzeTweets([
+    post(1, { text: 'https://x.com/i/article/2115026387115327488' }),
+    post(2, {
+      text: 'https://t.co/oYv4YDRdgx',
+      entities: { urls: [{ expanded_url: 'https://x.com/i/article/2115026387115327488' }] },
+    }),
+    post(3, { text: 'a thread 🧵' }),
+    post(4, {
+      text: 'https://t.co/zzz',
+      entities: { urls: [{ expanded_url: 'https://example.com' }] },
+    }),
+  ]);
+  test('articles counted from text or expanded url', a.contentPatterns.articles === 2);
+  test('threads still counted separately', a.contentPatterns.threadStarters === 1);
+  test('empty sample has 0 articles', analyzeTweets([]).contentPatterns.articles === 0);
+  test(
+    'expandArticleLinks swaps only article t.co links',
+    expandArticleLinks('read https://t.co/a and https://t.co/b', [
+      { url: 'https://t.co/a', expanded_url: 'https://x.com/i/article/9' },
+      { url: 'https://t.co/b', expanded_url: 'https://example.com' },
+    ]) === 'read https://x.com/i/article/9 and https://t.co/b'
+  );
+  test('twitter.com article urls count', isArticlePost('twitter.com/i/article/5'));
+  test('a status url is not an article', !isArticlePost('https://x.com/someone/status/5'));
+}
 
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);
