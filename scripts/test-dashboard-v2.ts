@@ -5,6 +5,7 @@
  */
 import { dashboardV2Rule } from '../src/lib/dashboard-v2-rules';
 import { nextMoves, pickIndex, type MoveInput } from '../src/lib/next-move';
+import { bodyOfWork, workLine } from '../src/lib/playbook';
 
 let pass = 0;
 let fail = 0;
@@ -151,6 +152,43 @@ test(
   [...Array(30)].every((_, i) => pickIndex(4, `2026-10-${i + 1}`) < 2)
 );
 test('one move → index 0', pickIndex(1, '2026-10-27') === 0);
+
+console.log('playbook: body of work');
+{
+  const now = new Date(Date.UTC(2026, 9, 27, 15));
+  const d = (daysAgo: number) => new Date(now.getTime() - daysAgo * 86_400_000);
+  const w = bodyOfWork(
+    {
+      ideas: [
+        { createdAt: d(1), status: 'saved' },
+        { createdAt: d(2), status: 'drafting' },
+        { createdAt: d(3), status: 'posted' },
+        { createdAt: d(20), status: 'saved' },
+        { createdAt: d(80), status: 'posted' }, // older than 8 weeks: ignored
+      ],
+      posts: [{ postedAt: d(0) }, { postedAt: d(10) }, { postedAt: d(400) }],
+      reads: [
+        { at: d(30), score: 68 },
+        { at: d(4), score: 72 },
+      ],
+    },
+    now
+  );
+  test('8 weeks, oldest first', w.length === 8 && w[0].start < w[7].start);
+  test('this week counts today', w[7].ideas === 3 && w[7].posts === 1, w[7]);
+  test('drafts = ideas taken to drafting or posted', w[7].drafts === 2);
+  test(
+    'ideas/posts outside the window are ignored',
+    w.reduce((a, x) => a + x.ideas, 0) === 4 && w.reduce((a, x) => a + x.posts, 0) === 2
+  );
+  test('score carries forward from the last read', w[7].score === 72 && w[5].score === 68);
+  test('no score before the first read', w[0].score === null);
+  test('work line', workLine(w) === '4 ideas → 2 drafts → 2 posts · score 68 → 72', workLine(w));
+  test(
+    'work line is null with nothing yet',
+    workLine(bodyOfWork({ ideas: [], posts: [], reads: [] }, now)) === null
+  );
+}
 
 console.log(`\n${pass} passed, ${fail} failed`);
 if (fail) process.exit(1);
