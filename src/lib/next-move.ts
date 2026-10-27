@@ -91,7 +91,7 @@ export function nextMoves(
       title: 'Write a follow-up to the post that reached furthest.',
       why: `“${clip(o.text)}” did ${compact(o.views)} views. The people it reached haven't seen what comes next.`,
       stat: { value: o.multiple, suffix: '×', label: 'your usual reach' },
-      source: 'From your record / your recent posts', // VCR has no · glyph
+      source: 'From your record · your recent posts',
       action: {
         label: 'Start writing',
         href: writeHref(`A follow-up to my post “${clip(o.text, 160)}”${voice}`),
@@ -135,7 +135,7 @@ export function nextMoves(
       title: FORMAT_MOVE[lever.format] ?? `Try more ${lever.label.toLowerCase()} this week.`,
       why: `${lever.label} earn ${lever.rate.toFixed(1)}% engagement against ${usual.rate.toFixed(1)}% for ${usual.label.toLowerCase()}, and they're only ${lever.share}% of your posts.`,
       stat: { value: lift, suffix: '×', label: 'engagement' },
-      source: 'From your record / your recent posts', // VCR has no · glyph
+      source: 'From your record · your recent posts',
       action: {
         label: 'Start writing',
         href: writeHref(`A post ${lever.label.toLowerCase()}${voice}`),
