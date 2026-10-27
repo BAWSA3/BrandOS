@@ -2,7 +2,7 @@ import { notFound, redirect } from 'next/navigation';
 import { after } from 'next/server';
 import { captureFunnelEvent } from '@/lib/funnel-events';
 import { getCurrentUser } from '@/lib/auth';
-import { indexOpenFor } from '@/lib/index-rules';
+import { indexOpenForUser } from '@/lib/early-access';
 import { getEntry, isFresh, latestRead, ownReservation } from '@/lib/creator-index';
 import { adoptPublicScan } from '@/lib/adopt-scan';
 import JoinForm from './JoinForm';
@@ -17,7 +17,7 @@ type Props = { searchParams: Promise<Record<string, string | string[] | undefine
 
 export default async function JoinIndexPage({ searchParams }: Props) {
   const user = await getCurrentUser().catch(() => null);
-  if (!indexOpenFor(user)) notFound();
+  if (!(await indexOpenForUser(user))) notFound();
   if (!user) redirect('/signup?next=/index/join');
   const x = user.platformConnections.find((pc) => pc.platform === 'x');
   // a homepage scan of their own handle becomes the account's first read (no new scan)

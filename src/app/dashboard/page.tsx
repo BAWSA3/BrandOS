@@ -25,7 +25,9 @@ import { addAccount, brandLimit, COMPETITORS_PER_BRAND } from '@/lib/tracked-acc
 import { getGrowthView, type GrowthView } from '@/lib/growth-data';
 import GrowthDashboard from '@/components/growth/GrowthDashboard';
 import type { IndexTileData } from '@/components/growth/IndexTile';
-import { indexOpenFor, standsOut } from '@/lib/index-rules';
+import { standsOut } from '@/lib/index-rules';
+import { earlyAccessFor, indexOpenForUser } from '@/lib/early-access';
+import EarlyAccessDock from '@/components/early-access/EarlyAccessDock';
 import { getEntry, viewSummary } from '@/lib/creator-index';
 
 // Auth-gated page: render per-request, never statically prerender at build.
@@ -34,7 +36,13 @@ export const dynamic = 'force-dynamic';
 export default async function DashboardPage({
   searchParams,
 }: {
-  searchParams: Promise<{ rescan?: string; design?: string; checkout?: string; brand?: string }>;
+  searchParams: Promise<{
+    rescan?: string;
+    design?: string;
+    checkout?: string;
+    brand?: string;
+    invite?: string;
+  }>;
 }) {
   const sp = await searchParams;
   let user = await getCurrentUser();
@@ -66,6 +74,13 @@ export default async function DashboardPage({
   const legacy = user.accountMigrationStatus === 'legacy';
 
   const xConnections = user.platformConnections.filter((pc) => pc.platform === 'x');
+  // Early-access code: the tag + feedback line, or "Have a code?" (and the
+  // result of an invite link, ?invite=ok|invalid, said once)
+  const access = await earlyAccessFor(user.id);
+  const tester = !!access?.perkTester;
+  // "ok" only when the code really is on the account (the param is just a hint)
+  const invite = sp.invite === 'ok' && access ? 'ok' : sp.invite === 'invalid' ? 'invalid' : null;
+  const dock = <EarlyAccessDock tester={tester} invite={invite} />;
 
   // Growth dashboard (pivot 2026-10-22) for anyone with Pro access (everyone
   // until Dec 3). ?design=v2 keeps the old dashboard reachable while the new
@@ -75,7 +90,13 @@ export default async function DashboardPage({
       loadGrowth(user, xConnections[0]?.platformUsername, sp.brand),
       loadIndexTile(user),
     ]);
-    if (view) return <GrowthDashboard view={view} index={index} />;
+    if (view)
+      return (
+        <>
+          <GrowthDashboard view={view} index={index} />
+          {dock}
+        </>
+      );
   }
   // Real-data bento once the user has a scan (the legacy tools page only shows
   // for accounts without X connected, which can't scan yet).
@@ -162,6 +183,7 @@ export default async function DashboardPage({
         <ConnectX name={user.name} />
       )}
       {legacy && bento && <BackupLoginNudge />}
+      {dock}
     </>
   );
 }
@@ -174,7 +196,7 @@ export default async function DashboardPage({
 async function loadIndexTile(
   user: NonNullable<Awaited<ReturnType<typeof getCurrentUser>>>
 ): Promise<IndexTileData | null> {
-  if (!indexOpenFor(user)) return null;
+  if (!(await indexOpenForUser(user))) return null;
   const entry = await getEntry(user.id);
   const pro = standsOut({
     role: String(user.role),

@@ -6,6 +6,7 @@ import { createBrowserClient } from '@supabase/ssr';
 import { TOS_VERSION } from '@/lib/tos';
 import Wordmark from '@/components/Wordmark';
 import { safeNextPath } from '@/lib/safe-input';
+import { INVALID_CODE_MESSAGE, normalizeCode } from '@/lib/early-access-rules';
 
 // One screen for new AND returning users (decided 2026-10-22): Continue with X
 // first (BrandOS reads your X), then Google, then a one-tap email link (no
@@ -75,6 +76,26 @@ export default function ContinuePage() {
     const t = window.setTimeout(() => setCompareWith(handle), 0);
     return () => window.clearTimeout(t);
   }, []);
+  // early-access code: saved by /i/<code> (cookie) or typed here, which goes
+  // through /i/<code> too, so the auth callback redeems it after sign-in
+  const [invite, setInvite] = useState<null | 'saved' | 'invalid'>(null);
+  useEffect(() => {
+    const v = new URLSearchParams(window.location.search).get('invite');
+    const t = window.setTimeout(() => setInvite(v === 'saved' || v === 'invalid' ? v : null), 0);
+    return () => window.clearTimeout(t);
+  }, []);
+  const [codeOpen, setCodeOpen] = useState(false);
+  const [code, setCode] = useState('');
+  const [codeError, setCodeError] = useState<string | null>(null);
+  function applyCode(e: React.FormEvent) {
+    e.preventDefault();
+    const c = normalizeCode(code);
+    if (!c) {
+      setCodeError(INVALID_CODE_MESSAGE);
+      return;
+    }
+    window.location.assign(`/i/${c}`);
+  }
   const callbackUrl = (via: 'x' | 'google' | 'email') =>
     typeof window !== 'undefined'
       ? `${window.location.origin}/api/auth/callback?next=${encodeURIComponent(next)}&tos=${encodeURIComponent(TOS_VERSION)}&via=${via}`
@@ -167,6 +188,19 @@ export default function ContinuePage() {
             style={{ fontFamily: LABEL, color: BLUE }}
           >
             Then we compare you to @{compareWith}
+          </p>
+        )}
+        {invite === 'saved' && (
+          <p
+            className="mt-2 text-center text-[11px] uppercase tracking-[0.14em]"
+            style={{ fontFamily: LABEL, color: BLUE }}
+          >
+            Your early-access code is saved. Sign in with X to claim it.
+          </p>
+        )}
+        {invite === 'invalid' && (
+          <p className="mt-2 text-center text-[13px] text-[#6B6862]" role="alert">
+            {INVALID_CODE_MESSAGE}
           </p>
         )}
         {ref && (
@@ -269,6 +303,49 @@ export default function ContinuePage() {
             </button>
           )}
         </div>
+
+        {invite !== 'saved' &&
+          (codeOpen ? (
+            <form onSubmit={applyCode} className="mt-6 space-y-2.5">
+              <input
+                value={code}
+                onChange={(e) => {
+                  setCode(e.target.value);
+                  setCodeError(null);
+                }}
+                autoFocus
+                autoComplete="off"
+                autoCapitalize="characters"
+                spellCheck={false}
+                maxLength={24}
+                placeholder="AU7K-2QX9"
+                aria-label="Early-access code"
+                className="w-full rounded-[6px] border border-black/15 bg-white px-3 py-3 text-center text-[15px] tracking-[0.14em] focus:outline-none focus:ring-2 focus:ring-[#0047FF]"
+              />
+              {codeError && (
+                <p className="text-center text-[13px] text-[#6B6862]" role="alert">
+                  {codeError}
+                </p>
+              )}
+              <button
+                type="submit"
+                disabled={!code.trim()}
+                className={`${btn} border border-black/15 bg-white hover:border-[#0047FF]`}
+                style={{ fontFamily: LABEL }}
+              >
+                Use code
+              </button>
+            </form>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setCodeOpen(true)}
+              className="mt-4 w-full py-2 text-center text-[11px] uppercase tracking-[0.14em] text-[#6B6862] hover:text-[#0E0E0E]"
+              style={{ fontFamily: LABEL }}
+            >
+              Have an early-access code?
+            </button>
+          ))}
 
         <p className="mt-8 text-center text-[12px] leading-[1.5] text-[#6B6862]">
           By continuing you agree to the{' '}
