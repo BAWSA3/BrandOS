@@ -7,6 +7,10 @@ import { bearer, extensionCors, verifyExtensionToken } from '@/lib/extension-tok
 /**
  * POST /api/extension/auth — the extension checks its token (Authorization:
  * Bearer bx1…) and gets who it's signed in as. Read-only.
+ *
+ * Invite-only (INVITE_ONLY): tokens are minted only for existing BrandOS
+ * accounts (/api/extension/token needs a signed-in User), so the extension can
+ * never create or reach an account the sign-in gate turned away.
  */
 
 export async function OPTIONS(request: NextRequest) {

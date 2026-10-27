@@ -12,6 +12,10 @@ import { DraftScoreError, scoreDraft, validateDraft } from '@/lib/draft-score';
  * brand. Auth: the extension token (scoped, 30 days). Cost surface: 12 per
  * minute per IP, 20 per minute and 40 per hour per member (shared with the
  * dashboard), a 2,000-character cap and an hour's cache per draft.
+ *
+ * Invite-only (INVITE_ONLY): tokens are minted only for existing BrandOS
+ * accounts (/api/extension/token needs a signed-in User), so the extension can
+ * never create or reach an account the sign-in gate turned away.
  */
 export const maxDuration = 60;
 

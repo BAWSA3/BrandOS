@@ -6,7 +6,8 @@ import { AnimateNumber } from 'motion-plus/react';
 import { useReducedMotion } from 'motion/react';
 import Wordmark from '@/components/Wordmark';
 import { FieldScreen } from '@/components/system';
-import type { GrowthView } from '@/lib/growth-data';
+import type { GrowthView, MemberRecord } from '@/lib/growth-data';
+import { LastPostsTile, LookupsBlock, ScoreHistoryTile } from './RecordTiles';
 import IdeaBoard, { type Idea } from './IdeaBoard';
 import { BIG, Bar, FollowersChart, Label, MONO, T, Tile, fmt } from './parts';
 import IndexTile, { type IndexTileData } from './IndexTile';
@@ -118,8 +119,11 @@ export default function GrowthDashboard({
   ideas = [],
   index = null,
   field = false,
+  record = null,
 }: {
   view: GrowthView;
+  /** The member's own record (history, last posts, lookups); null off their own brand. */
+  record?: MemberRecord | null;
   /** Direction 03: the dashboard on the field (preview: ?field=1). */
   field?: boolean;
   sample?: boolean;
@@ -490,6 +494,14 @@ export default function GrowthDashboard({
             </div>
           </Tile>
 
+          {/* The member's own record (score history, last posts), restored from the bento */}
+          {record && (
+            <>
+              <ScoreHistoryTile history={record.history} />
+              <LastPostsTile posts={record.posts} />
+            </>
+          )}
+
           {/* Post performance */}
           <Tile className="md:col-span-8">
             <Label>What&apos;s working · last {growth.samplePosts} posts</Label>
@@ -524,6 +536,21 @@ export default function GrowthDashboard({
                   {view.peakHour !== null && (
                     <p className="mt-4 text-[13px] leading-[1.5]" style={{ color: T.muted }}>
                       Best time to post: around {String(view.peakHour).padStart(2, '0')}:00 UTC.
+                    </p>
+                  )}
+                  {view.outlier && (
+                    <p className="mt-3 text-[13px] leading-[1.5]" style={{ color: T.muted }}>
+                      <a
+                        href={`https://x.com/${brand.handle}/status/${view.outlier.tweetId}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="underline-offset-2 hover:underline"
+                        style={{ color: T.ink }}
+                      >
+                        One post did {fmt.compact(view.outlier.views)} views
+                      </a>
+                      , {view.outlier.multiple}× your usual. The numbers above are your typical
+                      post, so one standout doesn&apos;t skew them.
                     </p>
                   )}
                 </div>
@@ -581,6 +608,8 @@ export default function GrowthDashboard({
               </p>
             )}
           </Tile>
+
+          {record?.lookups && <LookupsBlock handle={brand.handle} lookups={record.lookups} />}
 
           {/* Competitors */}
           <Tile className="md:col-span-7">

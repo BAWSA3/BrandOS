@@ -3,7 +3,7 @@
  *
  * Run:  npx tsx scripts/test-early-access.ts          (npm run test:early-access)
  *
- * A–D are pure (no network): code format, normalisation, generation, feedback
+ * A–D and F are pure (no network): code format, normalisation, generation, feedback
  * cleaning and redirect safety. E is the single-use race against a real
  * database and only runs with an env file whose DB has 049 applied:
  *   npx tsx --tsconfig tsconfig.json --env-file=<staging env> scripts/test-early-access.ts --db
@@ -19,7 +19,10 @@ import {
   formatCode,
   generateCode,
   inviteLink,
+  inviteOnlyFrom,
   normalizeCode,
+  signInGate,
+  typedCodePath,
 } from '../src/lib/early-access-rules';
 import { safeNextPath } from '../src/lib/safe-input';
 
@@ -100,6 +103,39 @@ check(
     safeNextPath('/\\evil.example') === '/dashboard'
 );
 
+console.log('\nF. Invite-only sign-in gate (INVITE_ONLY)');
+const g = (
+  inviteOnly: boolean,
+  existingAccount: boolean,
+  code: 'none' | 'redeemable' | 'bad' | 'unavailable'
+) => signInGate({ inviteOnly, existingAccount, code });
+check('flag off: a new account signs up as today', g(false, false, 'none') === 'allow');
+check('flag off: a bad carried code changes nothing', g(false, false, 'bad') === 'allow');
+check('existing account signs in with no code', g(true, true, 'none') === 'allow');
+check('existing account isn’t blocked by a bad code', g(true, true, 'bad') === 'allow');
+check('new account without a code is turned away', g(true, false, 'none') === 'required');
+check('new account with a valid code is admitted', g(true, false, 'redeemable') === 'admit');
+check('new account with a used / revoked code: invalid', g(true, false, 'bad') === 'invalid');
+check(
+  'codes table missing (049 not applied): fails closed',
+  g(true, false, 'unavailable') === 'required'
+);
+check(
+  'INVITE_ONLY parsing: only "true" turns it on',
+  inviteOnlyFrom('true') &&
+    inviteOnlyFrom(' TRUE ') &&
+    !inviteOnlyFrom(undefined) &&
+    !inviteOnlyFrom('') &&
+    !inviteOnlyFrom('false') &&
+    !inviteOnlyFrom('1')
+);
+check('typed code goes to its invite link', typedCodePath(' au7k-2qx9 ') === '/i/AU7K-2QX9');
+check('typed junk goes nowhere', typedCodePath('hello') === null && typedCodePath('') === null);
+check(
+  'typed code can’t inject a path',
+  typedCodePath('../../admin') === null && typedCodePath('AU7K2QX9/../x') === null
+);
+
 async function raceTest() {
   console.log('\nE. Single use against the database (--db)');
   const { default: prisma } = await import('../src/lib/db');
@@ -111,6 +147,8 @@ async function raceTest() {
     )
   );
   const codes = [0, 1].map(() => generateCode((n) => randomBytes(n)));
+  const gateCodes: string[] = [];
+  const gateUsers: string[] = [];
   try {
     await prisma.earlyAccessCode.createMany({
       data: codes.map((code, i) => ({ code, label: `test ${stamp} ${i}` })),
@@ -140,9 +178,38 @@ async function raceTest() {
       data: { revokedAt: new Date() },
     });
     check('revoking a redeemed code removes access', !(await earlyAccessFor(winner.id)));
+
+    // the gated sign-up: account + code in one transaction
+    const { createAccountWithCode, CodeTakenError } = await import('../src/lib/early-access');
+    const gateCode = generateCode((n) => randomBytes(n));
+    await prisma.earlyAccessCode.create({ data: { code: gateCode, label: `test ${stamp} gate` } });
+    gateCodes.push(gateCode);
+    const admitted = await createAccountWithCode(gateCode, (tx) =>
+      tx.user.create({ data: { supabaseId: `ea-test-${stamp}-gate-1` }, select: { id: true } })
+    );
+    gateUsers.push(admitted.id);
+    const used = await prisma.earlyAccessCode.findUnique({ where: { code: gateCode } });
+    check(
+      'a valid code admits a new account and is used by it',
+      used?.redeemedByUserId === admitted.id
+    );
+    let rejected = false;
+    try {
+      await createAccountWithCode(gateCode, (tx) =>
+        tx.user.create({ data: { supabaseId: `ea-test-${stamp}-gate-2` }, select: { id: true } })
+      );
+    } catch (e) {
+      rejected = e instanceof CodeTakenError;
+    }
+    const orphan = await prisma.user.findUnique({
+      where: { supabaseId: `ea-test-${stamp}-gate-2` },
+    });
+    check('a used code is rejected and no account is left behind', rejected && !orphan);
   } finally {
-    await prisma.earlyAccessCode.deleteMany({ where: { code: { in: codes } } });
-    await prisma.user.deleteMany({ where: { id: { in: users.map((u) => u.id) } } });
+    await prisma.earlyAccessCode.deleteMany({ where: { code: { in: [...codes, ...gateCodes] } } });
+    await prisma.user.deleteMany({
+      where: { id: { in: [...users.map((u) => u.id), ...gateUsers] } },
+    });
     await prisma.$disconnect();
   }
 }

@@ -11,6 +11,10 @@
  *   and says when views are missing instead of reporting 0%
  * - emoji share uses a non-global regex (the /g flag carried lastIndex between
  *   posts and skipped matches)
+ *
+ * Oct 27: engagement rate is the median post's rate, not total engagements ÷
+ * total views. Pooled, one viral post (127K views on a 1.7K account) carried
+ * the whole rate; the outlier is now reported separately.
  */
 
 export interface Tweet {
@@ -35,14 +39,43 @@ export interface Tweet {
   is_quote?: boolean;
 }
 
+export interface EngagementOutlier {
+  tweetId: string;
+  views: number;
+  /** Views ÷ the median post's views, e.g. 70 for "70× your usual". */
+  multiple: number;
+  /** That post's own engagement rate (%). */
+  rate: number;
+  excerpt: string;
+}
+
+/** A post is called out when it did at least this many times the median views. */
+export const OUTLIER_MULTIPLE = 5;
+
+export function median(values: number[]): number {
+  if (!values.length) return 0;
+  const v = [...values].sort((a, b) => a - b);
+  const mid = Math.floor(v.length / 2);
+  return v.length % 2 ? v[mid] : (v[mid - 1] + v[mid]) / 2;
+}
+
 export interface TweetAnalysis {
   tweets: Tweet[];
   stats: {
     totalTweets: number;
-    /** % of views that engaged (likes + reposts + replies + quotes). 0 when unknown. */
+    /**
+     * The typical post's engagement: the median of each post's
+     * (likes + reposts + replies + quotes) ÷ views, as a %. 0 when unknown.
+     */
     avgEngagementRate: number;
     /** False when no post in the sample had a view count. */
     engagementRateKnown: boolean;
+    /** Total engagements ÷ total views (%); one viral post can dominate it. */
+    pooledEngagementRate: number;
+    /** Median views per post (posts with a view count), 0 when unknown. */
+    medianViews: number;
+    /** The post that did far more than usual (≥ OUTLIER_MULTIPLE × median views), if any. */
+    outlier: EngagementOutlier | null;
     avgLikes: number;
     avgRetweets: number;
     avgReplies: number;
@@ -95,6 +128,9 @@ export function analyzeTweets(tweets: Tweet[]): TweetAnalysis {
         totalTweets: 0,
         avgEngagementRate: 0,
         engagementRateKnown: false,
+        pooledEngagementRate: 0,
+        medianViews: 0,
+        outlier: null,
         avgLikes: 0,
         avgRetweets: 0,
         avgReplies: 0,
@@ -126,17 +162,35 @@ export function analyzeTweets(tweets: Tweet[]): TweetAnalysis {
   // Engagement rate over posts that have views only (mixing in view-less posts
   // deflated it, and no views at all used to read as 0%)
   const viewed = tweets.filter((t) => (m(t)?.impression_count || 0) > 0);
-  const views = sum((t) => m(t)?.impression_count || 0, viewed);
-  const engaged = sum(
-    (t) =>
-      (m(t)?.like_count || 0) +
-      (m(t)?.retweet_count || 0) +
-      (m(t)?.reply_count || 0) +
-      (m(t)?.quote_count || 0),
-    viewed
-  );
+  const engagementOf = (t: Tweet) =>
+    (m(t)?.like_count || 0) +
+    (m(t)?.retweet_count || 0) +
+    (m(t)?.reply_count || 0) +
+    (m(t)?.quote_count || 0);
+  const viewsOf = (t: Tweet) => m(t)?.impression_count || 0;
+  const views = sum(viewsOf, viewed);
+  const engaged = sum(engagementOf, viewed);
   const engagementRateKnown = views > 0;
-  const avgEngagementRate = engagementRateKnown ? (engaged / views) * 100 : 0;
+  const pooledEngagementRate = engagementRateKnown ? (engaged / views) * 100 : 0;
+  // The typical post, not the sum: a single viral post can't carry the rate
+  const avgEngagementRate = engagementRateKnown
+    ? median(viewed.map((t) => (engagementOf(t) / viewsOf(t)) * 100))
+    : 0;
+  const medianViews = median(viewed.map(viewsOf));
+  let outlier: EngagementOutlier | null = null;
+  if (viewed.length >= 5 && medianViews > 0) {
+    const top = viewed.reduce((a, t) => (viewsOf(t) > viewsOf(a) ? t : a));
+    const multiple = viewsOf(top) / medianViews;
+    if (multiple >= OUTLIER_MULTIPLE) {
+      outlier = {
+        tweetId: top.id,
+        views: viewsOf(top),
+        multiple: Math.round(multiple),
+        rate: (engagementOf(top) / viewsOf(top)) * 100,
+        excerpt: top.text.replace(/\s+/g, ' ').trim().slice(0, 120),
+      };
+    }
+  }
 
   const hashtagCounts: Record<string, number> = {};
   for (const t of tweets)
@@ -180,6 +234,9 @@ export function analyzeTweets(tweets: Tweet[]): TweetAnalysis {
       totalTweets: n,
       avgEngagementRate,
       engagementRateKnown,
+      pooledEngagementRate,
+      medianViews,
+      outlier,
       avgLikes,
       avgRetweets,
       avgReplies,
