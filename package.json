@@ -25,7 +25,10 @@
     "test:index": "npx tsx scripts/test-index.ts",
     "test:field": "npx tsx scripts/test-field.ts",
     "test:early-access": "npx tsx scripts/test-early-access.ts",
-    "test:draft": "npx tsx scripts/test-draft-score.ts"
+    "test:draft": "npx tsx scripts/test-draft-score.ts",
+    "test:extension": "npx tsx scripts/test-extension.ts",
+    "ext:icons": "node scripts/build-extension-icons.mjs",
+    "ext:zip": "node scripts/build-extension-zip.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.71.2",

@@ -36,6 +36,7 @@ const allowedPages = [
   '/bots', // "How many bots follow you?" — public bot check
   '/creators', // the Creator Index; the public address is /index (rewritten below)
   '/i', // early-access invite links (/i/AU7K-2QX9): redeem or carry the code through sign-in
+  '/extension-auth', // BrandOS for Chrome: connects the extension to the signed-in member
 ];
 
 // Design-review pages (sample data) stay on staging and local, never on the

@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>BrandOS for Chrome · X composer fixture</title>
+    <!--
+      X's composer markup as of 26 Oct 2026 (data-testids read from x.com/home):
+      tweetTextarea_0 (role=textbox, contenteditable DraftEditor) sits ~20 levels
+      below the nearest ancestor that also holds [data-testid="toolBar"], which
+      holds fileInput, gifSearchButton, createPollButton, scheduleOption,
+      geoButton and tweetButtonInline. Not shipped in the extension zip.
+        ?test  run the DOM checks (results in #results and window.__results)
+        ?demo  run the real content.js with chrome.* stubbed (store screenshots)
+    -->
+    <style>
+      body { margin: 0; background: #fff; color: #0f1419; font: 15px/20px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+      .col { max-width: 600px; margin: 0 auto; border-left: 1px solid #eff3f4; border-right: 1px solid #eff3f4; min-height: 100vh; }
+      .tabs { display: flex; border-bottom: 1px solid #eff3f4; }
+      .tabs div { flex: 1; text-align: center; padding: 16px; font-weight: 700; }
+      .tabs div:first-child { border-bottom: 4px solid #1d9bf0; }
+      .compose { display: flex; gap: 12px; padding: 12px 16px; border-bottom: 1px solid #eff3f4; }
+      .avatar { width: 40px; height: 40px; border-radius: 50%; background: #0047ff; flex: none; }
+      .main { flex: 1; min-width: 0; }
+      [role="textbox"] { min-height: 52px; font-size: 20px; line-height: 24px; padding: 12px 0; outline: none; white-space: pre-wrap; }
+      [role="textbox"]:empty::before { content: "What is happening?!"; color: #536471; }
+      [data-testid="attachments"] img { width: 100%; height: 180px; object-fit: cover; border-radius: 16px; display: block; background: #e6ecf0; }
+      [data-testid="toolBar"] { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #eff3f4; padding-top: 8px; margin-top: 8px; }
+      .icons { display: flex; gap: 4px; }
+      .icons span { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #1d9bf0; font-size: 16px; }
+      .post { display: flex; align-items: center; }
+      [data-testid="tweetButtonInline"] { background: #0f1419; color: #fff; border: 0; border-radius: 999px; padding: 0 16px; height: 36px; font-weight: 700; font-size: 15px; }
+      .tweet { padding: 12px 16px; border-bottom: 1px solid #eff3f4; display: flex; gap: 12px; color: #536471; }
+      #results { font: 12px ui-monospace, monospace; padding: 16px; white-space: pre-wrap; }
+    </style>
+  </head>
+  <body>
+    <div class="col">
+      <div class="tabs"><div>For you</div><div>Following</div></div>
+      <div class="compose" id="composer-root">
+        <div class="avatar"></div>
+        <div class="main">
+          <div><div><div><div><div><div><div><div><div><div>
+            <div data-testid="tweetTextarea_0_label"><div><div><div>
+              <div data-testid="tweetTextarea_0RichTextInputContainer"><div><div>
+                <div data-testid="tweetTextarea_0" role="textbox" contenteditable="true" class="notranslate public-DraftEditor-content"></div>
+              </div></div></div>
+            </div></div></div></div>
+          </div></div></div></div></div></div></div></div></div></div>
+          <div data-testid="attachments" id="attachments"></div>
+          <div data-testid="toolBar">
+            <div class="icons" data-testid="ScrollSnap-List">
+              <span data-testid="fileInput">▣</span><span data-testid="gifSearchButton">GIF</span><span data-testid="createPollButton">☰</span><span data-testid="scheduleOption">◷</span><span data-testid="geoButton">⌖</span>
+            </div>
+            <div class="post"><div><button type="button" data-testid="tweetButtonInline">Post</button></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="tweet"><div class="avatar" style="background:#cfd9de"></div><div>A post in the timeline below the composer. It has a reply box only when opened.</div></div>
+      <div class="tweet"><div class="avatar" style="background:#cfd9de"></div><div>Another post. The extension touches only the composer, never the feed.</div></div>
+    </div>
+    <div id="results"></div>
+    <script src="../content/core.js"></script>
+    <script>
+      (function () {
+        var q = new URLSearchParams(location.search);
+        var box = document.querySelector('[data-testid="tweetTextarea_0"]');
+        function type(text) {
+          box.textContent = text;
+          box.dispatchEvent(new InputEvent('input', { bubbles: true }));
+        }
+        if (q.has('test')) {
+          var C = window.BrandOSCore;
+          var out = [];
+          var ok = function (name, cond) { out.push((cond ? 'PASS ' : 'FAIL ') + name); };
+          var found = C.findComposers(document);
+          ok('finds exactly one composer', found.length === 1);
+          var c = found[0];
+          ok('composer root is the box + toolbar ancestor', c && c.root.querySelector('[data-testid="toolBar"]') && c.root.contains(box));
+          ok('composer has the post box', c && c.boxes.length === 1 && c.boxes[0] === box);
+          box.innerHTML = '<div><span data-text="true">shipped the new onboarding today</span></div><div><span data-text="true">conversion went from 4% to 11%</span></div>';
+          ok('reads DraftJS lines', /shipped the new onboarding today\s+conversion went from 4% to 11%/.test(C.readDraft(c)));
+          ok('no media yet', C.hasMedia(c) === false);
+          document.getElementById('attachments').innerHTML = '<div><img alt="" src="data:image/gif;base64,R0lGODlhAQABAAAAACw="></div>';
+          ok('sees an attached image', C.hasMedia(c) === true);
+          document.getElementById('attachments').innerHTML = '';
+          var a = C.chipAnchor(c);
+          ok('chip goes in the toolbar', a.parent === c.toolbar);
+          ok('chip goes before the Post button slot', a.before && a.before.contains(document.querySelector('[data-testid="tweetButtonInline"]')));
+          var box2 = box.cloneNode(false);
+          box2.setAttribute('data-testid', 'tweetTextarea_1');
+          box2.textContent = 'and here is how';
+          box.parentElement.appendChild(box2);
+          var thread = C.findComposers(document);
+          ok('a thread is one composer', thread.length === 1 && thread[0].boxes.length === 2);
+          ok('a thread is numbered', /^1\/ [\s\S]+\n\n2\/ and here is how$/.test(C.readDraft(thread[0])));
+          box2.remove();
+          var label = document.querySelector('[data-testid="tweetTextarea_0_label"]');
+          label.setAttribute('role', 'textbox');
+          ok('ignores X\'s label/container testids', C.findComposers(document)[0].boxes.length === 1);
+          label.removeAttribute('role');
+          window.__results = out;
+          document.getElementById('results').textContent = out.join('\n');
+        }
+        if (q.has('demo')) {
+          var fake = {
+            score: 81,
+            verdict: 'Ready to post',
+            format: 'With media',
+            formatLift: 1.6,
+            reach: { low: 1.1, high: 1.8 },
+            fixes: [
+              { text: 'Open with the number: "4% → 11%" is the hook, and it is in your second line.', source: 'model' },
+              { text: 'Your audience engages most around 9pm (your time). Consider posting then.', source: 'data' },
+              { text: 'Name the one field you kept, so builders can copy it.', source: 'model' },
+            ],
+            voice: 'Plain and first-person, like your best posts.',
+            basedOn: 41,
+          };
+          window.chrome = {
+            storage: {
+              sync: { get: function (d, cb) { cb({ autoScore: true }); }, set: function () {} },
+              onChanged: { addListener: function () {} },
+            },
+            runtime: {
+              lastError: null,
+              sendMessage: function (msg, cb) { setTimeout(function () { cb({ ok: true, result: fake }); }, 500); },
+            },
+          };
+          var s = document.createElement('script');
+          s.src = '../content/content.js';
+          s.onload = function () {
+            setTimeout(function () {
+              type('spent the weekend rebuilding our onboarding. cut the signup form to one field and conversion went from 4% to 11%');
+              document.getElementById('attachments').innerHTML = '<div><img alt="" src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22600%22 height=%22180%22%3E%3Crect width=%22600%22 height=%22180%22 fill=%22%23F2EFE8%22/%3E%3Ctext x=%22300%22 y=%22104%22 text-anchor=%22middle%22 font-family=%22Helvetica%22 font-size=%2236%22 font-weight=%22700%22 fill=%22%230047FF%22%3E4%25 → 11%25%3C/text%3E%3C/svg%3E"></div>';
+              box.dispatchEvent(new InputEvent('input', { bubbles: true }));
+            }, 400);
+          };
+          document.body.appendChild(s);
+        }
+      })();
+    </script>
+  </body>
+</html>
