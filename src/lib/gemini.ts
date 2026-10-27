@@ -1,5 +1,6 @@
 import { GoogleGenerativeAI, type GenerativeModel } from '@google/generative-ai';
 import { GUARD_PREAMBLE, sanitizeInline, wrapUntrusted, INPUT_CAPS } from './prompt-safety';
+import { NO_HASHTAG_ADVICE } from './no-hashtag-advice';
 
 // Initialize Gemini client
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GEMINI_API_KEY || '');
@@ -1150,7 +1151,9 @@ export const xBrandScorePrompt = (profile: XProfileData) => {
   const influenceAnalysis = analyzeInfluence(profile);
 
   // Base prompt with influence tier context
-  let prompt = `${GUARD_PREAMBLE}You are an expert brand strategist analyzing an X (Twitter) creator. A brand is a REPUTATION — what someone is known for, how they demonstrate it through content, and why they should be remembered. Your goal is to evaluate brand effectiveness based entirely on CONTENT and its impact on reputation.
+  let prompt = `${GUARD_PREAMBLE}${NO_HASHTAG_ADVICE}
+
+You are an expert brand strategist analyzing an X (Twitter) creator. A brand is a REPUTATION — what someone is known for, how they demonstrate it through content, and why they should be remembered. Your goal is to evaluate brand effectiveness based entirely on CONTENT and its impact on reputation.
 
 CRITICAL — DO NOT evaluate any of the following. They are personal expression, NOT brand signals:
 - Username or handle (people pick fun names, real names, random names — irrelevant to brand)
@@ -1342,7 +1345,9 @@ export const enhancedBrandScorePrompt = (input: TweetAnalysisInput) => {
     )
     .join('\n');
 
-  return `${GUARD_PREAMBLE}You are an expert brand strategist analyzing an X (Twitter) creator's CONTENT to evaluate their brand (reputation). A brand is what someone is known for, how they demonstrate it through content, and why they should be remembered.
+  return `${GUARD_PREAMBLE}${NO_HASHTAG_ADVICE}
+
+You are an expert brand strategist analyzing an X (Twitter) creator's CONTENT to evaluate their brand (reputation). A brand is what someone is known for, how they demonstrate it through content, and why they should be remembered.
 
 CRITICAL — DO NOT evaluate any of the following. They are personal expression, NOT brand signals:
 - Username or handle (people pick fun names, real names, random names — irrelevant to brand)
@@ -1385,14 +1390,6 @@ TWEET ANALYTICS (measured from their ${stats.totalTweets} most recent original p
     stats.postsPerDay ? ` (${stats.postsPerDay.toFixed(1)} original posts per day)` : ''
   }
 - Most Active Time: ${stats.mostActiveDay}s at ${stats.mostActiveHour}:00 UTC
-- Top Hashtags: ${
-    stats.topHashtags.length > 0
-      ? stats.topHashtags
-          .slice(0, INPUT_CAPS.hashtagCount)
-          .map((h) => sanitizeInline(h, INPUT_CAPS.hashtag))
-          .join(', ')
-      : 'None frequently used'
-  }
 
 CONTENT PATTERNS:
 - Average Tweet Length: ${contentPatterns.avgTweetLength.toFixed(0)} characters
@@ -2104,7 +2101,9 @@ CONTENT ANALYSIS (PRIMARY - Base your analysis on this):
   const contentPrimaryNote = `
 IMPORTANT: A brand is a REPUTATION — what someone is known for, demonstrated through their content. Do NOT evaluate bio, username/handle, display name (emojis, symbols, real names are all irrelevant), profile picture, or any visual/profile elements. Only analyze content and reputation.`;
 
-  return `You are an expert brand strategist creating a comprehensive Brand DNA profile.
+  return `${NO_HASHTAG_ADVICE}
+
+You are an expert brand strategist creating a comprehensive Brand DNA profile.
 ${contentPrimaryNote}
 ${contentAnalysisSection}
 CREATOR DATA:
@@ -2159,7 +2158,9 @@ Return ONLY valid JSON:
 // =============================================================================
 
 export const brandImprovementsPrompt = (profile: XProfileData, brandDNA: BrandDNA) => {
-  return `You are an expert brand strategist helping optimize a personal/professional brand on X through content strategy.
+  return `${NO_HASHTAG_ADVICE}
+
+You are an expert brand strategist helping optimize a personal/professional brand on X through content strategy.
 
 CURRENT PROFILE:
 - Name: ${profile.name}
@@ -2375,6 +2376,8 @@ export const tweetVoiceAnalysisPrompt = (
   tweets: { text: string; likes: number; retweets: number; replies: number }[],
   stats: TweetAnalysisStats
 ) => `
+${NO_HASHTAG_ADVICE}
+
 You are a brand voice analyst examining a creator's tweet history to extract their authentic voice DNA.
 
 TWEET CORPUS (${tweets.length} tweets):
@@ -2392,7 +2395,6 @@ ENGAGEMENT STATS:
 - Avg Engagement Rate: ${stats.avgEngagementRate.toFixed(2)}%
 - Avg Likes: ${stats.avgLikes.toFixed(1)}
 - Posting Frequency: ${stats.postingFrequency}
-- Top Hashtags: ${stats.topHashtags.join(', ') || 'None'}
 
 ANALYZE FOR:
 
@@ -2569,7 +2571,9 @@ export async function diagnosePostPerformance(
       )
       .join('\n\n');
 
-    const prompt = `You are a brutally honest brand strategist reviewing @${username}'s recent posts. Your job is to diagnose their brand — what's strong, what's weak, and exactly how to fix it. Back everything up with their actual posts as evidence.
+    const prompt = `${NO_HASHTAG_ADVICE}
+
+You are a brutally honest brand strategist reviewing @${username}'s recent posts. Your job is to diagnose their brand — what's strong, what's weak, and exactly how to fix it. Back everything up with their actual posts as evidence.
 
 POSTS:
 ${tweetList}
@@ -2685,7 +2689,9 @@ export function voiceConsistencyPrompt(
     .map((t, i) => `[${i + 1}] (id: ${t.id}, date: ${t.postedAt})\n"${t.text.substring(0, 400)}"`)
     .join('\n\n');
 
-  return `You are a voice consistency analyst. You will compare a creator's posts against their established voice fingerprint and score each post on how well it matches.
+  return `${NO_HASHTAG_ADVICE}
+
+You are a voice consistency analyst. You will compare a creator's posts against their established voice fingerprint and score each post on how well it matches.
 
 ${fingerprint}
 
