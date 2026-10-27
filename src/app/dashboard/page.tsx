@@ -31,8 +31,8 @@ import { earlyAccessFor, indexOpenForUser } from '@/lib/early-access';
 import EarlyAccessDock from '@/components/early-access/EarlyAccessDock';
 import { getEntry, viewSummary } from '@/lib/creator-index';
 import { dashboardV2For } from '@/lib/dashboard-v2';
-import { levelFor } from '@/lib/xp';
-import Shell, { type StandingMini } from '@/components/dashboard-v2/Shell';
+import Shell from '@/components/dashboard-v2/Shell';
+import { loadStanding } from '@/lib/dashboard-v2-data';
 import Today from '@/components/dashboard-v2/Today';
 import Playbook, { type PlaybookData } from '@/components/dashboard-v2/Playbook';
 import { bodyOfWork } from '@/lib/playbook';
@@ -434,21 +434,6 @@ async function loadPlaybook({
         : null,
     },
   };
-}
-
-/** Standing for the v2 rail: level, progress into it, the visit run (null before mig 029). */
-async function loadStanding(userId: string): Promise<StandingMini | null> {
-  try {
-    const p = await prisma.userProgress.findUnique({
-      where: { userId },
-      select: { xpTotal: true, currentStreakDays: true },
-    });
-    if (!p) return null;
-    const l = levelFor(p.xpTotal);
-    return { level: l.level, progress: l.need > 0 ? l.into / l.need : 0, run: p.currentStreakDays };
-  } catch {
-    return null;
-  }
 }
 
 /** The member's own record for the growth dashboard (history, last posts, lookups). */

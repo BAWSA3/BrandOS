@@ -41,6 +41,7 @@ export default function Shell({
   brands = [],
   standing,
   preview = false,
+  focus = false,
   children,
 }: {
   finish: Colorway;
@@ -52,6 +53,8 @@ export default function Shell({
   standing: StandingMini | null;
   /** sample-data harness: no saves, no syncs */
   preview?: boolean;
+  /** the writing room: no rail, no tabs, one way back (to the Playbook) */
+  focus?: boolean;
   children: ReactNode;
 }) {
   const router = useRouter();
@@ -205,7 +208,7 @@ export default function Shell({
       <div className="md:flex">
         <nav
           aria-label="Dashboard"
-          className="sticky top-0 hidden h-screen w-[232px] shrink-0 flex-col px-5 pb-6 pt-7 md:flex"
+          className={`sticky top-0 hidden h-screen w-[232px] shrink-0 flex-col px-5 pb-6 pt-7 ${focus ? '' : 'md:flex'}`}
           style={{ boxShadow: '1px 0 0 var(--v-dot)' }}
         >
           <Wordmark height={18} mode={wordmarkFor(finish)} href="/dashboard" />
@@ -257,26 +260,51 @@ export default function Shell({
           </button>
         </nav>
 
-        <main className="min-w-0 flex-1 pb-[96px] md:pb-0">
-          <div className="flex h-[56px] items-center justify-between px-4 md:hidden">
-            <Wordmark height={15} mode={wordmarkFor(finish)} href="/dashboard" />
-            {standing && (
-              <span
-                className="flex h-[36px] items-center px-3 text-[13px]"
-                style={{ borderRadius: 999, boxShadow: 'inset 0 0 0 1px var(--v-dot)' }}
+        <main className={`min-w-0 flex-1 ${focus ? '' : 'pb-[96px] md:pb-0'}`}>
+          {focus ? (
+            <div className="flex h-[56px] items-center justify-between px-3 md:px-8">
+              <Link
+                href={href.playbook}
+                className="v2-focus v2-press flex min-h-[44px] items-center px-3 text-[14px]"
+                style={{ borderRadius: 999, color: 'var(--v-head-muted)' }}
               >
-                Level {standing.level}
-                <span style={{ color: 'var(--v-head-muted)' }}>&nbsp;· {standing.run}d</span>
-              </span>
-            )}
-          </div>
+                ← Playbook
+              </Link>
+              <button
+                type="button"
+                onClick={() => setCmd(true)}
+                aria-label="Do anything"
+                className="v2-focus v2-press flex min-h-[44px] items-center gap-2 px-3 text-[13px]"
+                style={{
+                  borderRadius: 999,
+                  boxShadow: 'inset 0 0 0 1px var(--v-dot)',
+                  color: 'var(--v-head-muted)',
+                }}
+              >
+                <span style={{ fontFamily: VCR }}>⌘K</span>
+              </button>
+            </div>
+          ) : (
+            <div className="flex h-[56px] items-center justify-between px-4 md:hidden">
+              <Wordmark height={15} mode={wordmarkFor(finish)} href="/dashboard" />
+              {standing && (
+                <span
+                  className="flex h-[36px] items-center px-3 text-[13px]"
+                  style={{ borderRadius: 999, boxShadow: 'inset 0 0 0 1px var(--v-dot)' }}
+                >
+                  Level {standing.level}
+                  <span style={{ color: 'var(--v-head-muted)' }}>&nbsp;· {standing.run}d</span>
+                </span>
+              )}
+            </div>
+          )}
           {children}
         </main>
       </div>
 
       <nav
         aria-label="Dashboard"
-        className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-4 items-center px-2 pb-[max(10px,env(safe-area-inset-bottom))] pt-2 md:hidden"
+        className={`fixed inset-x-0 bottom-0 z-30 grid-cols-4 items-center px-2 pb-[max(10px,env(safe-area-inset-bottom))] pt-2 md:hidden ${focus ? 'hidden' : 'grid'}`}
         style={{ background: 'var(--v-canvas)', boxShadow: '0 -1px 0 var(--v-dot)' }}
       >
         {[NAV[0], NAV[1], null, NAV[2]].map((n) =>
