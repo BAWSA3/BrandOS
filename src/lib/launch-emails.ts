@@ -17,6 +17,7 @@ import { formatNumber } from '@/lib/index-rules';
 export const CAMPAIGNS = {
   studioTease: 'studio-tease-oct22',
   indexReserved: 'index-reserved-nov2',
+  earlyAccess: 'early-access-oct27',
 } as const;
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://mybrandos.app';
@@ -368,6 +369,113 @@ export function renderIndexReservedEmail(
         <tr><td>${p(m.release)}${p('— Bawsa', 'margin-bottom:28px;')}</td></tr>
         <tr><td style="background:#FAF8F3;border:1px solid #DCD8CF;border-radius:10px;padding:20px 22px;">
           ${label('Founding 100', '#0047FF')}${p(`<b>p.s.</b> ${m.ps}`, 'font-size:15px;margin:0;')}
+        </td></tr>
+        <tr><td align="center" style="padding:30px 0 0 0;font-family:${SANS};font-size:12px;line-height:1.6;color:#9A968E;">
+          You're getting this because you signed up at <a href="${APP_URL}" style="color:#9A968E;">mybrandos.app</a>.<br>
+          <a href="${unsub}" style="color:#9A968E;text-decoration:underline;">Unsubscribe</a>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+  return { html, text };
+}
+
+/**
+ * Early access invite (Oct 27 2026), the whole list: "reply with BrandOS and
+ * i'll send you an early access code". One job: a reply. No button on
+ * purpose: it reads like a personal note, and replies help deliverability
+ * before the Nov 2 send. No price (GTM phase 1). Codes are sent by hand from
+ * /admin (Inner Circle invite codes) to everyone who replies.
+ *
+ * Subject A/B: A = "@handle, you're on the early access list",
+ * B = "early access to BrandOS. reply to claim it."
+ */
+export type EarlyAccessRecipient = {
+  handle: string | null;
+  score: number | null;
+  since: Date;
+  variant?: 'a' | 'b';
+};
+
+function earlyAccessModel(r: EarlyAccessRecipient) {
+  const month = r.since.toLocaleString('en-US', { month: 'long', timeZone: 'UTC' }).toLowerCase();
+  const recent = (Date.now() - r.since.getTime()) / 86_400_000 < 45;
+  const variant = r.variant ?? 'a';
+  return {
+    subject:
+      variant === 'b'
+        ? 'early access to BrandOS. reply to claim it.'
+        : r.handle
+          ? `@${r.handle}, you're on the early access list`
+          : "you're on the BrandOS early access list",
+    preheader: 'reply with one word and i&#39;ll send your code. free, no card.',
+    who: r.handle ? `@${esc(r.handle)}` : 'there',
+    intro: recent
+      ? 'you signed up for BrandOS recently, so you get in before everyone else. i&#39;m opening early access to this list first, before the public launch on nov 2.'
+      : `you signed up for BrandOS back in ${month}, so you get in before everyone else. i&#39;m opening early access to this list first, before the public launch on nov 2.`,
+    scoreLine:
+      r.score != null
+        ? `your last brand score was <b>${r.score}</b>. early access is where you see what moves it: your score over time, every post read for fit, and the one thing to fix next.`
+        : 'early access gets you the full dashboard: your brand score over time, every post read for fit, and the one thing to fix next.',
+    ask: 'want in? reply to this email with the word <b>BrandOS</b> and i&#39;ll send you your early access code. i answer every reply myself.',
+    ps: 'early access is free. no card.',
+  };
+}
+
+/** Plain content (subject, preheader, text part); the HTML comes from renderEarlyAccessEmail. */
+export function earlyAccessContent(r: EarlyAccessRecipient): NonNullable<NewsletterContent> {
+  const m = earlyAccessModel(r);
+  return {
+    subject: m.subject,
+    preheader: m.preheader,
+    sections: [
+      { type: 'text', content: `hey ${m.who},` },
+      { type: 'text', content: m.intro },
+      { type: 'text', content: m.scoreLine },
+      { type: 'text', content: `${m.ask}<br/><br/>— Bawsa` },
+      { type: 'text', content: `<b>p.s.</b> ${m.ps}` },
+    ],
+  };
+}
+
+/**
+ * HTML for the invite: deliberately plain (wordmark, text, signature), so it
+ * reads like a note from Bawsa rather than a campaign. Light-only, inline styles.
+ */
+export function renderEarlyAccessEmail(
+  r: EarlyAccessRecipient,
+  email: string
+): { html: string; text: string } {
+  const m = earlyAccessModel(r);
+  const { text } = renderNewsletter(earlyAccessContent(r), email);
+  const unsub = `${APP_URL}/api/newsletter/unsubscribe?email=${encodeURIComponent(email)}`;
+  const asset = process.env.EMAIL_ASSET_BASE || APP_URL;
+  const SANS = "'Helvetica Neue', Helvetica, Arial, sans-serif";
+  const p = (t: string, extra = '') =>
+    `<p style="font-family:${SANS};font-size:16px;line-height:1.6;color:#0E0E0E;margin:0 0 18px 0;${extra}">${t}</p>`;
+
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light only">
+  <meta name="supported-color-schemes" content="light only">
+  <title>${esc(m.subject)}</title>
+</head>
+<body style="margin:0;padding:0;background:#F2EFE8;-webkit-font-smoothing:antialiased;">
+  <div style="display:none;max-height:0;overflow:hidden;opacity:0;">${m.preheader}${'&nbsp;&zwnj;'.repeat(60)}</div>
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F2EFE8;">
+    <tr><td align="center" style="padding:28px 16px 40px 16px;">
+      <table role="presentation" width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;">
+        <tr><td style="padding:0 0 26px 0;">
+          <a href="${APP_URL}" style="text-decoration:none;"><img src="${asset}/brand/wordmark-day-480.png" width="120" alt="BrandOS" style="display:block;width:120px;height:auto;border:0;"></a>
+        </td></tr>
+        <tr><td>
+          ${p(`hey ${m.who},`)}${p(m.intro)}${p(m.scoreLine)}${p(m.ask)}
+          ${p('— Bawsa', 'margin-bottom:24px;')}${p(`<b>p.s.</b> ${m.ps}`, 'font-size:15px;')}
         </td></tr>
         <tr><td align="center" style="padding:30px 0 0 0;font-family:${SANS};font-size:12px;line-height:1.6;color:#9A968E;">
           You're getting this because you signed up at <a href="${APP_URL}" style="color:#9A968E;">mybrandos.app</a>.<br>
