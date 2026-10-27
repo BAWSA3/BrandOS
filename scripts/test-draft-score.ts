@@ -14,6 +14,7 @@ import {
   verdictOf,
 } from '../src/lib/draft-signals';
 import type { PostRow } from '../src/lib/growth-metrics';
+import { extractJson } from '../src/lib/score-schemas';
 
 let pass = 0;
 let fail = 0;
@@ -198,6 +199,17 @@ test(
   'valid timezone kept',
   validateDraft({ text: 'a fine draft here', tzOffsetMin: -420 }).tzOffsetMin === -420
 );
+
+console.log("\nI. Reading the model's JSON");
+const same = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b);
+test('plain object', same(extractJson('{"a":1}'), { a: 1 }));
+test(
+  'fenced, with a stray brace after',
+  same(extractJson('```json\n{"a":1}\n```\nnote: {x}'), { a: 1 })
+);
+test('brace inside a string', same(extractJson('here {"a":"x}y"} and after }'), { a: 'x}y' }));
+test('escaped quote inside a string', same(extractJson('{"a":"q\\"}"} trailing }'), { a: 'q"}' }));
+test('no JSON → null', extractJson('no json') === null);
 
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);
