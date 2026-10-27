@@ -8,6 +8,7 @@ import Wordmark from '@/components/Wordmark';
 import { FieldScreen } from '@/components/system';
 import type { GrowthView, MemberRecord } from '@/lib/growth-data';
 import { LastPostsTile, LookupsBlock, ScoreHistoryTile } from './RecordTiles';
+import { proofParts } from '@/lib/growth-proof';
 import IdeaBoard, { type Idea } from './IdeaBoard';
 import { BIG, Bar, FollowersChart, Label, MONO, T, Tile, fmt } from './parts';
 import IndexTile, { type IndexTileData } from './IndexTile';
@@ -351,6 +352,22 @@ export default function GrowthDashboard({
           >
             @{brand.handle}
           </h1>
+          {record?.proof && (
+            <p
+              className="mt-4 text-[11px] uppercase tracking-[0.14em]"
+              style={{ fontFamily: MONO }}
+            >
+              <span
+                style={
+                  field
+                    ? { background: T.blue, color: '#fff', padding: '2px 6px' }
+                    : { color: T.ink }
+                }
+              >
+                Since you joined · {proofParts(record.proof).join(' · ')}
+              </span>
+            </p>
+          )}
         </div>
 
         <div className="grid grid-cols-1 gap-5 md:grid-cols-12">
@@ -392,6 +409,19 @@ export default function GrowthDashboard({
                     /100
                   </span>
                 </div>
+                {record?.move && record.move.to === view.score.value && record.move.delta !== 0 && (
+                  <div
+                    className="mt-2 text-[11px] uppercase tracking-[0.14em]"
+                    style={{ fontFamily: MONO }}
+                  >
+                    {record.move.delta > 0 ? '▲' : '▼'} {Math.abs(record.move.delta)} since{' '}
+                    {new Date(record.move.since).toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      timeZone: 'UTC',
+                    })}
+                  </div>
+                )}
                 {view.score.phases && (
                   <div className="mt-6 grid grid-cols-2 gap-x-6 gap-y-4">
                     {(Object.keys(PHASE_LABEL) as (keyof typeof PHASE_LABEL)[]).map((k) => (
@@ -497,7 +527,7 @@ export default function GrowthDashboard({
           {/* The member's own record (score history, last posts), restored from the bento */}
           {record && (
             <>
-              <ScoreHistoryTile history={record.history} />
+              <ScoreHistoryTile history={record.history} move={record.move} handle={brand.handle} />
               <LastPostsTile posts={record.posts} />
             </>
           )}

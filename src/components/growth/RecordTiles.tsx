@@ -57,8 +57,63 @@ function HistoryLine({ points }: { points: MemberRecord['history'] }) {
   );
 }
 
-export function ScoreHistoryTile({ history }: { history: MemberRecord['history'] }) {
-  const recent = [...history].reverse().slice(0, 4);
+const PHASE_NAME = { define: 'Define', check: 'Check', generate: 'Generate', scale: 'Scale' };
+
+/** "Why it moved": each phase's change and the posts behind it (src/lib/score-moves.ts). */
+function WhyMoved({ move, handle }: { move: NonNullable<MemberRecord['move']>; handle: string }) {
+  if (!move.phases.length) return null;
+  return (
+    <div className="mt-5 border-t pt-4" style={{ borderColor: T.rule }}>
+      <Label>Why it moved · since {day(move.since)}</Label>
+      <ul className="mt-3 space-y-3">
+        {move.phases.slice(0, 3).map((p) => (
+          <li key={p.phase} className="text-[13px] leading-[1.45]">
+            <span style={{ fontFamily: MONO, color: p.delta > 0 ? T.blue : T.ink }}>
+              {PHASE_NAME[p.phase]} {p.delta > 0 ? '+' : '−'}
+              {Math.abs(p.delta)}
+            </span>
+            {p.posts.length ? (
+              <ul className="mt-1 space-y-1">
+                {p.posts.map((post) => (
+                  <li key={post.tweetId} className="flex gap-2">
+                    <span aria-hidden style={{ color: T.muted }}>
+                      ↳
+                    </span>
+                    <span className="min-w-0">
+                      <a
+                        href={`https://x.com/${handle}/status/${post.tweetId}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="hover:underline"
+                      >
+                        “{post.excerpt.length > 70 ? `${post.excerpt.slice(0, 70)}…` : post.excerpt}
+                        ”
+                      </a>
+                      <span style={{ color: T.muted }}> · {post.reason}</span>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <span style={{ color: T.muted }}> · {p.note}</span>
+            )}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+export function ScoreHistoryTile({
+  history,
+  move = null,
+  handle,
+}: {
+  history: MemberRecord['history'];
+  move?: MemberRecord['move'];
+  handle: string;
+}) {
+  const recent = [...history].reverse().slice(0, move?.phases.length ? 3 : 4);
   return (
     <Tile className="md:col-span-5">
       <Label>Score history · {history.length} reads</Label>
@@ -101,6 +156,7 @@ export function ScoreHistoryTile({ history }: { history: MemberRecord['history']
               );
             })}
           </ul>
+          {move && <WhyMoved move={move} handle={handle} />}
         </>
       )}
     </Tile>

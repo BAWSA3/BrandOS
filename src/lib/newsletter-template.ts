@@ -91,7 +91,18 @@ export function renderNewsletter(
 </body>
 </html>`;
 
-  // Plain text version
+  // Plain text version: section content is HTML (tags, entities), so flatten it
+  const plain = (v: string) =>
+    v
+      .replace(/<br\s*\/?>/gi, '\n')
+      .replace(/<[^>]+>/g, '')
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&#39;/g, "'")
+      .replace(/&quot;/g, '"')
+      .replace(/&rarr;/g, '→')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&amp;/g, '&');
   const text =
     content.sections
       .map((s) => {
@@ -110,7 +121,8 @@ export function renderNewsletter(
             return '';
         }
       })
-      .join('\n') + `\n\n---\nUnsubscribe: ${unsubscribeUrl}`;
+      .map(plain)
+      .join('\n\n') + `\n\n---\nUnsubscribe: ${unsubscribeUrl}`;
 
   return { html, text };
 }

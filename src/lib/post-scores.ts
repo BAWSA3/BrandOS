@@ -70,12 +70,24 @@ export function median(nums: number[]): number {
 /** 'owner' writes to the person ("you"); 'viewer' writes about them (@handle / they). */
 export type Audience = 'owner' | 'viewer';
 
+/** 'posted' scores published posts; 'draft' scores an unpublished draft before it goes out. */
+export type ScoreMode = 'posted' | 'draft';
+
+/** Token usage of one scoring call, for cost logging. */
+export interface ScoreUsage {
+  model: string;
+  inputTokens: number;
+  outputTokens: number;
+}
+
 function buildPrompt(opts: {
   audience: Audience;
+  mode: ScoreMode;
   handle: string;
   archetype: string | null;
   pillars: string[];
   summary: string | null;
+  notes: string;
   baseline: SocialDataTweet[];
   targets: SocialDataTweet[];
 }): string {
@@ -89,14 +101,16 @@ function buildPrompt(opts: {
   const baselineBlock = opts.baseline
     .map((t) => `- (${t.public_metrics.like_count} likes) ${clean(t.text).slice(0, 240)}`)
     .join('\n');
+  const draft = opts.mode === 'draft';
   const targetsBlock = opts.targets
-    .map(
-      (t) =>
-        `[id ${t.id}] (${t.public_metrics.like_count} likes, ${t.public_metrics.reply_count} replies) ${clean(t.text).slice(0, 600)}`
+    .map((t) =>
+      draft
+        ? `[id ${t.id}] (unpublished draft) ${clean(t.text).slice(0, 2000)}`
+        : `[id ${t.id}] (${t.public_metrics.like_count} likes, ${t.public_metrics.reply_count} replies) ${clean(t.text).slice(0, 600)}`
     )
     .join('\n');
   return `${GUARD_PREAMBLE}
-You are BrandOS, a brand strategist who reads taste. Score each TARGET post by @${opts.handle} for how on-brand it is for THIS person, judged against their brand and their recent posts.
+You are BrandOS, a brand strategist who reads taste. Score each TARGET ${draft ? 'draft (not posted yet)' : 'post'} by @${opts.handle} for how on-brand it is for THIS person, judged against their brand and their recent posts.
 
 Rules:
 - Be specific to the evidence. No generic social-media advice.
@@ -105,7 +119,11 @@ ${
     ? '- Write every field TO the person, in second person ("you", "your posts"). Never "they", "their" or "the account". Never assume gender.'
     : `- The reader is not @${opts.handle}: refer to them as @${opts.handle} or "they". Never assume gender.`
 }
-- Never rewrite a post. "sharpen" items are short, concrete suggestions for the next post like it; the person decides.
+${
+  draft
+    ? '- Never rewrite the draft. "sharpen" items are 2-3 short, concrete edits to make to THIS draft before posting (e.g. "open with the payoff", "name the tool"), grounded in what works for them; the person decides. "fit" predicts how well it will land for their brand.'
+    : '- Never rewrite a post. "sharpen" items are short, concrete suggestions for the next post like it; the person decides.'
+}
 - Every string is one short line. Return ONLY JSON, exactly:
 {"posts":[{"id":"","fit":0,"voice":"","format":"","hook":"","why":"","fits":["",""],"misses":[""],"sharpen":["",""]}]}
 - "fit" is 0-100. "why" explains the score in one sentence. "fits" = what matched the brand; "misses" = what drifted (may be empty for strong posts); "sharpen" = 2-3 suggestions.
@@ -114,10 +132,10 @@ ${
 THEIR BRAND (from the latest BrandOS scan):
 ${brand || '(no scan details)'}
 
-THEIR RECENT POSTS (baseline):
+${opts.notes ? `WHAT WORKS FOR THEM (measured from their own posts):\n${opts.notes}\n\n` : ''}THEIR RECENT POSTS (baseline):
 ${wrapUntrusted(baselineBlock || '(none)', 'recent_posts', 6000)}
 
-TARGET POSTS TO SCORE:
+TARGET ${draft ? 'DRAFT' : 'POSTS'} TO SCORE:
 ${wrapUntrusted(targetsBlock, 'target_posts', 4000)}`;
 }
 
@@ -152,6 +170,12 @@ function parse(
  */
 export async function scoreTweets(input: {
   audience?: Audience;
+  /** Default 'posted'. */
+  mode?: ScoreMode;
+  /** Measured "what works for them" lines (draft scoring). */
+  notes?: string;
+  /** Called with the call's token usage (cost logging). */
+  onUsage?: (u: ScoreUsage) => void;
   handle: string;
   archetype: string | null;
   pillars: string[];
@@ -172,9 +196,20 @@ export async function scoreTweets(input: {
     messages: [
       {
         role: 'user',
-        content: buildPrompt({ ...input, audience: input.audience ?? 'owner', archetype }),
+        content: buildPrompt({
+          ...input,
+          audience: input.audience ?? 'owner',
+          mode: input.mode ?? 'posted',
+          notes: input.notes ?? '',
+          archetype,
+        }),
       },
     ],
+  });
+  input.onUsage?.({
+    model: MODEL,
+    inputTokens: message.usage.input_tokens,
+    outputTokens: message.usage.output_tokens,
   });
   const text = message.content[0]?.type === 'text' ? message.content[0].text : '';
   return parse(text, new Set(input.targets.map((t) => t.id)));

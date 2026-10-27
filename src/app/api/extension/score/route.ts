@@ -1,305 +1,99 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-import { geminiFlash, xBrandScorePrompt, XProfileData } from '@/lib/gemini';
-import { resolveArchetype } from '@/lib/archetype-engine';
-import { getUserProfile } from '@/lib/user-profiles';
-import { checkRateLimit } from '@/lib/rate-limit';
-import { hasAccount, inviteOnly } from '@/lib/early-access';
-import { INVITE_ONLY_MESSAGE } from '@/lib/early-access-rules';
+import prisma from '@/lib/db';
+import { hasPro } from '@/lib/billing';
+import { checkRateLimit, getClientIdentifier } from '@/lib/rate-limit';
+import { bearer, extensionCors, verifyExtensionToken } from '@/lib/extension-token';
+import { DraftScoreError, scoreDraft, validateDraft } from '@/lib/draft-score';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey =
-  process.env.SUPABASE_SECRET_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!;
-
-// Specific extension ID — update when published to Chrome Web Store
-const BRANDOS_EXTENSION_ID = process.env.BRANDOS_CHROME_EXTENSION_ID;
-
-const ALLOWED_ORIGINS = ['https://brandos.app', 'https://www.brandos.app', 'http://localhost:3000'];
-
-function corsHeaders(origin?: string | null) {
-  const isAllowed =
-    origin &&
-    (ALLOWED_ORIGINS.includes(origin) ||
-      // Only allow the specific extension ID, or any in dev
-      (origin.startsWith('chrome-extension://') &&
-        (!BRANDOS_EXTENSION_ID || origin === `chrome-extension://${BRANDOS_EXTENSION_ID}`)));
-  const corsOrigin = isAllowed ? origin : ALLOWED_ORIGINS[0];
-
-  return {
-    'Access-Control-Allow-Origin': corsOrigin,
-    'Access-Control-Allow-Methods': 'GET, OPTIONS',
-    'Access-Control-Allow-Headers': 'Authorization, Content-Type',
-    'Access-Control-Max-Age': '86400',
-  };
-}
+/**
+ * POST /api/extension/score { text, hasMedia?, tzOffsetMin? }
+ * BrandOS for Chrome: score the draft in X's composer. Same engine as "Score
+ * this draft" on the dashboard (src/lib/draft-score.ts), for the member's own
+ * brand. Auth: the extension token (scoped, 30 days). Cost surface: 12 per
+ * minute per IP, 20 per minute and 40 per hour per member (shared with the
+ * dashboard), a 2,000-character cap and an hour's cache per draft.
+ *
+ * Invite-only (INVITE_ONLY): tokens are minted only for existing BrandOS
+ * accounts (/api/extension/token needs a signed-in User), so the extension can
+ * never create or reach an account the sign-in gate turned away.
+ */
+export const maxDuration = 60;
 
 export async function OPTIONS(request: NextRequest) {
-  const origin = request.headers.get('origin');
-  return new NextResponse(null, { status: 204, headers: corsHeaders(origin) });
-}
-
-async function authenticateRequest(
-  request: NextRequest
-): Promise<{ userId: string; error?: never } | { userId?: never; error: string }> {
-  const authHeader = request.headers.get('authorization');
-  if (!authHeader?.startsWith('Bearer ')) {
-    return { error: 'Missing or invalid Authorization header' };
-  }
-
-  const token = authHeader.slice(7);
-  const supabase = createClient(supabaseUrl, supabaseServiceKey);
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser(token);
-
-  if (error || !user) {
-    return { error: 'Invalid or expired token' };
-  }
-  // Closed beta: existing BrandOS accounts only
-  if (inviteOnly() && !(await hasAccount(user.id))) {
-    return { error: INVITE_ONLY_MESSAGE };
-  }
-
-  return { userId: user.id };
-}
-
-async function fetchProfile(username: string, origin: string): Promise<XProfileData | null> {
-  try {
-    const response = await fetch(`${origin}/api/x-profile`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username }),
-    });
-
-    if (!response.ok) return null;
-    const data = await response.json();
-    if (!data.profile) return null;
-
-    return {
-      name: data.profile.name,
-      username: data.profile.username,
-      description: data.profile.description,
-      profile_image_url: data.profile.profile_image_url,
-      public_metrics: data.profile.public_metrics || {
-        followers_count: 0,
-        following_count: 0,
-        tweet_count: 0,
-        listed_count: 0,
-      },
-      created_at: data.profile.created_at,
-      verified: data.profile.verified,
-      location: data.profile.location,
-      url: data.profile.url,
-    };
-  } catch {
-    return null;
-  }
-}
-
-export async function GET(request: NextRequest) {
-  const origin = request.headers.get('origin');
-  const headers = corsHeaders(origin);
-
-  // Authenticate
-  const auth = await authenticateRequest(request);
-  if (auth.error) {
-    return NextResponse.json({ error: auth.error }, { status: 401, headers });
-  }
-
-  // Rate limit: 60 req/min per user
-  const { limited, remaining, resetIn } = checkRateLimit(`ext:${auth.userId}`, {
-    interval: 60_000,
-    maxRequests: 60,
+  return new NextResponse(null, {
+    status: 204,
+    headers: extensionCors(request.headers.get('origin')),
   });
-  if (limited) {
+}
+
+export async function POST(request: NextRequest) {
+  const headers = extensionCors(request.headers.get('origin'));
+  if (
+    checkRateLimit(`ext-score-ip:${getClientIdentifier(request)}`, {
+      interval: 60_000,
+      maxRequests: 12,
+    }).limited
+  )
+    return NextResponse.json({ error: 'Slow down a little.' }, { status: 429, headers });
+  const userId = verifyExtensionToken(bearer(request));
+  if (!userId) return NextResponse.json({ error: 'Sign in again' }, { status: 401, headers });
+
+  const user = await prisma.user
+    .findUnique({ where: { id: userId }, include: { ownedWorkspaces: true } })
+    .catch(() => null);
+  if (!user) return NextResponse.json({ error: 'Sign in again' }, { status: 401, headers });
+  if (!hasPro(user))
     return NextResponse.json(
-      { error: 'Rate limit exceeded', retryAfter: Math.ceil(resetIn / 1000) },
-      { status: 429, headers: { ...headers, 'Retry-After': Math.ceil(resetIn / 1000).toString() } }
+      { error: 'Draft scoring is part of BrandOS Pro.', pro: false },
+      { status: 402, headers }
     );
+
+  const raw = await request.text();
+  if (raw.length > 12_000)
+    return NextResponse.json({ error: 'Request too large' }, { status: 413, headers });
+  let body: unknown;
+  try {
+    body = JSON.parse(raw);
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400, headers });
   }
 
-  // Get username
-  const username = request.nextUrl.searchParams.get('username');
-  if (!username) {
-    return NextResponse.json(
-      { error: 'username query parameter required' },
-      { status: 400, headers }
-    );
-  }
-  const cleanUsername = username.replace(/^@/, '').trim();
-
-  // Check cached profile first
-  const cachedProfile = getUserProfile(cleanUsername);
-  if (cachedProfile && Date.now() - cachedProfile.lastScannedAt < 24 * 60 * 60 * 1000) {
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin;
+  try {
+    const draft = validateDraft(body);
+    if (
+      checkRateLimit(`ext-score:${user.id}`, { interval: 60_000, maxRequests: 20 }).limited ||
+      checkRateLimit(`draft-score:${user.id}`, { interval: 60 * 60 * 1000, maxRequests: 40 })
+        .limited
+    )
+      return NextResponse.json(
+        { error: 'That is a lot of drafts for one hour. Try again soon.' },
+        { status: 429, headers }
+      );
+    const personal = user.ownedWorkspaces.find((w) => w.type === 'personal') ?? null;
+    const r = await scoreDraft({ userId: user.id, workspaceId: personal?.id ?? null, draft });
     return NextResponse.json(
       {
-        username: cachedProfile.username,
-        displayName: cachedProfile.displayName,
-        profileImageUrl: null,
-        overallScore: cachedProfile.currentScore,
-        phases: {
-          define: {
-            score: Math.round(cachedProfile.currentScore * 0.92),
-            topInsight: 'Cached score',
-          },
-          check: {
-            score: Math.round(cachedProfile.currentScore * 0.88),
-            topInsight: 'Cached score',
-          },
-          generate: {
-            score: Math.round(cachedProfile.currentScore * 0.82),
-            topInsight: 'Cached score',
-          },
-          scale: {
-            score: Math.round(cachedProfile.currentScore * 0.95),
-            topInsight: 'Cached score',
-          },
-        },
-        archetype: {
-          primary: cachedProfile.archetype.primary,
-          emoji: cachedProfile.archetype.emoji,
-          tagline: cachedProfile.archetype.tagline,
-        },
-        personalityCode: cachedProfile.archetype.primary.charAt(0).toUpperCase(),
-        influenceTier: 'established',
-        contentStyle: { topics: [], patterns: [], pillars: [] },
-        cachedAt: new Date(cachedProfile.lastScannedAt).toISOString(),
-        scoreUrl: `${appUrl}/score/${cleanUsername}`,
+        score: r.score,
+        verdict: r.verdict,
+        format: r.format,
+        formatLift: r.formatLift,
+        reach: r.reach,
+        fixes: r.fixes,
+        voice: r.voice,
+        hook: r.hook,
+        handle: r.handle,
+        basedOn: r.basedOn,
+        cached: r.cached,
       },
-      { headers: { ...headers, 'X-RateLimit-Remaining': remaining.toString() } }
+      { headers: { ...headers, 'Cache-Control': 'no-store' } }
+    );
+  } catch (e) {
+    if (e instanceof DraftScoreError)
+      return NextResponse.json({ error: e.message }, { status: e.status, headers });
+    console.error('[extension/score] error:', e);
+    return NextResponse.json(
+      { error: 'Something went wrong. Try again.' },
+      { status: 500, headers }
     );
   }
-
-  // Fresh score: fetch profile + score with Gemini
-  const reqOrigin = request.nextUrl.origin;
-  const profile = await fetchProfile(cleanUsername, reqOrigin);
-  if (!profile) {
-    return NextResponse.json({ error: 'Could not fetch X profile' }, { status: 404, headers });
-  }
-
-  let brandScore;
-  try {
-    const prompt = xBrandScorePrompt(profile);
-    const result = await geminiFlash.generateContent(prompt);
-    const responseText = result.response.text();
-    const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error('No JSON in response');
-    brandScore = JSON.parse(jsonMatch[0]);
-  } catch (geminiError) {
-    const msg = geminiError instanceof Error ? geminiError.message : '';
-    if (msg.includes('429') || msg.includes('quota')) {
-      // Return basic score from profile heuristics
-      const heuristicScore = Math.min(
-        100,
-        Math.round(
-          30 +
-            (profile.description ? 15 : 0) +
-            Math.min(20, Math.log10(Math.max(1, profile.public_metrics.followers_count)) * 5) +
-            (profile.verified ? 10 : 0) +
-            Math.min(15, Math.log10(Math.max(1, profile.public_metrics.tweet_count)) * 4)
-        )
-      );
-      const appUrl = process.env.NEXT_PUBLIC_APP_URL || reqOrigin;
-      return NextResponse.json(
-        {
-          username: cleanUsername,
-          displayName: profile.name,
-          profileImageUrl: profile.profile_image_url,
-          overallScore: heuristicScore,
-          phases: {
-            define: {
-              score: heuristicScore,
-              topInsight: 'Quick estimate — full analysis on BrandOS',
-            },
-            check: { score: heuristicScore, topInsight: 'Quick estimate' },
-            generate: { score: heuristicScore, topInsight: 'Quick estimate' },
-            scale: { score: heuristicScore, topInsight: 'Quick estimate' },
-          },
-          archetype: {
-            primary: 'Unknown',
-            emoji: '❓',
-            tagline: 'Scan on BrandOS for full analysis',
-          },
-          personalityCode: '?',
-          influenceTier: 'emerging',
-          contentStyle: { topics: [], patterns: [], pillars: [] },
-          cachedAt: new Date().toISOString(),
-          scoreUrl: `${appUrl}/score/${cleanUsername}`,
-        },
-        { headers: { ...headers, 'X-RateLimit-Remaining': remaining.toString() } }
-      );
-    }
-    return NextResponse.json({ error: 'Failed to analyze profile' }, { status: 500, headers });
-  }
-
-  // === SCORE SMOOTHING: prevent jarring score swings for returning users ===
-  // Gemini is non-deterministic — same profile can produce ±10 point variance.
-  // For returning users, clamp the new score within ±5 of their stored score.
-  const MAX_SCORE_DRIFT = 5;
-  if (cachedProfile) {
-    const storedScore = cachedProfile.currentScore;
-    const rawScore = brandScore.overallScore;
-    if (Math.abs(rawScore - storedScore) > MAX_SCORE_DRIFT) {
-      brandScore.overallScore =
-        rawScore > storedScore ? storedScore + MAX_SCORE_DRIFT : storedScore - MAX_SCORE_DRIFT;
-      console.log(
-        `[Extension] Smoothed score for @${cleanUsername}: ${rawScore} → ${brandScore.overallScore} (stored: ${storedScore})`
-      );
-    }
-  }
-
-  // Resolve archetype consistency
-  try {
-    const decision = await resolveArchetype(
-      cleanUsername,
-      profile.name || profile.username,
-      brandScore.archetype,
-      brandScore.overallScore,
-      false
-    );
-    brandScore.archetype = decision.archetype;
-  } catch {
-    // Continue with Gemini's archetype
-  }
-
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || reqOrigin;
-  const definePhase = brandScore.phases?.define;
-  const checkPhase = brandScore.phases?.check;
-  const generatePhase = brandScore.phases?.generate;
-  const scalePhase = brandScore.phases?.scale;
-
-  return NextResponse.json(
-    {
-      username: cleanUsername,
-      displayName: profile.name,
-      profileImageUrl: profile.profile_image_url,
-      overallScore: brandScore.overallScore,
-      phases: {
-        define: { score: definePhase?.score || 0, topInsight: definePhase?.insights?.[0] || '' },
-        check: { score: checkPhase?.score || 0, topInsight: checkPhase?.insights?.[0] || '' },
-        generate: {
-          score: generatePhase?.score || 0,
-          topInsight: generatePhase?.insights?.[0] || '',
-        },
-        scale: { score: scalePhase?.score || 0, topInsight: scalePhase?.insights?.[0] || '' },
-      },
-      archetype: {
-        primary: brandScore.archetype?.primary || 'Unknown',
-        emoji: brandScore.archetype?.emoji || '❓',
-        tagline: brandScore.archetype?.tagline || '',
-      },
-      personalityCode: (brandScore.archetype?.primary || '?').charAt(0).toUpperCase(),
-      influenceTier: brandScore.influenceTier || 'emerging',
-      contentStyle: {
-        topics: brandScore.topStrengths?.slice(0, 3) || [],
-        patterns: brandScore.topImprovements?.slice(0, 2) || [],
-        pillars: [],
-      },
-      cachedAt: new Date().toISOString(),
-      scoreUrl: `${appUrl}/score/${cleanUsername}`,
-    },
-    { headers: { ...headers, 'X-RateLimit-Remaining': remaining.toString() } }
-  );
 }
