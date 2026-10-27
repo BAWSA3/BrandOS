@@ -23,6 +23,7 @@ import FirstScan from './FirstScan';
 import prisma from '@/lib/db';
 import { addAccount, brandLimit, COMPETITORS_PER_BRAND } from '@/lib/tracked-accounts';
 import { getGrowthView, type GrowthView } from '@/lib/growth-data';
+import { memberRecord } from '@/lib/member-record';
 import GrowthDashboard from '@/components/growth/GrowthDashboard';
 import type { IndexTileData } from '@/components/growth/IndexTile';
 import { standsOut } from '@/lib/index-rules';
@@ -86,17 +87,33 @@ export default async function DashboardPage({
   // until Dec 3). ?design=v2 keeps the old dashboard reachable while the new
   // one beds in; before migration 040 is applied this falls through to it.
   if (sp.design !== 'v2' && hasPro(user)) {
-    const [view, index] = await Promise.all([
+    // "Your scan comes with you" (no AI or X calls), before the reads below
+    if (xConnections[0]) await adoptPublicScan(user, xConnections[0]);
+    const [view, index, home] = await Promise.all([
       loadGrowth(user, xConnections[0]?.platformUsername, sp.brand),
       loadIndexTile(user),
+      getHomeData(user),
     ]);
-    if (view)
+    if (view) {
+      // The visit (XP, streak, the week-4 retention count) and the daily avatar
+      // check run after the response, so they never hold up the page.
+      const tz = safeTz((await cookies()).get('bos_tz')?.value);
+      const userId = user.id;
+      after(async () => {
+        await recordVisit(userId, home.scans, new Date(), home.posts, tz).catch(() => null);
+        await refreshAvatar(userId).catch(() => null);
+      });
+      // Score history, last posts and lookups are the member's own: shown on
+      // their own brand only (not on a client brand or competitor they track).
+      const own = !!home.handle && view.brand.handle.toLowerCase() === home.handle.toLowerCase();
+      const record = own ? await loadRecord(home) : null;
       return (
         <>
-          <GrowthDashboard view={view} index={index} />
+          <GrowthDashboard view={view} index={index} record={record} />
           {dock}
         </>
       );
+    }
   }
   // Real-data bento once the user has a scan (the legacy tools page only shows
   // for accounts without X connected, which can't scan yet).
@@ -186,6 +203,18 @@ export default async function DashboardPage({
       {dock}
     </>
   );
+}
+
+/** The member's own record for the growth dashboard (history, last posts, lookups). */
+async function loadRecord(home: Awaited<ReturnType<typeof getHomeData>>) {
+  const now = Date.now();
+  const lookups = await Promise.all([
+    lookupStats(home.handle, new Date(now - 7 * 86_400_000)),
+    lookupStats(home.handle, new Date(now - 86_400_000)),
+  ])
+    .then(([week, today]) => ({ week, today }))
+    .catch(() => null);
+  return memberRecord(home, lookups);
 }
 
 /**
