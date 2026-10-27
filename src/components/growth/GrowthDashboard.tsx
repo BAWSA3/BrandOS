@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { AnimateNumber } from 'motion-plus/react';
 import { useReducedMotion } from 'motion/react';
@@ -12,6 +12,19 @@ import { proofParts } from '@/lib/growth-proof';
 import IdeaBoard, { type Idea } from './IdeaBoard';
 import { BIG, Bar, FollowersChart, Label, MONO, T, Tile, fmt } from './parts';
 import IndexTile, { type IndexTileData } from './IndexTile';
+import { GROWTH_TOKENS } from './tokens';
+import type { Colorway } from '@/lib/colorways';
+
+/**
+ * Dashboard v2 calm pass (on only inside the v2 shell): buttons and table
+ * heads in sentence case in the display face instead of VCR caps, softer
+ * tiles. VCR stays for section labels and data.
+ */
+const Calm = createContext(false);
+const caps = (calm: boolean, size = 'text-[11px]') =>
+  calm
+    ? { cls: 'text-[13px]', font: BIG }
+    : { cls: `${size} uppercase tracking-[0.14em]`, font: MONO };
 
 const FIELD_EDGE = [
   [2, 0],
@@ -63,6 +76,7 @@ function AddForm({
 }) {
   const [handle, setHandle] = useState('');
   const [kind, setKind] = useState<'creator' | 'brand'>('brand');
+  const c = caps(useContext(Calm));
   return (
     <form
       className="flex flex-col gap-2 p-3"
@@ -78,7 +92,7 @@ function AddForm({
         placeholder={placeholder}
         aria-label={placeholder}
         className="w-full border px-3 py-2 text-[14px]"
-        style={{ borderColor: T.rule, background: '#fff', borderRadius: 0 }}
+        style={{ borderColor: T.rule, background: T.raised, color: T.ink, borderRadius: 0 }}
       />
       {withKind && (
         <div className="flex gap-1" role="radiogroup" aria-label="Account type">
@@ -94,7 +108,7 @@ function AddForm({
                 fontFamily: MONO,
                 borderColor: kind === k ? T.ink : T.rule,
                 background: kind === k ? T.ink : 'transparent',
-                color: kind === k ? '#fff' : T.muted,
+                color: kind === k ? T.canvas : T.muted,
               }}
             >
               {k === 'brand' ? 'Brand / company' : 'Creator'}
@@ -105,8 +119,8 @@ function AddForm({
       <button
         type="submit"
         disabled={busy || !handle.trim()}
-        className="px-3 py-2 text-[11px] uppercase tracking-[0.14em] text-white disabled:opacity-40"
-        style={{ fontFamily: MONO, background: T.blue }}
+        className={`px-3 py-2 ${c.cls} text-white disabled:opacity-40`}
+        style={{ fontFamily: c.font, background: T.blue }}
       >
         {busy ? 'Reading X…' : 'Add →'}
       </button>
@@ -121,7 +135,13 @@ export default function GrowthDashboard({
   index = null,
   field = false,
   record = null,
+  colorway = null,
+  v2 = false,
 }: {
+  /** Dashboard v2: the finish the member picked (null keeps the Bone look). */
+  colorway?: Colorway | null;
+  /** Dashboard v2: rendered inside the v2 shell (no wordmark, calm pass, brand links keep the view). */
+  v2?: boolean;
   view: GrowthView;
   /** The member's own record (history, last posts, lookups); null off their own brand. */
   record?: MemberRecord | null;
@@ -178,7 +198,10 @@ export default function GrowthDashboard({
           })),
     [sample, ideas, view.ideas]
   );
-  const go = (id: string) => router.push(`/dashboard?brand=${encodeURIComponent(id)}`);
+  const go = (id: string) =>
+    router.push(`/dashboard?${v2 ? 'view=brand&' : ''}brand=${encodeURIComponent(id)}`);
+  const c = caps(v2);
+  const c10 = caps(v2, 'text-[10px]');
   const maxRate = Math.max(0, ...view.formats.map((f) => f.rate ?? 0));
   const comps = view.competitors;
   const maxCompEr = Math.max(0, ...comps.map((c) => c.engagement ?? 0));
@@ -191,7 +214,16 @@ export default function GrowthDashboard({
   const page = (
     <main
       className="min-h-screen pb-24"
-      style={{ background: field ? 'transparent' : T.canvas, color: T.ink }}
+      style={{
+        background: field ? 'transparent' : T.canvas,
+        color: T.ink,
+        ...(colorway
+          ? ({
+              ...GROWTH_TOKENS[colorway],
+              '--g-radius': v2 ? '18px' : '0px',
+            } as React.CSSProperties)
+          : {}),
+      }}
     >
       {/* Top bar: the brand switcher is the first thing an SMM touches */}
       <header
@@ -199,7 +231,7 @@ export default function GrowthDashboard({
         style={{ background: T.canvas, borderColor: T.rule }}
       >
         <div className="flex items-center gap-4">
-          <Wordmark height={20} />
+          {!v2 && <Wordmark height={20} />}
           <div className="relative">
             <button
               type="button"
@@ -207,8 +239,14 @@ export default function GrowthDashboard({
                 setOpen((o) => !o);
                 setAdding(null);
               }}
-              className="flex items-center gap-2 whitespace-nowrap border px-3 py-1.5 text-[11px] uppercase tracking-[0.14em]"
-              style={{ fontFamily: MONO, borderColor: T.rule, background: T.tile }}
+              className={`flex items-center gap-2 whitespace-nowrap border px-3 py-1.5 ${c.cls}`}
+              style={{
+                fontFamily: c.font,
+                borderColor: T.rule,
+                background: T.tile,
+                color: T.ink,
+                borderRadius: v2 ? 999 : 0,
+              }}
               aria-expanded={open}
             >
               @{brand.handle}
@@ -267,8 +305,8 @@ export default function GrowthDashboard({
                   <button
                     type="button"
                     onClick={() => setAdding('brand')}
-                    className="w-full border-t px-3 py-2.5 text-left text-[11px] uppercase tracking-[0.14em]"
-                    style={{ fontFamily: MONO, borderColor: T.rule, color: T.blue }}
+                    className={`w-full border-t px-3 py-2.5 text-left ${c.cls}`}
+                    style={{ fontFamily: c.font, borderColor: T.rule, color: T.blueText }}
                   >
                     + Add a brand
                   </button>
@@ -289,15 +327,20 @@ export default function GrowthDashboard({
             type="button"
             onClick={() => run(() => post(`/api/accounts/${brand.id}/sync`))}
             disabled={busy}
-            className="border px-2 py-1 text-[10px] uppercase tracking-[0.14em] disabled:opacity-50"
-            style={{ fontFamily: MONO, borderColor: T.rule, color: T.muted }}
+            className={`border px-2 py-1 ${c10.cls} disabled:opacity-50`}
+            style={{
+              fontFamily: c10.font,
+              borderColor: T.rule,
+              color: T.headMuted,
+              borderRadius: v2 ? 999 : 0,
+            }}
             title={
               brand.lastSyncedAt
                 ? `Last read ${new Date(brand.lastSyncedAt).toLocaleString()}`
                 : 'Not read yet'
             }
           >
-            {busy ? 'Reading…' : '↻ Refresh'}
+            {busy ? 'Reading…' : v2 ? 'Re-read' : '↻ Refresh'}
           </button>
         </div>
       </header>
@@ -314,7 +357,10 @@ export default function GrowthDashboard({
 
       <div className="mx-auto w-full max-w-[1240px] px-4 md:px-8">
         {/* Masthead */}
-        <div className="pb-8 pt-10 md:pt-14" style={field ? { color: '#fff' } : undefined}>
+        <div
+          className={v2 ? 'pb-8 pt-6 md:pt-10' : 'pb-8 pt-10 md:pt-14'}
+          style={field ? { color: '#fff' } : { color: T.head }}
+        >
           <span
             style={
               field
@@ -327,12 +373,13 @@ export default function GrowthDashboard({
                 : undefined
             }
           >
-            <Label color={field ? 'rgba(255,255,255,0.9)' : undefined}>
+            <Label color={field ? 'rgba(255,255,255,0.9)' : T.headMuted}>
               {[
                 kindLabel,
                 view.score?.archetype,
-                growth.followers !== null ? `${fmt.int(growth.followers)} followers` : null,
-                growth.trackedDays
+                // v2: the followers count lives in the Growth tile; don't repeat it here
+                !v2 && growth.followers !== null ? `${fmt.int(growth.followers)} followers` : null,
+                !v2 && growth.trackedDays
                   ? `tracked ${growth.trackedDays} day${growth.trackedDays === 1 ? '' : 's'}`
                   : null,
               ]
@@ -341,7 +388,7 @@ export default function GrowthDashboard({
             </Label>
           </span>
           <h1
-            className="mt-3 break-all text-[52px] leading-[0.9] md:text-[104px]"
+            className={`mt-3 break-all leading-[0.9] ${v2 ? 'text-[44px] md:text-[72px]' : 'text-[52px] md:text-[104px]'}`}
             style={{
               fontFamily: BIG,
               fontWeight: 500,
@@ -361,7 +408,7 @@ export default function GrowthDashboard({
                 style={
                   field
                     ? { background: T.blue, color: '#fff', padding: '2px 6px' }
-                    : { color: T.ink }
+                    : { color: T.head }
                 }
               >
                 Since you joined · {proofParts(record.proof).join(' · ')}
@@ -378,6 +425,7 @@ export default function GrowthDashboard({
               background: T.blue,
               // On the field the Klein tile needs an edge, or it melts into the blue.
               ...(field ? { outline: '1px solid rgba(255,255,255,0.9)', outlineOffset: -1 } : {}),
+              ...(v2 ? { borderRadius: T.radius, boxShadow: `inset 0 0 0 1px ${T.blueEdge}` } : {}),
             }}
           >
             <div className="flex items-center justify-between">
@@ -457,8 +505,8 @@ export default function GrowthDashboard({
                   type="button"
                   disabled={busy}
                   onClick={() => run(() => post('/api/public-brand', { handle: brand.handle }))}
-                  className="mt-5 bg-white px-5 py-3 text-[11px] uppercase tracking-[0.14em] disabled:opacity-60"
-                  style={{ fontFamily: MONO, color: T.blue }}
+                  className={`mt-5 bg-white px-5 py-3 ${c.cls} disabled:opacity-60`}
+                  style={{ fontFamily: c.font, color: T.blue, borderRadius: v2 ? 999 : 0 }}
                 >
                   {busy ? 'Reading the brand…' : 'Get the score →'}
                 </button>
@@ -627,7 +675,7 @@ export default function GrowthDashboard({
               <ol className="mt-4 space-y-4">
                 {view.score.nextMoves.map((m, i) => (
                   <li key={m} className="flex gap-3 text-[14px] leading-[1.45]">
-                    <span style={{ fontFamily: MONO, color: T.blue }}>0{i + 1}</span>
+                    <span style={{ fontFamily: MONO, color: T.blueText }}>0{i + 1}</span>
                     {m}
                   </li>
                 ))}
@@ -649,8 +697,8 @@ export default function GrowthDashboard({
                 <button
                   type="button"
                   onClick={() => setAdding('competitor')}
-                  className="text-[10px] uppercase tracking-[0.14em]"
-                  style={{ fontFamily: MONO, color: T.blue }}
+                  className={c10.cls}
+                  style={{ fontFamily: c10.font, color: T.blueText }}
                 >
                   + Add ({others.length} of {view.limits.competitors})
                 </button>
@@ -683,8 +731,8 @@ export default function GrowthDashboard({
                       {['', 'Score', 'Engagement', 'Posts/day', 'Followers', ''].map((h, i) => (
                         <th
                           key={i}
-                          className="pb-2 text-[10px] font-normal uppercase tracking-[0.14em]"
-                          style={{ fontFamily: MONO }}
+                          className={`pb-2 font-normal ${v2 ? 'text-[12px]' : 'text-[10px] uppercase tracking-[0.14em]'}`}
+                          style={{ fontFamily: v2 ? BIG : MONO }}
                         >
                           {h}
                         </th>
@@ -699,7 +747,7 @@ export default function GrowthDashboard({
                           {c.you && (
                             <span
                               className="ml-2 text-[9px] uppercase tracking-[0.14em]"
-                              style={{ fontFamily: MONO, color: T.blue }}
+                              style={{ fontFamily: MONO, color: T.blueText }}
                             >
                               you
                             </span>
@@ -856,5 +904,6 @@ export default function GrowthDashboard({
       </div>
     </main>
   );
-  return field ? <FieldScreen signalCell="none">{page}</FieldScreen> : page;
+  const out = <Calm.Provider value={v2}>{page}</Calm.Provider>;
+  return field ? <FieldScreen signalCell="none">{out}</FieldScreen> : out;
 }

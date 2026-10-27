@@ -9,7 +9,11 @@ import CopywriterChat from '@/components/dashboard/CopywriterChat';
 // the dashboard, which shows the paywall.
 export const dynamic = 'force-dynamic';
 
-export default async function WritePage() {
+export default async function WritePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ prompt?: string | string[] }>;
+}) {
   const user = await getCurrentUser();
   if (!user) redirect('/signup?next=/dashboard/write');
   if (!hasPro(user)) redirect('/dashboard');
@@ -19,5 +23,11 @@ export default async function WritePage() {
     ''
   ).replace(/^@/, '');
   const colorway = await getColorway(user.id);
-  return <CopywriterChat handle={handle || null} colorway={colorway} />;
+  // ?prompt= pre-fills the box (dashboard v2: "Start writing" on today's move). Text only,
+  // capped, never auto-sent; the copywriter route applies its own input guards on send.
+  const raw = (await searchParams).prompt;
+  const prompt = (typeof raw === 'string' ? raw : '')
+    .replace(/[\u0000-\u001f\u007f]/g, ' ')
+    .slice(0, 400);
+  return <CopywriterChat handle={handle || null} colorway={colorway} initialPrompt={prompt} />;
 }

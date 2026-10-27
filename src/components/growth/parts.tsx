@@ -6,14 +6,28 @@ import { useState } from 'react';
 
 export const BIG = "'Inter Tight', 'Helvetica Neue', Helvetica, Arial, sans-serif";
 export const MONO = "'VCR OSD Mono', 'JetBrains Mono', monospace";
+/**
+ * Colours read CSS variables with the Bone values as fallbacks, so the page is
+ * unchanged unless a finish sets the variables (dashboard v2: GROWTH_TOKENS in
+ * ./tokens.ts). `blue` is the Klein fill; `blueText` is Klein used as text or
+ * a thin line (lighter on Night, where #0047FF on dark fails AA).
+ */
 export const T = {
-  canvas: '#F2EFE8',
-  tile: '#FAF8F3',
-  ink: '#0E0E0E',
-  muted: '#6B6862',
-  rule: 'rgba(14,14,14,0.10)',
-  track: 'rgba(14,14,14,0.08)',
+  canvas: 'var(--g-canvas, #F2EFE8)',
+  tile: 'var(--g-tile, #FAF8F3)',
+  raised: 'var(--g-raised, #FFFFFF)',
+  ink: 'var(--g-ink, #0E0E0E)',
+  muted: 'var(--g-muted, #6B6862)',
+  rule: 'var(--g-rule, rgba(14,14,14,0.10))',
+  track: 'var(--g-track, rgba(14,14,14,0.08))',
   blue: '#0047FF',
+  blueText: 'var(--g-blue-text, #0047FF)',
+  /** the Klein score tile's edge (only visible on the Klein finish) */
+  blueEdge: 'var(--g-blue-edge, transparent)',
+  radius: 'var(--g-radius, 0px)',
+  /** type straight on the canvas (white on the Klein finish) */
+  head: 'var(--g-head, #0E0E0E)',
+  headMuted: 'var(--g-head-muted, #6B6862)',
 };
 
 export function Label({
@@ -34,15 +48,18 @@ export function Tile({
   children,
   className = '',
   style,
+  id,
 }: {
   children: React.ReactNode;
   className?: string;
   style?: React.CSSProperties;
+  id?: string;
 }) {
   return (
     <section
+      id={id}
       className={`border p-5 md:p-7 ${className}`}
-      style={{ background: T.tile, borderColor: T.rule, ...style }}
+      style={{ background: T.tile, borderColor: T.rule, borderRadius: T.radius, ...style }}
     >
       {children}
     </section>
@@ -119,7 +136,7 @@ export function FollowersChart({ series }: { series: { day: string; followers: n
         {[0.25, 0.5, 0.75].map((f) => (
           <line key={f} x1={0} x2={W} y1={H * f} y2={H * f} stroke={T.track} strokeWidth={1} />
         ))}
-        <path d={d} fill="none" stroke={T.blue} strokeWidth={2} strokeLinejoin="round" />
+        <path d={d} fill="none" stroke={T.blueText} strokeWidth={2} strokeLinejoin="round" />
         <line x1={x(i)} x2={x(i)} y1={0} y2={H} stroke={T.rule} strokeWidth={1} />
         <circle cx={x(i)} cy={y(vals[i])} r={4} fill={T.blue} stroke={T.tile} strokeWidth={2} />
         <text x={0} y={H + 15} fontSize={10} fill={T.muted} style={{ fontFamily: MONO }}>
