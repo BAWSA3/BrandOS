@@ -8,7 +8,7 @@
  *
  *   # preview (no sends)
  *   npx tsx --tsconfig tsconfig.json --env-file=<env> scripts/send-early-access.ts
- *   # both subject variants to one address that is on the list (doesn't count as their real send)
+ *   # a test to one address that is on the list (doesn't count as their real send)
  *   npx tsx --tsconfig tsconfig.json --env-file=<env> scripts/send-early-access.ts --send --test --to you@example.com
  *   # a first wave, then the rest (re-running skips everyone already sent)
  *   npx tsx --tsconfig tsconfig.json --env-file=<env> scripts/send-early-access.ts --send --limit 150
@@ -52,13 +52,6 @@ function cleanHandle(raw: string | null): string | null {
   return HANDLE_RE.test(h) ? h : null;
 }
 
-/** Stable 50/50 split by signup id, so re-runs agree. */
-function variantFor(id: string): 'a' | 'b' {
-  let h = 0;
-  for (const ch of id) h = (h * 31 + ch.charCodeAt(0)) | 0;
-  return (h & 1) === 0 ? 'a' : 'b';
-}
-
 async function main() {
   const host = (process.env.DATABASE_URL ?? '').replace(/^.*@/, '').replace(/[:/].*$/, '');
   console.log(`DB host: ${host}  |  mode: ${SEND ? 'SEND' : 'dry run'}`);
@@ -97,33 +90,30 @@ async function main() {
       handle,
       score: scan ? Math.round(scan.score) : null,
       since: r.createdAt,
-      variant: variantFor(r.id),
+      // Subject A only for this send (Bawsa, Oct 27): "@handle, you're on the early access list"
+      variant: 'a' as const,
     };
   });
 
   if (TEST) {
-    // --test --to <addr>: both subject variants to one address, outside the
-    // real campaign (fresh campaign ids), so the address still gets the real send.
+    // --test --to <addr>: one copy to one address, outside the real campaign
+    // (a fresh campaign id), so the address still gets the real send.
     if (!to || !SEND) throw new Error('--test needs --send --to <address on the list>');
-    const stamp = Date.now();
-    for (const v of ['a', 'b'] as const) {
-      const r = { ...audience[0], variant: v };
-      const res = await sendOnce(
-        r.id,
-        `${CAMPAIGNS.earlyAccess}:test-${stamp}-${v}`,
-        () => earlyAccessContent(r),
-        (_, email) => renderEarlyAccessEmail(r, email)
-      );
-      console.log(`test [${v}] "${earlyAccessContent(r).subject}" → ${res}`);
-      await new Promise((ok) => setTimeout(ok, 600));
-    }
+    const r = audience[0];
+    const res = await sendOnce(
+      r.id,
+      `${CAMPAIGNS.earlyAccess}:test-${Date.now()}`,
+      () => earlyAccessContent(r),
+      (_, email) => renderEarlyAccessEmail(r, email)
+    );
+    console.log(`test "${earlyAccessContent(r).subject}" → ${res}`);
     return;
   }
 
   const pending = audience.filter((r) => !sentIds.has(r.id)).slice(0, limit ?? undefined);
   const withHandle = audience.filter((a) => a.handle);
   console.log(
-    `list: ${rows.length} subscribed | with score: ${audience.filter((a) => a.score != null).length} | with handle: ${withHandle.length} | no usable handle: ${rows.length - withHandle.length} | A ${audience.filter((a) => a.variant === 'a').length} / B ${audience.filter((a) => a.variant === 'b').length}`
+    `list: ${rows.length} subscribed | with score: ${audience.filter((a) => a.score != null).length} | with handle: ${withHandle.length} | no usable handle: ${rows.length - withHandle.length}`
   );
   console.log(`already sent: ${sentIds.size}  |  this run: ${pending.length}`);
 
