@@ -1,6 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse, after } from 'next/server';
 import prisma from '@/lib/db';
 import { getUser } from '@/lib/auth';
+import { threadFromFeedback, triageAndDraft } from '@/lib/support-inbox';
 
 // POST /api/feedback - Submit feedback (public, optionally authenticated)
 export async function POST(request: NextRequest) {
@@ -70,6 +71,18 @@ export async function POST(request: NextRequest) {
         metadata,
         status: 'new',
       },
+    });
+
+    // Into the support inbox. The agent drafts a reply after the response,
+    // for signed-in members only: anonymous feedback has no address to reply
+    // to, and this endpoint is public (no free model calls for anyone).
+    after(async () => {
+      try {
+        const threadId = await threadFromFeedback(feedback.id);
+        if (threadId && userId) await triageAndDraft(threadId);
+      } catch (e) {
+        console.error('[Feedback] inbox thread failed:', e);
+      }
     });
 
     return NextResponse.json(

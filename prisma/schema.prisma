@@ -727,6 +727,44 @@ model Feedback {
   @@index([userId])
 }
 
+// Support inbox (migration 048): feedback + replies to our emails, one thread
+// per conversation. The support agent triages and drafts; an admin sends.
+model SupportThread {
+  id            String           @id @default(dbgenerated("(gen_random_uuid())::text"))
+  source        String // 'feedback' | 'email'
+  email         String? // where a reply goes; null = anonymous feedback, can't reply
+  name          String?
+  userId        String?
+  feedbackId    String?          @unique
+  subject       String
+  status        String           @default("open") // 'open' | 'replied' | 'closed'
+  category      String? // agent triage: bug | question | billing | account | idea | praise | spam | other
+  priority      String? // agent triage: low | medium | high
+  summary       String? // agent triage: one line
+  draft         String? // the reply as it stands; sent only by an admin
+  lastMessageAt DateTime         @default(now()) @db.Timestamptz
+  createdAt     DateTime         @default(now()) @db.Timestamptz
+  updatedAt     DateTime         @default(now()) @updatedAt @db.Timestamptz
+  messages      SupportMessage[]
+
+  @@index([status, lastMessageAt])
+  @@index([email])
+}
+
+model SupportMessage {
+  id        String        @id @default(dbgenerated("(gen_random_uuid())::text"))
+  threadId  String
+  thread    SupportThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  direction String // 'in' | 'out'
+  body      String
+  emailId   String?       @unique // Resend email id (idempotency)
+  messageId String? // RFC 5322 Message-ID, for threading
+  createdAt DateTime      @default(now()) @db.Timestamptz
+
+  @@index([threadId, createdAt])
+  @@index([messageId])
+}
+
 // ===== BRAND DRIFT ALERTS =====
 
 model DriftAlert {
