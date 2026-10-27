@@ -8,7 +8,7 @@ export default function PrivacyPage() {
     <div className="min-h-screen bg-black text-white py-16 px-4">
       <div className="max-w-3xl mx-auto">
         <h1 className="text-4xl font-bold mb-8">Privacy Policy</h1>
-        <p className="text-gray-400 mb-8">Last updated: January 21, 2026</p>
+        <p className="text-gray-400 mb-8">Last updated: October 27, 2026</p>
 
         <div className="space-y-8 text-gray-300">
           <section>
@@ -311,6 +311,42 @@ export default function PrivacyPage() {
               You can control cookies through your browser settings, but some features may not
               function properly without them.
             </p>
+          </section>
+
+          <section id="chrome">
+            <h2 className="text-2xl font-semibold text-white mb-4">
+              9.1 BrandOS for Chrome (browser extension)
+            </h2>
+            <p className="mb-4">
+              The BrandOS extension scores a post you are writing on X against your own brand before
+              you send it. It is built to collect as little as possible:
+            </p>
+            <ul className="list-disc pl-6 space-y-2">
+              <li>
+                <strong>What it sends:</strong> only the text of the draft in X&apos;s post composer
+                and whether an image or video is attached, to mybrandos.app, when you pause typing
+                (or when you click the BrandOS chip, if &quot;score as I type&quot; is off). It
+                never reads or sends your feed, your messages, other people&apos;s posts, your
+                browsing history or anything on other websites.
+              </li>
+              <li>
+                <strong>What it stores on your device:</strong> a sign-in token scoped to draft
+                scoring (it expires after 30 days and cannot access the rest of your account), your
+                X handle, and your &quot;score as I type&quot; setting. Signing out of the extension
+                deletes them.
+              </li>
+              <li>
+                <strong>What we keep:</strong> the draft is scored and the result cached for up to
+                an hour to avoid scoring the same text twice; drafts are not added to your public
+                profile or the Creator Index. Scoring uses our AI provider (Anthropic) under the
+                same terms as the rest of the Service.
+              </li>
+              <li>
+                <strong>Permissions:</strong> storage (the token and setting above) and access to
+                x.com (to show the chip in the composer) and mybrandos.app (to score drafts and sign
+                in). No other sites.
+              </li>
+            </ul>
           </section>
 
           <section>

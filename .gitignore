@@ -69,3 +69,6 @@ plus/
 superpowers/
 .env*.local
 .vercel
+
+# Chrome extension builds (npm run ext:zip)
+/extension-build/
