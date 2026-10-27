@@ -107,6 +107,10 @@ export interface MemberRecord {
     week: { total: number; page: number; mcp: number; compare: number };
     today: number;
   } | null;
+  /** "Why my score moved": the two latest reads, attributed to posts (null with < 2 reads). */
+  move?: import('@/lib/score-moves').ScoreMove | null;
+  /** "Since you joined": null until a week of tracking. */
+  proof?: import('@/lib/growth-proof').GrowthProof | null;
 }
 
 const parseJson = <T>(v: unknown): T | undefined => {

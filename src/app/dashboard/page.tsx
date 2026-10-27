@@ -106,7 +106,7 @@ export default async function DashboardPage({
       // Score history, last posts and lookups are the member's own: shown on
       // their own brand only (not on a client brand or competitor they track).
       const own = !!home.handle && view.brand.handle.toLowerCase() === home.handle.toLowerCase();
-      const record = own ? await loadRecord(home) : null;
+      const record = own ? await loadRecord(home, user, view.brand.id) : null;
       return (
         <>
           <GrowthDashboard view={view} index={index} record={record} />
@@ -206,15 +206,32 @@ export default async function DashboardPage({
 }
 
 /** The member's own record for the growth dashboard (history, last posts, lookups). */
-async function loadRecord(home: Awaited<ReturnType<typeof getHomeData>>) {
+async function loadRecord(
+  home: Awaited<ReturnType<typeof getHomeData>>,
+  user: { id: string; createdAt: Date },
+  brandId: string
+) {
   const now = Date.now();
-  const lookups = await Promise.all([
-    lookupStats(home.handle, new Date(now - 7 * 86_400_000)),
-    lookupStats(home.handle, new Date(now - 86_400_000)),
-  ])
-    .then(([week, today]) => ({ week, today }))
-    .catch(() => null);
-  return memberRecord(home, lookups);
+  const [lookups, snapshots, onBrandPosts] = await Promise.all([
+    Promise.all([
+      lookupStats(home.handle, new Date(now - 7 * 86_400_000)),
+      lookupStats(home.handle, new Date(now - 86_400_000)),
+    ])
+      .then(([week, today]) => ({ week, today }))
+      .catch(() => null),
+    // the member's own brand, daily: the follower change between reads + "since you joined"
+    prisma.accountSnapshot
+      .findMany({
+        where: { accountId: brandId },
+        orderBy: { day: 'asc' },
+        select: { day: true, followers: true, avgViews: true },
+      })
+      .catch(() => []),
+    prisma.postScore
+      .count({ where: { userId: user.id, fit: { gte: 80 }, postedAt: { gte: user.createdAt } } })
+      .catch(() => 0),
+  ]);
+  return memberRecord(home, lookups, { joinedAt: user.createdAt, snapshots, onBrandPosts });
 }
 
 /**
