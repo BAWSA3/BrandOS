@@ -288,7 +288,7 @@ export const contentTypeLabels: Record<
   },
   'social-instagram': {
     label: 'Instagram Caption',
-    description: 'Visual, engaging, hashtag-friendly',
+    description: 'Visual, engaging, made to be saved',
     placeholder: 'Describe the image or topic...',
   },
   headline: {

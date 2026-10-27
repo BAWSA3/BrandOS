@@ -21,7 +21,7 @@ export function isCopyFormat(v: unknown): v is CopyFormat {
 
 const FORMAT_RULES: Record<CopyFormat, string> = {
   'x-post':
-    'X POST. Each option is one post, 280 characters max (count them). No hashtags unless asked. Hooks in the first line. Give 3 options unless they ask for a different number.',
+    'X POST. Each option is one post, 280 characters max (count them). No hashtags unless the creator explicitly asks for them, and never suggest hashtags as a strategy. Hooks in the first line. Give 3 options unless they ask for a different number.',
   thread:
     'X THREAD. One option unless asked. Number each post "1/", "2/"... Each post 280 characters max. Post 1 must earn the click on its own. 4-8 posts unless asked.',
   email:

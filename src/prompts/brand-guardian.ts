@@ -1,6 +1,7 @@
 import { BrandDNA, ContentType } from '@/lib/types';
 import { VoiceFingerprintSummary } from '@/lib/voice-fingerprint';
 import { buildVoiceFingerprintInstructions } from '@/prompts/voice-fingerprint';
+import { NO_HASHTAG_ADVICE } from '@/lib/no-hashtag-advice';
 
 export function buildBrandContext(
   brand: BrandDNA,
@@ -24,7 +25,9 @@ BRAND DNA:
 }
 
 export function buildCheckPrompt(brand: BrandDNA, content: string): string {
-  return `You are a brand consistency analyzer. Analyze this content against the brand guidelines.
+  return `${NO_HASHTAG_ADVICE}
+
+You are a brand consistency analyzer. Analyze this content against the brand guidelines.
 
 ${buildBrandContext(brand)}
 
@@ -44,11 +47,11 @@ Analyze how well this content matches the brand identity. Return ONLY valid JSON
 const contentTypeInstructions: Record<ContentType, string> = {
   general: 'Generate versatile content that matches the brand voice.',
   'social-twitter':
-    'Generate Twitter/X posts. Keep under 280 characters. Be punchy, direct, and shareable. Can include 1-2 relevant hashtags if appropriate.',
+    'Generate Twitter/X posts. Keep under 280 characters. Be punchy, direct, and shareable. No hashtags.',
   'social-linkedin':
     'Generate LinkedIn posts. Professional yet personable. Include a hook, value, and call-to-action. Can be 1-3 paragraphs.',
   'social-instagram':
-    'Generate Instagram captions. Visual and engaging. Include line breaks for readability. End with 3-5 relevant hashtags.',
+    'Generate Instagram captions. Visual and engaging. Include line breaks for readability. No hashtags.',
   headline:
     'Generate attention-grabbing headlines. Be concise (under 10 words ideally), clear, and compelling. Create curiosity or promise value.',
   tagline:
@@ -78,7 +81,9 @@ If any phrase sounds like "an AI wrote this" — rewrite it before including.
 Common AI tells to AVOID: "In today's...", "Excited to announce", "It's worth noting", "At the end of the day", perfect parallel structure, excessive hedging.`
     : '';
 
-  return `You are a brand guardian AI. Generate content that perfectly matches this brand's identity.
+  return `${NO_HASHTAG_ADVICE}
+
+You are a brand guardian AI. Generate content that perfectly matches this brand's identity.
 
 ${buildBrandContext(brand, fingerprintSummary)}
 ${voiceWarning}
@@ -102,7 +107,9 @@ Format your response as:
 }
 
 export function buildToneAnalysisPrompt(brand: BrandDNA, content: string): string {
-  return `You are a real-time tone analyzer. Analyze this content's tone and compare it to the target brand tone.
+  return `${NO_HASHTAG_ADVICE}
+
+You are a real-time tone analyzer. Analyze this content's tone and compare it to the target brand tone.
 
 ${buildBrandContext(brand)}
 
@@ -125,7 +132,9 @@ export function buildCompetitorAnalysisPrompt(
   competitorName: string,
   competitorSamples: string[]
 ): string {
-  return `You are a brand strategist. Compare this brand to a competitor's voice.
+  return `${NO_HASHTAG_ADVICE}
+
+You are a brand strategist. Compare this brand to a competitor's voice.
 
 YOUR BRAND:
 ${buildBrandContext(brand)}

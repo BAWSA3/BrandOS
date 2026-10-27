@@ -14,6 +14,7 @@
 import { z } from 'zod';
 import type { XProfileData } from './gemini';
 import type { ScoreBoostAuditResult } from '@/prompts/score-boost-audit';
+import { dropHashtagAdvice, stripHashtagSentences } from '@/lib/no-hashtag-advice';
 
 /** Clamp any model-supplied number to a sane integer score in [0, 100]. */
 export function clampScore(n: unknown): number {
@@ -212,10 +213,33 @@ export function parseBrandScore(text: string): Record<string, unknown> | null {
   const phasesIn = obj.phases as Record<string, Record<string, unknown>>;
   const phasesOut: Record<string, unknown> = {};
   for (const p of PHASES) {
-    phasesOut[p] = { ...phasesIn[p], score: clampScore(phasesIn[p].score) };
+    phasesOut[p] = {
+      ...phasesIn[p],
+      score: clampScore(phasesIn[p].score),
+      insights: dropHashtagAdvice(phasesIn[p].insights),
+    };
   }
 
-  return { ...obj, overallScore: clampScore(obj.overallScore), phases: phasesOut };
+  // BrandOS never pitches hashtag strategy: drop any line that slipped past the prompt
+  const archetype = obj.archetype as Record<string, unknown> | undefined;
+  return {
+    ...obj,
+    overallScore: clampScore(obj.overallScore),
+    phases: phasesOut,
+    topStrengths: dropHashtagAdvice(obj.topStrengths),
+    topImprovements: dropHashtagAdvice(obj.topImprovements),
+    nextMoves: dropHashtagAdvice(obj.nextMoves),
+    summary: stripHashtagSentences(obj.summary as string),
+    ...(archetype
+      ? {
+          archetype: {
+            ...archetype,
+            strengths: dropHashtagAdvice(archetype.strengths),
+            growthTip: stripHashtagSentences(archetype.growthTip as string),
+          },
+        }
+      : {}),
+  };
 }
 
 // ----------------------------------------------------------------------------
