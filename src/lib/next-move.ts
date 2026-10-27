@@ -157,7 +157,7 @@ export function nextMoves(
           ? { value: v, suffix: '', label: `${PHASE[s.weakest] ?? s.weakest} / 100` }
           : null,
       source: 'From your latest read',
-      action: { label: 'Open your brand', href: '/dashboard?view=brand' },
+      action: { label: 'Open your Playbook', href: '/dashboard?view=playbook' },
     });
   }
 

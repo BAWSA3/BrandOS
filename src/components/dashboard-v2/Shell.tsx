@@ -10,11 +10,12 @@ import { DISPLAY, V2_CSS } from './ui';
 /**
  * Dashboard v2 shell (behind DASHBOARD_V2): a quiet rail on desktop, a top bar
  * and thumb-reach tabs on phones, the member's finish as the ground. Each
- * slice adds its place here; slice 1 has Today and Your brand (the growth
- * view, calmed), plus Write (the copywriter, which no longer hides).
+ * slice adds its place here: Today, the Playbook (home; the calmed growth
+ * view, "brand", opens from it until the ⌘K Brand view lands) and Write (the
+ * copywriter, which no longer hides).
  */
 
-export type V2Place = 'today' | 'brand';
+export type V2Place = 'today' | 'playbook' | 'brand';
 
 export interface StandingMini {
   level: number;
@@ -40,7 +41,7 @@ export default function Shell({
   const q = brandId ? `brand=${encodeURIComponent(brandId)}` : '';
   const NAV: { place: V2Place | 'write'; name: string; href: string }[] = [
     { place: 'today', name: 'Today', href: `/dashboard${q ? `?${q}` : ''}` },
-    { place: 'brand', name: 'Your brand', href: `/dashboard?view=brand${q ? `&${q}` : ''}` },
+    { place: 'playbook', name: 'Playbook', href: `/dashboard?view=playbook${q ? `&${q}` : ''}` },
     { place: 'write', name: 'Write', href: '/dashboard/write' },
   ];
 
@@ -65,7 +66,7 @@ export default function Shell({
           <Wordmark height={18} mode={wordmarkFor(finish)} href="/dashboard" />
           <ul className="mt-10 space-y-1">
             {NAV.map((n) => {
-              const on = n.place === place;
+              const on = n.place === place || (n.place === 'playbook' && place === 'brand');
               return (
                 <li key={n.place}>
                   <Link
@@ -111,7 +112,7 @@ export default function Shell({
         style={{ background: 'var(--v-canvas)', boxShadow: '0 -1px 0 var(--v-dot)' }}
       >
         {NAV.map((n) => {
-          const on = n.place === place;
+          const on = n.place === place || (n.place === 'playbook' && place === 'brand');
           return (
             <Link
               key={n.place}

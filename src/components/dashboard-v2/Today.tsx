@@ -157,6 +157,7 @@ export default function Today({
   }, [moves, day, laterId]);
   const move = order[shift % order.length];
   const brandHref = `/dashboard?view=brand${brandQuery ? `&${brandQuery}` : ''}`;
+  const playbookHref = `/dashboard?view=playbook${brandQuery ? `&${brandQuery}` : ''}`;
 
   return (
     <div className="mx-auto flex w-full max-w-[880px] flex-col px-4 pb-10 pt-6 md:px-10 md:pt-16">
@@ -309,7 +310,7 @@ export default function Today({
                     </Loop>
                   )}
                   {scoreLine && (
-                    <Loop href={brandHref}>
+                    <Loop href={playbookHref}>
                       Score {scoreLine.value}
                       <span style={{ color: 'var(--v-muted)' }}>
                         {scoreLine.delta
