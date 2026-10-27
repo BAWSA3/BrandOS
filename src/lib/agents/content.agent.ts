@@ -10,69 +10,60 @@ import {
   ContentEngineRequest,
   ContentEngineOutput,
 } from './content-engine.types';
+import { NO_HASHTAG_ADVICE } from '@/lib/no-hashtag-advice';
 
 // Platform-specific guidelines
 interface PlatformGuidelines {
   maxLength: number;
   style: string;
   tips: string;
-  hashtagStrategy: string;
 }
 
 const platformGuidelines: Record<Platform | 'default', PlatformGuidelines> = {
   twitter: {
     maxLength: 280,
     style: 'Punchy, conversational, thread-friendly. Strong hooks that stop the scroll.',
-    tips: 'Use threads for depth. Put the hook in the first tweet. Add hashtags in a reply, not the main post.',
-    hashtagStrategy: '1-2 max in reply tweet, not main content',
+    tips: 'Use threads for depth. Put the hook in the first tweet.',
   },
   linkedin: {
     maxLength: 3000,
     style: 'Professional yet personal. Story-driven. Thought leadership focused.',
     tips: 'Start with a hook line. Use line breaks liberally. Personal stories outperform corporate speak. End with a soft CTA or question.',
-    hashtagStrategy: '3-5 relevant hashtags at the end',
   },
   instagram: {
     maxLength: 2200,
     style: 'Visual-first, authentic, aspirational. The caption supports the image.',
     tips: 'Front-load the key message. Use emojis strategically. Line breaks create breathing room.',
-    hashtagStrategy: '15-25 hashtags, mix of broad and niche',
   },
   tiktok: {
     maxLength: 4000,
     style: 'Trend-aware, authentic, Gen-Z fluent. Hook in the first 3 seconds.',
     tips: 'Pattern interrupts work. Native slang is fine. Controversy drives engagement.',
-    hashtagStrategy: '3-5 trending + niche hashtags',
   },
   email: {
     maxLength: 5000,
     style: "Personal, value-focused, scannable. Write like you're talking to one person.",
     tips: 'Subject line is 80% of the battle. One clear CTA per email. Scannable with headers and bullets.',
-    hashtagStrategy: 'N/A',
   },
   website: {
     maxLength: 10000,
     style: 'SEO-aware, scannable, structured. Clear hierarchy and CTAs.',
     tips: 'Use headers for structure. Write for featured snippets. Include internal links.',
-    hashtagStrategy: 'N/A',
   },
   youtube: {
     maxLength: 5000,
     style: 'Descriptive, keyword-rich, value-packed. Optimize for search and watch time.',
     tips: 'Front-load keywords in title. Use timestamps for long videos. Compelling thumbnail copy.',
-    hashtagStrategy: '3-5 relevant hashtags in description',
   },
   threads: {
     maxLength: 500,
     style: 'Conversational, authentic, community-first. Less polished, more real.',
-    tips: 'Be genuine. Short paragraphs. Engage in replies. Skip the hashtag overload.',
-    hashtagStrategy: '0-2 hashtags max',
+    tips: 'Be genuine. Short paragraphs. Engage in replies.',
   },
   default: {
     maxLength: 3000,
     style: 'Clear, on-brand, appropriate for the context.',
     tips: 'Match the brand voice. Be concise. Include a clear CTA.',
-    hashtagStrategy: 'Use sparingly if at all',
   },
 };
 
@@ -117,14 +108,13 @@ CONTENT BRIEF:
 - Call to Action: ${brief.cta || 'Use an appropriate CTA for the platform'}
 - Tone Override: ${brief.tone || 'default (use brand tone)'}
 - Length Preference: ${brief.length || 'medium'}
-- Include Hashtags: ${brief.includeHashtags !== false ? 'Yes' : 'No'}
 ${brief.campaignContext ? `- Campaign Context: ${brief.campaignContext}` : ''}
 
 PLATFORM GUIDELINES for ${brief.platform}:
 - Maximum Length: ${guidelines.maxLength} characters
 - Style: ${guidelines.style}
 - Tips: ${guidelines.tips}
-- Hashtag Strategy: ${guidelines.hashtagStrategy}
+- Hashtags: none. ${NO_HASHTAG_ADVICE}
 
 CRITICAL REQUIREMENTS:
 1. The content MUST sound like ${brand.name}, not generic marketing
@@ -158,7 +148,7 @@ Return ONLY valid JSON:
     "Alternative version 1 with a different angle",
     "Alternative version 2 with a different hook"
   ],
-  "hashtags": ["hashtag1", "hashtag2", "hashtag3"],
+  "hashtags": [],
   "postingNotes": {
     "bestTime": "Recommended posting time (e.g., 'Tuesday 9am EST')",
     "mediaNeeded": ["Description of image/video needed", "Second media option"],
@@ -179,7 +169,8 @@ function parseGeneratedContent(responseText: string): GeneratedContent | null {
 
     if (!parsed.content || !parsed.platform) return null;
 
-    return parsed as GeneratedContent;
+    // BrandOS never adds hashtags, even if the model does
+    return { ...parsed, hashtags: [] } as GeneratedContent;
   } catch {
     return null;
   }
@@ -394,7 +385,7 @@ Return ONLY valid JSON:
   "contentType": "general",
   "content": "The adapted content here",
   "variations": ["Alternative adaptation"],
-  "hashtags": ["hashtag1", "hashtag2"],
+  "hashtags": [],
   "postingNotes": {
     "bestTime": "Recommended time",
     "mediaNeeded": ["Media suggestions"],
@@ -700,7 +691,7 @@ function parseScheduledOutput(raw: string): ContentEngineOutput {
     content: post.join('\n').trim(),
     footer: {
       postingWindow: afterMeta['POSTING WINDOW'] || '',
-      hashtags: afterMeta['HASHTAGS'] || '',
+      hashtags: '', // BrandOS never adds hashtags (no-hashtag-advice.ts)
     },
     raw,
   };
