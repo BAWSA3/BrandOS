@@ -100,7 +100,14 @@ export default async function TodayPreview({
   const view = SAMPLE_VIEW;
   if (sp.view === 'brand') {
     return (
-      <Shell finish={finish} place="brand" brandId={null} standing={standing}>
+      <Shell
+        finish={finish}
+        place="brand"
+        brandId={null}
+        brands={view.brands}
+        standing={standing}
+        preview
+      >
         <GrowthDashboard
           view={view}
           ideas={SAMPLE_IDEAS}
@@ -114,7 +121,14 @@ export default async function TodayPreview({
   }
   if (sp.view === 'playbook') {
     return (
-      <Shell finish={finish} place="playbook" brandId={null} standing={standing}>
+      <Shell
+        finish={finish}
+        place="playbook"
+        brandId={null}
+        brands={view.brands}
+        standing={standing}
+        preview
+      >
         <Playbook data={samplePlaybook()} />
       </Shell>
     );
@@ -125,7 +139,14 @@ export default async function TodayPreview({
     status: i.col === 'ideas' ? 'saved' : i.col,
   }));
   return (
-    <Shell finish={finish} place="today" brandId={null} standing={standing}>
+    <Shell
+      finish={finish}
+      place="today"
+      brandId={null}
+      brands={view.brands}
+      standing={standing}
+      preview
+    >
       <Today
         name="Bawsa"
         dayLabel="Tuesday 27 Oct 2026"

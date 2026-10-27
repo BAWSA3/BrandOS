@@ -127,7 +127,13 @@ export default async function DashboardPage({
         if (sp.view === 'brand') {
           return (
             <>
-              <Shell finish={colorway} place="brand" brandId={brandId} standing={standing}>
+              <Shell
+                finish={colorway}
+                place="brand"
+                brandId={brandId}
+                brands={view.brands}
+                standing={standing}
+              >
                 <GrowthDashboard view={view} index={index} record={record} colorway={colorway} v2 />
               </Shell>
               {dock}
@@ -138,7 +144,13 @@ export default async function DashboardPage({
           const data = await loadPlaybook({ view, home, record, own, index, brandId });
           return (
             <>
-              <Shell finish={colorway} place="playbook" brandId={brandId} standing={standing}>
+              <Shell
+                finish={colorway}
+                place="playbook"
+                brandId={brandId}
+                brands={view.brands}
+                standing={standing}
+              >
                 <Playbook data={data} />
               </Shell>
               {dock}
@@ -157,7 +169,13 @@ export default async function DashboardPage({
         const open = view.ideas.filter((i) => i.status === 'saved' || i.status === 'drafting');
         return (
           <>
-            <Shell finish={colorway} place="today" brandId={brandId} standing={standing}>
+            <Shell
+              finish={colorway}
+              place="today"
+              brandId={brandId}
+              brands={view.brands}
+              standing={standing}
+            >
               <Today
                 name={own ? (view.brand.name ?? user.name ?? null) : null}
                 dayLabel={dayLabel}
