@@ -96,6 +96,34 @@ test(
   Math.abs(mixed.stats.avgEngagementRate - 1.6) < 1e-9
 );
 
+// Viral outlier (bug: @aunnieonchain's one 127K-view post carried a 13.56% pooled rate)
+const viralPost = (i: number, views: number, eng: number): Tweet => ({
+  ...post(i),
+  text: i === 0 ? 'the viral one' : `post ${i}`,
+  public_metrics: {
+    like_count: eng,
+    retweet_count: 0,
+    reply_count: 0,
+    quote_count: 0,
+    impression_count: views,
+  },
+});
+const viral = analyzeTweets([
+  viralPost(0, 127_000, 18_800),
+  ...Array.from({ length: 9 }, (_, i) => viralPost(i + 1, 1000, 20)),
+]);
+test(
+  'one viral post does not carry the rate (median 2%)',
+  Math.abs(viral.stats.avgEngagementRate - 2) < 1e-9
+);
+test('pooled rate still reported, and much higher', viral.stats.pooledEngagementRate > 13);
+test('median views = 1,000', viral.stats.medianViews === 1000);
+test(
+  'the viral post is called out: 127× the usual, its own id',
+  viral.stats.outlier?.tweetId === '0' && viral.stats.outlier?.multiple === 127
+);
+test('no outlier when posts are alike', er.stats.outlier === null && a.stats.outlier === null);
+
 console.log('E. Read summary on the card (bug: cut at a decimal point, "With 52.")');
 test(
   'decimals stay intact',

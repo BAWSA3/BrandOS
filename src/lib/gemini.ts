@@ -650,6 +650,10 @@ export interface TweetAnalysisStats {
   avgEngagementRate: number;
   /** False when no sampled post had a view count (rate is then meaningless). */
   engagementRateKnown?: boolean;
+  /** Median views per post. */
+  medianViews?: number;
+  /** One post far above the usual reach, reported apart from the typical rate. */
+  outlier?: { views: number; multiple: number; rate: number; excerpt: string } | null;
   /** Original posts per day across the sample's span. */
   postsPerDay?: number;
   /** Days covered by the sample (oldest → newest post). */
@@ -1366,7 +1370,13 @@ TWEET ANALYTICS (measured from their ${stats.totalTweets} most recent original p
 - Average Engagement Rate: ${
     stats.engagementRateKnown === false
       ? 'unavailable (no view counts returned; do not judge engagement rate)'
-      : `${stats.avgEngagementRate.toFixed(2)}% of views (likes + reposts + replies + quotes)`
+      : `${stats.avgEngagementRate.toFixed(2)}% of views on the typical (median) post (likes + reposts + replies + quotes)`
+  }${
+    stats.medianViews ? `\n- Typical Views Per Post (median): ${Math.round(stats.medianViews)}` : ''
+  }${
+    stats.outlier
+      ? `\n- Outlier: one post did ${stats.outlier.views} views, ${stats.outlier.multiple}× the typical post ("${stats.outlier.excerpt}"). Treat it as one standout, not the baseline.`
+      : ''
   }
 - Average Likes: ${stats.avgLikes.toFixed(1)}
 - Average Retweets: ${stats.avgRetweets.toFixed(1)}
