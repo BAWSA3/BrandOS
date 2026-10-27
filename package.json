@@ -28,6 +28,7 @@
     "test:early-access": "npx tsx scripts/test-early-access.ts",
     "test:moves": "npx tsx scripts/test-moves.ts",
     "test:draft": "npx tsx scripts/test-draft-score.ts",
+    "test:dash-v2": "npx tsx scripts/test-dashboard-v2.ts",
     "test:extension": "npx tsx scripts/test-extension.ts",
     "ext:icons": "node scripts/build-extension-icons.mjs",
     "ext:zip": "node scripts/build-extension-zip.mjs"

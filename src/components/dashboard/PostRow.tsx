@@ -11,7 +11,9 @@ import type { RecentPost } from '@/components/dashboard/BentoDashboard';
 
 const MONO = "var(--dash-mono, 'VCR OSD Mono', monospace)";
 const BIG = "var(--dash-big, 'Inter Tight', sans-serif)";
-const BLUE = '#0047FF';
+// Klein as text/lines; a finish can lighten it for AA on dark (growth v2 sets --d-blue-text)
+const BLUE = 'var(--d-blue-text, #0047FF)';
+const BLUE_FILL = '#0047FF';
 
 function verdict(fit: number) {
   return fit >= 80 ? 'On-brand' : fit >= 60 ? 'Close' : 'Off-brand';
@@ -113,7 +115,10 @@ export default function PostRow({
               <div className="flex flex-wrap items-center gap-2">
                 <span
                   className="px-2 py-[3px] text-[10px] uppercase tracking-[0.14em] text-white"
-                  style={{ fontFamily: MONO, background: post.fit >= 80 ? BLUE : 'var(--d-ink)' }}
+                  style={{
+                    fontFamily: MONO,
+                    background: post.fit >= 80 ? BLUE_FILL : 'var(--d-ink)',
+                  }}
                 >
                   {verdict(post.fit)} · {post.fit}
                 </span>

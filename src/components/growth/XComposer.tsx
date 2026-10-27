@@ -15,9 +15,11 @@ import { motion, useReducedMotion } from 'motion/react';
 
 export const X = {
   font: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-  ink: '#0F1419',
-  muted: '#536471',
-  rule: '#EFF3F4',
+  // X's light palette by default; the Night finish swaps in X's dark one (growth/tokens.ts)
+  surface: 'var(--x-surface, #FFFFFF)',
+  ink: 'var(--x-ink, #0F1419)',
+  muted: 'var(--x-muted, #536471)',
+  rule: 'var(--x-rule, #EFF3F4)',
   blue: '#0047FF',
   warn: '#FFD400',
   over: '#F4212E',
@@ -240,7 +242,7 @@ export default function XComposer({
           rows={2}
           placeholder={placeholder}
           aria-describedby={`${id}-count`}
-          className="mt-1 block w-full resize-none overflow-hidden bg-transparent outline-none placeholder:text-[#536471]"
+          className="mt-1 block w-full resize-none overflow-hidden bg-transparent outline-none placeholder:text-[var(--x-muted,#536471)]"
           style={{
             // site-wide form styles give textareas a grey box; this is X's borderless page
             border: 'none',
@@ -295,7 +297,7 @@ export default function XComposer({
                 type="button"
                 onClick={onCancel}
                 className="rounded-full border px-4 text-[15px] font-bold leading-[34px] transition-colors hover:bg-[#F7F9F9]"
-                style={{ borderColor: '#CFD9DE', color: X.ink }}
+                style={{ borderColor: X.rule, color: X.ink }}
               >
                 Cancel
               </button>

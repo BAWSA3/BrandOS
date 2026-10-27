@@ -30,6 +30,10 @@ import { standsOut } from '@/lib/index-rules';
 import { earlyAccessFor, indexOpenForUser } from '@/lib/early-access';
 import EarlyAccessDock from '@/components/early-access/EarlyAccessDock';
 import { getEntry, viewSummary } from '@/lib/creator-index';
+import { dashboardV2For } from '@/lib/dashboard-v2';
+import { levelFor } from '@/lib/xp';
+import Shell, { type StandingMini } from '@/components/dashboard-v2/Shell';
+import Today from '@/components/dashboard-v2/Today';
 
 // Auth-gated page: render per-request, never statically prerender at build.
 export const dynamic = 'force-dynamic';
@@ -43,6 +47,7 @@ export default async function DashboardPage({
     checkout?: string;
     brand?: string;
     invite?: string;
+    view?: string;
   }>;
 }) {
   const sp = await searchParams;
@@ -107,6 +112,78 @@ export default async function DashboardPage({
       // their own brand only (not on a client brand or competitor they track).
       const own = !!home.handle && view.brand.handle.toLowerCase() === home.handle.toLowerCase();
       const record = own ? await loadRecord(home, user, view.brand.id) : null;
+      // Dashboard v2 (testers only until launch: env flag + redeemed code, or admin).
+      // Same reads as below plus the finish and Standing; nothing new is written.
+      if (await dashboardV2For(user)) {
+        const [colorway, standing] = await Promise.all([
+          getColorway(user.id),
+          loadStanding(user.id),
+        ]);
+        const brandId = sp.brand ? view.brand.id : null;
+        if (sp.view === 'brand') {
+          return (
+            <>
+              <Shell finish={colorway} place="brand" brandId={brandId} standing={standing}>
+                <GrowthDashboard view={view} index={index} record={record} colorway={colorway} v2 />
+              </Shell>
+              {dock}
+            </>
+          );
+        }
+        const now = new Date();
+        const dayLabel = new Intl.DateTimeFormat('en-GB', {
+          timeZone: tz ?? 'UTC',
+          weekday: 'long',
+          day: 'numeric',
+          month: 'short',
+          year: 'numeric',
+        }).format(now);
+        const day = new Intl.DateTimeFormat('en-CA', { timeZone: tz ?? 'UTC' }).format(now);
+        const open = view.ideas.filter((i) => i.status === 'saved' || i.status === 'drafting');
+        return (
+          <>
+            <Shell finish={colorway} place="today" brandId={brandId} standing={standing}>
+              <Today
+                name={own ? (view.brand.name ?? user.name ?? null) : null}
+                dayLabel={dayLabel}
+                day={day}
+                brandQuery={brandId ? `brand=${encodeURIComponent(brandId)}` : ''}
+                openIdeas={open.length}
+                input={{
+                  handle: view.brand.handle,
+                  outlier: view.outlier,
+                  formats: view.formats,
+                  score: view.score && {
+                    value: view.score.value,
+                    weakest: view.score.weakest,
+                    phases: view.score.phases,
+                    nextMoves: view.score.nextMoves,
+                  },
+                  ideas: view.ideas.map((i) => ({ id: i.id, text: i.text, status: i.status })),
+                }}
+                scoreLine={
+                  view.score && {
+                    value: view.score.value,
+                    delta:
+                      record?.move && record.move.to === view.score.value
+                        ? record.move.delta
+                        : null,
+                    since:
+                      record?.move && record.move.to === view.score.value
+                        ? new Date(record.move.since).toLocaleDateString('en-GB', {
+                            day: 'numeric',
+                            month: 'short',
+                            timeZone: 'UTC',
+                          })
+                        : null,
+                  }
+                }
+              />
+            </Shell>
+            {dock}
+          </>
+        );
+      }
       return (
         <>
           <GrowthDashboard view={view} index={index} record={record} />
@@ -203,6 +280,21 @@ export default async function DashboardPage({
       {dock}
     </>
   );
+}
+
+/** Standing for the v2 rail: level, progress into it, the visit run (null before mig 029). */
+async function loadStanding(userId: string): Promise<StandingMini | null> {
+  try {
+    const p = await prisma.userProgress.findUnique({
+      where: { userId },
+      select: { xpTotal: true, currentStreakDays: true },
+    });
+    if (!p) return null;
+    const l = levelFor(p.xpTotal);
+    return { level: l.level, progress: l.need > 0 ? l.into / l.need : 0, run: p.currentStreakDays };
+  } catch {
+    return null;
+  }
 }
 
 /** The member's own record for the growth dashboard (history, last posts, lookups). */
