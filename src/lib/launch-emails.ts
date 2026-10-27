@@ -383,8 +383,9 @@ export function renderIndexReservedEmail(
 }
 
 /**
- * Early access invite (Oct 27 2026), the whole list: "reply with BrandOS and
- * i'll send you your own link". One job: a reply. No button on purpose: it
+ * Early access invite (Oct 27 2026), the whole list. Sign-in is invite-only
+ * (INVITE_ONLY): new accounts need a personal code. "reply with BrandOS and
+ * i'll send you your own code to get in". One job: a reply. No button on purpose: it
  * reads like a personal note, and replies help deliverability before the
  * Nov 2 send. Everyone who replies gets a personal single-use code as a
  * link (mybrandos.app/i/<CODE>, scripts/invite-codes.ts): the Index before
@@ -412,22 +413,22 @@ function earlyAccessModel(r: EarlyAccessRecipient) {
         : r.handle
           ? `@${r.handle}, you're on the early access list`
           : "you're on the BrandOS early access list",
-    preheader: 'reply with one word and i&#39;ll send you your own link.',
+    preheader: 'BrandOS is invite-only right now. reply with one word to get in.',
     who: r.handle ? `@${esc(r.handle)}` : 'there',
     intro: recent
-      ? 'you signed up for BrandOS recently, so you get in before everyone else. i&#39;m opening early access to this list first, before the public launch on nov 2.'
-      : `you signed up for BrandOS back in ${month}, so you get in before everyone else. i&#39;m opening early access to this list first, before the public launch on nov 2.`,
+      ? 'you signed up for BrandOS recently. it&#39;s invite-only right now, and this list gets in first, before the public launch on nov 2.'
+      : `you signed up for BrandOS back in ${month}. it&#39;s invite-only right now, and this list gets in first, before the public launch on nov 2.`,
     scoreLine:
       r.score != null
-        ? `your last brand score was <b>${r.score}</b>. early access gets you three things:`
-        : 'early access gets you three things:',
+        ? `your last brand score was <b>${r.score}</b>. with your invite you get the full dashboard, plus:`
+        : 'with your invite you get the full dashboard, plus:',
     perks: [
       'your entry in the <b>BrandOS Creator Index</b> before it opens on nov 2, where brands browse creators by their real brand read',
       'the <b>Founding price, locked for life</b>, even after the founding spots are gone',
       'a <b>direct line to me</b> from your dashboard',
     ],
-    ask: 'want in? reply to this email with the word <b>BrandOS</b> and i&#39;ll send you your own link. it&#39;s single-use and just for you. i answer every reply myself.',
-    ps: 'the dashboard itself is free for everyone until dec 3. early access is about getting in the Index first.',
+    ask: 'want in? reply to this email with the word <b>BrandOS</b> and i&#39;ll send you your own code to get in. it&#39;s single-use and just for you. i answer every reply myself.',
+    ps: 'your free brand scan still works without a code. the invite is for the dashboard and the Index.',
   };
 }
 
