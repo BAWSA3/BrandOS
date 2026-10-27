@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { COLORWAY_TOKENS, type Colorway } from '@/lib/colorways';
 import { DASH_FONTS } from '@/components/dashboard/dashFonts';
+import DraftScore from '@/components/growth/DraftScore';
 
 // The copywriter chat (/dashboard/write). Session-only: nothing is saved yet.
 // Replies stream from /api/dashboard/copywriter; options come back separated
@@ -141,7 +142,16 @@ const microLabel: React.CSSProperties = {
  * (each with its own Copy, since subject and body are pasted into separate
  * fields); everything else renders as-is.
  */
-function OptionBody({ body, done }: { body: string; done: boolean }) {
+function OptionBody({
+  body,
+  done,
+  scorable,
+}: {
+  body: string;
+  done: boolean;
+  /** X posts and threads get "Score this draft" (not in the preview). */
+  scorable?: boolean;
+}) {
   const email = splitEmail(body);
   if (!email.subjects.length)
     return (
@@ -154,6 +164,7 @@ function OptionBody({ body, done }: { body: string; done: boolean }) {
             <CopyButton text={body} />
           </div>
         )}
+        {done && scorable && <DraftScore text={body} />}
       </>
     );
   return (
@@ -464,7 +475,11 @@ export default function CopywriterChat({
                           {opt.label}
                         </div>
                       )}
-                      <OptionBody body={opt.body} done={!(busy && i === messages.length - 1)} />
+                      <OptionBody
+                        body={opt.body}
+                        done={!(busy && i === messages.length - 1)}
+                        scorable={!demoReply && (format === 'x-post' || format === 'thread')}
+                      />
                     </div>
                   ))
                 )}
