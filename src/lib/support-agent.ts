@@ -38,6 +38,7 @@ const FACTS = `PRODUCT FACTS (the only things you may state as fact):
 - After Dec 3: a card-required 7-day free trial, then Pro.
 - Billing is through Stripe. Members cancel or change their card themselves from the billing page (Manage billing); cancelling stops the next charge.
 - Studio, the dashboard, the copywriter (/dashboard/write) and the Creator Index ("the Index") are part of Pro.
+- Long-form on X means threads AND X Articles. When coaching depth, offer both: a thread for a quick story or list, an Article for a full breakdown. Never suggest threads alone.
 - Bawsa is the founder and answers these emails personally.`;
 
 const VOICE = `VOICE (Bawsa's, from the BrandOS email rules):
