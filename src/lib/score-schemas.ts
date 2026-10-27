@@ -22,15 +22,39 @@ export function clampScore(n: unknown): number {
   return Math.max(0, Math.min(100, v));
 }
 
-/** Pull the first JSON object out of a model response; null if none/invalid. */
+/**
+ * Pull the first JSON object out of a model response; null if none/invalid.
+ * Tries the widest {…} first, then a ```json fenced block, then the first
+ * balanced {…} (a stray "}" in text after the JSON breaks the widest match).
+ */
 export function extractJson(text: string): unknown {
-  const match = typeof text === 'string' ? text.match(/\{[\s\S]*\}/) : null;
-  if (!match) return null;
-  try {
-    return JSON.parse(match[0]);
-  } catch {
-    return null;
+  if (typeof text !== 'string') return null;
+  const tryParse = (s: string | undefined) => {
+    if (!s) return undefined;
+    try {
+      return JSON.parse(s) as unknown;
+    } catch {
+      return undefined;
+    }
+  };
+  const wide = tryParse(text.match(/\{[\s\S]*\}/)?.[0]);
+  if (wide !== undefined) return wide;
+  const fenced = tryParse(text.match(/```(?:json)?\s*(\{[\s\S]*?\})\s*```/)?.[1]);
+  if (fenced !== undefined) return fenced;
+  const start = text.indexOf('{');
+  if (start < 0) return null;
+  let depth = 0;
+  let inString = false;
+  for (let i = start; i < text.length; i++) {
+    const c = text[i];
+    if (inString) {
+      if (c === '\\') i++;
+      else if (c === '"') inString = false;
+    } else if (c === '"') inString = true;
+    else if (c === '{') depth++;
+    else if (c === '}' && --depth === 0) return tryParse(text.slice(start, i + 1)) ?? null;
   }
+  return null;
 }
 
 // ----------------------------------------------------------------------------

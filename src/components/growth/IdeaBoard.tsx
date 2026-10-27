@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Label, MONO, T, Tile } from './parts';
 import XComposer, { Avatar, X } from './XComposer';
+import DraftScore, { type DraftScoreResult } from './DraftScore';
 
 /**
  * Idea board: a blank page to think on (not a search box), BrandOS ideas with
@@ -56,6 +57,27 @@ function ago(iso?: string) {
     ...(sameYear ? {} : { year: 'numeric' }),
   });
 }
+
+// the preview (no account) scores with this instead of calling the API
+const DEMO_SCORE: DraftScoreResult = {
+  score: 78,
+  verdict: 'Close',
+  format: 'Text only',
+  formatLift: 0.7,
+  reach: { low: 0.8, high: 1.3 },
+  fixes: [
+    {
+      text: 'Add an image: your posts with media engage 1.9× your text-only posts.',
+      source: 'data',
+    },
+    { text: 'Open with the result, then how you got there.', source: 'model' },
+    { text: 'Name the tool so builders can find it.', source: 'model' },
+  ],
+  voice: 'Direct and first-person, like your best posts.',
+  hook: 'The first line explains before it lands the point.',
+  why: 'On-brand for a builder, but the payoff comes late.',
+  basedOn: 41,
+};
 
 // prompts for a blank page: things only this person can say
 const SPARKS = [
@@ -190,6 +212,11 @@ export default function IdeaBoard({
             placeholder={`What should @${brand.handle} say next?`}
             textareaRef={pageRef}
           />
+          <DraftScore
+            text={draft}
+            accountId={accountId}
+            demo={accountId ? undefined : DEMO_SCORE}
+          />
         </div>
         <aside className="md:border-l md:pl-8" style={{ borderColor: T.rule }}>
           <Label>Stuck? Start from</Label>
@@ -249,6 +276,13 @@ export default function IdeaBoard({
                         submitLabel="Save"
                         toolbar={false}
                         autoFocus
+                      />
+                    ) : null}
+                    {editing?.id === i.id ? (
+                      <DraftScore
+                        text={editing.text}
+                        accountId={accountId}
+                        demo={accountId ? undefined : DEMO_SCORE}
                       />
                     ) : (
                       <div className="flex gap-3">
