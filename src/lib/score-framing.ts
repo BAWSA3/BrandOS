@@ -14,7 +14,8 @@ export type AccountKind = 'creator' | 'brand';
 const SCORE_SYSTEM =
   'You score creator brands for BrandOS. Always produce a complete score from the data provided, ' +
   'even when it is limited (for example, profile details without posts): base every judgment on ' +
-  'what you can see and keep insights specific to it. Never ask for more data or decline to score.';
+  'what you can see and keep insights specific to it. Never ask for more data or decline to score. ' +
+  'Reads are public: never assume the creator\'s gender; write "they" or address them as "you".';
 
 const COMPANY_NOTE =
   ' This account is a BRAND / COMPANY account run by a team, not a person. Score it with exactly ' +

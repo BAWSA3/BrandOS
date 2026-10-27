@@ -1145,6 +1145,17 @@ export function analyzeActivityLevel(profile: XProfileData): ActivityAnalysis {
   };
 }
 
+// What a read's "holding it back" (topImprovements) and next moves may say.
+// Reads are public (/@handle, creator cards, the Creator Index), so advice that
+// would fit any creator ("post more threads", "add hashtags") reads as a
+// template and costs trust in the read. Depth is the gap, not the thread count.
+const READ_ADVICE_RULES = `HOLDING IT BACK (topImprovements) AND NEXT MOVES — RULES:
+- Every item must point at something true of THIS account only: one of their content pillars, a post type they use, a specific post, or a measured number from the data above. If the sentence would fit any creator, rewrite it until it doesn't.
+- Depth, not threads. When their best ideas only ever show up as short single posts, the gap is a missing DEEPER FORMAT for a named idea or pillar of theirs. Name that idea, and name the options: a thread, an X Article, a long post, a carousel, or a recurring series. Never give "post more threads" or "use threads" as the fix on its own, and do not flag a low thread count when they already go deep another way (long posts, Articles, a series) or when single posts are clearly working for them.
+- Hashtags: do not recommend adding or using hashtags; they are not a growth lever on X. Only mention hashtags if this account already uses them and its own data shows they matter.
+- Do not call question posts "engagement bait" or tell them to cut questions unless their own numbers show those posts underperform.
+- No generic volume or polish advice ("post more", "be consistent", "improve your hooks", "engage more") unless it is tied to a measured number or a named post.`;
+
 export const xBrandScorePrompt = (profile: XProfileData) => {
   const cryptoAnalysis = detectCryptoSignals(profile);
   const influenceAnalysis = analyzeInfluence(profile);
@@ -1222,7 +1233,7 @@ Score each pillar 0-100, then ADD the tier/authority bonuses to the overall scor
 
 3. GENERATE (Weight: 25%) - Content Quality & Output
    - How strong is their content output volume and posting cadence?
-   - Are they using effective formats (threads, media, questions, polls)?
+   - Is there a sign their best thinking gets a deeper format anywhere (a thread, an X Article, a long post, a carousel, a recurring series)?
    - Does their content demonstrate expertise, insight, or entertainment value?
    - Are they creating original content vs just reposting/reacting?
    - Is the content quality appropriate for their influence tier?
@@ -1248,7 +1259,10 @@ Based on this creator's archetype, weakest phase, and current score, provide 3 c
 1. Specific to their archetype and current gaps (not generic advice like "post more")
 2. Actionable within 1-2 weeks
 3. Tied to improving a specific phase score
-Example for a BUILD.EXE with weak Define: "Ship a build-in-public thread documenting your current project — this crystallizes what you're known for and directly improves Define."
+Example for a BUILD.EXE with weak Define: "Turn the project you keep posting updates about into one X Article or a weekly build log series — this crystallizes what you're known for and directly improves Define."
+
+${READ_ADVICE_RULES}
+- Only profile numbers are available here, not their posts: do not claim anything about which formats they use or don't use.
 
 CONTENT PILLARS:
 Identify 2-4 recurring content topics/themes this creator is known for based on their profile. Be specific — not "technology" but "developer tools" or "Bitcoin analysis".
@@ -1278,7 +1292,7 @@ Return ONLY valid JSON:
   },
   "topStrengths": ["Strength 1", "Strength 2", "Strength 3"],
   "topImprovements": ["Improvement 1", "Improvement 2", "Improvement 3"],
-  "nextMoves": ["Specific action 1 tied to weakest phase", "Specific action 2 tied to archetype growth", "Specific action 3 tied to what top scorers do"],
+  "nextMoves": ["Specific action 1 tied to weakest phase", "Specific action 2 tied to archetype growth", "Specific action 3 tied to a measured number from their profile"],
   "contentPillars": ["Topic 1", "Topic 2", "Topic 3"],
   "summary": "2-3 sentence assessment acknowledging their influence tier and brand effectiveness.",
   "archetype": {
@@ -1392,13 +1406,14 @@ TWEET ANALYTICS (measured from their ${stats.totalTweets} most recent original p
           .map((h) => sanitizeInline(h, INPUT_CAPS.hashtag))
           .join(', ')
       : 'None frequently used'
-  }
+  } (hashtag performance is not measured here)
 
 CONTENT PATTERNS:
 - Average Tweet Length: ${contentPatterns.avgTweetLength.toFixed(0)} characters
+- Long Posts (over 280 characters): ${tweets.filter((t) => t.text.length > 280).length} of ${tweets.length}
 - Emoji Usage: ${contentPatterns.emojiUsage.toFixed(1)}% of tweets
-- Question Tweets: ${contentPatterns.questionTweets} (engagement bait)
-- Thread Starters: ${contentPatterns.threadStarters}
+- Question Posts: ${contentPatterns.questionTweets}
+- Posts Marked as Threads (🧵 or the word "thread"): ${contentPatterns.threadStarters} (a text match only: unmarked threads and X Articles are not counted, so a low number is not evidence of missing depth)
 - Media Usage: ${contentPatterns.mediaUsage} of ${stats.totalTweets} posts include a photo, video or GIF
 - Only state facts these numbers support (e.g. do not claim "zero media" or a posting rate other than the one above).
 
@@ -1439,7 +1454,8 @@ Perform a DEEP ANALYSIS — brand = reputation, built entirely through content:
 
 3. GENERATE (25%) - Content Quality & Performance
    - Engagement rate analysis (is it good for their size?)
-   - Content format effectiveness (threads, media, questions)
+   - Which of their post types perform best, judged from their own numbers
+   - Depth: do their strongest ideas ever get a deeper treatment (a thread, an X Article, a long post, a carousel, a recurring series), or only single posts?
    - Hook quality (do tweets grab attention?)
    - Original content vs reposting/reacting
    - Posting frequency and cadence
@@ -1462,6 +1478,9 @@ Analyze their writing style and provide:
 
 CONTENT RECOMMENDATIONS:
 Based on their best-performing content, suggest 3 specific content ideas.
+
+${READ_ADVICE_RULES}
+- Ground each item in the sample tweets and numbers above: quote or point at the post, pillar or number it comes from.
 
 Return ONLY valid JSON:
 {
@@ -1495,7 +1514,7 @@ Return ONLY valid JSON:
     "optimalPostingTime": "Day at HH:MM timezone",
     "hookEffectiveness": <0-100>
   },
-  "nextMoves": ["Specific action 1 tied to weakest phase and archetype", "Specific action 2 for archetype growth", "Specific action 3 based on top scorer patterns"],
+  "nextMoves": ["Specific action 1 tied to weakest phase and archetype", "Specific action 2 for archetype growth", "Specific action 3 built on their own best-performing post or pillar"],
   "contentPillars": ["Topic 1", "Topic 2", "Topic 3"],
   "contentSuggestions": [
     "Specific content idea 1 based on what works for them",
