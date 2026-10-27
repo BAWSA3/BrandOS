@@ -1,10 +1,11 @@
 import { redirect } from 'next/navigation';
 import { getCurrentUser, getCurrentWorkspace } from '@/lib/auth';
+import { roomFormat } from '@/lib/article';
 import { hasPro } from '@/lib/billing';
 import { getColorway } from '@/lib/user-preferences';
 import CopywriterChat from '@/components/dashboard/CopywriterChat';
 import { dashboardV2For } from '@/lib/dashboard-v2';
-import { loadBrands, loadStanding } from '@/lib/dashboard-v2-data';
+import { loadBrands, loadOpenIdeas, loadStanding, loadTopPosts } from '@/lib/dashboard-v2-data';
 import Shell from '@/components/dashboard-v2/Shell';
 import WritingRoom from '@/components/dashboard-v2/WritingRoom';
 
@@ -16,7 +17,7 @@ export const dynamic = 'force-dynamic';
 export default async function WritePage({
   searchParams,
 }: {
-  searchParams: Promise<{ prompt?: string | string[] }>;
+  searchParams: Promise<{ prompt?: string | string[]; mode?: string | string[] }>;
 }) {
   const user = await getCurrentUser();
   if (!user) redirect('/signup?next=/dashboard/write');
@@ -29,7 +30,8 @@ export default async function WritePage({
   const colorway = await getColorway(user.id);
   // ?prompt= pre-fills the box (dashboard v2: "Start writing" on today's move). Text only,
   // capped, never auto-sent; the copywriter route applies its own input guards on send.
-  const raw = (await searchParams).prompt;
+  const sp = await searchParams;
+  const raw = sp.prompt;
   const prompt = (typeof raw === 'string' ? raw : '')
     .replace(/[\u0000-\u001f\u007f]/g, ' ')
     .slice(0, 400);
@@ -42,6 +44,11 @@ export default async function WritePage({
       loadStanding(user.id),
     ]);
     const own = brands.find((b) => b.handle.toLowerCase() === handle.toLowerCase()) ?? null;
+    // Article mode's idea picker: open ideas on the member's own board and their
+    // most-liked recent posts (own brand only; text only, capped).
+    const [boardIdeas, topPosts] = own
+      ? await Promise.all([loadOpenIdeas(own.id), loadTopPosts(own.id)])
+      : [[], []];
     return (
       <Shell
         finish={colorway}
@@ -55,6 +62,9 @@ export default async function WritePage({
           idea={prompt.trim() || null}
           accountId={own?.id ?? null}
           handle={handle || null}
+          initialFormat={roomFormat(sp.mode)}
+          boardIdeas={boardIdeas}
+          topPosts={topPosts}
         />
       </Shell>
     );
