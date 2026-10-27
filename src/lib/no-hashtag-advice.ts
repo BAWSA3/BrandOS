@@ -11,7 +11,8 @@
 export const NO_HASHTAG_ADVICE =
   'NEVER recommend hashtags or a hashtag strategy (using more, fewer, different or trending hashtags), never praise or criticise hashtag use, and never add hashtags to drafted copy. BrandOS does not treat hashtags as a growth or discovery lever.';
 
-const HASHTAG = /\bhash-?tags?\b|(?:^|[\s(])#[A-Za-z][\w]*/i;
+// a #tag needs 2+ characters, so "Day #X" or "#1" don't count
+const HASHTAG = /\bhash-?tags?\b|(?:^|[\s(])#[A-Za-z]\w+/i;
 
 /** True when the text mentions hashtags or contains a #tag. */
 export function mentionsHashtags(text: string): boolean {

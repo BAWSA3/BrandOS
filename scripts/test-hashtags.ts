@@ -27,6 +27,7 @@ test('"hashtags"', mentionsHashtags('Use 2-3 niche hashtags per post'));
 test('"hash-tag"', mentionsHashtags('a smarter hash-tag mix'));
 test('a #tag', mentionsHashtags('add #web3 to your posts'));
 test('#1 is not a tag', !mentionsHashtags('ranked #1 this week'));
+test('"Day #X" is not a tag', !mentionsHashtags('like your Day #X trading updates'));
 test('plain advice', !mentionsHashtags('Turn your best post into a thread or an Article'));
 
 console.log('dropHashtagAdvice');
