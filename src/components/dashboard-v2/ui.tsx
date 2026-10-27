@@ -162,6 +162,7 @@ export function Panel({
 /** Shell-wide styles: focus ring, the CSS press for links, selection colour. */
 export const V2_CSS = `
   .v2-focus:focus-visible { outline: 2px solid var(--v-focus); outline-offset: 2px; }
+  .v2-within:focus-within { box-shadow: inset 0 0 0 2px var(--v-signal-text) !important; }
   .v2-press { transition: transform 260ms cubic-bezier(.34,1.56,.64,1); }
   .v2-press:active { transform: scale(0.97) translateY(1px); transition-duration: 120ms; }
   @media (prefers-reduced-motion: reduce) {

@@ -1,8 +1,12 @@
 import { redirect } from 'next/navigation';
-import { getCurrentUser } from '@/lib/auth';
+import { getCurrentUser, getCurrentWorkspace } from '@/lib/auth';
 import { hasPro } from '@/lib/billing';
 import { getColorway } from '@/lib/user-preferences';
 import CopywriterChat from '@/components/dashboard/CopywriterChat';
+import { dashboardV2For } from '@/lib/dashboard-v2';
+import { loadBrands, loadStanding } from '@/lib/dashboard-v2-data';
+import Shell from '@/components/dashboard-v2/Shell';
+import WritingRoom from '@/components/dashboard-v2/WritingRoom';
 
 // /dashboard/write — the copywriter chat (X posts, threads, emails, ads) in
 // the creator's own voice. Pro (open access counts); free accounts land on
@@ -29,5 +33,31 @@ export default async function WritePage({
   const prompt = (typeof raw === 'string' ? raw : '')
     .replace(/[\u0000-\u001f\u007f]/g, ' ')
     .slice(0, 400);
+  // Dashboard v2 (testers): the writing room, with the copywriter and draft
+  // scoring beside one draft. Same routes, same limits; nothing new is written.
+  if (await dashboardV2For(user)) {
+    const workspace = await getCurrentWorkspace(user).catch(() => null);
+    const [brands, standing] = await Promise.all([
+      workspace ? loadBrands(workspace.id) : Promise.resolve([]),
+      loadStanding(user.id),
+    ]);
+    const own = brands.find((b) => b.handle.toLowerCase() === handle.toLowerCase()) ?? null;
+    return (
+      <Shell
+        finish={colorway}
+        place="playbook"
+        brandId={null}
+        brands={brands}
+        standing={standing}
+        focus
+      >
+        <WritingRoom
+          idea={prompt.trim() || null}
+          accountId={own?.id ?? null}
+          handle={handle || null}
+        />
+      </Shell>
+    );
+  }
   return <CopywriterChat handle={handle || null} colorway={colorway} initialPrompt={prompt} />;
 }

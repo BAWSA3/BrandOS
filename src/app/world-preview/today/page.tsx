@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import Shell from '@/components/dashboard-v2/Shell';
 import Today from '@/components/dashboard-v2/Today';
 import GrowthDashboard from '@/components/growth/GrowthDashboard';
+import WritingRoom from '@/components/dashboard-v2/WritingRoom';
+import type { DraftScoreResult } from '@/components/growth/DraftScore';
 import Playbook, { type PlaybookData } from '@/components/dashboard-v2/Playbook';
 import { bodyOfWork } from '@/lib/playbook';
 import { classLabel, recordDate } from '@/lib/classifications';
@@ -14,6 +16,35 @@ import { SAMPLE_IDEAS, SAMPLE_RECORD, SAMPLE_VIEW } from '../growth/sample';
 //   ?c=bone|night|klein|paper  &view=brand
 
 export const metadata: Metadata = { title: 'Dashboard v2 preview · BrandOS' };
+
+const DEMO_SCORE: DraftScoreResult = {
+  score: 81,
+  verdict: 'On-brand and specific. The strongest line is buried: lead with it.',
+  format: 'Text',
+  formatLift: 1.3,
+  reach: { low: 0.9, high: 1.6 },
+  fixes: [
+    {
+      text: 'Open with the number: “31 of 40 brands scroll a profile for 10 seconds.”',
+      source: 'model',
+    },
+    { text: 'Posts with an image earn 2.1× your text-only ones. Add the chart.', source: 'data' },
+  ],
+  voice: 'Sounds like you',
+  hook: 'Buried in line three',
+  why: '',
+  basedOn: 41,
+};
+
+const DEMO_OPTIONS = `31 of 40 brands told me they scroll a creator’s profile for 10 seconds.
+
+if the last 9 posts are about 9 different things, they move on.
+
+pick 3 things. post only those for 30 days. watch who shows up.
+---
+part two of the 40-brands thing.
+
+the top reason they skipped creators wasn’t followers. it was “we couldn’t tell what they stand for.”`;
 
 /** Sample Playbook built the way /dashboard builds it (loadPlaybook), from the growth sample. */
 function samplePlaybook(): PlaybookData {
@@ -115,6 +146,26 @@ export default async function TodayPreview({
           sample
           colorway={finish}
           v2
+        />
+      </Shell>
+    );
+  }
+  if (sp.view === 'write') {
+    return (
+      <Shell
+        finish={finish}
+        place="playbook"
+        brandId={null}
+        brands={view.brands}
+        standing={standing}
+        preview
+        focus
+      >
+        <WritingRoom
+          idea="A follow-up to my post “i asked 40 brands why they skipped creators”"
+          accountId="sample"
+          handle={view.brand.handle}
+          demo={{ score: DEMO_SCORE, options: DEMO_OPTIONS }}
         />
       </Shell>
     );
