@@ -2,7 +2,8 @@ import { NextRequest, NextResponse, after } from 'next/server';
 import { getCurrentUser, getCurrentWorkspace } from '@/lib/auth';
 import { botGuard } from '@/lib/botid-guard';
 import { withRateLimit, withUserRateLimit, rateLimiters } from '@/lib/rate-limit';
-import { indexOpenFor, parseJoin } from '@/lib/index-rules';
+import { parseJoin } from '@/lib/index-rules';
+import { indexOpenForUser } from '@/lib/early-access';
 import { joinIndex } from '@/lib/creator-index';
 import { captureFunnelEvent } from '@/lib/funnel-events';
 import { rescanOwnBrand } from '@/lib/brand-rescan';
@@ -26,7 +27,8 @@ import { rescanOwnBrand } from '@/lib/brand-rescan';
  */
 async function handlePost(request: NextRequest) {
   const user = await getCurrentUser().catch(() => null);
-  if (!indexOpenFor(user)) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  if (!(await indexOpenForUser(user)))
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
   const botBlock = await botGuard(request);
   if (botBlock) return botBlock;
   if (!user)

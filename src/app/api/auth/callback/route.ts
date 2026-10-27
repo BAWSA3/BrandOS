@@ -9,6 +9,8 @@ import { captureFunnelEvent } from '@/lib/funnel-events';
 import { isValidTosVersion } from '@/lib/tos';
 import { decodeUtm, UTM_COOKIE } from '@/lib/utm';
 import { safeNextPath } from '@/lib/safe-input';
+import { redeemCode } from '@/lib/early-access';
+import { INVITE_COOKIE } from '@/lib/early-access-rules';
 
 const EARLY_ACCESS_MODE = process.env.NEXT_PUBLIC_EARLY_ACCESS_MODE === 'true';
 
@@ -276,11 +278,21 @@ export async function GET(request: NextRequest) {
 
     // Legacy accounts are no longer walled off: the dashboard shows an
     // optional "add a backup login" nudge instead (decided 2026-10-22).
-    const redirectTo = next;
+    // An early-access code carried through sign-in by /i/<code> (cookie) is
+    // redeemed now, and the dashboard says how it went.
+    let redirectTo = next;
+    const pendingEarlyCode = cookieStore.get(INVITE_COOKIE)?.value;
+    if (pendingEarlyCode) {
+      const redeemed = await redeemCode(user.id, pendingEarlyCode);
+      if (redirectTo === '/dashboard') {
+        redirectTo = `/dashboard?invite=${redeemed.ok ? 'ok' : 'invalid'}`;
+      }
+    }
 
     const response = NextResponse.redirect(new URL(redirectTo, request.url));
 
     response.cookies.delete('pendingInviteCode');
+    response.cookies.delete(INVITE_COOKIE);
 
     response.cookies.set('sb-access-token', session.access_token, {
       path: '/',

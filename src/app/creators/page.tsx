@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getCurrentUser } from '@/lib/auth';
-import { formatNumber, indexEnabled, indexOpenFor, parseFilters } from '@/lib/index-rules';
+import { formatNumber, indexEnabled, parseFilters } from '@/lib/index-rules';
+import { indexOpenForUser } from '@/lib/early-access';
 import { cardFor, getEntry, indexAggregates, listIndex, ownReservation } from '@/lib/creator-index';
 import prisma from '@/lib/db';
 import IndexBook from './IndexBook';
@@ -49,7 +50,7 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
 
 export default async function CreatorIndexPage({ searchParams }: Props) {
   const user = await getCurrentUser().catch(() => null);
-  if (!indexOpenFor(user)) notFound();
+  if (!(await indexOpenForUser(user))) notFound();
   const sp = await searchParams;
   const filters = parseFilters(sp);
   const m = member(sp);

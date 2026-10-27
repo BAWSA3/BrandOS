@@ -11,6 +11,7 @@ import {
 } from '@/lib/plans';
 import { isOpenAccess, isSubscribed } from '@/lib/billing';
 import { foundingSpotsLeft } from '@/lib/founding';
+import { earlyAccessFor } from '@/lib/early-access';
 import { botGuard } from '@/lib/botid-guard';
 import { captureFunnelEvent } from '@/lib/funnel-events';
 
@@ -97,7 +98,10 @@ export async function POST(request: NextRequest) {
       );
     }
     // $29 while founding spots last; $39 (STRIPE_PRICE_PRO_STANDARD) after
-    const founding = (await foundingSpotsLeft()) > 0;
+    // Founding price while seats last, and always for early-access code holders
+    // (their $29 is kept for life; numbers 1–100 still go to the first 100 paid)
+    const founding =
+      (await foundingSpotsLeft()) > 0 || !!(await earlyAccessFor(user.id))?.perkFoundingPrice;
     const priceId = founding
       ? PLAN_CONFIGS.PRO.stripePriceIdMonthly
       : stripeEnv('STRIPE_PRICE_PRO_STANDARD') || PLAN_CONFIGS.PRO.stripePriceIdMonthly;

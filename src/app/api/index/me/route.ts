@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth';
 import { botGuard } from '@/lib/botid-guard';
 import { withRateLimit, rateLimiters } from '@/lib/rate-limit';
-import { indexOpenFor } from '@/lib/index-rules';
+import { indexOpenForUser } from '@/lib/early-access';
 import { setListed } from '@/lib/creator-index';
 import { captureFunnelEvent } from '@/lib/funnel-events';
 
@@ -12,7 +12,8 @@ import { captureFunnelEvent } from '@/lib/funnel-events';
  */
 async function handlePatch(request: NextRequest) {
   const user = await getCurrentUser().catch(() => null);
-  if (!indexOpenFor(user)) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  if (!(await indexOpenForUser(user)))
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
   const botBlock = await botGuard(request);
   if (botBlock) return botBlock;
   if (!user) return NextResponse.json({ error: 'Sign in first.' }, { status: 401 });
