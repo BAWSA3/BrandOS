@@ -7,6 +7,7 @@ import { checkRateLimit, rateLimiters, withRateLimit } from '@/lib/rate-limit';
 import { sanitizeUntrusted } from '@/lib/prompt-safety';
 import {
   buildCopywriterPrompt,
+  COPY_MAX_TOKENS,
   copyBrandForUser,
   isCopyFormat,
   isEmailKind,
@@ -14,6 +15,8 @@ import {
 
 /**
  * POST /api/dashboard/copywriter { format, emailKind?, messages: [{role, content}] }
+ * format: x-post | thread | email | ad | other | outline | article (the writing
+ * room's Article mode: an outline, then one section at a time; shorter caps).
  * The copywriter chat (/dashboard/write). Streams plain text back.
  * AI cost surface: BotID + the per-IP AI limit + 60 messages per hour per
  * user, bounded history and input. The brand context comes from the user's
@@ -96,7 +99,8 @@ async function handlePost(request: NextRequest) {
 
   const stream = new Anthropic({ apiKey }).messages.stream({
     model: MODEL,
-    max_tokens: 2000,
+    // output cap per format (an outline or one article section is short)
+    max_tokens: COPY_MAX_TOKENS[format],
     // Sonnet 5 defaults to adaptive thinking — keep the budget for the copy.
     thinking: { type: 'disabled' },
     system,

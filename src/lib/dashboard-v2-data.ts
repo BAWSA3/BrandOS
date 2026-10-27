@@ -33,3 +33,36 @@ export async function loadBrands(
     return [];
   }
 }
+
+/** Article mode's idea picker: open ideas on the brand's board (text only, capped). */
+export async function loadOpenIdeas(accountId: string): Promise<{ id: string; text: string }[]> {
+  try {
+    const rows = await prisma.idea.findMany({
+      where: { accountId, status: { in: ['saved', 'drafting'] } },
+      orderBy: { createdAt: 'desc' },
+      take: 4,
+      select: { id: true, suggestion: true },
+    });
+    return rows.map((r) => ({ id: r.id, text: r.suggestion.slice(0, 300) }));
+  } catch {
+    return [];
+  }
+}
+
+/** Article mode's idea picker: the brand's most-liked posts of the last 60 days. */
+export async function loadTopPosts(accountId: string): Promise<{ text: string; note: string }[]> {
+  try {
+    const rows = await prisma.accountPost.findMany({
+      where: { accountId, postedAt: { gte: new Date(Date.now() - 60 * 86_400_000) } },
+      orderBy: { likes: 'desc' },
+      take: 3,
+      select: { text: true, likes: true },
+    });
+    return rows.map((p) => ({
+      text: p.text.slice(0, 280),
+      note: `A top post / ${p.likes.toLocaleString('en-US')} likes`,
+    }));
+  } catch {
+    return [];
+  }
+}

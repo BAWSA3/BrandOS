@@ -113,6 +113,12 @@ export default function Shell({
     const viewOf = place === 'today' ? '' : `view=${place}&`;
     const list: Command[] = [
       { id: 'write', group: 'Make', label: 'Write a post', hint: 'G W', run: go(href.write) },
+      {
+        id: 'article',
+        group: 'Make',
+        label: 'Write an article',
+        run: go(`${href.write}?mode=article`),
+      },
       { id: 'score', group: 'Make', label: 'Score a draft', run: go(href.write) },
       { id: 'idea', group: 'Make', label: 'New idea on the board', run: go(`${href.brand}#ideas`) },
       { id: 'today', group: 'Go to', label: "Today's move", hint: 'G T', run: go(href.today) },

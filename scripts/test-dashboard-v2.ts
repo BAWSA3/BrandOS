@@ -6,6 +6,18 @@
 import { dashboardV2Rule } from '../src/lib/dashboard-v2-rules';
 import { nextMoves, pickIndex, type MoveInput } from '../src/lib/next-move';
 import { bodyOfWork, workLine } from '../src/lib/playbook';
+import {
+  articleClipboard,
+  articleWords,
+  moveSection,
+  outlineAsIdea,
+  parseOutline,
+  parseSections,
+  parseTitleHook,
+  readArticle,
+  roomFormat,
+} from '../src/lib/article';
+import { COPY_MAX_TOKENS, isCopyFormat } from '../src/lib/copywriter';
 
 let pass = 0;
 let fail = 0;
@@ -187,6 +199,123 @@ console.log('playbook: body of work');
   test(
     'work line is null with nothing yet',
     workLine(bodyOfWork({ ideas: [], posts: [], reads: [] }, now)) === null
+  );
+}
+
+console.log('article mode: format switching');
+test('?mode=article opens Article mode', roomFormat('article') === 'article');
+test('?mode=thread opens Thread', roomFormat('thread') === 'thread');
+test(
+  'no or unknown mode is a Post',
+  roomFormat(undefined) === 'x-post' &&
+    roomFormat('essay') === 'x-post' &&
+    roomFormat(['article']) === 'x-post'
+);
+test(
+  'the copywriter accepts outline + article',
+  isCopyFormat('outline') && isCopyFormat('article') && !isCopyFormat('essay')
+);
+test(
+  'outline and section outputs are capped shorter than posts',
+  COPY_MAX_TOKENS.outline < COPY_MAX_TOKENS['x-post'] &&
+    COPY_MAX_TOKENS.article < COPY_MAX_TOKENS['x-post']
+);
+
+console.log('article mode: outline parsing');
+{
+  const o = parseOutline(`Title: What 40 brands told me
+Hook: I asked 40 brands why they passed.
+1. The 10-second scroll | brands decide before reading
+2. **“We couldn’t tell”** — the common reason
+3) Three pillars: beat thirty topics | what got picked
+- Use #creatorEconomy for reach | growth
+4. A 30-day test | run it`);
+  test(
+    'title and hook',
+    o?.title === 'What 40 brands told me' && o?.hook === 'I asked 40 brands why they passed.'
+  );
+  test(
+    'sections parsed (markdown, —, 3) all handled)',
+    o?.sections.length === 4,
+    o?.sections.map((s) => s.heading)
+  );
+  test(
+    'heading | point split',
+    o?.sections[0].heading === 'The 10-second scroll' &&
+      o?.sections[0].point === 'brands decide before reading'
+  );
+  test(
+    'em-dash split and bold/quotes stripped',
+    o?.sections[1].heading === 'We couldn’t tell' && o?.sections[1].point === 'the common reason'
+  );
+  test(
+    'hashtag lines are dropped',
+    !o?.sections.some((s) => /#|hashtag/i.test(`${s.heading} ${s.point}`))
+  );
+  test('unique section ids', new Set(o?.sections.map((s) => s.id)).size === o?.sections.length);
+  const many = parseOutline(
+    `Title: T\n${[1, 2, 3, 4, 5, 6, 7].map((n) => `${n}. S${n}`).join('\n')}`
+  );
+  test('more than 5 sections are cut to 5', many?.sections.length === 5);
+  test('no title → null', parseOutline('1. A\n2. B') === null);
+  test('no sections → null', parseOutline('Title: T\nHook: H') === null);
+  test('garbage → null', parseOutline('Sure! Here is an outline for you.') === null);
+  test(
+    'regenerated section line',
+    parseSections('3. A sharper heading | the point')[0]?.heading === 'A sharper heading'
+  );
+  test(
+    'regenerated title + hook',
+    parseTitleHook('Title: New one\nHook: A new hook').title === 'New one'
+  );
+  const a = parseOutline('Title: T\n1. A\n2. B\n3. C')!;
+  const moved = moveSection(a.sections, a.sections[0].id, 1);
+  test('move down', moved.map((s) => s.heading).join('') === 'BAC');
+  test('move past the end is a no-op', moveSection(a.sections, a.sections[2].id, 1) === a.sections);
+  test(
+    'outline as a board idea (capped)',
+    outlineAsIdea(a).startsWith('Article: T\n1. A') &&
+      outlineAsIdea({ ...a, title: 'x'.repeat(2000) }).length <= 1000
+  );
+  test(
+    'a malformed saved draft reads as null',
+    readArticle('{"sections":"nope"}') === null && readArticle('not json') === null
+  );
+  test('a saved draft round-trips', readArticle(JSON.stringify(a))?.sections.length === 3);
+}
+
+console.log('article mode: clipboard');
+{
+  const c = articleClipboard({
+    title: 'Brands & <creators>',
+    hook: 'The hook.',
+    sections: [
+      { id: '1', heading: 'One', point: '', body: 'First para.\n\nSecond "para".' },
+      { id: '2', heading: 'Two', point: '', body: '' },
+    ],
+  });
+  test(
+    'rich text: title as h1, sections as h2',
+    c.html.startsWith('<h1>Brands &amp; &lt;creators&gt;</h1>') &&
+      c.html.includes('<h2>One</h2>') &&
+      c.html.includes('<h2>Two</h2>')
+  );
+  test(
+    'paragraphs become <p>, escaped',
+    c.html.includes('<p>First para.</p>') && c.html.includes('<p>Second &quot;para&quot;.</p>')
+  );
+  test('no raw tags from the text survive', !c.html.includes('<creators>'));
+  test(
+    'plain-text fallback keeps the shape',
+    c.text === 'Brands & <creators>\n\nThe hook.\n\nOne\n\nFirst para.\n\nSecond "para".\n\nTwo'
+  );
+  test(
+    'word count covers hook + sections',
+    articleWords({
+      title: 'x',
+      hook: 'two words',
+      sections: [{ id: 'a', heading: 'h', point: '', body: 'three more words' }],
+    }) === 5
   );
 }
 

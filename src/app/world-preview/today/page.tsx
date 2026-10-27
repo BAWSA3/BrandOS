@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Shell from '@/components/dashboard-v2/Shell';
+import { roomFormat } from '@/lib/article';
 import Today from '@/components/dashboard-v2/Today';
 import GrowthDashboard from '@/components/growth/GrowthDashboard';
 import WritingRoom from '@/components/dashboard-v2/WritingRoom';
@@ -35,6 +36,19 @@ const DEMO_SCORE: DraftScoreResult = {
   why: '',
   basedOn: 41,
 };
+
+const DEMO_OUTLINE = `Title: What 40 brands told me about the creators they skip
+Hook: I asked 40 brands why they passed on creators they liked. The answer was rarely followers.
+1. The 10-second profile scroll | brands decide before they read a single post
+2. “We couldn’t tell what they stand for” | the most common reason, in their words
+3. Three pillars beat thirty topics | what the creators who got picked did differently
+4. A 30-day test you can run | post on three things only, then watch who shows up`;
+
+const DEMO_SECTION = `31 of the 40 brands said the same thing in different words: they give a profile about ten seconds.
+
+In those ten seconds they scroll your last nine posts. If those posts are about nine different things, they can’t picture what you’d make for them, so they move on. Nobody told me that before I asked.
+
+[the brand you quote here] put it best: “we’re not buying a post, we’re buying a person who already talks about our thing.”`;
 
 const DEMO_OPTIONS = `31 of 40 brands told me they scroll a creator’s profile for 10 seconds.
 
@@ -123,7 +137,7 @@ function samplePlaybook(): PlaybookData {
 export default async function TodayPreview({
   searchParams,
 }: {
-  searchParams: Promise<{ c?: string; view?: string }>;
+  searchParams: Promise<{ c?: string; view?: string; mode?: string }>;
 }) {
   const sp = await searchParams;
   const finish = isColorway(sp.c) ? sp.c : 'bone';
@@ -165,7 +179,23 @@ export default async function TodayPreview({
           idea="A follow-up to my post “i asked 40 brands why they skipped creators”"
           accountId="sample"
           handle={view.brand.handle}
-          demo={{ score: DEMO_SCORE, options: DEMO_OPTIONS }}
+          initialFormat={roomFormat(sp.mode)}
+          boardIdeas={[
+            { id: 'i1', text: 'How I priced my first brand deal' },
+            { id: 'i2', text: 'Why I stopped posting “gm”' },
+          ]}
+          topPosts={[
+            {
+              text: 'i asked 40 brands why they skipped creators. here is what they said',
+              note: 'A top post / 1,840 likes',
+            },
+          ]}
+          demo={{
+            score: DEMO_SCORE,
+            options: DEMO_OPTIONS,
+            outline: DEMO_OUTLINE,
+            section: DEMO_SECTION,
+          }}
         />
       </Shell>
     );
