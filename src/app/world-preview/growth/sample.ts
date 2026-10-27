@@ -251,4 +251,37 @@ export const SAMPLE_RECORD: MemberRecord = {
     },
   ],
   lookups: { week: { total: 37, page: 21, mcp: 11, compare: 5 }, today: 4 },
+  move: {
+    from: 70,
+    to: 72,
+    delta: 2,
+    since: at(12),
+    phases: [
+      {
+        phase: 'generate',
+        delta: 4,
+        posts: [
+          {
+            tweetId: '4',
+            excerpt: 'i asked 40 brands why they skipped creators. here is what they said 🧵',
+            reason: '41× your usual likes',
+          },
+          {
+            tweetId: '1',
+            excerpt: 'the 3 income streams nobody tells you about when you start posting…',
+            reason: '1.8× your usual likes',
+          },
+        ],
+        note: null,
+      },
+      { phase: 'scale', delta: 3, posts: [], note: '+421 followers since the last read' },
+      {
+        phase: 'check',
+        delta: -1,
+        posts: [{ tweetId: '3', excerpt: 'gm. building today 🔨', reason: 'off-brand, fit 41' }],
+        note: null,
+      },
+    ],
+  },
+  proof: { since: '2026-09-23', days: 33, followers: 412, reachPct: 38, onBrandPosts: 9 },
 };

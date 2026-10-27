@@ -31,6 +31,10 @@
     {
       "path": "/api/cron/sync-accounts",
       "schedule": "0 4 * * *"
+    },
+    {
+      "path": "/api/cron/reread",
+      "schedule": "30 5 * * *"
     }
   ]
 }
