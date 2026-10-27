@@ -4,6 +4,8 @@ import { geminiFlash, xBrandScorePrompt, XProfileData } from '@/lib/gemini';
 import { resolveArchetype } from '@/lib/archetype-engine';
 import { getUserProfile } from '@/lib/user-profiles';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { hasAccount, inviteOnly } from '@/lib/early-access';
+import { INVITE_ONLY_MESSAGE } from '@/lib/early-access-rules';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey =
@@ -53,6 +55,10 @@ async function authenticateRequest(
 
   if (error || !user) {
     return { error: 'Invalid or expired token' };
+  }
+  // Closed beta: existing BrandOS accounts only
+  if (inviteOnly() && !(await hasAccount(user.id))) {
+    return { error: INVITE_ONLY_MESSAGE };
   }
 
   return { userId: user.id };

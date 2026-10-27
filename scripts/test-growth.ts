@@ -4,6 +4,7 @@
  */
 import {
   bestAndWorst,
+  reachOutlier,
   delta,
   followerSeries,
   formatOf,
@@ -88,6 +89,17 @@ test('worst is the "gm" post', bw.worst?.p.tweetId === '5');
 test('best reason mentions media', /with media/.test(bw.best[0]?.why ?? ''));
 test('worst reason says short', /very short/.test(bw.worst?.why ?? ''));
 test('under 3 rated posts → nothing', bestAndWorst([post(1), post(2)]).best.length === 0);
+{
+  const usual = Array.from({ length: 9 }, (_, i) => ({ ...post(i + 1), views: 1000 }));
+  const viral = { ...post(0), views: 127_000 };
+  const o = reachOutlier([viral, ...usual]);
+  test(
+    'viral post called out at 127× the usual',
+    o?.tweetId === viral.tweetId && o?.multiple === 127
+  );
+  test('no outlier when reach is even', reachOutlier(usual) === null);
+  test('too few posts → no outlier', reachOutlier([viral, ...usual.slice(0, 2)]) === null);
+}
 
 console.log('D. Deltas + series');
 const snap = (d: number, followers: number, er: number | null = 2): SnapshotRow => ({

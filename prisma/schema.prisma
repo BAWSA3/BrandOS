@@ -165,6 +165,8 @@ model User {
   postScores           PostScore[] // per-post brand fit (migration 033)
   noteReports          NoteReport[]       @relation("NoteReporter")
   indexEntry           IndexEntry? // Creator Index membership (migration 044)
+  earlyAccessCode      EarlyAccessCode? // redeemed early-access code (migration 049)
+  testerFeedback       TesterFeedback[] // early-access feedback to Bawsa (migration 049)
   indexViews           IndexView[] // Index members' pages this user viewed (migration 044)
   indexReservations    IndexReservation[] // reserved Index numbers this user claimed (migration 045)
 
@@ -1531,4 +1533,32 @@ model IndexReservation {
   claimedBy       User?     @relation(fields: [claimedByUserId], references: [id], onDelete: SetNull)
 
   @@index([claimedAt])
+}
+
+// Early-access codes (migration 049): one personal, single-use code per person,
+// labelled with who it was given to. Each perk is a flag on the code.
+model EarlyAccessCode {
+  id                String    @id @default(dbgenerated("(gen_random_uuid())::text"))
+  code              String    @unique // 8 chars, uppercase, no dash (src/lib/early-access-rules.ts)
+  label             String // who it was given to, e.g. "@aunnieonchain"
+  createdAt         DateTime  @default(now()) @db.Timestamptz
+  redeemedAt        DateTime? @db.Timestamptz
+  redeemedByUserId  String?   @unique
+  redeemedBy        User?     @relation(fields: [redeemedByUserId], references: [id], onDelete: SetNull)
+  revokedAt         DateTime? @db.Timestamptz
+  perkIndex         Boolean   @default(true) // the Creator Index before it opens
+  perkFoundingPrice Boolean   @default(true) // $29/month for life, even after the 100 seats
+  perkTester        Boolean   @default(true) // "Early access" tag + feedback line to Bawsa
+}
+
+// A message from an early-access tester to Bawsa (also emailed on arrival).
+model TesterFeedback {
+  id        String   @id @default(dbgenerated("(gen_random_uuid())::text"))
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  message   String
+  page      String?
+  createdAt DateTime @default(now()) @db.Timestamptz
+
+  @@index([userId, createdAt(sort: Desc)])
 }

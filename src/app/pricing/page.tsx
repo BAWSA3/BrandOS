@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { getCurrentUser } from '@/lib/auth';
 import { isOpenAccess, isSubscribed, trialEndsAt } from '@/lib/billing';
 import { foundingNumber, foundingSpotsLeft } from '@/lib/founding';
+import { earlyAccessFor } from '@/lib/early-access';
 import { FOUNDING_SPOTS, OPEN_ACCESS_UNTIL, TRIAL_DAYS } from '@/lib/plans';
 import Wordmark from '@/components/Wordmark';
 import StartTrialButton from '@/components/billing/StartTrialButton';
@@ -63,6 +64,8 @@ export default async function PricingPage({
   const until = day(OPEN_ACCESS_UNTIL);
   const trialEnd = user ? trialEndsAt(user) : null;
   const founding = user && pro ? await foundingNumber(user.id) : null;
+  // early-access code holders keep the Founding price after the 100 seats are gone
+  const priceLocked = left > 0 || (!!user && !!(await earlyAccessFor(user.id))?.perkFoundingPrice);
   // Direction 03 (src/lib/field/switch.ts): the page on the field, reading on bone panels
   const field = await fieldSystemOn(sp, user);
   const intro = field
@@ -188,7 +191,7 @@ export default async function PricingPage({
                 className="mt-2 text-[11px] uppercase tracking-[0.14em] opacity-80"
                 style={{ fontFamily: MONO }}
               >
-                {left > 0 ? `for life, founding 100 · $39/month after` : '$39/month'}
+                {priceLocked ? `for life, founding 100 · $39/month after` : '$39/month'}
               </p>
             )}
             <ul className="mt-6 space-y-2.5 text-[15px] leading-[1.45]">
@@ -229,7 +232,7 @@ export default async function PricingPage({
                     next="/pricing"
                     label={
                       open
-                        ? left > 0
+                        ? priceLocked
                           ? 'Lock in $29 for life'
                           : 'Keep Pro after Dec 3'
                         : undefined

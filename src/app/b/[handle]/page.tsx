@@ -4,7 +4,7 @@ import { profileCard, publicRead } from '@/lib/mcp/profile-read';
 import { HANDLE_RE } from '@/lib/public-brand';
 import { colorwayForHandle } from '@/lib/user-preferences';
 import { isColorway, type Colorway } from '@/lib/colorways';
-import { indexOpenFor } from '@/lib/index-rules';
+import { indexOpenForUser } from '@/lib/early-access';
 import { getEntry, memberProfile } from '@/lib/creator-index';
 import PublicBrand from './PublicBrand';
 
@@ -49,7 +49,7 @@ export default async function PublicBrandPage({ params, searchParams }: Props) {
     null;
   // The Creator Index (closed until INDEX_ENABLED; admins preview): the
   // member strip for listed members, "Join the Index" for the page's owner.
-  const indexOpen = valid && indexOpenFor(user);
+  const indexOpen = valid && (await indexOpenForUser(user));
   const owner = !!mine && mine.replace(/^@/, '').toLowerCase() === handle.toLowerCase();
   const [member, ownEntry] = indexOpen
     ? await Promise.all([memberProfile(handle), owner && user ? getEntry(user.id) : null])

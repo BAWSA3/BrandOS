@@ -131,6 +131,29 @@ export function bestAndWorst(posts: PostRow[]) {
   };
 }
 
+/**
+ * The one post that reached far beyond the usual (≥ 5× the median post's
+ * views), called out on its own so it doesn't stand in for the typical post.
+ */
+export function reachOutlier(posts: PostRow[]) {
+  const viewed = posts.filter((p) => p.views > 0);
+  if (viewed.length < 5) return null;
+  const sorted = viewed.map((p) => p.views).sort((a, b) => a - b);
+  const mid = Math.floor(sorted.length / 2);
+  const median = sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+  if (median <= 0) return null;
+  const top = viewed.reduce((a, p) => (p.views > a.views ? p : a));
+  const multiple = top.views / median;
+  if (multiple < 5) return null;
+  return {
+    tweetId: top.tweetId,
+    text: top.text,
+    views: top.views,
+    multiple: Math.round(multiple),
+    medianViews: Math.round(median),
+  };
+}
+
 /** Change between the latest snapshot and the one closest to `days` before it. */
 export function delta(
   snaps: SnapshotRow[],

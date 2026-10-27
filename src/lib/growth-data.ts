@@ -7,6 +7,7 @@ import {
   followerSeries,
   formatPerformance,
   peakHour,
+  reachOutlier,
   type PostRow,
   type SnapshotRow,
 } from '@/lib/growth-metrics';
@@ -57,6 +58,8 @@ export interface GrowthView {
   peakHour: number | null;
   best: { text: string; rate: number; why: string; tweetId: string }[];
   worst: { text: string; rate: number; why: string; tweetId: string } | null;
+  /** One post far above the usual reach, shown apart from the typical numbers. */
+  outlier: ReturnType<typeof reachOutlier>;
   /** The brand's idea board (migration 042); empty before it's applied. */
   ideas: {
     id: string;
@@ -80,6 +83,30 @@ export interface GrowthView {
     followers: number | null;
     mediaShare: number | null;
   }[];
+}
+
+/**
+ * The signed-in member's own record, shown when the dashboard is on their own
+ * brand: score history (account reads), the last posts with their breakdowns
+ * (PostScore, scored overnight) and how often the brand was looked up.
+ */
+export interface MemberRecord {
+  /** Oldest first. */
+  history: { id: string; at: string; score: number; phases: Record<Phase, number> | null }[];
+  posts: {
+    id: string;
+    excerpt: string;
+    when: string;
+    fit: number;
+    likes: number;
+    multiple: string;
+    breakdown?: import('@/lib/post-scores').PostBreakdownData;
+    url?: string;
+  }[];
+  lookups: {
+    week: { total: number; page: number; mcp: number; compare: number };
+    today: number;
+  } | null;
 }
 
 const parseJson = <T>(v: unknown): T | undefined => {
@@ -274,6 +301,7 @@ export async function getGrowthView(
       why: b.why,
       tweetId: b.p.tweetId,
     })),
+    outlier: reachOutlier(rows),
     worst: bw.worst
       ? {
           text: bw.worst.p.text,

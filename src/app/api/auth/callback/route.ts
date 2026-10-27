@@ -9,6 +9,14 @@ import { captureFunnelEvent } from '@/lib/funnel-events';
 import { isValidTosVersion } from '@/lib/tos';
 import { decodeUtm, UTM_COOKIE } from '@/lib/utm';
 import { safeNextPath } from '@/lib/safe-input';
+import {
+  codeState,
+  CodeTakenError,
+  createAccountWithCode,
+  inviteOnly,
+  redeemCode,
+} from '@/lib/early-access';
+import { INVITE_COOKIE, signInGate } from '@/lib/early-access-rules';
 
 const EARLY_ACCESS_MODE = process.env.NEXT_PUBLIC_EARLY_ACCESS_MODE === 'true';
 
@@ -87,6 +95,34 @@ export async function GET(request: NextRequest) {
       (xData && (xData.user_name || xData.preferred_username || xData.screen_name)) || null;
     const xId = (xData && (xData.provider_id || xData.sub)) || null;
 
+    // Determine migration status for new vs existing users
+    const existingUser = await prisma.user.findUnique({
+      where: { supabaseId: session.user.id },
+    });
+
+    // Closed beta (INVITE_ONLY): a NEW account needs a redeemable code, from
+    // the /i/<code> cookie or the /signup code box (which goes through /i/).
+    // Existing accounts sign in as before. No code (or 049 not applied):
+    // nothing is created, the Supabase session is dropped, back to /signup.
+    const carriedCode = cookieStore.get(INVITE_COOKIE)?.value;
+    const gate = signInGate({
+      inviteOnly: inviteOnly(),
+      existingAccount: !!existingUser,
+      code: existingUser || !inviteOnly() ? 'none' : await codeState(carriedCode),
+    });
+    const turnAway = async (reason: 'required' | 'invalid') => {
+      await supabase.auth.signOut({ scope: 'local' }).catch(() => {});
+      await logSecurityEvent({
+        category: 'auth',
+        eventType: 'signup_blocked_invite_only',
+        metadata: { reason, method: provider },
+      });
+      const res = NextResponse.redirect(new URL(`/signup?invite=${reason}`, request.url));
+      res.cookies.delete(INVITE_COOKIE);
+      return res;
+    };
+    if (gate === 'required' || gate === 'invalid') return turnAway(gate);
+
     // Invite code redemption
     const pendingInviteCode = cookieStore.get('pendingInviteCode')?.value;
     let isInnerCircle = false;
@@ -130,11 +166,6 @@ export async function GET(request: NextRequest) {
       invitedBy = 'EARLY_ACCESS';
     }
 
-    // Determine migration status for new vs existing users
-    const existingUser = await prisma.user.findUnique({
-      where: { supabaseId: session.user.id },
-    });
-
     const migrationStatus = existingUser ? existingUser.accountMigrationStatus : 'completed'; // new users start as completed (no legacy migration needed)
 
     // Record TOS acknowledgment on first acceptance only (never overwrite an
@@ -142,32 +173,46 @@ export async function GET(request: NextRequest) {
     const recordTos = tosVersion !== null && !existingUser?.tosAcceptedAt;
     const tosFields = recordTos ? { tosAcceptedAt: new Date(), tosVersion } : {};
 
-    // Upsert user — xUsername/xId are nullable for non-X-first signups
-    const user = await prisma.user.upsert({
-      where: { supabaseId: session.user.id },
-      update: {
-        name,
-        avatar,
-        email,
-        // keep the handle current (people rename on X)
-        ...(xUsername ? { xUsername } : {}),
-        ...(xId && !existingUser?.xId ? { xId } : {}),
-        ...(isInnerCircle ? { isInnerCircle: true, invitedBy } : {}),
-        ...tosFields,
-      },
-      create: {
-        supabaseId: session.user.id,
-        xUsername: xUsername ?? undefined,
-        xId: xId ?? undefined,
-        name,
-        avatar,
-        email,
-        isInnerCircle,
-        invitedBy,
-        accountMigrationStatus: migrationStatus,
-        ...tosFields,
-      },
-    });
+    const createData = {
+      supabaseId: session.user.id,
+      xUsername: xUsername ?? undefined,
+      xId: xId ?? undefined,
+      name,
+      avatar,
+      email,
+      isInnerCircle,
+      invitedBy,
+      accountMigrationStatus: migrationStatus,
+      ...tosFields,
+    };
+
+    let user;
+    if (gate === 'admit') {
+      try {
+        user = await createAccountWithCode(carriedCode!, (tx) =>
+          tx.user.create({ data: createData })
+        );
+      } catch (e) {
+        if (!(e instanceof CodeTakenError)) console.error('[Auth Callback] Gated signup:', e);
+        return turnAway('invalid');
+      }
+    } else {
+      // Upsert user — xUsername/xId are nullable for non-X-first signups
+      user = await prisma.user.upsert({
+        where: { supabaseId: session.user.id },
+        update: {
+          name,
+          avatar,
+          email,
+          // keep the handle current (people rename on X)
+          ...(xUsername ? { xUsername } : {}),
+          ...(xId && !existingUser?.xId ? { xId } : {}),
+          ...(isInnerCircle ? { isInnerCircle: true, invitedBy } : {}),
+          ...tosFields,
+        },
+        create: createData,
+      });
+    }
 
     // Ensure personal workspace
     const workspace = await ensurePersonalWorkspace(
@@ -276,11 +321,23 @@ export async function GET(request: NextRequest) {
 
     // Legacy accounts are no longer walled off: the dashboard shows an
     // optional "add a backup login" nudge instead (decided 2026-10-22).
-    const redirectTo = next;
+    // An early-access code carried through sign-in by /i/<code> (cookie) is
+    // redeemed now, and the dashboard says how it went.
+    let redirectTo = next;
+    const pendingEarlyCode = carriedCode;
+    if (gate === 'admit') {
+      if (redirectTo === '/dashboard') redirectTo = '/dashboard?invite=ok';
+    } else if (pendingEarlyCode) {
+      const redeemed = await redeemCode(user.id, pendingEarlyCode);
+      if (redirectTo === '/dashboard') {
+        redirectTo = `/dashboard?invite=${redeemed.ok ? 'ok' : 'invalid'}`;
+      }
+    }
 
     const response = NextResponse.redirect(new URL(redirectTo, request.url));
 
     response.cookies.delete('pendingInviteCode');
+    response.cookies.delete(INVITE_COOKIE);
 
     response.cookies.set('sb-access-token', session.access_token, {
       path: '/',

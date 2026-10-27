@@ -1,4 +1,4 @@
-import type { GrowthView } from '@/lib/growth-data';
+import type { GrowthView, MemberRecord } from '@/lib/growth-data';
 import type { Idea } from '@/components/growth/IdeaBoard';
 
 // Sample view for the layout preview (/world-preview/growth). Competitor reads
@@ -70,6 +70,13 @@ export const SAMPLE_VIEW: GrowthView = {
       why: '1.5× your average · posted at your peak hour',
     },
   ],
+  outlier: {
+    tweetId: '4',
+    text: 'i asked 40 brands why they skipped creators. here is what they said 🧵',
+    views: 127_000,
+    multiple: 41,
+    medianViews: 3100,
+  },
   worst: {
     tweetId: '3',
     text: 'gm. building today 🔨',
@@ -189,3 +196,59 @@ export const SAMPLE_IDEAS: Idea[] = [
     createdAt: ago(9 * D),
   },
 ];
+
+const at = (daysAgo: number) =>
+  new Date(Date.UTC(2026, 9, 26) - daysAgo * 86_400_000).toISOString();
+
+/** The member's own record (score history, last posts, lookups) for the preview. */
+export const SAMPLE_RECORD: MemberRecord = {
+  history: [
+    { id: 'h1', at: at(40), score: 64, phases: { define: 70, check: 66, generate: 58, scale: 61 } },
+    { id: 'h2', at: at(26), score: 68, phases: { define: 74, check: 68, generate: 62, scale: 63 } },
+    { id: 'h3', at: at(12), score: 70, phases: { define: 76, check: 70, generate: 64, scale: 66 } },
+    { id: 'h4', at: at(3), score: 72, phases: { define: 78, check: 71, generate: 68, scale: 69 } },
+  ],
+  posts: [
+    {
+      id: 'p1',
+      excerpt: 'i asked 40 brands why they skipped creators. here is what they said 🧵',
+      when: '2d ago',
+      fit: 91,
+      likes: 1840,
+      multiple: '41.0x',
+    },
+    {
+      id: 'p2',
+      excerpt: 'the 3 income streams nobody tells you about when you start posting…',
+      when: '3d ago',
+      fit: 84,
+      likes: 212,
+      multiple: '1.8x',
+    },
+    {
+      id: 'p3',
+      excerpt: 'stop asking for followers. ask for one reply from the right person.',
+      when: '4d ago',
+      fit: 78,
+      likes: 160,
+      multiple: '1.5x',
+    },
+    {
+      id: 'p4',
+      excerpt: 'gm. building today 🔨',
+      when: '5d ago',
+      fit: 41,
+      likes: 12,
+      multiple: '0.2x',
+    },
+    {
+      id: 'p5',
+      excerpt: 'what i learned shipping a product in public for 30 days',
+      when: '6d ago',
+      fit: 72,
+      likes: 98,
+      multiple: '0.9x',
+    },
+  ],
+  lookups: { week: { total: 37, page: 21, mcp: 11, compare: 5 }, today: 4 },
+};
