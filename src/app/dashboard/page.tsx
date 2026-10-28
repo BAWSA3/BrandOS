@@ -30,6 +30,14 @@ import { standsOut } from '@/lib/index-rules';
 import { earlyAccessFor, indexOpenForUser } from '@/lib/early-access';
 import EarlyAccessDock from '@/components/early-access/EarlyAccessDock';
 import { getEntry, viewSummary } from '@/lib/creator-index';
+import { dashboardV2For } from '@/lib/dashboard-v2';
+import Shell from '@/components/dashboard-v2/Shell';
+import { loadStanding } from '@/lib/dashboard-v2-data';
+import Today from '@/components/dashboard-v2/Today';
+import Playbook, { type PlaybookData } from '@/components/dashboard-v2/Playbook';
+import { bodyOfWork } from '@/lib/playbook';
+import { classLabel, recordDate } from '@/lib/classifications';
+import { proofParts } from '@/lib/growth-proof';
 
 // Auth-gated page: render per-request, never statically prerender at build.
 export const dynamic = 'force-dynamic';
@@ -43,6 +51,7 @@ export default async function DashboardPage({
     checkout?: string;
     brand?: string;
     invite?: string;
+    view?: string;
   }>;
 }) {
   const sp = await searchParams;
@@ -107,6 +116,107 @@ export default async function DashboardPage({
       // their own brand only (not on a client brand or competitor they track).
       const own = !!home.handle && view.brand.handle.toLowerCase() === home.handle.toLowerCase();
       const record = own ? await loadRecord(home, user, view.brand.id) : null;
+      // Dashboard v2 (testers only until launch: env flag + redeemed code, or admin).
+      // Same reads as below plus the finish and Standing; nothing new is written.
+      if (await dashboardV2For(user)) {
+        const [colorway, standing] = await Promise.all([
+          getColorway(user.id),
+          loadStanding(user.id),
+        ]);
+        const brandId = sp.brand ? view.brand.id : null;
+        if (sp.view === 'brand') {
+          return (
+            <>
+              <Shell
+                finish={colorway}
+                place="brand"
+                brandId={brandId}
+                brands={view.brands}
+                standing={standing}
+              >
+                <GrowthDashboard view={view} index={index} record={record} colorway={colorway} v2 />
+              </Shell>
+              {dock}
+            </>
+          );
+        }
+        if (sp.view === 'playbook') {
+          const data = await loadPlaybook({ view, home, record, own, index, brandId });
+          return (
+            <>
+              <Shell
+                finish={colorway}
+                place="playbook"
+                brandId={brandId}
+                brands={view.brands}
+                standing={standing}
+              >
+                <Playbook data={data} />
+              </Shell>
+              {dock}
+            </>
+          );
+        }
+        const now = new Date();
+        const dayLabel = new Intl.DateTimeFormat('en-GB', {
+          timeZone: tz ?? 'UTC',
+          weekday: 'long',
+          day: 'numeric',
+          month: 'short',
+          year: 'numeric',
+        }).format(now);
+        const day = new Intl.DateTimeFormat('en-CA', { timeZone: tz ?? 'UTC' }).format(now);
+        const open = view.ideas.filter((i) => i.status === 'saved' || i.status === 'drafting');
+        return (
+          <>
+            <Shell
+              finish={colorway}
+              place="today"
+              brandId={brandId}
+              brands={view.brands}
+              standing={standing}
+            >
+              <Today
+                name={own ? (view.brand.name ?? user.name ?? null) : null}
+                dayLabel={dayLabel}
+                day={day}
+                brandQuery={brandId ? `brand=${encodeURIComponent(brandId)}` : ''}
+                openIdeas={open.length}
+                input={{
+                  handle: view.brand.handle,
+                  outlier: view.outlier,
+                  formats: view.formats,
+                  score: view.score && {
+                    value: view.score.value,
+                    weakest: view.score.weakest,
+                    phases: view.score.phases,
+                    nextMoves: view.score.nextMoves,
+                  },
+                  ideas: view.ideas.map((i) => ({ id: i.id, text: i.text, status: i.status })),
+                }}
+                scoreLine={
+                  view.score && {
+                    value: view.score.value,
+                    delta:
+                      record?.move && record.move.to === view.score.value
+                        ? record.move.delta
+                        : null,
+                    since:
+                      record?.move && record.move.to === view.score.value
+                        ? new Date(record.move.since).toLocaleDateString('en-GB', {
+                            day: 'numeric',
+                            month: 'short',
+                            timeZone: 'UTC',
+                          })
+                        : null,
+                  }
+                }
+              />
+            </Shell>
+            {dock}
+          </>
+        );
+      }
       return (
         <>
           <GrowthDashboard view={view} index={index} record={record} />
@@ -203,6 +313,127 @@ export default async function DashboardPage({
       {dock}
     </>
   );
+}
+
+const PHASE_NAME: Record<string, string> = {
+  define: 'Define',
+  check: 'Check',
+  generate: 'Generate',
+  scale: 'Scale',
+};
+
+/**
+ * The read-only Playbook (dashboard v2, slice 2), assembled from what the
+ * dashboard already reads plus two date-only queries for the body of work
+ * (this brand's ideas and posts, last 8 weeks). The member's own read (summary,
+ * pillars, strengths) shows only on their own brand, like the record.
+ */
+async function loadPlaybook({
+  view,
+  home,
+  record,
+  own,
+  index,
+  brandId,
+}: {
+  view: GrowthView;
+  home: Awaited<ReturnType<typeof getHomeData>>;
+  record: Awaited<ReturnType<typeof loadRecord>> | null;
+  own: boolean;
+  index: IndexTileData | null;
+  brandId: string | null;
+}): Promise<PlaybookData> {
+  const now = new Date();
+  const since = new Date(now.getTime() - 8 * 7 * 86_400_000);
+  const [ideas, posts] = await Promise.all([
+    prisma.idea
+      .findMany({
+        where: { accountId: view.brand.id, createdAt: { gte: since } },
+        select: { createdAt: true, status: true },
+        take: 1000,
+      })
+      .catch(() => []),
+    prisma.accountPost
+      .findMany({
+        where: { accountId: view.brand.id, postedAt: { gte: since } },
+        select: { postedAt: true },
+        take: 2000,
+      })
+      .catch(() => []),
+  ]);
+  const latest = own ? home.scans.at(-1) : undefined;
+  const reads = own
+    ? (record?.history ?? []).map((h) => ({ at: h.at, score: h.score }))
+    : view.score
+      ? [{ at: view.score.scannedAt, score: view.score.value }]
+      : [];
+  const q = brandId ? `brand=${encodeURIComponent(brandId)}` : '';
+  const brandHref = `/dashboard?view=brand${q ? `&${q}` : ''}`;
+  const rated = view.formats.filter((f) => f.rate !== null && f.posts > 0);
+  const topRate = Math.max(0, ...rated.map((f) => f.rate ?? 0));
+  const best = view.best[0];
+  const move =
+    record?.move && view.score && record.move.to === view.score.value ? record.move : null;
+  const day = (iso: string) =>
+    new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' });
+  const voice = latest?.insights?.Check ?? latest?.insights?.check ?? [];
+  return {
+    handle: view.brand.handle,
+    entryNo: own ? (index?.member?.number ?? null) : null,
+    classification: view.score?.archetype ? classLabel(view.score.archetype, '/') : null,
+    readOn: view.score ? recordDate(view.score.scannedAt) : null,
+    proof: own && record?.proof ? proofParts(record.proof).join(', ') : null,
+    positioning: latest?.summary ?? (own ? home.summary : null),
+    pillars: own ? home.pillars : [],
+    strengths: latest?.strengths ?? [],
+    gap: latest?.improvements?.[0] ?? null,
+    voice: voice.slice(0, 3),
+    working: rated.map((f) => ({
+      label: f.label,
+      rate: f.rate ?? 0,
+      share: f.share,
+      top: (f.rate ?? 0) === topRate && topRate > 0,
+    })),
+    best: best
+      ? {
+          text: best.text.length > 160 ? `${best.text.slice(0, 159)}…` : best.text,
+          why: best.why,
+          href: `https://x.com/${view.brand.handle}/status/${best.tweetId}`,
+        }
+      : null,
+    record: view.score
+      ? {
+          score: view.score.value,
+          delta: move?.delta ?? null,
+          since: move ? day(move.since) : null,
+          phases: view.score.phases
+            ? (['define', 'check', 'generate', 'scale'] as const).map((k) => ({
+                k: PHASE_NAME[k],
+                v: view.score!.phases![k],
+              }))
+            : [],
+          moved: (move?.phases ?? [])
+            .filter((p) => p.delta !== 0)
+            .slice(0, 3)
+            .map((p) => ({
+              phase: PHASE_NAME[p.phase] ?? p.phase,
+              delta: p.delta,
+              why: p.posts[0]
+                ? `“${p.posts[0].excerpt.length > 70 ? `${p.posts[0].excerpt.slice(0, 69)}…` : p.posts[0].excerpt}”: ${p.posts[0].reason}`
+                : (p.note ?? ''),
+            })),
+        }
+      : null,
+    weeks: bodyOfWork({ ideas, posts, reads }, now),
+    links: {
+      brand: brandHref,
+      board: `${brandHref}#ideas`,
+      write: '/dashboard/write',
+      doMore: best
+        ? `/dashboard/write?prompt=${encodeURIComponent(`Another post like my best recent one: “${best.text.slice(0, 160)}”`)}`
+        : null,
+    },
+  };
 }
 
 /** The member's own record for the growth dashboard (history, last posts, lookups). */

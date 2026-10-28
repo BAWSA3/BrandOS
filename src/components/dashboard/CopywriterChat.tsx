@@ -223,17 +223,20 @@ export default function CopywriterChat({
   colorway,
   demoReply,
   initialFormat = 'x-post',
+  initialPrompt = '',
 }: {
   handle: string | null;
   colorway: Colorway;
   /** Preview only (/world-preview/write): reply with this instead of calling the API. */
   demoReply?: string;
   initialFormat?: Format;
+  /** Pre-filled request (dashboard v2: today's move). Never sent until the member presses Write. */
+  initialPrompt?: string;
 }) {
   const [format, setFormat] = useState<Format>(initialFormat);
   const [emailKind, setEmailKind] = useState<EmailKind>('pitch');
   const [messages, setMessages] = useState<Msg[]>([]);
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState(initialPrompt);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);

@@ -103,7 +103,7 @@ export default function DraftScore({
           onClick={score}
           disabled={busy || tooShort}
           className="rounded-full border px-4 text-[14px] font-bold leading-8 transition-colors disabled:opacity-50"
-          style={{ borderColor: X.blue, color: X.blue, background: '#fff' }}
+          style={{ borderColor: X.blue, color: X.blue, background: X.surface }}
           title={tooShort ? 'Write a little more first' : undefined}
         >
           {busy ? 'Scoring…' : result && !stale ? 'Re-score' : 'Score this draft'}
@@ -135,7 +135,7 @@ export default function DraftScore({
         <section
           aria-label="Draft score"
           className="mt-3 border px-4 py-3"
-          style={{ borderColor: X.rule, background: '#fff', opacity: stale ? 0.55 : 1 }}
+          style={{ borderColor: X.rule, background: X.surface, opacity: stale ? 0.55 : 1 }}
         >
           <div className="flex items-end justify-between gap-3">
             <div className="flex items-baseline gap-1.5">

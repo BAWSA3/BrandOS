@@ -23,7 +23,7 @@ export default function IndexTile({ data }: { data: IndexTileData }) {
       <Tile className="md:col-span-12">
         <div className="flex flex-wrap items-end justify-between gap-6">
           <div>
-            <Label color={T.blue}>The BrandOS Creator Index</Label>
+            <Label color={T.blueText}>The BrandOS Creator Index</Label>
             <div
               className="mt-3 text-[28px] leading-tight md:text-[36px]"
               style={{ fontFamily: BIG, fontWeight: 500, letterSpacing: '-0.03em' }}
@@ -51,12 +51,17 @@ export default function IndexTile({ data }: { data: IndexTileData }) {
     <Tile className="md:col-span-12">
       <div className="grid gap-6 md:grid-cols-[auto_1fr_auto] md:items-end">
         <div>
-          <Label color={T.blue}>
+          <Label color={T.blueText}>
             {member.listed ? 'In the Creator Index' : 'Hidden from the Index'}
           </Label>
           <div
             className="mt-2 text-[44px] leading-none md:text-[56px]"
-            style={{ fontFamily: BIG, fontWeight: 500, letterSpacing: '-0.04em', color: T.blue }}
+            style={{
+              fontFamily: BIG,
+              fontWeight: 500,
+              letterSpacing: '-0.04em',
+              color: T.blueText,
+            }}
           >
             {formatNumber(member.number)}
           </div>
@@ -73,7 +78,7 @@ export default function IndexTile({ data }: { data: IndexTileData }) {
               <ul className="mt-2 space-y-1 text-[14px]">
                 {views.teams.map((t) => (
                   <li key={t.name}>
-                    <span style={{ color: T.blue }}>{t.name}</span>
+                    <span style={{ color: T.blueText }}>{t.name}</span>
                     <span style={{ color: T.muted }}>
                       {' '}
                       · {t.views} {t.views === 1 ? 'view' : 'views'}
@@ -91,7 +96,7 @@ export default function IndexTile({ data }: { data: IndexTileData }) {
               {people > 0
                 ? 'Founding Members see which brand and agency teams they were with.'
                 : 'Founding Members see which brand teams view their entry.'}{' '}
-              <Link href="/pricing" style={{ color: T.blue }}>
+              <Link href="/pricing" style={{ color: T.blueText }}>
                 Become a Founding Member →
               </Link>
             </p>

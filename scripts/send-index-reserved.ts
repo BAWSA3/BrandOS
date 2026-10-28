@@ -1,6 +1,11 @@
 /**
- * Launch email (Nov 2): "your creator index number is reserved: No. 0137",
- * to everyone whose reserved number (migration 045) is still unclaimed.
+ * Launch email (Nov 2): "@handle, No. 0137 is yours. no code needed", to
+ * everyone whose reserved number (migration 045) is still unclaimed and who
+ * doesn't have an account yet (members already in get a DM from Bawsa instead).
+ *
+ * A real send refuses to start unless sign-up is open: INVITE_ONLY off and
+ * INDEX_ENABLED "true" in the env it runs with (pull prod's env first), and
+ * /index/join answering 200 signed out on APP_URL. "no code needed" has to be true.
  *
  * DRY RUN BY DEFAULT: prints the audience and renders a sample into
  * PREVIEW_DIR (default: the OS temp dir). Nothing is sent without --send.
@@ -22,6 +27,8 @@ import { writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import prisma from '@/lib/db';
+import { inviteOnly } from '@/lib/early-access';
+import { indexEnabled } from '@/lib/index-rules';
 import {
   CAMPAIGNS,
   indexReservedContent,
@@ -37,12 +44,23 @@ const REPORT = args.includes('--report');
 const to = args.includes('--to') ? args[args.indexOf('--to') + 1]?.toLowerCase() : undefined;
 const limit = args.includes('--limit') ? Number(args[args.indexOf('--limit') + 1]) : undefined;
 const PREVIEW_DIR = process.env.PREVIEW_DIR || tmpdir();
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://mybrandos.app';
+
+/** The email says "no code needed": stop a list send while that isn't true. */
+async function assertSignupOpen() {
+  if (inviteOnly()) throw new Error('INVITE_ONLY is on: turn it off on prod before the send.');
+  if (!indexEnabled()) throw new Error('INDEX_ENABLED is not "true": the Index is closed.');
+  const res = await fetch(`${APP_URL}/index/join`, { redirect: 'manual' });
+  if (res.status !== 200)
+    throw new Error(`${APP_URL}/index/join answered ${res.status} signed out (want 200).`);
+}
 
 async function main() {
   const host = (process.env.DATABASE_URL ?? '').replace(/^.*@/, '').replace(/[:/].*$/, '');
   console.log(`DB host: ${host}  |  mode: ${SEND ? 'SEND' : REPORT ? 'report' : 'dry run'}`);
   if (!process.env.EMAIL_REPLY_TO && SEND && !to)
     throw new Error('Set EMAIL_REPLY_TO before a list send (people reply to these).');
+  if (SEND && !TEST) await assertSignupOpen();
 
   const reservations = await prisma.indexReservation.findMany({
     where: { NOT: { emailSignupId: null } },
@@ -88,18 +106,65 @@ async function main() {
     })
   );
 
+  // Already a member (signed in with this email or this X handle, or in the
+  // Index): they don't get "no code needed". That covers repliers who used their code.
+  const members = await prisma.user.findMany({
+    where: {
+      OR: [
+        { email: { in: signups.map((s) => s.email), mode: 'insensitive' } },
+        { xUsername: { in: handles, mode: 'insensitive' } },
+      ],
+    },
+    select: { email: true, xUsername: true },
+  });
+  const entries = await prisma.indexEntry.findMany({
+    where: { handle: { in: handles } },
+    select: { handle: true },
+  });
+  const memberEmails = new Set(members.flatMap((u) => (u.email ? [u.email.toLowerCase()] : [])));
+  const memberHandles = new Set([
+    ...members.flatMap((u) => (u.xUsername ? [u.xUsername.toLowerCase()] : [])),
+    ...entries.map((e) => e.handle),
+  ]);
+
+  // The opening line follows the Oct 27 early access email: got it, replied
+  // and was sent a code (label "@handle") they haven't used, or never got it.
+  const earlySends = await prisma.emailSend.findMany({
+    where: { campaign: CAMPAIGNS.earlyAccess },
+    select: { emailSignupId: true },
+  });
+  const gotEarly = new Set(earlySends.map((s) => s.emailSignupId));
+  const codes = await prisma.earlyAccessCode.findMany({
+    where: { redeemedAt: null, revokedAt: null },
+    select: { label: true },
+  });
+  const sentCode = new Set(codes.map((c) => c.label.replace(/^@/, '').trim().toLowerCase()));
+
   const audience = reservations
-    .filter((r) => !r.claimedAt && emailOf.has(r.emailSignupId!))
+    .filter(
+      (r) =>
+        !r.claimedAt &&
+        emailOf.has(r.emailSignupId!) &&
+        !memberHandles.has(r.handle) &&
+        !memberEmails.has(emailOf.get(r.emailSignupId!)!.toLowerCase())
+    )
     .map((r) => ({
       id: r.emailSignupId!,
       email: emailOf.get(r.emailSignupId!)!,
       handle: r.handle,
       number: r.number,
       read: readOf.get(r.handle) ?? null,
+      earlyAccess: (sentCode.has(r.handle)
+        ? 'replied'
+        : gotEarly.has(r.emailSignupId!)
+          ? 'sent'
+          : 'none') as 'sent' | 'replied' | 'none',
       // Subject A/B split by number parity: stable across re-runs.
       variant: (r.number % 2 === 0 ? 'a' : 'b') as 'a' | 'b',
     }));
-  console.log(`with a brand read: ${audience.filter((a) => a.read).length} of ${audience.length}`);
+  console.log(
+    `members left out: ${reservations.filter((r) => !r.claimedAt && emailOf.has(r.emailSignupId!)).length - audience.length} | with a brand read: ${audience.filter((a) => a.read).length} of ${audience.length} | opening sent/replied/none: ${['sent', 'replied', 'none'].map((k) => audience.filter((a) => a.earlyAccess === k).length).join('/')}`
+  );
   if (to && audience.length === 0)
     throw new Error(`${to} has no unclaimed reservation (or isn't on the list)`);
 
@@ -146,6 +211,15 @@ async function main() {
 
   const tally: Record<string, number> = {};
   for (const [i, r] of pending.entries()) {
+    // Claimed since the list was read (the send takes ~10 minutes): skip.
+    const now = await prisma.indexReservation.findUnique({
+      where: { handle: r.handle },
+      select: { claimedAt: true },
+    });
+    if (now?.claimedAt) {
+      tally.claimed = (tally.claimed ?? 0) + 1;
+      continue;
+    }
     const res = await sendOnce(
       r.id,
       CAMPAIGNS.indexReserved,

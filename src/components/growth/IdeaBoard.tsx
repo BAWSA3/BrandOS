@@ -166,7 +166,7 @@ export default function IdeaBoard({
   const brand = { handle, name, avatarUrl };
 
   return (
-    <Tile className="md:col-span-12">
+    <Tile id="ideas" className="scroll-mt-20 md:col-span-12">
       <div className="flex items-center justify-between gap-3">
         <Label>Idea board</Label>
         {accountId && (
@@ -175,7 +175,7 @@ export default function IdeaBoard({
             onClick={generate}
             disabled={busy}
             className="text-[10px] uppercase tracking-[0.14em] disabled:opacity-50"
-            style={{ fontFamily: MONO, color: T.blue }}
+            style={{ fontFamily: MONO, color: T.blueText }}
           >
             {busy ? 'Thinking…' : '✦ New BrandOS ideas'}
           </button>
@@ -195,7 +195,7 @@ export default function IdeaBoard({
         className="mt-4 grid grid-cols-1 gap-6 border p-5 md:grid-cols-[1fr_260px] md:gap-10 md:p-8"
         style={{
           borderColor: T.rule,
-          background: '#FFFFFF',
+          background: X.surface,
         }}
       >
         <div>
@@ -229,8 +229,8 @@ export default function IdeaBoard({
                   setDraft(`${sp}: `);
                   pageRef.current?.focus();
                 }}
-                className="border bg-white px-3 py-2 text-left text-[13px] leading-[1.35] transition-colors hover:border-[#0047FF]"
-                style={{ borderColor: T.rule }}
+                className="border px-3 py-2 text-left text-[13px] leading-[1.35] transition-colors hover:border-[#0047FF]"
+                style={{ borderColor: T.rule, background: X.surface, color: X.ink }}
               >
                 {sp}
               </button>
@@ -261,8 +261,13 @@ export default function IdeaBoard({
                 .map((i) => (
                   <article
                     key={i.id}
-                    className="border bg-white px-3 py-3"
-                    style={{ borderColor: X.rule, fontFamily: X.font, color: X.ink }}
+                    className="border px-3 py-3"
+                    style={{
+                      borderColor: X.rule,
+                      fontFamily: X.font,
+                      color: X.ink,
+                      background: X.surface,
+                    }}
                   >
                     {editing?.id === i.id ? (
                       <XComposer
@@ -305,7 +310,7 @@ export default function IdeaBoard({
                           {i.why && (
                             <div
                               className="mt-1 text-[9px] uppercase tracking-[0.14em]"
-                              style={{ fontFamily: MONO, color: T.blue }}
+                              style={{ fontFamily: MONO, color: T.blueText }}
                             >
                               ✦ BrandOS idea
                             </div>

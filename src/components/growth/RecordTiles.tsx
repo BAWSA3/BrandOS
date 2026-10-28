@@ -20,6 +20,7 @@ const TOKENS = {
   '--d-muted': T.muted,
   '--d-track': T.track,
   '--d-blue': T.blue,
+  '--d-blue-text': T.blueText,
 } as React.CSSProperties;
 
 const day = (iso: string) =>

@@ -83,7 +83,7 @@ export default function LookupStrip({ handle, data }: { handle: string; data: Lo
         type="button"
         onClick={copy}
         className="shrink-0 text-[10px] uppercase tracking-[0.14em] hover:underline"
-        style={{ fontFamily: MONO, color: '#0047FF' }}
+        style={{ fontFamily: MONO, color: 'var(--d-blue-text, #0047FF)' }}
       >
         {copied ? 'Link copied ✓' : `${url} · copy ↗`}
       </button>
