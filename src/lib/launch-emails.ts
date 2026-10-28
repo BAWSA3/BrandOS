@@ -242,20 +242,26 @@ export function renderStudioTease(
 }
 
 /**
- * "Your Creator Index number is reserved" (launch, Nov 2): everyone on the list
+ * "No. 0137 is yours. no code needed" (launch, Nov 2): everyone on the list
  * with an X handle had a number reserved for them (migration 045,
  * scripts/reserve-index-numbers.ts). One job: claim it, which means signing in
- * with X as that handle and joining. Founding 100 in the P.S.
+ * with X as that handle and joining. It picks up from the Oct 27 early access
+ * email: the list went in first, now it's open to all of them, no code needed
+ * (so INVITE_ONLY must be off when it goes). No price (GTM phase 2): the P.S.
+ * is "free until dec 3, no card".
  */
 /**
  * `read` is their latest public scan (score + archetype) when there is one.
- * Subject A/B: A = "your creator index number is reserved: No. 0137",
- * B = "you're No. 0137". The variant rides utm_content.
+ * `earlyAccess` picks the opening: 'sent' got the Oct 27 email, 'replied' was
+ * sent a code they never used, 'none' never got it.
+ * Subject A/B: A = "@handle, No. 0137 is yours. no code needed",
+ * B = "@handle, no code needed anymore". The variant rides utm_content.
  */
 export type ReservedRecipient = {
   handle: string;
   number: number;
   read?: { score: number; archetype: string } | null;
+  earlyAccess?: 'sent' | 'replied' | 'none';
   variant?: 'a' | 'b';
 };
 
@@ -266,6 +272,9 @@ export function readArchetype(raw: string | null | undefined): string | null {
   return getArchetypeInfo(name)?.name ?? null;
 }
 
+// Past this, "@handle, No. 0137 is yours. no code needed" runs over 50 characters.
+const SUBJECT_HANDLE_MAX = 13;
+
 function reservedModel(r: ReservedRecipient) {
   const no = formatNumber(r.number);
   const variant = r.variant ?? 'a';
@@ -273,22 +282,32 @@ function reservedModel(r: ReservedRecipient) {
   const read = r.read
     ? { score: Math.round(r.read.score), archetype: esc(r.read.archetype) }
     : null;
+  const yours =
+    r.handle.length > SUBJECT_HANDLE_MAX
+      ? `${no} is yours. no code needed`
+      : `@${r.handle}, ${no} is yours. no code needed`;
   return {
     no,
     url,
     read,
     handle: esc(r.handle),
-    subject: variant === 'b' ? `you're ${no}` : `your creator index number is reserved: ${no}`,
-    preheader: 'you signed up early, so we held a number for you. claim it before dec 3.',
-    problem:
-      'most good creators never get found by brands. not because they&#39;re bad, because nobody can see them. so i built the <b>BrandOS Creator Index</b>: the record of creator reputation. a book of creators brands can browse, every entry backed by a real brand read instead of a follower count.',
-    readLine: read
-      ? `your read: <b>${read.archetype}, ${read.score}/100</b>. that&#39;s what brands will see on your entry.`
-      : null,
-    held: 'you signed up early, so your number is already held. claiming takes a minute: sign in with X, pick your niches, write one line for brands.',
+    subject: variant === 'b' ? `@${r.handle}, no code needed anymore` : yours,
+    preheader: 'the early access list went in first. now it&#39;s open to you, free until dec 3.',
+    opening: {
+      sent: 'last tuesday i emailed you about early access. everyone who replied got a code and went in first.',
+      replied: 'you replied last week and i sent you a code. you don&#39;t need it anymore.',
+      none: 'BrandOS has been invite-only. the early access list went in first.',
+    }[r.earlyAccess ?? 'sent'],
+    open: `today it&#39;s open to everyone on this list. no code needed. your number in the Index is held: <b>${no}</b>.`,
     cta: `Claim ${no} →`,
-    release: 'numbers under 1,000 won&#39;t exist again. unclaimed ones are released dec 3.',
-    ps: 'the first 100 to add a card become Founding Members and keep Pro at $29/mo for life. featured in the Index, and you see which brands viewed your entry. nothing&#39;s charged until dec 3.',
+    index: `the Index is a book of creators brands can browse. every entry shows a real read, not a follower count. ${
+      read
+        ? `yours is <b>${read.score}/100, ${read.archetype}</b>. that&#39;s what a brand sees on your entry.`
+        : 'claiming runs your read, so you&#39;ll see what a brand sees on your entry.'
+    }`,
+    claim: 'claiming takes a minute: sign in with X, pick your niches, write one line for brands.',
+    reply: 'if your read looks wrong, reply and tell me why. i answer every one myself.',
+    ps: 'full access is free until dec 3, no card. unclaimed numbers are released dec 3.',
   };
 }
 
@@ -300,12 +319,11 @@ export function indexReservedContent(r: ReservedRecipient): NonNullable<Newslett
     preheader: m.preheader,
     sections: [
       { type: 'text', content: `hey @${m.handle},` },
-      { type: 'stat', label: m.no, content: `reserved for @${m.handle}` },
-      { type: 'text', content: m.problem },
-      ...(m.readLine ? [{ type: 'text' as const, content: m.readLine }] : []),
-      { type: 'text', content: m.held },
+      { type: 'text', content: `${m.opening}<br/><br/>${m.open}` },
       { type: 'cta', content: m.cta, url: m.url },
-      { type: 'text', content: `${m.release}<br/><br/>— Bawsa` },
+      { type: 'text', content: m.index },
+      { type: 'text', content: m.claim },
+      { type: 'text', content: `${m.reply}<br/><br/>— Bawsa` },
       { type: 'text', content: `<b>p.s.</b> ${m.ps}` },
     ],
   };
@@ -358,7 +376,7 @@ export function renderIndexReservedEmail(
             </td></tr>
           </table>
         </td></tr>
-        <tr><td>${p(m.problem)}${m.readLine ? p(m.readLine) : ''}${p(m.held)}</td></tr>
+        <tr><td>${p(m.opening)}${p(m.open)}</td></tr>
         <tr><td style="padding:6px 0 30px 0;">
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
             <td align="center" style="background:#0E0E0E;border-radius:6px;">
@@ -366,9 +384,9 @@ export function renderIndexReservedEmail(
             </td>
           </tr></table>
         </td></tr>
-        <tr><td>${p(m.release)}${p('— Bawsa', 'margin-bottom:28px;')}</td></tr>
+        <tr><td>${p(m.index)}${p(m.claim)}${p(m.reply)}${p('— Bawsa', 'margin-bottom:28px;')}</td></tr>
         <tr><td style="background:#FAF8F3;border:1px solid #DCD8CF;border-radius:10px;padding:20px 22px;">
-          ${label('Founding 100', '#0047FF')}${p(`<b>p.s.</b> ${m.ps}`, 'font-size:15px;margin:0;')}
+          ${label('Free until Dec 3', '#0047FF')}${p(`<b>p.s.</b> ${m.ps}`, 'font-size:15px;margin:0;')}
         </td></tr>
         <tr><td align="center" style="padding:30px 0 0 0;font-family:${SANS};font-size:12px;line-height:1.6;color:#9A968E;">
           You're getting this because you signed up at <a href="${APP_URL}" style="color:#9A968E;">mybrandos.app</a>.<br>
