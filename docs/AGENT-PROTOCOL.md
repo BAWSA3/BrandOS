@@ -53,6 +53,9 @@ routines) reads this before touching the repo._
 - UI on dashboard surfaces uses the world CSS variables and the shared
   primitives in `src/components/dashboard/terminal-ui.tsx`. Preview
   harnesses: `/world-preview?wizard=1`, `?dna=1`.
+- UI changes follow `docs/UI-QUALITY-PLAYBOOK.md`: question round, state
+  matrix, variants, break-it pass, before/after screenshots (PR template
+  carries the checklist).
 - One branch, one owner. Never commit to a branch another agent has open.
 
 ## Division of labor: Fable here vs Opus in Cursor
