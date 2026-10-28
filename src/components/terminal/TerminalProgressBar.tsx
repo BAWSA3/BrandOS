@@ -6,10 +6,10 @@ import { motion } from 'motion/react';
 
 const PHASE_LABELS = ['DEFINE', 'CHECK', 'GENERATE', 'SCALE'];
 const PHASE_COMMANDS = [
-  '> RUNNING: identity.extract()',
-  '> RUNNING: coherence.check()',
-  '> RUNNING: dna.generate()',
-  '> RUNNING: growth.scale()',
+  '> READING: YOUR TOPICS',
+  '> READING: YOUR VOICE',
+  '> READING: YOUR POSTS',
+  '> READING: YOUR SIGNALS',
 ];
 
 interface TerminalProgressBarProps {

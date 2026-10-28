@@ -379,32 +379,33 @@ const PHASE_COLORS = [
   '#ff6b35', // Phase 4 (Scale) - Orange
 ];
 
+// The reading's four phases, in the record's words (homepage "02 / The scan"):
+// say what is actually read, never theatre ("pinging nodes"). The score comes
+// from posts; the profile is context only.
 const phaseConfig: PhaseConfigItem[] = [
   {
     id: 'define',
     number: 1,
     title: 'DEFINE',
-    subtitle: 'Extracting your brand DNA',
-    explanation:
-      'Identifying the patterns, voice, and signals in your profile that make your content recognizably yours.',
+    subtitle: 'What are you known for?',
+    explanation: 'Your content pillars, a one-line identity and who your posts speak to.',
     items: [
       {
-        label: 'Name Sync',
-        description: 'Locking onto identity... confirming brand-name alignment.',
-        dataKey: 'name',
-      },
-      {
-        label: 'Bio Extract',
-        description: 'Parsing bio data... isolating core value proposition.',
+        label: 'Profile',
+        description: 'Reading your name and bio. Context only: the score comes from your posts.',
         dataKey: 'description',
       },
       {
-        label: 'Edge Finder',
-        description: 'Scanning for differentiators... what makes you, you.',
+        label: 'Recent posts',
+        description: 'Reading up to 50 recent original posts. No reposts, no replies.',
       },
       {
-        label: 'Audience Ping',
-        description: "Triangulating audience... mapping who's listening.",
+        label: 'Pillars',
+        description: 'Finding the topics you return to.',
+      },
+      {
+        label: 'Audience',
+        description: 'Reading who your posts speak to.',
       },
     ],
   },
@@ -412,26 +413,25 @@ const phaseConfig: PhaseConfigItem[] = [
     id: 'check',
     number: 2,
     title: 'CHECK',
-    subtitle: 'Checking brand coherence',
-    explanation:
-      'Measuring how consistently your profile projects a unified brand—not scattered or contradictory signals.',
+    subtitle: 'Does your voice hold?',
+    explanation: 'Whether your voice and topics stay recognisably yours from post to post.',
     items: [
       {
-        label: 'Handle Lock',
-        description: 'Syncing handle to identity... confirming recognition match.',
+        label: 'Account',
+        description: 'Confirming the account.',
         dataKey: 'username',
       },
       {
-        label: 'Tone Scan',
-        description: 'Analyzing voice patterns... measuring consistency levels.',
+        label: 'Voice',
+        description: 'Reading the tone of your posts.',
       },
       {
-        label: 'Polish Check',
-        description: 'Scanning presentation metrics... assessing brand polish.',
+        label: 'Consistency',
+        description: 'Checking that the voice holds from post to post.',
       },
       {
-        label: 'Content Flow',
-        description: 'Reviewing post patterns... detecting consistency signals.',
+        label: 'Focus',
+        description: 'Measuring how focused your topics are.',
       },
     ],
   },
@@ -439,28 +439,25 @@ const phaseConfig: PhaseConfigItem[] = [
     id: 'generate',
     number: 3,
     title: 'GENERATE',
-    subtitle: 'Priming content engine',
-    explanation:
-      'Calibrating your profile data to power AI generation that captures your authentic voice—not generic outputs.',
+    subtitle: 'Does your content perform?',
+    explanation: 'How your posts land: engagement, cadence, formats and timing.',
     items: [
       {
-        label: 'Field Scan',
-        description: 'Verifying profile data points... checking completion status.',
-        dataKey: 'location',
-      },
-      {
-        label: 'Bio Parse',
-        description: 'Deconstructing bio structure... analyzing readability index.',
-      },
-      {
-        label: 'Link Trace',
-        description: 'Tracing external pathways... confirming traffic routes.',
-        dataKey: 'url',
-      },
-      {
-        label: 'Activity Pulse',
-        description: 'Measuring content cadence... evaluating engagement signals.',
+        label: 'Cadence',
+        description: 'Counting how often you post.',
         dataKey: 'tweet_count',
+      },
+      {
+        label: 'Engagement',
+        description: 'Measuring engagement per view.',
+      },
+      {
+        label: 'Formats',
+        description: 'Sorting your formats: threads, media, questions, length.',
+      },
+      {
+        label: 'Timing',
+        description: 'Finding the hour your posts land best.',
       },
     ],
   },
@@ -468,29 +465,27 @@ const phaseConfig: PhaseConfigItem[] = [
     id: 'scale',
     number: 4,
     title: 'SCALE',
-    subtitle: 'Initializing growth protocols',
+    subtitle: 'What signals your reputation?',
     explanation:
-      'Your Brand DNA is compiled and ready. Activating the systems that will scale your presence while maintaining brand integrity.',
+      'The signals other people give you: reach, lists, and how you compare at your size.',
     items: [
       {
-        label: 'Tier Scan',
-        description: 'Classifying influence level... determining account tier.',
-        dataKey: 'influence_tier',
-      },
-      {
-        label: 'Reach Scan',
-        description: 'Mapping audience perimeter... quantifying brand reach.',
+        label: 'Reach',
+        description: 'Reading your followers.',
         dataKey: 'followers_count',
       },
       {
-        label: 'Network Ping',
-        description: 'Pinging connection nodes... measuring interaction density.',
+        label: 'Following',
+        description: 'Followers against following.',
         dataKey: 'following_count',
       },
       {
-        label: 'Age Verify',
-        description: 'Validating account tenure... confirming establishment level.',
-        dataKey: 'account_age',
+        label: 'Size tier',
+        description: 'Placing the account in its size tier, so it is compared fairly.',
+      },
+      {
+        label: 'Classification',
+        description: 'Scoring the four phases and classifying the brand.',
       },
     ],
   },
