@@ -20,6 +20,7 @@ export default async function GrowthPreviewPage({
       record={SAMPLE_RECORD}
       sample
       field={field === '1'}
+      plan={{ kind: 'open', until: '2026-12-03T00:00:00.000Z', spotsLeft: 100 }}
     />
   );
 }

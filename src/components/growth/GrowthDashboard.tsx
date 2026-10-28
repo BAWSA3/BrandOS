@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { AnimateNumber } from 'motion-plus/react';
 import { useReducedMotion } from 'motion/react';
 import Wordmark from '@/components/Wordmark';
+import PlanChip, { type PlanBadge } from '@/components/billing/PlanChip';
 import { FieldScreen } from '@/components/system';
 import type { GrowthView, MemberRecord } from '@/lib/growth-data';
 import { LastPostsTile, LookupsBlock, ScoreHistoryTile } from './RecordTiles';
@@ -137,7 +138,10 @@ export default function GrowthDashboard({
   record = null,
   colorway = null,
   v2 = false,
+  plan = null,
 }: {
+  /** The plan badge ("Lock $29 for life" during the launch window); v2 shows it in the shell instead. */
+  plan?: PlanBadge | null;
   /** Dashboard v2: the finish the member picked (null keeps the Bone look). */
   colorway?: Colorway | null;
   /** Dashboard v2: rendered inside the v2 shell (no wordmark, calm pass, brand links keep the view). */
@@ -323,6 +327,7 @@ export default function GrowthDashboard({
           </div>
         </div>
         <div className="flex items-center gap-2">
+          {plan && !v2 && <PlanChip plan={plan} />}
           <button
             type="button"
             onClick={() => run(() => post(`/api/accounts/${brand.id}/sync`))}

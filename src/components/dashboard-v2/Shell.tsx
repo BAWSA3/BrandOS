@@ -13,6 +13,7 @@ import {
   type Colorway,
 } from '@/lib/colorways';
 import CommandBar, { type Command } from './CommandBar';
+import PlanChip, { type PlanBadge } from '@/components/billing/PlanChip';
 import { V_TOKENS } from './tokens';
 import { DISPLAY, V2_CSS, VCR } from './ui';
 
@@ -40,6 +41,7 @@ export default function Shell({
   brandId,
   brands = [],
   standing,
+  plan = null,
   preview = false,
   focus = false,
   children,
@@ -51,6 +53,8 @@ export default function Shell({
   /** the workspace's brands, for ⌘K (first = the member's own) */
   brands?: { id: string; handle: string; kind: string }[];
   standing: StandingMini | null;
+  /** the plan badge: "Lock $29 for life" during the launch window (opens checkout) */
+  plan?: PlanBadge | null;
   /** sample-data harness: no saves, no syncs */
   preview?: boolean;
   /** the writing room: no rail, no tabs, one way back (to the Playbook) */
@@ -240,6 +244,11 @@ export default function Shell({
             })}
           </ul>
           <div className="flex-1" />
+          {plan && (
+            <div className="mb-5 flex">
+              <PlanChip plan={plan} v2 />
+            </div>
+          )}
           {standing && <StandingRail s={standing} />}
           <button
             type="button"
@@ -293,14 +302,18 @@ export default function Shell({
           ) : (
             <div className="flex h-[56px] items-center justify-between px-4 md:hidden">
               <Wordmark height={15} mode={wordmarkFor(finish)} href="/dashboard" />
-              {standing && (
-                <span
-                  className="flex h-[36px] items-center px-3 text-[13px]"
-                  style={{ borderRadius: 999, boxShadow: 'inset 0 0 0 1px var(--v-dot)' }}
-                >
-                  Level {standing.level}
-                  <span style={{ color: 'var(--v-head-muted)' }}>&nbsp;· {standing.run}d</span>
-                </span>
+              {plan?.kind === 'open' ? (
+                <PlanChip plan={plan} v2 />
+              ) : (
+                standing && (
+                  <span
+                    className="flex h-[36px] items-center px-3 text-[13px]"
+                    style={{ borderRadius: 999, boxShadow: 'inset 0 0 0 1px var(--v-dot)' }}
+                  >
+                    Level {standing.level}
+                    <span style={{ color: 'var(--v-head-muted)' }}>&nbsp;· {standing.run}d</span>
+                  </span>
+                )
               )}
             </div>
           )}

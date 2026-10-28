@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import type { PlanBadge } from '@/components/billing/PlanChip';
 import Shell from '@/components/dashboard-v2/Shell';
 import { roomFormat } from '@/lib/article';
 import Today from '@/components/dashboard-v2/Today';
@@ -15,6 +16,13 @@ import { SAMPLE_IDEAS, SAMPLE_RECORD, SAMPLE_VIEW } from '../growth/sample';
 // sample data, so it can be checked without a tester account. The real page is
 // /dashboard behind DASHBOARD_V2. Hidden on mybrandos.app (middleware).
 //   ?c=bone|night|klein|paper  &view=brand
+
+// the launch-window buy button, as a member without a card sees it
+const PREVIEW_PLAN: PlanBadge = {
+  kind: 'open',
+  until: '2026-12-03T00:00:00.000Z',
+  spotsLeft: 100,
+};
 
 export const metadata: Metadata = { title: 'Dashboard v2 preview · BrandOS' };
 
@@ -151,6 +159,7 @@ export default async function TodayPreview({
         brandId={null}
         brands={view.brands}
         standing={standing}
+        plan={PREVIEW_PLAN}
         preview
       >
         <GrowthDashboard
@@ -172,6 +181,7 @@ export default async function TodayPreview({
         brandId={null}
         brands={view.brands}
         standing={standing}
+        plan={PREVIEW_PLAN}
         preview
         focus
       >
@@ -208,6 +218,7 @@ export default async function TodayPreview({
         brandId={null}
         brands={view.brands}
         standing={standing}
+        plan={PREVIEW_PLAN}
         preview
       >
         <Playbook data={samplePlaybook()} />
@@ -226,6 +237,7 @@ export default async function TodayPreview({
       brandId={null}
       brands={view.brands}
       standing={standing}
+      plan={PREVIEW_PLAN}
       preview
     >
       <Today

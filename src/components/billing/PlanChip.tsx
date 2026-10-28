@@ -24,9 +24,12 @@ const shortDate = (iso: string) =>
 export default function PlanChip({
   plan,
   onCanvas = false,
+  v2 = false,
 }: {
   plan: PlanBadge;
   onCanvas?: boolean;
+  /** Dashboard v2 shell: rounded, full width in the side nav, --v-* colours. */
+  v2?: boolean;
 }) {
   const [busy, setBusy] = useState(false);
   // trial days left, computed after mount (the clock isn't read during render)
@@ -84,13 +87,26 @@ export default function PlanChip({
       onClick={go}
       disabled={busy}
       title={title}
-      className="mr-1 border px-2 py-1 text-[10px] uppercase tracking-[0.14em] disabled:opacity-60"
-      style={{
-        fontFamily: MONO,
-        borderColor: accent ? '#0047FF' : onCanvas ? 'var(--d-head-muted)' : 'var(--d-rule)',
-        background: accent ? '#0047FF' : 'transparent',
-        color: accent ? '#FFFFFF' : onCanvas ? 'var(--d-head)' : 'var(--d-muted)',
-      }}
+      className={
+        v2
+          ? 'v2-focus v2-press min-h-[40px] px-3 py-2 text-left text-[13px] leading-snug disabled:opacity-60'
+          : 'mr-1 border px-2 py-1 text-[10px] uppercase tracking-[0.14em] disabled:opacity-60'
+      }
+      style={
+        v2
+          ? {
+              borderRadius: 12,
+              background: accent ? '#0047FF' : 'transparent',
+              color: accent ? '#FFFFFF' : 'var(--v-head-muted)',
+              boxShadow: accent ? 'none' : 'inset 0 0 0 1px var(--v-dot)',
+            }
+          : {
+              fontFamily: MONO,
+              borderColor: accent ? '#0047FF' : onCanvas ? 'var(--d-head-muted)' : 'var(--d-rule)',
+              background: accent ? '#0047FF' : 'transparent',
+              color: accent ? '#FFFFFF' : onCanvas ? 'var(--d-head)' : 'var(--d-muted)',
+            }
+      }
     >
       {busy ? (plan.kind === 'open' ? 'Opening checkout…' : 'Opening…') : label}
     </button>
