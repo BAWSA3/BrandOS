@@ -69,6 +69,19 @@ function TerminalTypewriter({ text, speed = 25 }: { text: string; speed?: number
   );
 }
 
+/** Plain labels for the profile values shown under a step (no code syntax). */
+const VALUE_LABELS: Record<string, string> = {
+  name: 'name',
+  username: 'handle',
+  description: 'bio',
+  location: 'location',
+  url: 'link',
+  tweet_count: 'posts',
+  followers_count: 'followers',
+  following_count: 'following',
+  ratio: 'ratio',
+};
+
 function formatProfileValue(
   dataKey: string | undefined,
   profile: XProfileData | null
@@ -79,7 +92,7 @@ function formatProfileValue(
     case 'name':
       return profile.name;
     case 'username':
-      return `"${profile.username}"`;
+      return `@${profile.username}`;
     case 'description':
       return profile.description
         ? `"${
@@ -87,11 +100,11 @@ function formatProfileValue(
               ? profile.description.substring(0, 60) + '...'
               : profile.description
           }"`
-        : '"// No bio set"';
+        : 'no bio';
     case 'location':
-      return profile.location ? `"${profile.location}"` : '"// Not specified"';
+      return profile.location ? `"${profile.location}"` : 'not set';
     case 'url':
-      return profile.url ? `"${profile.url}"` : '"// No link"';
+      return profile.url ? `"${profile.url}"` : 'no link';
     case 'tweet_count':
       return `${profile.tweet_count.toLocaleString()}`;
     case 'followers_count':
@@ -197,11 +210,9 @@ export default function TerminalPhaseCard({
           lineHeight: 1.6,
         }}
       >
-        <div>/* ═══════════════════════════════════════ */</div>
         <div style={{ color: '#0047FF', fontWeight: 500 }}>
-          /* {phaseName} — PHASE {phase.number} OF 4 */
+          PHASE {phase.number} OF 4 / {phaseName}
         </div>
-        <div>/* ═══════════════════════════════════════ */</div>
       </div>
 
       {/* Phase title */}
@@ -314,7 +325,7 @@ export default function TerminalPhaseCard({
               marginLeft: 'auto',
             }}
           >
-            brandos-cli v2.0
+            {profile?.username ? `READING @${profile.username.toUpperCase()}` : 'THE READING'}
           </span>
         </div>
 
@@ -399,7 +410,7 @@ export default function TerminalPhaseCard({
                   </div>
                 </div>
 
-                {/* Profile data as TypeScript const */}
+                {/* Profile value behind this step, as a plain label: value */}
                 <AnimatePresence>
                   {isItemActive && profileValue && (
                     <motion.div
@@ -419,9 +430,9 @@ export default function TerminalPhaseCard({
                         color: 'rgba(0, 0, 0, 0.7)',
                       }}
                     >
-                      <span style={{ color: '#0047FF' }}>const</span>{' '}
-                      <span style={{ color: '#000' }}>{item.dataKey}</span>{' '}
-                      <span style={{ color: 'rgba(0,0,0,0.4)' }}>=</span>{' '}
+                      <span style={{ color: 'rgba(0,0,0,0.5)' }}>
+                        {VALUE_LABELS[item.dataKey ?? ''] ?? item.dataKey}:
+                      </span>{' '}
                       <span style={{ color: '#10B981' }}>{profileValue}</span>
                       <span style={{ color: 'rgba(0,0,0,0.4)' }}>;</span>
                     </motion.div>

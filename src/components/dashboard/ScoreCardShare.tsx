@@ -5,6 +5,13 @@ import { AnimateNumber } from 'motion-plus/react';
 import { DASH_FONTS } from '@/components/dashboard/dashFonts';
 import { captureNode } from '@/lib/capture-node';
 import type { ScoreCardData } from '@/lib/score-card';
+import { classify } from '@/lib/classifications';
+
+/** "CLASS 04" above the class name, as on the homepage ("CLASS 04 / ARC"). */
+const classNo = (name: string) => {
+  const c = classify(name);
+  return c ? `CLASS ${String(c.number).padStart(2, '0')}` : 'CLASS';
+};
 
 // The shareable brand-score card (2026-10-14): the dashboard's blue score tile
 // as a square asset (score, change, history line, the four phases) + photo,
@@ -301,7 +308,7 @@ export function ScoreCard({
         {hist.length < 2 && d.archetype ? (
           <div style={{ paddingBottom: 2 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span style={micro}>ARCHETYPE</span>
+              <span style={micro}>{classNo(d.archetype.name)}</span>
               <span style={micro}>SCAN YOURS · MYBRANDOS.APP</span>
             </div>
             <div
