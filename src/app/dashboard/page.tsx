@@ -116,6 +116,8 @@ export default async function DashboardPage({
       // their own brand only (not on a client brand or competitor they track).
       const own = !!home.handle && view.brand.handle.toLowerCase() === home.handle.toLowerCase();
       const record = own ? await loadRecord(home, user, view.brand.id) : null;
+      // the buy button ("Lock $29 for life") lives in every dashboard's top bar
+      const plan = await planBadgeFor(user);
       // Dashboard v2 (testers only until launch: env flag + redeemed code, or admin).
       // Same reads as below plus the finish and Standing; nothing new is written.
       if (await dashboardV2For(user)) {
@@ -133,6 +135,7 @@ export default async function DashboardPage({
                 brandId={brandId}
                 brands={view.brands}
                 standing={standing}
+                plan={plan}
               >
                 <GrowthDashboard view={view} index={index} record={record} colorway={colorway} v2 />
               </Shell>
@@ -150,6 +153,7 @@ export default async function DashboardPage({
                 brandId={brandId}
                 brands={view.brands}
                 standing={standing}
+                plan={plan}
               >
                 <Playbook data={data} />
               </Shell>
@@ -175,6 +179,7 @@ export default async function DashboardPage({
               brandId={brandId}
               brands={view.brands}
               standing={standing}
+              plan={plan}
             >
               <Today
                 name={own ? (view.brand.name ?? user.name ?? null) : null}
@@ -219,7 +224,7 @@ export default async function DashboardPage({
       }
       return (
         <>
-          <GrowthDashboard view={view} index={index} record={record} />
+          <GrowthDashboard view={view} index={index} record={record} plan={plan} />
           {dock}
         </>
       );
@@ -252,18 +257,8 @@ export default async function DashboardPage({
   const autoRescan = (sp.rescan === '1' && pro) || firstScan;
   const subscribed = isSubscribed(user);
   const foundingLeft = !subscribed && bento ? await foundingSpotsLeft() : 0;
-  const trialEnd = trialEndsAt(user);
   // Top-bar plan badge: the launch offer (lock $29), a founding card, or a trial
-  let plan: PlanBadge | null = null;
-  if (!subscribed && isOpenAccess()) {
-    plan = { kind: 'open', until: OPEN_ACCESS_UNTIL.toISOString(), spotsLeft: foundingLeft };
-  } else if (trialEnd) {
-    const number = await foundingNumber(user.id);
-    plan =
-      number !== null
-        ? { kind: 'founding', number, chargesAt: trialEnd.toISOString() }
-        : { kind: 'trial', endsAt: trialEnd.toISOString() };
-  }
+  const plan = await planBadgeFor(user, foundingLeft);
   // "your brand was looked up": last 7 days + last 24h (counts only)
   const now = Date.now();
   const [lookWeek, lookDay] = bento
@@ -520,4 +515,28 @@ async function loadGrowth(
     console.error('[dashboard] growth view unavailable, using the classic dashboard', e);
     return null;
   }
+}
+
+/**
+ * The plan badge every dashboard shows (old bento, growth, v2): the launch
+ * offer ("Lock $29 for life", opens the Founding checkout), a founding card,
+ * or a trial. Null for subscribers outside those windows.
+ */
+async function planBadgeFor(
+  user: NonNullable<Awaited<ReturnType<typeof getCurrentUser>>>,
+  spotsLeft?: number
+): Promise<PlanBadge | null> {
+  const subscribed = isSubscribed(user);
+  const trialEnd = trialEndsAt(user);
+  if (!subscribed && isOpenAccess()) {
+    const left = spotsLeft ?? (await foundingSpotsLeft());
+    return { kind: 'open', until: OPEN_ACCESS_UNTIL.toISOString(), spotsLeft: left };
+  }
+  if (trialEnd) {
+    const number = await foundingNumber(user.id);
+    return number !== null
+      ? { kind: 'founding', number, chargesAt: trialEnd.toISOString() }
+      : { kind: 'trial', endsAt: trialEnd.toISOString() };
+  }
+  return null;
 }
