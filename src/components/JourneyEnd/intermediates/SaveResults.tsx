@@ -97,7 +97,7 @@ export default function SaveResults({ username, onSave, onSkip, theme }: SaveRes
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
           style={{
-            fontFamily: "var(--font-inter), sans-serif",
+            fontFamily: 'var(--font-inter), sans-serif',
             fontSize: '22px',
             fontWeight: 700,
             color: '#FFFFFF',
@@ -114,7 +114,7 @@ export default function SaveResults({ username, onSave, onSkip, theme }: SaveRes
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.35 }}
           style={{
-            fontFamily: "var(--font-inter), sans-serif",
+            fontFamily: 'var(--font-inter), sans-serif',
             fontSize: '14px',
             color: 'rgba(255,255,255,0.6)',
             textAlign: 'center',
@@ -161,7 +161,7 @@ export default function SaveResults({ username, onSave, onSkip, theme }: SaveRes
                     border: error ? '1px solid #EF4444' : '1px solid rgba(255,255,255,0.15)',
                     background: 'rgba(255,255,255,0.05)',
                     color: '#FFFFFF',
-                    fontFamily: "var(--font-inter), sans-serif",
+                    fontFamily: 'var(--font-inter), sans-serif',
                     fontSize: '14px',
                     outline: 'none',
                     transition: 'border-color 0.2s',
@@ -213,7 +213,7 @@ export default function SaveResults({ username, onSave, onSkip, theme }: SaveRes
                   initial={{ opacity: 0, y: -5 }}
                   animate={{ opacity: 1, y: 0 }}
                   style={{
-                    fontFamily: "var(--font-inter), sans-serif",
+                    fontFamily: 'var(--font-inter), sans-serif',
                     fontSize: '12px',
                     color: '#EF4444',
                     marginBottom: '16px',
@@ -300,7 +300,7 @@ export default function SaveResults({ username, onSave, onSkip, theme }: SaveRes
                 </svg>
                 <span
                   style={{
-                    fontFamily: "var(--font-inter), sans-serif",
+                    fontFamily: 'var(--font-inter), sans-serif',
                     fontSize: '12px',
                     color: 'rgba(255,255,255,0.7)',
                   }}

@@ -119,14 +119,17 @@ export default function InfoTip({ label, children }: { label: string; children: 
 export const TIPS = {
   record:
     'Your score out of 100: how clearly your posts say who you are, and how well they land. It moves as you post.',
-  classification:
-    'The kind of creator your posts read as. It can change as your posts change.',
-  known: "What your recent posts say you're known for, read from the posts themselves, not your bio.",
-  working: 'Each kind of post you make, and how many people react when they see it. The highlighted bar lands best.',
+  classification: 'The kind of creator your posts read as. It can change as your posts change.',
+  known:
+    "What your recent posts say you're known for, read from the posts themselves, not your bio.",
+  working:
+    'Each kind of post you make, and how many people react when they see it. The highlighted bar lands best.',
   sharpen: 'The one change that would lift your score most right now.',
-  move: "One thing to do today, picked from your own recent posts. Do it and skip the rest.",
-  marks: "Notes that appear as you type: voice (sounds like you?), lane (on what you're known for?), landing (will it land?). They say what's off; you fix it.",
-  liveScore: 'Your draft scored as you type, on the same scale as your score. It updates when you pause.',
+  move: 'One thing to do today, picked from your own recent posts. Do it and skip the rest.',
+  marks:
+    "Notes that appear as you type: voice (sounds like you?), lane (on what you're known for?), landing (will it land?). They say what's off; you fix it.",
+  liveScore:
+    'Your draft scored as you type, on the same scale as your score. It updates when you pause.',
   invites: 'Codes you can give friends. Each one gets them in for 30 days, free.',
   growth:
     'Followers, how much people react, how often you post and your average views, from your X account. The chart is followers over time.',

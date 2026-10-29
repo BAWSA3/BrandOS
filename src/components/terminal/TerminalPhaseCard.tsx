@@ -425,7 +425,7 @@ export default function TerminalPhaseCard({
                         background: 'rgba(0, 71, 255, 0.04)',
                         border: '1px solid rgba(0, 71, 255, 0.1)',
                         borderRadius: '4px',
-                        fontFamily: "var(--font-jetbrains), monospace",
+                        fontFamily: 'var(--font-jetbrains), monospace',
                         fontSize: '11px',
                         color: 'rgba(0, 0, 0, 0.7)',
                       }}

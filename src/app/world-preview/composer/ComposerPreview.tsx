@@ -109,7 +109,10 @@ function Frame({
       header={
         <span
           className="text-[11px] uppercase tracking-[0.08em]"
-          style={{ fontFamily: "'VCR OSD Mono', var(--font-jetbrains), monospace", color: '#6E6A62' }}
+          style={{
+            fontFamily: "'VCR OSD Mono', var(--font-jetbrains), monospace",
+            color: '#6E6A62',
+          }}
         >
           Writing room / {smm ? '@northwind (client) ▾' : '@bawsaxbt'}
         </span>

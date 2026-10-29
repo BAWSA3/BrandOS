@@ -400,7 +400,6 @@ export default function ContinuePage() {
               Have an early-access code?
             </button>
           ))}
-
       </div>
     </main>
   );

@@ -296,7 +296,12 @@ function ScoreRoll({ value }: { value: number }) {
   return (
     <AnimateNumber
       className="text-[96px] leading-none md:text-[148px]"
-      style={{ fontFamily: DISPLAY, fontWeight: 500, letterSpacing: '-0.05em', color: 'var(--v-signal-text)' }}
+      style={{
+        fontFamily: DISPLAY,
+        fontWeight: 500,
+        letterSpacing: '-0.05em',
+        color: 'var(--v-signal-text)',
+      }}
       transition={reduce ? { duration: 0 } : { type: 'spring', duration: 1.3, bounce: 0 }}
     >
       {shown}
@@ -319,7 +324,9 @@ function StepBody({ step, handle }: { step: WalkStep; handle: string }) {
         </div>
         <Plain delay={0.9}>{step.body}</Plain>
         <div className="mt-6">
-          <Plain small delay={1.3}>{step.term}</Plain>
+          <Plain small delay={1.3}>
+            {step.term}
+          </Plain>
           {step.classification && (
             <Plain small delay={1.5}>
               {`${step.classification} is your classification: the kind of creator your posts read as.`}

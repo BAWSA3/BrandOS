@@ -196,7 +196,9 @@ export default function InvitePasses({ preview }: { preview?: InviteData }) {
                     boxShadow: isCopied ? 'none' : 'inset 0 0 0 1px var(--v-ink)',
                     minWidth: 128,
                   }}
-                  aria-label={inv ? `Copy invite link ${slot + 1}` : `Make and copy invite link ${slot + 1}`}
+                  aria-label={
+                    inv ? `Copy invite link ${slot + 1}` : `Make and copy invite link ${slot + 1}`
+                  }
                 >
                   {busy === slot ? 'Making…' : isCopied ? 'Copied' : 'Copy link'}
                 </motion.button>

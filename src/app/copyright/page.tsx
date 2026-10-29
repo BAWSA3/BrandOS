@@ -21,8 +21,8 @@ export default function CopyrightPage() {
         <div className="space-y-8 text-gray-300">
           <section>
             <p>
-              BrandOS respects the intellectual property rights of others. If you believe content
-              on BrandOS infringes your copyright, send a notice to our designated agent under the
+              BrandOS respects the intellectual property rights of others. If you believe content on
+              BrandOS infringes your copyright, send a notice to our designated agent under the
               Digital Millennium Copyright Act (17 U.S.C. § 512).
             </p>
           </section>

@@ -392,7 +392,7 @@ export default function ScoreReveal({ profile, brandScore, isVisible, theme }: S
           </span>
           <h3
             style={{
-              fontFamily: "var(--font-inter), sans-serif",
+              fontFamily: 'var(--font-inter), sans-serif',
               fontSize: '24px',
               fontWeight: 900,
               fontStyle: 'italic',

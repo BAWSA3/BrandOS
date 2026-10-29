@@ -37,7 +37,10 @@ export function walkthroughSteps(d: WalkthroughInput): WalkStep[] {
       term: 'We call it your Record because it keeps the history: it moves as you post, and every read is kept.',
     });
   }
-  const known = d.strengths.map((s) => s.trim()).filter(Boolean).slice(0, 3);
+  const known = d.strengths
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .slice(0, 3);
   if (known.length > 0) {
     steps.push({
       kind: 'known',
