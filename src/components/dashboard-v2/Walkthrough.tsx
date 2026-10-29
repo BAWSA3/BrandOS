@@ -7,6 +7,8 @@ import { AnimateNumber } from 'motion-plus/react';
 import {
   LOCAL_DONE_KEY,
   STEP_LABEL,
+  WRITE_NOTES,
+  WRITE_NOTE_SEEN_KEY,
   walkthroughSteps,
   type WalkStep,
   type WalkthroughInput,
@@ -417,6 +419,8 @@ function PersonaStep({ name, onPick }: { name: string | null; onPick: (p: Person
 }
 
 function HandOff() {
+  // seen here, so the one-time note in Write doesn't repeat it
+  useEffect(() => writeLocal(WRITE_NOTE_SEEN_KEY, '1'), []);
   return (
     <div>
       <div className="text-[36px] leading-[1.04] md:text-[56px]" style={BIG_STYLE}>
@@ -443,26 +447,6 @@ function HandOff() {
     </div>
   );
 }
-
-/** What each numbered part of the Write picture means (plain words, one line each). */
-const WRITE_NOTES = [
-  {
-    mark: '1',
-    text: 'Write your post. BrandOS reads along as you type.',
-  },
-  {
-    mark: '2',
-    text: 'Your score for the draft, out of 100. It updates when you pause.',
-  },
-  {
-    mark: '3',
-    text: "Underlines show what's off. Solid: doesn't sound like you. Dashed: off what you're known for. You fix it, so it stays yours.",
-  },
-  {
-    mark: '4',
-    text: 'When it reads right, Open in X sends it over, ready to post.',
-  },
-];
 
 function FadeLine({ children, delay }: { children: React.ReactNode; delay: number }) {
   const reduce = useReducedMotion();
