@@ -134,11 +134,16 @@ async function main() {
     select: { emailSignupId: true },
   });
   const gotEarly = new Set(earlySends.map((s) => s.emailSignupId));
+  // Repliers' codes carry the Founding price; the Oct 30 list codes don't.
   const codes = await prisma.earlyAccessCode.findMany({
     where: { redeemedAt: null, revokedAt: null },
-    select: { label: true },
+    select: { label: true, perkFoundingPrice: true },
   });
-  const sentCode = new Set(codes.map((c) => c.label.replace(/^@/, '').trim().toLowerCase()));
+  const bareLabel = (l: string) => l.replace(/^@/, '').trim().toLowerCase();
+  const sentCode = new Set(codes.filter((c) => c.perkFoundingPrice).map((c) => bareLabel(c.label)));
+  const listCode = new Set(
+    codes.filter((c) => !c.perkFoundingPrice).map((c) => bareLabel(c.label))
+  );
 
   const audience = reservations
     .filter(
@@ -156,14 +161,16 @@ async function main() {
       read: readOf.get(r.handle) ?? null,
       earlyAccess: (sentCode.has(r.handle)
         ? 'replied'
-        : gotEarly.has(r.emailSignupId!)
-          ? 'sent'
-          : 'none') as 'sent' | 'replied' | 'none',
+        : listCode.has(r.handle)
+          ? 'code'
+          : gotEarly.has(r.emailSignupId!)
+            ? 'sent'
+            : 'none') as 'sent' | 'replied' | 'code' | 'none',
       // Subject A/B split by number parity: stable across re-runs.
       variant: (r.number % 2 === 0 ? 'a' : 'b') as 'a' | 'b',
     }));
   console.log(
-    `members left out: ${reservations.filter((r) => !r.claimedAt && emailOf.has(r.emailSignupId!)).length - audience.length} | with a brand read: ${audience.filter((a) => a.read).length} of ${audience.length} | opening sent/replied/none: ${['sent', 'replied', 'none'].map((k) => audience.filter((a) => a.earlyAccess === k).length).join('/')}`
+    `members left out: ${reservations.filter((r) => !r.claimedAt && emailOf.has(r.emailSignupId!)).length - audience.length} | with a brand read: ${audience.filter((a) => a.read).length} of ${audience.length} | opening sent/replied/code/none: ${['sent', 'replied', 'code', 'none'].map((k) => audience.filter((a) => a.earlyAccess === k).length).join('/')}`
   );
   if (to && audience.length === 0)
     throw new Error(`${to} has no unclaimed reservation (or isn't on the list)`);
