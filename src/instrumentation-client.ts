@@ -37,6 +37,8 @@ initBotId({
     { path: '/api/dashboard/copywriter', method: 'POST' },
     // "Score this draft" (idea board + copywriter) — signed-in AI cost surface
     { path: '/api/dashboard/draft-score', method: 'POST' },
+    { path: '/api/dashboard/live-marks', method: 'GET' },
+    { path: '/api/dashboard/live-marks', method: 'POST' },
     // Early-access signup form — email capture (spam surface)
     { path: '/api/early-access', method: 'POST' },
     // Post-scan email capture + enterprise contact form — both send mail to

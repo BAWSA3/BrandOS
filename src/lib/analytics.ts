@@ -23,6 +23,7 @@ export type BetaEvent =
 
   // Core Features
   | 'beta_content_checked'
+  | 'beta_composer_copied_out'
   | 'beta_content_generated'
   | 'beta_brand_exported'
   | 'beta_brand_shared'
