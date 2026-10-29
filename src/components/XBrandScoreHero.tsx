@@ -1870,7 +1870,9 @@ export default function XBrandScoreHero({
                   className="capture-hide mt-3 block text-center text-[11px] tracking-[0.14em] text-black/60 uppercase hover:text-[#0047FF]"
                   style={{ fontFamily: "'VCR OSD Mono', var(--font-jetbrains), monospace" }}
                 >
-                  {CODE_TRIAL ? 'Get a code · save it to your dashboard →' : 'Save it to your dashboard · continue with X →'}
+                  {CODE_TRIAL
+                    ? 'Get a code · save it to your dashboard →'
+                    : 'Save it to your dashboard · continue with X →'}
                 </a>
                 {/* The Creator Index (shown only while it's open) */}
                 {indexStatus?.open && !indexStatus.member?.listed && (
@@ -1943,7 +1945,7 @@ export default function XBrandScoreHero({
                 </h3>
                 <span
                   style={{
-                    fontFamily: "var(--font-jetbrains), monospace",
+                    fontFamily: 'var(--font-jetbrains), monospace',
                     fontSize: '14px',
                     color: theme === 'dark' ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)',
                   }}
@@ -1993,7 +1995,7 @@ export default function XBrandScoreHero({
               style={{
                 display: 'flex',
                 gap: '32px',
-                fontFamily: "var(--font-jetbrains), monospace",
+                fontFamily: 'var(--font-jetbrains), monospace',
                 fontSize: '12px',
               }}
             >

@@ -12,14 +12,24 @@ import PostHogProvider from '@/components/PostHogProvider';
 // Self-hosted at build time by next/font (no request to Google from the
 // visitor's browser). Exposed as CSS variables; components use
 // var(--font-inter) / var(--font-jetbrains) / var(--font-press-start).
-const inter = Inter({ subsets: ['latin'], weight: ['400', '600', '800'], variable: '--font-inter', display: 'swap' });
+const inter = Inter({
+  subsets: ['latin'],
+  weight: ['400', '600', '800'],
+  variable: '--font-inter',
+  display: 'swap',
+});
 const jetbrains = JetBrains_Mono({
   subsets: ['latin'],
   weight: ['400', '700'],
   variable: '--font-jetbrains',
   display: 'swap',
 });
-const pressStart = Press_Start_2P({ subsets: ['latin'], weight: '400', variable: '--font-press-start', display: 'swap' });
+const pressStart = Press_Start_2P({
+  subsets: ['latin'],
+  weight: '400',
+  variable: '--font-press-start',
+  display: 'swap',
+});
 
 export const viewport = {
   width: 'device-width',

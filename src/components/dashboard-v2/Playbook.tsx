@@ -389,7 +389,11 @@ export default function Playbook({ data }: { data: PlaybookData }) {
         )}
 
         {d.gap && (
-          <Section label="One thing to sharpen" tip={TIPS.sharpen} className={gapAlone ? 'md:col-span-2' : ''}>
+          <Section
+            label="One thing to sharpen"
+            tip={TIPS.sharpen}
+            className={gapAlone ? 'md:col-span-2' : ''}
+          >
             <p className="text-[17px] leading-[1.5]">{d.gap}</p>
             <div className="mt-5">
               <ButtonLink href={d.links.write} kind="secondary">

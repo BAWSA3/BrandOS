@@ -199,7 +199,9 @@ export async function sendEmail(
       }
     }
 
-    const plain = body.replace('{{SCORE_CARD_IMAGE}}', '').replace(/\{\{ARCHETYPE_IMAGE:.*?\}\}/g, ''); // Plain text fallback
+    const plain = body
+      .replace('{{SCORE_CARD_IMAGE}}', '')
+      .replace(/\{\{ARCHETYPE_IMAGE:.*?\}\}/g, ''); // Plain text fallback
     const out = opts.marketing ? withMarketingFooter(html, plain, to) : { html, text: plain };
     const result = await resend.emails.send({
       from: FROM_EMAIL,

@@ -7,11 +7,7 @@ import { AnimateNumber } from 'motion-plus/react';
 import { useEffect, useState } from 'react';
 import StartTrialButton from '@/components/billing/StartTrialButton';
 import { FOUNDING_SPOTS, TRIAL_DAYS } from '@/lib/plans';
-import {
-  CODE_TRIAL_DAYS,
-  INVALID_CODE_MESSAGE,
-  typedCodePath,
-} from '@/lib/early-access-rules';
+import { CODE_TRIAL_DAYS, INVALID_CODE_MESSAGE, typedCodePath } from '@/lib/early-access-rules';
 
 const MONO = "var(--dash-mono, 'VCR OSD Mono', monospace)";
 const BIG = "var(--dash-big, 'Inter Tight', sans-serif)";

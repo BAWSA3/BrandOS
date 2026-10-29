@@ -87,7 +87,9 @@ export function memberFreeUntil(
   if (code?.revokedAt) return null;
   const fromCode = code?.redeemedAt ? freeUntilFrom(code.redeemedAt) : null;
   const early =
-    accountCreatedAt && accountCreatedAt < CODE_TRIAL_START ? freeUntilFrom(CODE_TRIAL_START) : null;
+    accountCreatedAt && accountCreatedAt < CODE_TRIAL_START
+      ? freeUntilFrom(CODE_TRIAL_START)
+      : null;
   if (fromCode && early) return fromCode > early ? fromCode : early;
   return fromCode ?? early;
 }

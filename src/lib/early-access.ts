@@ -296,7 +296,12 @@ export async function mintInvite(
       if (!made) return { ok: false, reason: 'none-left' };
       return {
         ok: true,
-        invite: { code: made.code, link: inviteLink(made.code, origin), usedBy: null, usedAt: null },
+        invite: {
+          code: made.code,
+          link: inviteLink(made.code, origin),
+          usedBy: null,
+          usedAt: null,
+        },
       };
     } catch (e) {
       if ((e as { code?: string }).code === 'P2002') continue; // code collision: draw again

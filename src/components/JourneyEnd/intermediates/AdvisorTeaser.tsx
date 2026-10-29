@@ -112,7 +112,7 @@ export default function AdvisorTeaser({ data, onContinue, onAskMore, theme }: Ad
           <div>
             <div
               style={{
-                fontFamily: "var(--font-inter), sans-serif",
+                fontFamily: 'var(--font-inter), sans-serif',
                 fontSize: '14px',
                 fontWeight: 600,
                 color: '#FFFFFF',
@@ -159,7 +159,7 @@ export default function AdvisorTeaser({ data, onContinue, onAskMore, theme }: Ad
         >
           <p
             style={{
-              fontFamily: "var(--font-inter), sans-serif",
+              fontFamily: 'var(--font-inter), sans-serif',
               fontSize: '15px',
               lineHeight: 1.6,
               color: 'rgba(255,255,255,0.9)',
@@ -187,7 +187,7 @@ export default function AdvisorTeaser({ data, onContinue, onAskMore, theme }: Ad
           animate={{ opacity: isTyping ? 0 : 1 }}
           transition={{ delay: 0.2 }}
           style={{
-            fontFamily: "var(--font-inter), sans-serif",
+            fontFamily: 'var(--font-inter), sans-serif',
             fontSize: '13px',
             color: 'rgba(255,255,255,0.5)',
             textAlign: 'center',

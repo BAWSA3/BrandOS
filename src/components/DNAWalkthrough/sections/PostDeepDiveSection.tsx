@@ -330,7 +330,7 @@ export default function PostDeepDiveSection({
             {/* ASCII progress bar */}
             <div
               style={{
-                fontFamily: "var(--font-jetbrains), monospace",
+                fontFamily: 'var(--font-jetbrains), monospace',
                 fontSize: '14px',
                 color: '#000',
                 marginBottom: '16px',

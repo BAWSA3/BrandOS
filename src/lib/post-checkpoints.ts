@@ -58,7 +58,10 @@ export function checkpointRows(accountId: string, posts: CheckpointPost[], now: 
  * Best effort: never fails a sync. Skips quietly until migration 050 is
  * applied (P2021 = table does not exist).
  */
-export async function captureCheckpoints(accountId: string, posts: CheckpointPost[]): Promise<number> {
+export async function captureCheckpoints(
+  accountId: string,
+  posts: CheckpointPost[]
+): Promise<number> {
   const data = checkpointRows(accountId, posts, new Date());
   if (!data.length) return 0;
   try {

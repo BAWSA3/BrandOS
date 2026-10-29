@@ -14,7 +14,12 @@ const INVITES: Record<string, InviteData> = {
     cap: 3,
     left: 1,
     invites: [
-      { code: 'AU7K2QX9', link: link('AU7K2QX9'), usedBy: 'aunnieonchain', usedAt: '2026-11-03T10:00:00Z' },
+      {
+        code: 'AU7K2QX9',
+        link: link('AU7K2QX9'),
+        usedBy: 'aunnieonchain',
+        usedAt: '2026-11-03T10:00:00Z',
+      },
       { code: 'HQUP4WY8', link: link('HQUP4WY8'), usedBy: null, usedAt: null },
     ],
   },
@@ -22,9 +27,24 @@ const INVITES: Record<string, InviteData> = {
     cap: 3,
     left: 0,
     invites: [
-      { code: 'AU7K2QX9', link: link('AU7K2QX9'), usedBy: 'aunnieonchain', usedAt: '2026-11-03T10:00:00Z' },
-      { code: 'HQUP4WY8', link: link('HQUP4WY8'), usedBy: 'q_bree_', usedAt: '2026-11-04T10:00:00Z' },
-      { code: 'K4L4ZXQM', link: link('K4L4ZXQM'), usedBy: 'musaakoke', usedAt: '2026-11-05T10:00:00Z' },
+      {
+        code: 'AU7K2QX9',
+        link: link('AU7K2QX9'),
+        usedBy: 'aunnieonchain',
+        usedAt: '2026-11-03T10:00:00Z',
+      },
+      {
+        code: 'HQUP4WY8',
+        link: link('HQUP4WY8'),
+        usedBy: 'q_bree_',
+        usedAt: '2026-11-04T10:00:00Z',
+      },
+      {
+        code: 'K4L4ZXQM',
+        link: link('K4L4ZXQM'),
+        usedBy: 'musaakoke',
+        usedAt: '2026-11-05T10:00:00Z',
+      },
     ],
   },
 };
@@ -73,7 +93,8 @@ export default function AccessPreview({ state, finish }: { state: string; finish
       preview={{
         apply: state === 'applied' ? 'sent' : state === 'apply-error' ? 'error' : 'idle',
         codeError: state === 'code-error',
-        applyError: state === 'apply-error' ? 'Applications open soon. Try again in a bit.' : undefined,
+        applyError:
+          state === 'apply-error' ? 'Applications open soon. Try again in a bit.' : undefined,
       }}
     />
   );

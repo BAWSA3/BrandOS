@@ -15,7 +15,7 @@ const BLUE = '#0047FF';
 const BONE = '#ECE9E1';
 const INK = '#141414';
 const MONO = "'VCR OSD Mono', var(--font-jetbrains), monospace";
-const TYPE = "var(--pass-type, var(--font-jetbrains), ui-monospace, monospace)";
+const TYPE = 'var(--pass-type, var(--font-jetbrains), ui-monospace, monospace)';
 
 /** The Pass recolors with the creator's dashboard skin (Settings → Dashboard). */
 interface PassSkin {

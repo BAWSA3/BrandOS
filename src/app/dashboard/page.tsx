@@ -248,11 +248,14 @@ export default async function DashboardPage({
               />
               {/* invite-only trial: a member's 3 invites (guest-pass style) */}
               {CODE_TRIAL &&
-                (access || isSubscribed(user) || user.role === 'admin' || isEarlyAccount(user.createdAt)) && (
-                <div className="mx-auto w-full max-w-[880px] px-4 pb-12 md:px-10">
-                  <InvitePasses />
-                </div>
-              )}
+                (access ||
+                  isSubscribed(user) ||
+                  user.role === 'admin' ||
+                  isEarlyAccount(user.createdAt)) && (
+                  <div className="mx-auto w-full max-w-[880px] px-4 pb-12 md:px-10">
+                    <InvitePasses />
+                  </div>
+                )}
               {walkthrough}
             </Shell>
             {dock}

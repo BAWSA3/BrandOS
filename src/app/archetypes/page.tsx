@@ -71,7 +71,7 @@ export default function ArchetypesPage() {
         minHeight: '100vh',
         background: '#050505',
         color: '#fff',
-        fontFamily: "var(--font-jetbrains), monospace",
+        fontFamily: 'var(--font-jetbrains), monospace',
       }}
     >
       {/* Header */}
@@ -88,7 +88,7 @@ export default function ArchetypesPage() {
         </p>
         <h1
           style={{
-            fontFamily: "var(--font-inter), sans-serif",
+            fontFamily: 'var(--font-inter), sans-serif',
             fontSize: 'clamp(32px, 5vw, 48px)',
             fontWeight: 900,
             fontStyle: 'italic',
@@ -164,7 +164,7 @@ export default function ArchetypesPage() {
             {/* Name */}
             <h2
               style={{
-                fontFamily: "var(--font-inter), sans-serif",
+                fontFamily: 'var(--font-inter), sans-serif',
                 fontSize: '22px',
                 fontWeight: 800,
                 fontStyle: 'italic',
@@ -191,7 +191,7 @@ export default function ArchetypesPage() {
             background: '#2E6AFF',
             color: '#fff',
             borderRadius: '4px',
-            fontFamily: "var(--font-jetbrains), monospace",
+            fontFamily: 'var(--font-jetbrains), monospace',
             fontSize: '12px',
             fontWeight: 700,
             letterSpacing: '0.1em',

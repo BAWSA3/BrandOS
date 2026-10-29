@@ -120,8 +120,8 @@ export default function AccessGate({
             maxWidth: 440,
           }}
         >
-          A code is {CODE_TRIAL_DAYS} days of everything, no card: today’s move, the live
-          composer, your Brand view.
+          A code is {CODE_TRIAL_DAYS} days of everything, no card: today’s move, the live composer,
+          your Brand view.
         </p>
 
         {/* the one moment: the free days count up on the Klein tile */}
@@ -198,7 +198,10 @@ export default function AccessGate({
             No code? Apply
           </h2>
           {apply === 'sent' ? (
-            <div className="sys-anim" style={{ animation: 'sys-press 420ms cubic-bezier(.16,1,.3,1) both' }}>
+            <div
+              className="sys-anim"
+              style={{ animation: 'sys-press 420ms cubic-bezier(.16,1,.3,1) both' }}
+            >
               <p style={{ margin: 0, fontSize: 16, lineHeight: 1.5 }}>You’re on the list.</p>
               <p style={{ margin: '6px 0 0', fontSize: 14, lineHeight: 1.5, color: MUTED }}>
                 Bawsa reads every application and sends codes in batches, by email.

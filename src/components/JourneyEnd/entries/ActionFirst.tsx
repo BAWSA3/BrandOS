@@ -119,7 +119,7 @@ export default function ActionFirst({
                   </div>
                   <div
                     style={{
-                      fontFamily: "var(--font-inter), sans-serif",
+                      fontFamily: 'var(--font-inter), sans-serif',
                       fontSize: '14px',
                       fontWeight: 600,
                       color: '#FFFFFF',
@@ -144,7 +144,7 @@ export default function ActionFirst({
               >
                 <span
                   style={{
-                    fontFamily: "var(--font-inter), sans-serif",
+                    fontFamily: 'var(--font-inter), sans-serif',
                     fontSize: '20px',
                     fontWeight: 700,
                     color: '#10B981',

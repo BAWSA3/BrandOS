@@ -124,7 +124,7 @@ export default function TypeScriptInterfaceBg() {
           top: '50%',
           left: '50%',
           transform: 'translate(-50%, -50%)',
-          fontFamily: "var(--font-jetbrains), monospace",
+          fontFamily: 'var(--font-jetbrains), monospace',
           fontSize: 'clamp(200px, 30vw, 400px)',
           color: '#000000',
           userSelect: 'none',

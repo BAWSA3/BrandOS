@@ -47,7 +47,10 @@ export async function POST(request: NextRequest) {
   return NextResponse.json(
     {
       valid: true,
-      user: { handle: x?.platformUsername ?? user.xUsername ?? null, pro: hasPro({ ...user, freeUntil: CODE_TRIAL ? await codeFreeUntil(user.id) : null }) },
+      user: {
+        handle: x?.platformUsername ?? user.xUsername ?? null,
+        pro: hasPro({ ...user, freeUntil: CODE_TRIAL ? await codeFreeUntil(user.id) : null }),
+      },
     },
     { headers }
   );
