@@ -83,7 +83,7 @@ export default function TestArchetypesPage() {
         minHeight: '100vh',
         background: '#F2EFE8',
         padding: '48px 24px',
-        fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace",
+        fontFamily: "'VCR OSD Mono', var(--font-jetbrains), monospace",
       }}
     >
       <style>{shimmerKeyframes}</style>

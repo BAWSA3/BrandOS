@@ -101,7 +101,7 @@ export default function HighlightReel({ data, onContinue, theme }: HighlightReel
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
           style={{
-            fontFamily: "'VCR OSD Mono', 'Press Start 2P', monospace",
+            fontFamily: "'VCR OSD Mono', var(--font-press-start), monospace",
             fontSize: '9px',
             letterSpacing: '0.25em',
             color: scoreColor,
@@ -283,7 +283,7 @@ export default function HighlightReel({ data, onContinue, theme }: HighlightReel
               border: '2px solid #6BD04A',
               background: 'linear-gradient(135deg, #5ABF3E 0%, #4AA235 100%)',
               color: '#050505',
-              fontFamily: "'VCR OSD Mono', 'Press Start 2P', monospace",
+              fontFamily: "'VCR OSD Mono', var(--font-press-start), monospace",
               fontSize: '11px',
               letterSpacing: '0.1em',
               cursor: 'pointer',

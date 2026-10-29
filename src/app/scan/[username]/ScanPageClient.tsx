@@ -67,7 +67,7 @@ export default function ScanPageClient({ data }: { data: ScoreData }) {
         minHeight: '100vh',
         background: '#000',
         color: '#fff',
-        fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace",
+        fontFamily: "'VCR OSD Mono', var(--font-jetbrains), monospace",
       }}
     >
       {/* Terminal header */}

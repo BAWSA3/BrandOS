@@ -1,4 +1,5 @@
 import { Resend } from 'resend';
+import { marketingBlocked, unsubscribeHeaders, withMarketingFooter } from '@/lib/email-compliance';
 import prisma from '@/lib/db';
 import { getArchetypeInfo } from '@/lib/archetype-descriptions';
 import { normalizeArchetypeName } from '@/lib/archetype-names';
@@ -804,6 +805,9 @@ function client(): Resend {
 
 export type SendResult = 'sent' | 'already-sent' | 'skipped-unsubscribed' | 'failed';
 
+/** Campaigns that are transactional, not marketing (no postal-address gate). */
+const TRANSACTIONAL_CAMPAIGNS = new Set<string>([CAMPAIGNS.earlyAccessWelcome]);
+
 /**
  * Send `content` to a signup at most once per campaign. The EmailSend claim is
  * inserted first (unique key), so concurrent or repeated calls can't double
@@ -827,6 +831,13 @@ export async function sendOnce(
     select: { id: true, email: true, unsubscribed: true },
   });
   if (!signup || signup.unsubscribed) return 'skipped-unsubscribed';
+  // Marketing needs a postal address in the footer (src/lib/email-compliance.ts);
+  // the redeem welcome is a transactional/relationship email.
+  const blocked = TRANSACTIONAL_CAMPAIGNS.has(campaign) ? null : marketingBlocked();
+  if (blocked) {
+    console.error(`[launch-emails] ${campaign} not sent: ${blocked}`);
+    return 'failed';
+  }
 
   try {
     await prisma.emailSend.create({ data: { emailSignupId: signup.id, campaign } });
@@ -836,7 +847,8 @@ export async function sendOnce(
   }
 
   const content = build(signup);
-  const { html, text } = render(content, signup.email);
+  const rendered = render(content, signup.email);
+  const { html, text } = withMarketingFooter(rendered.html, rendered.text, signup.email);
   const { data, error } = await client().emails.send({
     from: FROM,
     to: signup.email,
@@ -844,11 +856,8 @@ export async function sendOnce(
     subject: content.subject,
     html,
     text,
-    headers: {
-      'List-Unsubscribe': `<${APP_URL}/api/newsletter/unsubscribe?email=${encodeURIComponent(signup.email)}>`,
-      // RFC 8058 one-click: Gmail/Yahoo POST to the URL above (the route reads ?email=)
-      'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
-    },
+    // RFC 8058 one-click: Gmail/Yahoo POST to the URL (the route reads ?email=)
+    headers: unsubscribeHeaders(signup.email),
   });
   if (error || !data) {
     await prisma.emailSend

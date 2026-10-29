@@ -30,9 +30,9 @@ const manifest: WorldManifest = {
     danger: '#FF3B30',
   },
   typography: {
-    fontSans: `"JetBrains Mono", "VCR OSD Mono", monospace`,
-    fontMono: `"JetBrains Mono", "VCR OSD Mono", monospace`,
-    fontDisplay: `"VCR OSD Mono", "JetBrains Mono", monospace`,
+    fontSans: `var(--font-jetbrains), "VCR OSD Mono", monospace`,
+    fontMono: `var(--font-jetbrains), "VCR OSD Mono", monospace`,
+    fontDisplay: `"VCR OSD Mono", var(--font-jetbrains), monospace`,
     baseSize: '15px',
     letterSpacing: '0.01em',
   },

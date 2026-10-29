@@ -135,7 +135,7 @@ export default function AchievementUnlock({
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
             style={{
-              fontFamily: "'VCR OSD Mono', 'Press Start 2P', monospace",
+              fontFamily: "'VCR OSD Mono', var(--font-press-start), monospace",
               fontSize: '9px',
               letterSpacing: '0.25em',
               color: tierInfo.color,
@@ -159,7 +159,7 @@ export default function AchievementUnlock({
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
             style={{
-              fontFamily: "'VCR OSD Mono', 'Press Start 2P', monospace",
+              fontFamily: "'VCR OSD Mono', var(--font-press-start), monospace",
               fontSize: '20px',
               fontWeight: 400,
               color: '#FFFFFF',

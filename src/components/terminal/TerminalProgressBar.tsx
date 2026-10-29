@@ -115,7 +115,7 @@ export default function TerminalProgressBar({
               >
                 <span
                   style={{
-                    fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace",
+                    fontFamily: "'VCR OSD Mono', var(--font-jetbrains), monospace",
                     fontSize: '10px',
                     letterSpacing: '0.1em',
                     color: isCompleted ? '#10B981' : isActive ? '#0047FF' : 'rgba(0, 0, 0, 0.4)',
@@ -139,7 +139,7 @@ export default function TerminalProgressBar({
         >
           <span
             style={{
-              fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace",
+              fontFamily: "'VCR OSD Mono', var(--font-jetbrains), monospace",
               fontSize: '11px',
               color: 'rgba(0, 0, 0, 0.6)',
               whiteSpace: 'pre',
@@ -149,7 +149,7 @@ export default function TerminalProgressBar({
           </span>
           <span
             style={{
-              fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace",
+              fontFamily: "'VCR OSD Mono', var(--font-jetbrains), monospace",
               fontSize: '11px',
               color: '#0047FF',
               minWidth: '36px',
@@ -170,7 +170,7 @@ export default function TerminalProgressBar({
         >
           <span
             style={{
-              fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace",
+              fontFamily: "'VCR OSD Mono', var(--font-jetbrains), monospace",
               fontSize: '10px',
               color: 'rgba(0, 0, 0, 0.5)',
             }}

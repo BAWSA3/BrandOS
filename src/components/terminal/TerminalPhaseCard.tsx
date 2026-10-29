@@ -202,7 +202,7 @@ export default function TerminalPhaseCard({
       {/* Phase header as comment block */}
       <div
         style={{
-          fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace",
+          fontFamily: "'VCR OSD Mono', var(--font-jetbrains), monospace",
           fontSize: '11px',
           letterSpacing: '0.15em',
           color: 'rgba(0, 0, 0, 0.5)',
@@ -219,7 +219,7 @@ export default function TerminalPhaseCard({
       <motion.h2
         animate={{ scale: isActive ? 1 : 0.9 }}
         style={{
-          fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace",
+          fontFamily: "'VCR OSD Mono', var(--font-jetbrains), monospace",
           fontSize: 'clamp(32px, 7vw, 56px)',
           fontWeight: 400,
           letterSpacing: '0.15em',
@@ -258,7 +258,7 @@ export default function TerminalPhaseCard({
       >
         <span
           style={{
-            fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace",
+            fontFamily: "'VCR OSD Mono', var(--font-jetbrains), monospace",
             fontSize: '12px',
             color: 'rgba(0, 0, 0, 0.4)',
           }}
@@ -425,7 +425,7 @@ export default function TerminalPhaseCard({
                         background: 'rgba(0, 71, 255, 0.04)',
                         border: '1px solid rgba(0, 71, 255, 0.1)',
                         borderRadius: '4px',
-                        fontFamily: "'JetBrains Mono', monospace",
+                        fontFamily: "var(--font-jetbrains), monospace",
                         fontSize: '11px',
                         color: 'rgba(0, 0, 0, 0.7)',
                       }}

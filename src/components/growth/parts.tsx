@@ -5,7 +5,7 @@ import { useState } from 'react';
 /** Growth dashboard building blocks, in the locked BrandOS system (bone, Klein, mono labels). */
 
 export const BIG = "'Inter Tight', 'Helvetica Neue', Helvetica, Arial, sans-serif";
-export const MONO = "'VCR OSD Mono', 'JetBrains Mono', monospace";
+export const MONO = "'VCR OSD Mono', var(--font-jetbrains), monospace";
 /**
  * Colours read CSS variables with the Bone values as fallbacks, so the page is
  * unchanged unless a finish sets the variables (dashboard v2: GROWTH_TOKENS in

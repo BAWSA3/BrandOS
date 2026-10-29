@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { motion, useReducedMotion } from 'motion/react';
 import { MEMBER_INVITES } from '@/lib/early-access-rules';
 
-const VCR = "'VCR OSD Mono', 'JetBrains Mono', monospace";
+const VCR = "'VCR OSD Mono', var(--font-jetbrains), monospace";
 const DISPLAY = "'Inter Tight', 'Helvetica Neue', Helvetica, Arial, sans-serif";
 
 export interface InvitePass {

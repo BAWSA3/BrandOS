@@ -1,13 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { proPrice, renewalTerms } from '@/lib/billing-terms';
 
 const MONO = "var(--dash-mono, 'VCR OSD Mono', monospace)";
 
 /** What the dashboard top bar says about the account's plan. */
 export type PlanBadge =
   /** Launch window, no card yet: "Free until Dec 3 · Lock $29 →" (opens checkout). */
-  | { kind: 'open'; until: string; spotsLeft: number }
+  | { kind: 'open'; until: string; spotsLeft: number; priceLocked?: boolean }
   /** Card on file during the launch window: "Founding #12 · first charge Dec 3". */
   | { kind: 'founding'; number: number | null; chargesAt: string }
   /** Card trial after the launch window: "Trial · 5 days left". */
@@ -45,6 +46,13 @@ export default function PlanChip({
   }, [endsAt]);
 
   const go = async () => {
+    // The renewal terms must sit beside the subscribe button. The v2 side nav
+    // shows them under the chip; the compact top-bar chip has no room, so it
+    // goes to /pricing, where they sit next to the button.
+    if (plan.kind === 'open' && !v2) {
+      window.location.href = '/pricing';
+      return;
+    }
     setBusy(true);
     try {
       const res = await fetch(
@@ -81,7 +89,15 @@ export default function PlanChip({
         : `Your trial ends ${shortDate(plan.endsAt)}. Manage billing`;
   const accent = plan.kind === 'open';
 
-  return (
+  const terms =
+    plan.kind === 'open' && v2
+      ? renewalTerms(proPrice(plan.priceLocked ?? plan.spotsLeft > 0), {
+          kind: 'on',
+          date: shortDate(plan.until),
+        })
+      : null;
+
+  const chip = (
     <button
       type="button"
       onClick={go}
@@ -110,5 +126,14 @@ export default function PlanChip({
     >
       {busy ? (plan.kind === 'open' ? 'Opening checkout…' : 'Opening…') : label}
     </button>
+  );
+  if (!terms) return chip;
+  return (
+    <div className="flex flex-col gap-1.5">
+      {chip}
+      <p className="px-1 text-[11px] leading-snug" style={{ color: 'var(--v-head-muted)' }}>
+        {terms}
+      </p>
+    </div>
   );
 }

@@ -55,7 +55,7 @@ export default function BrandOSLogo({
             data-letter={letter}
             data-index={i}
             style={{
-              fontFamily: "'Blauer Nue', 'Inter', sans-serif",
+              fontFamily: "'Blauer Nue', var(--font-inter), sans-serif",
               fontWeight: 800,
               fontStyle: 'italic',
               color: 'var(--foreground)',
@@ -76,7 +76,7 @@ export default function BrandOSLogo({
             data-letter={letter}
             data-index={i}
             style={{
-              fontFamily: "'Mac Minecraft', 'Press Start 2P', cursive",
+              fontFamily: "'Mac Minecraft', var(--font-press-start), cursive",
               fontWeight: 700,
               fontStyle: 'italic',
               fontSize: `${osSizeRatio}em`,

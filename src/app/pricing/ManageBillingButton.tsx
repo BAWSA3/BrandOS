@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 
-const MONO = "'VCR OSD Mono', 'JetBrains Mono', monospace";
+const MONO = "'VCR OSD Mono', var(--font-jetbrains), monospace";
 
 /** Opens Stripe's billing portal (cancel, card, invoices). */
 export default function ManageBillingButton() {

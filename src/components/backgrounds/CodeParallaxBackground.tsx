@@ -98,7 +98,7 @@ export default function CodeParallaxBackground({ theme = 'dark' }: CodeParallaxB
           style={{
             position: 'absolute',
             ...snippet.position,
-            fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
+            fontFamily: "var(--font-jetbrains), 'Fira Code', monospace",
             fontSize: 'clamp(9px, 1vw, 11px)',
             lineHeight: 1.7,
             color: '#000000',

@@ -7,7 +7,7 @@ import { useSearchParams } from 'next/navigation';
 // leaves an email and /api/breakdown sends their full scan breakdown, which
 // also secures an early-access spot for BrandOS Dashboards.
 
-const MONO = "'VCR OSD Mono', 'JetBrains Mono', monospace";
+const MONO = "'VCR OSD Mono', var(--font-jetbrains), monospace";
 const BLUE = '#0047FF';
 const HANDLE_RE = /^[A-Za-z0-9_]{1,30}$/;
 

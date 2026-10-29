@@ -99,7 +99,7 @@ export default function SystemLogsBg() {
           position: 'absolute',
           top: '10%',
           left: '4%',
-          fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace",
+          fontFamily: "'VCR OSD Mono', var(--font-jetbrains), monospace",
           fontSize: 'clamp(9px, 1vw, 12px)',
           lineHeight: 1.8,
         }}
@@ -138,7 +138,7 @@ export default function SystemLogsBg() {
           position: 'absolute',
           top: '12%',
           right: '4%',
-          fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace",
+          fontFamily: "'VCR OSD Mono', var(--font-jetbrains), monospace",
           fontSize: 'clamp(9px, 1vw, 11px)',
           lineHeight: 1.8,
           textAlign: 'right',

@@ -317,7 +317,7 @@ function TypedLogBlock() {
         position: 'absolute',
         top: '6%',
         left: '4%',
-        fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace",
+        fontFamily: "'VCR OSD Mono', var(--font-jetbrains), monospace",
         fontSize: 'clamp(9px, 1vw, 11px)',
         lineHeight: 1.8,
       }}
@@ -366,7 +366,7 @@ function TypedCodeBlock({ setIndex: blockIndex }: { setIndex: number }) {
       {/* Invisible spacer */}
       <pre
         style={{
-          fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
+          fontFamily: "var(--font-jetbrains), 'Fira Code', monospace",
           fontSize: 'clamp(9px, 1.1vw, 12px)',
           lineHeight: 1.7,
           margin: 0,
@@ -386,7 +386,7 @@ function TypedCodeBlock({ setIndex: blockIndex }: { setIndex: number }) {
           position: 'absolute',
           top: 0,
           left: 0,
-          fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
+          fontFamily: "var(--font-jetbrains), 'Fira Code', monospace",
           fontSize: 'clamp(9px, 1.1vw, 12px)',
           lineHeight: 1.7,
           color: '#000000',

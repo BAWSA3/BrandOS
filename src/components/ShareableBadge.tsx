@@ -3,6 +3,14 @@
 import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 
+// Canvas can't read CSS variables, so resolve the self-hosted font family
+// (next/font, set on <html>) at draw time.
+function fontVar(name: string, fallback: string): string {
+  if (typeof document === 'undefined') return `"${fallback}"`;
+  const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  return v || `"${fallback}"`;
+}
+
 // =============================================================================
 // TYPES
 // =============================================================================
@@ -164,7 +172,7 @@ export async function generateBadgeImage(data: BadgeData): Promise<Blob | null> 
 
   ctx.textBaseline = 'alphabetic';
   ctx.textAlign = 'left';
-  ctx.font = 'bold 28px "Inter", "Helvetica Neue", sans-serif';
+  ctx.font = `bold 28px ${fontVar('--font-inter', 'Inter')}, "Helvetica Neue", sans-serif`;
   ctx.fillStyle = '#FFFFFF';
   ctx.fillText('Brand', 60, 60);
 
@@ -186,7 +194,7 @@ export async function generateBadgeImage(data: BadgeData): Promise<Blob | null> 
   ctx.fillText(data.archetype.emoji, centerX, centerY - 80);
 
   // Archetype name with glow effect
-  ctx.font = 'bold 56px "Inter", "Helvetica Neue", sans-serif';
+  ctx.font = `bold 56px ${fontVar('--font-inter', 'Inter')}, "Helvetica Neue", sans-serif`;
   ctx.shadowColor = colors.glow;
   ctx.shadowBlur = 30;
   ctx.fillStyle = colors.primary;
@@ -194,13 +202,13 @@ export async function generateBadgeImage(data: BadgeData): Promise<Blob | null> 
   ctx.shadowBlur = 0;
 
   // Score display
-  ctx.font = 'bold 32px "JetBrains Mono", "Courier New", monospace';
+  ctx.font = `bold 32px ${fontVar('--font-jetbrains', 'JetBrains Mono')}, "Courier New", monospace`;
   ctx.fillStyle = '#FFFFFF';
   ctx.fillText(`${data.score}/100`, centerX, centerY + 90);
 
   // Score label badge
   const label = getScoreLabel(data.score);
-  ctx.font = '600 14px "JetBrains Mono", monospace';
+  ctx.font = `600 14px ${fontVar('--font-jetbrains', 'JetBrains Mono')}, monospace`;
   const labelWidth = ctx.measureText(label).width + 32;
   const labelX = centerX - labelWidth / 2;
   const labelY = centerY + 115;
@@ -247,18 +255,18 @@ export async function generateBadgeImage(data: BadgeData): Promise<Blob | null> 
 
     // Username
     ctx.textAlign = 'left';
-    ctx.font = 'bold 20px "Inter", sans-serif';
+    ctx.font = `bold 20px ${fontVar('--font-inter', 'Inter')}, sans-serif`;
     ctx.fillStyle = '#FFFFFF';
     ctx.fillText(data.displayName || `@${data.username}`, profileX + imgSize + 16, profileY + 28);
 
-    ctx.font = '400 16px "Inter", sans-serif';
+    ctx.font = `400 16px ${fontVar('--font-inter', 'Inter')}, sans-serif`;
     ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
     if (data.displayName) {
       ctx.fillText(`@${data.username}`, profileX + imgSize + 16, profileY + 52);
     }
   } else {
     ctx.textAlign = 'left';
-    ctx.font = 'bold 22px "Inter", sans-serif';
+    ctx.font = `bold 22px ${fontVar('--font-inter', 'Inter')}, sans-serif`;
     ctx.fillStyle = '#FFFFFF';
     ctx.fillText(`@${data.username}`, profileX, profileY + 32);
   }
@@ -271,11 +279,11 @@ export async function generateBadgeImage(data: BadgeData): Promise<Blob | null> 
   const statY = canvas.height - 120;
 
   ctx.textAlign = 'right';
-  ctx.font = '600 12px "JetBrains Mono", monospace';
+  ctx.font = `600 12px ${fontVar('--font-jetbrains', 'JetBrains Mono')}, monospace`;
   ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
   ctx.fillText('VOICE CONSISTENCY', rightX, statY);
 
-  ctx.font = 'bold 32px "JetBrains Mono", monospace';
+  ctx.font = `bold 32px ${fontVar('--font-jetbrains', 'JetBrains Mono')}, monospace`;
   ctx.fillStyle = '#10B981';
   ctx.fillText(`${data.voiceConsistency}%`, rightX, statY + 40);
 
@@ -284,7 +292,7 @@ export async function generateBadgeImage(data: BadgeData): Promise<Blob | null> 
   // ==========================================================================
 
   ctx.textAlign = 'center';
-  ctx.font = '500 16px "Inter", sans-serif';
+  ctx.font = `500 16px ${fontVar('--font-inter', 'Inter')}, sans-serif`;
   ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
   ctx.fillText('Get yours → mybrandos.app', centerX, canvas.height - 35);
 
@@ -294,7 +302,7 @@ export async function generateBadgeImage(data: BadgeData): Promise<Blob | null> 
 
   // Draw a small badge indicator
   ctx.textAlign = 'right';
-  ctx.font = '600 11px "JetBrains Mono", monospace';
+  ctx.font = `600 11px ${fontVar('--font-jetbrains', 'JetBrains Mono')}, monospace`;
   ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
   ctx.fillText('BRAND DNA ANALYSIS', canvas.width - 60, 55);
 

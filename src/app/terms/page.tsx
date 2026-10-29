@@ -1,9 +1,13 @@
+import Link from 'next/link';
+import { dmcaAgent } from '@/lib/dmca';
+
 export const metadata = {
   title: 'Terms of Service | BrandOS',
   description: 'Terms of Service for BrandOS',
 };
 
 export default function TermsPage() {
+  const dmca = dmcaAgent();
   return (
     <div className="min-h-screen bg-black text-white py-16 px-4">
       <div className="max-w-3xl mx-auto">
@@ -121,10 +125,21 @@ export default function TermsPage() {
               and content, is owned by BrandOS and protected by intellectual property laws. You may
               not copy, modify, distribute, or create derivative works without our permission.
             </p>
-            <p>
+            <p className={dmca ? 'mb-4' : undefined}>
               <strong>Feedback:</strong> Any feedback, suggestions, or ideas you provide about the
               Service may be used by us without any obligation to you.
             </p>
+            {dmca && (
+              <p>
+                <strong>Copyright complaints:</strong> If you believe content on the Service
+                infringes your copyright, see our{' '}
+                <Link href="/copyright" className="underline">
+                  Copyright &amp; DMCA policy
+                </Link>{' '}
+                for how to notify our designated agent. We terminate repeat infringers in
+                appropriate circumstances.
+              </p>
+            )}
           </section>
 
           <section>
