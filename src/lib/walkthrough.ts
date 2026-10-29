@@ -81,3 +81,26 @@ export const STEP_LABEL: Record<WalkStep['kind'], string> = {
 
 /** This-device fallback before migration 052 (or when the account save fails). */
 export const LOCAL_DONE_KEY = 'brandos:walkthrough-done';
+
+/** What each numbered part of the Write picture means (plain words, one line each). */
+export const WRITE_NOTES = [
+  {
+    mark: '1',
+    text: 'Write your post. BrandOS reads along as you type.',
+  },
+  {
+    mark: '2',
+    text: 'Your score for the draft, out of 100. It updates when you pause.',
+  },
+  {
+    mark: '3',
+    text: "Underlines show what's off. Solid: doesn't sound like you. Dashed: off what you're known for. You fix it, so it stays yours.",
+  },
+  {
+    mark: '4',
+    text: 'When it reads right, Open in X sends it over, ready to post.',
+  },
+];
+
+/** Set once the member has seen how Write works (walkthrough last step or the note in Write). */
+export const WRITE_NOTE_SEEN_KEY = 'brandos:write-note-seen';

@@ -219,6 +219,7 @@ export default async function TodayPreview({
     thin?: string;
     persona?: string;
     people?: string;
+    live?: string;
   }>;
 }) {
   const sp = await searchParams;
@@ -297,12 +298,18 @@ export default async function TodayPreview({
               note: 'A top post / 1,840 likes',
             },
           ]}
-          demo={{
-            score: DEMO_SCORE,
-            options: DEMO_OPTIONS,
-            outline: DEMO_OUTLINE,
-            section: DEMO_SECTION,
-          }}
+          // ?live=1: the live composer (and the one-time Write note); marks need sign-in
+          live={sp.live === '1'}
+          demo={
+            sp.live === '1'
+              ? undefined
+              : {
+                  score: DEMO_SCORE,
+                  options: DEMO_OPTIONS,
+                  outline: DEMO_OUTLINE,
+                  section: DEMO_SECTION,
+                }
+          }
         />
       </Shell>
     );
