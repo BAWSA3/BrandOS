@@ -13,6 +13,7 @@ import { bodyOfWork } from '@/lib/playbook';
 import { classLabel, recordDate } from '@/lib/classifications';
 import { isColorway } from '@/lib/colorways';
 import { SAMPLE_IDEAS, SAMPLE_RECORD, SAMPLE_VIEW } from '../growth/sample';
+import type { PeopleState, PersonView } from '@/lib/people-to-know';
 
 // Dashboard v2, slice 1 (Today + the calmed growth view in each finish) with
 // sample data, so it can be checked without a tester account. The real page is
@@ -21,6 +22,8 @@ import { SAMPLE_IDEAS, SAMPLE_RECORD, SAMPLE_VIEW } from '../growth/sample';
 //   &walk=0..5   the first-run walkthrough over the page, opened at that step
 //                (0 = "Which one are you?", last = the hand-off to Write)
 //   &thin=1      a thin read (no score, no formats) &persona=creator|founder|builder
+//   &people=full|partial|none|scale|loading|off   People to know (053) on the
+//                Playbook and Today's move (default full; off = no gap)
 
 // the launch-window buy button, as a member without a card sees it
 const PREVIEW_PLAN: PlanBadge = {
@@ -74,7 +77,64 @@ part two of the 40-brands thing.
 the top reason they skipped creators wasn’t followers. it was “we couldn’t tell what they stand for.”`;
 
 /** Sample Playbook built the way /dashboard builds it (loadPlaybook), from the growth sample. */
-function samplePlaybook(): PlaybookData {
+const SAMPLE_PEOPLE: PersonView[] = [
+  {
+    handle: 'ninaontheblock',
+    name: 'Nina Okafor',
+    avatarUrl: null,
+    followers: 4_300,
+    tier: 'peer',
+    why: 'You both break down why brands pick some creators over others, from the creator side.',
+    dm: "saw your post on brand briefs that ask for 'authentic' and then send a script. same thing keeps coming up in my reads. what's the worst brief you've had this year?",
+    messaged: false,
+  },
+  {
+    handle: 'theo_builds_xyz_long_handle'.slice(0, 15),
+    name: 'Theo Marchetti — building in public, shipping weekly 🚀',
+    avatarUrl: null,
+    followers: 2_950,
+    tier: 'peer',
+    why: 'Same lane: building a creator tool in public, with the numbers.',
+    dm: "your weekly numbers posts are the only build-in-public updates i actually read. i'm doing the same with BrandOS reads. want to swap what's working on retention?",
+    messaged: true,
+  },
+  {
+    handle: 'marisol_media',
+    name: 'Marisol Reyes',
+    avatarUrl: null,
+    followers: 38_000,
+    tier: 'bigger',
+    why: 'Runs creator partnerships for brands: the other side of what you post about.',
+    dm: "you've posted about how brands shortlist creators. i've been reading 6k creator accounts to see what makes one legible to a brand. curious if the pattern i'm seeing matches yours?",
+    messaged: false,
+  },
+];
+
+function samplePeople(kind: string | undefined): PlaybookData['people'] {
+  const ready = (people: PersonView[], reason: 'engagers' | 'scale' = 'engagers'): PeopleState => ({
+    state: 'ready',
+    reason,
+    week: '2026-10-26',
+    next: '2026-11-02',
+    people,
+  });
+  switch (kind) {
+    case 'off':
+      return { show: false };
+    case 'loading':
+      return { show: true, sample: { state: 'loading' } };
+    case 'partial':
+      return { show: true, sample: ready(SAMPLE_PEOPLE.slice(0, 1)) };
+    case 'none':
+      return { show: true, sample: ready([]) };
+    case 'scale':
+      return { show: true, sample: ready(SAMPLE_PEOPLE, 'scale') };
+    default:
+      return { show: true, sample: ready(SAMPLE_PEOPLE) };
+  }
+}
+
+function samplePlaybook(people?: string): PlaybookData {
   const now = new Date(Date.UTC(2026, 9, 27));
   const at = (daysAgo: number) => new Date(now.getTime() - daysAgo * 86_400_000);
   // eight weeks of ideas and posts that grow, so the chart has a story
@@ -144,6 +204,7 @@ function samplePlaybook(): PlaybookData {
       write: '/world-preview/write',
       doMore: '/world-preview/write',
     },
+    people: samplePeople(people),
   };
 }
 
@@ -157,6 +218,7 @@ export default async function TodayPreview({
     walk?: string;
     thin?: string;
     persona?: string;
+    people?: string;
   }>;
 }) {
   const sp = await searchParams;
@@ -256,7 +318,7 @@ export default async function TodayPreview({
         plan={PREVIEW_PLAN}
         preview
       >
-        <Playbook data={samplePlaybook()} />
+        <Playbook data={samplePlaybook(sp.people)} />
         {walk}
       </Shell>
     );
@@ -293,6 +355,10 @@ export default async function TodayPreview({
             nextMoves: view.score.nextMoves,
           },
           ideas,
+          connect:
+            sp.people === 'off'
+              ? null
+              : { reason: sp.people === 'scale' ? 'scale' : 'engagers', knownEngagers: 1 },
         }}
         scoreLine={{ value: 72, delta: 2, since: '14 Oct' }}
       />

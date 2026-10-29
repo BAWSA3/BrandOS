@@ -24,6 +24,7 @@
     "test:bots": "npx tsx scripts/test-bots.ts",
     "test:index": "npx tsx scripts/test-index.ts",
     "test:field": "npx tsx scripts/test-field.ts",
+    "test:people": "npx tsx scripts/test-people.ts",
     "test:hashtags": "npx tsx scripts/test-hashtags.ts",
     "test:early-access": "npx tsx scripts/test-early-access.ts",
     "test:moves": "npx tsx scripts/test-moves.ts",
