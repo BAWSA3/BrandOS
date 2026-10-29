@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { buildCheckPrompt } from '@/prompts/brand-guardian';
 import { BrandDNA } from '@/lib/types';
 import { checkRateLimit, getClientIdentifier, rateLimiters } from '@/lib/rate-limit';
+import { replyText } from '@/lib/model-text';
 
 // Security: Validate callback URL to prevent SSRF attacks
 function isCallbackUrlSafe(urlString: string): boolean {
@@ -97,7 +98,7 @@ export async function POST(request: NextRequest) {
       ],
     });
 
-    const responseText = message.content[0].type === 'text' ? message.content[0].text : '';
+    const responseText = replyText(message);
 
     // Parse JSON from response
     const jsonMatch = responseText.match(/\{[\s\S]*\}/);

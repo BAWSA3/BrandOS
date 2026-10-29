@@ -4,6 +4,7 @@ import { freshRead, profileCard, publicRead, type ProfileRead } from '@/lib/mcp/
 import { GUARD_PREAMBLE, wrapUntrusted } from '@/lib/prompt-safety';
 import { extractJson } from '@/lib/score-schemas';
 import { getArchetypeInfo } from '@/lib/archetype-descriptions';
+import { replyText } from '@/lib/model-text';
 
 /**
  * The public brand page (mybrandos.app/@handle) and its "Compare your brand"
@@ -84,7 +85,7 @@ ${wrapUntrusted(brief(them), 'their_brand', 2000)}`,
         },
       ],
     });
-    const text = msg.content[0]?.type === 'text' ? msg.content[0].text : '';
+    const text = replyText(msg);
     const raw = extractJson(text) as { gaps?: unknown } | null;
     const gaps = Array.isArray(raw?.gaps)
       ? raw.gaps

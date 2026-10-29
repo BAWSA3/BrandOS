@@ -11,6 +11,7 @@ import {
   ContentEngineOutput,
 } from './content-engine.types';
 import { NO_HASHTAG_ADVICE } from '@/lib/no-hashtag-advice';
+import { replyText } from '@/lib/model-text';
 
 // Platform-specific guidelines
 interface PlatformGuidelines {
@@ -231,7 +232,7 @@ export async function generateContent(
       ],
     });
 
-    const responseText = message.content[0].type === 'text' ? message.content[0].text : '';
+    const responseText = replyText(message);
 
     const generatedContent = parseGeneratedContent(responseText);
 
@@ -398,7 +399,7 @@ Return ONLY valid JSON:
       ],
     });
 
-    const responseText = message.content[0].type === 'text' ? message.content[0].text : '';
+    const responseText = replyText(message);
 
     const adaptedContent = parseGeneratedContent(responseText);
 
@@ -476,7 +477,7 @@ Return ONLY valid JSON:
       ],
     });
 
-    const responseText = message.content[0].type === 'text' ? message.content[0].text : '';
+    const responseText = replyText(message);
 
     const jsonMatch = responseText.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
@@ -750,7 +751,7 @@ export async function generateScheduledContent(
       messages: [{ role: 'user', content: prompt }],
     });
 
-    const responseText = message.content[0].type === 'text' ? message.content[0].text : '';
+    const responseText = replyText(message);
     if (!responseText) {
       return {
         success: false,

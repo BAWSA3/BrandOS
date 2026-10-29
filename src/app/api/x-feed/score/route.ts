@@ -3,6 +3,7 @@ import { cookies } from 'next/headers';
 import { createClient } from '@supabase/supabase-js';
 import Anthropic from '@anthropic-ai/sdk';
 import prisma from '@/lib/db';
+import { replyText } from '@/lib/model-text';
 
 const MAX_BATCH = 10; // Score up to 10 tweets per request
 
@@ -117,7 +118,7 @@ No explanation, just the JSON array.`;
       messages: [{ role: 'user', content: prompt }],
     });
 
-    const responseText = message.content[0].type === 'text' ? message.content[0].text : '';
+    const responseText = replyText(message);
 
     // Parse scores from response
     let scores: Array<{ index: number; score: number }>;

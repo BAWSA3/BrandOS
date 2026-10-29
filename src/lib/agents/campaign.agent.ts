@@ -4,6 +4,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { BrandDNA } from '@/lib/types';
 import { AgentContext, AgentResponse, CampaignBrief, CampaignPlan } from './types';
+import { replyText } from '@/lib/model-text';
 
 // Build the campaign planning prompt
 function buildCampaignPrompt(brand: BrandDNA, brief: CampaignBrief): string {
@@ -183,7 +184,7 @@ export async function createCampaignPlan(
       ],
     });
 
-    const responseText = message.content[0].type === 'text' ? message.content[0].text : '';
+    const responseText = replyText(message);
 
     const campaignPlan = parseCampaignPlan(responseText);
 
@@ -274,7 +275,7 @@ Return ONLY valid JSON:
       ],
     });
 
-    const responseText = message.content[0].type === 'text' ? message.content[0].text : '';
+    const responseText = replyText(message);
 
     const jsonMatch = responseText.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {

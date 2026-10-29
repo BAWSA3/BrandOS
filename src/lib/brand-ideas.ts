@@ -3,6 +3,7 @@ import prisma from '@/lib/db';
 import { GUARD_PREAMBLE, wrapUntrusted } from '@/lib/prompt-safety';
 import { parseIdeas, type Idea } from '@/lib/brainstorm';
 import type { GrowthView } from '@/lib/growth-data';
+import { replyText } from '@/lib/model-text';
 
 /**
  * BrandOS ideas for the growth dashboard's idea board (migration 042): new
@@ -82,7 +83,7 @@ ${wrapUntrusted(posts || '(none yet)', 'posts', 1500)}`;
     thinking: { type: 'disabled' },
     messages: [{ role: 'user', content: prompt }],
   });
-  const text = msg.content[0]?.type === 'text' ? msg.content[0].text : '';
+  const text = replyText(msg);
   return parseIdeas(text).slice(0, 3);
 }
 

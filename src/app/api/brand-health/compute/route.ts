@@ -14,6 +14,7 @@ import {
   computeTrend,
   type AvailableDataFlags,
 } from '@/lib/brand-health';
+import { replyText } from '@/lib/model-text';
 
 async function getAuthUser() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -155,7 +156,7 @@ export async function POST(request: NextRequest) {
           max_tokens: 256,
           messages: [{ role: 'user', content: prompt }],
         });
-        return message.content[0].type === 'text' ? message.content[0].text : '';
+        return replyText(message);
       });
     }
 

@@ -2,6 +2,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import { GUARD_PREAMBLE, wrapUntrusted } from '@/lib/prompt-safety';
 import { extractJson } from '@/lib/score-schemas';
 import { getArchetypeInfo } from '@/lib/archetype-descriptions';
+import { replyText } from '@/lib/model-text';
 
 /**
  * Studio brainstorm: from one "Next time" suggestion on an analyzed post,
@@ -86,7 +87,7 @@ ${wrapUntrusted(input.suggestion, 'suggestion', 300)}`;
     thinking: { type: 'disabled' },
     messages: [{ role: 'user', content: prompt }],
   });
-  const text = msg.content[0]?.type === 'text' ? msg.content[0].text : '';
+  const text = replyText(msg);
   const ideas = parseIdeas(text);
   if (!ideas.length) throw new Error('The brainstorm came back empty. Try again.');
   return ideas;
