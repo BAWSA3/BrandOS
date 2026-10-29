@@ -43,7 +43,10 @@ It replaces paste-and-check in the writing room. Target: testers before Nov 2.
 - Every copy-out is logged. **Win metric: copy-outs per Pro member per week.**
   Post performance matching comes after Nov 2.
 
-## Video
+## Video — moved to November (after launch), per Bawsa 2026-10-28
+
+Not part of the Nov 2 build. Notes kept for when it starts.
+
 
 - **Script mode:** same composer, plus spoken checks: hook inside the first ~3s of
   speech (≈8 words) and an estimated read-aloud length against X video limits.
@@ -62,8 +65,8 @@ It replaces paste-and-check in the writing room. Target: testers before Nov 2.
 | Day | Ship (behind DASHBOARD_V2, testers) |
 |---|---|
 | Oct 29–30 | Composer: tier 0 + 1 marks, brand switch, copy-out logging |
-| Oct 31 | Tier 2 full read; video script mode |
-| Nov 1 | Rough cut (cut line applies); break-it pass; before/after screenshots |
+| Oct 31 | Tier 2 full read; thread copy-out part-by-part |
+| Nov 1 | Break-it pass; before/after screenshots; variant picked |
 | Nov 2 | Bawsa's go → promote |
 
 UI work follows `docs/UI-QUALITY-PLAYBOOK.md`. The state matrix covers: empty, thin
