@@ -1,5 +1,6 @@
 import type { SubscriptionStatus } from '@prisma/client';
 import { OPEN_ACCESS_UNTIL, PAID_TIERS, type SubscriptionTier } from '@/lib/plans';
+import { CODE_TRIAL } from '@/lib/early-access-rules';
 
 /**
  * Who gets Pro (the launch's one entitlement check). Pure: no DB, safe on
@@ -10,6 +11,9 @@ import { OPEN_ACCESS_UNTIL, PAID_TIERS, type SubscriptionTier } from '@/lib/plan
  *          a trial), CANCELED, INCOMPLETE
  *   Admins (role "admin") always get Pro, so the founder isn't paywalled.
  *   Until OPEN_ACCESS_UNTIL (Dec 3) everyone gets Pro: the launch offer.
+ *   Invite-only trial (CODE_TRIAL, from Nov 2): the launch offer is off;
+ *   instead a redeemed code gives Pro until `freeUntil` (30 days after
+ *   redeeming, set by getCurrentUser). Everyone else is Free until they pay.
  */
 
 export interface BillingFields {
@@ -17,13 +21,41 @@ export interface BillingFields {
   subscriptionStatus: SubscriptionStatus | string;
   currentPeriodEnd?: Date | null;
   role?: string | null;
+  /** End of this person's free code access (CODE_TRIAL only), or null. */
+  freeUntil?: Date | null;
 }
 
 const ENTITLED: string[] = ['ACTIVE', 'TRIALING'];
 
-/** The launch window: everyone gets full access until OPEN_ACCESS_UNTIL. */
-export function isOpenAccess(now: Date = new Date()): boolean {
-  return now < OPEN_ACCESS_UNTIL;
+/**
+ * The launch window: everyone gets full access until OPEN_ACCESS_UNTIL.
+ * Off in the invite-only trial, where access is per person (inCodeTrial).
+ */
+export function isOpenAccess(now: Date = new Date(), codeTrial: boolean = CODE_TRIAL): boolean {
+  return !codeTrial && now < OPEN_ACCESS_UNTIL;
+}
+
+/** Inside their free 30 days from a redeemed code (invite-only trial only). */
+export function inCodeTrial(
+  u: Pick<BillingFields, 'freeUntil'>,
+  now: Date = new Date(),
+  codeTrial: boolean = CODE_TRIAL
+): boolean {
+  return codeTrial && !!u.freeUntil && now < u.freeUntil;
+}
+
+/**
+ * When this person's free access ends, or null when it isn't running: the
+ * launch window's end for everyone, or their own code's end. Founding cards
+ * added before it are first charged at this moment.
+ */
+export function freeAccessEndsAt(
+  u: Pick<BillingFields, 'freeUntil'>,
+  now: Date = new Date(),
+  codeTrial: boolean = CODE_TRIAL
+): Date | null {
+  if (isOpenAccess(now, codeTrial)) return OPEN_ACCESS_UNTIL;
+  return inCodeTrial(u, now, codeTrial) ? (u.freeUntil ?? null) : null;
 }
 
 /** Has a live paid subscription (founding cards count: TRIALING until the first charge). */
@@ -39,9 +71,13 @@ export function isSubscribed(u: BillingFields): boolean {
  * pay" (checkout guard, checkout-return sync), since open access makes this
  * true for everyone until Dec 3.
  */
-export function hasPro(u: BillingFields, now: Date = new Date()): boolean {
+export function hasPro(
+  u: BillingFields,
+  now: Date = new Date(),
+  codeTrial: boolean = CODE_TRIAL
+): boolean {
   if (u.role === 'admin') return true;
-  return isSubscribed(u) || isOpenAccess(now);
+  return isSubscribed(u) || freeAccessEndsAt(u, now, codeTrial) !== null;
 }
 
 /** When the trial ends (Stripe's current period end during a trial), or null. */

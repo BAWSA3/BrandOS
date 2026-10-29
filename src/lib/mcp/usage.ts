@@ -1,5 +1,7 @@
 import prisma from '@/lib/db';
 import { hasPro, trialEndsAt } from '@/lib/billing';
+import { codeFreeUntil } from '@/lib/auth';
+import { CODE_TRIAL } from '@/lib/early-access-rules';
 
 /**
  * BrandOS MCP allowance (migration 034, "McpUsage").
@@ -37,7 +39,9 @@ export function weekStart(now = new Date()): Date {
 }
 
 export async function allowance(a: McpAccount, now = new Date()): Promise<Allowance> {
-  if (hasPro(a)) {
+  // invite-only trial: a redeemed code's 30 days count as Pro here too
+  const freeUntil = CODE_TRIAL ? await codeFreeUntil(a.id) : null;
+  if (hasPro({ ...a, freeUntil }, now)) {
     const ends = trialEndsAt(a);
     return ends
       ? { kind: 'unlimited', reason: 'trial', trialEnds: ends }
@@ -81,6 +85,8 @@ export function allowanceLine(a: Allowance, spent: boolean): string {
 export function limitReached(a: Extract<Allowance, { kind: 'metered' }>, site: string): string {
   return (
     `You've used your ${FREE_PER_WEEK} free BrandOS reads this week. They reset ${day(a.resetsAt)} ` +
-    `(Monday 00:00 UTC). Want unlimited reads? Start a 7-day Pro trial: ${site}/pricing?utm_source=mcp`
+    (CODE_TRIAL
+      ? `(Monday 00:00 UTC). Want unlimited reads? BrandOS is invite-only: a code is 30 days free, no card: ${site}/access?utm_source=mcp`
+      : `(Monday 00:00 UTC). Want unlimited reads? Start a 7-day Pro trial: ${site}/pricing?utm_source=mcp`)
   );
 }

@@ -6,6 +6,11 @@ import { AnimateNumber } from 'motion-plus/react';
 import { useEffect, useState } from 'react';
 import StartTrialButton from '@/components/billing/StartTrialButton';
 import { FOUNDING_SPOTS, TRIAL_DAYS } from '@/lib/plans';
+import {
+  CODE_TRIAL_DAYS,
+  INVALID_CODE_MESSAGE,
+  typedCodePath,
+} from '@/lib/early-access-rules';
 
 const MONO = "var(--dash-mono, 'VCR OSD Mono', monospace)";
 const BIG = "var(--dash-big, 'Inter Tight', sans-serif)";
@@ -13,18 +18,45 @@ const BLUE = '#0047FF';
 
 /**
  * Free accounts see their real dashboard, blurred, under this card: the
- * locked preview (docs/LAUNCH-PLAN.md). Their own score is the hook; the
- * trial is the one action.
+ * locked preview (docs/LAUNCH-PLAN.md). Their own score is the hook.
+ *  - `trial` (default): the 7-day card trial is the one action.
+ *  - Invite-only trial (Nov 2): `code-needed` (no code yet: enter one, apply,
+ *    or go straight to Pro) and `code-ended` (their 30 free days are over:
+ *    keep Pro, charged from today; a code's 30 days were the trial).
  */
+export type PaywallMode = 'trial' | 'code-needed' | 'code-ended';
+
 export default function Paywall({
   handle,
   score,
   foundingLeft,
+  mode = 'trial',
 }: {
   handle: string;
   score: number;
   foundingLeft: number;
+  mode?: PaywallMode;
 }) {
+  const [code, setCode] = useState('');
+  const [codeError, setCodeError] = useState<string | null>(null);
+  const applyCode = (e: React.FormEvent) => {
+    e.preventDefault();
+    const path = typedCodePath(code);
+    if (!path) return setCodeError(INVALID_CODE_MESSAGE);
+    window.location.assign(path);
+  };
+  const kicker =
+    mode === 'code-needed'
+      ? `Invite-only · ${CODE_TRIAL_DAYS} days free with a code`
+      : mode === 'code-ended'
+        ? `Your ${CODE_TRIAL_DAYS} free days are over`
+        : `BrandOS Pro · ${TRIAL_DAYS}-day free trial`;
+  const pitch =
+    mode === 'code-needed'
+      ? 'BrandOS is invite-only right now. A code gets you 30 days of everything, no card: today’s move, the live composer, your Brand view.'
+      : mode === 'code-ended'
+        ? 'Keep everything you’ve been using: today’s move, the live composer, your Brand view and every post analyzed.'
+        : 'Start your free trial to see what’s moving it: score history, every post analyzed, your Brand Pass, and BrandOS inside Claude and ChatGPT.';
   const reduce = useReducedMotion();
   // roll the score up once the card lands (Motion+ AnimateNumber needs a change)
   const [shown, setShown] = useState(0);
@@ -43,7 +75,7 @@ export default function Paywall({
       }}
       role="dialog"
       aria-modal="true"
-      aria-label="Start your BrandOS Pro trial"
+      aria-label={mode === 'code-needed' ? 'Get into BrandOS' : 'Keep BrandOS Pro'}
     >
       <motion.div
         initial={reduce ? false : { opacity: 0, y: 24 }}
@@ -56,13 +88,15 @@ export default function Paywall({
           className="text-[11px] uppercase tracking-[0.16em]"
           style={{ fontFamily: MONO, color: BLUE }}
         >
-          BrandOS Pro · {TRIAL_DAYS}-day free trial
+          {kicker}
         </div>
         <h1
           className="mt-4 text-[34px] leading-[1.02] sm:text-[42px]"
           style={{ fontFamily: BIG, fontWeight: 500, letterSpacing: '-0.035em' }}
         >
-          Your dashboard is ready, @{handle}.
+          {mode === 'code-ended'
+            ? `Keep your dashboard, @${handle}.`
+            : `Your dashboard is ready, @${handle}.`}
         </h1>
         <div className="mt-5 flex items-end gap-3">
           <span
@@ -79,14 +113,74 @@ export default function Paywall({
           </span>
         </div>
         <p className="mt-5 text-[15px] leading-[1.55]" style={{ color: '#333' }}>
-          Start your free trial to see what&apos;s moving it: score history, every post analyzed,
-          your Brand Pass, and BrandOS inside Claude and ChatGPT.
+          {pitch}
         </p>
-        <StartTrialButton signedIn next="/dashboard" className="mt-6" />
-        <p className="mt-3 text-center text-[12px] leading-[1.5]" style={{ color: '#6B6B6B' }}>
-          $29/month after {TRIAL_DAYS} days · card required · cancel before day {TRIAL_DAYS} and pay
-          nothing
-        </p>
+        {mode === 'code-needed' ? (
+          <>
+            <form onSubmit={applyCode} className="mt-6 flex gap-2">
+              <input
+                value={code}
+                onChange={(e) => {
+                  setCode(e.target.value);
+                  setCodeError(null);
+                }}
+                autoComplete="off"
+                autoCapitalize="characters"
+                spellCheck={false}
+                maxLength={24}
+                placeholder="AU7K-2QX9"
+                aria-label="Early-access code"
+                className="min-w-0 flex-1 border bg-white px-3 py-3 text-center text-[15px] tracking-[0.14em] focus:outline-none focus:ring-2 focus:ring-[#0047FF]"
+                style={{ borderColor: 'rgba(14,14,14,0.15)' }}
+              />
+              <button
+                type="submit"
+                disabled={!code.trim()}
+                className="px-5 text-[12px] uppercase tracking-[0.14em] text-white disabled:opacity-50"
+                style={{ fontFamily: MONO, background: BLUE }}
+              >
+                Use code
+              </button>
+            </form>
+            {codeError && (
+              <p className="mt-2 text-center text-[13px]" style={{ color: '#6B6B6B' }} role="alert">
+                {codeError}
+              </p>
+            )}
+            <p className="mt-3 text-center text-[13px]" style={{ color: '#333' }}>
+              No code?{' '}
+              <Link href="/access#apply" className="underline hover:text-[#0047FF]">
+                Apply for one
+              </Link>{' '}
+              or ask a member: each one has 3 to give.
+            </p>
+            <StartTrialButton
+              signedIn
+              next="/dashboard"
+              label="Or go straight to Pro"
+              className="mt-5"
+            />
+            <p className="mt-2 text-center text-[12px] leading-[1.5]" style={{ color: '#6B6B6B' }}>
+              $29/month after {TRIAL_DAYS} days · card required · cancel before day {TRIAL_DAYS}{' '}
+              and pay nothing
+            </p>
+          </>
+        ) : mode === 'code-ended' ? (
+          <>
+            <StartTrialButton signedIn next="/dashboard" label="Keep Pro" className="mt-6" />
+            <p className="mt-3 text-center text-[12px] leading-[1.5]" style={{ color: '#6B6B6B' }}>
+              $29/month from today · cancel any time
+            </p>
+          </>
+        ) : (
+          <>
+            <StartTrialButton signedIn next="/dashboard" className="mt-6" />
+            <p className="mt-3 text-center text-[12px] leading-[1.5]" style={{ color: '#6B6B6B' }}>
+              $29/month after {TRIAL_DAYS} days · card required · cancel before day {TRIAL_DAYS} and
+              pay nothing
+            </p>
+          </>
+        )}
         {foundingLeft > 0 && (
           <div
             className="mt-5 border-t pt-4 text-[11px] uppercase tracking-[0.12em]"

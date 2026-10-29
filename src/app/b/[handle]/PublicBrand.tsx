@@ -11,6 +11,7 @@ import { PUBLIC_TOKENS, wordmarkFor, type Colorway } from '@/lib/colorways';
 import type { MemberProfile } from '@/lib/creator-index';
 import IndexSection from './IndexSection';
 import { handleInputValue } from '@/lib/safe-input';
+import { CODE_TRIAL, joinHref } from '@/lib/early-access-rules';
 
 // The public brand page (mybrandos.app/@handle): the BrandOS read of one
 // handle, then "Compare your brand to @handle". Signed out: type your handle
@@ -212,7 +213,8 @@ function BrandRead({ card }: { card: BrandCard }) {
  * handle on return, so nobody types it twice.
  */
 function signInToCompare(handle: string): string {
-  return `/signup?next=${encodeURIComponent(`/@${handle}?compare=1`)}`;
+  // invite-only trial: new people get a code first (/access also has sign-in)
+  return joinHref(`/@${handle}?compare=1`);
 }
 
 function CompareView({ data, signedIn }: { data: Compare; signedIn: boolean }) {
@@ -320,11 +322,11 @@ function CompareView({ data, signedIn }: { data: Compare; signedIn: boolean }) {
             </p>
             <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-3">
               <Link
-                href="/signup?next=/dashboard"
+                href={joinHref('/dashboard')}
                 className="inline-block bg-white px-4 py-3 text-[11px] uppercase tracking-[0.14em]"
                 style={{ fontFamily: MONO, color: BLUE }}
               >
-                Create your account →
+                {CODE_TRIAL ? 'Get a code →' : 'Create your account →'}
               </Link>
               <Link
                 href="/signup?next=/dashboard"

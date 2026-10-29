@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import { PAID_TIERS } from '@/lib/plans';
 import { isOpenAccess } from '@/lib/billing';
+import { CODE_TRIAL, CODE_TRIAL_DAYS } from '@/lib/early-access-rules';
 import { scoreLatestPosts } from '@/lib/post-scores';
 
 /**
@@ -24,7 +25,8 @@ export async function GET(request: NextRequest) {
   }
   const started = Date.now();
 
-  // launch window (until Dec 3): everyone has full access, so everyone is scored
+  // launch window (until Dec 3): everyone has full access, so everyone is scored;
+  // in the invite-only trial: paid, admins and code holders inside their 30 days
   const users = await prisma.user.findMany({
     where: {
       platformConnections: { some: { platform: 'x', status: 'active' } },
@@ -37,6 +39,19 @@ export async function GET(request: NextRequest) {
                 subscriptionTier: { in: PAID_TIERS },
                 subscriptionStatus: { in: ['ACTIVE', 'TRIALING'] },
               },
+              // invite-only trial: inside a redeemed code's 30 days
+              ...(CODE_TRIAL
+                ? [
+                    {
+                      earlyAccessCode: {
+                        redeemedAt: {
+                          gt: new Date(Date.now() - CODE_TRIAL_DAYS * 24 * 60 * 60 * 1000),
+                        },
+                        revokedAt: null,
+                      },
+                    },
+                  ]
+                : []),
             ],
           }),
     },

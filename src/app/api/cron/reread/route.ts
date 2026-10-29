@@ -7,6 +7,8 @@ import {
   MAX_REREADS_PER_RUN,
   rereadDue,
 } from '@/lib/auto-reread-rules';
+import { codeFreeUntil } from '@/lib/auth';
+import { CODE_TRIAL } from '@/lib/early-access-rules';
 
 /**
  * Nightly (vercel.json): re-read active members' brands so the score moves
@@ -83,7 +85,9 @@ export async function GET(request: NextRequest) {
         continue;
       }
       const workspace = user.ownedWorkspaces.find((w) => w.type === 'personal') ?? null;
-      const r = await rescanOwnBrand(user, workspace, request.nextUrl.origin);
+      // freeUntil: a code's 30 days count as Pro for the rescan limit (invite-only trial)
+      const freeUntil = CODE_TRIAL ? await codeFreeUntil(user.id) : null;
+      const r = await rescanOwnBrand({ ...user, freeUntil }, workspace, request.nextUrl.origin);
       if (r.ok && r.saved) read++;
       else if (r.ok) unchanged++;
       else {

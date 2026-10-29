@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import { hasPro } from '@/lib/billing';
+import { codeFreeUntil } from '@/lib/auth';
+import { CODE_TRIAL } from '@/lib/early-access-rules';
 import { checkRateLimit, getClientIdentifier } from '@/lib/rate-limit';
 import { bearer, extensionCors, verifyExtensionToken } from '@/lib/extension-token';
 
@@ -45,7 +47,7 @@ export async function POST(request: NextRequest) {
   return NextResponse.json(
     {
       valid: true,
-      user: { handle: x?.platformUsername ?? user.xUsername ?? null, pro: hasPro(user) },
+      user: { handle: x?.platformUsername ?? user.xUsername ?? null, pro: hasPro({ ...user, freeUntil: CODE_TRIAL ? await codeFreeUntil(user.id) : null }) },
     },
     { headers }
   );

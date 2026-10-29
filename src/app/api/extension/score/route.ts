@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import { hasPro } from '@/lib/billing';
+import { codeFreeUntil } from '@/lib/auth';
+import { CODE_TRIAL } from '@/lib/early-access-rules';
 import { checkRateLimit, getClientIdentifier } from '@/lib/rate-limit';
 import { bearer, extensionCors, verifyExtensionToken } from '@/lib/extension-token';
 import { DraftScoreError, scoreDraft, validateDraft } from '@/lib/draft-score';
@@ -42,7 +44,8 @@ export async function POST(request: NextRequest) {
     .findUnique({ where: { id: userId }, include: { ownedWorkspaces: true } })
     .catch(() => null);
   if (!user) return NextResponse.json({ error: 'Sign in again' }, { status: 401, headers });
-  if (!hasPro(user))
+  const freeUntil = CODE_TRIAL ? await codeFreeUntil(user.id) : null;
+  if (!hasPro({ ...user, freeUntil }))
     return NextResponse.json(
       { error: 'Draft scoring is part of BrandOS Pro.', pro: false },
       { status: 402, headers }

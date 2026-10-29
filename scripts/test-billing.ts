@@ -3,7 +3,9 @@
  *   npm run test:billing
  */
 import {
+  freeAccessEndsAt,
   hasPro,
+  inCodeTrial,
   isOpenAccess,
   isSubscribed,
   mapStripeStatus,
@@ -139,6 +141,31 @@ test(
   'no items → null',
   periodEndOf({ status: 'active', trial_end: null, items: { data: [] } }) === null
 );
+
+console.log('\nZ. Invite-only trial (CODE_TRIAL, from Nov 2)');
+{
+  const NOV5 = new Date('2026-11-05T12:00:00Z');
+  const in30 = new Date('2026-12-02T12:00:00Z');
+  const coder = { ...u('FREE', 'ACTIVE'), freeUntil: in30 };
+  const nocode = { ...u('FREE', 'ACTIVE'), freeUntil: null };
+  test('trial on: the launch window is off', !isOpenAccess(NOV5, true));
+  test('trial off: the launch window still runs', isOpenAccess(NOV5, false));
+  test('code holder inside 30 days → Pro', hasPro(coder, NOV5, true));
+  test('code holder after 30 days → Free', !hasPro(coder, new Date('2026-12-03T00:00:00Z'), true));
+  test('no code, not paid → Free', !hasPro(nocode, NOV5, true));
+  test('paid without a code → Pro', hasPro({ ...u('PRO', 'ACTIVE'), freeUntil: null }, NOV5, true));
+  test('admin → Pro', hasPro({ ...u('FREE', 'ACTIVE', 'admin'), freeUntil: null }, NOV5, true));
+  test('freeUntil ignored with the trial off', inCodeTrial(coder, NOV5, false) === false);
+  test(
+    'free access ends at their own date',
+    freeAccessEndsAt(coder, NOV5, true)?.getTime() === in30.getTime()
+  );
+  test('no free access without a code', freeAccessEndsAt(nocode, NOV5, true) === null);
+  test(
+    'trial off: free access ends at the window',
+    freeAccessEndsAt(nocode, NOV5, false)?.getTime() === OPEN_ACCESS_UNTIL.getTime()
+  );
+}
 
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

@@ -215,7 +215,12 @@ export default function ContinuePage() {
             role="alert"
           >
             <p className="text-[15px] leading-[1.45] text-[#0E0E0E]">{INVITE_ONLY_MESSAGE}</p>
-            <p className="mt-1.5 text-[13px] text-[#6B6862]">{INVITE_ONLY_HOW}</p>
+            <p className="mt-1.5 text-[13px] text-[#6B6862]">
+              {INVITE_ONLY_HOW}{' '}
+              <Link href="/access#apply" className="underline hover:text-[#0E0E0E]">
+                Apply for a code →
+              </Link>
+            </p>
           </div>
         )}
         {invite === 'invalid' && (

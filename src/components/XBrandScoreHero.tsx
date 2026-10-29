@@ -48,6 +48,7 @@ import {
 import { LANDING } from '@/lib/landing-copy';
 import type { LandingData } from '@/lib/landing-data';
 import { handleInputValue } from '@/lib/safe-input';
+import { CODE_TRIAL, CODE_TRIAL_DAYS, joinHref } from '@/lib/early-access-rules';
 
 // Background style options for easy switching
 type BgStyle = 'ascii-dna' | 'typescript' | 'system-logs' | 'hybrid';
@@ -1783,15 +1784,17 @@ export default function XBrandScoreHero({
                       Get the full breakdown →
                     </a>
                     <a
-                      href="/signup?next=/dashboard"
+                      href={joinHref('/dashboard')}
                       className="sys-press sys-focus"
                       style={revealLink('secondary')}
                     >
-                      Save it to your dashboard · continue with X →
+                      {CODE_TRIAL
+                        ? 'Get a code · save it to your dashboard →'
+                        : 'Save it to your dashboard · continue with X →'}
                     </a>
                     {indexStatus?.open && !indexStatus.member?.listed && (
                       <a
-                        href={indexStatus.signedIn ? '/index/join' : '/signup?next=/index/join'}
+                        href={indexStatus.signedIn ? '/index/join' : joinHref('/index/join')}
                         className="sys-press sys-focus"
                         style={revealLink('secondary')}
                       >
@@ -1808,7 +1811,9 @@ export default function XBrandScoreHero({
                       color: 'rgba(14,14,14,.7)',
                     }}
                   >
-                    BrandOS Studio opens Nov 2 · free until Dec 3
+                    {CODE_TRIAL
+                      ? `Invite-only · ${CODE_TRIAL_DAYS} days free with a code`
+                      : 'BrandOS Studio opens Nov 2 · free until Dec 3'}
                   </p>
                 </Panel>
               </div>
@@ -1854,21 +1859,23 @@ export default function XBrandScoreHero({
                   className="capture-hide mt-4 text-center text-[11px] tracking-[0.14em] text-black/70 uppercase"
                   style={{ fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace" }}
                 >
-                  BrandOS Studio opens Nov 2 ·{' '}
-                  <span className="text-[#0047FF]">free until Dec 3</span>
+                  {CODE_TRIAL ? 'Invite-only ·' : 'BrandOS Studio opens Nov 2 ·'}{' '}
+                  <span className="text-[#0047FF]">
+                    {CODE_TRIAL ? `${CODE_TRIAL_DAYS} days free with a code` : 'free until Dec 3'}
+                  </span>
                 </p>
                 {/* Sign in keeps this scan: it becomes the account's first dashboard scan */}
                 <a
-                  href="/signup?next=/dashboard"
+                  href={joinHref('/dashboard')}
                   className="capture-hide mt-3 block text-center text-[11px] tracking-[0.14em] text-black/60 uppercase hover:text-[#0047FF]"
                   style={{ fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace" }}
                 >
-                  Save it to your dashboard · continue with X →
+                  {CODE_TRIAL ? 'Get a code · save it to your dashboard →' : 'Save it to your dashboard · continue with X →'}
                 </a>
                 {/* The Creator Index (shown only while it's open) */}
                 {indexStatus?.open && !indexStatus.member?.listed && (
                   <a
-                    href={indexStatus.signedIn ? '/index/join' : '/signup?next=/index/join'}
+                    href={indexStatus.signedIn ? '/index/join' : joinHref('/index/join')}
                     className="capture-hide mt-3 block text-center text-[11px] tracking-[0.14em] text-[#0047FF] uppercase hover:underline"
                     style={{ fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace" }}
                   >

@@ -1,7 +1,16 @@
 import type { Prisma } from '@prisma/client';
 import prisma from '@/lib/db';
 import { indexOpenFor, type IndexViewer } from '@/lib/index-rules';
-import { inviteOnlyFrom, normalizeCode, type CodeState } from '@/lib/early-access-rules';
+import { randomBytes } from 'node:crypto';
+import {
+  generateCode,
+  inviteLink,
+  inviteOnlyFrom,
+  invitesLeft,
+  MEMBER_INVITES,
+  normalizeCode,
+  type CodeState,
+} from '@/lib/early-access-rules';
 import { welcomeAfterRedeem } from '@/lib/early-access-welcome';
 
 /**
@@ -165,4 +174,135 @@ export async function redeemCode(userId: string, raw: unknown): Promise<RedeemRe
 /** Where tester feedback is emailed: the address the app already uses for team mail. */
 export function teamInbox(): string {
   return process.env.ENTERPRISE_NOTIFY_EMAIL || process.env.EMAIL_FROM || 'team@mybrandos.app';
+}
+
+// ---------------------------------------------------------------------------
+// Invite-only trial (migration 051): the apply list and members' own invites.
+// Every function here reports "unavailable" instead of throwing when 051 isn't
+// applied, so the form and the invite card degrade quietly.
+// ---------------------------------------------------------------------------
+
+export type ApplyResult = 'ok' | 'unavailable';
+
+/**
+ * Save an "apply for a code" request. One per handle: a repeat (or a new
+ * email for the same handle) changes nothing and gets the same answer, so the
+ * form says nothing about who has applied.
+ */
+export async function saveApplication(a: {
+  handle: string;
+  email: string;
+  note: string | null;
+}): Promise<ApplyResult> {
+  try {
+    await prisma.accessApplication.create({ data: a, select: { id: true } });
+    return 'ok';
+  } catch (e) {
+    if ((e as { code?: string }).code === 'P2002') return 'ok';
+    console.error('[early-access] application not saved (is 051 applied?)', e);
+    return 'unavailable';
+  }
+}
+
+export interface MemberInvite {
+  code: string;
+  link: string;
+  /** X handle of whoever used it, or null while it's open. */
+  usedBy: string | null;
+  usedAt: string | null;
+}
+export interface MemberInvites {
+  cap: number;
+  left: number;
+  invites: MemberInvite[];
+}
+
+/** The perks a member's invite carries: theirs (a paid member without a code: none extra). */
+async function invitePerks(userId: string) {
+  const own = await earlyAccessFor(userId);
+  return {
+    perkIndex: !!own?.perkIndex,
+    perkFoundingPrice: !!own?.perkFoundingPrice,
+    perkTester: !!own?.perkTester,
+  };
+}
+
+/** A member's invites (oldest first), or null before 051. */
+export async function memberInvites(
+  userId: string,
+  origin = 'https://mybrandos.app'
+): Promise<MemberInvites | null> {
+  try {
+    const rows = await prisma.earlyAccessCode.findMany({
+      where: { createdByUserId: userId },
+      orderBy: { createdAt: 'asc' },
+      select: {
+        code: true,
+        redeemedAt: true,
+        revokedAt: true,
+        redeemedBy: { select: { xUsername: true } },
+      },
+    });
+    return {
+      cap: MEMBER_INVITES,
+      left: invitesLeft(rows.length),
+      invites: rows
+        .filter((r) => !r.revokedAt)
+        .map((r) => ({
+          code: r.code,
+          link: inviteLink(r.code, origin),
+          usedBy: r.redeemedAt ? (r.redeemedBy?.xUsername ?? 'someone') : null,
+          usedAt: r.redeemedAt ? r.redeemedAt.toISOString() : null,
+        })),
+    };
+  } catch {
+    return null;
+  }
+}
+
+export type MintResult =
+  | { ok: true; invite: MemberInvite }
+  | { ok: false; reason: 'none-left' | 'unavailable' };
+
+/**
+ * Make one of a member's invites (on their first copy, not upfront). The cap
+ * is enforced inside a transaction holding a per-member advisory lock, so two
+ * quick taps can't make a 4th. Revoked invites still count: revoking never
+ * hands out a new one. Callers check the member is eligible first.
+ */
+export async function mintInvite(
+  userId: string,
+  handle: string | null,
+  origin = 'https://mybrandos.app'
+): Promise<MintResult> {
+  const perks = await invitePerks(userId);
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const code = generateCode((n) => randomBytes(n));
+    try {
+      const made = await prisma.$transaction(async (tx) => {
+        await tx.$executeRaw`select pg_advisory_xact_lock(hashtext(${'invites:' + userId}))`;
+        const count = await tx.earlyAccessCode.count({ where: { createdByUserId: userId } });
+        if (invitesLeft(count) <= 0) return null;
+        return tx.earlyAccessCode.create({
+          data: {
+            code,
+            label: handle ? `invite from @${handle}` : 'member invite',
+            createdByUserId: userId,
+            ...perks,
+          },
+          select: { code: true },
+        });
+      });
+      if (!made) return { ok: false, reason: 'none-left' };
+      return {
+        ok: true,
+        invite: { code: made.code, link: inviteLink(made.code, origin), usedBy: null, usedAt: null },
+      };
+    } catch (e) {
+      if ((e as { code?: string }).code === 'P2002') continue; // code collision: draw again
+      console.error('[early-access] invite not made (is 051 applied?)', e);
+      return { ok: false, reason: 'unavailable' };
+    }
+  }
+  return { ok: false, reason: 'unavailable' };
 }
