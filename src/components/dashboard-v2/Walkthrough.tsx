@@ -419,16 +419,154 @@ function PersonaStep({ name, onPick }: { name: string | null; onPick: (p: Person
 function HandOff() {
   return (
     <div>
-      <div className="text-[40px] leading-[1.04] md:text-[64px]" style={BIG_STYLE}>
+      <div className="text-[36px] leading-[1.04] md:text-[56px]" style={BIG_STYLE}>
         <Words text="Try it on your next post." />
       </div>
-      <Plain delay={0.6}>
-        {
-          "Write it in BrandOS and it reads along as you type: whether it sounds like you, whether it's on what you're known for, and your score for the draft. It tells you what's off. You fix it, so it stays yours."
-        }
-      </Plain>
-      <Plain delay={1}>{"When it's ready, one tap opens it in X."}</Plain>
+      <WriteMock />
+      <ol className="mt-5 max-w-[560px] space-y-2 text-[15px] leading-[1.5] md:text-[16px]">
+        {WRITE_NOTES.map((n, k) => (
+          <FadeLine key={n.mark} delay={0.9 + k * 0.25}>
+            <span
+              className="mr-2 mt-[2px] inline-flex h-[20px] w-[20px] shrink-0 items-center justify-center rounded-full text-[11px]"
+              style={{
+                background: 'var(--v-signal)',
+                color: 'var(--v-on-signal)',
+                fontFamily: VCR,
+              }}
+            >
+              {n.mark}
+            </span>
+            <span style={{ color: 'var(--v-head)' }}>{n.text}</span>
+          </FadeLine>
+        ))}
+      </ol>
     </div>
+  );
+}
+
+/** What each numbered part of the Write picture means (plain words, one line each). */
+const WRITE_NOTES = [
+  {
+    mark: '1',
+    text: 'Write your post. BrandOS reads along as you type.',
+  },
+  {
+    mark: '2',
+    text: 'Your score for the draft, out of 100. It updates when you pause.',
+  },
+  {
+    mark: '3',
+    text: "Underlines show what's off. Solid: doesn't sound like you. Dashed: off what you're known for. You fix it, so it stays yours.",
+  },
+  {
+    mark: '4',
+    text: 'When it reads right, Open in X sends it over, ready to post.',
+  },
+];
+
+function FadeLine({ children, delay }: { children: React.ReactNode; delay: number }) {
+  const reduce = useReducedMotion();
+  return (
+    <motion.li
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ delay: reduce ? 0 : delay, duration: reduce ? 0 : 0.35 }}
+      className="flex items-start"
+    >
+      {children}
+    </motion.li>
+  );
+}
+
+function Pin({ n }: { n: string }) {
+  return (
+    <span
+      className="inline-flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full text-[10px]"
+      style={{ background: 'var(--v-signal)', color: 'var(--v-on-signal)', fontFamily: VCR }}
+      aria-hidden
+    >
+      {n}
+    </span>
+  );
+}
+
+/** A small, labelled picture of the Write screen (not the real composer). */
+function WriteMock() {
+  const reduce = useReducedMotion();
+  return (
+    <motion.div
+      initial={reduce ? { opacity: 0 } : { opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: reduce ? 0 : 0.45, duration: reduce ? 0 : 0.4 }}
+      className="mt-6 grid max-w-[620px] grid-cols-[1fr_auto] gap-3 p-4 md:gap-5 md:p-5"
+      style={{
+        background: 'var(--v-surface)',
+        color: 'var(--v-ink)',
+        borderRadius: 16,
+        boxShadow: 'inset 0 0 0 1px var(--v-rule)',
+      }}
+      aria-hidden
+    >
+      <div
+        className="p-3 text-[14px] leading-[1.6]"
+        style={{ background: 'var(--v-raised)', borderRadius: 10 }}
+      >
+        <div className="mb-1 flex items-center gap-2">
+          <Pin n="1" />
+          <span
+            className="text-[10px] uppercase tracking-[0.14em]"
+            style={{ fontFamily: VCR, color: 'var(--v-muted)' }}
+          >
+            Your draft
+          </span>
+        </div>
+        testing out different ai tools to{' '}
+        <span style={{ borderBottom: '2px solid var(--v-signal-text)' }}>leverage synergies</span>{' '}
+        and{' '}
+        <span style={{ borderBottom: '2px dashed var(--v-signal-text)' }}>
+          my weekend golf swing
+        </span>
+        <span className="ml-1 inline-flex align-middle">
+          <Pin n="3" />
+        </span>
+      </div>
+      <div className="flex min-w-[88px] flex-col items-start gap-2">
+        <div className="flex items-center gap-1.5">
+          <Pin n="2" />
+          <span
+            className="text-[10px] uppercase tracking-[0.14em]"
+            style={{ fontFamily: VCR, color: 'var(--v-muted)' }}
+          >
+            On-brand
+          </span>
+        </div>
+        <div
+          className="text-[40px] leading-none md:text-[48px]"
+          style={{
+            fontFamily: DISPLAY,
+            fontWeight: 500,
+            letterSpacing: '-0.04em',
+            color: 'var(--v-signal-text)',
+          }}
+        >
+          72
+        </div>
+        <div className="mt-auto flex items-center gap-1.5">
+          <Pin n="4" />
+          <span
+            className="px-2.5 py-1 text-[11px]"
+            style={{
+              background: 'var(--v-signal)',
+              color: 'var(--v-on-signal)',
+              borderRadius: 999,
+              fontFamily: DISPLAY,
+            }}
+          >
+            Open in X →
+          </span>
+        </div>
+      </div>
+    </motion.div>
   );
 }
 
