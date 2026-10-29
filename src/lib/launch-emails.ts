@@ -18,6 +18,7 @@ export const CAMPAIGNS = {
   studioTease: 'studio-tease-oct22',
   indexReserved: 'index-reserved-nov2',
   earlyAccess: 'early-access-oct27',
+  earlyAccessWelcome: 'early-access-welcome',
 } as const;
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://mybrandos.app';
@@ -508,6 +509,116 @@ export function renderEarlyAccessEmail(
         </td></tr>
         <tr><td align="center" style="padding:30px 0 0 0;font-family:${SANS};font-size:12px;line-height:1.6;color:#9A968E;">
           You're getting this because you signed up at <a href="${APP_URL}" style="color:#9A968E;">mybrandos.app</a>.<br>
+          <a href="${unsub}" style="color:#9A968E;text-decoration:underline;">Unsubscribe</a>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+  return { html, text };
+}
+
+/**
+ * Sent automatically when someone redeems an early-access code
+ * (src/lib/early-access-welcome.ts): "you're in, here are 3 things to do this
+ * week". The copy is the manual tour Bawsa approved on Oct 28, as a standalone
+ * email. One job: do today's move. One ask: reply with what was confusing.
+ *
+ * `usedBy` is set when the code was given to one handle and redeemed by
+ * another; the email goes to the person it was given to, who may not know.
+ */
+export type EarlyAccessWelcomeRecipient = {
+  handle: string | null;
+  usedBy?: string | null;
+};
+
+function earlyAccessWelcomeModel(r: EarlyAccessWelcomeRecipient) {
+  const usedBy = r.usedBy ? `@${esc(r.usedBy)}` : null;
+  return {
+    subject: r.handle
+      ? `@${r.handle}, you're in. here's what to do first`
+      : "you're in. here's what to do first",
+    preheader: 'three things for your first week on BrandOS, and one small ask.',
+    who: r.handle ? `@${esc(r.handle)}` : 'there',
+    opening: usedBy
+      ? `saw your code got used by ${usedBy}. if that&#39;s you, you&#39;re in. here&#39;s how to get the most out of it this week.`
+      : 'you&#39;re in. here&#39;s how to get the most out of it this week.',
+    steps: [
+      '<b>do today&#39;s move.</b> the top card on your dashboard is one thing to do today, picked from your recent posts. do that, skip the rest.',
+      '<b>score a draft before you post it.</b> open Write, paste what you&#39;re about to post, and you&#39;ll see what&#39;s working and what to fix. it can also draft a post or a full article in your voice.',
+      '<b>read your playbook.</b> it&#39;s what your posts say you&#39;re known for and what&#39;s landing. the Brand tab has your growth, who you&#39;re up against, your audience, and an idea board.',
+    ],
+    cta: 'Do today&#39;s move →',
+    url: `${APP_URL}/dashboard?utm_source=email&utm_medium=email&utm_campaign=${CAMPAIGNS.earlyAccessWelcome}`,
+    small:
+      'small stuff: ⌘K (ctrl+K on windows) jumps anywhere. if you run more than one account, add it from Brand.',
+    ask: 'one ask: after you&#39;ve used it twice, reply with the one thing that was confusing or felt useless. one line is plenty. that&#39;s what i&#39;m fixing before launch.',
+    ps: usedBy ? `(if ${usedBy} isn&#39;t you, reply and i&#39;ll sort you out.)` : null,
+  };
+}
+
+/** Plain content (subject, preheader, text part); the HTML comes from renderEarlyAccessWelcomeEmail. */
+export function earlyAccessWelcomeContent(
+  r: EarlyAccessWelcomeRecipient
+): NonNullable<NewsletterContent> {
+  const m = earlyAccessWelcomeModel(r);
+  return {
+    subject: m.subject,
+    preheader: m.preheader,
+    sections: [
+      { type: 'text', content: `hey ${m.who},` },
+      { type: 'text', content: m.opening },
+      { type: 'text', content: m.steps.map((t, i) => `${i + 1}. ${t}`).join('<br/>') },
+      { type: 'cta', content: m.cta, url: m.url },
+      { type: 'text', content: m.small },
+      { type: 'text', content: `${m.ask}<br/><br/>— Bawsa` },
+      ...(m.ps ? [{ type: 'text' as const, content: m.ps }] : []),
+    ],
+  };
+}
+
+/** HTML for the welcome: the same plain note look as the invite, plus one button. */
+export function renderEarlyAccessWelcomeEmail(
+  r: EarlyAccessWelcomeRecipient,
+  email: string
+): { html: string; text: string } {
+  const m = earlyAccessWelcomeModel(r);
+  const { text } = renderNewsletter(earlyAccessWelcomeContent(r), email);
+  const unsub = `${APP_URL}/api/newsletter/unsubscribe?email=${encodeURIComponent(email)}`;
+  const asset = process.env.EMAIL_ASSET_BASE || APP_URL;
+  const SANS = "'Helvetica Neue', Helvetica, Arial, sans-serif";
+  const p = (t: string, extra = '') =>
+    `<p style="font-family:${SANS};font-size:16px;line-height:1.6;color:#0E0E0E;margin:0 0 18px 0;${extra}">${t}</p>`;
+
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light only">
+  <meta name="supported-color-schemes" content="light only">
+  <title>${esc(m.subject)}</title>
+</head>
+<body style="margin:0;padding:0;background:#F2EFE8;-webkit-font-smoothing:antialiased;">
+  <div style="display:none;max-height:0;overflow:hidden;opacity:0;">${m.preheader}${'&nbsp;&zwnj;'.repeat(60)}</div>
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F2EFE8;">
+    <tr><td align="center" style="padding:28px 16px 40px 16px;">
+      <table role="presentation" width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;">
+        <tr><td style="padding:0 0 26px 0;">
+          <a href="${APP_URL}" style="text-decoration:none;"><img src="${asset}/brand/wordmark-day-480.png" width="120" alt="BrandOS" style="display:block;width:120px;height:auto;border:0;"></a>
+        </td></tr>
+        <tr><td>
+          ${p(`hey ${m.who},`)}${p(m.opening, 'margin-bottom:10px;')}
+          <ol style="font-family:${SANS};font-size:16px;line-height:1.6;color:#0E0E0E;margin:0 0 22px 0;padding-left:22px;">${m.steps.map((t) => `<li style="margin:0 0 8px 0;">${t}</li>`).join('')}</ol>
+          <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 24px 0;"><tr><td style="background:#0047FF;">
+            <a href="${m.url}" style="display:inline-block;padding:13px 22px;font-family:${SANS};font-size:15px;font-weight:bold;color:#FFFFFF;text-decoration:none;">${m.cta}</a>
+          </td></tr></table>
+          ${p(m.small, 'font-size:15px;color:#4A4741;')}${p(m.ask)}
+          ${p('— Bawsa', m.ps ? '' : 'margin-bottom:0;')}${m.ps ? p(m.ps, 'font-size:15px;') : ''}
+        </td></tr>
+        <tr><td align="center" style="padding:30px 0 0 0;font-family:${SANS};font-size:12px;line-height:1.6;color:#9A968E;">
+          You're getting this because you redeemed an early-access code at <a href="${APP_URL}" style="color:#9A968E;">mybrandos.app</a>.<br>
           <a href="${unsub}" style="color:#9A968E;text-decoration:underline;">Unsubscribe</a>
         </td></tr>
       </table>
