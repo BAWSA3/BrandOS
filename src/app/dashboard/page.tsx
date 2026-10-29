@@ -5,9 +5,8 @@ import { getCurrentUser, getCurrentWorkspace } from '@/lib/auth';
 import { getHomeData, toDashboardData } from '@/lib/home-data';
 import { cookies } from 'next/headers';
 import { recordVisit, safeTz } from '@/lib/progress';
-import { getColorway } from '@/lib/user-preferences';
-import { hasPro, isOpenAccess, isSubscribed, trialEndsAt } from '@/lib/billing';
-import { OPEN_ACCESS_UNTIL } from '@/lib/plans';
+import { getColorway, getWalkthrough } from '@/lib/user-preferences';
+import { freeAccessEndsAt, hasPro, isSubscribed, trialEndsAt } from '@/lib/billing';
 import type { PlanBadge } from '@/components/billing/PlanChip';
 import { syncSubscription } from '@/lib/billing-sync';
 import { foundingNumber, foundingSpotsLeft } from '@/lib/founding';
@@ -28,13 +27,16 @@ import GrowthDashboard from '@/components/growth/GrowthDashboard';
 import type { IndexTileData } from '@/components/growth/IndexTile';
 import { standsOut } from '@/lib/index-rules';
 import { earlyAccessFor, indexOpenForUser } from '@/lib/early-access';
+import { CODE_TRIAL, isEarlyAccount } from '@/lib/early-access-rules';
 import EarlyAccessDock from '@/components/early-access/EarlyAccessDock';
+import InvitePasses from '@/components/access/InvitePasses';
 import { getEntry, viewSummary } from '@/lib/creator-index';
 import { dashboardV2For } from '@/lib/dashboard-v2';
 import Shell from '@/components/dashboard-v2/Shell';
 import { loadStanding } from '@/lib/dashboard-v2-data';
 import Today from '@/components/dashboard-v2/Today';
 import Playbook, { type PlaybookData } from '@/components/dashboard-v2/Playbook';
+import Walkthrough from '@/components/dashboard-v2/Walkthrough';
 import { bodyOfWork } from '@/lib/playbook';
 import { classLabel, recordDate } from '@/lib/classifications';
 import { proofParts } from '@/lib/growth-proof';
@@ -121,11 +123,35 @@ export default async function DashboardPage({
       // Dashboard v2 (testers only until launch: env flag + redeemed code, or admin).
       // Same reads as below plus the finish and Standing; nothing new is written.
       if (await dashboardV2For(user)) {
-        const [colorway, standing] = await Promise.all([
+        const [colorway, standing, walk] = await Promise.all([
           getColorway(user.id),
           loadStanding(user.id),
+          getWalkthrough(user.id),
         ]);
         const brandId = sp.brand ? view.brand.id : null;
+        // First-run walkthrough (once per account, on the member's own brand):
+        // the playbook revealed step by step, ending in Write.
+        const showWalk = own && !walk.done;
+        const playbook =
+          sp.view === 'playbook' || showWalk
+            ? await loadPlaybook({ view, home, record, own, index, brandId })
+            : null;
+        const walkthrough =
+          showWalk && playbook ? (
+            <Walkthrough
+              data={{
+                handle: playbook.handle,
+                score: playbook.record?.score ?? null,
+                classification: playbook.classification,
+                strengths: playbook.strengths,
+                working: playbook.working,
+                gap: playbook.gap,
+              }}
+              persona={walk.persona}
+              saved={walk.saved}
+              name={view.brand.name ?? user.name ?? null}
+            />
+          ) : null;
         if (sp.view === 'brand') {
           return (
             <>
@@ -138,13 +164,14 @@ export default async function DashboardPage({
                 plan={plan}
               >
                 <GrowthDashboard view={view} index={index} record={record} colorway={colorway} v2 />
+                {walkthrough}
               </Shell>
               {dock}
             </>
           );
         }
-        if (sp.view === 'playbook') {
-          const data = await loadPlaybook({ view, home, record, own, index, brandId });
+        if (sp.view === 'playbook' && playbook) {
+          const data = playbook;
           return (
             <>
               <Shell
@@ -156,6 +183,7 @@ export default async function DashboardPage({
                 plan={plan}
               >
                 <Playbook data={data} />
+                {walkthrough}
               </Shell>
               {dock}
             </>
@@ -187,6 +215,7 @@ export default async function DashboardPage({
                 day={day}
                 brandQuery={brandId ? `brand=${encodeURIComponent(brandId)}` : ''}
                 openIdeas={open.length}
+                accountPersona={walk.persona}
                 input={{
                   handle: view.brand.handle,
                   outlier: view.outlier,
@@ -217,6 +246,17 @@ export default async function DashboardPage({
                   }
                 }
               />
+              {/* invite-only trial: a member's 3 invites (guest-pass style) */}
+              {CODE_TRIAL &&
+                (access ||
+                  isSubscribed(user) ||
+                  user.role === 'admin' ||
+                  isEarlyAccount(user.createdAt)) && (
+                  <div className="mx-auto w-full max-w-[880px] px-4 pb-12 md:px-10">
+                    <InvitePasses />
+                  </div>
+                )}
+              {walkthrough}
             </Shell>
             {dock}
           </>
@@ -296,7 +336,13 @@ export default async function DashboardPage({
         />
       )}
       {bento && !pro && (
-        <Paywall handle={bento.handle} score={bento.ticker.score} foundingLeft={foundingLeft} />
+        <Paywall
+          handle={bento.handle}
+          score={bento.ticker.score}
+          foundingLeft={foundingLeft}
+          priceLocked={foundingLeft > 0 || !!access?.perkFoundingPrice}
+          mode={!CODE_TRIAL || subscribed ? 'trial' : user.freeUntil ? 'code-ended' : 'code-needed'}
+        />
       )}
       {firstScan ? (
         <FirstScan handle={home.handle} />
@@ -528,9 +574,12 @@ async function planBadgeFor(
 ): Promise<PlanBadge | null> {
   const subscribed = isSubscribed(user);
   const trialEnd = trialEndsAt(user);
-  if (!subscribed && isOpenAccess()) {
+  // free access: the launch window for everyone, or this person's 30 days from a code
+  const freeEnd = subscribed ? null : freeAccessEndsAt(user);
+  if (freeEnd) {
     const left = spotsLeft ?? (await foundingSpotsLeft());
-    return { kind: 'open', until: OPEN_ACCESS_UNTIL.toISOString(), spotsLeft: left };
+    const priceLocked = left > 0 || !!(await earlyAccessFor(user.id))?.perkFoundingPrice;
+    return { kind: 'open', until: freeEnd.toISOString(), spotsLeft: left, priceLocked };
   }
   if (trialEnd) {
     const number = await foundingNumber(user.id);

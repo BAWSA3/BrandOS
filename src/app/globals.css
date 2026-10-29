@@ -526,8 +526,8 @@ body,
 body {
   color: var(--text-primary);
   font-family:
-    -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
+    -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", var(--font-inter),
+    "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   font-weight: 400;
   line-height: 1.5;
   letter-spacing: -0.01em;
@@ -1483,16 +1483,16 @@ code {
 
 /* Landing page typography */
 .font-inter {
-  font-family: "Inter", sans-serif;
+  font-family: var(--font-inter), sans-serif;
 }
 .logo-brand-text {
-  font-family: "Blauer Nue", "Inter", sans-serif;
+  font-family: "Blauer Nue", var(--font-inter), sans-serif;
   font-weight: 800;
   font-style: italic;
   letter-spacing: -2px;
 }
 .logo-os-text {
-  font-family: "Mac Minecraft", "Press Start 2P", cursive;
+  font-family: "Mac Minecraft", var(--font-press-start), cursive;
   font-weight: 700;
   font-style: italic;
   color: #0047ff;

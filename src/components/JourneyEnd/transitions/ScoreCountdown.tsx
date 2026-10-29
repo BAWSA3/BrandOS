@@ -200,7 +200,7 @@ export default function ScoreCountdown({ targetScore, onComplete, theme }: Score
         {/* Big number */}
         <motion.div
           style={{
-            fontFamily: "'Inter', sans-serif",
+            fontFamily: 'var(--font-inter), sans-serif',
             fontSize: 'clamp(80px, 20vw, 160px)',
             fontWeight: 800,
             color: '#FFFFFF',

@@ -301,7 +301,7 @@ export default function DataRevealSection({
             {/* ASCII progress bar */}
             <div
               style={{
-                fontFamily: "'JetBrains Mono', monospace",
+                fontFamily: 'var(--font-jetbrains), monospace',
                 fontSize: '14px',
                 color: '#000',
                 marginBottom: '16px',

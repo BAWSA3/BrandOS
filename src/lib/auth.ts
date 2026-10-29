@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import prisma from '@/lib/db';
+import { CODE_TRIAL, memberFreeUntil } from '@/lib/early-access-rules';
 
 function supabaseEnv() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -74,7 +75,8 @@ export async function getUser() {
       },
     });
 
-    return user;
+    if (!user) return null;
+    return { ...user, freeUntil: CODE_TRIAL ? await codeFreeUntil(user.id) : null };
   } catch (error) {
     console.error('[Auth] Database error:', error);
     return null;
@@ -194,10 +196,35 @@ export async function getCurrentUser() {
       },
     });
 
-    return user;
+    if (!user) return null;
+    return { ...user, freeUntil: CODE_TRIAL ? await codeFreeUntil(user.id) : null };
   } catch (error) {
     console.error('[Auth] getCurrentUser error:', error);
     return null;
+  }
+}
+
+/**
+ * Invite-only trial: when this user's free access ends, or null. 30 days after
+ * redeeming a code; accounts made before the Nov 2 start also get 30 days from
+ * the start (memberFreeUntil). Separate reads, never part of the user query, so
+ * a missing codes table (before 049) can't sign anyone out.
+ */
+export async function codeFreeUntil(userId: string): Promise<Date | null> {
+  let code: { redeemedAt: Date | null; revokedAt: Date | null } | null = null;
+  try {
+    code = await prisma.earlyAccessCode.findUnique({
+      where: { redeemedByUserId: userId },
+      select: { redeemedAt: true, revokedAt: true },
+    });
+  } catch {
+    code = null;
+  }
+  try {
+    const u = await prisma.user.findUnique({ where: { id: userId }, select: { createdAt: true } });
+    return memberFreeUntil(code, u?.createdAt ?? null);
+  } catch {
+    return memberFreeUntil(code, null);
   }
 }
 

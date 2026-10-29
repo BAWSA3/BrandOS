@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { getSupabaseBrowser } from '@/lib/supabase-browser';
 import Wordmark from '@/components/Wordmark';
 
-const MONO = "'VCR OSD Mono', 'JetBrains Mono', monospace";
+const MONO = "'VCR OSD Mono', var(--font-jetbrains), monospace";
 const BIG = "'Helvetica Custom', 'Helvetica Neue', Helvetica, Arial, sans-serif";
 const BLUE = '#0047FF';
 

@@ -9,7 +9,8 @@ import {
   type SocialDataTweet,
 } from '@/lib/socialdata';
 import { analyzeTweets, type TweetAnalysis } from '@/lib/tweet-analysis';
-import { isOpenAccess, isSubscribed, type BillingFields } from '@/lib/billing';
+import { captureCheckpoints } from '@/lib/post-checkpoints';
+import { freeAccessEndsAt, isSubscribed, type BillingFields } from '@/lib/billing';
 
 /**
  * Growth dashboard accounts (migration 040, pivot 2026-10-22). A workspace
@@ -34,11 +35,11 @@ export function brandLimit(
   if (isSubscribed(u)) {
     if (u.subscriptionTier === 'AGENCY' || u.subscriptionTier === 'ENTERPRISE') return 20;
     if (u.subscriptionTier === 'TEAM') return 5;
-    // during the launch window a paid Pro card still gets the window's limit
-    return isOpenAccess(now) ? 5 : 1;
+    // during free access a paid Pro card still gets the window's limit
+    return freeAccessEndsAt(u, now) ? 5 : 1;
   }
-  // launch window (free until Dec 3): Team-sized so SMMs can try it properly
-  return isOpenAccess(now) ? 5 : 1;
+  // free access (launch window, or a code's 30 days): Team-sized so SMMs can try it properly
+  return freeAccessEndsAt(u, now) ? 5 : 1;
 }
 
 /** "@Foo", "x.com/foo", " foo " → "foo"; null if it isn't a valid handle. */
@@ -142,6 +143,14 @@ export async function syncAccount(accountId: string): Promise<void> {
       },
     }),
   ]);
+
+  // brands only: fixed copies of each new post's numbers at set ages (look-back loop)
+  if (!account.competitorOfId) {
+    await captureCheckpoints(
+      accountId,
+      valid.map((t) => ({ tweetId: t.id, ...postRow(t) }))
+    );
+  }
 }
 
 /** Posts per audience sync, and how long before a post's audience is re-read. */

@@ -1,3 +1,4 @@
+import { marketingBlocked, unsubscribeHeaders, withMarketingFooter } from '@/lib/email-compliance';
 import { Resend } from 'resend';
 import prisma from '@/lib/db';
 import { renderNewsletter, type NewsletterContent } from '@/lib/newsletter-template';
@@ -58,6 +59,11 @@ export async function sendLookupDigest(
   week: Date
 ): Promise<'sent' | 'skipped' | 'already' | 'failed'> {
   if (!process.env.RESEND_API_KEY || stats.total === 0) return 'skipped';
+  const blocked = marketingBlocked();
+  if (blocked) {
+    console.error(`[lookup-digest] not sent: ${blocked}`);
+    return 'skipped';
+  }
   const unsub = await prisma.emailSignup
     .findUnique({ where: { email: user.email.toLowerCase() }, select: { unsubscribed: true } })
     .catch(() => null);
@@ -78,16 +84,15 @@ export async function sendLookupDigest(
     })
     .catch(() => null);
   const content = digestContent(user.handle, stats, scan?.score ?? null);
-  const { html, text } = renderNewsletter(content, user.email);
+  const rendered = renderNewsletter(content, user.email);
+  const { html, text } = withMarketingFooter(rendered.html, rendered.text, user.email);
   const { error } = await new Resend(process.env.RESEND_API_KEY).emails.send({
     from: FROM,
     to: user.email,
     subject: content.subject,
     html,
     text,
-    headers: {
-      'List-Unsubscribe': `<${APP_URL}/api/newsletter/unsubscribe?email=${encodeURIComponent(user.email)}>`,
-    },
+    headers: unsubscribeHeaders(user.email),
   });
   if (error) {
     await prisma.lookupDigest

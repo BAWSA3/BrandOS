@@ -1,3 +1,4 @@
+import { marketingBlocked, unsubscribeHeaders, withMarketingFooter } from '@/lib/email-compliance';
 import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import { getActiveSubscribers } from '@/lib/newsletter';
@@ -56,6 +57,9 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    const blocked = marketingBlocked();
+    if (blocked) return NextResponse.json({ error: blocked }, { status: 503 });
+
     // Send via Resend
     const resend = new Resend(process.env.RESEND_API_KEY);
     if (!process.env.RESEND_API_KEY) {
@@ -72,13 +76,15 @@ export async function POST(request: NextRequest) {
       const batch = subscribers.slice(i, i + BATCH_SIZE);
 
       const emails = batch.map((sub) => {
-        const { html, text } = renderNewsletter(content, sub.email);
+        const rendered = renderNewsletter(content, sub.email);
+        const { html, text } = withMarketingFooter(rendered.html, rendered.text, sub.email);
         return {
           from: FROM_EMAIL,
           to: sub.email,
           subject,
           html,
           text,
+          headers: unsubscribeHeaders(sub.email),
         };
       });
 

@@ -19,7 +19,7 @@ import { BOT_RULES, SIGNAL_LABEL, type BotCheckView, type BotSignal } from '@/li
  */
 
 const BIG = "'Inter Tight', 'Helvetica Neue', Helvetica, Arial, sans-serif";
-const MONO = "'VCR OSD Mono', 'JetBrains Mono', monospace";
+const MONO = "'VCR OSD Mono', var(--font-jetbrains), monospace";
 const C = {
   bone: '#F2EFE8',
   ink: '#0E0E0E',

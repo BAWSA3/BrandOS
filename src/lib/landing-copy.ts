@@ -8,6 +8,8 @@
  * never write a figure into this file.
  */
 
+import { CODE_TRIAL } from '@/lib/early-access-rules';
+
 export const EDITOR = 'bawsa, editor';
 
 export const LANDING = {
@@ -215,7 +217,9 @@ export const LANDING = {
     founding: {
       label: 'Founding 100',
       title: '$29/mo for life.',
-      body: 'Everything is free until 3 Dec. The first 100 members to add a card keep Pro at $29/mo for life: featured in the Index, a full profile, and which brands viewed them. Nothing is charged until 3 Dec. After the first 100, Pro is $39/mo.',
+      body: CODE_TRIAL
+        ? 'BrandOS is invite-only: a code is 30 days of everything, no card. The first 100 members to add a card keep Pro at $29/mo for life: featured in the Index, a full profile, and which brands viewed them. Nothing is charged until your 30 days end. After the first 100, Pro is $39/mo.'
+        : 'Everything is free until 3 Dec. The first 100 members to add a card keep Pro at $29/mo for life: featured in the Index, a full profile, and which brands viewed them. Nothing is charged until 3 Dec. After the first 100, Pro is $39/mo.',
       seatsLabel: 'Seats left',
       cta: 'Become a Founding Member',
     },
@@ -223,7 +227,9 @@ export const LANDING = {
     faq: [
       {
         q: 'Is it free?',
-        a: 'Reading your brand and joining the Index are free. Everything is free until 3 Dec. After that, listing stays free and Pro is paid.',
+        a: CODE_TRIAL
+          ? 'Reading your brand is free for anyone. BrandOS itself is invite-only for now: a code is 30 days of everything, no card. After that, Pro is paid.'
+          : 'Reading your brand and joining the Index are free. Everything is free until 3 Dec. After that, listing stays free and Pro is paid.',
       },
       { q: 'Which accounts can be read?', a: 'Any public X account.' },
       {

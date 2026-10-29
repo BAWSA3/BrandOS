@@ -128,7 +128,7 @@ const MANUAL_SCAN_STEPS = [
   { text: 'COMPILING MISSION DEBRIEF...', icon: '⊕' },
 ];
 
-const MONO = "'VCR OSD Mono', 'JetBrains Mono', monospace";
+const MONO = "'VCR OSD Mono', var(--font-jetbrains), monospace";
 
 // ---------------------------------------------------------------------------
 // Radar Animation

@@ -56,7 +56,7 @@ export default function TestCardsClient() {
           color: '#555',
           textAlign: 'center',
           marginBottom: '32px',
-          fontFamily: "'JetBrains Mono', monospace",
+          fontFamily: 'var(--font-jetbrains), monospace',
           fontSize: '12px',
         }}
       >
@@ -74,7 +74,7 @@ export default function TestCardsClient() {
             color: '#fff',
             border: 'none',
             borderRadius: '6px',
-            fontFamily: "'JetBrains Mono', monospace",
+            fontFamily: 'var(--font-jetbrains), monospace',
             fontSize: '13px',
             fontWeight: 700,
             letterSpacing: '0.05em',
@@ -114,7 +114,7 @@ export default function TestCardsClient() {
                 style={{
                   color: '#888',
                   fontSize: '11px',
-                  fontFamily: "'JetBrains Mono', monospace",
+                  fontFamily: 'var(--font-jetbrains), monospace',
                   margin: 0,
                 }}
               >
@@ -129,7 +129,7 @@ export default function TestCardsClient() {
                   border: '1px solid #333',
                   borderRadius: '4px',
                   color: '#666',
-                  fontFamily: "'JetBrains Mono', monospace",
+                  fontFamily: 'var(--font-jetbrains), monospace',
                   fontSize: '10px',
                   cursor: 'pointer',
                 }}

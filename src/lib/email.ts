@@ -1,6 +1,8 @@
 import { Resend } from 'resend';
 import { promises as fs } from 'fs';
 import path from 'path';
+import prisma from '@/lib/db';
+import { marketingBlocked, unsubscribeHeaders, withMarketingFooter } from '@/lib/email-compliance';
 import {
   EmailTemplateData,
   Segment,
@@ -98,9 +100,24 @@ export async function sendEmail(
   to: string,
   subject: string,
   body: string,
-  scoreCardImage?: string
+  scoreCardImage?: string,
+  // Marketing (the welcome sequence): needs the postal address, honors
+  // unsubscribes and carries the unsubscribe link + one-click headers.
+  opts: { marketing?: boolean } = {}
 ): Promise<{ success: boolean; id?: string; error?: string }> {
   const resend = getResendClient();
+
+  if (opts.marketing) {
+    const blocked = marketingBlocked();
+    if (blocked) {
+      console.error(`[Email] Not sent: ${blocked}`);
+      return { success: false, error: blocked };
+    }
+    const signup = await prisma.emailSignup
+      .findUnique({ where: { email: to.toLowerCase() }, select: { unsubscribed: true } })
+      .catch(() => null);
+    if (signup?.unsubscribed) return { success: false, error: 'unsubscribed' };
+  }
 
   // Skip if no API key (development mode)
   if (!resend) {
@@ -182,12 +199,17 @@ export async function sendEmail(
       }
     }
 
+    const plain = body
+      .replace('{{SCORE_CARD_IMAGE}}', '')
+      .replace(/\{\{ARCHETYPE_IMAGE:.*?\}\}/g, ''); // Plain text fallback
+    const out = opts.marketing ? withMarketingFooter(html, plain, to) : { html, text: plain };
     const result = await resend.emails.send({
       from: FROM_EMAIL,
       to,
       subject,
-      html,
-      text: body.replace('{{SCORE_CARD_IMAGE}}', '').replace(/\{\{ARCHETYPE_IMAGE:.*?\}\}/g, ''), // Plain text fallback
+      html: out.html,
+      text: out.text,
+      ...(opts.marketing ? { headers: unsubscribeHeaders(to) } : {}),
       ...(attachments.length > 0 ? { attachments } : {}),
     });
 
@@ -308,7 +330,8 @@ export async function sendWelcomeSequence(
           email,
           content.subject,
           content.body,
-          templateData.scoreCardImage
+          templateData.scoreCardImage,
+          { marketing: true }
         );
         if (result.success) {
           emailsSent++;
@@ -393,7 +416,9 @@ export async function processPendingEmails(): Promise<{
     }
 
     // Send the email
-    const result = await sendEmail(email.to, content.subject, content.body);
+    const result = await sendEmail(email.to, content.subject, content.body, undefined, {
+      marketing: true,
+    });
     if (result.success) {
       email.status = 'sent';
       sent++;

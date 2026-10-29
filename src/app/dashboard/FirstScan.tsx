@@ -5,7 +5,7 @@ import { DASH_FONTS } from '@/components/dashboard/dashFonts';
 // Shown behind the first-scan overlay (and if that scan fails): the dashboard
 // fills in from the scan, so there's nothing else to show yet.
 
-const MONO = "'VCR OSD Mono', 'JetBrains Mono', monospace";
+const MONO = "'VCR OSD Mono', var(--font-jetbrains), monospace";
 const BLUE = '#0047FF';
 
 export default function FirstScan({ handle }: { handle: string }) {

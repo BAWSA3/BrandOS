@@ -165,7 +165,8 @@ model User {
   postScores           PostScore[] // per-post brand fit (migration 033)
   noteReports          NoteReport[]       @relation("NoteReporter")
   indexEntry           IndexEntry? // Creator Index membership (migration 044)
-  earlyAccessCode      EarlyAccessCode? // redeemed early-access code (migration 049)
+  earlyAccessCode      EarlyAccessCode?   @relation("CodeRedeemed") // redeemed early-access code (migration 049)
+  invitesMade          EarlyAccessCode[]  @relation("InvitesMade") // codes this member made (051)
   testerFeedback       TesterFeedback[] // early-access feedback to Bawsa (migration 049)
   indexViews           IndexView[] // Index members' pages this user viewed (migration 044)
   indexReservations    IndexReservation[] // reserved Index numbers this user claimed (migration 045)
@@ -1356,6 +1357,10 @@ model UserPreference {
   userId            String   @id
   user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   dashboardColorway String   @default("bone")
+  /// first-run walkthrough finished or skipped (migration 052); null = show it
+  walkthroughDoneAt DateTime? @db.Timestamptz
+  /// "Which one are you?": creator | founder | builder (migration 052)
+  persona           String?
   updatedAt         DateTime @default(now()) @updatedAt @db.Timestamptz
 }
 
@@ -1433,23 +1438,43 @@ model AccountSnapshot {
 
 model AccountPost {
   accountId        String
-  account          TrackedAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  account          TrackedAccount         @relation(fields: [accountId], references: [id], onDelete: Cascade)
   tweetId          String
   text             String
-  postedAt         DateTime       @db.Timestamptz
-  likes            Int            @default(0)
-  replies          Int            @default(0)
-  reposts          Int            @default(0)
-  quotes           Int            @default(0)
-  bookmarks        Int            @default(0)
-  views            Int            @default(0)
-  media            String[]       @default([])
-  isQuote          Boolean        @default(false)
-  updatedAt        DateTime       @default(now()) @db.Timestamptz
-  audienceSyncedAt DateTime?      @db.Timestamptz
+  postedAt         DateTime               @db.Timestamptz
+  likes            Int                    @default(0)
+  replies          Int                    @default(0)
+  reposts          Int                    @default(0)
+  quotes           Int                    @default(0)
+  bookmarks        Int                    @default(0)
+  views            Int                    @default(0)
+  media            String[]               @default([])
+  isQuote          Boolean                @default(false)
+  updatedAt        DateTime               @default(now()) @db.Timestamptz
+  audienceSyncedAt DateTime?              @db.Timestamptz
+  checkpoints      PostMetricCheckpoint[]
 
   @@id([accountId, tweetId])
   @@index([accountId, postedAt(sort: Desc)])
+}
+
+// Post look-back history (migration 050): a brand post's numbers frozen at
+// first sight, ~24h and ~48h. AccountPost keeps only the latest numbers.
+model PostMetricCheckpoint {
+  accountId  String
+  tweetId    String
+  checkpoint String // first | 24h | 48h
+  capturedAt DateTime    @default(now()) @db.Timestamptz
+  ageHours   Float       @db.Real
+  likes      Int         @default(0)
+  replies    Int         @default(0)
+  reposts    Int         @default(0)
+  quotes     Int         @default(0)
+  bookmarks  Int         @default(0)
+  views      Int         @default(0)
+  post       AccountPost @relation(fields: [accountId, tweetId], references: [accountId, tweetId], onDelete: Cascade)
+
+  @@id([accountId, tweetId, checkpoint])
 }
 
 // Growth dashboard audience (migration 041): who replied to / reposted /
@@ -1538,17 +1563,37 @@ model IndexReservation {
 // Early-access codes (migration 049): one personal, single-use code per person,
 // labelled with who it was given to. Each perk is a flag on the code.
 model EarlyAccessCode {
-  id                String    @id @default(dbgenerated("(gen_random_uuid())::text"))
-  code              String    @unique // 8 chars, uppercase, no dash (src/lib/early-access-rules.ts)
+  id                String             @id @default(dbgenerated("(gen_random_uuid())::text"))
+  code              String             @unique // 8 chars, uppercase, no dash (src/lib/early-access-rules.ts)
   label             String // who it was given to, e.g. "@aunnieonchain"
-  createdAt         DateTime  @default(now()) @db.Timestamptz
-  redeemedAt        DateTime? @db.Timestamptz
-  redeemedByUserId  String?   @unique
-  redeemedBy        User?     @relation(fields: [redeemedByUserId], references: [id], onDelete: SetNull)
-  revokedAt         DateTime? @db.Timestamptz
-  perkIndex         Boolean   @default(true) // the Creator Index before it opens
-  perkFoundingPrice Boolean   @default(true) // $29/month for life, even after the 100 seats
-  perkTester        Boolean   @default(true) // "Early access" tag + feedback line to Bawsa
+  createdAt         DateTime           @default(now()) @db.Timestamptz
+  redeemedAt        DateTime?          @db.Timestamptz
+  redeemedByUserId  String?            @unique
+  redeemedBy        User?              @relation("CodeRedeemed", fields: [redeemedByUserId], references: [id], onDelete: SetNull)
+  revokedAt         DateTime?          @db.Timestamptz
+  perkIndex         Boolean            @default(true) // the Creator Index before it opens
+  perkFoundingPrice Boolean            @default(true) // $29/month for life, even after the 100 seats
+  perkTester        Boolean            @default(true) // "Early access" tag + feedback line to Bawsa
+  createdByUserId   String? // a member's own invite (migration 051); null = made by Bawsa
+  createdBy         User?              @relation("InvitesMade", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  application       AccessApplication?
+  reservedHandle    String?            @unique // minted for this Index reservation (051)
+
+  @@index([createdByUserId])
+}
+
+// "Apply for a code" (migration 051), approved by Bawsa in batches.
+model AccessApplication {
+  id         String           @id @default(dbgenerated("(gen_random_uuid())::text"))
+  handle     String           @unique // lowercase, no @
+  email      String
+  note       String?
+  createdAt  DateTime         @default(now()) @db.Timestamptz
+  approvedAt DateTime?        @db.Timestamptz
+  codeId     String?          @unique
+  code       EarlyAccessCode? @relation(fields: [codeId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt(sort: Desc)])
 }
 
 // A message from an early-access tester to Bawsa (also emailed on arrival).

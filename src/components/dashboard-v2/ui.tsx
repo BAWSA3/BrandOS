@@ -13,7 +13,7 @@ import { DASH_FONTS } from '@/components/dashboard/dashFonts';
  */
 
 export const DISPLAY = `${DASH_FONTS.big}, 'Helvetica Neue', Helvetica, Arial, sans-serif`;
-export const VCR = "'VCR OSD Mono', 'JetBrains Mono', ui-monospace, monospace";
+export const VCR = "'VCR OSD Mono', var(--font-jetbrains), ui-monospace, monospace";
 
 const PRESS = { scale: 0.97, y: 1 };
 const RELEASE = { type: 'spring' as const, stiffness: 520, damping: 30, mass: 0.6 };

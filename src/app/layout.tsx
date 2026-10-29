@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next';
+import { Inter, JetBrains_Mono, Press_Start_2P } from 'next/font/google';
 import './globals.css';
 import ThemeProvider from '@/components/ThemeProvider';
 import { Analytics } from '@vercel/analytics/react';
@@ -7,6 +8,28 @@ import { ToastProvider } from '@/components/ToastProvider';
 import BetaBadge from '@/components/BetaBadge';
 import EnvBanner from '@/components/EnvBanner';
 import PostHogProvider from '@/components/PostHogProvider';
+
+// Self-hosted at build time by next/font (no request to Google from the
+// visitor's browser). Exposed as CSS variables; components use
+// var(--font-inter) / var(--font-jetbrains) / var(--font-press-start).
+const inter = Inter({
+  subsets: ['latin'],
+  weight: ['400', '600', '800'],
+  variable: '--font-inter',
+  display: 'swap',
+});
+const jetbrains = JetBrains_Mono({
+  subsets: ['latin'],
+  weight: ['400', '700'],
+  variable: '--font-jetbrains',
+  display: 'swap',
+});
+const pressStart = Press_Start_2P({
+  subsets: ['latin'],
+  weight: '400',
+  variable: '--font-press-start',
+  display: 'swap',
+});
 
 export const viewport = {
   width: 'device-width',
@@ -74,15 +97,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" data-theme="dark" suppressHydrationWarning>
-      <head>
-        {/* Google Fonts for Design #2 */}
-        <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Press+Start+2P&display=swap"
-          rel="stylesheet"
-        />
-        {/* Custom fonts loaded via @font-face in globals.css */}
-      </head>
+    <html
+      lang="en"
+      data-theme="dark"
+      className={`${inter.variable} ${jetbrains.variable} ${pressStart.variable}`}
+      suppressHydrationWarning
+    >
+      {/* Custom fonts loaded via @font-face in globals.css (all from /public/fonts) */}
       <body>
         <EnvBanner />
         <PostHogProvider>

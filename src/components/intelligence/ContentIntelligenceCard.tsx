@@ -83,7 +83,7 @@ export default function ContentIntelligenceCard({ brandId }: ContentIntelligence
         padding: 24,
         border: '1px solid var(--border)',
         boxShadow: 'var(--shadow-card)',
-        fontFamily: '"VCR OSD Mono", "JetBrains Mono", monospace',
+        fontFamily: '"VCR OSD Mono", var(--font-jetbrains), monospace',
       }}
       className="h-full flex flex-col"
     >

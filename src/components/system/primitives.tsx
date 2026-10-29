@@ -23,7 +23,7 @@ import { FIELD, SIGNAL } from '@/lib/field/dither';
 
 export const SYSTEM_FONTS = {
   display: "'Helvetica Custom', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-  vcr: "'VCR OSD Mono', 'JetBrains Mono', monospace",
+  vcr: "'VCR OSD Mono', var(--font-jetbrains), monospace",
   plex: FIELD_FONTS.plex,
 };
 

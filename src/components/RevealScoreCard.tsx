@@ -5,7 +5,7 @@ import ScoreCardShare from '@/components/dashboard/ScoreCardShare';
 import { getArchetypeInfo } from '@/lib/archetype-descriptions';
 import type { ScoreCardData } from '@/lib/score-card';
 
-const MONO = "'VCR OSD Mono', 'JetBrains Mono', monospace";
+const MONO = "'VCR OSD Mono', var(--font-jetbrains), monospace";
 const APP = 'https://mybrandos.app';
 
 /**

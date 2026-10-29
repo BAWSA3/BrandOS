@@ -7,6 +7,8 @@ import GrowthDashboard from '@/components/growth/GrowthDashboard';
 import WritingRoom from '@/components/dashboard-v2/WritingRoom';
 import type { DraftScoreResult } from '@/components/growth/DraftScore';
 import Playbook, { type PlaybookData } from '@/components/dashboard-v2/Playbook';
+import Walkthrough from '@/components/dashboard-v2/Walkthrough';
+import { isPersona } from '@/lib/user-preferences';
 import { bodyOfWork } from '@/lib/playbook';
 import { classLabel, recordDate } from '@/lib/classifications';
 import { isColorway } from '@/lib/colorways';
@@ -16,6 +18,9 @@ import { SAMPLE_IDEAS, SAMPLE_RECORD, SAMPLE_VIEW } from '../growth/sample';
 // sample data, so it can be checked without a tester account. The real page is
 // /dashboard behind DASHBOARD_V2. Hidden on mybrandos.app (middleware).
 //   ?c=bone|night|klein|paper  &view=brand
+//   &walk=0..5   the first-run walkthrough over the page, opened at that step
+//                (0 = "Which one are you?", last = the hand-off to Write)
+//   &thin=1      a thin read (no score, no formats) &persona=creator|founder|builder
 
 // the launch-window buy button, as a member without a card sees it
 const PREVIEW_PLAN: PlanBadge = {
@@ -145,12 +150,41 @@ function samplePlaybook(): PlaybookData {
 export default async function TodayPreview({
   searchParams,
 }: {
-  searchParams: Promise<{ c?: string; view?: string; mode?: string }>;
+  searchParams: Promise<{
+    c?: string;
+    view?: string;
+    mode?: string;
+    walk?: string;
+    thin?: string;
+    persona?: string;
+  }>;
 }) {
   const sp = await searchParams;
   const finish = isColorway(sp.c) ? sp.c : 'bone';
   const standing = { level: 7, progress: 0.91, run: 9 };
   const view = SAMPLE_VIEW;
+  const walk = (() => {
+    if (typeof sp.walk !== 'string') return null;
+    const pb = samplePlaybook();
+    const thin = sp.thin === '1';
+    return (
+      <Walkthrough
+        preview
+        startAt={Number(sp.walk) || 0}
+        name="Bawsa"
+        saved
+        persona={isPersona(sp.persona) ? sp.persona : null}
+        data={{
+          handle: pb.handle,
+          score: thin ? null : (pb.record?.score ?? 72),
+          classification: thin ? null : pb.classification,
+          strengths: pb.strengths,
+          working: thin ? [] : pb.working,
+          gap: pb.gap,
+        }}
+      />
+    );
+  })();
   if (sp.view === 'brand') {
     return (
       <Shell
@@ -170,6 +204,7 @@ export default async function TodayPreview({
           colorway={finish}
           v2
         />
+        {walk}
       </Shell>
     );
   }
@@ -222,6 +257,7 @@ export default async function TodayPreview({
         preview
       >
         <Playbook data={samplePlaybook()} />
+        {walk}
       </Shell>
     );
   }
@@ -260,6 +296,7 @@ export default async function TodayPreview({
         }}
         scoreLine={{ value: 72, delta: 2, since: '14 Oct' }}
       />
+      {walk}
     </Shell>
   );
 }

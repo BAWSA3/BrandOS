@@ -14,7 +14,17 @@ import { randomBytes } from 'node:crypto';
 import {
   CODE_ALPHABET,
   CODE_LENGTH,
+  CODE_TRIAL_DAYS,
+  cleanApplication,
   cleanFeedback,
+  codeTrialFrom,
+  freeUntilFrom,
+  memberFreeUntil,
+  isEarlyAccount,
+  CODE_TRIAL_START,
+  invitesLeft,
+  joinHref,
+  MEMBER_INVITES,
   FEEDBACK_MAX,
   formatCode,
   generateCode,
@@ -136,6 +146,73 @@ check(
   typedCodePath('../../admin') === null && typedCodePath('AU7K2QX9/../x') === null
 );
 
+console.log('\nG. Invite-only trial (Nov 2): 30 days, apply form, member invites');
+{
+  const t = new Date('2026-11-02T17:00:00Z');
+  check('30 days', CODE_TRIAL_DAYS === 30);
+  check(
+    'free until = redeemed + 30 days',
+    freeUntilFrom(t).toISOString() === '2026-12-02T17:00:00.000Z'
+  );
+  {
+    const early = new Date('2026-10-01T00:00:00Z');
+    const late = new Date('2026-11-05T00:00:00Z');
+    const startEnd = '2026-12-02T08:00:00.000Z';
+    check('early account: before start, trial on', isEarlyAccount(early, true));
+    check('early account: trial off → no', !isEarlyAccount(early, false));
+    check('early account: after start → no', !isEarlyAccount(late, true));
+    check('early account: no date → no', !isEarlyAccount(null, true));
+    check('start = Nov 2 midnight Pacific', CODE_TRIAL_START.toISOString() === '2026-11-02T08:00:00.000Z');
+    check('early account, no code: 30 days from start', memberFreeUntil(null, early)?.toISOString() === startEnd);
+    check('new account, no code: nothing', memberFreeUntil(null, late) === null);
+    check('no account date, no code: nothing', memberFreeUntil(null, null) === null);
+    check(
+      'early account + later code: the later end wins',
+      memberFreeUntil({ redeemedAt: new Date('2026-11-20T00:00:00Z'), revokedAt: null }, early)?.toISOString() ===
+        '2026-12-20T00:00:00.000Z'
+    );
+    check(
+      'early account + earlier code: start end wins',
+      memberFreeUntil({ redeemedAt: new Date('2026-10-28T00:00:00Z'), revokedAt: null }, early)?.toISOString() === startEnd
+    );
+    check(
+      'revoked code: nothing, even for an early account',
+      memberFreeUntil({ redeemedAt: t, revokedAt: t }, early) === null
+    );
+  }
+  check('flag: "true" on', codeTrialFrom('true') && codeTrialFrom(' TRUE '));
+  check('flag: anything else off', !codeTrialFrom('1') && !codeTrialFrom(undefined) && !codeTrialFrom(''));
+  check('join: trial on → /access', joinHref('/dashboard', true) === '/access?next=%2Fdashboard');
+  check('join: trial off → /signup', joinHref('/dashboard', false) === '/signup?next=%2Fdashboard');
+  check(
+    'join: next is encoded',
+    joinHref('/@jbawsa?compare=1', true) === '/access?next=%2F%40jbawsa%3Fcompare%3D1'
+  );
+  const a = cleanApplication({ handle: ' @JBawsa ', email: ' Me@Example.com ', note: ' hi\u0000 ' });
+  check(
+    'apply: handle + email cleaned',
+    a?.handle === 'jbawsa' && a?.email === 'me@example.com' && a?.note === 'hi'
+  );
+  check(
+    'apply: an x.com link becomes the handle',
+    cleanApplication({ handle: 'https://x.com/jbawsa/status/1', email: 'a@b.co' })?.handle ===
+      'jbawsa'
+  );
+  check('apply: bad handle rejected', !cleanApplication({ handle: 'no spaces', email: 'a@b.co' }));
+  check('apply: long handle rejected', !cleanApplication({ handle: 'a'.repeat(16), email: 'a@b.co' }));
+  check('apply: bad email rejected', !cleanApplication({ handle: 'ok', email: 'nope' }));
+  check('apply: non-strings rejected', !cleanApplication({ handle: 1, email: {} }));
+  check(
+    'apply: note capped at 280',
+    (cleanApplication({ handle: 'ok', email: 'a@b.co', note: 'x'.repeat(999) })?.note?.length ?? 0) ===
+      280
+  );
+  check('apply: empty note → null', cleanApplication({ handle: 'ok', email: 'a@b.co', note: '  ' })?.note === null);
+  check('invites: 3 each', MEMBER_INVITES === 3);
+  check('invites: left counts down', invitesLeft(0) === 3 && invitesLeft(2) === 1);
+  check('invites: never below zero', invitesLeft(5) === 0);
+}
+
 async function raceTest() {
   console.log('\nE. Single use against the database (--db)');
   const { default: prisma } = await import('../src/lib/db');
@@ -165,30 +242,41 @@ async function raceTest() {
     // one person can't take two codes
     const second = await redeemCode(winner.id, codes[1]);
     check('a second code for the same person is left unused', second.ok && second.already);
-    const left = await prisma.earlyAccessCode.findUnique({ where: { code: codes[1] } });
+    const left = await prisma.earlyAccessCode.findUnique({
+      where: { code: codes[1] },
+      select: { redeemedAt: true },
+    });
     check('…and still open for someone else', !!left && !left.redeemedAt);
     // revoked codes don't redeem, and revoking removes access
     await prisma.earlyAccessCode.update({
       where: { code: codes[1] },
       data: { revokedAt: new Date() },
+      select: { id: true },
     });
     check('a revoked code can’t be redeemed', !(await redeemCode(loser.id, codes[1])).ok);
     await prisma.earlyAccessCode.update({
       where: { code: codes[0] },
       data: { revokedAt: new Date() },
+      select: { id: true },
     });
     check('revoking a redeemed code removes access', !(await earlyAccessFor(winner.id)));
 
     // the gated sign-up: account + code in one transaction
     const { createAccountWithCode, CodeTakenError } = await import('../src/lib/early-access');
     const gateCode = generateCode((n) => randomBytes(n));
-    await prisma.earlyAccessCode.create({ data: { code: gateCode, label: `test ${stamp} gate` } });
+    await prisma.earlyAccessCode.create({
+      data: { code: gateCode, label: `test ${stamp} gate` },
+      select: { id: true },
+    });
     gateCodes.push(gateCode);
     const admitted = await createAccountWithCode(gateCode, (tx) =>
       tx.user.create({ data: { supabaseId: `ea-test-${stamp}-gate-1` }, select: { id: true } })
     );
     gateUsers.push(admitted.id);
-    const used = await prisma.earlyAccessCode.findUnique({ where: { code: gateCode } });
+    const used = await prisma.earlyAccessCode.findUnique({
+      where: { code: gateCode },
+      select: { redeemedByUserId: true },
+    });
     check(
       'a valid code admits a new account and is used by it',
       used?.redeemedByUserId === admitted.id

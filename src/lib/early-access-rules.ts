@@ -29,7 +29,108 @@ export const FEEDBACK_MAX = 2000;
 /** Shown when a new account tries to sign in without a code (INVITE_ONLY on). */
 export const INVITE_ONLY_MESSAGE =
   'BrandOS is invite-only for now. Members get in with a personal code.';
-export const INVITE_ONLY_HOW = 'Reply BrandOS to our email, or ask @jbawsa.';
+export const INVITE_ONLY_HOW = 'Apply for a code, or ask a member for one of theirs.';
+
+/**
+ * The invite-only trial (decided with Bawsa on Oct 28, on from the Nov 2
+ * launch). The scan, the read and /@handle pages stay public; the product
+ * needs a code. A redeemed code is CODE_TRIAL_DAYS of full access from the
+ * moment it's redeemed, no card. Founding stays buyable the whole time. Every
+ * member can hand out MEMBER_INVITES codes of their own.
+ *
+ * NEXT_PUBLIC_CODE_TRIAL=true turns it on (public, so the scan's call to
+ * action and the server agree). Off: the old launch offer (everyone free until
+ * OPEN_ACCESS_UNTIL) stands.
+ */
+export const CODE_TRIAL_DAYS = 30;
+export const MEMBER_INVITES = 3;
+
+export function codeTrialFrom(value: string | undefined): boolean {
+  return (value ?? '').trim().toLowerCase() === 'true';
+}
+export const CODE_TRIAL = codeTrialFrom(process.env.NEXT_PUBLIC_CODE_TRIAL);
+
+/** When a code's free access ends: CODE_TRIAL_DAYS after it was redeemed. */
+export function freeUntilFrom(redeemedAt: Date): Date {
+  return new Date(redeemedAt.getTime() + CODE_TRIAL_DAYS * 24 * 60 * 60 * 1000);
+}
+
+/**
+ * When the invite-only trial starts (the Nov 2 launch, midnight Pacific).
+ * Accounts made before it, with no code, get the same CODE_TRIAL_DAYS from
+ * this moment (Bawsa, Oct 28) so nobody who signed up early is paywalled.
+ */
+export const CODE_TRIAL_START = new Date('2026-11-02T08:00:00Z');
+
+/**
+ * Made before the invite-only trial started, so treated as a member without a
+ * code (Bawsa, Oct 28): 30 free days from the start, dashboard v2 and the 3
+ * invites. Only while the trial is on.
+ */
+export function isEarlyAccount(
+  createdAt: Date | null | undefined,
+  codeTrial: boolean = CODE_TRIAL
+): boolean {
+  return codeTrial && !!createdAt && createdAt < CODE_TRIAL_START;
+}
+
+/**
+ * Free access end for a member: the later of their code's 30 days and, for an
+ * account made before CODE_TRIAL_START, 30 days from the start. Null when
+ * neither applies. A revoked code gives nothing (and cancels the early-account
+ * days too: revoking is deliberate).
+ */
+export function memberFreeUntil(
+  code: { redeemedAt: Date | null; revokedAt: Date | null } | null,
+  accountCreatedAt: Date | null
+): Date | null {
+  if (code?.revokedAt) return null;
+  const fromCode = code?.redeemedAt ? freeUntilFrom(code.redeemedAt) : null;
+  const early =
+    accountCreatedAt && accountCreatedAt < CODE_TRIAL_START
+      ? freeUntilFrom(CODE_TRIAL_START)
+      : null;
+  if (fromCode && early) return fromCode > early ? fromCode : early;
+  return fromCode ?? early;
+}
+
+/**
+ * Where "continue / save it to your dashboard" goes from a public page. In the
+ * invite-only trial that's the get-a-code step (/access), which also has the
+ * sign-in for people who already have an account.
+ */
+export function joinHref(next: string, codeTrial: boolean = CODE_TRIAL): string {
+  return `${codeTrial ? '/access' : '/signup'}?next=${encodeURIComponent(next)}`;
+}
+
+/** The apply form's fields, cleaned. Null when the handle or email is unusable. */
+export const APPLY_NOTE_MAX = 280;
+const APPLY_HANDLE_RE = /^[A-Za-z0-9_]{1,15}$/;
+const APPLY_EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+export function cleanApplication(raw: {
+  handle?: unknown;
+  email?: unknown;
+  note?: unknown;
+}): { handle: string; email: string; note: string | null } | null {
+  const handle =
+    typeof raw.handle === 'string'
+      ? raw.handle
+          .trim()
+          .replace(/^https?:\/\/(www\.)?(x|twitter)\.com\//i, '')
+          .replace(/^@/, '')
+          .split(/[/?#]/)[0]
+      : '';
+  const email = typeof raw.email === 'string' ? raw.email.trim().toLowerCase() : '';
+  if (!APPLY_HANDLE_RE.test(handle)) return null;
+  if (!email || email.length > 254 || !APPLY_EMAIL_RE.test(email)) return null;
+  const note = cleanFeedback(raw.note)?.slice(0, APPLY_NOTE_MAX) ?? null;
+  return { handle: handle.toLowerCase(), email, note };
+}
+
+/** How many more codes a member may make (never below zero). */
+export function invitesLeft(made: number, cap: number = MEMBER_INVITES): number {
+  return Math.max(0, cap - made);
+}
 
 /**
  * Closed beta (decided with Bawsa on Oct 27): with INVITE_ONLY on, a NEW

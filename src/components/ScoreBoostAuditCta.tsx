@@ -81,7 +81,7 @@ export default function ScoreBoostAuditCta({ handle, phaseScores }: Props) {
     >
       <p
         style={{
-          fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace",
+          fontFamily: "'VCR OSD Mono', var(--font-jetbrains), monospace",
           fontSize: '10px',
           letterSpacing: '0.12em',
           color: '#737373',
@@ -92,7 +92,7 @@ export default function ScoreBoostAuditCta({ handle, phaseScores }: Props) {
       </p>
       <p
         style={{
-          fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace",
+          fontFamily: "'VCR OSD Mono', var(--font-jetbrains), monospace",
           fontSize: '14px',
           letterSpacing: '0.02em',
           color: '#ffffff',
@@ -125,7 +125,7 @@ export default function ScoreBoostAuditCta({ handle, phaseScores }: Props) {
           border: 'none',
           borderRadius: '4px',
           cursor: loading ? 'wait' : 'pointer',
-          fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace",
+          fontFamily: "'VCR OSD Mono', var(--font-jetbrains), monospace",
           fontSize: '12px',
           letterSpacing: '0.1em',
           fontWeight: 600,

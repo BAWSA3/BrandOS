@@ -7,7 +7,7 @@ import { motion } from 'motion/react';
 // Brand Identity Card — Public, shareable creator profile
 // =============================================================================
 
-const MONO = "'VCR OSD Mono', 'JetBrains Mono', monospace";
+const MONO = "'VCR OSD Mono', var(--font-jetbrains), monospace";
 const SANS = "'Helvetica Neue', sans-serif";
 const KLEIN = '#0047FF';
 

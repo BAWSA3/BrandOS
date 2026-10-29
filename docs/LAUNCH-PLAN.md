@@ -38,6 +38,38 @@ video tease) has to multiply scan volume; current traffic alone won't do it.
 
 ## Offer and funnel
 
+> **Updated Oct 28: the invite-only trial, from Nov 2 (supersedes "free for everyone until
+> Dec 3" below).** Decided by Bawsa on Oct 28; code in the invite-only trial PR.
+>
+> - **Public, no code:** the scan, the read (score + playbook), `/@handle` pages. After a read,
+>   the next step is `/access`: "You've seen your read. Now get a code."
+> - **Needs a code:** BrandOS itself (today's move, the live composer, the Brand view). Sign-up
+>   for new accounts is invite-only (`INVITE_ONLY`).
+> - **A code = 30 days of full access from the moment it's redeemed, no card.** Not a shared
+>   end date: everyone's 30 days run from their own redemption. Codes redeemed before Nov 2
+>   (the 35 testers, the friends batch) count from when they were redeemed.
+> - **After the 30 days:** a paywall into the existing checkout, charged from that day (the 30
+>   days were the trial; no second 7-day trial).
+> - **Founding stays buyable the whole time.** A card added during the 30 days locks $29/mo for
+>   life and is first charged when that person's 30 days end. Code holders keep the Founding
+>   price even after the 100 seats (their code's perk).
+> - **Where codes come from:** every member has **3 invites** (dashboard card, a link per
+>   invite, made on first copy); Bawsa hands them out (DMs, reply waves); anyone can **apply**
+>   on `/access` and Bawsa approves in batches (`scripts/invite-codes.ts applicants|approve`).
+> - **Index reservations:** each unclaimed reservation gets a code minted for it
+>   (`invite-codes.ts reserve-codes`), and the Nov 2 Index email carries it. That's how the
+>   reserved spot is honored now that sign-up needs a code. Index = anyone who has a code
+>   and signs up; scanning alone never puts anyone on it.
+> - **Accounts made before the gate with no code:** Free (their read + the paywall), with a
+>   code box, "apply", or straight to Pro (the 7-day card trial still applies to them).
+> - **Why:** scarcity without losing discovery (the scan stays the front door), predictable AI
+>   and X costs, better feedback, growth through invites. Known costs, accepted: no-card
+>   trials convert less at the end than card-required ones, and codes lose people (12 of 35
+>   redeemed on day one).
+> - **Changed from the Oct 22 plan:** no "free for everyone until Dec 3" (that window ends when
+>   `NEXT_PUBLIC_CODE_TRIAL` is on); no shared Dec 3 cliff; copy that says "free until Dec 3"
+>   or "no code needed" is replaced (list in the PR).
+
 > **Updated Oct 22 (supersedes the card-required trial for launch):** Nov 2 → **Dec 3, full
 > access is free for everyone, no card.** The **Founding 100** add a card before Dec 3 to keep
 > **$29/mo for life** (first charge Dec 3) plus a recorded teardown. After the first 100, Pro is

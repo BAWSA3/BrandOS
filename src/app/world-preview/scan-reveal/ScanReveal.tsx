@@ -19,7 +19,7 @@ const C = {
   rule: 'rgba(14,14,14,0.18)',
   blue: '#0047FF',
 };
-const MONO = "'VCR OSD Mono', 'JetBrains Mono', monospace";
+const MONO = "'VCR OSD Mono', var(--font-jetbrains), monospace";
 
 const HANDLE = 'jbawsa';
 const SCORE = 73;

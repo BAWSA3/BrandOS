@@ -1,7 +1,9 @@
+import { proPrice, renewalTerms } from '@/lib/billing-terms';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { getCurrentUser } from '@/lib/auth';
-import { isOpenAccess, isSubscribed, trialEndsAt } from '@/lib/billing';
+import { freeAccessEndsAt, isOpenAccess, isSubscribed, trialEndsAt } from '@/lib/billing';
+import { CODE_TRIAL, CODE_TRIAL_DAYS } from '@/lib/early-access-rules';
 import { foundingNumber, foundingSpotsLeft } from '@/lib/founding';
 import { earlyAccessFor } from '@/lib/early-access';
 import { FOUNDING_SPOTS, OPEN_ACCESS_UNTIL, TRIAL_DAYS } from '@/lib/plans';
@@ -21,11 +23,12 @@ export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'Pricing · BrandOS',
-  description:
-    'Know your reputation score before brands check it. BrandOS Studio is free for everyone until Dec 3; the first 100 keep $29/month for life.',
+  description: CODE_TRIAL
+    ? 'Know your reputation score before brands check it. BrandOS is invite-only: a code is 30 days free, no card; the first 100 keep $29/month for life.'
+    : 'Know your reputation score before brands check it. BrandOS Studio is free for everyone until Dec 3; the first 100 keep $29/month for life.',
 };
 
-const MONO = "'VCR OSD Mono', 'JetBrains Mono', monospace";
+const MONO = "'VCR OSD Mono', var(--font-jetbrains), monospace";
 const BIG = "'Inter Tight', 'Helvetica Neue', Helvetica, Arial, sans-serif";
 const BLUE = '#0047FF';
 const INK = '#0E0E0E';
@@ -61,7 +64,12 @@ export default async function PricingPage({
   // "has Pro" here means paid / card on file: open access makes hasPro() true for all
   const pro = user ? isSubscribed(user) : false;
   const open = isOpenAccess();
-  const until = day(OPEN_ACCESS_UNTIL);
+  // free access still running for this person: the launch window, or (invite-only
+  // trial) their own 30 days from a code; a card locks the price until it ends
+  const freeEnd = user && !pro ? freeAccessEndsAt(user) : open ? OPEN_ACCESS_UNTIL : null;
+  const until = day(freeEnd ?? OPEN_ACCESS_UNTIL);
+  // invite-only: their code's 30 days are over (no second trial; pay from today)
+  const codeEnded = CODE_TRIAL && !!user?.freeUntil && !freeEnd && !pro;
   const trialEnd = user ? trialEndsAt(user) : null;
   const founding = user && pro ? await foundingNumber(user.id) : null;
   // early-access code holders keep the Founding price after the 100 seats are gone
@@ -103,7 +111,9 @@ export default async function PricingPage({
           <p className="mt-5 max-w-[560px] text-[16px] leading-[1.55]" style={{ color: '#333' }}>
             {open
               ? `Full access is free for everyone until ${until}: the full dashboard, what's working, what's drifting, and what to post next. The first ${FOUNDING_SPOTS} to add a card keep $29/month for life.`
-              : "Scan your brand for free. Go Pro for the full dashboard: what's working, what's drifting, and what to post next."}
+              : CODE_TRIAL
+                ? `Your read is free for anyone. BrandOS itself is invite-only: a code is ${CODE_TRIAL_DAYS} days of the full dashboard, no card. The first ${FOUNDING_SPOTS} to add a card keep $29/month for life.`
+                : "Scan your brand for free. Go Pro for the full dashboard: what's working, what's drifting, and what to post next."}
           </p>
 
           {sp.canceled && (
@@ -169,7 +179,11 @@ export default async function PricingPage({
             >
               <span>Pro</span>
               <span className="border border-white/60 px-2 py-[3px]">
-                {open ? `Free until ${until}` : `${TRIAL_DAYS}-day free trial`}
+                {freeEnd
+                  ? `Free until ${until}`
+                  : CODE_TRIAL
+                    ? `${CODE_TRIAL_DAYS} days free with a code`
+                    : `${TRIAL_DAYS}-day free trial`}
               </span>
             </div>
             <div className="mt-4 flex items-baseline gap-2">
@@ -186,7 +200,7 @@ export default async function PricingPage({
                 / month
               </span>
             </div>
-            {open && (
+            {(open || CODE_TRIAL) && (
               <p
                 className="mt-2 text-[11px] uppercase tracking-[0.14em] opacity-80"
                 style={{ fontFamily: MONO }}
@@ -226,25 +240,45 @@ export default async function PricingPage({
                 </div>
               ) : (
                 <div className="bg-white p-4">
-                  <StartTrialButton
-                    signal={field}
-                    signedIn={!!user}
-                    next="/pricing"
-                    label={
-                      open
-                        ? priceLocked
-                          ? 'Lock in $29 for life'
-                          : 'Keep Pro after Dec 3'
-                        : undefined
-                    }
-                  />
+                  {CODE_TRIAL && !user ? (
+                    // invite-only trial: signed-out visitors get a code first
+                    <Link
+                      href="/access?next=/pricing"
+                      className="block w-full px-4 py-3.5 text-center text-[12px] uppercase tracking-[0.14em] text-white"
+                      style={{ fontFamily: MONO, background: BLUE }}
+                    >
+                      Get a code →
+                    </Link>
+                  ) : (
+                    <StartTrialButton
+                      signal={field}
+                      signedIn={!!user}
+                      next="/pricing"
+                      label={
+                        freeEnd
+                          ? priceLocked
+                            ? 'Lock in $29 for life'
+                            : `Keep Pro after ${until}`
+                          : codeEnded
+                            ? 'Get Pro'
+                            : undefined
+                      }
+                    />
+                  )}
                   <p
                     className="mt-3 text-center text-[12px] leading-[1.5]"
                     style={{ color: MUTED }}
                   >
-                    {open
-                      ? `Card required · nothing charged until ${until} · cancel before then and pay nothing`
-                      : `Card required · $29/month after ${TRIAL_DAYS} days · cancel before day ${TRIAL_DAYS} and pay nothing`}
+                    {CODE_TRIAL && !user
+                      ? `Invite-only · a code is ${CODE_TRIAL_DAYS} days of everything, no card`
+                      : renewalTerms(
+                          proPrice(priceLocked),
+                          freeEnd
+                            ? { kind: 'on', date: until }
+                            : codeEnded
+                              ? { kind: 'today' }
+                              : { kind: 'after-trial', days: TRIAL_DAYS }
+                        )}
                   </p>
                 </div>
               )}
@@ -279,7 +313,7 @@ export default async function PricingPage({
               Founding 100
             </div>
             <p className="mt-2 text-[15px] leading-[1.55]" style={{ color: '#333' }}>
-              {open
+              {freeEnd
                 ? `Add a card before ${until} and keep $29/month for life (your first charge is ${until}), plus a short recorded brand teardown from Bawsa. After the first ${FOUNDING_SPOTS}, Pro is $39/month.`
                 : `The first ${FOUNDING_SPOTS} paying members keep $29/month forever, even when prices go up, and get a short recorded brand teardown from Bawsa.`}
             </p>

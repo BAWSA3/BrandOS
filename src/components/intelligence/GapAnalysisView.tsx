@@ -185,7 +185,7 @@ export default function GapAnalysisView({ brandId }: GapAnalysisViewProps) {
           borderRadius: 16,
           padding: 24,
           border: '1px solid var(--border)',
-          fontFamily: '"VCR OSD Mono", "JetBrains Mono", monospace',
+          fontFamily: '"VCR OSD Mono", var(--font-jetbrains), monospace',
         }}
       >
         <h3
@@ -224,7 +224,7 @@ export default function GapAnalysisView({ brandId }: GapAnalysisViewProps) {
         padding: 24,
         border: '1px solid var(--border)',
         boxShadow: 'var(--shadow-card)',
-        fontFamily: '"VCR OSD Mono", "JetBrains Mono", monospace',
+        fontFamily: '"VCR OSD Mono", var(--font-jetbrains), monospace',
       }}
     >
       {/* Header */}

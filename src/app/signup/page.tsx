@@ -15,12 +15,13 @@ import {
 
 // One screen for new AND returning users (decided 2026-10-22): Continue with X
 // first (BrandOS reads your X), then Google, then a one-tap email link (no
-// password). "By continuing you agree" replaces the terms checkbox; the tos
-// param still rides every callback URL so the acceptance is recorded.
+// password). One checkbox confirms the age in the Terms (13+) and accepts the
+// Terms; the buttons wait for it, so the tos param (recorded as tosAcceptedAt
+// on the account) only ever rides a callback after that confirmation.
 // Everyone lands on the dashboard.
 
 const DISPLAY = "'Helvetica Custom', 'Helvetica Neue', Helvetica, Arial, sans-serif";
-const LABEL = "'VCR OSD Mono', 'JetBrains Mono', monospace";
+const LABEL = "'VCR OSD Mono', var(--font-jetbrains), monospace";
 const BLUE = '#0047FF';
 
 const supabase = createBrowserClient(
@@ -61,9 +62,15 @@ export default function ContinuePage() {
   const [sent, setSent] = useState(false);
   // the method that last worked on this device (cookie set by the callback)
   const [lastUsed, setLastUsed] = useState<null | 'x' | 'google' | 'email'>(null);
+  // Age + Terms confirmation (Terms: 13+). Pre-checked on a device that has
+  // signed in before, since that account already confirmed it.
+  const [ageOk, setAgeOk] = useState(false);
   useEffect(() => {
     const v = document.cookie.match(/(?:^|; )bos_last_signin=(x|google|email)/)?.[1];
-    const t = window.setTimeout(() => setLastUsed((v as 'x' | 'google' | 'email') ?? null), 0);
+    const t = window.setTimeout(() => {
+      setLastUsed((v as 'x' | 'google' | 'email') ?? null);
+      if (v) setAgeOk(true);
+    }, 0);
     return () => window.clearTimeout(t);
   }, []);
 
@@ -113,6 +120,7 @@ export default function ContinuePage() {
       : '';
 
   async function oauth(provider: 'twitter' | 'google') {
+    if (!ageOk) return;
     setError(null);
     setBusy(provider === 'twitter' ? 'x' : 'google');
     const { error: e } = await supabase.auth.signInWithOAuth({
@@ -127,6 +135,7 @@ export default function ContinuePage() {
 
   async function emailLink(e: React.FormEvent) {
     e.preventDefault();
+    if (!ageOk) return;
     setError(null);
     setBusy('email');
     // One-tap link: creates the account if new, signs in if returning.
@@ -215,7 +224,12 @@ export default function ContinuePage() {
             role="alert"
           >
             <p className="text-[15px] leading-[1.45] text-[#0E0E0E]">{INVITE_ONLY_MESSAGE}</p>
-            <p className="mt-1.5 text-[13px] text-[#6B6862]">{INVITE_ONLY_HOW}</p>
+            <p className="mt-1.5 text-[13px] text-[#6B6862]">
+              {INVITE_ONLY_HOW}{' '}
+              <Link href="/access#apply" className="underline hover:text-[#0E0E0E]">
+                Apply for a code →
+              </Link>
+            </p>
           </div>
         )}
         {invite === 'invalid' && (
@@ -241,11 +255,31 @@ export default function ContinuePage() {
           </div>
         )}
 
-        <div className="mt-8 space-y-3">
+        <label className="mt-8 flex cursor-pointer items-start gap-2.5 text-[12px] leading-[1.5] text-[#3A3833]">
+          <input
+            type="checkbox"
+            checked={ageOk}
+            onChange={(e) => setAgeOk(e.target.checked)}
+            className="mt-[2px] h-4 w-4 shrink-0 accent-[#0047FF]"
+          />
+          <span>
+            I&apos;m 13 or older and I agree to the{' '}
+            <Link href="/terms" target="_blank" className="underline hover:text-[#0E0E0E]">
+              Terms
+            </Link>{' '}
+            and{' '}
+            <Link href="/privacy" target="_blank" className="underline hover:text-[#0E0E0E]">
+              Privacy Policy
+            </Link>
+            .
+          </span>
+        </label>
+
+        <div className="mt-4 space-y-3">
           <button
             type="button"
             onClick={() => oauth('twitter')}
-            disabled={busy !== null}
+            disabled={busy !== null || !ageOk}
             className={`${btn} bg-[#0047FF] text-white hover:bg-[#0035CC]`}
             style={{ fontFamily: LABEL }}
           >
@@ -262,7 +296,7 @@ export default function ContinuePage() {
           <button
             type="button"
             onClick={() => oauth('google')}
-            disabled={busy !== null}
+            disabled={busy !== null || !ageOk}
             className={`${btn} border border-black/15 bg-white hover:border-[#0047FF]`}
             style={{ fontFamily: LABEL }}
           >
@@ -303,7 +337,7 @@ export default function ContinuePage() {
               />
               <button
                 type="submit"
-                disabled={busy !== null}
+                disabled={busy !== null || !ageOk}
                 className={`${btn} bg-[#0E0E0E] text-white hover:bg-black`}
                 style={{ fontFamily: LABEL }}
               >
@@ -366,18 +400,6 @@ export default function ContinuePage() {
               Have an early-access code?
             </button>
           ))}
-
-        <p className="mt-8 text-center text-[12px] leading-[1.5] text-[#6B6862]">
-          By continuing you agree to the{' '}
-          <Link href="/terms" target="_blank" className="underline hover:text-[#0E0E0E]">
-            Terms
-          </Link>{' '}
-          and{' '}
-          <Link href="/privacy" target="_blank" className="underline hover:text-[#0E0E0E]">
-            Privacy Policy
-          </Link>
-          .
-        </p>
       </div>
     </main>
   );

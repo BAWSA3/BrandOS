@@ -37,6 +37,9 @@ test(
   !dashboardV2Rule({ envFlag: undefined, role: 'admin', redeemed: true })
 );
 test('flag "0" → off', !dashboardV2Rule({ envFlag: '0', role: 'admin', redeemed: true }));
+test('early account (no code) → on', dashboardV2Rule({ envFlag: '1', role: 'user', redeemed: false, early: true }));
+test('early account, flag off → off', !dashboardV2Rule({ envFlag: '0', role: 'user', redeemed: false, early: true }));
+test('not early, no code → off', !dashboardV2Rule({ envFlag: '1', role: 'user', redeemed: false, early: false }));
 test(
   'flag on, public member → off',
   !dashboardV2Rule({ envFlag: '1', role: 'user', redeemed: false })

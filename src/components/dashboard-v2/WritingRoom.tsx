@@ -9,6 +9,9 @@ import { streamCopy, type CopyMsg } from './copyStream';
 import { ScoreReading, useDraftScore } from './ScoreReading';
 import { FormatSwitch, ReadingDock, useNote } from './room';
 import { Btn, DISPLAY, Label, Panel, VCR } from './ui';
+import LiveComposerView from '@/components/live-composer/LiveComposerView';
+import { useLiveComposer } from '@/components/live-composer/useLiveComposer';
+import { trackBetaEvent } from '@/lib/analytics';
 
 /**
  * The writing room (dashboard v2): one idea at a time, distraction-free, with
@@ -62,6 +65,8 @@ export default function WritingRoom({
   initialFormat = 'x-post',
   boardIdeas = [],
   topPosts = [],
+  brands = [],
+  live = false,
   demo,
 }: {
   /** the move or idea this room opened on (from ?prompt=), or null */
@@ -74,6 +79,10 @@ export default function WritingRoom({
   /** Article mode's idea picker: open ideas on the board, top posts from the record */
   boardIdeas?: { id: string; text: string }[];
   topPosts?: { text: string; note: string }[];
+  /** the workspace's own brands: an SMM switches which brand the draft is read against */
+  brands?: { id: string; handle: string }[];
+  /** live composer (LIVE_COMPOSER): marks while typing instead of paste-and-check */
+  live?: boolean;
   /** preview harness only: answer with these instead of calling the routes */
   demo?: { score: DraftScoreResult; options: string } & Partial<ArticleDemo>;
 }) {
@@ -103,17 +112,23 @@ export default function WritingRoom({
       format={format}
       onFormat={setFormat}
       demo={demo}
+      live={live && !demo}
+      brands={brands}
+      ideas={boardIdeas}
     />
   );
 }
 
 function PostRoom({
   idea,
-  accountId,
+  accountId: ownAccountId,
   handle,
   format,
   onFormat,
   demo,
+  live = false,
+  brands = [],
+  ideas = [],
 }: {
   idea: string | null;
   accountId: string | null;
@@ -121,12 +136,17 @@ function PostRoom({
   format: 'x-post' | 'thread';
   onFormat: (f: RoomFormat) => void;
   demo?: { score: DraftScoreResult; options: string };
+  live?: boolean;
+  brands?: { id: string; handle: string }[];
+  ideas?: { id: string; text: string }[];
 }) {
+  // the brand the draft is read against (SMMs switch; marks follow it)
+  const [accountId, setAccountId] = useState<string | null>(ownAccountId);
   const reduce = useReducedMotion();
   const stored = useSyncExternalStore(subscribe, readDraft, () => '');
   const [local, setLocal] = useState<string | null>(null);
   const text = local ?? stored;
-  const [side, setSide] = useState(true);
+  const [side, setSide] = useState(!live);
   const [ask, setAsk] = useState('');
   const [history, setHistory] = useState<CopyMsg[]>([]);
   const [options, setOptions] = useState<string[]>([]);
@@ -135,6 +155,12 @@ function PostRoom({
   const [error, setError] = useState<string | null>(null);
   const abort = useRef<AbortController | null>(null);
   const scoreState = useDraftScore({ accountId, demo: demo?.score });
+  const liveState = useLiveComposer({
+    text: live ? text : '',
+    enabled: live,
+    accountId,
+    ideas: accountId === ownAccountId ? ideas : [],
+  });
   const { setNote, view: noteView } = useNote();
 
   const setText = (v: string) => {
@@ -242,7 +268,9 @@ function PostRoom({
   return (
     <div className="pb-28 md:pb-16">
       <div className="mx-auto flex max-w-[1180px] gap-10 px-4 md:px-8">
-        <div className="mx-auto w-full max-w-[680px] flex-1 pt-4 md:pt-10">
+        <div
+          className={`mx-auto w-full flex-1 pt-4 md:pt-10 ${live ? 'max-w-[1080px]' : 'max-w-[680px]'}`}
+        >
           <Label tone="head-muted">Writing room{handle ? ` / @${handle}` : ''}</Label>
           <h1
             className="mt-3 text-[26px] leading-[1.12] md:text-[38px]"
@@ -256,45 +284,91 @@ function PostRoom({
             {idea ?? 'One idea. Write it the way you’d post it.'}
           </h1>
 
-          <Panel className="v2-within mt-6 p-5 md:mt-8 md:p-8" style={{ borderRadius: 20 }}>
-            <textarea
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              aria-label="Draft"
-              rows={10}
-              maxLength={4000}
-              placeholder={
-                idea
-                  ? 'Start here, or ask the copywriter for a first draft.'
-                  : 'Half-formed is fine.'
-              }
-              className="w-full resize-y text-[18px] leading-[1.65] outline-none md:text-[19px]"
-              style={{
-                color: 'var(--v-ink)',
-                fontFamily: DISPLAY,
-                background: 'transparent',
-                border: 'none',
-                padding: 0,
-                borderRadius: 0,
-                boxShadow: 'none',
-              }}
-            />
-            <div
-              className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t pt-4"
-              style={{ borderColor: 'var(--v-rule)' }}
-            >
-              <FormatSwitch value={format} onChange={onFormat} />
-              <span
-                className="text-[12px]"
-                style={{ fontFamily: VCR, color: over ? '#C2410C' : 'var(--v-muted)' }}
-              >
-                {format === 'x-post'
-                  ? `${[...text].length} / ${XLIMIT}`
-                  : `${trimmed ? trimmed.split(/\s+/).length : 0} WORDS`}
-                {' / SAVED ON THIS DEVICE'}
-              </span>
+          {live ? (
+            <div className="mt-6 md:mt-8">
+              <LiveComposerView
+                state={liveState}
+                onChange={setText}
+                placeholder={
+                  idea ? 'Start here. BrandOS reads as you write.' : 'Half-formed is fine.'
+                }
+                ideaHref={() => '/dashboard?view=brand#ideas'}
+                header={
+                  brands.length > 1 ? (
+                    <label className="inline-flex items-center gap-2">
+                      <Label tone="head-muted">Reading as</Label>
+                      <select
+                        value={accountId ?? ''}
+                        onChange={(e) => setAccountId(e.target.value || null)}
+                        className="v2-focus bg-transparent text-[13px]"
+                        style={{ fontFamily: VCR, color: 'var(--v-ink)' }}
+                      >
+                        {brands.map((b) => (
+                          <option key={b.id} value={b.id}>
+                            @{b.handle}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  ) : null
+                }
+                footer={
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <FormatSwitch value={format} onChange={onFormat} />
+                    <span
+                      className="text-[12px]"
+                      style={{ fontFamily: VCR, color: over ? '#C2410C' : 'var(--v-muted)' }}
+                    >
+                      {format === 'x-post'
+                        ? `${[...text].length} / ${XLIMIT}`
+                        : `${trimmed ? trimmed.split(/\s+/).length : 0} WORDS`}
+                      {' / SAVED ON THIS DEVICE'}
+                    </span>
+                  </div>
+                }
+              />
             </div>
-          </Panel>
+          ) : (
+            <Panel className="v2-within mt-6 p-5 md:mt-8 md:p-8" style={{ borderRadius: 20 }}>
+              <textarea
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                aria-label="Draft"
+                rows={10}
+                maxLength={4000}
+                placeholder={
+                  idea
+                    ? 'Start here, or ask the copywriter for a first draft.'
+                    : 'Half-formed is fine.'
+                }
+                className="w-full resize-y text-[18px] leading-[1.65] outline-none md:text-[19px]"
+                style={{
+                  color: 'var(--v-ink)',
+                  fontFamily: DISPLAY,
+                  background: 'transparent',
+                  border: 'none',
+                  padding: 0,
+                  borderRadius: 0,
+                  boxShadow: 'none',
+                }}
+              />
+              <div
+                className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t pt-4"
+                style={{ borderColor: 'var(--v-rule)' }}
+              >
+                <FormatSwitch value={format} onChange={onFormat} />
+                <span
+                  className="text-[12px]"
+                  style={{ fontFamily: VCR, color: over ? '#C2410C' : 'var(--v-muted)' }}
+                >
+                  {format === 'x-post'
+                    ? `${[...text].length} / ${XLIMIT}`
+                    : `${trimmed ? trimmed.split(/\s+/).length : 0} WORDS`}
+                  {' / SAVED ON THIS DEVICE'}
+                </span>
+              </div>
+            </Panel>
+          )}
 
           {/* the copywriter's options, when asked */}
           <AnimatePresence>
@@ -347,6 +421,17 @@ function PostRoom({
             ) : (
               <a
                 href={trimmed ? xIntent : undefined}
+                onClick={() => {
+                  // copy out: the clipboard too (threads, long posts), and count it
+                  navigator.clipboard?.writeText(trimmed).catch(() => {});
+                  trackBetaEvent('beta_composer_copied_out', {
+                    live,
+                    format,
+                    chars: [...trimmed].length,
+                    marks: live ? liveState.marks.length : 0,
+                    score: live ? (liveState.score ?? -1) : -1,
+                  });
+                }}
                 target="_blank"
                 rel="noreferrer"
                 aria-disabled={!trimmed}

@@ -152,7 +152,7 @@ export default function SpotlightScore({ score, children, onReady }: SpotlightSc
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ delay: 0.5, type: 'spring', damping: 15 }}
                 style={{
-                  fontFamily: "'Inter', sans-serif",
+                  fontFamily: 'var(--font-inter), sans-serif',
                   fontSize: 'clamp(80px, 15vw, 140px)',
                   fontWeight: 800,
                   color: '#FFFFFF',

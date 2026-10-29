@@ -5,7 +5,7 @@ import { createBrowserClient } from '@supabase/ssr';
 import Wordmark from '@/components/Wordmark';
 
 const DISPLAY = "'Helvetica Custom', 'Helvetica Neue', Helvetica, Arial, sans-serif";
-const LABEL = "'VCR OSD Mono', 'JetBrains Mono', monospace";
+const LABEL = "'VCR OSD Mono', var(--font-jetbrains), monospace";
 
 const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
