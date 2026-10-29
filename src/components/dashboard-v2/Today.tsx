@@ -13,6 +13,7 @@ import {
   type Persona,
 } from '@/lib/next-move';
 import { Btn, ButtonLink, DISPLAY, Label, Panel, VCR } from './ui';
+import InfoTip, { TIPS } from './InfoTip';
 
 /**
  * Today (dashboard v2): a calm screen with one move drawn from the member's
@@ -114,6 +115,7 @@ export default function Today({
   scoreLine,
   openIdeas,
   brandQuery,
+  accountPersona = null,
 }: {
   name: string | null;
   /** e.g. "Tuesday 27 Oct 2026" in the member's timezone */
@@ -125,7 +127,12 @@ export default function Today({
   openIdeas: number;
   /** "brand=<id>" or "" so links stay on the brand in view */
   brandQuery: string;
+  /** the account's answer (migration 052), so a new device doesn't ask again */
+  accountPersona?: Persona | null;
 }) {
+  useEffect(() => {
+    if (accountPersona && !read(KEY.persona)) write(KEY.persona, accountPersona);
+  }, [accountPersona]);
   const reduce = useReducedMotion();
   const personaRaw = useStored(KEY.persona);
   const founderRaw = useStored(KEY.founderFor);
@@ -230,6 +237,12 @@ export default function Today({
                           selected={persona === p.id}
                           onPick={() => {
                             write(KEY.persona, p.id);
+                            // follows the account to other devices (052); best effort
+                            void fetch('/api/me/preferences', {
+                              method: 'PATCH',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ persona: p.id }),
+                            }).catch(() => null);
                             if (p.id !== 'founder') write(KEY.founderFor, null);
                             setAskFounder(false);
                             setShift(0);
@@ -257,7 +270,10 @@ export default function Today({
                   {name ? `${name}, one` : 'One'} move today.
                 </p>
                 <Panel className="mt-5 p-6 md:p-10" style={{ borderRadius: 24 }}>
-                  <Label>Today&apos;s move</Label>
+                  <Label>
+                    Today&apos;s move
+                    <InfoTip label="today's move">{TIPS.move}</InfoTip>
+                  </Label>
                   <h1
                     className="mt-4 text-[30px] leading-[1.06] md:text-[52px]"
                     style={{ fontFamily: DISPLAY, fontWeight: 500, letterSpacing: '-0.04em' }}

@@ -14,6 +14,7 @@ import { AnimateNumber } from 'motion-plus/react';
 import { segments, type Lens, type Mark } from '@/lib/live-marks';
 import { reveal, type Reveal } from './reveal';
 import type { LiveState } from './types';
+import InfoTip, { TIPS } from '@/components/dashboard-v2/InfoTip';
 
 /**
  * The live composer's presentation: the marked draft plus the four surfaces
@@ -213,6 +214,11 @@ function ScoreTile({ s, r, compact }: { s: LiveState; r: Reveal; compact?: boole
     <Surface o={r.score}>
       <div className={compact ? 'flex items-baseline gap-2' : ''}>
         <Micro tone={s.reading ? 'signal' : 'muted'}>{s.reading ? 'Reading…' : 'On-brand'}</Micro>
+        {!compact && (
+          <span style={{ color: T.muted }}>
+            <InfoTip label="the draft score">{TIPS.liveScore}</InfoTip>
+          </span>
+        )}
         <div
           className={
             compact ? 'text-[34px] leading-none' : 'mt-1 text-[72px] leading-[0.95] md:text-[88px]'
@@ -339,6 +345,9 @@ function Notes({
             <Micro>{LENS[l].label}</Micro>
           </span>
         ))}
+        <span style={{ color: T.muted }}>
+          <InfoTip label="these marks">{TIPS.marks}</InfoTip>
+        </span>
       </div>
       {!s.landingReady && (
         <p className="mt-2 text-[12px]" style={{ color: T.muted }}>

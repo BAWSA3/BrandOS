@@ -19,6 +19,54 @@ export async function setColorway(userId: string, colorway: Colorway): Promise<v
     where: { userId },
     create: { userId, dashboardColorway: colorway },
     update: { dashboardColorway: colorway },
+    // explicit select: the row's newer columns (052) may not exist yet
+    select: { userId: true },
+  });
+}
+
+export const PERSONAS = ['creator', 'founder', 'builder'] as const;
+export type Persona = (typeof PERSONAS)[number];
+export const isPersona = (v: unknown): v is Persona =>
+  typeof v === 'string' && (PERSONAS as readonly string[]).includes(v);
+
+/**
+ * The first-run walkthrough state (migration 052). `done` is true when the
+ * member finished or skipped it. `saved` is false before 052 is applied (or on
+ * a read error): the client then falls back to this-device storage, so the
+ * walkthrough never loops on every visit.
+ */
+export async function getWalkthrough(
+  userId: string
+): Promise<{ done: boolean; persona: Persona | null; saved: boolean }> {
+  try {
+    const p = await prisma.userPreference.findUnique({
+      where: { userId },
+      select: { walkthroughDoneAt: true, persona: true },
+    });
+    return {
+      done: !!p?.walkthroughDoneAt,
+      persona: isPersona(p?.persona) ? p.persona : null,
+      saved: true,
+    };
+  } catch {
+    return { done: false, persona: null, saved: false }; // 052 not applied yet
+  }
+}
+
+/** Save the walkthrough as done and/or the persona answer. Own account only (caller checks). */
+export async function setWalkthrough(
+  userId: string,
+  patch: { done?: true; persona?: Persona | null }
+): Promise<void> {
+  const data: { walkthroughDoneAt?: Date; persona?: Persona | null } = {};
+  if (patch.done) data.walkthroughDoneAt = new Date();
+  if (patch.persona !== undefined) data.persona = patch.persona;
+  if (Object.keys(data).length === 0) return;
+  await prisma.userPreference.upsert({
+    where: { userId },
+    create: { userId, ...data },
+    update: data,
+    select: { userId: true },
   });
 }
 

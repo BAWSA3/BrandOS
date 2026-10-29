@@ -12,6 +12,7 @@ import { LastPostsTile, LookupsBlock, ScoreHistoryTile } from './RecordTiles';
 import { proofParts } from '@/lib/growth-proof';
 import IdeaBoard, { type Idea } from './IdeaBoard';
 import { BIG, Bar, FollowersChart, Label, MONO, T, Tile, fmt } from './parts';
+import InfoTip, { TIPS } from '@/components/dashboard-v2/InfoTip';
 import IndexTile, { type IndexTileData } from './IndexTile';
 import { GROWTH_TOKENS } from './tokens';
 import type { Colorway } from '@/lib/colorways';
@@ -521,7 +522,10 @@ export default function GrowthDashboard({
 
           {/* Growth */}
           <Tile className="md:col-span-7">
-            <Label>Growth</Label>
+            <Label>
+              Growth
+              {v2 && <InfoTip label="growth">{TIPS.growth}</InfoTip>}
+            </Label>
             <div className="mt-5 grid grid-cols-2 gap-5 md:grid-cols-4">
               {[
                 [

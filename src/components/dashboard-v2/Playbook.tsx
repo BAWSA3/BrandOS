@@ -8,6 +8,7 @@ import type { WeekOfWork } from '@/lib/playbook';
 import { workLine } from '@/lib/playbook';
 import { recordDate } from '@/lib/classifications';
 import { ButtonLink, DISPLAY, Label, Panel, VCR } from './ui';
+import InfoTip, { TIPS } from './InfoTip';
 
 /**
  * The Playbook (dashboard v2, slice 2): the brand's living page, read-only
@@ -62,11 +63,14 @@ function FromRead() {
 
 function Section({
   label,
+  tip,
   children,
   read = true,
   className = '',
 }: {
   label: string;
+  /** the plain sentence behind the "i" (key terms only) */
+  tip?: string;
   children: React.ReactNode;
   read?: boolean;
   className?: string;
@@ -74,7 +78,10 @@ function Section({
   return (
     <Panel className={`p-6 md:p-8 ${className}`}>
       <div className="flex items-center justify-between gap-3">
-        <Label>{label}</Label>
+        <Label>
+          {label}
+          {tip && <InfoTip label={label}>{tip}</InfoTip>}
+        </Label>
         {read && <FromRead />}
       </div>
       <div className="mt-4">{children}</div>
@@ -110,6 +117,7 @@ function RecordTile({
       <div className="flex items-center justify-between">
         <Label tone="on-signal" style={{ opacity: 0.85 }}>
           The Record
+          <InfoTip label="the Record">{TIPS.record}</InfoTip>
         </Label>
         {readOn && (
           <Label tone="on-signal" style={{ opacity: 0.85 }}>
@@ -320,6 +328,7 @@ export default function Playbook({ data }: { data: PlaybookData }) {
         {d.classification && (
           <span style={{ fontFamily: VCR, fontSize: 12, letterSpacing: '0.12em' }}>
             {d.classification}
+            <InfoTip label="your classification">{TIPS.classification}</InfoTip>
           </span>
         )}
         {d.proof && <span>Since you joined: {d.proof}</span>}
@@ -344,7 +353,7 @@ export default function Playbook({ data }: { data: PlaybookData }) {
         {d.record ? <RecordTile r={d.record} readOn={d.readOn} href={d.links.brand} /> : null}
 
         {d.strengths.length > 0 && (
-          <Section label="Known for">
+          <Section label="Known for" tip={TIPS.known}>
             <ul className="space-y-2 text-[17px] leading-[1.45]">
               {d.strengths.slice(0, 3).map((s) => (
                 <li key={s}>{s}</li>
@@ -380,7 +389,7 @@ export default function Playbook({ data }: { data: PlaybookData }) {
         )}
 
         {d.gap && (
-          <Section label="One thing to sharpen" className={gapAlone ? 'md:col-span-2' : ''}>
+          <Section label="One thing to sharpen" tip={TIPS.sharpen} className={gapAlone ? 'md:col-span-2' : ''}>
             <p className="text-[17px] leading-[1.5]">{d.gap}</p>
             <div className="mt-5">
               <ButtonLink href={d.links.write} kind="secondary">
@@ -393,7 +402,10 @@ export default function Playbook({ data }: { data: PlaybookData }) {
         {d.working.length > 0 && (
           <Panel className="grid grid-cols-1 gap-8 p-6 md:col-span-2 md:grid-cols-2 md:p-8">
             <div>
-              <Label>What&apos;s working</Label>
+              <Label>
+                What&apos;s working
+                <InfoTip label="what's working">{TIPS.working}</InfoTip>
+              </Label>
               <div className="mt-4 space-y-3">
                 {d.working.map((f) => (
                   <div key={f.label}>
