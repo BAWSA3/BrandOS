@@ -7,8 +7,10 @@ import { TOS_VERSION } from '@/lib/tos';
 import Wordmark from '@/components/Wordmark';
 import { safeNextPath } from '@/lib/safe-input';
 import {
+  CODE_TRIAL,
   INVALID_CODE_MESSAGE,
   INVITE_ONLY_HOW,
+  INVITE_ONLY_HOW_BEFORE_TRIAL,
   INVITE_ONLY_MESSAGE,
   typedCodePath,
 } from '@/lib/early-access-rules';
@@ -225,10 +227,17 @@ export default function ContinuePage() {
           >
             <p className="text-[15px] leading-[1.45] text-[#0E0E0E]">{INVITE_ONLY_MESSAGE}</p>
             <p className="mt-1.5 text-[13px] text-[#6B6862]">
-              {INVITE_ONLY_HOW}{' '}
-              <Link href="/access#apply" className="underline hover:text-[#0E0E0E]">
-                Apply for a code →
-              </Link>
+              {/* /access (the apply form) only opens with the trial switch on */}
+              {CODE_TRIAL ? (
+                <>
+                  {INVITE_ONLY_HOW}{' '}
+                  <Link href="/access#apply" className="underline hover:text-[#0E0E0E]">
+                    Apply for a code →
+                  </Link>
+                </>
+              ) : (
+                INVITE_ONLY_HOW_BEFORE_TRIAL
+              )}
             </p>
           </div>
         )}
