@@ -6,7 +6,8 @@ import type { LiveState } from './types';
  * draft grows (Bawsa's pick, 2026-10-28).
  *   first sentence (or a pause after 3 words) → voice marks
  *   hook done (first sentence ended, then a     → score + lane read + playbook
- *   pause or more writing)
+ *   pause or more writing; or, with no
+ *   punctuation, a pause on 5+ words or 10+)
  *   enough text                                → landing, proof, idea; the
  *                                                playbook line lights up
  * Pure (state in, opacities out), so the harness, the real room and a
@@ -38,7 +39,13 @@ export function milestones(text: string, paused = false) {
   const firstSentence = ended || (paused && words(t) >= 3);
   // the hook is done once the first sentence has ended and they've paused on
   // it or kept writing past it (so it stays done while they type on)
-  const hook = ended && (paused || text.trimStart().length > (ends[0] ?? '').trim().length);
+  // Lowercase one-liners often never end in punctuation, so the hook also
+  // counts once they pause on 5+ words or keep going past 10.
+  const n = words(t);
+  const hook =
+    (ended && (paused || text.trimStart().length > (ends[0] ?? '').trim().length)) ||
+    (paused && n >= 5) ||
+    n >= 10;
   return { firstSentence, hook, enough: [...t].length >= ENOUGH_CHARS };
 }
 
