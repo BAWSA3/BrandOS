@@ -32,7 +32,8 @@
     "test:dash-v2": "npx tsx scripts/test-dashboard-v2.ts",
     "test:extension": "npx tsx scripts/test-extension.ts",
     "ext:icons": "node scripts/build-extension-icons.mjs",
-    "ext:zip": "node scripts/build-extension-zip.mjs"
+    "ext:zip": "node scripts/build-extension-zip.mjs",
+    "test:post-checkpoints": "npx tsx scripts/test-post-checkpoints.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.71.2",
