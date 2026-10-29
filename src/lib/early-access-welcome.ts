@@ -6,6 +6,7 @@ import {
   earlyAccessWelcomeContent,
   renderEarlyAccessWelcomeEmail,
   sendOnce,
+  sendTransactionalTo,
   type SendResult,
 } from '@/lib/launch-emails';
 
@@ -15,8 +16,14 @@ import {
  *
  * It goes to the list signup the code was given to (the code's label is
  * "@handle", and codes went out as replies to that signup's address), falling
- * back to the redeemer's own account email or handle. sendOnce() makes it at
- * most one per signup, however many times redemption is retried.
+ * back to the redeemer's own list signup (by handle or account email). sendOnce()
+ * makes it at most one per signup, however many times redemption is retried.
+ *
+ * Friend codes and member invites usually have no list signup: then it goes
+ * to the redeemer's account email directly (sendTransactionalTo), without
+ * adding them to the list. "Once" there is the redemption itself: this runs
+ * only after a fresh, single-use redemption. An address that unsubscribed
+ * from the list is never emailed.
  *
  * Off when EARLY_ACCESS_WELCOME=off, and until EMAIL_REPLY_TO is set: the
  * email asks for a reply, and mybrandos.app has no inbox.
@@ -65,7 +72,23 @@ export async function sendEarlyAccessWelcome(userId: string): Promise<WelcomeRes
   const redeemer = bare(code.redeemedBy?.xUsername);
   const toOwner = await signupFor(givenTo, labelEmail);
   const signup = toOwner ?? (await signupFor(redeemer, code.redeemedBy?.email ?? null));
-  if (!signup) return 'no-address';
+  if (!signup) {
+    // not on the list (friend code, member invite): the account email, if any
+    const email = code.redeemedBy?.email?.trim();
+    if (!email) return 'no-address';
+    const optedOut = await prisma.emailSignup.findFirst({
+      where: { email: { equals: email, mode: 'insensitive' }, unsubscribed: true },
+      select: { id: true },
+    });
+    if (optedOut) return 'no-address';
+    const recipient = { handle: redeemer, usedBy: null, codeTrial: CODE_TRIAL };
+    return sendTransactionalTo(
+      email,
+      CAMPAIGNS.earlyAccessWelcome,
+      earlyAccessWelcomeContent(recipient),
+      renderEarlyAccessWelcomeEmail(recipient, email)
+    );
+  }
 
   // Emailing the code's owner about someone else using it: say so.
   const usedBy = toOwner && givenTo && redeemer && givenTo !== redeemer ? redeemer : null;

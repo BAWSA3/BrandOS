@@ -810,6 +810,38 @@ export type SendResult = 'sent' | 'already-sent' | 'skipped-unsubscribed' | 'fai
 const TRANSACTIONAL_CAMPAIGNS = new Set<string>([CAMPAIGNS.earlyAccessWelcome]);
 
 /**
+ * Send a transactional email straight to an address that isn't on the list
+ * (no EmailSignup row, so no EmailSend claim). The caller owns "once": the redeem
+ * welcome calls this only after a fresh, single-use redemption. It never adds
+ * anyone to the list, so marketing sends can't reach them through it.
+ */
+export async function sendTransactionalTo(
+  email: string,
+  campaign: string,
+  content: NonNullable<NewsletterContent>,
+  rendered: { html: string; text: string }
+): Promise<SendResult> {
+  if (!TRANSACTIONAL_CAMPAIGNS.has(campaign)) {
+    console.error(`[launch-emails] ${campaign} is not transactional; not sent off-list`);
+    return 'failed';
+  }
+  const { html, text } = withMarketingFooter(rendered.html, rendered.text, email);
+  const { data, error } = await client().emails.send({
+    from: FROM,
+    to: email,
+    ...(REPLY_TO ? { replyTo: REPLY_TO } : {}),
+    subject: content.subject,
+    html,
+    text,
+  });
+  if (error || !data) {
+    console.error(`[launch-emails] ${campaign} send failed`, error);
+    return 'failed';
+  }
+  return 'sent';
+}
+
+/**
  * Send `content` to a signup at most once per campaign. The EmailSend claim is
  * inserted first (unique key), so concurrent or repeated calls can't double
  * send. If Resend fails, the claim is released so a later run can retry.
