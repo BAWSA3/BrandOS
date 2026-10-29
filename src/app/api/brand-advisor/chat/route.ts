@@ -14,6 +14,7 @@ import { buildAdvisorSystemPrompt } from '@/prompts/brand-advisor';
 import { botGuard } from '@/lib/botid-guard';
 import { checkRateLimit, getClientIdentifier, rateLimiters } from '@/lib/rate-limit';
 import { sanitizeInline, sanitizeUntrusted } from '@/lib/prompt-safety';
+import { replyText } from '@/lib/model-text';
 
 const MAX_BODY_BYTES = 60_000;
 const MAX_MESSAGE_CHARS = 2_000;
@@ -188,9 +189,7 @@ export async function POST(request: NextRequest) {
     });
 
     const responseContent =
-      response.content[0]?.type === 'text'
-        ? response.content[0].text
-        : 'I apologize, but I had trouble processing that request.';
+      replyText(response) || 'I apologize, but I had trouble processing that request.';
 
     return NextResponse.json({
       content: responseContent,

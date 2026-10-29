@@ -22,6 +22,7 @@ import { parseAudit } from '@/lib/score-schemas';
 import { logSecurityEvent, getClientIp } from '@/lib/audit-log';
 import { botGuard } from '@/lib/botid-guard';
 import { checkRateLimit, getClientIdentifier, rateLimiters } from '@/lib/rate-limit';
+import { replyText } from '@/lib/model-text';
 
 // Regeneration cap: a paid session can re-run its audit a few times (page
 // reloads, transient LLM failures) but not farm the ~$0.05/run cost.
@@ -126,7 +127,7 @@ export async function POST(request: NextRequest) {
       messages: [{ role: 'user', content: prompt }],
     });
 
-    const text = message.content[0]?.type === 'text' ? message.content[0].text : '';
+    const text = replyText(message);
 
     // Validate + clamp model output (no untyped JSON.parse). A paid audit gets
     // NO heuristic fallback — error out rather than serve garbage to a customer.

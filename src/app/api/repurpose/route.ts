@@ -9,6 +9,7 @@ import { botGuard } from '@/lib/botid-guard';
 import { checkAndIncrementUsage } from '@/lib/usage';
 import { GUARD_PREAMBLE, wrapUntrusted } from '@/lib/prompt-safety';
 import { readJsonBody } from '@/lib/api-body';
+import { replyText } from '@/lib/model-text';
 
 // Content repurposing (consolidation step 6). The legacy route read the dead
 // sb-access-token cookie, gated on user.subscriptionTier, and interpolated
@@ -172,7 +173,7 @@ Return ONLY the repurposed content, no explanations or meta-commentary.`;
             messages: [{ role: 'user', content: GUARD_PREAMBLE + prompt }],
           });
 
-          const content = message.content[0]?.type === 'text' ? message.content[0].text : '';
+          const content = replyText(message);
           return content.trim() ? { format, content: content.slice(0, MAX_OUTPUT_CHARS) } : null;
         } catch (err) {
           console.error(`[repurpose] Failed to generate ${format}:`, err);

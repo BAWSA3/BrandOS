@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getWorkspaceContext } from '@/lib/workspace-auth';
 import { VoiceFingerprint, AuthenticityScore } from '@/lib/voice-fingerprint';
 import { buildAuthenticityCheckPrompt } from '@/prompts/voice-fingerprint';
+import { replyText } from '@/lib/model-text';
 
 export async function POST(request: NextRequest) {
   try {
@@ -55,7 +56,7 @@ export async function POST(request: NextRequest) {
       ],
     });
 
-    const responseText = message.content[0].type === 'text' ? message.content[0].text : '';
+    const responseText = replyText(message);
 
     const jsonMatch = responseText.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {

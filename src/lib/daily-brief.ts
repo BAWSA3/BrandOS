@@ -1,6 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import type { DailyBrief } from '@prisma/client';
 import { prisma } from './db';
+import { replyText } from '@/lib/model-text';
 
 const MODEL = 'claude-haiku-4-5-20251001';
 const MAX_TOKENS = 400;
@@ -75,7 +76,7 @@ Respond with JSON ONLY. No preamble, no markdown fences. Schema:
     messages: [{ role: 'user', content: userPrompt }],
   });
 
-  const text = message.content[0]?.type === 'text' ? message.content[0].text : '';
+  const text = replyText(message);
   if (!text) throw new Error('Empty model response');
 
   const stripped = text.trim().replace(/^```(?:json)?\s*|\s*```$/g, '');

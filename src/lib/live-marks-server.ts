@@ -16,6 +16,7 @@ import {
   type ProofPost,
   type VoiceProfile,
 } from '@/lib/live-marks';
+import { replyText } from '@/lib/model-text';
 
 /**
  * Live composer, server half (docs/LIVE-COMPOSER-SPEC.md). Reuses draft
@@ -139,10 +140,14 @@ export async function liveRead(opts: {
   try {
     const msg = await new Anthropic({ apiKey }).messages.create({
       model: LIVE_MODEL,
-      max_tokens: 700,
+      // A quick read beside the draft: no thinking. With it on (Haiku 5.5's
+      // default) the reply led with a thinking block and ran into max_tokens,
+      // so the score came back empty on every read.
+      thinking: { type: 'disabled' },
+      max_tokens: 1200,
       messages: [{ role: 'user', content: buildPrompt(opts.ctx, opts.draft) }],
     });
-    text = msg.content[0]?.type === 'text' ? msg.content[0].text : '';
+    text = replyText(msg);
     console.info(
       `[live-marks] user=${opts.userId} model=${LIVE_MODEL} in=${msg.usage.input_tokens} out=${msg.usage.output_tokens} ms=${Date.now() - started}`
     );
