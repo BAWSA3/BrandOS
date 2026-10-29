@@ -20,6 +20,7 @@ import {
   codeTrialFrom,
   freeUntilFrom,
   memberFreeUntil,
+  isEarlyAccount,
   CODE_TRIAL_START,
   invitesLeft,
   joinHref,
@@ -157,6 +158,10 @@ console.log('\nG. Invite-only trial (Nov 2): 30 days, apply form, member invites
     const early = new Date('2026-10-01T00:00:00Z');
     const late = new Date('2026-11-05T00:00:00Z');
     const startEnd = '2026-12-02T08:00:00.000Z';
+    check('early account: before start, trial on', isEarlyAccount(early, true));
+    check('early account: trial off → no', !isEarlyAccount(early, false));
+    check('early account: after start → no', !isEarlyAccount(late, true));
+    check('early account: no date → no', !isEarlyAccount(null, true));
     check('start = Nov 2 midnight Pacific', CODE_TRIAL_START.toISOString() === '2026-11-02T08:00:00.000Z');
     check('early account, no code: 30 days from start', memberFreeUntil(null, early)?.toISOString() === startEnd);
     check('new account, no code: nothing', memberFreeUntil(null, late) === null);

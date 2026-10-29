@@ -27,7 +27,7 @@ import GrowthDashboard from '@/components/growth/GrowthDashboard';
 import type { IndexTileData } from '@/components/growth/IndexTile';
 import { standsOut } from '@/lib/index-rules';
 import { earlyAccessFor, indexOpenForUser } from '@/lib/early-access';
-import { CODE_TRIAL } from '@/lib/early-access-rules';
+import { CODE_TRIAL, isEarlyAccount } from '@/lib/early-access-rules';
 import EarlyAccessDock from '@/components/early-access/EarlyAccessDock';
 import InvitePasses from '@/components/access/InvitePasses';
 import { getEntry, viewSummary } from '@/lib/creator-index';
@@ -219,7 +219,8 @@ export default async function DashboardPage({
                 }
               />
               {/* invite-only trial: a member's 3 invites (guest-pass style) */}
-              {CODE_TRIAL && (access || isSubscribed(user) || user.role === 'admin') && (
+              {CODE_TRIAL &&
+                (access || isSubscribed(user) || user.role === 'admin' || isEarlyAccount(user.createdAt)) && (
                 <div className="mx-auto w-full max-w-[880px] px-4 pb-12 md:px-10">
                   <InvitePasses />
                 </div>
