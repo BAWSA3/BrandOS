@@ -9,28 +9,40 @@ Rings: **direct** (creator discovery/scoring, esp. X and crypto) · **adjacent**
 (agencies, spreadsheets, KOL groups) · **platform** (X or another big platform
 shipping it).
 
-Latest brief: `2026-10-23-competitors.md`.
+Latest brief: `2026-10-23-competitors.md`. Deep dives: `2026-10-29-deep-dive-creator-wire.md`.
 
-| Company | Ring | Who pays | Entry price | Threat (H/M/L) | Status | Last checked |
-| ------- | ---- | -------- | ----------- | -------------- | ------ | ------------ |
-| X Creator Connect | platform | Brands (via X ads) | Not disclosed | H | announced May 2026 ("in development"); launch unconfirmed | 2026-10-23 |
-| X profile trust features (About this account, Paid Partnership label, Grok summary) | platform | Free / Premium | Free | M | live | 2026-10-23 |
-| Kaito (Studio, Katalyst, Pro) | direct | Brands; Pro subscribers | Pro from $833/mo | H | pivoted 2026-01-15 (Yaps → Studio) | 2026-10-23 |
-| Favikon | adjacent | Brands; creators | Creator €29/mo; brand €159/mo | H | live | 2026-10-23 |
-| TwitterScore | direct | Investors, projects, creators | PRO $19/mo; API $49/mo | M | live | 2026-10-23 |
-| Ethos Network | direct | Users stake to vouch (no subscription) | Free to view | M | live | 2026-10-23 |
-| Lever.io | direct | Brands | Custom | M | live | 2026-10-23 |
-| Crypto KOL agencies (KolHQ, Growgami, Coinbound et al.) | substitute | Brands / projects | ~$5K+/mo (third party) | M | live | 2026-10-23 |
-| Passionfroot | adjacent | Brands (fee on bookings) | Free for creators to start | M | pivoted (to B2B AI agent, 2026) | 2026-10-23 |
-| SuperX | adjacent | Creators | $49/mo | M | live | 2026-10-23 |
-| Addressable | substitute | Crypto brands | Not published | L | live | 2026-10-23 |
-| Cookie3 / Cookie DAO | direct | Projects | Not found | L | pivoted? (Snaps shut 2026-01) | 2026-10-23 |
-| Modash | adjacent | Brands | $199/mo | L | live (no X coverage) | 2026-10-23 |
-| HypeAuditor | adjacent | Brands | ~$299/mo (third party) | L | live | 2026-10-23 |
-| Snaplama X Creators Marketplace | direct | Brands | Not published | L | unknown | 2026-10-23 |
-| Kolscan | direct | Free | Free | L | live (reportedly owned by Pump.fun) | 2026-10-23 |
+| Company                                                                             | Ring       | Who pays                               | Entry price                   | Threat (H/M/L) | Status                                                    | Last checked |
+| ----------------------------------------------------------------------------------- | ---------- | -------------------------------------- | ----------------------------- | -------------- | --------------------------------------------------------- | ------------ |
+| Creator Wire                                                                        | direct     | Crypto teams / agencies (operators)    | Not published                 | H              | live (app.creatorwire.xyz)                                | 2026-10-29   |
+| X Creator Connect                                                                   | platform   | Brands (via X ads)                     | Not disclosed                 | H              | announced May 2026 ("in development"); launch unconfirmed | 2026-10-23   |
+| X profile trust features (About this account, Paid Partnership label, Grok summary) | platform   | Free / Premium                         | Free                          | M              | live                                                      | 2026-10-23   |
+| Kaito (Studio, Katalyst, Pro)                                                       | direct     | Brands; Pro subscribers                | Pro from $833/mo              | H              | pivoted 2026-01-15 (Yaps → Studio)                        | 2026-10-23   |
+| Favikon                                                                             | adjacent   | Brands; creators                       | Creator €29/mo; brand €159/mo | H              | live                                                      | 2026-10-23   |
+| TwitterScore                                                                        | direct     | Investors, projects, creators          | PRO $19/mo; API $49/mo        | M              | live                                                      | 2026-10-23   |
+| Ethos Network                                                                       | direct     | Users stake to vouch (no subscription) | Free to view                  | M              | live                                                      | 2026-10-23   |
+| Lever.io                                                                            | direct     | Brands                                 | Custom                        | M              | live                                                      | 2026-10-23   |
+| Crypto KOL agencies (KolHQ, Growgami, Coinbound et al.)                             | substitute | Brands / projects                      | ~$5K+/mo (third party)        | M              | live                                                      | 2026-10-23   |
+| Passionfroot                                                                        | adjacent   | Brands (fee on bookings)               | Free for creators to start    | M              | pivoted (to B2B AI agent, 2026)                           | 2026-10-23   |
+| SuperX                                                                              | adjacent   | Creators                               | $49/mo                        | M              | live                                                      | 2026-10-23   |
+| Addressable                                                                         | substitute | Crypto brands                          | Not published                 | L              | live                                                      | 2026-10-23   |
+| Cookie3 / Cookie DAO                                                                | direct     | Projects                               | Not found                     | L              | pivoted? (Snaps shut 2026-01)                             | 2026-10-23   |
+| Modash                                                                              | adjacent   | Brands                                 | $199/mo                       | L              | live (no X coverage)                                      | 2026-10-23   |
+| HypeAuditor                                                                         | adjacent   | Brands                                 | ~$299/mo (third party)        | L              | live                                                      | 2026-10-23   |
+| Snaplama X Creators Marketplace                                                     | direct     | Brands                                 | Not published                 | L              | unknown                                                   | 2026-10-23   |
+| Kolscan                                                                             | direct     | Free                                   | Free                          | L              | live (reportedly owned by Pump.fun)                       | 2026-10-23   |
 
 ## Profiles
+
+### Creator Wire (creatorwire.xyz)
+
+- **What it is:** a crypto KOL campaign workspace built by a former KOL agency: vetted creators, approvals with live budgets, onchain payouts, automatic reporting. Three surfaces: operators, creators, clients (white-label link). Runs the Turtle distributor program (creators earn on DeFi deposits they bring, onchain).
+- **Who pays / price (as of 2026-10-29):** Operators and crypto teams. Prices not published ("Tiers and transparent pricing" heading only).
+- **Core features:** "700+" vetted crypto creators, tiered on engagement benchmarks; shortlist → brief → approvals → deliverables → reporting → one payment; bounty campaigns; creator competition with badges.
+- **Positioning (their words):** "the workspace for crypto creator campaigns."
+- **Traction (they say):** Polkadot DeFi TVL "$27M to $54M" in 60 days; a "$34 CPM" campaign; a "219 creator program". Logos include Polkadot, ZAMA, OKX, CoinGecko, Mantle (relationship not stated). X: BrandOS read 73, ~0.7 posts/day.
+- **Weak spots:** closed network (apply, get reviewed); creators don't own their record; operator with paid incentives (clients, Turtle deposits), so not neutral. No third-party coverage found.
+- **vs BrandOS:** they win on campaign ops, payouts, real case studies and brand relationships. BrandOS wins on an open, creator-owned, public record and brand-fit reads. **Could they ship the Index next month?** Yes: open the network as a public directory and add a "see your tier" page.
+- **Sources (read 2026-10-29):** [creatorwire.xyz](https://creatorwire.xyz/), brief `2026-10-29-deep-dive-creator-wire.md`
 
 ### X Creator Connect (business.x.com)
 
