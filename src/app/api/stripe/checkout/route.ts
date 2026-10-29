@@ -9,7 +9,8 @@ import {
   TRIAL_DAYS,
   type SubscriptionTier,
 } from '@/lib/plans';
-import { isOpenAccess, isSubscribed } from '@/lib/billing';
+import { freeAccessEndsAt, isOpenAccess, isSubscribed } from '@/lib/billing';
+import { CODE_TRIAL } from '@/lib/early-access-rules';
 import { foundingSpotsLeft } from '@/lib/founding';
 import { earlyAccessFor } from '@/lib/early-access';
 import { botGuard } from '@/lib/botid-guard';
@@ -116,14 +117,20 @@ export async function POST(request: NextRequest) {
       limit: 1,
     });
     const open = isOpenAccess();
-    const trial = open || prior.data.length === 0;
+    // Free access still running (the launch window, or this person's own 30
+    // days from a code): the card locks the price and is first charged when
+    // it ends. A code's 30 days ARE the trial, so once they're over there's no
+    // second one: pay from day one. Everyone else: one 7-day card trial.
+    const freeEnd = freeAccessEndsAt(user);
+    const usedCodeTrial = CODE_TRIAL && !!user.freeUntil && !freeEnd;
+    const trial = !!freeEnd || (prior.data.length === 0 && !usedCodeTrial);
     // Stripe wants trial_end >= 48h out; in the last two days, a 2-day trial
-    // (charged at most ~2 days after Dec 3) instead
-    const lockUntil = Math.floor(OPEN_ACCESS_UNTIL.getTime() / 1000);
+    // (charged at most ~2 days after the free access ends) instead
+    const lockUntil = freeEnd ? Math.floor(freeEnd.getTime() / 1000) : 0;
     const trialTiming =
-      open && lockUntil - Date.now() / 1000 > 49 * 3600
+      freeEnd && lockUntil - Date.now() / 1000 > 49 * 3600
         ? { trial_end: lockUntil }
-        : { trial_period_days: open ? 2 : TRIAL_DAYS };
+        : { trial_period_days: freeEnd ? 2 : TRIAL_DAYS };
     const app = process.env.NEXT_PUBLIC_APP_URL;
     const meta = { userId: user.id, tier: 'PRO', founding: founding ? '1' : '0' };
 
@@ -154,6 +161,7 @@ export async function POST(request: NextRequest) {
       trial,
       founding,
       open_access: open,
+      code_trial: CODE_TRIAL && !!freeEnd && !open,
     });
 
     return NextResponse.json({ url: session.url });

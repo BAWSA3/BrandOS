@@ -29,6 +29,7 @@ const allowedPages = [
   '/dashboard', // Phase 1: authenticated user dashboard
   '/home', // title screen / main menu after sign-in
   '/signup', // Phase 1: new account creation (email/Google/Apple)
+  '/access', // invite-only trial: "you've seen your read, now get a code" (enter or apply)
   '/today', // Daily creator brief — 1 idea, 1 metric, 1 action
   '/world-preview', // design previews with sample data (not on the production domain, below)
   '/oauth', // "Sign in with BrandOS" consent for the MCP (Claude / ChatGPT)

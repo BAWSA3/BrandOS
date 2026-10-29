@@ -6,8 +6,7 @@ import { getHomeData, toDashboardData } from '@/lib/home-data';
 import { cookies } from 'next/headers';
 import { recordVisit, safeTz } from '@/lib/progress';
 import { getColorway } from '@/lib/user-preferences';
-import { hasPro, isOpenAccess, isSubscribed, trialEndsAt } from '@/lib/billing';
-import { OPEN_ACCESS_UNTIL } from '@/lib/plans';
+import { freeAccessEndsAt, hasPro, isSubscribed, trialEndsAt } from '@/lib/billing';
 import type { PlanBadge } from '@/components/billing/PlanChip';
 import { syncSubscription } from '@/lib/billing-sync';
 import { foundingNumber, foundingSpotsLeft } from '@/lib/founding';
@@ -28,7 +27,9 @@ import GrowthDashboard from '@/components/growth/GrowthDashboard';
 import type { IndexTileData } from '@/components/growth/IndexTile';
 import { standsOut } from '@/lib/index-rules';
 import { earlyAccessFor, indexOpenForUser } from '@/lib/early-access';
+import { CODE_TRIAL } from '@/lib/early-access-rules';
 import EarlyAccessDock from '@/components/early-access/EarlyAccessDock';
+import InvitePasses from '@/components/access/InvitePasses';
 import { getEntry, viewSummary } from '@/lib/creator-index';
 import { dashboardV2For } from '@/lib/dashboard-v2';
 import Shell from '@/components/dashboard-v2/Shell';
@@ -217,6 +218,12 @@ export default async function DashboardPage({
                   }
                 }
               />
+              {/* invite-only trial: a member's 3 invites (guest-pass style) */}
+              {CODE_TRIAL && (access || isSubscribed(user) || user.role === 'admin') && (
+                <div className="mx-auto w-full max-w-[880px] px-4 pb-12 md:px-10">
+                  <InvitePasses />
+                </div>
+              )}
             </Shell>
             {dock}
           </>
@@ -296,7 +303,12 @@ export default async function DashboardPage({
         />
       )}
       {bento && !pro && (
-        <Paywall handle={bento.handle} score={bento.ticker.score} foundingLeft={foundingLeft} />
+        <Paywall
+          handle={bento.handle}
+          score={bento.ticker.score}
+          foundingLeft={foundingLeft}
+          mode={!CODE_TRIAL || subscribed ? 'trial' : user.freeUntil ? 'code-ended' : 'code-needed'}
+        />
       )}
       {firstScan ? (
         <FirstScan handle={home.handle} />
@@ -528,9 +540,11 @@ async function planBadgeFor(
 ): Promise<PlanBadge | null> {
   const subscribed = isSubscribed(user);
   const trialEnd = trialEndsAt(user);
-  if (!subscribed && isOpenAccess()) {
+  // free access: the launch window for everyone, or this person's 30 days from a code
+  const freeEnd = subscribed ? null : freeAccessEndsAt(user);
+  if (freeEnd) {
     const left = spotsLeft ?? (await foundingSpotsLeft());
-    return { kind: 'open', until: OPEN_ACCESS_UNTIL.toISOString(), spotsLeft: left };
+    return { kind: 'open', until: freeEnd.toISOString(), spotsLeft: left };
   }
   if (trialEnd) {
     const number = await foundingNumber(user.id);

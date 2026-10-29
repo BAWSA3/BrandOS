@@ -266,6 +266,14 @@ export type ReservedRecipient = {
   read?: { score: number; archetype: string } | null;
   earlyAccess?: 'sent' | 'replied' | 'code' | 'none';
   variant?: 'a' | 'b';
+  /**
+   * Invite-only from Nov 2: the code minted for this reservation
+   * (scripts/invite-codes.ts reserve-codes), shown as "AU7K-2QX9", and its
+   * link (mybrandos.app/i/AU7K-2QX9). The copy must use them while INVITE_ONLY
+   * is on; send-index-reserved.ts refuses to send until it does.
+   */
+  code?: string;
+  codeLink?: string;
 };
 
 /** A scan's archetype as a display name, or null when it's missing or junk. */

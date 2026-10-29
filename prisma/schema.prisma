@@ -165,7 +165,8 @@ model User {
   postScores           PostScore[] // per-post brand fit (migration 033)
   noteReports          NoteReport[]       @relation("NoteReporter")
   indexEntry           IndexEntry? // Creator Index membership (migration 044)
-  earlyAccessCode      EarlyAccessCode? // redeemed early-access code (migration 049)
+  earlyAccessCode      EarlyAccessCode?   @relation("CodeRedeemed") // redeemed early-access code (migration 049)
+  invitesMade          EarlyAccessCode[]  @relation("InvitesMade") // codes this member made (051)
   testerFeedback       TesterFeedback[] // early-access feedback to Bawsa (migration 049)
   indexViews           IndexView[] // Index members' pages this user viewed (migration 044)
   indexReservations    IndexReservation[] // reserved Index numbers this user claimed (migration 045)
@@ -1558,17 +1559,37 @@ model IndexReservation {
 // Early-access codes (migration 049): one personal, single-use code per person,
 // labelled with who it was given to. Each perk is a flag on the code.
 model EarlyAccessCode {
-  id                String    @id @default(dbgenerated("(gen_random_uuid())::text"))
-  code              String    @unique // 8 chars, uppercase, no dash (src/lib/early-access-rules.ts)
+  id                String             @id @default(dbgenerated("(gen_random_uuid())::text"))
+  code              String             @unique // 8 chars, uppercase, no dash (src/lib/early-access-rules.ts)
   label             String // who it was given to, e.g. "@aunnieonchain"
-  createdAt         DateTime  @default(now()) @db.Timestamptz
-  redeemedAt        DateTime? @db.Timestamptz
-  redeemedByUserId  String?   @unique
-  redeemedBy        User?     @relation(fields: [redeemedByUserId], references: [id], onDelete: SetNull)
-  revokedAt         DateTime? @db.Timestamptz
-  perkIndex         Boolean   @default(true) // the Creator Index before it opens
-  perkFoundingPrice Boolean   @default(true) // $29/month for life, even after the 100 seats
-  perkTester        Boolean   @default(true) // "Early access" tag + feedback line to Bawsa
+  createdAt         DateTime           @default(now()) @db.Timestamptz
+  redeemedAt        DateTime?          @db.Timestamptz
+  redeemedByUserId  String?            @unique
+  redeemedBy        User?              @relation("CodeRedeemed", fields: [redeemedByUserId], references: [id], onDelete: SetNull)
+  revokedAt         DateTime?          @db.Timestamptz
+  perkIndex         Boolean            @default(true) // the Creator Index before it opens
+  perkFoundingPrice Boolean            @default(true) // $29/month for life, even after the 100 seats
+  perkTester        Boolean            @default(true) // "Early access" tag + feedback line to Bawsa
+  createdByUserId   String? // a member's own invite (migration 051); null = made by Bawsa
+  createdBy         User?              @relation("InvitesMade", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  application       AccessApplication?
+  reservedHandle    String?            @unique // minted for this Index reservation (051)
+
+  @@index([createdByUserId])
+}
+
+// "Apply for a code" (migration 051), approved by Bawsa in batches.
+model AccessApplication {
+  id         String           @id @default(dbgenerated("(gen_random_uuid())::text"))
+  handle     String           @unique // lowercase, no @
+  email      String
+  note       String?
+  createdAt  DateTime         @default(now()) @db.Timestamptz
+  approvedAt DateTime?        @db.Timestamptz
+  codeId     String?          @unique
+  code       EarlyAccessCode? @relation(fields: [codeId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt(sort: Desc)])
 }
 
 // A message from an early-access tester to Bawsa (also emailed on arrival).

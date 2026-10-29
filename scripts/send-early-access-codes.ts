@@ -86,6 +86,7 @@ async function codeFor(label: string): Promise<string> {
     try {
       await prisma.earlyAccessCode.create({
         data: { code, label, perkIndex: false, perkFoundingPrice: false, perkTester: true },
+        select: { id: true },
       });
       return code;
     } catch (e) {

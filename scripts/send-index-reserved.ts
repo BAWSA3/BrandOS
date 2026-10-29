@@ -3,9 +3,14 @@
  * everyone whose reserved number (migration 045) is still unclaimed and who
  * doesn't have an account yet (members already in get a DM from Bawsa instead).
  *
- * A real send refuses to start unless sign-up is open: INVITE_ONLY off and
- * INDEX_ENABLED "true" in the env it runs with (pull prod's env first), and
- * /index/join answering 200 signed out on APP_URL. "no code needed" has to be true.
+ * A real send refuses to start unless the Index is open (INDEX_ENABLED "true"
+ * in the env it runs with, pull prod's env first; /index/join answering 200
+ * signed out on APP_URL) and sign-up works for everyone it goes to:
+ *  - INVITE_ONLY off: "no code needed" is true as written.
+ *  - INVITE_ONLY on (the invite-only trial, from Nov 2): every recipient needs
+ *    the code minted for their reservation (scripts/invite-codes.ts
+ *    reserve-codes, migration 051), and the rendered email must contain that
+ *    code's link. Until the copy uses `code` / `codeLink`, it refuses.
  *
  * DRY RUN BY DEFAULT: prints the audience and renders a sample into
  * PREVIEW_DIR (default: the OS temp dir). Nothing is sent without --send.
@@ -28,6 +33,7 @@ import { tmpdir } from 'os';
 import { join } from 'path';
 import prisma from '@/lib/db';
 import { inviteOnly } from '@/lib/early-access';
+import { formatCode, inviteLink } from '@/lib/early-access-rules';
 import { indexEnabled } from '@/lib/index-rules';
 import {
   CAMPAIGNS,
@@ -46,9 +52,8 @@ const limit = args.includes('--limit') ? Number(args[args.indexOf('--limit') + 1
 const PREVIEW_DIR = process.env.PREVIEW_DIR || tmpdir();
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://mybrandos.app';
 
-/** The email says "no code needed": stop a list send while that isn't true. */
+/** The Index must be open, and sign-up must work for the people it goes to. */
 async function assertSignupOpen() {
-  if (inviteOnly()) throw new Error('INVITE_ONLY is on: turn it off on prod before the send.');
   if (!indexEnabled()) throw new Error('INDEX_ENABLED is not "true": the Index is closed.');
   const res = await fetch(`${APP_URL}/index/join`, { redirect: 'manual' });
   if (res.status !== 200)
@@ -145,6 +150,19 @@ async function main() {
     codes.filter((c) => !c.perkFoundingPrice).map((c) => bareLabel(c.label))
   );
 
+  // Invite-only (Nov 2): the code minted per reservation (reserve-codes, 051).
+  // Before 051 this read fails; with INVITE_ONLY off it isn't needed.
+  const reservedCodes = await prisma.earlyAccessCode
+    .findMany({
+      where: { reservedHandle: { in: handles }, redeemedAt: null, revokedAt: null },
+      select: { code: true, reservedHandle: true },
+    })
+    .catch((e) => {
+      if (inviteOnly()) throw e;
+      return [] as { code: string; reservedHandle: string | null }[];
+    });
+  const reservedCode = new Map(reservedCodes.map((c) => [c.reservedHandle!, c.code]));
+
   const audience = reservations
     .filter(
       (r) =>
@@ -168,6 +186,12 @@ async function main() {
             : 'none') as 'sent' | 'replied' | 'code' | 'none',
       // Subject A/B split by number parity: stable across re-runs.
       variant: (r.number % 2 === 0 ? 'a' : 'b') as 'a' | 'b',
+      ...(reservedCode.has(r.handle)
+        ? {
+            code: formatCode(reservedCode.get(r.handle)!),
+            codeLink: inviteLink(reservedCode.get(r.handle)!, APP_URL),
+          }
+        : {}),
     }));
   console.log(
     `members left out: ${reservations.filter((r) => !r.claimedAt && emailOf.has(r.emailSignupId!)).length - audience.length} | with a brand read: ${audience.filter((a) => a.read).length} of ${audience.length} | opening sent/replied/code/none: ${['sent', 'replied', 'code', 'none'].map((k) => audience.filter((a) => a.earlyAccess === k).length).join('/')}`
@@ -211,6 +235,23 @@ async function main() {
   console.log(
     `reservations: ${reservations.length} | unclaimed with a subscribed email: ${audience.length} | already sent: ${sentIds.size} | this run: ${pending.length}`
   );
+  // Invite-only: everyone sent to needs their code, and the copy must carry it.
+  if (inviteOnly()) {
+    const missing = pending.filter((r) => !r.codeLink);
+    console.log(`invite-only: ${pending.length - missing.length} of ${pending.length} have a code`);
+    const probe = pending.find((r) => r.codeLink);
+    const carries = probe
+      ? renderIndexReservedEmail(probe, probe.email).html.includes(probe.codeLink!)
+      : false;
+    if (!carries) console.log('invite-only: the email copy does not include the code link yet');
+    if (SEND && (missing.length || !carries)) {
+      throw new Error(
+        missing.length
+          ? `${missing.length} recipients have no code: run scripts/invite-codes.ts reserve-codes first.`
+          : 'INVITE_ONLY is on and the email does not include the code link (r.codeLink): update indexReservedContent / renderIndexReservedEmail first.'
+      );
+    }
+  }
   if (!SEND) {
     console.log('dry run: nothing sent. Add --send to send.');
     return;
