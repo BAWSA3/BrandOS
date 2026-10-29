@@ -192,5 +192,18 @@ test(
   reveal({ ...hook, text: SAMPLE_TEXT.L1 + ' ', typing: true }).score === 1
 );
 
+test(
+  'no punctuation: a pause on 5 words opens the score',
+  reveal({ ...final, text: 'not every post will be a banger', typing: false }).score === 1
+);
+test(
+  'no punctuation: 10+ words opens the score while typing',
+  reveal({ ...final, text: 'i keep writing this one long lowercase line with no full stop at all', typing: true }).score === 1
+);
+test(
+  'no punctuation: 4 words and a pause is still too early',
+  reveal({ ...final, text: 'gm to the builders', typing: false }).score === 0
+);
+
 console.log(`\n${pass} passed, ${fail} failed`);
 if (fail) process.exit(1);
