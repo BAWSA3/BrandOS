@@ -19,6 +19,8 @@ import {
   cleanFeedback,
   codeTrialFrom,
   freeUntilFrom,
+  memberFreeUntil,
+  CODE_TRIAL_START,
   invitesLeft,
   joinHref,
   MEMBER_INVITES,
@@ -151,6 +153,28 @@ console.log('\nG. Invite-only trial (Nov 2): 30 days, apply form, member invites
     'free until = redeemed + 30 days',
     freeUntilFrom(t).toISOString() === '2026-12-02T17:00:00.000Z'
   );
+  {
+    const early = new Date('2026-10-01T00:00:00Z');
+    const late = new Date('2026-11-05T00:00:00Z');
+    const startEnd = '2026-12-02T08:00:00.000Z';
+    check('start = Nov 2 midnight Pacific', CODE_TRIAL_START.toISOString() === '2026-11-02T08:00:00.000Z');
+    check('early account, no code: 30 days from start', memberFreeUntil(null, early)?.toISOString() === startEnd);
+    check('new account, no code: nothing', memberFreeUntil(null, late) === null);
+    check('no account date, no code: nothing', memberFreeUntil(null, null) === null);
+    check(
+      'early account + later code: the later end wins',
+      memberFreeUntil({ redeemedAt: new Date('2026-11-20T00:00:00Z'), revokedAt: null }, early)?.toISOString() ===
+        '2026-12-20T00:00:00.000Z'
+    );
+    check(
+      'early account + earlier code: start end wins',
+      memberFreeUntil({ redeemedAt: new Date('2026-10-28T00:00:00Z'), revokedAt: null }, early)?.toISOString() === startEnd
+    );
+    check(
+      'revoked code: nothing, even for an early account',
+      memberFreeUntil({ redeemedAt: t, revokedAt: t }, early) === null
+    );
+  }
   check('flag: "true" on', codeTrialFrom('true') && codeTrialFrom(' TRUE '));
   check('flag: anything else off', !codeTrialFrom('1') && !codeTrialFrom(undefined) && !codeTrialFrom(''));
   check('join: trial on → /access', joinHref('/dashboard', true) === '/access?next=%2Fdashboard');
