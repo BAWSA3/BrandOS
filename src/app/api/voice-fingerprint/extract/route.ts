@@ -9,6 +9,7 @@ import { getWorkspaceContext } from '@/lib/workspace-auth';
 import { botGuard } from '@/lib/botid-guard';
 import { GUARD_PREAMBLE, wrapUntrusted } from '@/lib/prompt-safety';
 import { extractJson } from '@/lib/score-schemas';
+import { replyText } from '@/lib/model-text';
 
 // Voice fingerprint extraction (consolidation step 5). This was always meant
 // to be a PRO feature but the legacy /app surface rendered it ungated and
@@ -108,7 +109,7 @@ export async function POST(request: NextRequest) {
       messages: [{ role: 'user', content: GUARD_PREAMBLE + prompt }],
     });
 
-    const responseText = message.content[0]?.type === 'text' ? message.content[0].text : '';
+    const responseText = replyText(message);
     const raw = extractJson(responseText);
     if (!isFingerprintShape(raw)) {
       console.error('[Voice Fingerprint] Model output failed validation');

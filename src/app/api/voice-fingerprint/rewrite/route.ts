@@ -6,6 +6,7 @@ import {
   buildAuthenticityRewritePrompt,
   buildAuthenticityCheckPrompt,
 } from '@/prompts/voice-fingerprint';
+import { replyText } from '@/lib/model-text';
 
 export async function POST(request: NextRequest) {
   try {
@@ -67,8 +68,7 @@ export async function POST(request: NextRequest) {
       ],
     });
 
-    const rewriteText =
-      rewriteMessage.content[0].type === 'text' ? rewriteMessage.content[0].text : '';
+    const rewriteText = replyText(rewriteMessage);
 
     const rewriteJson = rewriteText.match(/\{[\s\S]*\}/);
     if (!rewriteJson) {
@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
       ],
     });
 
-    const scoreText = scoreMessage.content[0].type === 'text' ? scoreMessage.content[0].text : '';
+    const scoreText = replyText(scoreMessage);
 
     const scoreJson = scoreText.match(/\{[\s\S]*\}/);
     let newScore: AuthenticityScore | null = null;

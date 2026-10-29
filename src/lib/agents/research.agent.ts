@@ -19,6 +19,7 @@ import {
   ResearchContentBrief,
 } from './research.types';
 import { aggregateFromSources, getAvailableSources } from './sources';
+import { replyText } from '@/lib/model-text';
 
 // ===== PROMPT BUILDERS =====
 
@@ -437,7 +438,7 @@ export async function aggregateTrends(
       ],
     });
 
-    const responseText = message.content[0].type === 'text' ? message.content[0].text : '';
+    const responseText = replyText(message);
 
     const researchBrief = parseResearchBrief(responseText, rawData, verticals);
 
@@ -566,7 +567,7 @@ export async function generateContentBrief(
       ],
     });
 
-    const responseText = message.content[0].type === 'text' ? message.content[0].text : '';
+    const responseText = replyText(message);
 
     const brief = parseContentBrief(responseText, topic, contentType, platform);
 

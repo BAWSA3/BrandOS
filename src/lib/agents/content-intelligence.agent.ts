@@ -3,6 +3,7 @@
 
 import Anthropic from '@anthropic-ai/sdk';
 import prisma from '@/lib/db';
+import { replyText } from '@/lib/model-text';
 
 interface IntelligentContentIdea {
   hook: string;
@@ -181,7 +182,7 @@ Return ONLY valid JSON:
       ],
     });
 
-    const responseText = response.content[0].type === 'text' ? response.content[0].text : '';
+    const responseText = replyText(response);
     const jsonMatch = responseText.match(/\{[\s\S]*\}/);
     if (!jsonMatch) return { ideasGenerated: 0, draftsCreated: 0 };
 

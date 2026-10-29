@@ -11,6 +11,7 @@ import {
   clampTone,
   parseModelJson,
 } from '@/lib/import-extraction';
+import { replyText } from '@/lib/model-text';
 
 // Import Hub — brand-image analysis (consolidation step 7). The legacy route
 // was an unauthenticated mock that picked hex codes based on whether the
@@ -115,7 +116,7 @@ export async function POST(request: NextRequest) {
       ],
     });
 
-    const text = message.content[0]?.type === 'text' ? message.content[0].text : '';
+    const text = replyText(message);
     const raw = parseModelJson(text);
     if (!raw) {
       return NextResponse.json(

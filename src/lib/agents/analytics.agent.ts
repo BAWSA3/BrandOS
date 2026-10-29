@@ -12,6 +12,7 @@ import {
   GoalAchievement,
   ChannelPerformance,
 } from './types';
+import { replyText } from '@/lib/model-text';
 
 // Platform benchmarks for context
 interface PlatformBenchmarks {
@@ -313,7 +314,7 @@ export async function analyzePerformance(
       ],
     });
 
-    const responseText = message.content[0].type === 'text' ? message.content[0].text : '';
+    const responseText = replyText(message);
 
     const report = parseAnalyticsReport(responseText);
 
@@ -422,7 +423,7 @@ Return ONLY valid JSON:
       ],
     });
 
-    const responseText = message.content[0].type === 'text' ? message.content[0].text : '';
+    const responseText = replyText(message);
 
     const jsonMatch = responseText.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
@@ -545,7 +546,7 @@ Return ONLY valid JSON:
       ],
     });
 
-    const responseText = message.content[0].type === 'text' ? message.content[0].text : '';
+    const responseText = replyText(message);
 
     const jsonMatch = responseText.match(/\{[\s\S]*\}/);
     const aiInsights = jsonMatch

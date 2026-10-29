@@ -3,6 +3,7 @@ import { buildCheckPrompt } from '@/prompts/brand-guardian';
 import type { BrandDNA } from '@/lib/types';
 import { GUARD_PREAMBLE, wrapUntrusted } from '@/lib/prompt-safety';
 import { clampScore, extractJson } from '@/lib/score-schemas';
+import { replyText } from '@/lib/model-text';
 
 // Content Check core: score a draft against a brand. Shared by POST /api/check
 // (dashboard) and the BrandOS MCP check_draft tool. Callers own auth, usage
@@ -73,6 +74,6 @@ export async function runBrandCheck(
       { role: 'user', content: GUARD_PREAMBLE + buildCheckPrompt(brandDNA, fencedContent) },
     ],
   });
-  const text = message.content[0]?.type === 'text' ? message.content[0].text : '';
+  const text = replyText(message);
   return parseCheckResult(text);
 }

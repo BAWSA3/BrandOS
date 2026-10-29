@@ -4,6 +4,7 @@ import { fetchUserTweets, type SocialDataTweet } from '@/lib/socialdata';
 import { GUARD_PREAMBLE, wrapUntrusted } from '@/lib/prompt-safety';
 import { clampScore, extractJson } from '@/lib/score-schemas';
 import { getArchetypeInfo } from '@/lib/archetype-descriptions';
+import { replyText } from '@/lib/model-text';
 
 /**
  * Server-only. Scores a signed-in user's latest original X posts for brand fit
@@ -211,7 +212,7 @@ export async function scoreTweets(input: {
     inputTokens: message.usage.input_tokens,
     outputTokens: message.usage.output_tokens,
   });
-  const text = message.content[0]?.type === 'text' ? message.content[0].text : '';
+  const text = replyText(message);
   return parse(text, new Set(input.targets.map((t) => t.id)));
 }
 

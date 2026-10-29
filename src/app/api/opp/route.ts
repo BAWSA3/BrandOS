@@ -4,6 +4,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import { buildOppRoastPrompt, OppRoastResult } from '@/prompts/opp-roast';
 import supabase from '@/lib/supabase';
 import type { MutualInteractionResult } from '@/lib/interaction-scanner';
+import { replyText } from '@/lib/model-text';
 
 interface ProfileData {
   name: string;
@@ -110,7 +111,7 @@ async function generateRoast(
     messages: [{ role: 'user', content: prompt }],
   });
 
-  const text = message.content[0].type === 'text' ? message.content[0].text : '';
+  const text = replyText(message);
   const jsonMatch = text.match(/\{[\s\S]*\}/);
   if (!jsonMatch) throw new Error('Failed to parse roast response');
 

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { checkRateLimit, getClientIdentifier, rateLimiters } from '@/lib/rate-limit';
 import Anthropic from '@anthropic-ai/sdk';
 import supabase from '@/lib/supabase';
+import { replyText } from '@/lib/model-text';
 
 /**
  * "Beat My Opp" — email capture + instant preview + async detailed report.
@@ -101,7 +102,7 @@ Example: ["Pin your niche in your bio — your DEFINE score is 12 points behind.
       ],
     });
 
-    const text = message.content[0].type === 'text' ? message.content[0].text : '';
+    const text = replyText(message);
     const parsed = JSON.parse(text);
     if (Array.isArray(parsed) && parsed.length >= 3) return parsed.slice(0, 3);
     return getDefaultQuickWins(body);
@@ -184,7 +185,7 @@ Keep the spy/mission briefing tone. Be specific and actionable, not generic.`,
     ],
   });
 
-  const reportText = message.content[0].type === 'text' ? message.content[0].text : '';
+  const reportText = replyText(message);
 
   // Send via Resend
   const fromEmail = process.env.FROM_EMAIL || 'BrandOS <onboarding@resend.dev>';

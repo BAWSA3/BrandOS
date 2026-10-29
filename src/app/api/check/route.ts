@@ -14,6 +14,7 @@ import {
   fenceDraft,
   runBrandCheck,
 } from '@/lib/content-check';
+import { replyText } from '@/lib/model-text';
 
 // Content Check — scores a draft against the user's brand DNA (consolidation
 // step 4). Hardened for the dashboard surface: the legacy route allowed
@@ -126,7 +127,7 @@ export async function POST(request: NextRequest) {
 
     let authenticityScore: AuthenticityScore | null = null;
     if (authMessage) {
-      const authText = authMessage.content[0]?.type === 'text' ? authMessage.content[0].text : '';
+      const authText = replyText(authMessage);
       const parsed = extractJson(authText);
       // Minimal shape gate — non-blocking feature, but never forward
       // unvalidated model output.
