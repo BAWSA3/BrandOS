@@ -252,16 +252,16 @@ Tomorrow's two posts:
 
 ## What gets built, and when
 
-| By      | What                                                                             | Who         |
-| ------- | -------------------------------------------------------------------------------- | ----------- |
-| Oct 25  | Index MVP: table (044), join flow, `/index`, share card, "Join the Index" CTAs   | Claude      |
-| Oct 27  | Pro perks: Featured, full profile, profile-view counts                           | Claude      |
-| Oct 27  | Past brand deals: `IndexDeal` (046), API, optional step after joining            | Claude      |
-| Oct 28  | Live payment check; X crypto paid-partnership rule check                         | 👤          |
-| Oct 29  | Promote to prod with the Index behind a flag; "run 044" (+ 045, 046) on both DBs | 👤 + Claude |
-| Nov 1   | Preflight; Index switched on for the early-number list                           | Claude      |
-| Nov 2   | Index public                                                                     | –           |
-| Nov 5   | Brand view: read-only Index access for invited brands (moved from Nov 8)         | Claude      |
-| Nov 12  | Brand confirms a past deal (one-time link from the creator)                      | Claude      |
-| Sundays | `/market-research competitors`: what changed (Creator Connect, Kaito, Favikon)   | Claude      |
-| Nov 9   | Verified badge                                                                   | Claude      |
+| By      | What                                                                                                                                       | Who         |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ----------- |
+| Oct 25  | Index MVP: table (044), join flow, `/index`, share card, "Join the Index" CTAs                                                             | Claude      |
+| Oct 27  | Pro perks: Featured, full profile, profile-view counts                                                                                     | Claude      |
+| Oct 27  | Past brand deals: `IndexDeal` (046), API, optional step after joining                                                                      | Claude      |
+| Oct 28  | Live payment check; X crypto paid-partnership rule check                                                                                   | 👤          |
+| Oct 29  | Promote to prod with the Index behind a flag; "run 044" (+ 045, 046) on both DBs                                                           | 👤 + Claude |
+| Nov 1   | Preflight; Index switched on for the early-number list                                                                                     | Claude      |
+| Nov 2   | Index public                                                                                                                               | –           |
+| Nov 5   | Brand view: read-only Index access for invited brands (moved from Nov 8)                                                                   | Claude      |
+| Nov 12  | Brand confirms a past deal (one-time link from the creator)                                                                                | Claude      |
+| Sundays | `/market-research competitors`: what changed (Creator Connect, Kaito, Favikon, Creator Wire: public directory? creator self-view? prices?) | Claude      |
+| Nov 9   | Verified badge                                                                                                                             | Claude      |
