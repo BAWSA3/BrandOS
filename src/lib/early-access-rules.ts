@@ -56,6 +56,31 @@ export function freeUntilFrom(redeemedAt: Date): Date {
 }
 
 /**
+ * When the invite-only trial starts (the Nov 2 launch, midnight Pacific).
+ * Accounts made before it, with no code, get the same CODE_TRIAL_DAYS from
+ * this moment (Bawsa, Oct 28) so nobody who signed up early is paywalled.
+ */
+export const CODE_TRIAL_START = new Date('2026-11-02T08:00:00Z');
+
+/**
+ * Free access end for a member: the later of their code's 30 days and, for an
+ * account made before CODE_TRIAL_START, 30 days from the start. Null when
+ * neither applies. A revoked code gives nothing (and cancels the early-account
+ * days too: revoking is deliberate).
+ */
+export function memberFreeUntil(
+  code: { redeemedAt: Date | null; revokedAt: Date | null } | null,
+  accountCreatedAt: Date | null
+): Date | null {
+  if (code?.revokedAt) return null;
+  const fromCode = code?.redeemedAt ? freeUntilFrom(code.redeemedAt) : null;
+  const early =
+    accountCreatedAt && accountCreatedAt < CODE_TRIAL_START ? freeUntilFrom(CODE_TRIAL_START) : null;
+  if (fromCode && early) return fromCode > early ? fromCode : early;
+  return fromCode ?? early;
+}
+
+/**
  * Where "continue / save it to your dashboard" goes from a public page. In the
  * invite-only trial that's the get-a-code step (/access), which also has the
  * sign-in for people who already have an account.
