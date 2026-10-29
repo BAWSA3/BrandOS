@@ -5,6 +5,8 @@ import type { TweetData, TweetAnalysisStats, ContentPatterns } from '@/lib/gemin
 export interface ScoringTweets {
   tweets: TweetData[];
   rawTweets: { id: string; text: string; created_at: string }[];
+  /** The posts exactly as /api/x-tweets returned them (the homepage reuses these). */
+  source: unknown[];
   stats: TweetAnalysisStats;
   contentPatterns: ContentPatterns;
 }
@@ -69,6 +71,7 @@ export async function fetchScoringTweets(
         text: t.text,
         created_at: t.created_at,
       })),
+      source: data.tweets,
       stats: data.analysis.stats,
       contentPatterns: data.analysis.contentPatterns,
     };

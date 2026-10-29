@@ -98,6 +98,8 @@ export async function fetchProfile(username: string, origin: string): Promise<XP
 export interface BrandScoreResult {
   status: number;
   body: Record<string, unknown>;
+  /** The posts this read was scored from, when it fetched them (not on a cache hit). */
+  tweets?: unknown[];
 }
 
 const respond = (body: Record<string, unknown>, init?: { status: number }): BrandScoreResult => ({
@@ -300,7 +302,7 @@ export async function computeBrandScore(
     }).catch((err) => console.error('Scan tracking error:', err))
   );
 
-  return respond({
+  const scored = respond({
     profile,
     brandScore,
     meta: {
@@ -319,4 +321,5 @@ export async function computeBrandScore(
         : undefined,
     },
   });
+  return tweetData ? { ...scored, tweets: tweetData.source } : scored;
 }
