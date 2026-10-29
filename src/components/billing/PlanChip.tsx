@@ -33,6 +33,8 @@ export default function PlanChip({
   v2?: boolean;
 }) {
   const [busy, setBusy] = useState(false);
+  // why the click didn't open Stripe, in plain words (never a silent reset)
+  const [note, setNote] = useState<string | null>(null);
   // trial days left, computed after mount (the clock isn't read during render)
   const [days, setDays] = useState<number | null>(null);
   const endsAt = plan.kind === 'trial' ? plan.endsAt : null;
@@ -54,6 +56,7 @@ export default function PlanChip({
       return;
     }
     setBusy(true);
+    setNote(null);
     try {
       const res = await fetch(
         plan.kind === 'open' ? '/api/stripe/checkout' : '/api/stripe/portal',
@@ -64,9 +67,15 @@ export default function PlanChip({
         }
       );
       const body = (await res.json().catch(() => ({}))) as { url?: string };
-      if (body.url) window.location.href = body.url;
-      else setBusy(false);
+      if (body.url) {
+        window.location.href = body.url;
+        return;
+      }
+      console.error('[billing] checkout did not open', res.status);
+      setNote(failureNote(res.status));
+      setBusy(false);
     } catch {
+      setNote(failureNote(0));
       setBusy(false);
     }
   };
@@ -127,13 +136,34 @@ export default function PlanChip({
       {busy ? (plan.kind === 'open' ? 'Opening checkout…' : 'Opening…') : label}
     </button>
   );
-  if (!terms) return chip;
+  const noteEl = note ? (
+    <p
+      role="status"
+      className={v2 ? 'px-1 text-[12px] leading-snug' : 'mt-1 text-[11px] leading-snug'}
+      style={{ color: v2 ? 'var(--v-head)' : onCanvas ? 'var(--d-head)' : 'var(--d-muted)' }}
+    >
+      {note}
+    </p>
+  ) : null;
+  if (!terms && !noteEl) return chip;
   return (
     <div className="flex flex-col gap-1.5">
       {chip}
-      <p className="px-1 text-[11px] leading-snug" style={{ color: 'var(--v-head-muted)' }}>
-        {terms}
-      </p>
+      {noteEl}
+      {terms && (
+        <p className="px-1 text-[11px] leading-snug" style={{ color: 'var(--v-head-muted)' }}>
+          {terms}
+        </p>
+      )}
     </div>
   );
+}
+
+/** What to tell someone whose click didn't reach Stripe. */
+function failureNote(status: number): string {
+  if (status === 401) return 'Your session ended. Sign in again, then try once more.';
+  if (status === 403) return "We couldn't check your browser. Refresh the page and try again.";
+  if (status === 503) return "Checkout isn't open right now. Try again in a little while.";
+  if (status === 0) return 'No connection. Check your internet and try again.';
+  return "Checkout didn't open. Try again in a minute; nothing was charged.";
 }
