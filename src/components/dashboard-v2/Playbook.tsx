@@ -9,6 +9,8 @@ import { workLine } from '@/lib/playbook';
 import { recordDate } from '@/lib/classifications';
 import { ButtonLink, DISPLAY, Label, Panel, VCR } from './ui';
 import InfoTip, { TIPS } from './InfoTip';
+import PeopleToKnow from './PeopleToKnow';
+import type { PeopleState } from '@/lib/people-to-know';
 
 /**
  * The Playbook (dashboard v2, slice 2): the brand's living page, read-only
@@ -43,6 +45,8 @@ export interface PlaybookData {
   } | null;
   weeks: WeekOfWork[];
   links: { brand: string; board: string; write: string; doMore: string | null };
+  /** People to know (053): shown when the member has the gap; `sample` = preview data, no fetch */
+  people: { show: boolean; sample?: PeopleState | { state: 'loading' } };
 }
 
 function FromRead() {
@@ -402,6 +406,8 @@ export default function Playbook({ data }: { data: PlaybookData }) {
             </div>
           </Section>
         )}
+
+        {d.people.show && <PeopleToKnow initial={d.people.sample} />}
 
         {d.working.length > 0 && (
           <Panel className="grid grid-cols-1 gap-8 p-6 md:col-span-2 md:grid-cols-2 md:p-8">

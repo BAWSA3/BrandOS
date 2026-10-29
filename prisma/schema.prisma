@@ -170,6 +170,7 @@ model User {
   testerFeedback       TesterFeedback[] // early-access feedback to Bawsa (migration 049)
   indexViews           IndexView[] // Index members' pages this user viewed (migration 044)
   indexReservations    IndexReservation[] // reserved Index numbers this user claimed (migration 045)
+  peopleToKnow         PersonToKnow[] // Playbook "People to know" picks (migration 053)
 
   @@index([xUsername])
   @@index([stripeCustomerId])
@@ -1354,14 +1355,14 @@ model FoundingMember {
 
 // Per-account display settings (migration 036): the dashboard colorway.
 model UserPreference {
-  userId            String   @id
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  dashboardColorway String   @default("bone")
+  userId            String    @id
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dashboardColorway String    @default("bone")
   /// first-run walkthrough finished or skipped (migration 052); null = show it
   walkthroughDoneAt DateTime? @db.Timestamptz
   /// "Which one are you?": creator | founder | builder (migration 052)
   persona           String?
-  updatedAt         DateTime @default(now()) @updatedAt @db.Timestamptz
+  updatedAt         DateTime  @default(now()) @updatedAt @db.Timestamptz
 }
 
 // Studio idea board (migration 035): post ideas built on a "Next time" suggestion.
@@ -1606,4 +1607,27 @@ model TesterFeedback {
   createdAt DateTime @default(now()) @db.Timestamptz
 
   @@index([userId, createdAt(sort: Desc)])
+}
+
+// "People to know" (migration 053): 3 niche creators a member should reach out
+// to, one list per week. messagedAt is the member's own tick.
+model PersonToKnow {
+  id            String    @id @default(dbgenerated("(gen_random_uuid())::text"))
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  weekOf        DateTime  @db.Date
+  handle        String // lowercase
+  displayHandle String
+  name          String?
+  avatarUrl     String?
+  followers     Int       @default(0)
+  tier          String // 'peer' | 'bigger'
+  why           String
+  dm            String
+  messagedAt    DateTime? @db.Timestamptz
+  createdAt     DateTime  @default(now()) @db.Timestamptz
+
+  @@unique([userId, weekOf, handle])
+  @@index([userId, weekOf])
+  @@index([userId, handle])
 }

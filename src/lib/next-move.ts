@@ -26,11 +26,13 @@ export interface MoveInput {
   } | null;
   /** The brand's idea board, newest first (status: saved | drafting | posted). */
   ideas: { id: string; text: string; status: string }[];
+  /** People to know (053): set when few known accounts engage or Scale is weakest. */
+  connect?: { reason: 'engagers' | 'scale' | 'both'; knownEngagers: number } | null;
 }
 
 export interface Move {
   id: string;
-  kind: 'build' | 'finish' | 'fix' | 'phase';
+  kind: 'connect' | 'build' | 'finish' | 'fix' | 'phase';
   title: string;
   why: string;
   stat: { value: number; suffix: string; label: string } | null;
@@ -81,6 +83,30 @@ export function nextMoves(
 ): Move[] {
   const out: Move[] = [];
   const voice = voiceFor(persona, founderFor);
+
+  // 0. Meet the people in your niche (the gap is people, not posts)
+  if (input.connect) {
+    const c = input.connect;
+    out.push({
+      id: 'connect',
+      kind: 'connect',
+      title: 'Reach out to 3 people in your niche this week.',
+      why:
+        c.reason === 'scale'
+          ? "Scale is your weakest phase: the right people don't know you yet. We picked people in your niche, with a first message for each."
+          : 'Few known accounts engage with your posts yet. We picked people in your niche, with a first message for each.',
+      stat:
+        c.reason === 'scale'
+          ? null
+          : {
+              value: c.knownEngagers,
+              suffix: '',
+              label: `known account${c.knownEngagers === 1 ? '' : 's'} engaging, 30 days`,
+            },
+      source: 'From your record / who engages with you',
+      action: { label: 'See who', href: '/dashboard?view=playbook#people' },
+    });
+  }
 
   // 1. Build on the post that travelled furthest
   if (input.outlier && input.outlier.multiple >= 5) {

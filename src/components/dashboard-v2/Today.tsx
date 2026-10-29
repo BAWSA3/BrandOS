@@ -156,7 +156,8 @@ export default function Today({
       ? laterRaw.slice(day.length + 1)
       : null;
   const order = useMemo(() => {
-    const start = pickIndex(moves.length, day);
+    // People to know leads while the member has the gap; otherwise the day's pick
+    const start = moves[0]?.kind === 'connect' ? 0 : pickIndex(moves.length, day);
     const rotated = [...moves.slice(start), ...moves.slice(0, start)];
     return laterId
       ? [...rotated.filter((m) => m.id !== laterId), ...rotated.filter((m) => m.id === laterId)]

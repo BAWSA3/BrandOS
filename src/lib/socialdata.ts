@@ -615,3 +615,64 @@ export async function fetchEngagerAccounts(
   ].filter((a): a is XAccount => !!a && a.handle.toLowerCase() !== self);
   return { accounts, failed };
 }
+
+// ---------------------------------------------------------------------------
+// People to know (migration 053): niche creators a member could reach out to
+// ---------------------------------------------------------------------------
+
+export interface NicheAccount extends XAccount {
+  /** X says this account accepts DMs from anyone. */
+  canDm: boolean;
+  avatarUrl: string | null;
+}
+
+function nicheAccount(u: Record<string, unknown> | undefined): NicheAccount | null {
+  const a = xAccount(u);
+  if (!a) return null;
+  const avatar = String(u?.profile_image_url_https ?? '');
+  return {
+    ...a,
+    canDm: u?.can_dm === true,
+    avatarUrl: avatar.startsWith('https://pbs.twimg.com/')
+      ? avatar.replace('_normal', '_200x200')
+      : null,
+  };
+}
+
+/** X's "similar accounts" for a user id (about 10). [] on any failure. */
+export async function fetchSimilarAccounts(userId: string): Promise<NicheAccount[]> {
+  if (!/^\d{1,25}$/.test(userId)) return [];
+  try {
+    const res = await socialDataFetch(`/twitter/user/${userId}/similar`);
+    console.log(`[SOCIALDATA] similar ${userId} -> ${res.status}`);
+    if (!res.ok) return [];
+    const data = (await res.json()) as { users?: Record<string, unknown>[] };
+    return (data.users ?? []).map(nicheAccount).filter((a): a is NicheAccount => !!a);
+  } catch (error) {
+    console.error('[SOCIALDATA] similar error:', error);
+    return [];
+  }
+}
+
+/** Authors of the top recent posts for a search query (original posts only). [] on failure. */
+export async function fetchSearchAuthors(query: string): Promise<NicheAccount[]> {
+  try {
+    const params = new URLSearchParams({ query, type: 'Top' });
+    const res = await socialDataFetch(`/twitter/search?${params}`);
+    console.log(`[SOCIALDATA] search authors "${query.slice(0, 40)}" -> ${res.status}`);
+    if (!res.ok) return [];
+    const data = (await res.json()) as { tweets?: Record<string, unknown>[] };
+    const seen = new Set<string>();
+    const out: NicheAccount[] = [];
+    for (const t of data.tweets ?? []) {
+      const a = nicheAccount(t.user as Record<string, unknown> | undefined);
+      if (!a || seen.has(a.handle.toLowerCase())) continue;
+      seen.add(a.handle.toLowerCase());
+      out.push(a);
+    }
+    return out;
+  } catch (error) {
+    console.error('[SOCIALDATA] search authors error:', error);
+    return [];
+  }
+}
