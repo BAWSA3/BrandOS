@@ -101,7 +101,7 @@ function fromTweet(t: SocialDataTweet): PostRow {
 }
 
 /** Which brand the draft is for: a tracked brand in their workspace, else their own X account. */
-async function resolveBrand(userId: string, workspaceId: string | null, accountId?: string) {
+export async function resolveBrand(userId: string, workspaceId: string | null, accountId?: string) {
   const x = await prisma.platformConnection.findFirst({
     where: { userId, platform: 'x', status: 'active' },
     select: { platformUserId: true, platformUsername: true },
@@ -138,7 +138,7 @@ async function resolveBrand(userId: string, workspaceId: string | null, accountI
 }
 
 /** Their recent original posts: stored first (free), SocialData only as a last resort. */
-async function loadHistory(
+export async function loadHistory(
   userId: string,
   brand: Awaited<ReturnType<typeof resolveBrand>>
 ): Promise<PostRow[]> {
@@ -193,7 +193,7 @@ async function loadHistory(
 }
 
 /** The brand read a draft is judged against. */
-async function loadBrandRead(userId: string, handle: string, own: boolean) {
+export async function loadBrandRead(userId: string, handle: string, own: boolean) {
   if (own) {
     const b = await brandForUser(userId);
     if (b.archetype || b.summary) return b;

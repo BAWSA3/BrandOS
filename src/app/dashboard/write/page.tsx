@@ -65,6 +65,9 @@ export default async function WritePage({
           initialFormat={roomFormat(sp.mode)}
           boardIdeas={boardIdeas}
           topPosts={topPosts}
+          brands={brands}
+          // the live composer (docs/LIVE-COMPOSER-SPEC.md): off until LIVE_COMPOSER=1
+          live={process.env.LIVE_COMPOSER === '1'}
         />
       </Shell>
     );
