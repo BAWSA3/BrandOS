@@ -13,7 +13,7 @@ import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { AnimateNumber } from 'motion-plus/react';
 import { segments, type Lens, type Mark } from '@/lib/live-marks';
 import { reveal, type Reveal } from './reveal';
-import type { LiveState, Variant } from './types';
+import type { LiveState } from './types';
 
 /**
  * The live composer's presentation: the marked draft plus the four surfaces
@@ -167,13 +167,11 @@ function Micro({ children, tone = 'muted' }: { children: ReactNode; tone?: 'mute
 /** A surface that eases in and out with opacity + a short rise (no layout). */
 function Surface({
   o,
-  delay = 0,
   children,
   className = '',
   x = 0,
 }: {
   o: number;
-  delay?: number;
   children: ReactNode;
   className?: string;
   x?: number;
@@ -183,8 +181,15 @@ function Surface({
     <motion.div
       className={className}
       initial={false}
+      // layout="position": when a surface above grows (a new note), this one
+      // glides down on a transform instead of jumping
+      layout={reduce ? false : 'position'}
       animate={{ opacity: o, y: o > 0.5 || reduce ? 0 : 6, x: o > 0.5 || reduce ? 0 : x }}
-      transition={reduce ? { duration: 0 } : { duration: 0.5, ease: EASE, delay }}
+      transition={
+        reduce
+          ? { duration: 0 }
+          : { duration: 0.5, ease: EASE, layout: { duration: 0.4, ease: EASE } }
+      }
       style={{ pointerEvents: o > 0.5 ? 'auto' : 'none', willChange: 'opacity, transform' }}
       aria-hidden={o < 0.5}
     >
@@ -200,11 +205,12 @@ function ScoreTile({ s, r, compact }: { s: LiveState; r: Reveal; compact?: boole
   const [shown, setShown] = useState(() => (reduce && r.score >= 0.5 ? (s.score ?? 0) : 0));
   useEffect(() => {
     if (s.score === null || r.score < 0.5) return;
-    const t = setTimeout(() => setShown(s.score ?? 0), reduce ? 0 : r.delay.score * 1000);
-    return () => clearTimeout(t);
-  }, [s.score, r.score, r.delay.score, reduce]);
+    // next frame, so the roll starts from what's on screen
+    const t = requestAnimationFrame(() => setShown(s.score ?? 0));
+    return () => cancelAnimationFrame(t);
+  }, [s.score, r.score]);
   return (
-    <Surface o={r.score} delay={r.delay.score}>
+    <Surface o={r.score}>
       <div className={compact ? 'flex items-baseline gap-2' : ''}>
         <Micro tone={s.reading ? 'signal' : 'muted'}>{s.reading ? 'Reading…' : 'On-brand'}</Micro>
         <div
@@ -235,7 +241,7 @@ function Playbook({ s, r }: { s: LiveState; r: Reveal }) {
   const reduce = useCalm();
   if (!s.pillars.length) return null;
   return (
-    <Surface o={r.playbook} delay={r.delay.playbook}>
+    <Surface o={r.playbook}>
       <Micro>Your playbook</Micro>
       <ul className="mt-2 space-y-1.5">
         {s.pillars.map((p, i) => {
@@ -261,7 +267,7 @@ function Playbook({ s, r }: { s: LiveState; r: Reveal }) {
 
 function Proof({ s, r }: { s: LiveState; r: Reveal }) {
   return (
-    <Surface o={s.proof ? r.proof : 0} delay={r.delay.proof} x={14}>
+    <Surface o={s.proof ? r.proof : 0} x={14}>
       {s.proof && (
         <div
           className="rounded-[14px] p-4"
@@ -281,7 +287,7 @@ function Proof({ s, r }: { s: LiveState; r: Reveal }) {
 
 function Idea({ s, r, href }: { s: LiveState; r: Reveal; href?: (id: string) => string }) {
   return (
-    <Surface o={s.idea ? r.idea : 0} delay={r.delay.idea} x={14}>
+    <Surface o={s.idea ? r.idea : 0} x={14}>
       {s.idea && (
         <div>
           <Micro>From your board</Micro>
@@ -318,7 +324,7 @@ function Notes({
   const lenses: Lens[] = s.landingReady ? ['voice', 'lane', 'landing'] : ['voice', 'lane'];
   const anyOn = lenses.some((l) => r.marks[l] > 0);
   return (
-    <Surface o={anyOn ? 1 : 0} delay={r.delay.marks}>
+    <Surface o={anyOn ? 1 : 0}>
       <div className="flex flex-wrap gap-x-4 gap-y-1">
         {lenses.map((l) => (
           <span
@@ -376,7 +382,6 @@ function Notes({
 
 export default function LiveComposerView({
   state,
-  variant,
   onChange,
   caret,
   placeholder = 'Half-formed is fine.',
@@ -386,7 +391,6 @@ export default function LiveComposerView({
   instant = false,
 }: {
   state: LiveState;
-  variant: Variant;
   /** Editable draft; omit for scripted playback. */
   onChange?: (v: string) => void;
   caret?: boolean;
@@ -400,7 +404,7 @@ export default function LiveComposerView({
   instant?: boolean;
 }) {
   const [active, setActive] = useState<string | null>(null);
-  const r = reveal(variant, state);
+  const r = reveal(state);
   const markOp = r.marks;
   return (
     <Instant.Provider value={instant}>

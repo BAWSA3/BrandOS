@@ -11,7 +11,6 @@ import { FormatSwitch, ReadingDock, useNote } from './room';
 import { Btn, DISPLAY, Label, Panel, VCR } from './ui';
 import LiveComposerView from '@/components/live-composer/LiveComposerView';
 import { useLiveComposer } from '@/components/live-composer/useLiveComposer';
-import type { Variant } from '@/components/live-composer/types';
 import { trackBetaEvent } from '@/lib/analytics';
 
 /**
@@ -68,7 +67,6 @@ export default function WritingRoom({
   topPosts = [],
   brands = [],
   live = false,
-  liveVariant = 'a',
   demo,
 }: {
   /** the move or idea this room opened on (from ?prompt=), or null */
@@ -85,8 +83,6 @@ export default function WritingRoom({
   brands?: { id: string; handle: string }[];
   /** live composer (LIVE_COMPOSER): marks while typing instead of paste-and-check */
   live?: boolean;
-  /** reveal variant until Bawsa picks one (docs/LIVE-COMPOSER-SPEC.md) */
-  liveVariant?: Variant;
   /** preview harness only: answer with these instead of calling the routes */
   demo?: { score: DraftScoreResult; options: string } & Partial<ArticleDemo>;
 }) {
@@ -117,7 +113,6 @@ export default function WritingRoom({
       onFormat={setFormat}
       demo={demo}
       live={live && !demo}
-      liveVariant={liveVariant}
       brands={brands}
       ideas={boardIdeas}
     />
@@ -132,7 +127,6 @@ function PostRoom({
   onFormat,
   demo,
   live = false,
-  liveVariant = 'a',
   brands = [],
   ideas = [],
 }: {
@@ -143,7 +137,6 @@ function PostRoom({
   onFormat: (f: RoomFormat) => void;
   demo?: { score: DraftScoreResult; options: string };
   live?: boolean;
-  liveVariant?: Variant;
   brands?: { id: string; handle: string }[];
   ideas?: { id: string; text: string }[];
 }) {
@@ -295,7 +288,6 @@ function PostRoom({
             <div className="mt-6 md:mt-8">
               <LiveComposerView
                 state={liveState}
-                variant={liveVariant}
                 onChange={setText}
                 placeholder={
                   idea ? 'Start here. BrandOS reads as you write.' : 'Half-formed is fine.'

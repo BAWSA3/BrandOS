@@ -1,5 +1,5 @@
 /**
- * Live composer marks (src/lib/live-marks.ts), the reveal variants and the
+ * Live composer marks (src/lib/live-marks.ts), the milestone reveal and the
  * scripted film. Pure: no DB, no network, no model calls.  npm run test:live-marks
  */
 import {
@@ -163,20 +163,34 @@ test(
 const thin = demoStateAt(THIN_SCRIPT, settledAt(THIN_SCRIPT, L1 + L2 + L3));
 test('thin: no proof, no landing', thin.proof === null && !thin.landingReady);
 
-console.log('reveal');
-const typing = { ...final, typing: true };
-test('a: all on at the end', reveal('a', final).score === 1 && reveal('a', final).proof === 1);
+console.log('reveal (milestones)');
 test(
-  'a: nothing before the first sentence',
-  reveal('a', { ...final, text: 'i asked' }).score === 0
+  'all on at the end',
+  reveal(final).score === 1 && reveal(final).proof === 1 && reveal(final).playbookLit
 );
 test(
-  'b: faint early',
-  reveal('b', { ...final, text: 'i asked' }).score < 1 &&
-    reveal('b', { ...final, text: 'i asked' }).score > 0
+  'nothing while typing the first words',
+  reveal({ ...final, text: 'i asked', typing: true }).marks.voice === 0
 );
-test('c: hidden while typing', reveal('c', typing).score === 0);
-test('c: staggered on pause', reveal('c', final).delay.idea > reveal('c', final).delay.score);
+test(
+  'a pause after 3 words opens voice',
+  reveal({ ...final, text: 'Excited to announce', typing: false }).marks.voice === 1
+);
+const hook = demoStateAt(SAMPLE_SCRIPT, settledAt(SAMPLE_SCRIPT, L1));
+test(
+  'hook: score + lane on, landing + proof still closed',
+  reveal(hook).score === 1 &&
+    reveal(hook).marks.lane === 1 &&
+    reveal(hook).marks.landing === 0 &&
+    reveal(hook).proof === 0,
+  reveal(hook)
+);
+test('playbook line lights only with enough text', !reveal(hook).playbookLit);
+
+test(
+  'hook stays done through the space after the period',
+  reveal({ ...hook, text: SAMPLE_TEXT.L1 + ' ', typing: true }).score === 1
+);
 
 console.log(`\n${pass} passed, ${fail} failed`);
 if (fail) process.exit(1);

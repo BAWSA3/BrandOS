@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import LiveComposerView from '@/components/live-composer/LiveComposerView';
 import {
   demoStateAt,
+  filmLength,
   SAMPLE_SCRIPT,
   SAMPLE_TEXT,
   scriptedState,
@@ -11,7 +12,7 @@ import {
   THIN_SCRIPT,
   type DemoScript,
 } from '@/components/live-composer/demo';
-import type { LiveState, Variant } from '@/components/live-composer/types';
+import type { LiveState } from '@/components/live-composer/types';
 import { useDemoComposer } from '@/components/live-composer/useLiveComposer';
 
 const { L1, L2, L3, HONEST } = SAMPLE_TEXT;
@@ -42,23 +43,21 @@ function still(state: string): { script: DemoScript; t: number | 'typing'; error
   }
 }
 
-function Still({ state, variant }: { state: string; variant: Variant }) {
+function Still({ state }: { state: string }) {
   const s = useMemo<LiveState>(() => {
     const f = still(state);
     if (f.t === 'typing') {
-      // mid-sentence, keys still going: what variant c hides and b shows faintly
+      // mid-sentence, keys still going
       const t = settledAt(SAMPLE_SCRIPT, L1) + 2600;
       return demoStateAt(SAMPLE_SCRIPT, t);
     }
     return { ...demoStateAt(f.script, f.t), error: f.error ?? null };
   }, [state]);
-  return (
-    <Frame state={s} variant={variant} caret={state !== 'empty'} smm={state === 'smm'} instant />
-  );
+  return <Frame state={s} caret={state !== 'empty'} smm={state === 'smm'} instant />;
 }
 
 // ?state=live: type for real; marks from the sample profile, reads from the script
-function Live({ variant }: { variant: Variant }) {
+function Live() {
   const [text, setText] = useState('');
   const [typing, setTyping] = useState(false);
   useEffect(() => {
@@ -69,7 +68,6 @@ function Live({ variant }: { variant: Variant }) {
   return (
     <LiveComposerView
       state={s}
-      variant={variant}
       onChange={(v) => {
         setTyping(true);
         setText(v);
@@ -79,20 +77,26 @@ function Live({ variant }: { variant: Variant }) {
   );
 }
 
-function Demo({ variant }: { variant: Variant }) {
+const LOOP_MS = filmLength(SAMPLE_SCRIPT);
+
+function Demo() {
   const s = useDemoComposer(SAMPLE_SCRIPT, { loop: true });
-  return <Frame state={s} variant={variant} caret />;
+  // fade out at the end of each loop and back in, so the restart never cuts
+  return (
+    <div style={{ animation: `lc-loop ${LOOP_MS}ms linear infinite` }}>
+      <style>{`@keyframes lc-loop{0%{opacity:0}1.5%{opacity:1}98%{opacity:1}100%{opacity:0}}@media (prefers-reduced-motion: reduce){[style*="lc-loop"]{animation:none!important}}`}</style>
+      <Frame state={s} caret />
+    </div>
+  );
 }
 
 function Frame({
   state,
-  variant,
   caret,
   smm,
   instant,
 }: {
   state: LiveState;
-  variant: Variant;
   caret?: boolean;
   smm?: boolean;
   instant?: boolean;
@@ -100,7 +104,6 @@ function Frame({
   return (
     <LiveComposerView
       state={state}
-      variant={variant}
       caret={caret}
       instant={instant}
       header={
@@ -131,17 +134,14 @@ function Frame({
 }
 
 export default function ComposerPreview({
-  variant,
   demo,
   state,
   chrome,
 }: {
-  variant: Variant;
   demo: boolean;
   state: string;
   chrome: boolean;
 }) {
-  const q = (v: string) => `?v=${v}${demo ? '&demo=1' : `&state=${state}`}`;
   return (
     <main
       className="min-h-screen px-4 pb-24 pt-8 md:px-10 md:pt-14"
@@ -153,24 +153,7 @@ export default function ComposerPreview({
             className="mb-8 flex flex-wrap items-center gap-2 text-[12px]"
             style={{ fontFamily: 'ui-monospace, monospace' }}
           >
-            {(['a', 'b', 'c'] as const).map((v) => (
-              <a
-                key={v}
-                href={q(v)}
-                className="rounded-full px-3 py-1.5"
-                style={{
-                  background: v === variant ? '#0047FF' : 'transparent',
-                  color: v === variant ? '#fff' : '#141414',
-                  boxShadow: 'inset 0 0 0 1px rgba(20,20,20,.15)',
-                }}
-              >
-                {v === 'a' ? 'A · milestones' : v === 'b' ? 'B · ambient' : 'C · one moment'}
-              </a>
-            ))}
-            <a
-              href={demo ? `?v=${variant}&state=final` : `?v=${variant}&demo=1`}
-              className="ml-2 underline"
-            >
+            <a href={demo ? '?state=final' : '?demo=1'} className="underline">
               {demo ? 'stills' : 'play demo'}
             </a>
           </nav>
@@ -185,13 +168,7 @@ export default function ComposerPreview({
         >
           One idea. Write it the way you’d post it.
         </h1>
-        {demo ? (
-          <Demo variant={variant} />
-        ) : state === 'live' ? (
-          <Live variant={variant} />
-        ) : (
-          <Still state={state} variant={variant} />
-        )}
+        {demo ? <Demo /> : state === 'live' ? <Live /> : <Still state={state} />}
       </div>
     </main>
   );

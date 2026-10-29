@@ -7,6 +7,7 @@ import {
   localMarks,
   matchIdea,
   mergeMarks,
+  readStillFits,
   shapeOf,
   VOICE_MIN_POSTS,
   type DraftShape,
@@ -14,7 +15,7 @@ import {
   type ProofPost,
   type VoiceProfile,
 } from '@/lib/live-marks';
-import { keystrokes, demoStateAt, PAUSE_MS, type DemoScript } from './demo';
+import { keystrokes, demoStateAt, HOLD_MS, PAUSE_MS, type DemoScript } from './demo';
 import type { LiveState } from './types';
 
 /**
@@ -121,7 +122,7 @@ export function useLiveComposer({
   }, [text, c, accountId, brandKey, read]);
 
   const local = useMemo(() => localMarks(text, c?.profile ?? null), [text, c]);
-  const r = read?.key === brandKey ? read.value : null;
+  const r = read?.key === brandKey && readStillFits(read.text, text) ? read.value : null;
   const marks = useMemo(
     () => mergeMarks(local, r ? anchorQuotes(text, r.marks) : [], c?.landingReady ?? false),
     [local, r, text, c]
@@ -158,7 +159,7 @@ export function useDemoComposer(script: DemoScript, opts: { loop?: boolean } = {
     const tick = (ms: number) => {
       if (start === null) start = ms;
       let el = ms - start;
-      if (el > film.end + 1500) {
+      if (el > film.end + HOLD_MS) {
         if (!opts.loop) return;
         start = ms;
         el = 0;

@@ -413,3 +413,17 @@ export function matchIdea<T extends { id: string; text: string }>(
   }
   return best?.idea ?? null;
 }
+
+/**
+ * Does a read made for `readText` still describe `text`? Edits at the end keep
+ * it (they share most of a prefix); deleting what it read retires it, so a
+ * stale score never flashes before the next read lands.
+ */
+export function readStillFits(readText: string, text: string): boolean {
+  const a = readText.trim();
+  const b = text.trim();
+  if (!a) return false;
+  let i = 0;
+  while (i < a.length && i < b.length && a[i] === b[i]) i++;
+  return i >= a.length * 0.6;
+}

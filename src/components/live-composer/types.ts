@@ -23,6 +23,3 @@ export interface LiveState {
   reading: boolean;
   error: string | null;
 }
-
-/** a = unlocks by milestone · b = ambient, sharpens · c = one big moment on pause */
-export type Variant = 'a' | 'b' | 'c';

@@ -3,6 +3,7 @@ import {
   localMarks,
   matchIdea,
   mergeMarks,
+  readStillFits,
   shapeOf,
   type LiveRead,
   type ProofPost,
@@ -29,6 +30,14 @@ export interface DemoScript {
   proof: Partial<Record<ReturnType<typeof shapeOf>, ProofPost>>;
   ideas: { id: string; text: string }[];
   landingReady: boolean;
+}
+
+/** The film holds its last frame this long before looping. */
+export const HOLD_MS = 1500;
+
+/** One loop of the film, in ms (typing + hold). */
+export function filmLength(script: DemoScript): number {
+  return keystrokes(script).end + HOLD_MS;
 }
 
 /** Typing pauses longer than this count as "stopped typing" (live read fires). */
@@ -114,6 +123,7 @@ export function demoStateAt(
       }
     }
   }
+  if (read && !readStillFits(readText, text)) read = null;
   const reading = !typing && i >= 0 && readText !== text && t - lastKey >= PAUSE_MS;
   const marks = mergeMarks(
     localMarks(text, script.profile),

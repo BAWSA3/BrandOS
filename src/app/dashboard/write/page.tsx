@@ -8,13 +8,6 @@ import { dashboardV2For } from '@/lib/dashboard-v2';
 import { loadBrands, loadOpenIdeas, loadStanding, loadTopPosts } from '@/lib/dashboard-v2-data';
 import Shell from '@/components/dashboard-v2/Shell';
 import WritingRoom from '@/components/dashboard-v2/WritingRoom';
-import type { Variant } from '@/components/live-composer/types';
-
-// The live composer (docs/LIVE-COMPOSER-SPEC.md) is off until LIVE_COMPOSER=1;
-// LIVE_COMPOSER_VARIANT picks the reveal (a|b|c) until Bawsa chooses one.
-function liveVariant(v: string | undefined): Variant {
-  return v === 'b' || v === 'c' ? v : 'a';
-}
 
 // /dashboard/write — the copywriter chat (X posts, threads, emails, ads) in
 // the creator's own voice. Pro (open access counts); free accounts land on
@@ -73,8 +66,8 @@ export default async function WritePage({
           boardIdeas={boardIdeas}
           topPosts={topPosts}
           brands={brands}
+          // the live composer (docs/LIVE-COMPOSER-SPEC.md): off until LIVE_COMPOSER=1
           live={process.env.LIVE_COMPOSER === '1'}
-          liveVariant={liveVariant(process.env.LIVE_COMPOSER_VARIANT)}
         />
       </Shell>
     );
