@@ -2,6 +2,7 @@ import type { Prisma } from '@prisma/client';
 import prisma from '@/lib/db';
 import { indexOpenFor, type IndexViewer } from '@/lib/index-rules';
 import { inviteOnlyFrom, normalizeCode, type CodeState } from '@/lib/early-access-rules';
+import { welcomeAfterRedeem } from '@/lib/early-access-welcome';
 
 /**
  * Early-access codes, data side (migration 049). Rules and format live in
@@ -118,7 +119,7 @@ export async function createAccountWithCode<T extends { id: string }>(
 ): Promise<T> {
   const code = normalizeCode(raw);
   if (!code) throw new CodeTakenError();
-  return prisma.$transaction(async (tx) => {
+  const created = await prisma.$transaction(async (tx) => {
     const user = await create(tx);
     const { count } = await tx.earlyAccessCode.updateMany({
       where: { code, redeemedAt: null, revokedAt: null },
@@ -127,6 +128,8 @@ export async function createAccountWithCode<T extends { id: string }>(
     if (count !== 1) throw new CodeTakenError();
     return user;
   });
+  welcomeAfterRedeem(created.id);
+  return created;
 }
 
 export type RedeemResult = { ok: true; already: boolean } | { ok: false };
@@ -136,7 +139,8 @@ export type RedeemResult = { ok: true; already: boolean } | { ok: false };
  * conditional UPDATE claims the code only if nobody has (redeemedAt null, not
  * revoked), and "redeemedByUserId" is UNIQUE, so two people racing for one
  * code, or one person redeeming two codes, can't both win. A user who already
- * has early access keeps it and the new code stays unused.
+ * has early access keeps it and the new code stays unused. A fresh redemption
+ * queues the welcome email (src/lib/early-access-welcome.ts).
  */
 export async function redeemCode(userId: string, raw: unknown): Promise<RedeemResult> {
   const code = normalizeCode(raw);
@@ -147,7 +151,9 @@ export async function redeemCode(userId: string, raw: unknown): Promise<RedeemRe
       where: { code, redeemedAt: null, revokedAt: null },
       data: { redeemedAt: new Date(), redeemedByUserId: userId },
     });
-    return count === 1 ? { ok: true, already: false } : { ok: false };
+    if (count !== 1) return { ok: false };
+    welcomeAfterRedeem(userId);
+    return { ok: true, already: false };
   } catch (e) {
     // P2002: this user redeemed another code in the same moment
     if ((e as { code?: string }).code === 'P2002') return { ok: true, already: true };
