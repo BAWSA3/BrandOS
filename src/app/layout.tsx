@@ -38,9 +38,9 @@ export const viewport = {
 };
 
 export const metadata: Metadata = {
-  title: 'BrandOS — Discover Your Brand DNA',
+  title: 'BrandOS — Your brand, scored.',
   description:
-    'AI-powered brand analysis that reveals your unique creator identity. Get your Brand Score, discover your archetype, and unlock personalized growth insights.',
+    "See what your posts say you're known for, what's landing, and the one move to make next. Scan your X free.",
   keywords: [
     'brand',
     'AI',
@@ -58,24 +58,24 @@ export const metadata: Metadata = {
     locale: 'en_US',
     url: 'https://mybrandos.app',
     siteName: 'BrandOS',
-    title: 'BrandOS — Discover Your Brand DNA',
+    title: 'BrandOS — Your brand, scored.',
     description:
-      'AI-powered brand analysis that reveals your unique creator identity. Get your Brand Score and unlock personalized growth insights.',
+      "See what your posts say you're known for, what's landing, and the one move to make next. Scan your X free.",
     images: [
       {
-        url: '/og-home.png',
+        url: '/api/og/home',
         width: 1200,
         height: 630,
-        alt: 'BrandOS - Discover Your Brand DNA',
+        alt: 'BrandOS: Your brand, scored.',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'BrandOS — Discover Your Brand DNA',
+    title: 'BrandOS — Your brand, scored.',
     description:
-      'AI-powered brand analysis that reveals your unique creator identity. Get your Brand Score and unlock personalized growth insights.',
-    images: ['/og-home.png'],
+      "See what your posts say you're known for, what's landing, and the one move to make next. Scan your X free.",
+    images: ['/api/og/home'],
     creator: '@mybrandos',
   },
   robots: {

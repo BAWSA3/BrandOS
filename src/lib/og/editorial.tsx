@@ -550,3 +550,130 @@ export async function editorialImage(card: EditorialCard, headers?: Record<strin
     { ...OG_SIZE, fonts: f, headers }
   );
 }
+
+/**
+ * A message card on the field (no score, no pass): the site default and the
+ * invite-link preview (approved 2026-10-29). Same field, chips and bold face
+ * as the score card; the headline is the figure.
+ */
+export type FieldMessage = {
+  /** header chip, e.g. "INVITE-ONLY" */
+  label: string;
+  /** the headline, one line per entry; the last line sits on a Klein chip */
+  lines: string[];
+  /** one plain sentence under the headline */
+  sub: string;
+  /** footer chip, e.g. "30 DAYS FREE · NO CARD" */
+  note: string;
+};
+
+export async function fieldMessageImage(card: FieldMessage, headers?: Record<string, string>) {
+  const [f, wm] = await Promise.all([fonts(), wordmark('white')]);
+  const logo = `data:image/png;base64,${wm.toString('base64')}`;
+  const longest = Math.max(...card.lines.map((l) => l.length));
+  const size = longest > 16 ? 112 : longest > 12 ? 132 : 150;
+  return new ImageResponse(
+    <div
+      style={{
+        width: 1200,
+        height: 630,
+        display: 'flex',
+        background: BLUE,
+        position: 'relative',
+      }}
+    >
+      {/* eslint-disable-next-line @next/next/no-img-element -- satori */}
+      <img
+        src={field()}
+        width={1200}
+        height={630}
+        alt=""
+        style={{ position: 'absolute', left: 0, top: 0 }}
+      />
+      <div
+        style={{
+          position: 'absolute',
+          left: 44,
+          right: 44,
+          top: 36,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
+      >
+        <div style={{ display: 'flex', background: BLUE, padding: '6px 8px' }}>
+          {/* eslint-disable-next-line @next/next/no-img-element -- satori */}
+          <img src={logo} width={120} height={24} alt="BrandOS" />
+        </div>
+        <Chip>{card.label}</Chip>
+        <Chip>MYBRANDOS.APP</Chip>
+      </div>
+
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'flex-end',
+          paddingLeft: 44,
+          paddingBottom: 40,
+          width: 1100,
+        }}
+      >
+        {card.lines.map((line, i) => {
+          const last = i === card.lines.length - 1;
+          return (
+            <div key={line} style={{ display: 'flex' }}>
+              <span
+                style={{
+                  display: 'flex',
+                  fontFamily: 'Display',
+                  fontWeight: 700,
+                  fontSize: size,
+                  lineHeight: 0.92,
+                  letterSpacing: -size * 0.05,
+                  color: '#FFFFFF',
+                  background: BLUE,
+                  padding: last ? '0 14px 10px 6px' : '0 14px 4px 6px',
+                }}
+              >
+                {line}
+              </span>
+            </div>
+          );
+        })}
+        <div style={{ display: 'flex', marginTop: 26 }}>
+          <span
+            style={{
+              display: 'flex',
+              fontFamily: 'Grotesk',
+              fontSize: 34,
+              color: BLUE,
+              background: '#FFFFFF',
+              padding: '6px 14px 8px',
+            }}
+          >
+            {card.sub}
+          </span>
+        </div>
+        <div style={{ display: 'flex', marginTop: 22 }}>
+          <Chip>{card.note}</Chip>
+        </div>
+      </div>
+    </div>,
+    { ...OG_SIZE, fonts: f, headers }
+  );
+}
+
+/** The two field message cards (one place, so copy stays consistent). */
+export const SITE_CARD: FieldMessage = {
+  label: 'BRAND INTELLIGENCE',
+  lines: ['Your brand,', 'scored.'],
+  sub: 'See what your posts say about you.',
+  note: 'SCAN YOUR X FREE',
+};
+export const INVITE_CARD: FieldMessage = {
+  label: 'INVITE-ONLY',
+  lines: ["You're invited."],
+  sub: 'See what your posts say about you.',
+  note: '30 DAYS FREE · NO CARD',
+};
