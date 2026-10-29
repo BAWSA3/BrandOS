@@ -576,8 +576,9 @@ export function renderEarlyAccessEmail(
 /**
  * Sent automatically when someone redeems an early-access code
  * (src/lib/early-access-welcome.ts): "you're in, here are 3 things to do this
- * week". The copy is the manual tour Bawsa approved on Oct 28, as a standalone
- * email. One job: do today's move. One ask: reply with what was confusing.
+ * week". Steps follow what a redeemer sees on prod (Oct 29): the first-run
+ * playbook walkthrough, Write's live marks, Today's move. One ask: reply with
+ * what was confusing. Invites are named only once NEXT_PUBLIC_CODE_TRIAL is on.
  *
  * `usedBy` is set when the code was given to one handle and redeemed by
  * another; the email goes to the person it was given to, who may not know.
@@ -595,23 +596,23 @@ function earlyAccessWelcomeModel(r: EarlyAccessWelcomeRecipient) {
     subject: r.handle
       ? `@${r.handle}, you're in. here's what to do first`
       : "you're in. here's what to do first",
-    preheader: 'three things for your first week on BrandOS, and one small ask.',
+    preheader: 'your playbook, a live check while you write, and one move a day.',
     who: r.handle ? `@${esc(r.handle)}` : 'there',
     opening: usedBy
-      ? `saw your code got used by ${usedBy}. if that&#39;s you, you&#39;re in. here&#39;s how to get the most out of it this week.`
-      : 'you&#39;re in. here&#39;s how to get the most out of it this week.',
+      ? `saw your code got used by ${usedBy}. if that&#39;s you, you&#39;re in. here&#39;s what&#39;s inside and what to do first.`
+      : 'you&#39;re in. here&#39;s what&#39;s inside and what to do first.',
     steps: [
-      '<b>do today&#39;s move.</b> the top card on your dashboard is one thing to do today, picked from your recent posts. do that, skip the rest.',
-      '<b>score a draft before you post it.</b> open Write, paste what you&#39;re about to post, and you&#39;ll see what&#39;s working and what to fix. it can also draft a post or a full article in your voice.',
-      '<b>read your playbook.</b> it&#39;s what your posts say you&#39;re known for and what&#39;s landing. the Brand tab has your growth, who you&#39;re up against, your audience, and an idea board.',
+      '<b>see your playbook.</b> the first time you open BrandOS it walks you through what your posts say about you: your score, what you&#39;re known for, what&#39;s working, and the one thing to sharpen. takes a minute.',
+      '<b>write your next post in Write.</b> as you type, it marks whether it sounds like you, whether it&#39;s on what you&#39;re known for, and (once it has 10 of your posts) whether it&#39;ll land. you get a live score and one of your past posts as proof. it tells you what&#39;s off and you fix it, it doesn&#39;t rewrite you. then "Open in X" sends it across.',
+      '<b>do today&#39;s move.</b> one thing to do today, picked from your recent posts. do that, skip the rest. the Brand tab has your growth, who you&#39;re up against, your audience, and an idea board.',
     ],
-    cta: 'Do today&#39;s move →',
+    cta: 'See your playbook →',
     url: `${APP_URL}/dashboard?utm_source=email&utm_medium=email&utm_campaign=${CAMPAIGNS.earlyAccessWelcome}`,
     trial: r.codeTrial
       ? `your ${CODE_TRIAL_DAYS} days started today: full access, free, no card. you also have ${MEMBER_INVITES} invites to hand out. they&#39;re on your dashboard, one link each.`
       : null,
     small:
-      'small stuff: ⌘K (ctrl+K on windows) jumps anywhere. if you run more than one account, add it from Brand.',
+      'small stuff: lost on a term? tap the little i next to it. ⌘K (ctrl+K on windows) jumps anywhere. if you run more than one account, add it from Brand.',
     ask: `one ask: after you&#39;ve used it twice, reply with the one thing that was confusing or felt useless. one line is plenty. that&#39;s what i&#39;m fixing ${r.codeTrial ? 'next' : 'before launch'}.`,
     ps: usedBy ? `(if ${usedBy} isn&#39;t you, reply and i&#39;ll sort you out.)` : null,
   };
