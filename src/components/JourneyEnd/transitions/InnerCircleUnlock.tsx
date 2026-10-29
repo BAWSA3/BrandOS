@@ -303,7 +303,7 @@ export default function InnerCircleUnlock({ onComplete, theme }: InnerCircleUnlo
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
             style={{
-              fontFamily: "'Inter', sans-serif",
+              fontFamily: "var(--font-inter), sans-serif",
               fontSize: '32px',
               fontWeight: 800,
               background: 'linear-gradient(135deg, #FFD700 0%, #F59E0B 50%, #D97706 100%)',
@@ -322,7 +322,7 @@ export default function InnerCircleUnlock({ onComplete, theme }: InnerCircleUnlo
             animate={{ opacity: 1 }}
             transition={{ delay: 0.7 }}
             style={{
-              fontFamily: "'Inter', sans-serif",
+              fontFamily: "var(--font-inter), sans-serif",
               fontSize: '14px',
               color: 'rgba(255,255,255,0.6)',
               margin: '0 auto 24px auto',
@@ -354,7 +354,7 @@ export default function InnerCircleUnlock({ onComplete, theme }: InnerCircleUnlo
             <span style={{ fontSize: '16px' }}>👑</span>
             <span
               style={{
-                fontFamily: "'Inter', sans-serif",
+                fontFamily: "var(--font-inter), sans-serif",
                 fontSize: '13px',
                 fontWeight: 700,
                 color: '#1a1a1a',

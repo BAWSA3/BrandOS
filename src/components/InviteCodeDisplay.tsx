@@ -115,7 +115,7 @@ export function InviteCodeDisplay({ username, onGenerate }: InviteCodeDisplayPro
           </div>
           <div
             style={{
-              fontFamily: "'Inter', sans-serif",
+              fontFamily: "var(--font-inter), sans-serif",
               fontSize: '14px',
               fontWeight: 600,
               color: '#FFFFFF',
@@ -244,7 +244,7 @@ export function InviteCodeDisplay({ username, onGenerate }: InviteCodeDisplayPro
       <div
         style={{
           marginTop: '16px',
-          fontFamily: "'Inter', sans-serif",
+          fontFamily: "var(--font-inter), sans-serif",
           fontSize: '12px',
           color: 'rgba(255, 255, 255, 0.5)',
           textAlign: 'center',

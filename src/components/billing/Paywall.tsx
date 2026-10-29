@@ -1,5 +1,6 @@
 'use client';
 
+import { proPrice, renewalTerms } from '@/lib/billing-terms';
 import Link from 'next/link';
 import { motion, useReducedMotion } from 'motion/react';
 import { AnimateNumber } from 'motion-plus/react';
@@ -31,12 +32,16 @@ export default function Paywall({
   score,
   foundingLeft,
   mode = 'trial',
+  priceLocked = foundingLeft > 0,
 }: {
   handle: string;
   score: number;
   foundingLeft: number;
   mode?: PaywallMode;
+  /** $29 (Founding seats left, or a code's founding perk) vs $39. */
+  priceLocked?: boolean;
 }) {
+  const price = proPrice(priceLocked);
   const [code, setCode] = useState('');
   const [codeError, setCodeError] = useState<string | null>(null);
   const applyCode = (e: React.FormEvent) => {
@@ -161,23 +166,21 @@ export default function Paywall({
               className="mt-5"
             />
             <p className="mt-2 text-center text-[12px] leading-[1.5]" style={{ color: '#6B6B6B' }}>
-              $29/month after {TRIAL_DAYS} days · card required · cancel before day {TRIAL_DAYS}{' '}
-              and pay nothing
+              {renewalTerms(price, { kind: 'after-trial', days: TRIAL_DAYS })}
             </p>
           </>
         ) : mode === 'code-ended' ? (
           <>
             <StartTrialButton signedIn next="/dashboard" label="Keep Pro" className="mt-6" />
             <p className="mt-3 text-center text-[12px] leading-[1.5]" style={{ color: '#6B6B6B' }}>
-              $29/month from today · cancel any time
+              {renewalTerms(price, { kind: 'today' })}
             </p>
           </>
         ) : (
           <>
             <StartTrialButton signedIn next="/dashboard" className="mt-6" />
             <p className="mt-3 text-center text-[12px] leading-[1.5]" style={{ color: '#6B6B6B' }}>
-              $29/month after {TRIAL_DAYS} days · card required · cancel before day {TRIAL_DAYS} and
-              pay nothing
+              {renewalTerms(price, { kind: 'after-trial', days: TRIAL_DAYS })}
             </p>
           </>
         )}

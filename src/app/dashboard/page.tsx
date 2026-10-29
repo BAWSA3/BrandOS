@@ -307,6 +307,7 @@ export default async function DashboardPage({
           handle={bento.handle}
           score={bento.ticker.score}
           foundingLeft={foundingLeft}
+          priceLocked={foundingLeft > 0 || !!access?.perkFoundingPrice}
           mode={!CODE_TRIAL || subscribed ? 'trial' : user.freeUntil ? 'code-ended' : 'code-needed'}
         />
       )}
@@ -544,7 +545,8 @@ async function planBadgeFor(
   const freeEnd = subscribed ? null : freeAccessEndsAt(user);
   if (freeEnd) {
     const left = spotsLeft ?? (await foundingSpotsLeft());
-    return { kind: 'open', until: freeEnd.toISOString(), spotsLeft: left };
+    const priceLocked = left > 0 || !!(await earlyAccessFor(user.id))?.perkFoundingPrice;
+    return { kind: 'open', until: freeEnd.toISOString(), spotsLeft: left, priceLocked };
   }
   if (trialEnd) {
     const number = await foundingNumber(user.id);

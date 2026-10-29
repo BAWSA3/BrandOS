@@ -1,3 +1,4 @@
+import { proPrice, renewalTerms } from '@/lib/billing-terms';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { getCurrentUser } from '@/lib/auth';
@@ -27,7 +28,7 @@ export const metadata: Metadata = {
     : 'Know your reputation score before brands check it. BrandOS Studio is free for everyone until Dec 3; the first 100 keep $29/month for life.',
 };
 
-const MONO = "'VCR OSD Mono', 'JetBrains Mono', monospace";
+const MONO = "'VCR OSD Mono', var(--font-jetbrains), monospace";
 const BIG = "'Inter Tight', 'Helvetica Neue', Helvetica, Arial, sans-serif";
 const BLUE = '#0047FF';
 const INK = '#0E0E0E';
@@ -268,13 +269,16 @@ export default async function PricingPage({
                     className="mt-3 text-center text-[12px] leading-[1.5]"
                     style={{ color: MUTED }}
                   >
-                    {freeEnd
-                      ? `Card required · nothing charged until ${until} · cancel before then and pay nothing`
-                      : CODE_TRIAL && !user
-                        ? `Invite-only · a code is ${CODE_TRIAL_DAYS} days of everything, no card`
-                        : codeEnded
-                          ? '$29/month from today · cancel any time'
-                          : `Card required · $29/month after ${TRIAL_DAYS} days · cancel before day ${TRIAL_DAYS} and pay nothing`}
+                    {CODE_TRIAL && !user
+                      ? `Invite-only · a code is ${CODE_TRIAL_DAYS} days of everything, no card`
+                      : renewalTerms(
+                          proPrice(priceLocked),
+                          freeEnd
+                            ? { kind: 'on', date: until }
+                            : codeEnded
+                              ? { kind: 'today' }
+                              : { kind: 'after-trial', days: TRIAL_DAYS }
+                        )}
                   </p>
                 </div>
               )}

@@ -16,6 +16,7 @@ import { promises as fs, readFileSync } from 'fs';
 import path from 'path';
 import { Resend } from 'resend';
 import { PrismaClient } from '@prisma/client';
+import { marketingBlocked, unsubscribeHeaders, withMarketingFooter } from '../src/lib/email-compliance';
 
 // Load .env.local
 try {
@@ -144,7 +145,9 @@ function promptMultiline(instruction: string): Promise<string> {
 async function loadSignups(): Promise<Signup[]> {
   const prisma = new PrismaClient();
   try {
+    // never mail anyone who unsubscribed
     const dbSignups = await prisma.emailSignup.findMany({
+      where: { OR: [{ unsubscribed: false }, { unsubscribed: null }] },
       orderBy: { createdAt: 'desc' },
     });
     return dbSignups.map(s => ({
@@ -213,12 +216,16 @@ async function sendEmail(
       })
       .join('\n');
 
+    const blocked = marketingBlocked();
+    if (blocked) return { success: false, error: blocked };
+    const out = withMarketingFooter(html, body, to);
     const result = await resend.emails.send({
       from: process.env.EMAIL_FROM || 'BrandOS <onboarding@resend.dev>',
       to,
       subject,
-      html,
-      text: body,
+      html: out.html,
+      text: out.text,
+      headers: unsubscribeHeaders(to),
     });
 
     if (result.error) {

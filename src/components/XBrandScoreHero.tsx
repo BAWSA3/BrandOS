@@ -1850,14 +1850,14 @@ export default function XBrandScoreHero({
                 <a
                   href={`/breakdown?handle=${encodeURIComponent(profile.username)}`}
                   className="capture-hide mt-8 inline-flex items-center justify-center gap-2 rounded-[4px] bg-[#0047FF] px-7 py-4 text-[13px] font-semibold tracking-[0.12em] text-white uppercase transition-colors duration-200 hover:bg-[#0036C4]"
-                  style={{ fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace" }}
+                  style={{ fontFamily: "'VCR OSD Mono', var(--font-jetbrains), monospace" }}
                 >
                   Get The Full Breakdown <span aria-hidden>→</span>
                 </a>
                 {/* Sets up launch day for today's scanners (offer decided 2026-10-22) */}
                 <p
                   className="capture-hide mt-4 text-center text-[11px] tracking-[0.14em] text-black/70 uppercase"
-                  style={{ fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace" }}
+                  style={{ fontFamily: "'VCR OSD Mono', var(--font-jetbrains), monospace" }}
                 >
                   {CODE_TRIAL ? 'Invite-only ·' : 'BrandOS Studio opens Nov 2 ·'}{' '}
                   <span className="text-[#0047FF]">
@@ -1868,7 +1868,7 @@ export default function XBrandScoreHero({
                 <a
                   href={joinHref('/dashboard')}
                   className="capture-hide mt-3 block text-center text-[11px] tracking-[0.14em] text-black/60 uppercase hover:text-[#0047FF]"
-                  style={{ fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace" }}
+                  style={{ fontFamily: "'VCR OSD Mono', var(--font-jetbrains), monospace" }}
                 >
                   {CODE_TRIAL ? 'Get a code · save it to your dashboard →' : 'Save it to your dashboard · continue with X →'}
                 </a>
@@ -1877,7 +1877,7 @@ export default function XBrandScoreHero({
                   <a
                     href={indexStatus.signedIn ? '/index/join' : joinHref('/index/join')}
                     className="capture-hide mt-3 block text-center text-[11px] tracking-[0.14em] text-[#0047FF] uppercase hover:underline"
-                    style={{ fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace" }}
+                    style={{ fontFamily: "'VCR OSD Mono', var(--font-jetbrains), monospace" }}
                   >
                     Get listed in the Creator Index · get your number →
                   </a>
@@ -1943,7 +1943,7 @@ export default function XBrandScoreHero({
                 </h3>
                 <span
                   style={{
-                    fontFamily: "'JetBrains Mono', monospace",
+                    fontFamily: "var(--font-jetbrains), monospace",
                     fontSize: '14px',
                     color: theme === 'dark' ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)',
                   }}
@@ -1993,7 +1993,7 @@ export default function XBrandScoreHero({
               style={{
                 display: 'flex',
                 gap: '32px',
-                fontFamily: "'JetBrains Mono', monospace",
+                fontFamily: "var(--font-jetbrains), monospace",
                 fontSize: '12px',
               }}
             >
@@ -2108,7 +2108,7 @@ export default function XBrandScoreHero({
               {/* Terminal-style comment header */}
               <div
                 style={{
-                  fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace",
+                  fontFamily: "'VCR OSD Mono', var(--font-jetbrains), monospace",
                   fontSize: '10px',
                   letterSpacing: '0.2em',
                   color: 'rgba(255,255,255,0.25)',
@@ -2121,7 +2121,7 @@ export default function XBrandScoreHero({
 
               <motion.h2
                 style={{
-                  fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace",
+                  fontFamily: "'VCR OSD Mono', var(--font-jetbrains), monospace",
                   fontSize: 'clamp(16px, 4vw, 22px)',
                   fontWeight: 400,
                   letterSpacing: '0.08em',
@@ -2136,7 +2136,7 @@ export default function XBrandScoreHero({
 
               <motion.p
                 style={{
-                  fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace",
+                  fontFamily: "'VCR OSD Mono', var(--font-jetbrains), monospace",
                   fontSize: '11px',
                   letterSpacing: '0.05em',
                   color: 'rgba(255,255,255,0.4)',
@@ -2234,7 +2234,7 @@ export default function XBrandScoreHero({
 
                     <p
                       style={{
-                        fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace",
+                        fontFamily: "'VCR OSD Mono', var(--font-jetbrains), monospace",
                         fontSize: '12px',
                         letterSpacing: '0.05em',
                         color: 'rgba(255,255,255,0.45)',
@@ -2276,7 +2276,7 @@ export default function XBrandScoreHero({
                     required
                     style={{
                       width: '100%',
-                      fontFamily: "'VCR OSD Mono', 'JetBrains Mono', monospace",
+                      fontFamily: "'VCR OSD Mono', var(--font-jetbrains), monospace",
                       fontSize: '13px',
                       letterSpacing: '0.05em',
                       padding: '14px 16px',

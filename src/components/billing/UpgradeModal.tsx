@@ -24,23 +24,13 @@ export default function UpgradeModal({
 
   if (!isOpen) return null;
 
-  const handleUpgrade = async (tier: SubscriptionTier) => {
+  // Checkout only sells Pro monthly (src/app/api/stripe/checkout/route.ts), so
+  // this legacy modal's annual/Agency prices can't be bought as shown. Send
+  // people to /pricing, where the real price and renewal terms sit beside the
+  // subscribe button.
+  const handleUpgrade = (tier: SubscriptionTier) => {
     setIsLoading(tier);
-    try {
-      const res = await fetch('/api/stripe/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tier, interval }),
-      });
-      const data = await res.json();
-      if (data.url) {
-        window.location.href = data.url;
-      }
-    } catch (error) {
-      console.error('Upgrade error:', error);
-    } finally {
-      setIsLoading(null);
-    }
+    window.location.href = '/pricing';
   };
 
   const tierOrder: SubscriptionTier[] = ['FREE', 'CREATOR', 'PRO', 'AGENCY', 'ENTERPRISE'];

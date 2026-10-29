@@ -28,7 +28,7 @@ export interface DraftScoreResult {
   basedOn: number;
 }
 
-const MONO = 'var(--d-mono, "JetBrains Mono", ui-monospace, monospace)';
+const MONO = 'var(--d-mono, var(--font-jetbrains), ui-monospace, monospace)';
 
 export default function DraftScore({
   text,

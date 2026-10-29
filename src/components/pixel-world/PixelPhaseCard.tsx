@@ -195,7 +195,7 @@ export default function PixelPhaseCard({
         }}
         transition={{ duration: 0.8, repeat: isActive ? Infinity : 0, repeatDelay: 1 }}
         style={{
-          fontFamily: "'VCR OSD Mono', 'Press Start 2P', monospace",
+          fontFamily: "'VCR OSD Mono', var(--font-press-start), monospace",
           fontSize: '10px',
           letterSpacing: '0.2em',
           color: phaseColor,
@@ -212,7 +212,7 @@ export default function PixelPhaseCard({
       <motion.h2
         animate={{ scale: isActive ? 1 : 0.9 }}
         style={{
-          fontFamily: "'VCR OSD Mono', 'Press Start 2P', monospace",
+          fontFamily: "'VCR OSD Mono', var(--font-press-start), monospace",
           fontSize: 'clamp(36px, 8vw, 64px)',
           fontWeight: 400,
           letterSpacing: '0.15em',

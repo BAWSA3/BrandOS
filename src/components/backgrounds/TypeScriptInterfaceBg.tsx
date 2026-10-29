@@ -101,7 +101,7 @@ export default function TypeScriptInterfaceBg() {
           style={{
             position: 'absolute',
             ...block.position,
-            fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
+            fontFamily: "var(--font-jetbrains), 'Fira Code', monospace",
             fontSize: 'clamp(10px, 1.2vw, 14px)',
             lineHeight: 1.6,
             color: '#000000',
@@ -124,7 +124,7 @@ export default function TypeScriptInterfaceBg() {
           top: '50%',
           left: '50%',
           transform: 'translate(-50%, -50%)',
-          fontFamily: "'JetBrains Mono', monospace",
+          fontFamily: "var(--font-jetbrains), monospace",
           fontSize: 'clamp(200px, 30vw, 400px)',
           color: '#000000',
           userSelect: 'none',

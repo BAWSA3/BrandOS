@@ -12,6 +12,11 @@ if (typeof window !== 'undefined' && process.env.NEXT_PUBLIC_POSTHOG_KEY) {
     person_profiles: 'identified_only',
     capture_pageview: false,
     capture_pageleave: true,
+    // No session replay: we don't ask for recording consent, so it stays off
+    // in code whatever the PostHog project setting says. Inputs are masked in
+    // case it is ever switched on.
+    disable_session_recording: true,
+    session_recording: { maskAllInputs: true },
   });
 }
 

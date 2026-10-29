@@ -212,7 +212,7 @@ function TypedCodeBlock() {
       <pre
         className="text-[11px] text-white/20 whitespace-pre"
         style={{
-          fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
+          fontFamily: "var(--font-jetbrains), 'Fira Code', monospace",
           lineHeight: 1.7,
           background: 'none',
           padding: 0,

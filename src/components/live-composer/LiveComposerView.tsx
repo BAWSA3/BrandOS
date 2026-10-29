@@ -45,7 +45,7 @@ const T = {
   raised: 'var(--v-raised, #FBFAF6)',
   signal: 'var(--v-signal-text, #0047FF)',
   display: "var(--lc-display, 'Inter Tight', 'Helvetica Neue', Helvetica, Arial, sans-serif)",
-  label: "'VCR OSD Mono', 'JetBrains Mono', ui-monospace, monospace",
+  label: "'VCR OSD Mono', var(--font-jetbrains), ui-monospace, monospace",
 };
 const EASE = [0.22, 1, 0.36, 1] as const;
 

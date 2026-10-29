@@ -94,7 +94,7 @@ export default function PixelProgressBar({ currentPhase, phaseProgress }: PixelP
               />
               <span
                 style={{
-                  fontFamily: "'VCR OSD Mono', 'Press Start 2P', monospace",
+                  fontFamily: "'VCR OSD Mono', var(--font-press-start), monospace",
                   fontSize: '9px',
                   letterSpacing: '0.1em',
                   color: isActive ? color : isCompleted ? '#10B981' : 'rgba(255,255,255,0.5)',
@@ -136,7 +136,7 @@ export default function PixelProgressBar({ currentPhase, phaseProgress }: PixelP
         </div>
         <span
           style={{
-            fontFamily: "'VCR OSD Mono', 'Press Start 2P', monospace",
+            fontFamily: "'VCR OSD Mono', var(--font-press-start), monospace",
             fontSize: '9px',
             letterSpacing: '0.1em',
             color: 'rgba(255,255,255,0.5)',

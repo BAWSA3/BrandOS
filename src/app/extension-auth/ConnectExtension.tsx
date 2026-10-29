@@ -8,7 +8,7 @@ declare const chrome: any;
 const KLEIN = '#0047FF';
 const INK = '#0E0E0E';
 const BONE = '#F2EFE8';
-const VCR = "'VCR OSD Mono', 'JetBrains Mono', monospace";
+const VCR = "'VCR OSD Mono', var(--font-jetbrains), monospace";
 
 type State = 'connecting' | 'done' | 'error';
 

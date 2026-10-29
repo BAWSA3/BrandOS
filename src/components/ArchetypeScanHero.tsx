@@ -124,7 +124,7 @@ function DarkTypedLogBlock({
       style={{
         position: 'absolute',
         ...position,
-        fontFamily: "'JetBrains Mono', monospace",
+        fontFamily: "var(--font-jetbrains), monospace",
         fontSize: 'clamp(9px, 1vw, 11px)',
         lineHeight: 1.8,
       }}
@@ -169,7 +169,7 @@ function DarkTypedCodeBlock({
     <div style={{ position: 'absolute', ...position }}>
       <div
         style={{
-          fontFamily: "'JetBrains Mono', monospace",
+          fontFamily: "var(--font-jetbrains), monospace",
           fontSize: 'clamp(9px, 1.1vw, 12px)',
           lineHeight: 1.7,
           whiteSpace: 'pre',
@@ -190,7 +190,7 @@ function DarkTypedCodeBlock({
           position: 'absolute',
           top: 0,
           left: 0,
-          fontFamily: "'JetBrains Mono', monospace",
+          fontFamily: "var(--font-jetbrains), monospace",
           fontSize: 'clamp(9px, 1.1vw, 12px)',
           lineHeight: 1.7,
           color: 'rgba(255,255,255,0.8)',
@@ -345,7 +345,7 @@ function DarkCodeBg() {
           position: 'absolute',
           bottom: '12%',
           left: '6%',
-          fontFamily: "'JetBrains Mono', monospace",
+          fontFamily: "var(--font-jetbrains), monospace",
           fontSize: '10px',
           color: 'rgba(255,255,255,0.12)',
           whiteSpace: 'pre',
@@ -369,7 +369,7 @@ function DarkCodeBg() {
           position: 'absolute',
           bottom: '12%',
           right: '6%',
-          fontFamily: "'JetBrains Mono', monospace",
+          fontFamily: "var(--font-jetbrains), monospace",
           fontSize: '10px',
           color: 'rgba(255,255,255,0.12)',
           whiteSpace: 'pre',
@@ -565,7 +565,7 @@ function DecryptPhase({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: isActive || isComplete ? 1 : 0.25, y: 0 }}
       style={{
-        fontFamily: "'JetBrains Mono', monospace",
+        fontFamily: "var(--font-jetbrains), monospace",
         marginBottom: '20px',
         width: '100%',
         maxWidth: '440px',
@@ -623,7 +623,7 @@ function AsciiBar({ progress }: { progress: number }) {
   const bar = '█'.repeat(filled) + '░'.repeat(width - filled);
   return (
     <div
-      style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '11px', textAlign: 'center' }}
+      style={{ fontFamily: "var(--font-jetbrains), monospace", fontSize: '11px', textAlign: 'center' }}
     >
       <span style={{ color: '#fff' }}>[{bar}]</span>{' '}
       <span style={{ color: '#555' }}>{progress}%</span>
@@ -1414,7 +1414,7 @@ export default function ArchetypeScanHero({ initialUsername, autoStart }: Archet
               )}
               <p
                 style={{
-                  fontFamily: "'JetBrains Mono', monospace",
+                  fontFamily: "var(--font-jetbrains), monospace",
                   fontSize: '10px',
                   letterSpacing: '0.2em',
                   color: '#555',
@@ -1425,7 +1425,7 @@ export default function ArchetypeScanHero({ initialUsername, autoStart }: Archet
               </p>
               <p
                 style={{
-                  fontFamily: "'JetBrains Mono', monospace",
+                  fontFamily: "var(--font-jetbrains), monospace",
                   fontSize: '10px',
                   letterSpacing: '0.15em',
                   color: '#333',
@@ -1475,7 +1475,7 @@ export default function ArchetypeScanHero({ initialUsername, autoStart }: Archet
               animate={{ opacity: 1 }}
               transition={{ delay: 0.2 }}
               style={{
-                fontFamily: "'JetBrains Mono', monospace",
+                fontFamily: "var(--font-jetbrains), monospace",
                 fontSize: '10px',
                 letterSpacing: '0.2em',
                 color: '#444',
@@ -1530,7 +1530,7 @@ export default function ArchetypeScanHero({ initialUsername, autoStart }: Archet
                 whileTap={{ scale: 0.98 }}
                 style={{
                   padding: '12px 24px',
-                  fontFamily: "'JetBrains Mono', monospace",
+                  fontFamily: "var(--font-jetbrains), monospace",
                   fontSize: '11px',
                   fontWeight: 700,
                   letterSpacing: '0.05em',
@@ -1551,7 +1551,7 @@ export default function ArchetypeScanHero({ initialUsername, autoStart }: Archet
                 whileTap={{ scale: 0.98 }}
                 style={{
                   padding: '12px 24px',
-                  fontFamily: "'JetBrains Mono', monospace",
+                  fontFamily: "var(--font-jetbrains), monospace",
                   fontSize: '11px',
                   fontWeight: 700,
                   letterSpacing: '0.05em',
@@ -1579,7 +1579,7 @@ export default function ArchetypeScanHero({ initialUsername, autoStart }: Archet
                   <button
                     onClick={() => setShowEvolutionHook(true)}
                     style={{
-                      fontFamily: "'JetBrains Mono', monospace",
+                      fontFamily: "var(--font-jetbrains), monospace",
                       fontSize: '12px',
                       color: result.color,
                       background: 'none',
@@ -1614,7 +1614,7 @@ export default function ArchetypeScanHero({ initialUsername, autoStart }: Archet
                       >
                         <p
                           style={{
-                            fontFamily: "'JetBrains Mono', monospace",
+                            fontFamily: "var(--font-jetbrains), monospace",
                             fontSize: '9px',
                             letterSpacing: '0.15em',
                             color: '#444',
@@ -1635,7 +1635,7 @@ export default function ArchetypeScanHero({ initialUsername, autoStart }: Archet
                         >
                           <span
                             style={{
-                              fontFamily: "'Inter', sans-serif",
+                              fontFamily: "var(--font-inter), sans-serif",
                               fontSize: '14px',
                               fontWeight: 800,
                               fontStyle: 'italic',
@@ -1651,7 +1651,7 @@ export default function ArchetypeScanHero({ initialUsername, autoStart }: Archet
                               <span
                                 key={path}
                                 style={{
-                                  fontFamily: "'JetBrains Mono', monospace",
+                                  fontFamily: "var(--font-jetbrains), monospace",
                                   fontSize: '11px',
                                   color: p?.color || '#666',
                                   border: `1px solid ${p?.color || '#666'}25`,
@@ -1666,7 +1666,7 @@ export default function ArchetypeScanHero({ initialUsername, autoStart }: Archet
                         </div>
                         <p
                           style={{
-                            fontFamily: "'Inter', sans-serif",
+                            fontFamily: "var(--font-inter), sans-serif",
                             fontSize: '12px',
                             color: '#555',
                             lineHeight: 1.5,
@@ -1685,7 +1685,7 @@ export default function ArchetypeScanHero({ initialUsername, autoStart }: Archet
                           style={{
                             flex: 1,
                             padding: '12px 14px',
-                            fontFamily: "'JetBrains Mono', monospace",
+                            fontFamily: "var(--font-jetbrains), monospace",
                             fontSize: '12px',
                             background: 'rgba(255,255,255,0.03)',
                             border: '1px solid #222',
@@ -1701,7 +1701,7 @@ export default function ArchetypeScanHero({ initialUsername, autoStart }: Archet
                           whileTap={{ scale: 0.98 }}
                           style={{
                             padding: '12px 20px',
-                            fontFamily: "'JetBrains Mono', monospace",
+                            fontFamily: "var(--font-jetbrains), monospace",
                             fontSize: '11px',
                             fontWeight: 700,
                             background: result.color,
@@ -1719,7 +1719,7 @@ export default function ArchetypeScanHero({ initialUsername, autoStart }: Archet
                       {emailStatus === 'error' && (
                         <p
                           style={{
-                            fontFamily: "'JetBrains Mono', monospace",
+                            fontFamily: "var(--font-jetbrains), monospace",
                             fontSize: '10px',
                             color: '#EF4444',
                             marginTop: '8px',
@@ -1744,7 +1744,7 @@ export default function ArchetypeScanHero({ initialUsername, autoStart }: Archet
                   >
                     <p
                       style={{
-                        fontFamily: "'JetBrains Mono', monospace",
+                        fontFamily: "var(--font-jetbrains), monospace",
                         fontSize: '11px',
                         color: '#10B981',
                         marginBottom: '4px',
@@ -1754,7 +1754,7 @@ export default function ArchetypeScanHero({ initialUsername, autoStart }: Archet
                     </p>
                     <p
                       style={{
-                        fontFamily: "'JetBrains Mono', monospace",
+                        fontFamily: "var(--font-jetbrains), monospace",
                         fontSize: '10px',
                         color: '#555',
                       }}
@@ -1775,7 +1775,7 @@ export default function ArchetypeScanHero({ initialUsername, autoStart }: Archet
                 <a
                   href="https://mybrandos.app"
                   style={{
-                    fontFamily: "'JetBrains Mono', monospace",
+                    fontFamily: "var(--font-jetbrains), monospace",
                     fontSize: '12px',
                     color: '#0047FF',
                     textDecoration: 'none',
@@ -1806,7 +1806,7 @@ export default function ArchetypeScanHero({ initialUsername, autoStart }: Archet
                   setEmail('');
                 }}
                 style={{
-                  fontFamily: "'JetBrains Mono', monospace",
+                  fontFamily: "var(--font-jetbrains), monospace",
                   fontSize: '10px',
                   color: '#333',
                   background: 'none',

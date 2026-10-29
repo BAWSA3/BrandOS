@@ -279,7 +279,7 @@ export default function GuidedTour({ children, onComplete, autoStart = true }: G
               {/* Title */}
               <h3
                 style={{
-                  fontFamily: "'Inter', sans-serif",
+                  fontFamily: "var(--font-inter), sans-serif",
                   fontSize: '16px',
                   fontWeight: 600,
                   color: '#FFFFFF',
@@ -292,7 +292,7 @@ export default function GuidedTour({ children, onComplete, autoStart = true }: G
               {/* Description */}
               <p
                 style={{
-                  fontFamily: "'Inter', sans-serif",
+                  fontFamily: "var(--font-inter), sans-serif",
                   fontSize: '13px',
                   color: 'rgba(255,255,255,0.6)',
                   lineHeight: 1.5,

@@ -5,7 +5,7 @@ import { motion } from 'motion/react';
 // Shared terminal-aesthetic primitives for dashboard surfaces (setup wizard,
 // DNA editor). Everything themes through world CSS variables only.
 
-export const MONO = "'VCR OSD Mono', 'JetBrains Mono', monospace";
+export const MONO = "'VCR OSD Mono', var(--font-jetbrains), monospace";
 
 export function asciiBar(progress: number, width = 16) {
   const filled = Math.round((progress / 100) * width);

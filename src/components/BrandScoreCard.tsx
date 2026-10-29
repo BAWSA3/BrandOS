@@ -55,8 +55,8 @@ const BrandScoreCard: React.FC<BrandScoreCardProps> = ({
   return (
     <>
       <style>{`
-        .font-brand { font-family: 'Inter', sans-serif; }
-        .font-os { font-family: 'JetBrains Mono', monospace; }
+        .font-brand { font-family: var(--font-inter), sans-serif; }
+        .font-os { font-family: var(--font-jetbrains), monospace; }
         .bg-grid-pattern {
           background-image: radial-gradient(rgba(255, 255, 255, 0.2) 1px, transparent 1px);
           background-size: 24px 24px;

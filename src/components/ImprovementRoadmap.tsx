@@ -284,9 +284,8 @@ const ImprovementRoadmap: React.FC<ImprovementRoadmapProps> = ({ data, onJoinWai
   return (
     <div className="w-full max-w-4xl mx-auto px-4 py-8 md:py-12">
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap');
-        .font-brand { font-family: 'Inter', sans-serif; }
-        .font-os { font-family: 'JetBrains Mono', monospace; }
+        .font-brand { font-family: var(--font-inter), sans-serif; }
+        .font-os { font-family: var(--font-jetbrains), monospace; }
       `}</style>
 
       {/* Header */}
