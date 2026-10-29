@@ -5,6 +5,8 @@
  * Returns scored rankings that guide and validate Gemini's classification.
  */
 
+import { isArticlePost } from '@/lib/post-formats';
+
 export interface SignalScore {
   archetype: string;
   score: number; // 0-100
@@ -295,11 +297,16 @@ const SIGNAL_DEFS: ArchetypeSignalDef[] = [
         score += 20;
         signals.push(`${Math.round(longRatio * 100)}% long-form posts`);
       }
-      // Thread markers
+      // Long-form: thread markers and X Articles
       const threadTweets = tweets.filter((t) => t.match(/🧵|\b\d+\/\d*\b|thread|a thread/i)).length;
-      if (threadTweets > 2) {
+      const articleTweets = tweets.filter((t) => isArticlePost(t)).length;
+      if (threadTweets + articleTweets > 2) {
         score += 15;
-        signals.push(`${threadTweets} threads/thread markers`);
+        signals.push(
+          articleTweets
+            ? `${threadTweets} threads + ${articleTweets} X Articles`
+            : `${threadTweets} threads/thread markers`
+        );
       }
       // Numbered lists
       const listTweets = tweets.filter((t) => t.match(/^\d[\.\)]\s|^-\s|^•/m)).length;

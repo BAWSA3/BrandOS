@@ -7,6 +7,8 @@
  * API returns Twitter v1.1-style JSON — we map it to our internal interfaces.
  */
 
+import { expandArticleLinks } from '@/lib/post-formats';
+
 const SOCIALDATA_BASE = 'https://api.socialdata.tools';
 
 function getApiKey(): string | null {
@@ -132,7 +134,10 @@ export async function fetchProfile(
  * Map a single SocialData v1.1 tweet to our internal format.
  */
 function mapTweet(raw: Record<string, unknown>): SocialDataTweet {
-  const fullText = (raw.full_text || raw.text || '') as string;
+  const rawUrls = (raw.entities as { urls?: { url?: string; expanded_url?: string }[] } | undefined)
+    ?.urls;
+  // An X Article is a bare t.co link; expanded, the text itself says "Article"
+  const fullText = expandArticleLinks((raw.full_text || raw.text || '') as string, rawUrls);
   // SocialData's v1.1 tweets carry tweet_created_at (ISO); created_at is absent
   const createdAt = ((raw.tweet_created_at || raw.created_at) as string) || '';
 
@@ -298,7 +303,10 @@ export async function fetchTweetById(
       status: 200,
       post: {
         id: String(d.id_str),
-        text: String(d.full_text || d.text || ''),
+        text: expandArticleLinks(
+          String(d.full_text || d.text || ''),
+          (d.entities as { urls?: { url?: string; expanded_url?: string }[] } | undefined)?.urls
+        ),
         createdAt: String(d.tweet_created_at || d.created_at || ''),
         metrics: {
           likes: Number(d.favorite_count) || 0,
