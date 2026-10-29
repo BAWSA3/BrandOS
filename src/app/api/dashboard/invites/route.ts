@@ -3,6 +3,7 @@ import { getCurrentUser } from '@/lib/auth';
 import { isSubscribed } from '@/lib/billing';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { earlyAccessFor, memberInvites, mintInvite } from '@/lib/early-access';
+import { isEarlyAccount } from '@/lib/early-access-rules';
 
 /**
  * A member's own invites (invite-only trial, migration 051): up to 3 codes,
@@ -15,7 +16,10 @@ async function member() {
   const user = await getCurrentUser();
   if (!user) return { error: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) };
   const eligible =
-    user.role === 'admin' || isSubscribed(user) || !!(await earlyAccessFor(user.id));
+    user.role === 'admin' ||
+    isSubscribed(user) ||
+    isEarlyAccount(user.createdAt) ||
+    !!(await earlyAccessFor(user.id));
   if (!eligible) {
     return { error: NextResponse.json({ error: 'Invites are for members' }, { status: 403 }) };
   }

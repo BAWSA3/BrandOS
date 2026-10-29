@@ -63,6 +63,18 @@ export function freeUntilFrom(redeemedAt: Date): Date {
 export const CODE_TRIAL_START = new Date('2026-11-02T08:00:00Z');
 
 /**
+ * Made before the invite-only trial started, so treated as a member without a
+ * code (Bawsa, Oct 28): 30 free days from the start, dashboard v2 and the 3
+ * invites. Only while the trial is on.
+ */
+export function isEarlyAccount(
+  createdAt: Date | null | undefined,
+  codeTrial: boolean = CODE_TRIAL
+): boolean {
+  return codeTrial && !!createdAt && createdAt < CODE_TRIAL_START;
+}
+
+/**
  * Free access end for a member: the later of their code's 30 days and, for an
  * account made before CODE_TRIAL_START, 30 days from the start. Null when
  * neither applies. A revoked code gives nothing (and cancels the early-account
