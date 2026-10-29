@@ -9,6 +9,7 @@ import {
   type SocialDataTweet,
 } from '@/lib/socialdata';
 import { analyzeTweets, type TweetAnalysis } from '@/lib/tweet-analysis';
+import { captureCheckpoints } from '@/lib/post-checkpoints';
 import { isOpenAccess, isSubscribed, type BillingFields } from '@/lib/billing';
 
 /**
@@ -142,6 +143,14 @@ export async function syncAccount(accountId: string): Promise<void> {
       },
     }),
   ]);
+
+  // brands only: fixed copies of each new post's numbers at set ages (look-back loop)
+  if (!account.competitorOfId) {
+    await captureCheckpoints(
+      accountId,
+      valid.map((t) => ({ tweetId: t.id, ...postRow(t) }))
+    );
+  }
 }
 
 /** Posts per audience sync, and how long before a post's audience is re-read. */

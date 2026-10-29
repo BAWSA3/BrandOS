@@ -1433,23 +1433,43 @@ model AccountSnapshot {
 
 model AccountPost {
   accountId        String
-  account          TrackedAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  account          TrackedAccount         @relation(fields: [accountId], references: [id], onDelete: Cascade)
   tweetId          String
   text             String
-  postedAt         DateTime       @db.Timestamptz
-  likes            Int            @default(0)
-  replies          Int            @default(0)
-  reposts          Int            @default(0)
-  quotes           Int            @default(0)
-  bookmarks        Int            @default(0)
-  views            Int            @default(0)
-  media            String[]       @default([])
-  isQuote          Boolean        @default(false)
-  updatedAt        DateTime       @default(now()) @db.Timestamptz
-  audienceSyncedAt DateTime?      @db.Timestamptz
+  postedAt         DateTime               @db.Timestamptz
+  likes            Int                    @default(0)
+  replies          Int                    @default(0)
+  reposts          Int                    @default(0)
+  quotes           Int                    @default(0)
+  bookmarks        Int                    @default(0)
+  views            Int                    @default(0)
+  media            String[]               @default([])
+  isQuote          Boolean                @default(false)
+  updatedAt        DateTime               @default(now()) @db.Timestamptz
+  audienceSyncedAt DateTime?              @db.Timestamptz
+  checkpoints      PostMetricCheckpoint[]
 
   @@id([accountId, tweetId])
   @@index([accountId, postedAt(sort: Desc)])
+}
+
+// Post look-back history (migration 050): a brand post's numbers frozen at
+// first sight, ~24h and ~48h. AccountPost keeps only the latest numbers.
+model PostMetricCheckpoint {
+  accountId  String
+  tweetId    String
+  checkpoint String // first | 24h | 48h
+  capturedAt DateTime    @default(now()) @db.Timestamptz
+  ageHours   Float       @db.Real
+  likes      Int         @default(0)
+  replies    Int         @default(0)
+  reposts    Int         @default(0)
+  quotes     Int         @default(0)
+  bookmarks  Int         @default(0)
+  views      Int         @default(0)
+  post       AccountPost @relation(fields: [accountId, tweetId], references: [accountId, tweetId], onDelete: Cascade)
+
+  @@id([accountId, tweetId, checkpoint])
 }
 
 // Growth dashboard audience (migration 041): who replied to / reposted /
