@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 const title = 'See Your Brand Score | BrandOS';
 const description =
   'You read about building a brand with AI. Now see yours — get your Brand Score and discover your unique brand identity.';
-const ogImageUrl = 'https://mybrandos.app/og-home.png';
+const ogImageUrl = 'https://mybrandos.app/api/og/home';
 
 export const metadata: Metadata = {
   title,
