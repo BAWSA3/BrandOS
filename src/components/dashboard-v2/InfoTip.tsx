@@ -130,6 +130,8 @@ export const TIPS = {
     "Notes that appear as you type: voice (sounds like you?), lane (on what you're known for?), landing (will it land?). They say what's off; you fix it.",
   liveScore:
     'Your draft scored as you type, on the same scale as your score. It updates when you pause.',
+  people:
+    'People in your niche worth knowing, found on X each week: two about your size, one a step up. You send the message; BrandOS never does.',
   invites: 'Codes you can give friends. Each one gets them in for 30 days, free.',
   growth:
     'Followers, how much people react, how often you post and your average views, from your X account. The chart is followers over time.',

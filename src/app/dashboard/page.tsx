@@ -38,6 +38,7 @@ import Today from '@/components/dashboard-v2/Today';
 import Playbook, { type PlaybookData } from '@/components/dashboard-v2/Playbook';
 import Walkthrough from '@/components/dashboard-v2/Walkthrough';
 import { bodyOfWork } from '@/lib/playbook';
+import { peopleGapForDashboard } from '@/lib/people-to-know';
 import { classLabel, recordDate } from '@/lib/classifications';
 import { proofParts } from '@/lib/growth-proof';
 
@@ -132,9 +133,19 @@ export default async function DashboardPage({
         // First-run walkthrough (once per account, on the member's own brand):
         // the playbook revealed step by step, ending in Write.
         const showWalk = own && !walk.done;
+        // People to know: the member's own brand only, when they have the gap
+        const people =
+          own && sp.view !== 'brand'
+            ? await peopleGapForDashboard({
+                userId: user.id,
+                accountId: view.brand.id,
+                memberFollowers: view.growth.followers ?? 0,
+                weakest: view.score?.weakest ?? null,
+              })
+            : null;
         const playbook =
           sp.view === 'playbook' || showWalk
-            ? await loadPlaybook({ view, home, record, own, index, brandId })
+            ? await loadPlaybook({ view, home, record, own, index, brandId, people: !!people })
             : null;
         const walkthrough =
           showWalk && playbook ? (
@@ -227,6 +238,9 @@ export default async function DashboardPage({
                     nextMoves: view.score.nextMoves,
                   },
                   ideas: view.ideas.map((i) => ({ id: i.id, text: i.text, status: i.status })),
+                  connect: people?.reason
+                    ? { reason: people.reason, knownEngagers: people.knownEngagers }
+                    : null,
                 }}
                 scoreLine={
                   view.score && {
@@ -376,6 +390,7 @@ async function loadPlaybook({
   own,
   index,
   brandId,
+  people,
 }: {
   view: GrowthView;
   home: Awaited<ReturnType<typeof getHomeData>>;
@@ -383,6 +398,7 @@ async function loadPlaybook({
   own: boolean;
   index: IndexTileData | null;
   brandId: string | null;
+  people: boolean;
 }): Promise<PlaybookData> {
   const now = new Date();
   const since = new Date(now.getTime() - 8 * 7 * 86_400_000);
@@ -466,6 +482,7 @@ async function loadPlaybook({
         }
       : null,
     weeks: bodyOfWork({ ideas, posts, reads }, now),
+    people: { show: people },
     links: {
       brand: brandHref,
       board: `${brandHref}#ideas`,
