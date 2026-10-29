@@ -12,6 +12,7 @@ import { Btn, DISPLAY, Label, Panel, VCR } from './ui';
 import LiveComposerView from '@/components/live-composer/LiveComposerView';
 import { useLiveComposer } from '@/components/live-composer/useLiveComposer';
 import { trackBetaEvent } from '@/lib/analytics';
+import WriteNote from './WriteNote';
 
 /**
  * The writing room (dashboard v2): one idea at a time, distraction-free, with
@@ -284,6 +285,7 @@ function PostRoom({
             {idea ?? 'One idea. Write it the way you’d post it.'}
           </h1>
 
+          {live && <WriteNote />}
           {live ? (
             <div className="mt-6 md:mt-8">
               <LiveComposerView
