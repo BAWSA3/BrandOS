@@ -30,6 +30,8 @@ export const FEEDBACK_MAX = 2000;
 export const INVITE_ONLY_MESSAGE =
   'BrandOS is invite-only for now. Members get in with a personal code.';
 export const INVITE_ONLY_HOW = 'Apply for a code, or ask a member for one of theirs.';
+/** Before the invite-only trial is switched on (no /access apply page yet). */
+export const INVITE_ONLY_HOW_BEFORE_TRIAL = 'Reply BrandOS to our email, or ask @jbawsa.';
 
 /**
  * The invite-only trial (decided with Bawsa on Oct 28, on from the Nov 2
