@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { motion, useReducedMotion } from 'motion/react';
 import { MEMBER_INVITES } from '@/lib/early-access-rules';
+import InfoTip, { TIPS } from '@/components/dashboard-v2/InfoTip';
 
 const VCR = "'VCR OSD Mono', var(--font-jetbrains), monospace";
 const DISPLAY = "'Inter Tight', 'Helvetica Neue', Helvetica, Arial, sans-serif";
@@ -140,6 +141,7 @@ export default function InvitePasses({ preview }: { preview?: InviteData }) {
           style={{ fontFamily: DISPLAY, fontWeight: 500, letterSpacing: '-0.02em', margin: 0 }}
         >
           {cap} invites
+          <InfoTip label="invites">{TIPS.invites}</InfoTip>
         </h2>
         <span
           className="text-[11px] uppercase tracking-[0.16em]"

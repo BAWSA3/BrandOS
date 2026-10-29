@@ -1357,6 +1357,10 @@ model UserPreference {
   userId            String   @id
   user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   dashboardColorway String   @default("bone")
+  /// first-run walkthrough finished or skipped (migration 052); null = show it
+  walkthroughDoneAt DateTime? @db.Timestamptz
+  /// "Which one are you?": creator | founder | builder (migration 052)
+  persona           String?
   updatedAt         DateTime @default(now()) @updatedAt @db.Timestamptz
 }
 
