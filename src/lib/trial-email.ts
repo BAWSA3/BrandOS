@@ -5,8 +5,9 @@ import { foundingNumber } from '@/lib/founding';
 
 /**
  * "Here's what your dashboard says" — sent when Stripe fires
- * customer.subscription.trial_will_end (≈3 days before the first charge on a
- * 7-day trial). Their real score + weakest phase, the charge date, and a
+ * customer.subscription.trial_will_end (≈3 days before the first charge: the
+ * end of a 7-day card trial, or of a code's 30 free days when a card was added
+ * during them). Their real score + weakest phase, the charge date, and a
  * one-click way to cancel. Transactional: one per trial (Stripe sends the
  * event once; the webhook is idempotent).
  */
@@ -49,7 +50,8 @@ export async function sendTrialEndingEmail(
     month: 'short',
     day: 'numeric',
   });
-  // Founding 100 (launch offer): card added during free access, first charge Dec 3
+  // Founding 100: a card added during free access (from Nov 2, a code's own 30
+  // days; checkout sets trial_end to their end), first charged on `endsAt`
   const founding = await foundingNumber(userId);
 
   const content: NewsletterContent = {

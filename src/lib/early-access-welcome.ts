@@ -1,5 +1,6 @@
 import { after } from 'next/server';
 import prisma from '@/lib/db';
+import { CODE_TRIAL } from '@/lib/early-access-rules';
 import {
   CAMPAIGNS,
   earlyAccessWelcomeContent,
@@ -68,7 +69,11 @@ export async function sendEarlyAccessWelcome(userId: string): Promise<WelcomeRes
 
   // Emailing the code's owner about someone else using it: say so.
   const usedBy = toOwner && givenTo && redeemer && givenTo !== redeemer ? redeemer : null;
-  const recipient = { handle: toOwner && givenTo ? givenTo : redeemer, usedBy };
+  const recipient = {
+    handle: toOwner && givenTo ? givenTo : redeemer,
+    usedBy,
+    codeTrial: CODE_TRIAL,
+  };
   return sendOnce(
     signup.id,
     CAMPAIGNS.earlyAccessWelcome,

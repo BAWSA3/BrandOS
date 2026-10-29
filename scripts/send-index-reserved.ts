@@ -139,16 +139,18 @@ async function main() {
     select: { emailSignupId: true },
   });
   const gotEarly = new Set(earlySends.map((s) => s.emailSignupId));
-  // Repliers' codes carry the Founding price; the Oct 30 list codes don't.
+  // Repliers' codes carry the Founding price. 'code' = got the Oct 30 codes
+  // email (not just any code: reserve-codes mints for people who didn't).
   const codes = await prisma.earlyAccessCode.findMany({
-    where: { redeemedAt: null, revokedAt: null },
-    select: { label: true, perkFoundingPrice: true },
+    where: { redeemedAt: null, revokedAt: null, perkFoundingPrice: true },
+    select: { label: true },
   });
-  const bareLabel = (l: string) => l.replace(/^@/, '').trim().toLowerCase();
-  const sentCode = new Set(codes.filter((c) => c.perkFoundingPrice).map((c) => bareLabel(c.label)));
-  const listCode = new Set(
-    codes.filter((c) => !c.perkFoundingPrice).map((c) => bareLabel(c.label))
-  );
+  const sentCode = new Set(codes.map((c) => c.label.replace(/^@/, '').trim().toLowerCase()));
+  const listSends = await prisma.emailSend.findMany({
+    where: { campaign: CAMPAIGNS.earlyAccessCodes },
+    select: { emailSignupId: true },
+  });
+  const gotListCode = new Set(listSends.map((s) => s.emailSignupId));
 
   // Invite-only (Nov 2): the code minted per reservation (reserve-codes, 051).
   // Before 051 this read fails; with INVITE_ONLY off it isn't needed.
@@ -179,7 +181,7 @@ async function main() {
       read: readOf.get(r.handle) ?? null,
       earlyAccess: (sentCode.has(r.handle)
         ? 'replied'
-        : listCode.has(r.handle)
+        : gotListCode.has(r.emailSignupId!)
           ? 'code'
           : gotEarly.has(r.emailSignupId!)
             ? 'sent'

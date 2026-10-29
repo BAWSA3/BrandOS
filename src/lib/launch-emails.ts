@@ -4,6 +4,7 @@ import { getArchetypeInfo } from '@/lib/archetype-descriptions';
 import { normalizeArchetypeName } from '@/lib/archetype-names';
 import { renderNewsletter, type NewsletterContent } from '@/lib/newsletter-template';
 import { formatNumber } from '@/lib/index-rules';
+import { CODE_TRIAL_DAYS, MEMBER_INVITES } from '@/lib/early-access-rules';
 
 /**
  * List email campaigns (the BrandOS Studio tease and what follows). Server-only.
@@ -113,7 +114,7 @@ function teaseModel(r: TeaseRecipient) {
     studio:
       'on <b>nov 2</b> i&#39;m opening <b>BrandOS Studio</b>: one dashboard that tracks your brand score over time, keeps you on-brand, and tells you what to fix after every post.',
     reply: 'hit reply with your new score and i&#39;ll tell you the one thing i&#39;d fix first.',
-    ps: 'on nov 2 everyone gets full access to BrandOS Studio, free until dec 3. no card needed. the first 100 people who add a card before dec 3 lock in $29/mo for life (nothing is charged until dec 3), plus a recorded teardown of their brand from me. after that, Pro is $39/mo.',
+    ps: 'BrandOS opens nov 2, by invite: a code gets you 30 days of full access from the day you use it, no card. the first 100 people who add a card lock in $29/mo for life (nothing is charged until their 30 days end), plus a recorded teardown of their brand from me. after that, Pro is $39/mo.',
   };
 }
 
@@ -244,21 +245,25 @@ export function renderStudioTease(
 }
 
 /**
- * "No. 0137 is yours. no code needed" (launch, Nov 2): everyone on the list
+ * "No. 0137 is yours. here's your code" (launch, Nov 2): everyone on the list
  * with an X handle had a number reserved for them (migration 045,
- * scripts/reserve-index-numbers.ts). One job: claim it, which means signing in
- * with X as that handle and joining. It picks up from the Oct 27 early access
- * email: the list went in first, now it's open to all of them, no code needed
- * (so INVITE_ONLY must be off when it goes). No price (GTM phase 2): the P.S.
- * is "free until dec 3, no card".
+ * scripts/reserve-index-numbers.ts). One job: get in with their code and claim
+ * it. From Nov 2 sign-up is invite-only, so the email carries the code minted
+ * for the reservation (`code` / `codeLink`); the button is that code's link,
+ * and claiming is the next line. No price (GTM phase 2): the P.S. is "30 days
+ * free from the day you use it, no card".
+ *
+ * Without a code (INVITE_ONLY off) it falls back to the open-access copy:
+ * "no code needed", free until dec 3.
  */
 /**
  * `read` is their latest public scan (score + archetype) when there is one.
  * `earlyAccess` picks the opening: 'sent' got the Oct 27 email, 'replied' was
  * sent a code they never used, 'code' got an unused code in the Oct 30 list
  * send, 'none' never got it.
- * Subject A/B: A = "@handle, No. 0137 is yours. no code needed",
- * B = "@handle, no code needed anymore". The variant rides utm_content.
+ * Subject A/B: A = "@handle, No. 0137 is yours. here's your code",
+ * B = "@handle, BrandOS is open. your code is inside". The variant rides
+ * utm_content.
  */
 export type ReservedRecipient = {
   handle: string;
@@ -283,23 +288,63 @@ export function readArchetype(raw: string | null | undefined): string | null {
   return getArchetypeInfo(name)?.name ?? null;
 }
 
-// Past this, "@handle, No. 0137 is yours. no code needed" runs over 50 characters.
+// Past this, "@handle, No. 0137 is yours. here's your code" runs over 50 characters.
 const SUBJECT_HANDLE_MAX = 13;
 
 function reservedModel(r: ReservedRecipient) {
   const no = formatNumber(r.number);
   const variant = r.variant ?? 'a';
-  const url = `${APP_URL}/index/claim?utm_source=email&utm_medium=email&utm_campaign=${CAMPAIGNS.indexReserved}&utm_content=${variant}`;
+  const utm = `utm_source=email&utm_medium=email&utm_campaign=${CAMPAIGNS.indexReserved}&utm_content=${variant}`;
+  const claimUrl = `${APP_URL}/index/claim?${utm}`;
   const read = r.read
     ? { score: Math.round(r.read.score), archetype: esc(r.read.archetype) }
     : null;
+  const index = `the Index is a book of creators brands can browse. every entry shows a real read, not a follower count. ${
+    read
+      ? `yours is <b>${read.score}/100, ${read.archetype}</b>. that&#39;s what a brand sees on your entry.`
+      : 'claiming runs your read, so you&#39;ll see what a brand sees on your entry.'
+  }`;
+  const reply = 'if your read looks wrong, reply and tell me why. i answer every one myself.';
+
+  // Invite-only (from Nov 2): their code gets them in, then they claim.
+  if (r.code && r.codeLink) {
+    const code = esc(r.code);
+    const yours =
+      r.handle.length > SUBJECT_HANDLE_MAX
+        ? `${no} is yours. here's your code`
+        : `@${r.handle}, ${no} is yours. here's your code`;
+    return {
+      no,
+      url: `${r.codeLink}?${utm}`,
+      read,
+      handle: esc(r.handle),
+      subject: variant === 'b' ? `@${r.handle}, BrandOS is open. your code is inside` : yours,
+      preheader:
+        'your number in the Index is held, and your code is inside. 30 days free, no card.',
+      opening: {
+        sent: 'last tuesday i emailed you about early access. everyone who replied got a code and went in first.',
+        replied:
+          'you replied last week and i sent you a code. here&#39;s yours below, in case it got buried.',
+        code: 'on friday i sent you an early access code. here&#39;s yours below, in case it got buried.',
+        none: 'BrandOS has been invite-only. the early access list went in first.',
+      }[r.earlyAccess ?? 'sent'],
+      open: `today BrandOS opens, still by invite. your code is <b>${code}</b>, and your number in the Index is held: <b>${no}</b>.`,
+      cta: 'Use my code →',
+      index,
+      claim: `once you&#39;re in, claim <b>${no}</b> at <a href="${claimUrl}" style="color:#0047FF;">mybrandos.app/index/claim</a>: pick your niches, write one line for brands. it takes a minute.`,
+      reply,
+      psLabel: '30 days free',
+      ps: 'your code gives you 30 days of BrandOS free from the day you use it, no card. unclaimed numbers are released dec 3.',
+    };
+  }
+
   const yours =
     r.handle.length > SUBJECT_HANDLE_MAX
       ? `${no} is yours. no code needed`
       : `@${r.handle}, ${no} is yours. no code needed`;
   return {
     no,
-    url,
+    url: claimUrl,
     read,
     handle: esc(r.handle),
     subject: variant === 'b' ? `@${r.handle}, no code needed anymore` : yours,
@@ -312,13 +357,10 @@ function reservedModel(r: ReservedRecipient) {
     }[r.earlyAccess ?? 'sent'],
     open: `today it&#39;s open to everyone on this list. no code needed. your number in the Index is held: <b>${no}</b>.`,
     cta: `Claim ${no} →`,
-    index: `the Index is a book of creators brands can browse. every entry shows a real read, not a follower count. ${
-      read
-        ? `yours is <b>${read.score}/100, ${read.archetype}</b>. that&#39;s what a brand sees on your entry.`
-        : 'claiming runs your read, so you&#39;ll see what a brand sees on your entry.'
-    }`,
+    index,
     claim: 'claiming takes a minute: sign in with X, pick your niches, write one line for brands.',
-    reply: 'if your read looks wrong, reply and tell me why. i answer every one myself.',
+    reply,
+    psLabel: 'Free until Dec 3',
     ps: 'full access is free until dec 3, no card. unclaimed numbers are released dec 3.',
   };
 }
@@ -398,7 +440,7 @@ export function renderIndexReservedEmail(
         </td></tr>
         <tr><td>${p(m.index)}${p(m.claim)}${p(m.reply)}${p('— Bawsa', 'margin-bottom:28px;')}</td></tr>
         <tr><td style="background:#FAF8F3;border:1px solid #DCD8CF;border-radius:10px;padding:20px 22px;">
-          ${label('Free until Dec 3', '#0047FF')}${p(`<b>p.s.</b> ${m.ps}`, 'font-size:15px;margin:0;')}
+          ${label(m.psLabel, '#0047FF')}${p(`<b>p.s.</b> ${m.ps}`, 'font-size:15px;margin:0;')}
         </td></tr>
         <tr><td align="center" style="padding:30px 0 0 0;font-family:${SANS};font-size:12px;line-height:1.6;color:#9A968E;">
           You're getting this because you signed up at <a href="${APP_URL}" style="color:#9A968E;">mybrandos.app</a>.<br>
@@ -542,6 +584,8 @@ export function renderEarlyAccessEmail(
 export type EarlyAccessWelcomeRecipient = {
   handle: string | null;
   usedBy?: string | null;
+  /** Invite-only trial on (NEXT_PUBLIC_CODE_TRIAL): name the 30 days and the invites. */
+  codeTrial?: boolean;
 };
 
 function earlyAccessWelcomeModel(r: EarlyAccessWelcomeRecipient) {
@@ -562,9 +606,12 @@ function earlyAccessWelcomeModel(r: EarlyAccessWelcomeRecipient) {
     ],
     cta: 'Do today&#39;s move →',
     url: `${APP_URL}/dashboard?utm_source=email&utm_medium=email&utm_campaign=${CAMPAIGNS.earlyAccessWelcome}`,
+    trial: r.codeTrial
+      ? `your ${CODE_TRIAL_DAYS} days started today: full access, free, no card. you also have ${MEMBER_INVITES} invites to hand out. they&#39;re on your dashboard, one link each.`
+      : null,
     small:
       'small stuff: ⌘K (ctrl+K on windows) jumps anywhere. if you run more than one account, add it from Brand.',
-    ask: 'one ask: after you&#39;ve used it twice, reply with the one thing that was confusing or felt useless. one line is plenty. that&#39;s what i&#39;m fixing before launch.',
+    ask: `one ask: after you&#39;ve used it twice, reply with the one thing that was confusing or felt useless. one line is plenty. that&#39;s what i&#39;m fixing ${r.codeTrial ? 'next' : 'before launch'}.`,
     ps: usedBy ? `(if ${usedBy} isn&#39;t you, reply and i&#39;ll sort you out.)` : null,
   };
 }
@@ -582,6 +629,7 @@ export function earlyAccessWelcomeContent(
       { type: 'text', content: m.opening },
       { type: 'text', content: m.steps.map((t, i) => `${i + 1}. ${t}`).join('<br/>') },
       { type: 'cta', content: m.cta, url: m.url },
+      ...(m.trial ? [{ type: 'text' as const, content: m.trial }] : []),
       { type: 'text', content: m.small },
       { type: 'text', content: `${m.ask}<br/><br/>— Bawsa` },
       ...(m.ps ? [{ type: 'text' as const, content: m.ps }] : []),
@@ -625,7 +673,7 @@ export function renderEarlyAccessWelcomeEmail(
           <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 24px 0;"><tr><td style="background:#0047FF;">
             <a href="${m.url}" style="display:inline-block;padding:13px 22px;font-family:${SANS};font-size:15px;font-weight:bold;color:#FFFFFF;text-decoration:none;">${m.cta}</a>
           </td></tr></table>
-          ${p(m.small, 'font-size:15px;color:#4A4741;')}${p(m.ask)}
+          ${m.trial ? p(m.trial) : ''}${p(m.small, 'font-size:15px;color:#4A4741;')}${p(m.ask)}
           ${p('— Bawsa', m.ps ? '' : 'margin-bottom:0;')}${m.ps ? p(m.ps, 'font-size:15px;') : ''}
         </td></tr>
         <tr><td align="center" style="padding:30px 0 0 0;font-family:${SANS};font-size:12px;line-height:1.6;color:#9A968E;">
@@ -664,14 +712,14 @@ function earlyAccessCodeModel(r: EarlyAccessCodeRecipient) {
       variant === 'b' || !r.handle
         ? "you're in early. here's your code"
         : `@${r.handle}, here's your early access code`,
-    preheader: 'BrandOS opens to everyone on nov 2. you can start today.',
+    preheader: 'your own code to BrandOS. 30 days free, no card.',
     who: r.handle ? `@${esc(r.handle)}` : 'there',
-    intro: `BrandOS opens to everyone on nov 2. you&#39;re on the list, so you can start now. here&#39;s your code: <b>${shown}</b>`,
+    intro: `BrandOS is invite-only, and you&#39;re on the list, so here&#39;s your own code: <b>${shown}</b>`,
     cta: 'Get in early →',
     url: `${APP_URL}/i/${shown}?utm_source=email&utm_medium=email&utm_campaign=${CAMPAIGNS.earlyAccessCodes}&utm_content=${variant}`,
     how: 'the button signs you in with X and applies the code for you. or go to mybrandos.app/signup, tap &quot;Have an early-access code?&quot; and paste it.',
     close:
-      'it&#39;s free until dec 3, no card. the code is single-use and just for you. reply if anything breaks, i read every one.',
+      'your code gives you 30 days free from the day you use it, no card. it&#39;s single-use and just for you. reply if anything breaks, i read every one.',
   };
 }
 

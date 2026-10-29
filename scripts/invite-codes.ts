@@ -21,10 +21,13 @@
  *   npx tsx --tsconfig tsconfig.json --env-file=<env> scripts/invite-codes.ts reserve-codes [--dry] [--out file.csv]
  *
  * reserve-codes (051): one code per unclaimed Index reservation whose holder
- * isn't a member yet (same perks as tester codes: all on). Sign-up is
- * invite-only from Nov 2, so the Nov 2 Index email carries this code; it's how
- * the reserved spot is honored. Idempotent: EarlyAccessCode."reservedHandle"
- * is UNIQUE, so a re-run mints only for reservations without one and prints
+ * isn't a member yet. Sign-up is invite-only from Nov 2, so the Nov 2 Index
+ * email carries this code; it's how the reserved spot is honored. One code per
+ * person (Bawsa, Oct 28): an unused code already given to that handle (a
+ * replier's code, or the Oct 30 list code) is reused, so it keeps its perks.
+ * Only someone with no code gets a new one, with list-code perks (tester only:
+ * no Founding price, no early Index). Idempotent: EarlyAccessCode."reservedHandle"
+ * is UNIQUE, so a re-run only fills reservations without one and prints
  * every reservation's code (old and new). --out writes the same as CSV
  * (handle,number,email,code,link) for the Email session. --dry mints nothing.
  *
@@ -212,7 +215,9 @@ async function reserveCodes() {
       select: { code: true, reservedHandle: true, redeemedAt: true, revokedAt: true },
     }),
     prisma.emailSignup.findMany({
-      where: { id: { in: reservations.flatMap((r) => (r.emailSignupId ? [r.emailSignupId] : [])) } },
+      where: {
+        id: { in: reservations.flatMap((r) => (r.emailSignupId ? [r.emailSignupId] : [])) },
+      },
       select: { id: true, email: true },
     }),
   ]);
@@ -221,10 +226,18 @@ async function reserveCodes() {
     ...entries.map((e) => e.handle),
   ]);
   const codeOf = new Map(existing.map((c) => [c.reservedHandle!, c]));
+  // Unused codes already handed to a handle ("@handle"), a replier's first.
+  const handed = await prisma.earlyAccessCode.findMany({
+    where: { reservedHandle: null, redeemedAt: null, revokedAt: null, label: { startsWith: '@' } },
+    select: { id: true, code: true, label: true, perkFoundingPrice: true },
+    orderBy: { perkFoundingPrice: 'asc' }, // later wins: Founding codes over list codes
+  });
+  const handedTo = new Map(handed.map((c) => [c.label.slice(1).trim().toLowerCase(), c]));
   const emailOf = new Map(signups.map((s) => [s.id, s.email]));
 
   const rows: string[] = ['handle,number,email,code,link'];
   let minted = 0;
+  let reused = 0;
   let skipped = 0;
   for (const r of reservations) {
     if (member.has(r.handle)) {
@@ -232,12 +245,35 @@ async function reserveCodes() {
       continue;
     }
     let code = codeOf.get(r.handle)?.code ?? null;
+    const theirs = code ? undefined : handedTo.get(r.handle.toLowerCase());
+    if (theirs) {
+      if (dry) {
+        code = theirs.code;
+        reused++;
+      } else {
+        const { count } = await prisma.earlyAccessCode.updateMany({
+          where: { id: theirs.id, reservedHandle: null, redeemedAt: null },
+          data: { reservedHandle: r.handle },
+        });
+        if (count === 1) {
+          code = theirs.code;
+          reused++;
+        }
+      }
+    }
     if (!code && !dry) {
       for (;;) {
         const fresh = generateCode((n) => randomBytes(n));
         try {
           await prisma.earlyAccessCode.create({
-            data: { code: fresh, label: `@${r.handle}`, reservedHandle: r.handle },
+            data: {
+              code: fresh,
+              label: `@${r.handle}`,
+              reservedHandle: r.handle,
+              perkIndex: false,
+              perkFoundingPrice: false,
+              perkTester: true,
+            },
             select: { id: true },
           });
           code = fresh;
@@ -260,7 +296,13 @@ async function reserveCodes() {
     }
     const email = r.emailSignupId ? (emailOf.get(r.emailSignupId) ?? '') : '';
     rows.push(
-      [r.handle, r.number, email, code ? formatCode(code) : '', code ? inviteLink(code, origin) : '']
+      [
+        r.handle,
+        r.number,
+        email,
+        code ? formatCode(code) : '',
+        code ? inviteLink(code, origin) : '',
+      ]
         .map((v) => `${v}`.replace(/[",\n]/g, ' '))
         .join(',')
     );
@@ -274,7 +316,7 @@ async function reserveCodes() {
     console.log(rows.join('\n'));
   }
   console.log(
-    `\nunclaimed reservations: ${reservations.length} | already members (no code): ${skipped} | minted now: ${minted}${dry ? ' (dry run: nothing minted)' : ''}`
+    `\nunclaimed reservations: ${reservations.length} | already members (no code): ${skipped} | reused their code: ${reused} | minted now: ${minted}${dry ? ' (dry run: nothing written)' : ''}`
   );
 }
 
