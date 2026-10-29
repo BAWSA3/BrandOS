@@ -37,6 +37,46 @@ changes are written into the calendar, rules and build table below:
 8. **Design-partner track** (Oct 24): 3–5 brands/agencies running KOL campaigns get a free,
    hands-on campaign through Dec 3 in exchange for a case study. See the section below
 
+## Positioning: the record, not the workspace (Oct 29, approved by Bawsa)
+
+Written after the Creator Wire deep dive (`docs/research/2026-10-29-deep-dive-creator-wire.md`).
+Campaign workspaces (Creator Wire), curated marketplaces (Kaito Studio) and X's own matching
+(Creator Connect) all run or pick campaigns. BrandOS doesn't. It's the public record they, and
+any brand, can read. Same split as a credit bureau and a lender: the lender does the deal; the
+record follows the person.
+
+> **BrandOS is the open record of creator reputation: who's real, who fits, and who delivered.
+> Creators own it, and anyone can read it.**
+
+| Line                                | Them                               | BrandOS                                                       | Say it like this                                                      |
+| ----------------------------------- | ---------------------------------- | ------------------------------------------------------------- | --------------------------------------------------------------------- |
+| Open vs closed                      | Private lists you apply to         | Any creator who opts in, browsable in public                  | "you don't apply to be on the record. you join it."                   |
+| Creator-owned vs platform-owned     | Tiers live inside their tool       | The read, the number and the track record go with the creator | "your reputation shouldn't belong to whoever ran your last campaign." |
+| Neutral vs paid to pick             | Paid by clients (and deposit cuts) | No stake in which creator gets picked                         | "nobody pays to rank on brandos."                                     |
+| Makes creators better vs sorts them | Accept or reject                   | Reads, coaching and writing tools                             | "they pick creators. we make creators worth picking."                 |
+
+**By audience**
+
+- **Creators:** "agencies have private lists. you're on them or you're not, and you never see
+  why. brandos is the list you can see, join, and take with you."
+- **Brands and agencies:** "check any creator before you brief them: a public read on fit, plus
+  deals other brands confirmed. use it with whatever tool runs your campaign." BrandOS sits
+  alongside their campaign tool; we never ask them to switch.
+- **Campaign workspaces (if we ever talk to them):** "your creators apply to prove their numbers.
+  a brandos read is that proof." Supplier, not rival.
+
+**Don't**
+
+- Name or attack a competitor in public. Say "private agency lists", never their name.
+- Claim campaign management: no "run your campaigns on brandos". Payouts, approvals and
+  reporting are their strength.
+- Promise a track record before it exists: "brands confirm your deals" goes in posts only once
+  the Nov 12 confirmation step is live.
+
+**What it depends on:** the Index filling up (so "open" is real); confirmed deals shipping (#211,
+migration 046, the Nov 12 step); one design-partner case study by Dec 3 showing a brand used
+the record to pick creators alongside its own campaign tool.
+
 ## The framework: Problem → Proof → Product → People → Price
 
 Every post, email and DM belongs to one of five jobs, and they run **in this order**. Nobody
