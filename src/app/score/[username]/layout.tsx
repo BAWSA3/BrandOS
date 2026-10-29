@@ -14,7 +14,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   // Dynamic OG image URL - points to a route that generates the image
   // For now, we'll use a static OG image with the branding
-  const ogImageUrl = `https://mybrandos.app/og-home.png`;
+  const ogImageUrl = `https://mybrandos.app/api/og/home`;
 
   return {
     title,
