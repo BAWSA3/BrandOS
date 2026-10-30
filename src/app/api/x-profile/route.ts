@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { profileCache, notFoundCache } from '@/lib/cache';
 import { checkRateLimit, getClientIdentifier, rateLimiters } from '@/lib/rate-limit';
+import { isInternalRequest } from '@/lib/internal-auth';
 import prisma from '@/lib/db';
 import { normalizeXHandle } from '@/lib/safe-input';
 
@@ -197,9 +198,11 @@ function persistToDbCache(usernameLower: string, profile: XProfile) {
 // ---------------------------------------------------------------------------
 export async function POST(request: NextRequest) {
   try {
-    // Rate limiting: 30 requests per minute per IP
+    // Rate limiting: 30 requests per minute per IP (first-party server calls skip it)
     const clientId = getClientIdentifier(request);
-    const { limited, resetIn } = checkRateLimit(clientId + ':x-profile', rateLimiters.standard);
+    const { limited, resetIn } = isInternalRequest(request)
+      ? { limited: false, resetIn: 0 }
+      : checkRateLimit(clientId + ':x-profile', rateLimiters.standard);
 
     if (limited) {
       return NextResponse.json(

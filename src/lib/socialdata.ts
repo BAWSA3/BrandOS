@@ -23,6 +23,8 @@ async function socialDataFetch(path: string): Promise<Response> {
       Authorization: `Bearer ${apiKey}`,
       Accept: 'application/json',
     },
+    // fail fast under load instead of hanging the scan (callers already catch)
+    signal: AbortSignal.timeout(20_000),
   });
 }
 
