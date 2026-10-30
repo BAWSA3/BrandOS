@@ -15,6 +15,7 @@ import { fetchScoringTweets, type ScoringTweets } from '@/lib/score-tweets';
 import { applyMeasuredSignals, SCORER_VERSION } from '@/lib/score-signals';
 import { scoreSystem, type AccountKind } from '@/lib/score-framing';
 import { trackedKind } from '@/lib/tracked-accounts';
+import { internalHeaders } from '@/lib/internal-auth';
 
 // The homepage brand score (profile + recent posts -> Claude Haiku -> archetype
 // engine), shared by POST /api/x-brand-score and the BrandOS MCP scan_brand tool.
@@ -35,7 +36,8 @@ async function scoreWithClaude(prompt: string, kind: AccountKind): Promise<strin
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) throw new Error('ANTHROPIC_API_KEY not configured');
 
-  const anthropic = new Anthropic({ apiKey });
+  // 30s, one retry: a slow API falls back to the heuristic score instead of hanging
+  const anthropic = new Anthropic({ apiKey, timeout: 30_000, maxRetries: 1 });
   // Structured outputs live on the beta path in this SDK version (0.71).
   const message = await anthropic.beta.messages.create({
     model: 'claude-haiku-4-5-20251001',
@@ -62,10 +64,13 @@ async function scoreWithClaude(prompt: string, kind: AccountKind): Promise<strin
 
 export async function fetchProfile(username: string, origin: string): Promise<XProfileData | null> {
   try {
+    // first-party: our callers are BotID + rate-limited, so skip x-profile's
+    // per-IP cap (server calls share a few IPs and would trip it under a burst)
     const response = await fetch(`${origin}/api/x-profile`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...internalHeaders() },
       body: JSON.stringify({ username }),
+      signal: AbortSignal.timeout(25_000),
     });
 
     if (!response.ok) return null;
