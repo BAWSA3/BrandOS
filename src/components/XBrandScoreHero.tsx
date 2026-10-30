@@ -49,7 +49,7 @@ import { LANDING } from '@/lib/landing-copy';
 import type { LandingData } from '@/lib/landing-data';
 import { handleInputValue } from '@/lib/safe-input';
 import { ScanCounter, ScanLimitNotice } from '@/components/ScanLimitNotice';
-import type { QuotaView } from '@/lib/scan-quota-rules';
+import { limitCopy, type QuotaView } from '@/lib/scan-quota-rules';
 import { CODE_TRIAL, CODE_TRIAL_DAYS, joinHref } from '@/lib/early-access-rules';
 
 // Background style options for easy switching
@@ -790,6 +790,9 @@ export default function XBrandScoreHero({
       const fresh = await loadQuota();
       if (!fresh || (!fresh.unlimited && fresh.left === 0)) {
         setLimitHit(true);
+        // the field form shows ScanLimitNotice; the classic form shows this line
+        const c = limitCopy(fresh ?? quota, new Date());
+        setError(`${c.title} ${c.body}`);
         return;
       }
     }
