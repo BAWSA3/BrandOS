@@ -11,7 +11,8 @@ import { cleanFeedback } from '@/lib/early-access-rules';
  * POST /api/early-access/feedback { message, page? } — "Send feedback to
  * Bawsa" for early-access testers. Signed in, with a redeemed code that has the
  * tester perk. Stored (TesterFeedback) and emailed to the team inbox, escaped
- * and length-capped. 5 messages an hour per tester.
+ * and length-capped, with Reply-To set to the tester so Bawsa can answer from
+ * the inbox. 5 messages an hour per tester.
  */
 export async function POST(request: NextRequest) {
   const user = await getUser();
@@ -46,18 +47,28 @@ export async function POST(request: NextRequest) {
   }
 
   const who = user.xUsername ? `@${user.xUsername}` : (user.email ?? user.id);
+  // Reply goes straight to the tester (only a plain, single-line address).
+  const email =
+    user.email && /^[^\s@<>,;"]+@[^\s@<>,;"]+\.[^\s@<>,;"]{2,}$/.test(user.email)
+      ? user.email
+      : null;
   await sendEmail(
     teamInbox(),
     `[Tester feedback] ${who.replace(/[\r\n]+/g, ' ').slice(0, 80)}`,
     [
       `**Feedback from ${escapeHtml(who)}**`,
+      email
+        ? `Email: ${escapeHtml(email)} (hit Reply to answer them)`
+        : 'No email on file: reply on X.',
       page ? `Page: ${escapeHtml(page)}` : '',
       ``,
       ...escapeHtml(message).split('\n'),
       ``,
       `---`,
       `Sent ${new Date().toISOString()}`,
-    ].join('\n')
+    ].join('\n'),
+    undefined,
+    email ? { replyTo: email } : {}
   ).catch((e) => console.error('[early-access] feedback email failed', e));
 
   return NextResponse.json({ ok: true });
