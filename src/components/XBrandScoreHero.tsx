@@ -48,6 +48,8 @@ import {
 import { LANDING } from '@/lib/landing-copy';
 import type { LandingData } from '@/lib/landing-data';
 import { handleInputValue } from '@/lib/safe-input';
+import { ScanCounter, ScanLimitNotice } from '@/components/ScanLimitNotice';
+import type { QuotaView } from '@/lib/scan-quota-rules';
 import { CODE_TRIAL, CODE_TRIAL_DAYS, joinHref } from '@/lib/early-access-rules';
 
 // Background style options for easy switching
@@ -741,6 +743,23 @@ export default function XBrandScoreHero({
   } | null>(null);
   const apiCompleteRef = useRef(false);
   const apiErrorRef = useRef<string | null>(null);
+  // Daily scan limit (src/lib/scan-quota.ts): the counter + the notice when used up
+  const [quota, setQuota] = useState<QuotaView | null>(null);
+  const [limitHit, setLimitHit] = useState(false);
+  const loadQuota = useCallback(async (): Promise<QuotaView | null> => {
+    try {
+      const r = await fetch('/api/scan-quota', { cache: 'no-store' });
+      const q = r.ok ? ((await r.json()) as QuotaView) : null;
+      if (q) setQuota(q);
+      return q;
+    } catch {
+      return null;
+    }
+  }, []);
+  const isPreview = !!previewReveal;
+  useEffect(() => {
+    if (!isPreview) loadQuota();
+  }, [loadQuota, isPreview]);
   const rawTweetsRef = useRef<typeof rawTweets>([]);
   const autoStartTriggered = useRef(false);
 
@@ -764,6 +783,17 @@ export default function XBrandScoreHero({
     }
 
     setError('');
+    setLimitHit(false);
+
+    // Used up today: say so here instead of starting a read the server would refuse
+    if (quota && !quota.unlimited && quota.left === 0) {
+      const fresh = await loadQuota();
+      if (!fresh || (!fresh.unlimited && fresh.left === 0)) {
+        setLimitHit(true);
+        return;
+      }
+    }
+
     setIsValidating(true);
 
     // First, validate that the profile exists before starting the journey
@@ -814,23 +844,8 @@ export default function XBrandScoreHero({
       apiCompleteRef.current = false;
       apiErrorRef.current = null;
 
-      // Fetch tweets in parallel (non-blocking, requires Basic tier)
-      fetch('/api/x-tweets', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: username.trim(), maxResults: 50 }),
-      })
-        .then(async (res) => {
-          if (!res.ok) return;
-          const data = await res.json();
-          if (data.tweets?.length) {
-            setRawTweets(data.tweets);
-            rawTweetsRef.current = data.tweets;
-          }
-        })
-        .catch(() => {});
-
-      // Start full brand score API call in background
+      // Start full brand score API call in background. It returns the posts it
+      // scored from, so they aren't fetched (and paid for) a second time.
       fetch('/api/x-brand-score', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -839,10 +854,32 @@ export default function XBrandScoreHero({
         .then(async (response) => {
           const data = await response.json();
           if (!response.ok) {
+            if (response.status === 429 && data.code === 'SCAN_LIMIT') {
+              setQuota((q) => (q && !q.unlimited ? { ...q, used: q.limit, left: 0 } : q));
+              setLimitHit(true);
+            }
             throw new Error(data.error || 'Failed to analyze profile');
           }
+          let tweets: typeof rawTweets = Array.isArray(data.tweets) ? data.tweets : [];
+          if (!tweets.length) {
+            // a cached score carries no posts: fetch them (usually a cache hit)
+            tweets = await fetch('/api/x-tweets', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ username: username.trim(), maxResults: 50 }),
+            })
+              .then((res) => (res.ok ? res.json() : null))
+              .then((d) => (Array.isArray(d?.tweets) ? d.tweets : []))
+              .catch(() => []);
+          }
+          if (tweets.length) {
+            setRawTweets(tweets);
+            rawTweetsRef.current = tweets;
+          }
+          delete data.tweets;
           apiResultRef.current = data;
           apiCompleteRef.current = true;
+          loadQuota();
 
           // Also fetch brand identity for Brand DNA generation
           if (data.profile) {
@@ -1110,18 +1147,25 @@ export default function XBrandScoreHero({
           {isValidating ? 'Reading…' : 'Read my brand →'}
         </Button>
       )}
-      {error && (
-        <p
-          role="alert"
-          style={{
-            margin: 0,
-            fontFamily: SYSTEM_FONTS.plex,
-            fontSize: 13,
-            color: '#0E0E0E',
-          }}
-        >
-          {error}
-        </p>
+      {limitHit && quota && !quota.unlimited ? (
+        <ScanLimitNotice quota={quota} />
+      ) : (
+        <>
+          {error && (
+            <p
+              role="alert"
+              style={{
+                margin: 0,
+                fontFamily: SYSTEM_FONTS.plex,
+                fontSize: 13,
+                color: '#0E0E0E',
+              }}
+            >
+              {error}
+            </p>
+          )}
+          <ScanCounter quota={quota} />
+        </>
       )}
     </form>
   );

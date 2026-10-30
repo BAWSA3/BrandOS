@@ -25,6 +25,7 @@
     "test:index": "npx tsx scripts/test-index.ts",
     "test:field": "npx tsx scripts/test-field.ts",
     "test:people": "npx tsx scripts/test-people.ts",
+    "test:scan-quota": "npx tsx scripts/test-scan-quota.ts",
     "test:hashtags": "npx tsx scripts/test-hashtags.ts",
     "test:early-access": "npx tsx scripts/test-early-access.ts",
     "test:moves": "npx tsx scripts/test-moves.ts",

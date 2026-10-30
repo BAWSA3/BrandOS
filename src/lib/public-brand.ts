@@ -5,6 +5,7 @@ import { GUARD_PREAMBLE, wrapUntrusted } from '@/lib/prompt-safety';
 import { extractJson } from '@/lib/score-schemas';
 import { getArchetypeInfo } from '@/lib/archetype-descriptions';
 import { replyText } from '@/lib/model-text';
+import { refundScan, takeScan, type ScanSubject } from '@/lib/scan-quota';
 
 /**
  * The public brand page (mybrandos.app/@handle) and its "Compare your brand"
@@ -24,13 +25,31 @@ export class BrandLookupError extends Error {
   }
 }
 
-/** Stored public read (free) or a fresh scan. Throws BrandLookupError. */
-export async function readOrScan(rawHandle: string, origin: string): Promise<ProfileRead> {
+/** The daily scan limit was hit before a fresh scan (the route answers 429). */
+export class ScanLimitError extends Error {
+  constructor() {
+    super('Daily scan limit reached');
+  }
+}
+
+/**
+ * Stored public read (free) or a fresh scan. Throws BrandLookupError, or
+ * ScanLimitError when `quota` is given and its daily limit is used up. Only a
+ * fresh scan counts; a cached score or a failed scan gives it back.
+ */
+export async function readOrScan(
+  rawHandle: string,
+  origin: string,
+  quota?: ScanSubject
+): Promise<ProfileRead> {
   const handle = rawHandle.replace(/^@/, '');
   if (!HANDLE_RE.test(handle)) throw new BrandLookupError('That is not a valid X handle.', 400);
   const stored = await publicRead(handle);
   if (stored) return stored;
+  if (quota && !(await takeScan(quota))) throw new ScanLimitError();
   const result = await computeBrandScore(handle.toLowerCase(), origin);
+  const cached = (result.body.meta as { cached?: boolean } | undefined)?.cached;
+  if (quota && (result.status !== 200 || cached)) await refundScan(quota);
   if (result.status === 404) throw new BrandLookupError(`Couldn't find @${handle} on X.`, 404);
   if (result.status !== 200) throw new BrandLookupError('The scan failed. Try again shortly.', 502);
   const profile = result.body.profile as { username?: string } | undefined;

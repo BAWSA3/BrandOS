@@ -1631,3 +1631,16 @@ model PersonToKnow {
   @@index([userId, weekOf])
   @@index([userId, handle])
 }
+
+// Daily fresh-scan count per subject (migration 054): 'u:<userId>' or
+// 'd:<sha256 of ip + user agent>' for signed-out visitors. Rules in
+// src/lib/scan-quota-rules.ts. Paid members and admins never get a row.
+model ScanQuota {
+  subject   String
+  day       DateTime @db.Date
+  count     Int      @default(0)
+  updatedAt DateTime @default(now()) @db.Timestamptz
+
+  @@id([subject, day])
+  @@index([day])
+}

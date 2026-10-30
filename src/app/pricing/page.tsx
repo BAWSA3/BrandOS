@@ -286,8 +286,9 @@ export default async function PricingPage({
           </section>
         </div>
 
-        {/* Founding 100 */}
+        {/* Founding 100 (the daily scan limit links here: /pricing#founding) */}
         <section
+          id="founding"
           className="mt-5 grid grid-cols-1 items-center gap-4 border bg-[#FAF8F3] p-6 md:grid-cols-[auto_1fr] md:gap-10 md:p-8"
           style={{ borderColor: 'rgba(14,14,14,0.1)' }}
         >
