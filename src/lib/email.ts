@@ -103,7 +103,8 @@ export async function sendEmail(
   scoreCardImage?: string,
   // Marketing (the welcome sequence): needs the postal address, honors
   // unsubscribes and carries the unsubscribe link + one-click headers.
-  opts: { marketing?: boolean } = {}
+  // replyTo: where hitting Reply goes (e.g. the tester behind a feedback note).
+  opts: { marketing?: boolean; replyTo?: string } = {}
 ): Promise<{ success: boolean; id?: string; error?: string }> {
   const resend = getResendClient();
 
@@ -210,6 +211,7 @@ export async function sendEmail(
       html: out.html,
       text: out.text,
       ...(opts.marketing ? { headers: unsubscribeHeaders(to) } : {}),
+      ...(opts.replyTo ? { replyTo: opts.replyTo } : {}),
       ...(attachments.length > 0 ? { attachments } : {}),
     });
 
