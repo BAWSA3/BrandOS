@@ -375,8 +375,9 @@ async function generatePersonalitySummary(
         'x-api-key': process.env.ANTHROPIC_API_KEY || '',
         'anthropic-version': '2023-06-01',
       },
+      signal: AbortSignal.timeout(20_000),
       body: JSON.stringify({
-        model: 'claude-3-haiku-20240307',
+        model: 'claude-haiku-4-5-20251001',
         max_tokens: 250,
         messages: [
           {
@@ -406,7 +407,11 @@ Use second person ("You..."). Be direct, specific, no fluff. Reference content p
 
     if (response.ok) {
       const data = await response.json();
-      const rawText: string = data.content?.[0]?.text || '';
+      const rawText: string =
+        (data.content as { type: string; text?: string }[] | undefined)
+          ?.filter((b) => b.type === 'text')
+          .map((b) => b.text ?? '')
+          .join('') || '';
       if (rawText) {
         return stripPromptLeaks(rawText);
       }
