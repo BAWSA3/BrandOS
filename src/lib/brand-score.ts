@@ -36,8 +36,8 @@ async function scoreWithClaude(prompt: string, kind: AccountKind): Promise<strin
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) throw new Error('ANTHROPIC_API_KEY not configured');
 
-  // 30s, one retry: a slow API falls back to the heuristic score instead of hanging
-  const anthropic = new Anthropic({ apiKey, timeout: 30_000, maxRetries: 1 });
+  // 60s, one retry (reads take ~25-30s): a stuck API falls back to the heuristic score
+  const anthropic = new Anthropic({ apiKey, timeout: 60_000, maxRetries: 1 });
   // Structured outputs live on the beta path in this SDK version (0.71).
   const message = await anthropic.beta.messages.create({
     model: 'claude-haiku-4-5-20251001',
