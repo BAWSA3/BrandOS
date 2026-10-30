@@ -28,4 +28,4 @@ async function handlePost(request: NextRequest) {
 }
 
 export const POST = withRateLimit(handlePost, rateLimiters.ai);
-export const maxDuration = 90;
+export const maxDuration = 150;
