@@ -3,6 +3,8 @@
  * (migration 040). Pure: no DB, no network — `npm run test:growth` covers it.
  */
 
+import { isArticlePost } from '@/lib/post-formats';
+
 export interface PostRow {
   tweetId: string;
   text: string;
@@ -27,8 +29,9 @@ export interface SnapshotRow {
   samplePosts: number;
 }
 
-export type Format = 'media' | 'thread' | 'quote' | 'text';
+export type Format = 'article' | 'media' | 'thread' | 'quote' | 'text';
 export const FORMAT_LABEL: Record<Format, string> = {
+  article: 'Articles',
   media: 'With media',
   thread: 'Threads',
   quote: 'Quote posts',
@@ -41,6 +44,7 @@ const engaged = (p: PostRow) => p.likes + p.replies + p.reposts + p.quotes;
 export const postRate = (p: PostRow) => (p.views > 0 ? (engaged(p) / p.views) * 100 : null);
 
 export function formatOf(p: PostRow): Format {
+  if (isArticlePost(p.text)) return 'article';
   if (/🧵|\b1\s?\/\s?\d+\b|\(1\/\d+\)/.test(p.text)) return 'thread';
   if (p.media.length > 0) return 'media';
   if (p.isQuote) return 'quote';
@@ -56,7 +60,7 @@ export function formatPerformance(posts: PostRow[]) {
     share: number;
     posts: number;
   }[] = [];
-  for (const format of ['media', 'thread', 'quote', 'text'] as Format[]) {
+  for (const format of ['article', 'media', 'thread', 'quote', 'text'] as Format[]) {
     const group = posts.filter((p) => formatOf(p) === format);
     if (!group.length) continue;
     const viewed = group.filter((p) => p.views > 0);
