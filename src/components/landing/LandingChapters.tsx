@@ -1,5 +1,6 @@
 'use client';
 
+import { FREE_FOR_EVERYONE } from '@/lib/free-mode';
 import Link from 'next/link';
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import {
@@ -1809,6 +1810,8 @@ export default function LandingChapters({
           .lc-founding .motion-curtain { background: ${KLEIN}; }
           .lc-index-grid { display: grid; gap: 16px; margin-top: 24px; align-items: start; grid-template-columns: 1fr 1fr; grid-template-areas: 'info found' 'faq found'; }
           @media (max-width: 719px) { .lc-index-grid { grid-template-columns: 1fr; grid-template-areas: 'info' 'found' 'faq'; } }
+          .lc-index-grid.lc-index-free { grid-template-areas: 'info faq'; }
+          @media (max-width: 719px) { .lc-index-grid.lc-index-free { grid-template-areas: 'info' 'faq'; } }
           @media (max-width: 899px) { .lc-rail { display: none !important; } .lc-span2 { grid-column: auto !important; } }
           @media (prefers-reduced-motion: reduce) {
             .lc-press, .lc-stamp { animation: none; }
@@ -1943,7 +1946,7 @@ export default function LandingChapters({
                   {I.readsNote}
                 </FieldText>
               )}
-              <div className="lc-index-grid">
+              <div className={`lc-index-grid${FREE_FOR_EVERYONE ? ' lc-index-free' : ''}`}>
                 <div style={{ gridArea: 'info', minWidth: 0 }}>
                   <Panel padding={24}>
                     <p style={{ margin: 0, fontSize: 17, lineHeight: 1.6 }}>{I.body}</p>
@@ -1976,10 +1979,12 @@ export default function LandingChapters({
                     </div>
                   </Panel>
                 </div>
-                {/* phones: the offer comes before the questions */}
-                <div style={{ gridArea: 'found', minWidth: 0 }}>
-                  <FoundingCard data={data} />
-                </div>
+                {/* phones: the offer comes before the questions (none while BrandOS is free) */}
+                {!FREE_FOR_EVERYONE && (
+                  <div style={{ gridArea: 'found', minWidth: 0 }}>
+                    <FoundingCard data={data} />
+                  </div>
+                )}
                 <div style={{ gridArea: 'faq', minWidth: 0 }}>
                   <Faq />
                 </div>

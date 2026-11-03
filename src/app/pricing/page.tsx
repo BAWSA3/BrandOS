@@ -12,6 +12,7 @@ import StartTrialButton from '@/components/billing/StartTrialButton';
 import ManageBillingButton from './ManageBillingButton';
 import { FieldScreen } from '@/components/system';
 import { fieldSystemOn } from '@/lib/field/switch-server';
+import { FREE_FOR_EVERYONE } from '@/lib/free-mode';
 
 // Launch pricing (docs/LAUNCH-PLAN.md, offer decided 2026-10-22): full access
 // free for everyone until Dec 3; Founding 100 add a card before then to keep
@@ -22,10 +23,12 @@ import { fieldSystemOn } from '@/lib/field/switch-server';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'Pricing · BrandOS',
-  description: CODE_TRIAL
-    ? 'Know your reputation score before brands check it. BrandOS is invite-only: a code is 30 days free, no card; the first 100 keep $29/month for life.'
-    : 'Know your reputation score before brands check it. BrandOS Studio is free for everyone until Dec 3; the first 100 keep $29/month for life.',
+  title: FREE_FOR_EVERYONE ? 'BrandOS is free' : 'Pricing · BrandOS',
+  description: FREE_FOR_EVERYONE
+    ? 'No plans, no card, no upgrade. BrandOS is free now.'
+    : CODE_TRIAL
+      ? 'Know your reputation score before brands check it. BrandOS is invite-only: a code is 30 days free, no card; the first 100 keep $29/month for life.'
+      : 'Know your reputation score before brands check it. BrandOS Studio is free for everyone until Dec 3; the first 100 keep $29/month for life.',
 };
 
 const MONO = "'VCR OSD Mono', var(--font-jetbrains), monospace";
@@ -56,6 +59,7 @@ export default async function PricingPage({
 }: {
   searchParams: Promise<{ canceled?: string; field?: string }>;
 }) {
+  if (FREE_FOR_EVERYONE) return <FreeNow />;
   const [user, left, sp] = await Promise.all([
     getCurrentUser().catch(() => null),
     foundingSpotsLeft(),
@@ -324,4 +328,75 @@ export default async function PricingPage({
     </main>
   );
   return field ? <FieldScreen signalCell="none">{page}</FieldScreen> : page;
+}
+
+/** BrandOS is free (free-mode.ts): what /pricing says instead of plans. */
+async function FreeNow() {
+  const user = await getCurrentUser().catch(() => null);
+  // a card already on file can still be managed or cancelled
+  const card = user ? isSubscribed(user) || !!trialEndsAt(user) : false;
+  const link = 'underline underline-offset-4 hover:no-underline';
+  return (
+    <main className="min-h-screen bg-[#F2EFE8] px-4 pb-20 pt-6 md:px-8" style={{ color: INK }}>
+      <div className="mx-auto w-full max-w-[1040px]">
+        <header className="flex items-center justify-between">
+          <Wordmark height={24} />
+          <Link
+            href={user ? '/dashboard' : '/signup?next=/'}
+            className="text-[11px] uppercase tracking-[0.14em] hover:underline"
+            style={{ fontFamily: MONO }}
+          >
+            {user ? 'My dashboard →' : 'Sign in'}
+          </Link>
+        </header>
+
+        <h1
+          className="mt-14 max-w-[820px] text-[44px] leading-[0.95] md:text-[76px]"
+          style={{ fontFamily: BIG, fontWeight: 500, letterSpacing: '-0.04em' }}
+        >
+          BrandOS is free now.
+        </h1>
+        <div
+          className="mt-6 grid max-w-[560px] gap-4 text-[16px] leading-[1.55]"
+          style={{ color: '#333' }}
+        >
+          <p>No plans, no card, no upgrade.</p>
+          <p>
+            BrandOS exists to show you your brand the way a stranger reads it in five seconds. That
+            should be free, so it is.
+          </p>
+          <p>
+            Reads are free for anyone: one a day signed out, three a day signed in.
+            {CODE_TRIAL ? ' The dashboard is still invite-only while it’s small.' : ''}
+          </p>
+          <p>
+            Want the method behind it? The brand audit skill is free on{' '}
+            <a className={link} href="https://github.com/BAWSA3/skills">
+              GitHub
+            </a>
+            .
+          </p>
+          <p style={{ color: MUTED }}>Bawsa</p>
+        </div>
+
+        <div className="mt-10 flex flex-wrap items-center gap-6">
+          <Link
+            href="/"
+            className="inline-block px-5 py-3 text-[12px] uppercase tracking-[0.14em] text-white"
+            style={{ fontFamily: MONO, background: BLUE }}
+          >
+            Read your brand →
+          </Link>
+          {card && (
+            <div className="grid gap-2">
+              <p className="text-[13px]" style={{ color: MUTED }}>
+                You have a card on file. Manage or cancel it here:
+              </p>
+              <ManageBillingButton />
+            </div>
+          )}
+        </div>
+      </div>
+    </main>
+  );
 }

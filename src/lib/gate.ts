@@ -1,4 +1,5 @@
 import { type SubscriptionTier, getPlanLimits, canAccessFeature, normalizeTier } from '@/lib/plans';
+import { FREE_FOR_EVERYONE } from '@/lib/free-mode';
 
 export type GatedFeature =
   | 'voiceFingerprint'
@@ -79,11 +80,17 @@ const FEATURE_TO_PLAN_KEY: Record<GatedFeature, keyof import('@/lib/plans').Plan
   intelligenceReport: 'intelligenceReport',
 };
 
+/** While BrandOS is free, everyone has at least Pro's features. */
+function effectiveTier(tier: SubscriptionTier): SubscriptionTier {
+  const normalized = normalizeTier(tier);
+  return FREE_FOR_EVERYONE && normalized === 'FREE' ? 'PRO' : normalized;
+}
+
 export function checkFeatureAccess(
   currentTier: SubscriptionTier,
   feature: GatedFeature
 ): FeatureGateResult {
-  const normalized = normalizeTier(currentTier);
+  const normalized = effectiveTier(currentTier);
   const planKey = FEATURE_TO_PLAN_KEY[feature];
   const allowed = canAccessFeature(normalized, planKey);
   const requiredTier = FEATURE_MINIMUM_TIER[feature];
@@ -123,7 +130,7 @@ export function enforceFeatureAccess(
 }
 
 export function getAvailableFeatures(tier: SubscriptionTier): GatedFeature[] {
-  const normalized = normalizeTier(tier);
+  const normalized = effectiveTier(tier);
   return (Object.keys(FEATURE_MINIMUM_TIER) as GatedFeature[]).filter((feature) =>
     canAccessFeature(normalized, FEATURE_TO_PLAN_KEY[feature])
   );
@@ -134,7 +141,7 @@ export function getLockedFeatures(tier: SubscriptionTier): {
   requiredTier: SubscriptionTier;
   displayName: string;
 }[] {
-  const normalized = normalizeTier(tier);
+  const normalized = effectiveTier(tier);
   return (Object.keys(FEATURE_MINIMUM_TIER) as GatedFeature[])
     .filter((feature) => !canAccessFeature(normalized, FEATURE_TO_PLAN_KEY[feature]))
     .map((feature) => ({

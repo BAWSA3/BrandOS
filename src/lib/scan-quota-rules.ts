@@ -11,7 +11,10 @@
  * - paid ($29 Pro / Founding) and admins: unlimited
  * - the day is UTC; counts reset at midnight UTC
  * - the upgrade is the Founding offer
+ * Since 2026-11-03 BrandOS is free (free-mode.ts): nothing is sold, so the
+ * limit only says when reads come back. The limits themselves stay.
  */
+import { FREE_FOR_EVERYONE } from '@/lib/free-mode';
 
 export const SIGNED_OUT_SCANS_PER_DAY = 1;
 export const FREE_SCANS_PER_DAY = 3;
@@ -87,8 +90,23 @@ export function counterLine(q: QuotaView): string | null {
 /** What the limit says, signed in or out. */
 export function limitCopy(
   q: Pick<QuotaView, 'signedIn' | 'limit'>,
-  now: Date
+  now: Date,
+  free: boolean = FREE_FOR_EVERYONE
 ): { title: string; body: string; cta: string; href: string } {
+  if (free)
+    return q.signedIn
+      ? {
+          title: `That's your ${q.limit} reads for today.`,
+          body: `More in ${resetsIn(now)}. Reads you've already done stay free to open.`,
+          cta: 'Back to your dashboard',
+          href: '/dashboard',
+        }
+      : {
+          title: "That's today's free read.",
+          body: `Sign in with X to keep reading: ${FREE_SCANS_PER_DAY} a day, free.`,
+          cta: 'Sign in with X',
+          href: '/signup?next=/',
+        };
   if (!q.signedIn)
     return {
       title: "That's today's free read.",

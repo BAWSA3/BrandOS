@@ -12,6 +12,7 @@ import { syncSubscription } from '@/lib/billing-sync';
 import { foundingNumber, foundingSpotsLeft } from '@/lib/founding';
 import { stripe } from '@/lib/stripe';
 import Paywall from '@/components/billing/Paywall';
+import { FREE_FOR_EVERYONE } from '@/lib/free-mode';
 import { lookupStats } from '@/lib/lookups';
 import BentoDashboard from '@/components/dashboard/BentoDashboard';
 import RescanOnLoad from '@/components/dashboard/RescanOnLoad';
@@ -533,11 +534,14 @@ async function loadIndexTile(
 ): Promise<IndexTileData | null> {
   if (!(await indexOpenForUser(user))) return null;
   const entry = await getEntry(user.id);
-  const pro = standsOut({
-    role: String(user.role),
-    subscriptionTier: String(user.subscriptionTier),
-    subscriptionStatus: String(user.subscriptionStatus),
-  });
+  // while BrandOS is free everyone sees who viewed them (Featured stays a paid card)
+  const pro =
+    FREE_FOR_EVERYONE ||
+    standsOut({
+      role: String(user.role),
+      subscriptionTier: String(user.subscriptionTier),
+      subscriptionStatus: String(user.subscriptionStatus),
+    });
   if (!entry) return { member: null, views: null, standsOut: pro };
   const v = await viewSummary(entry.id, 7);
   return {
@@ -591,6 +595,9 @@ async function planBadgeFor(
 ): Promise<PlanBadge | null> {
   const subscribed = isSubscribed(user);
   const trialEnd = trialEndsAt(user);
+  // BrandOS is free: no offer in the top bar (a card already on file still
+  // gets its founding/trial badge, which opens the billing portal)
+  if (FREE_FOR_EVERYONE && !trialEnd) return null;
   // free access: the launch window for everyone, or this person's 30 days from a code
   const freeEnd = subscribed ? null : freeAccessEndsAt(user);
   if (freeEnd) {

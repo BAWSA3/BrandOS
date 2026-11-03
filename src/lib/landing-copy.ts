@@ -9,6 +9,7 @@
  */
 
 import { CODE_TRIAL } from '@/lib/early-access-rules';
+import { FREE_FOR_EVERYONE } from '@/lib/free-mode';
 
 export const EDITOR = 'bawsa, editor';
 
@@ -201,7 +202,9 @@ export const LANDING = {
     label: '04 / The Index',
     headlineBefore: 'The BrandOS Creator Index opens 2 Nov.',
     headlineOpen: 'The Index is open.',
-    body: 'A public book of creators, each with a reading behind them. Free to be listed. Pro to be picked.',
+    body: FREE_FOR_EVERYONE
+      ? 'A public book of creators, each with a reading behind them. Free to be listed.'
+      : 'A public book of creators, each with a reading behind them. Free to be listed. Pro to be picked.',
     brands: 'Brands browse the Index free.',
     membersLabel: 'Members',
     sampleEntry: 'Sample entry',
@@ -227,9 +230,13 @@ export const LANDING = {
     faq: [
       {
         q: 'Is it free?',
-        a: CODE_TRIAL
-          ? 'Reading your brand is free for anyone. BrandOS itself is invite-only for now: a code is 30 days of everything, no card. After that, Pro is paid.'
-          : 'Reading your brand and joining the Index are free. Everything is free until 3 Dec. After that, listing stays free and Pro is paid.',
+        a: FREE_FOR_EVERYONE
+          ? CODE_TRIAL
+            ? 'Yes. Reading your brand is free for anyone, and so is BrandOS. The dashboard is invite-only while it’s small. No plans, no card.'
+            : 'Yes. Reading your brand, joining the Index and the dashboard are all free. No plans, no card.'
+          : CODE_TRIAL
+            ? 'Reading your brand is free for anyone. BrandOS itself is invite-only for now: a code is 30 days of everything, no card. After that, Pro is paid.'
+            : 'Reading your brand and joining the Index are free. Everything is free until 3 Dec. After that, listing stays free and Pro is paid.',
       },
       { q: 'Which accounts can be read?', a: 'Any public X account.' },
       {

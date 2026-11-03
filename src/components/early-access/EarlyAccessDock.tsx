@@ -95,8 +95,7 @@ export default function EarlyAccessDock({
 
           {notice === 'ok' && (
             <p style={{ margin: '0 0 14px', fontSize: 14, lineHeight: 1.5 }}>
-              Early access is on: the Creator Index before it opens, the Founding price kept at
-              $29/month, and a direct line to Bawsa.
+              Early access is on: the Creator Index before it opens and a direct line to Bawsa.
             </p>
           )}
           {notice === 'invalid' && (
@@ -162,8 +161,7 @@ function RedeemForm({ onRedeemed }: { onRedeemed: () => void }) {
   if (done) {
     return (
       <p style={{ margin: 0, fontSize: 14, lineHeight: 1.5 }}>
-        Early access is on: the Creator Index before it opens, the Founding price kept at $29/month,
-        and a direct line to Bawsa.
+        Early access is on: the Creator Index before it opens and a direct line to Bawsa.
       </p>
     );
   }

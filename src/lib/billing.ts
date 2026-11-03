@@ -1,6 +1,7 @@
 import type { SubscriptionStatus } from '@prisma/client';
 import { OPEN_ACCESS_UNTIL, PAID_TIERS, type SubscriptionTier } from '@/lib/plans';
 import { CODE_TRIAL } from '@/lib/early-access-rules';
+import { FREE_FOR_EVERYONE } from '@/lib/free-mode';
 
 /**
  * Who gets Pro (the launch's one entitlement check). Pure: no DB, safe on
@@ -10,6 +11,8 @@ import { CODE_TRIAL } from '@/lib/early-access-rules';
  *   Free = everything else: FREE, PAST_DUE (a failed charge, incl. the end of
  *          a trial), CANCELED, INCOMPLETE
  *   Admins (role "admin") always get Pro, so the founder isn't paywalled.
+ *   FREE_FOR_EVERYONE (from Nov 3, the default): everyone gets Pro, nothing
+ *   is sold. The rest of this applies only when it's switched off.
  *   Until OPEN_ACCESS_UNTIL (Dec 3) everyone gets Pro: the launch offer.
  *   Invite-only trial (CODE_TRIAL, from Nov 2): the launch offer is off;
  *   instead a redeemed code gives Pro until `freeUntil` (30 days after
@@ -74,9 +77,10 @@ export function isSubscribed(u: BillingFields): boolean {
 export function hasPro(
   u: BillingFields,
   now: Date = new Date(),
-  codeTrial: boolean = CODE_TRIAL
+  codeTrial: boolean = CODE_TRIAL,
+  free: boolean = FREE_FOR_EVERYONE
 ): boolean {
-  if (u.role === 'admin') return true;
+  if (free || u.role === 'admin') return true;
   return isSubscribed(u) || freeAccessEndsAt(u, now, codeTrial) !== null;
 }
 
