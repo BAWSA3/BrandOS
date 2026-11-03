@@ -65,8 +65,9 @@ test('signed out: no counter line', counterLine(quotaView(out, 0, now)) === null
 test('paid: no counter line', counterLine(quotaView({ unlimited: true }, 0, now)) === null);
 
 console.log('limit copy');
-const outCopy = limitCopy({ signedIn: false, limit: 1 }, now);
-const freeCopy = limitCopy({ signedIn: true, limit: 3 }, now);
+// the paid model (FREE_FOR_EVERYONE off)
+const outCopy = limitCopy({ signedIn: false, limit: 1 }, now, false);
+const freeCopy = limitCopy({ signedIn: true, limit: 3 }, now, false);
 test(
   'signed out → sign in with X',
   outCopy.href.startsWith('/signup') && /Sign in with X/.test(outCopy.cta)
@@ -81,10 +82,20 @@ test(
 );
 test('says when it resets', /More in 12h/.test(freeCopy.body));
 test('no hashtags in copy', ![outCopy, freeCopy].some((c) => mentionsHashtags(c.title + c.body)));
+console.log('limit copy while BrandOS is free');
+const freeOut = limitCopy({ signedIn: false, limit: 1 }, now, true);
+const freeIn = limitCopy({ signedIn: true, limit: 3 }, now, true);
+test('signed out → sign in with X', freeOut.href.startsWith('/signup'));
+test('signed in → dashboard, no offer', freeIn.href === '/dashboard');
+test(
+  'nothing for sale',
+  ![freeOut, freeIn].some((c) => /\$|Founding|Pro\b|pricing/.test(c.title + c.body + c.href))
+);
+test('still says when it resets', /More in 12h/.test(freeIn.body));
 const body = limitBody(quotaView(free, 3, now), now);
 test(
-  '429 body has code + upgradeUrl',
-  body.code === 'SCAN_LIMIT' && body.upgradeUrl === UPGRADE_URL
+  '429 body has code + where to go',
+  body.code === 'SCAN_LIMIT' && body.upgradeUrl === '/dashboard'
 );
 test('429 body error is readable', body.error.startsWith("That's your 3 reads"));
 

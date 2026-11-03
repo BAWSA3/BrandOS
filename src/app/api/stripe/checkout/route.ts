@@ -15,6 +15,7 @@ import { foundingSpotsLeft } from '@/lib/founding';
 import { earlyAccessFor } from '@/lib/early-access';
 import { botGuard } from '@/lib/botid-guard';
 import { captureFunnelEvent } from '@/lib/funnel-events';
+import { FREE_FOR_EVERYONE } from '@/lib/free-mode';
 
 export async function POST(request: NextRequest) {
   try {
@@ -24,6 +25,10 @@ export async function POST(request: NextRequest) {
     const user = await getUser();
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    // BrandOS is free: nothing to buy (the portal stays open for existing cards)
+    if (FREE_FOR_EVERYONE) {
+      return NextResponse.json({ error: 'BrandOS is free now' }, { status: 410 });
     }
     if (!stripeEnv('STRIPE_SECRET_KEY')) {
       return NextResponse.json({ error: 'Billing is not open yet' }, { status: 503 });

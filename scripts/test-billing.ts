@@ -4,7 +4,7 @@
  */
 import {
   freeAccessEndsAt,
-  hasPro,
+  hasPro as hasProCore,
   inCodeTrial,
   isOpenAccess,
   isSubscribed,
@@ -15,6 +15,11 @@ import {
 import { TRIAL_DAYS, FOUNDING_SPOTS, OPEN_ACCESS_UNTIL, PLAN_CONFIGS } from '../src/lib/plans';
 import { viewerKey } from '../src/lib/lookups';
 import { digestContent } from '../src/lib/lookup-digest';
+
+// These cover the paid model; BrandOS-is-free (the default) is tested at the end.
+type ProArgs = Parameters<typeof hasProCore>;
+const hasPro = (u: ProArgs[0], now?: Date, codeTrial?: boolean) =>
+  hasProCore(u, now, codeTrial, false);
 
 let pass = 0;
 let fail = 0;
@@ -165,6 +170,27 @@ console.log('\nZ. Invite-only trial (CODE_TRIAL, from Nov 2)');
     'trial off: free access ends at the window',
     freeAccessEndsAt(nocode, NOV5, false)?.getTime() === OPEN_ACCESS_UNTIL.getTime()
   );
+}
+
+console.log('\nF. BrandOS is free (FREE_FOR_EVERYONE, from Nov 3)');
+{
+  const LATER = new Date('2027-03-01T00:00:00Z');
+  test('free account → Pro', hasProCore(u('FREE', 'ACTIVE'), LATER, true, true));
+  test('canceled account → Pro', hasProCore(u('PRO', 'CANCELED'), LATER, true, true));
+  test(
+    'code ended → Pro',
+    hasProCore(
+      { ...u('FREE', 'ACTIVE'), freeUntil: new Date('2026-12-01T00:00:00Z') },
+      LATER,
+      true,
+      true
+    )
+  );
+  test(
+    'switched off → back to the paid rules',
+    !hasProCore(u('FREE', 'ACTIVE'), LATER, true, false)
+  );
+  test('default is on', hasProCore(u('FREE', 'ACTIVE'), LATER));
 }
 
 console.log(`\n${pass} passed, ${fail} failed`);

@@ -1,5 +1,6 @@
 'use client';
 
+import { FREE_FOR_EVERYONE } from '@/lib/free-mode';
 import { useIndexStatus } from '@/hooks/useIndexStatus';
 import { useState, useEffect, useRef, useCallback, MouseEvent as ReactMouseEvent } from 'react';
 import { useSearchParams } from 'next/navigation';
@@ -636,7 +637,7 @@ function stripItems(d: LandingData): string[] {
   const ex = d.example;
   const items: string[] = [];
   if (d.brandsRead) items.push(`${S.brandsRead.toUpperCase()} ${d.brandsRead}`);
-  items.push(`${S.seats.toUpperCase()} ${d.seatsLeft}/100`);
+  if (!FREE_FOR_EVERYONE) items.push(`${S.seats.toUpperCase()} ${d.seatsLeft}/100`);
   items.push(
     `${S.example.toUpperCase()} @${ex.handle.toUpperCase()} · ${classLabel(ex.archetype)} · ${ex.score}`
   );
@@ -1462,7 +1463,7 @@ export default function XBrandScoreHero({
                       'THE RECORD OF CREATOR REPUTATION',
                       'CLASS 01–08',
                       'READ FROM REAL POSTS',
-                      'FOUNDING 100',
+                      ...(FREE_FOR_EVERYONE ? [] : ['FOUNDING 100']),
                       'MYBRANDOS.APP',
                       '//',
                     ]}

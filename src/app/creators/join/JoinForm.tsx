@@ -1,5 +1,6 @@
 'use client';
 
+import { FREE_FOR_EVERYONE } from '@/lib/free-mode';
 import Link from 'next/link';
 import { createContext, useContext, useEffect, useState } from 'react';
 import { FieldScreen } from '@/components/system';
@@ -247,13 +248,15 @@ function JoinFormInner({
             See the Index
           </Link>
         </div>
-        <p className="mt-8 max-w-[520px] text-[14px] leading-relaxed" style={{ color: C.muted }}>
-          Founding Members (Pro, $29/mo for life) are Featured at the top of the Index and see which
-          brand teams viewed their entry.{' '}
-          <Link href="/pricing" style={{ color: C.blue }}>
-            Become a Founding Member →
-          </Link>
-        </p>
+        {!FREE_FOR_EVERYONE && (
+          <p className="mt-8 max-w-[520px] text-[14px] leading-relaxed" style={{ color: C.muted }}>
+            Founding Members (Pro, $29/mo for life) are Featured at the top of the Index and see
+            which brand teams viewed their entry.{' '}
+            <Link href="/pricing" style={{ color: C.blue }}>
+              Become a Founding Member →
+            </Link>
+          </p>
+        )}
       </Shell>
     );
   }

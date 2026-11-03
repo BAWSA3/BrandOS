@@ -1,10 +1,6 @@
 {
   "crons": [
     {
-      "path": "/api/cron/send-emails",
-      "schedule": "0 9 * * *"
-    },
-    {
       "path": "/api/cron/market-scan",
       "schedule": "0 6 * * *"
     },
@@ -23,10 +19,6 @@
     {
       "path": "/api/cron/score-posts",
       "schedule": "0 5 * * *"
-    },
-    {
-      "path": "/api/cron/lookup-digest",
-      "schedule": "0 16 * * 1"
     },
     {
       "path": "/api/cron/sync-accounts",

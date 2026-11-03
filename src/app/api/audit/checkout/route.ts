@@ -17,9 +17,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
 import { captureFunnelEvent } from '@/lib/funnel-events';
 import { ONE_TIME_PRODUCTS } from '@/lib/plans';
+import { FREE_FOR_EVERYONE } from '@/lib/free-mode';
 
 export async function POST(request: NextRequest) {
   try {
+    // BrandOS is free: nothing to buy
+    if (FREE_FOR_EVERYONE) {
+      return NextResponse.json({ error: 'BrandOS is free now' }, { status: 410 });
+    }
     if (!stripe) {
       return NextResponse.json({ error: 'Stripe not configured' }, { status: 503 });
     }
